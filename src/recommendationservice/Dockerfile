@@ -1,13 +1,11 @@
-FROM python:3.5-jessie
+FROM grpc/python:1.0
 
-RUN pip --no-cache-dir install \
-        grpcio
 
 # show python logs as they occur
 ENV PYTHONUNBUFFERED=0
 
 # add files into working directory
-ADD recommendation.py /home
+ADD ./*.py /home/
 WORKDIR /home
 
-ENTRYPOINT /usr/bin/python /home/recommendation.py
+ENTRYPOINT python /home/recommendation_server.py
