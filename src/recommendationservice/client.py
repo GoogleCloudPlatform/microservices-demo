@@ -1,12 +1,22 @@
 import grpc
 import demo_pb2
 import demo_pb2_grpc
+import sys
 
-channel = grpc.insecure_channel('localhost:8081')
-stub = demo_pb2_grpc.RecommendationServiceStub(channel)
+if __name__ == "__main__":
+    # get port
+    if len(sys.argv) > 1:
+        port = sys.argv[1]
+    else:
+        port = "8080"
 
-request = demo_pb2.ListRecommendationsRequest(user_id="test", product_ids=["test"])
+    # set up server stub
+    channel = grpc.insecure_channel('localhost:'+port)
+    stub = demo_pb2_grpc.RecommendationServiceStub(channel)
 
-response = stub.ListRecommendations(request)
+    # form request
+    request = demo_pb2.ListRecommendationsRequest(user_id="test", product_ids=["test"])
 
-print(response)
+    # make call to server
+    response = stub.ListRecommendations(request)
+    print(response)

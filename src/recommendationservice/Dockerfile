@@ -1,6 +1,5 @@
 FROM grpc/python:1.0
 
-
 # show python logs as they occur
 ENV PYTHONUNBUFFERED=0
 
@@ -8,4 +7,7 @@ ENV PYTHONUNBUFFERED=0
 ADD ./*.py /home/
 WORKDIR /home
 
-ENTRYPOINT python /home/recommendation_server.py
+# set listen port
+ENV PORT=8080
+
+ENTRYPOINT python /home/recommendation_server.py $PORT
