@@ -4,22 +4,16 @@ import demo_pb2_grpc
 from concurrent import futures
 import time
 import sys
+import random
 
 class RecommendationService(demo_pb2_grpc.RecommendationServiceServicer):
     def ListRecommendations(self, request, context):
         print("handling request")
         response = demo_pb2.ListRecommendationsResponse()
         prod_list = []
-        for i in range(3):
-            this_price = demo_pb2.MoneyAmount(decimal=i,
-                                              fractional=i)
-            this_prod = demo_pb2.Product(id=i,
-                                         name="test-"+str(i),
-                                         description="test product",
-                                         picture="test image",
-                                         price_usd=this_price)
-            prod_list.append(this_prod)
-        response.products.extend(prod_list)
+        for i in range(5):
+            prod_list.append(str(random.randint(1,100)))
+        response.product_ids.extend(prod_list)
         return response
 
 if __name__ == "__main__":

@@ -47,7 +47,7 @@ message ListRecommendationsRequest {
 }
 
 message ListRecommendationsResponse {
-    repeated Product products = 1;
+    repeated string product_ids = 1;
 }
 
 // ---------------Product Catalog----------------

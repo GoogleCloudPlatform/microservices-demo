@@ -19,7 +19,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   name='demo.proto',
   package='hipstershop',
   syntax='proto3',
-  serialized_pb=_b('\n\ndemo.proto\x12\x0bhipstershop\"0\n\x08\x43\x61rtItem\x12\x12\n\nproduct_id\x18\x01 \x01(\t\x12\x10\n\x08quantity\x18\x02 \x01(\x05\"F\n\x0e\x41\x64\x64ItemRequest\x12\x0f\n\x07user_id\x18\x01 \x01(\t\x12#\n\x04item\x18\x02 \x01(\x0b\x32\x15.hipstershop.CartItem\"#\n\x10\x45mptyCartRequest\x12\x0f\n\x07user_id\x18\x01 \x01(\t\"!\n\x0eGetCartRequest\x12\x0f\n\x07user_id\x18\x01 \x01(\t\"=\n\x04\x43\x61rt\x12\x0f\n\x07user_id\x18\x01 \x01(\t\x12$\n\x05items\x18\x02 \x03(\x0b\x32\x15.hipstershop.CartItem\"\x07\n\x05\x45mpty\"B\n\x1aListRecommendationsRequest\x12\x0f\n\x07user_id\x18\x01 \x01(\t\x12\x13\n\x0bproduct_ids\x18\x02 \x03(\t\"E\n\x1bListRecommendationsResponse\x12&\n\x08products\x18\x01 \x03(\x0b\x32\x14.hipstershop.Product\"v\n\x07Product\x12\n\n\x02id\x18\x01 \x01(\x05\x12\x0c\n\x04name\x18\x02 \x01(\t\x12\x13\n\x0b\x64\x65scription\x18\x03 \x01(\t\x12\x0f\n\x07picture\x18\x04 \x01(\t\x12+\n\tprice_usd\x18\x05 \x01(\x0b\x32\x18.hipstershop.MoneyAmount\">\n\x14ListProductsResponse\x12&\n\x08products\x18\x01 \x03(\x0b\x32\x14.hipstershop.Product\"\x1f\n\x11GetProductRequest\x12\n\n\x02id\x18\x01 \x01(\x05\"&\n\x15SearchProductsRequest\x12\r\n\x05query\x18\x01 \x01(\t\"?\n\x16SearchProductsResponse\x12%\n\x07results\x18\x01 \x03(\x0b\x32\x14.hipstershop.Product\"^\n\x0fGetQuoteRequest\x12%\n\x07\x61\x64\x64ress\x18\x01 \x01(\x0b\x32\x14.hipstershop.Address\x12$\n\x05items\x18\x02 \x03(\x0b\x32\x15.hipstershop.CartItem\">\n\x10GetQuoteResponse\x12*\n\x08\x63ost_usd\x18\x01 \x01(\x0b\x32\x18.hipstershop.MoneyAmount\"_\n\x10ShipOrderRequest\x12%\n\x07\x61\x64\x64ress\x18\x01 \x01(\x0b\x32\x14.hipstershop.Address\x12$\n\x05items\x18\x02 \x03(\x0b\x32\x15.hipstershop.CartItem\"(\n\x11ShipOrderResponse\x12\x13\n\x0btracking_id\x18\x01 \x01(\t\"n\n\x07\x41\x64\x64ress\x12\x18\n\x10street_address_1\x18\x01 \x01(\t\x12\x18\n\x10street_address_2\x18\x02 \x01(\t\x12\x0c\n\x04\x63ity\x18\x03 \x01(\t\x12\x0f\n\x07\x63ountry\x18\x04 \x01(\t\x12\x10\n\x08zip_code\x18\x05 \x01(\x05\"2\n\x0bMoneyAmount\x12\x0f\n\x07\x64\x65\x63imal\x18\x01 \x01(\r\x12\x12\n\nfractional\x18\x02 \x01(\r\"H\n\x05Money\x12\x15\n\rcurrency_code\x18\x01 \x01(\t\x12(\n\x06\x61mount\x18\x02 \x01(\x0b\x32\x18.hipstershop.MoneyAmount\"8\n\x1eGetSupportedCurrenciesResponse\x12\x16\n\x0e\x63urrency_codes\x18\x01 \x03(\t\"F\n\x11\x43onversionRequest\x12 \n\x04\x66rom\x18\x01 \x01(\x0b\x32\x12.hipstershop.Money\x12\x0f\n\x07to_code\x18\x02 \x01(\t\"8\n\x12\x43onversionResponse\x12\"\n\x06result\x18\x01 \x01(\x0b\x32\x12.hipstershop.Money\"\x90\x01\n\x0e\x43reditCardInfo\x12\x1a\n\x12\x63redit_card_number\x18\x01 \x01(\t\x12\x17\n\x0f\x63redit_card_cvv\x18\x02 \x01(\x05\x12#\n\x1b\x63redit_card_expiration_year\x18\x03 \x01(\x05\x12$\n\x1c\x63redit_card_expiration_month\x18\x04 \x01(\x05\"e\n\rChargeRequest\x12\"\n\x06\x61mount\x18\x01 \x01(\x0b\x32\x12.hipstershop.Money\x12\x30\n\x0b\x63redit_card\x18\x02 \x01(\x0b\x32\x1b.hipstershop.CreditCardInfo\"(\n\x0e\x43hargeResponse\x12\x16\n\x0etransaction_id\x18\x01 \x01(\t\"R\n\tOrderItem\x12#\n\x04item\x18\x01 \x01(\x0b\x32\x15.hipstershop.CartItem\x12 \n\x04\x63ost\x18\x02 \x01(\x0b\x32\x12.hipstershop.Money\"\xbf\x01\n\x0bOrderResult\x12\x10\n\x08order_id\x18\x01 \x01(\t\x12\x1c\n\x14shipping_tracking_id\x18\x02 \x01(\t\x12)\n\rshipping_cost\x18\x03 \x01(\x0b\x32\x12.hipstershop.Money\x12.\n\x10shipping_address\x18\x04 \x01(\x0b\x32\x14.hipstershop.Address\x12%\n\x05items\x18\x05 \x03(\x0b\x32\x16.hipstershop.OrderItem\"V\n\x1cSendOrderConfirmationRequest\x12\r\n\x05\x65mail\x18\x01 \x01(\t\x12\'\n\x05order\x18\x02 \x01(\x0b\x32\x18.hipstershop.OrderResult\"c\n\x12\x43reateOrderRequest\x12\x0f\n\x07user_id\x18\x01 \x01(\t\x12\x15\n\ruser_currency\x18\x02 \x01(\t\x12%\n\x07\x61\x64\x64ress\x18\x03 \x01(\x0b\x32\x14.hipstershop.Address\"g\n\x13\x43reateOrderResponse\x12%\n\x05items\x18\x01 \x03(\x0b\x32\x16.hipstershop.OrderItem\x12)\n\rshipping_cost\x18\x02 \x01(\x0b\x32\x12.hipstershop.Money\"\xa3\x01\n\x11PlaceOrderRequest\x12\x0f\n\x07user_id\x18\x01 \x01(\t\x12\x15\n\ruser_currency\x18\x02 \x01(\t\x12%\n\x07\x61\x64\x64ress\x18\x03 \x01(\x0b\x32\x14.hipstershop.Address\x12\r\n\x05\x65mail\x18\x05 \x01(\t\x12\x30\n\x0b\x63redit_card\x18\x06 \x01(\x0b\x32\x1b.hipstershop.CreditCardInfo\"=\n\x12PlaceOrderResponse\x12\'\n\x05order\x18\x01 \x01(\x0b\x32\x18.hipstershop.OrderResult2\xca\x01\n\x0b\x43\x61rtService\x12<\n\x07\x41\x64\x64Item\x12\x1b.hipstershop.AddItemRequest\x1a\x12.hipstershop.Empty\"\x00\x12;\n\x07GetCart\x12\x1b.hipstershop.GetCartRequest\x1a\x11.hipstershop.Cart\"\x00\x12@\n\tEmptyCart\x12\x1d.hipstershop.EmptyCartRequest\x1a\x12.hipstershop.Empty\"\x00\x32\x83\x01\n\x15RecommendationService\x12j\n\x13ListRecommendations\x12\'.hipstershop.ListRecommendationsRequest\x1a(.hipstershop.ListRecommendationsResponse\"\x00\x32\x83\x02\n\x15ProductCatalogService\x12G\n\x0cListProducts\x12\x12.hipstershop.Empty\x1a!.hipstershop.ListProductsResponse\"\x00\x12\x44\n\nGetProduct\x12\x1e.hipstershop.GetProductRequest\x1a\x14.hipstershop.Product\"\x00\x12[\n\x0eSearchProducts\x12\".hipstershop.SearchProductsRequest\x1a#.hipstershop.SearchProductsResponse\"\x00\x32\xaa\x01\n\x0fShippingService\x12I\n\x08GetQuote\x12\x1c.hipstershop.GetQuoteRequest\x1a\x1d.hipstershop.GetQuoteResponse\"\x00\x12L\n\tShipOrder\x12\x1d.hipstershop.ShipOrderRequest\x1a\x1e.hipstershop.ShipOrderResponse\"\x00\x32\xbc\x01\n\x0f\x43urrencyService\x12[\n\x16GetSupportedCurrencies\x12\x12.hipstershop.Empty\x1a+.hipstershop.GetSupportedCurrenciesResponse\"\x00\x12L\n\x07\x43onvert\x12\x1e.hipstershop.ConversionRequest\x1a\x1f.hipstershop.ConversionResponse\"\x00\x32U\n\x0ePaymentService\x12\x43\n\x06\x43harge\x12\x1a.hipstershop.ChargeRequest\x1a\x1b.hipstershop.ChargeResponse\"\x00\x32h\n\x0c\x45mailService\x12X\n\x15SendOrderConfirmation\x12).hipstershop.SendOrderConfirmationRequest\x1a\x12.hipstershop.Empty\"\x00\x32\xb6\x01\n\x0f\x43heckoutService\x12R\n\x0b\x43reateOrder\x12\x1f.hipstershop.CreateOrderRequest\x1a .hipstershop.CreateOrderResponse\"\x00\x12O\n\nPlaceOrder\x12\x1e.hipstershop.PlaceOrderRequest\x1a\x1f.hipstershop.PlaceOrderResponse\"\x00\x62\x06proto3')
+  serialized_pb=_b('\n\ndemo.proto\x12\x0bhipstershop\"0\n\x08\x43\x61rtItem\x12\x12\n\nproduct_id\x18\x01 \x01(\t\x12\x10\n\x08quantity\x18\x02 \x01(\x05\"F\n\x0e\x41\x64\x64ItemRequest\x12\x0f\n\x07user_id\x18\x01 \x01(\t\x12#\n\x04item\x18\x02 \x01(\x0b\x32\x15.hipstershop.CartItem\"#\n\x10\x45mptyCartRequest\x12\x0f\n\x07user_id\x18\x01 \x01(\t\"!\n\x0eGetCartRequest\x12\x0f\n\x07user_id\x18\x01 \x01(\t\"=\n\x04\x43\x61rt\x12\x0f\n\x07user_id\x18\x01 \x01(\t\x12$\n\x05items\x18\x02 \x03(\x0b\x32\x15.hipstershop.CartItem\"\x07\n\x05\x45mpty\"B\n\x1aListRecommendationsRequest\x12\x0f\n\x07user_id\x18\x01 \x01(\t\x12\x13\n\x0bproduct_ids\x18\x02 \x03(\t\"2\n\x1bListRecommendationsResponse\x12\x13\n\x0bproduct_ids\x18\x01 \x03(\t\"v\n\x07Product\x12\n\n\x02id\x18\x01 \x01(\x05\x12\x0c\n\x04name\x18\x02 \x01(\t\x12\x13\n\x0b\x64\x65scription\x18\x03 \x01(\t\x12\x0f\n\x07picture\x18\x04 \x01(\t\x12+\n\tprice_usd\x18\x05 \x01(\x0b\x32\x18.hipstershop.MoneyAmount\">\n\x14ListProductsResponse\x12&\n\x08products\x18\x01 \x03(\x0b\x32\x14.hipstershop.Product\"\x1f\n\x11GetProductRequest\x12\n\n\x02id\x18\x01 \x01(\x05\"&\n\x15SearchProductsRequest\x12\r\n\x05query\x18\x01 \x01(\t\"?\n\x16SearchProductsResponse\x12%\n\x07results\x18\x01 \x03(\x0b\x32\x14.hipstershop.Product\"^\n\x0fGetQuoteRequest\x12%\n\x07\x61\x64\x64ress\x18\x01 \x01(\x0b\x32\x14.hipstershop.Address\x12$\n\x05items\x18\x02 \x03(\x0b\x32\x15.hipstershop.CartItem\">\n\x10GetQuoteResponse\x12*\n\x08\x63ost_usd\x18\x01 \x01(\x0b\x32\x18.hipstershop.MoneyAmount\"_\n\x10ShipOrderRequest\x12%\n\x07\x61\x64\x64ress\x18\x01 \x01(\x0b\x32\x14.hipstershop.Address\x12$\n\x05items\x18\x02 \x03(\x0b\x32\x15.hipstershop.CartItem\"(\n\x11ShipOrderResponse\x12\x13\n\x0btracking_id\x18\x01 \x01(\t\"n\n\x07\x41\x64\x64ress\x12\x18\n\x10street_address_1\x18\x01 \x01(\t\x12\x18\n\x10street_address_2\x18\x02 \x01(\t\x12\x0c\n\x04\x63ity\x18\x03 \x01(\t\x12\x0f\n\x07\x63ountry\x18\x04 \x01(\t\x12\x10\n\x08zip_code\x18\x05 \x01(\x05\"2\n\x0bMoneyAmount\x12\x0f\n\x07\x64\x65\x63imal\x18\x01 \x01(\r\x12\x12\n\nfractional\x18\x02 \x01(\r\"H\n\x05Money\x12\x15\n\rcurrency_code\x18\x01 \x01(\t\x12(\n\x06\x61mount\x18\x02 \x01(\x0b\x32\x18.hipstershop.MoneyAmount\"8\n\x1eGetSupportedCurrenciesResponse\x12\x16\n\x0e\x63urrency_codes\x18\x01 \x03(\t\"F\n\x11\x43onversionRequest\x12 \n\x04\x66rom\x18\x01 \x01(\x0b\x32\x12.hipstershop.Money\x12\x0f\n\x07to_code\x18\x02 \x01(\t\"8\n\x12\x43onversionResponse\x12\"\n\x06result\x18\x01 \x01(\x0b\x32\x12.hipstershop.Money\"\x90\x01\n\x0e\x43reditCardInfo\x12\x1a\n\x12\x63redit_card_number\x18\x01 \x01(\t\x12\x17\n\x0f\x63redit_card_cvv\x18\x02 \x01(\x05\x12#\n\x1b\x63redit_card_expiration_year\x18\x03 \x01(\x05\x12$\n\x1c\x63redit_card_expiration_month\x18\x04 \x01(\x05\"e\n\rChargeRequest\x12\"\n\x06\x61mount\x18\x01 \x01(\x0b\x32\x12.hipstershop.Money\x12\x30\n\x0b\x63redit_card\x18\x02 \x01(\x0b\x32\x1b.hipstershop.CreditCardInfo\"(\n\x0e\x43hargeResponse\x12\x16\n\x0etransaction_id\x18\x01 \x01(\t\"R\n\tOrderItem\x12#\n\x04item\x18\x01 \x01(\x0b\x32\x15.hipstershop.CartItem\x12 \n\x04\x63ost\x18\x02 \x01(\x0b\x32\x12.hipstershop.Money\"\xbf\x01\n\x0bOrderResult\x12\x10\n\x08order_id\x18\x01 \x01(\t\x12\x1c\n\x14shipping_tracking_id\x18\x02 \x01(\t\x12)\n\rshipping_cost\x18\x03 \x01(\x0b\x32\x12.hipstershop.Money\x12.\n\x10shipping_address\x18\x04 \x01(\x0b\x32\x14.hipstershop.Address\x12%\n\x05items\x18\x05 \x03(\x0b\x32\x16.hipstershop.OrderItem\"V\n\x1cSendOrderConfirmationRequest\x12\r\n\x05\x65mail\x18\x01 \x01(\t\x12\'\n\x05order\x18\x02 \x01(\x0b\x32\x18.hipstershop.OrderResult\"c\n\x12\x43reateOrderRequest\x12\x0f\n\x07user_id\x18\x01 \x01(\t\x12\x15\n\ruser_currency\x18\x02 \x01(\t\x12%\n\x07\x61\x64\x64ress\x18\x03 \x01(\x0b\x32\x14.hipstershop.Address\"g\n\x13\x43reateOrderResponse\x12%\n\x05items\x18\x01 \x03(\x0b\x32\x16.hipstershop.OrderItem\x12)\n\rshipping_cost\x18\x02 \x01(\x0b\x32\x12.hipstershop.Money\"\xa3\x01\n\x11PlaceOrderRequest\x12\x0f\n\x07user_id\x18\x01 \x01(\t\x12\x15\n\ruser_currency\x18\x02 \x01(\t\x12%\n\x07\x61\x64\x64ress\x18\x03 \x01(\x0b\x32\x14.hipstershop.Address\x12\r\n\x05\x65mail\x18\x05 \x01(\t\x12\x30\n\x0b\x63redit_card\x18\x06 \x01(\x0b\x32\x1b.hipstershop.CreditCardInfo\"=\n\x12PlaceOrderResponse\x12\'\n\x05order\x18\x01 \x01(\x0b\x32\x18.hipstershop.OrderResult2\xca\x01\n\x0b\x43\x61rtService\x12<\n\x07\x41\x64\x64Item\x12\x1b.hipstershop.AddItemRequest\x1a\x12.hipstershop.Empty\"\x00\x12;\n\x07GetCart\x12\x1b.hipstershop.GetCartRequest\x1a\x11.hipstershop.Cart\"\x00\x12@\n\tEmptyCart\x12\x1d.hipstershop.EmptyCartRequest\x1a\x12.hipstershop.Empty\"\x00\x32\x83\x01\n\x15RecommendationService\x12j\n\x13ListRecommendations\x12\'.hipstershop.ListRecommendationsRequest\x1a(.hipstershop.ListRecommendationsResponse\"\x00\x32\x83\x02\n\x15ProductCatalogService\x12G\n\x0cListProducts\x12\x12.hipstershop.Empty\x1a!.hipstershop.ListProductsResponse\"\x00\x12\x44\n\nGetProduct\x12\x1e.hipstershop.GetProductRequest\x1a\x14.hipstershop.Product\"\x00\x12[\n\x0eSearchProducts\x12\".hipstershop.SearchProductsRequest\x1a#.hipstershop.SearchProductsResponse\"\x00\x32\xaa\x01\n\x0fShippingService\x12I\n\x08GetQuote\x12\x1c.hipstershop.GetQuoteRequest\x1a\x1d.hipstershop.GetQuoteResponse\"\x00\x12L\n\tShipOrder\x12\x1d.hipstershop.ShipOrderRequest\x1a\x1e.hipstershop.ShipOrderResponse\"\x00\x32\xbc\x01\n\x0f\x43urrencyService\x12[\n\x16GetSupportedCurrencies\x12\x12.hipstershop.Empty\x1a+.hipstershop.GetSupportedCurrenciesResponse\"\x00\x12L\n\x07\x43onvert\x12\x1e.hipstershop.ConversionRequest\x1a\x1f.hipstershop.ConversionResponse\"\x00\x32U\n\x0ePaymentService\x12\x43\n\x06\x43harge\x12\x1a.hipstershop.ChargeRequest\x1a\x1b.hipstershop.ChargeResponse\"\x00\x32h\n\x0c\x45mailService\x12X\n\x15SendOrderConfirmation\x12).hipstershop.SendOrderConfirmationRequest\x1a\x12.hipstershop.Empty\"\x00\x32\xb6\x01\n\x0f\x43heckoutService\x12R\n\x0b\x43reateOrder\x12\x1f.hipstershop.CreateOrderRequest\x1a .hipstershop.CreateOrderResponse\"\x00\x12O\n\nPlaceOrder\x12\x1e.hipstershop.PlaceOrderRequest\x1a\x1f.hipstershop.PlaceOrderResponse\"\x00\x62\x06proto3')
 )
 
 
@@ -271,8 +271,8 @@ _LISTRECOMMENDATIONSRESPONSE = _descriptor.Descriptor(
   containing_type=None,
   fields=[
     _descriptor.FieldDescriptor(
-      name='products', full_name='hipstershop.ListRecommendationsResponse.products', index=0,
-      number=1, type=11, cpp_type=10, label=3,
+      name='product_ids', full_name='hipstershop.ListRecommendationsResponse.product_ids', index=0,
+      number=1, type=9, cpp_type=9, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
@@ -290,7 +290,7 @@ _LISTRECOMMENDATIONSRESPONSE = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=361,
-  serialized_end=430,
+  serialized_end=411,
 )
 
 
@@ -348,8 +348,8 @@ _PRODUCT = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=432,
-  serialized_end=550,
+  serialized_start=413,
+  serialized_end=531,
 )
 
 
@@ -379,8 +379,8 @@ _LISTPRODUCTSRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=552,
-  serialized_end=614,
+  serialized_start=533,
+  serialized_end=595,
 )
 
 
@@ -410,8 +410,8 @@ _GETPRODUCTREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=616,
-  serialized_end=647,
+  serialized_start=597,
+  serialized_end=628,
 )
 
 
@@ -441,8 +441,8 @@ _SEARCHPRODUCTSREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=649,
-  serialized_end=687,
+  serialized_start=630,
+  serialized_end=668,
 )
 
 
@@ -472,8 +472,8 @@ _SEARCHPRODUCTSRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=689,
-  serialized_end=752,
+  serialized_start=670,
+  serialized_end=733,
 )
 
 
@@ -510,8 +510,8 @@ _GETQUOTEREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=754,
-  serialized_end=848,
+  serialized_start=735,
+  serialized_end=829,
 )
 
 
@@ -541,8 +541,8 @@ _GETQUOTERESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=850,
-  serialized_end=912,
+  serialized_start=831,
+  serialized_end=893,
 )
 
 
@@ -579,8 +579,8 @@ _SHIPORDERREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=914,
-  serialized_end=1009,
+  serialized_start=895,
+  serialized_end=990,
 )
 
 
@@ -610,8 +610,8 @@ _SHIPORDERRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1011,
-  serialized_end=1051,
+  serialized_start=992,
+  serialized_end=1032,
 )
 
 
@@ -669,8 +669,8 @@ _ADDRESS = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1053,
-  serialized_end=1163,
+  serialized_start=1034,
+  serialized_end=1144,
 )
 
 
@@ -707,8 +707,8 @@ _MONEYAMOUNT = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1165,
-  serialized_end=1215,
+  serialized_start=1146,
+  serialized_end=1196,
 )
 
 
@@ -745,8 +745,8 @@ _MONEY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1217,
-  serialized_end=1289,
+  serialized_start=1198,
+  serialized_end=1270,
 )
 
 
@@ -776,8 +776,8 @@ _GETSUPPORTEDCURRENCIESRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1291,
-  serialized_end=1347,
+  serialized_start=1272,
+  serialized_end=1328,
 )
 
 
@@ -814,8 +814,8 @@ _CONVERSIONREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1349,
-  serialized_end=1419,
+  serialized_start=1330,
+  serialized_end=1400,
 )
 
 
@@ -845,8 +845,8 @@ _CONVERSIONRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1421,
-  serialized_end=1477,
+  serialized_start=1402,
+  serialized_end=1458,
 )
 
 
@@ -897,8 +897,8 @@ _CREDITCARDINFO = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1480,
-  serialized_end=1624,
+  serialized_start=1461,
+  serialized_end=1605,
 )
 
 
@@ -935,8 +935,8 @@ _CHARGEREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1626,
-  serialized_end=1727,
+  serialized_start=1607,
+  serialized_end=1708,
 )
 
 
@@ -966,8 +966,8 @@ _CHARGERESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1729,
-  serialized_end=1769,
+  serialized_start=1710,
+  serialized_end=1750,
 )
 
 
@@ -1004,8 +1004,8 @@ _ORDERITEM = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1771,
-  serialized_end=1853,
+  serialized_start=1752,
+  serialized_end=1834,
 )
 
 
@@ -1063,8 +1063,8 @@ _ORDERRESULT = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1856,
-  serialized_end=2047,
+  serialized_start=1837,
+  serialized_end=2028,
 )
 
 
@@ -1101,8 +1101,8 @@ _SENDORDERCONFIRMATIONREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2049,
-  serialized_end=2135,
+  serialized_start=2030,
+  serialized_end=2116,
 )
 
 
@@ -1146,8 +1146,8 @@ _CREATEORDERREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2137,
-  serialized_end=2236,
+  serialized_start=2118,
+  serialized_end=2217,
 )
 
 
@@ -1184,8 +1184,8 @@ _CREATEORDERRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2238,
-  serialized_end=2341,
+  serialized_start=2219,
+  serialized_end=2322,
 )
 
 
@@ -1243,8 +1243,8 @@ _PLACEORDERREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2344,
-  serialized_end=2507,
+  serialized_start=2325,
+  serialized_end=2488,
 )
 
 
@@ -1274,13 +1274,12 @@ _PLACEORDERRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2509,
-  serialized_end=2570,
+  serialized_start=2490,
+  serialized_end=2551,
 )
 
 _ADDITEMREQUEST.fields_by_name['item'].message_type = _CARTITEM
 _CART.fields_by_name['items'].message_type = _CARTITEM
-_LISTRECOMMENDATIONSRESPONSE.fields_by_name['products'].message_type = _PRODUCT
 _PRODUCT.fields_by_name['price_usd'].message_type = _MONEYAMOUNT
 _LISTPRODUCTSRESPONSE.fields_by_name['products'].message_type = _PRODUCT
 _SEARCHPRODUCTSRESPONSE.fields_by_name['results'].message_type = _PRODUCT
@@ -1580,8 +1579,8 @@ _CARTSERVICE = _descriptor.ServiceDescriptor(
   file=DESCRIPTOR,
   index=0,
   options=None,
-  serialized_start=2573,
-  serialized_end=2775,
+  serialized_start=2554,
+  serialized_end=2756,
   methods=[
   _descriptor.MethodDescriptor(
     name='AddItem',
@@ -1622,8 +1621,8 @@ _RECOMMENDATIONSERVICE = _descriptor.ServiceDescriptor(
   file=DESCRIPTOR,
   index=1,
   options=None,
-  serialized_start=2778,
-  serialized_end=2909,
+  serialized_start=2759,
+  serialized_end=2890,
   methods=[
   _descriptor.MethodDescriptor(
     name='ListRecommendations',
@@ -1646,8 +1645,8 @@ _PRODUCTCATALOGSERVICE = _descriptor.ServiceDescriptor(
   file=DESCRIPTOR,
   index=2,
   options=None,
-  serialized_start=2912,
-  serialized_end=3171,
+  serialized_start=2893,
+  serialized_end=3152,
   methods=[
   _descriptor.MethodDescriptor(
     name='ListProducts',
@@ -1688,8 +1687,8 @@ _SHIPPINGSERVICE = _descriptor.ServiceDescriptor(
   file=DESCRIPTOR,
   index=3,
   options=None,
-  serialized_start=3174,
-  serialized_end=3344,
+  serialized_start=3155,
+  serialized_end=3325,
   methods=[
   _descriptor.MethodDescriptor(
     name='GetQuote',
@@ -1721,8 +1720,8 @@ _CURRENCYSERVICE = _descriptor.ServiceDescriptor(
   file=DESCRIPTOR,
   index=4,
   options=None,
-  serialized_start=3347,
-  serialized_end=3535,
+  serialized_start=3328,
+  serialized_end=3516,
   methods=[
   _descriptor.MethodDescriptor(
     name='GetSupportedCurrencies',
@@ -1754,8 +1753,8 @@ _PAYMENTSERVICE = _descriptor.ServiceDescriptor(
   file=DESCRIPTOR,
   index=5,
   options=None,
-  serialized_start=3537,
-  serialized_end=3622,
+  serialized_start=3518,
+  serialized_end=3603,
   methods=[
   _descriptor.MethodDescriptor(
     name='Charge',
@@ -1778,8 +1777,8 @@ _EMAILSERVICE = _descriptor.ServiceDescriptor(
   file=DESCRIPTOR,
   index=6,
   options=None,
-  serialized_start=3624,
-  serialized_end=3728,
+  serialized_start=3605,
+  serialized_end=3709,
   methods=[
   _descriptor.MethodDescriptor(
     name='SendOrderConfirmation',
@@ -1802,8 +1801,8 @@ _CHECKOUTSERVICE = _descriptor.ServiceDescriptor(
   file=DESCRIPTOR,
   index=7,
   options=None,
-  serialized_start=3731,
-  serialized_end=3913,
+  serialized_start=3712,
+  serialized_end=3894,
   methods=[
   _descriptor.MethodDescriptor(
     name='CreateOrder',
