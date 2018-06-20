@@ -10,9 +10,8 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 
-	pb "microservices-demo/pb"
+	pb "./genproto"
 )
-
 
 const (
 	default_port = "50051"
@@ -36,7 +35,7 @@ func (s *server) GetQuote(ctx context.Context, in *pb.GetQuoteRequest) (*pb.GetQ
 	// 3. Generate a response.
 	return &pb.GetQuoteResponse{
 		CostUsd: &pb.MoneyAmount{
-			Decimal: quote.Dollars,
+			Decimal:    quote.Dollars,
 			Fractional: quote.Cents,
 		},
 	}, nil

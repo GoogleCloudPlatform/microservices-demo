@@ -1,31 +1,14 @@
-FROM golang:1.10.3-alpine3.7 as deps
-
+FROM golang:1.10-alpine as builder
 RUN apk add --no-cache \
   ca-certificates \
-  curl \
-  git \
-  gcc \
-  libffi-dev \
-  make \
-  musl-dev \
-  protobuf \
-  tar
+  git
+WORKDIR /src/microservices-demo/shippingservice
+COPY . .
+RUN go get -d ./...
+RUN go build -v -o /shippingservice .
 
-ENV PATH=$PATH:$GOPATH/bin
-RUN go get -u google.golang.org/grpc && \
-  go get github.com/golang/protobuf/protoc-gen-go
-
-FROM deps as builder
-WORKDIR $GOPATH/src/microservices-demo/shipping
-COPY src/shippingservice $GOPATH/src/microservices-demo/shipping
-COPY pb/demo.proto $GOPATH/src/microservices-demo/pb/demo.proto
-
-RUN protoc -I ../pb/ ../pb/demo.proto --go_out=plugins=grpc:../pb
-RUN go build -o /shipping/shipit
-
-FROM golang:1.10.3-alpine3.7 as release
-COPY --from=builder /shipping/shipit /shipit
+FROM alpine as release
+COPY --from=builder /shippingservice /shippingservice
 ENV APP_PORT=50051
-
-# @TODO add light init system.
-ENTRYPOINT /shipit
+EXPOSE 50051
+ENTRYPOINT /shippingservice

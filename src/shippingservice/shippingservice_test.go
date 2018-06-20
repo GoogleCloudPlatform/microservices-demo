@@ -1,10 +1,11 @@
 package main
 
-import(
+import (
 	"testing"
+
 	"golang.org/x/net/context"
 
-	pb "microservices-demo/pb"
+	pb "./genproto"
 )
 
 // TestGetQuote is a basic check on the GetQuote RPC service.
@@ -16,17 +17,17 @@ func TestGetQuote(t *testing.T) {
 		Address: &pb.Address{
 			StreetAddress_1: "Muffin Man",
 			StreetAddress_2: "Drury Lane",
-			City: "London",
-			Country: "England",
+			City:            "London",
+			Country:         "England",
 		},
 		Items: []*pb.CartItem{
 			{
 				ProductId: "23",
-				Quantity: 1,
+				Quantity:  1,
 			},
 			{
 				ProductId: "46",
-				Quantity: 3,
+				Quantity:  3,
 			},
 		},
 	}
@@ -49,17 +50,17 @@ func TestShipOrder(t *testing.T) {
 		Address: &pb.Address{
 			StreetAddress_1: "Muffin Man",
 			StreetAddress_2: "Drury Lane",
-			City: "London",
-			Country: "England",
+			City:            "London",
+			Country:         "England",
 		},
 		Items: []*pb.CartItem{
 			{
 				ProductId: "23",
-				Quantity: 1,
+				Quantity:  1,
 			},
 			{
 				ProductId: "46",
-				Quantity: 3,
+				Quantity:  3,
 			},
 		},
 	}
