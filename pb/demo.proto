@@ -119,7 +119,7 @@ message Address {
 
 service CurrencyService {
     rpc GetSupportedCurrencies(Empty) returns (GetSupportedCurrenciesResponse) {}
-    rpc Convert(ConversionRequest) returns (ConversionResponse) {}
+    rpc Convert(CurrencyConversionRequest) returns (Money) {}
 }
 
 
@@ -141,15 +141,11 @@ message GetSupportedCurrenciesResponse {
     repeated string currency_codes = 1;
 }
 
-message ConversionRequest {
+message CurrencyConversionRequest {
     Money from = 1;
 
     // The 3-letter currency code defined in ISO 4217.
     string to_code = 2;
-}
-
-message ConversionResponse {
-    Money result = 1;
 }
 
 // -------------Payment service-----------------
