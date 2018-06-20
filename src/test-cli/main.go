@@ -32,6 +32,10 @@ var (
 			envs: []string{"PAYMENT_SERVICE_ADDR"},
 			f:    testPaymentService,
 		},
+		"emailservice": {
+			envs: []string{"EMAIL_SERVICE_ADDR"},
+			f:    testEmailService,
+		},
 	}
 )
 
@@ -102,7 +106,7 @@ func testShippingService() error {
 		StreetAddress_1: "Muffin Man",
 		StreetAddress_2: "Drury Lane",
 		City:            "London",
-		Country:         "England",
+		Country:         "United Kingdom",
 	}
 	items := []*pb.CartItem{
 		{
@@ -183,6 +187,63 @@ func testPaymentService() error {
 	})
 	if err != nil {
 		return nil
+	}
+	log.Printf("--> resp: %+v", resp)
+	return nil
+}
+
+func testEmailService() error {
+	addr := os.Getenv("EMAIL_SERVICE_ADDR")
+	conn, err := grpc.Dial(addr, grpc.WithInsecure())
+	if err != nil {
+		return err
+	}
+	defer conn.Close()
+	cl := pb.NewEmailServiceClient(conn)
+	log.Println("--- rpc SendOrderConfirmation()")
+	resp, err := cl.SendOrderConfirmation(context.TODO(), &pb.SendOrderConfirmationRequest{
+		Email: "noreply@example.com",
+		Order: &pb.OrderResult{
+			OrderId:            "123456",
+			ShippingTrackingId: "000-123-456",
+			ShippingCost: &pb.Money{
+				CurrencyCode: "CAD",
+				Amount: &pb.MoneyAmount{
+					Decimal:    10,
+					Fractional: 55},
+			},
+			ShippingAddress: &pb.Address{
+				StreetAddress_1: "Muffin Man",
+				StreetAddress_2: "Drury Lane",
+				City:            "London",
+				Country:         "United Kingdom",
+			},
+			Items: []*pb.OrderItem{
+				&pb.OrderItem{
+					Item: &pb.CartItem{
+						ProductId: "1",
+						Quantity:  4},
+					Cost: &pb.Money{
+						CurrencyCode: "CAD",
+						Amount: &pb.MoneyAmount{
+							Decimal:    120,
+							Fractional: 0}},
+				},
+				&pb.OrderItem{
+					Item: &pb.CartItem{
+						ProductId: "2",
+						Quantity:  1},
+					Cost: &pb.Money{
+						CurrencyCode: "CAD",
+						Amount: &pb.MoneyAmount{
+							Decimal:    12,
+							Fractional: 25}},
+				},
+			},
+		},
+	})
+	if err != nil {
+		return err
 	}
 	log.Printf("--> resp: %+v", resp)
 	return nil
