@@ -266,7 +266,8 @@ func testCurrencyService() error {
 	if err != nil {
 		return err
 	}
-	log.Printf("--> %v", listResp)
+	log.Printf("--> returned %d currency codes", len(listResp.GetCurrencyCodes()))
+	log.Printf("--> %v", listResp.GetCurrencyCodes())
 	convertResp, err := cl.Convert(context.TODO(), &pb.ConversionRequest{
 		From: &pb.Money{
 			CurrencyCode: "CAD",
