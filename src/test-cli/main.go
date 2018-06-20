@@ -24,6 +24,10 @@ var (
 			envs: []string{"SHIPPING_SERVICE_ADDR"},
 			f:    testShippingService,
 		},
+		"recommendationservice": {
+			envs: []string{"RECOMMENDATION_SERVICE_ADDR"},
+			f:    testRecommendationService,
+		},
 	}
 )
 
@@ -124,5 +128,27 @@ func testShippingService() error {
 		return err
 	}
 	log.Printf("--> quote: %+v", shipResp)
+	return nil
+}
+
+func testRecommendationService() error {
+	addr := os.Getenv("RECOMMENDATION_SERVICE_ADDR")
+	conn, err := grpc.Dial(addr, grpc.WithInsecure())
+	if err != nil {
+		return err
+	}
+	defer conn.Close()
+	cl := pb.NewRecommendationServiceClient(conn)
+
+	log.Println("--- rpc ShipOrder()")
+	resp, err := cl.ListRecommendations(context.TODO(), &pb.ListRecommendationsRequest{
+		UserId:     "foo",
+		ProductIds: []string{"1", "2", "3", "4", "5"},
+	})
+	if err != nil {
+		return err
+	}
+	log.Printf("--> returned %d recommendations", len(resp.GetProductIds()))
+	log.Printf("--> ids: %v", resp.GetProductIds())
 	return nil
 }
