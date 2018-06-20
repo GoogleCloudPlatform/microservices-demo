@@ -36,6 +36,10 @@ var (
 			envs: []string{"EMAIL_SERVICE_ADDR"},
 			f:    testEmailService,
 		},
+		"currencyservice": {
+			envs: []string{"CURRENCY_SERVICE_ADDR"},
+			f:    testCurrencyService,
+		},
 	}
 )
 
@@ -246,5 +250,34 @@ func testEmailService() error {
 		return err
 	}
 	log.Printf("--> resp: %+v", resp)
+	return nil
+}
+
+func testCurrencyService() error {
+	addr := os.Getenv("EMAIL_SERVICE_ADDR")
+	conn, err := grpc.Dial(addr, grpc.WithInsecure())
+	if err != nil {
+		return err
+	}
+	defer conn.Close()
+	cl := pb.NewCurrencyServiceClient(conn)
+	log.Println("--- rpc GetSupportedCurrencies()")
+	listResp, err := cl.GetSupportedCurrencies(context.TODO(), &pb.Empty{})
+	if err != nil {
+		return err
+	}
+	log.Printf("--> %v", listResp)
+	convertResp, err := cl.Convert(context.TODO(), &pb.ConversionRequest{
+		From: &pb.Money{
+			CurrencyCode: "CAD",
+			Amount: &pb.MoneyAmount{
+				Decimal:    12,
+				Fractional: 25},
+		},
+		ToCode: "USD"})
+	if err != nil {
+		return err
+	}
+	log.Printf("--> result: %+v", convertResp.GetResult())
 	return nil
 }
