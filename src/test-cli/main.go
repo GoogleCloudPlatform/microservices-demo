@@ -20,6 +20,10 @@ var (
 			envs: []string{"PRODUCT_CATALOG_SERVICE_ADDR"},
 			f:    testProductCatalogService,
 		},
+		"shippingservice": {
+			envs: []string{"SHIPPING_SERVICE_ADDR"},
+			f:    testShippingService,
+		},
 	}
 )
 
@@ -74,5 +78,51 @@ func testProductCatalogService() error {
 	}
 	log.Printf("--> %d results found", len(searchResp.GetResults()))
 
+	return nil
+}
+
+func testShippingService() error {
+	addr := os.Getenv("SHIPPING_SERVICE_ADDR")
+	conn, err := grpc.Dial(addr, grpc.WithInsecure())
+	if err != nil {
+		return err
+	}
+	defer conn.Close()
+
+	address := &pb.Address{
+		StreetAddress_1: "Muffin Man",
+		StreetAddress_2: "Drury Lane",
+		City:            "London",
+		Country:         "England",
+	}
+	items := []*pb.CartItem{
+		{
+			ProductId: "23",
+			Quantity:  10,
+		},
+		{
+			ProductId: "46",
+			Quantity:  3,
+		},
+	}
+
+	log.Println("--- rpc GetQuote()")
+	cl := pb.NewShippingServiceClient(conn)
+	quoteResp, err := cl.GetQuote(context.TODO(), &pb.GetQuoteRequest{
+		Address: address,
+		Items:   items})
+	if err != nil {
+		return err
+	}
+	log.Printf("--> quote: %+v", quoteResp)
+
+	log.Println("--- rpc ShipOrder()")
+	shipResp, err := cl.ShipOrder(context.TODO(), &pb.ShipOrderRequest{
+		Address: address,
+		Items:   items})
+	if err != nil {
+		return err
+	}
+	log.Printf("--> quote: %+v", shipResp)
 	return nil
 }
