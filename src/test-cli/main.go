@@ -28,6 +28,10 @@ var (
 			envs: []string{"RECOMMENDATION_SERVICE_ADDR"},
 			f:    testRecommendationService,
 		},
+		"paymentservice": {
+			envs: []string{"PAYMENT_SERVICE_ADDR"},
+			f:    testPaymentService,
+		},
 	}
 )
 
@@ -44,6 +48,7 @@ func main() {
 			log.Fatalf("environment variable %q not set", e)
 		}
 	}
+	log.Printf("smoke test %q", os.Args[1])
 	if err := t.f(); err != nil {
 		panic(err)
 	}
@@ -70,7 +75,7 @@ func testProductCatalogService() error {
 	}
 
 	log.Println("--- rpc GetProduct()")
-	getResp, err := cl.GetProduct(context.TODO(), &pb.GetProductRequest{Id: 1})
+	getResp, err := cl.GetProduct(context.TODO(), &pb.GetProductRequest{Id: "1"})
 	if err != nil {
 		return err
 	}
@@ -150,5 +155,35 @@ func testRecommendationService() error {
 	}
 	log.Printf("--> returned %d recommendations", len(resp.GetProductIds()))
 	log.Printf("--> ids: %v", resp.GetProductIds())
+	return nil
+}
+
+func testPaymentService() error {
+	addr := os.Getenv("RECOMMENDATION_SERVICE_ADDR")
+	conn, err := grpc.Dial(addr, grpc.WithInsecure())
+	if err != nil {
+		return err
+	}
+	defer conn.Close()
+	cl := pb.NewPaymentServiceClient(conn)
+
+	log.Println("--- rpc Charge()")
+	resp, err := cl.Charge(context.TODO(), &pb.ChargeRequest{
+		Amount: &pb.Money{
+			CurrencyCode: "USD",
+			Amount: &pb.MoneyAmount{
+				Decimal:    10,
+				Fractional: 55},
+		},
+		CreditCard: &pb.CreditCardInfo{
+			CreditCardNumber:          "9999-9999-9999-9999",
+			CreditCardCvv:             612,
+			CreditCardExpirationYear:  2022,
+			CreditCardExpirationMonth: 10},
+	})
+	if err != nil {
+		return nil
+	}
+	log.Printf("--> resp: %+v", resp)
 	return nil
 }
