@@ -29,14 +29,14 @@ func TestServer(t *testing.T) {
 		t.Error(diff)
 	}
 
-	got, err := client.GetProduct(ctx, &pb.GetProductRequest{Id: 2})
+	got, err := client.GetProduct(ctx, &pb.GetProductRequest{Id: "2"})
 	if err != nil {
 		t.Fatal(err)
 	}
 	if want := catalog[1]; !proto.Equal(got, want) {
 		t.Errorf("got %v, want %v", got, want)
 	}
-	_, err = client.GetProduct(ctx, &pb.GetProductRequest{Id: -1})
+	_, err = client.GetProduct(ctx, &pb.GetProductRequest{Id: "N/A"})
 	if got, want := status.Code(err), codes.NotFound; got != want {
 		t.Errorf("got %s, want %s", got, want)
 	}

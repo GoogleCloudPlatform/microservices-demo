@@ -17,9 +17,9 @@ import (
 var port = flag.Int("port", 3550, "port to listen at")
 
 var catalog = []*pb.Product{
-	{Id: 1, Name: "shirt", Description: "nice shirt", Picture: "picture1", PriceUsd: &pb.MoneyAmount{Decimal: 53}},
-	{Id: 2, Name: "pants", Description: "nice pants", Picture: "picture2", PriceUsd: &pb.MoneyAmount{Decimal: 81}},
-	{Id: 3, Name: "hat", Description: "nice hat", Picture: "picture3", PriceUsd: &pb.MoneyAmount{Decimal: 20}},
+	{Id: "1", Name: "shirt", Description: "nice shirt", Picture: "picture1", PriceUsd: &pb.MoneyAmount{Decimal: 53}},
+	{Id: "2", Name: "pants", Description: "nice pants", Picture: "picture2", PriceUsd: &pb.MoneyAmount{Decimal: 81}},
+	{Id: "3", Name: "hat", Description: "nice hat", Picture: "picture3", PriceUsd: &pb.MoneyAmount{Decimal: 20}},
 }
 
 func main() {

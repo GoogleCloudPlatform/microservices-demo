@@ -59,7 +59,7 @@ service ProductCatalogService {
 }
 
 message Product {
-    int32 id = 1;
+    string id = 1;
     string name = 2;
     string description = 3;
     string picture = 4;
@@ -71,7 +71,7 @@ message ListProductsResponse {
 }
 
 message GetProductRequest {
-    int32 id = 1;
+    string id = 1;
 }
 
 message SearchProductsRequest {
