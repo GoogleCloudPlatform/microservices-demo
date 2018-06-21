@@ -19,7 +19,7 @@
 const HipsterShopServer = require('./server');
 
 const PORT = process.env['PORT'];
-const PROTO_PATH = __dirname + '/../../pb/demo.proto';
+const PROTO_PATH = __dirname + '/proto/demo.proto';
 
 const server = new HipsterShopServer(PROTO_PATH, PORT);
 
