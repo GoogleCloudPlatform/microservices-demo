@@ -9,15 +9,14 @@ import os
 class RecommendationService(demo_pb2_grpc.RecommendationServiceServicer):
     def ListRecommendations(self, request, context):
         max_responses = 5
-        print("handling request")
 
         # get list of products
         cat_response = stub.ListProducts(demo_pb2.Empty())
         num_prodcuts = len(cat_response.products)
 
         indices = random.sample(range(num_prodcuts), min(max_responses, num_prodcuts))
-        prod_list = [str(cat_response.products[i].id) for i in indices]
-        print(indices, prod_list)
+        prod_list = [cat_response.products[i].id for i in indices]
+        print("handling request: {}".format(prod_list))
 
         response = demo_pb2.ListRecommendationsResponse()
         response.product_ids.extend(prod_list)
