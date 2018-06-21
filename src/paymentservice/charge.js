@@ -1,4 +1,5 @@
 const cardValidator = require('simple-card-validator');
+const uuid = require('uuid/v4');
 
 class CreditCardError extends Error {
   constructor(message) {
@@ -29,7 +30,7 @@ class ExpiredCreditCard extends CreditCardError {
  * Verifies the credit card number and (pretend) charges the card.
  *
  * @param {*} request
- * @return transaction_id - a random number.
+ * @return transaction_id - a random uuid v4.
  */
 module.exports = function charge(request) {
   const { amount, credit_card: creditCard } = request;
@@ -59,6 +60,6 @@ module.exports = function charge(request) {
   console.log(`Transaction processed: ${cardType} ending ${cardNumber.substr(-4)} \
     Amount: ${amount.currency_code}${amount.amount.decimal}.${amount.amount.fractional}`)
 
-  return { transaction_id: -1 }
+  return { transaction_id: uuid() }
 }
 
