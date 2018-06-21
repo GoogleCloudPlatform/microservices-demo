@@ -1,5 +1,7 @@
 ﻿using System;
 using System.IO;
+using System.Threading;
+using System.Threading.Tasks;
 using cartservice.cartstore;
 using CommandLine;
 using Grpc.Core;
@@ -11,6 +13,7 @@ namespace cartservice
     {
         const string CART_SERVICE_ADDRESS = "CART_SERVICE_ADDR";
         const string REDIS_ADDRESS = "REDIS_ADDR";
+        const string CART_SERVICE_PORT = "CART_SERVICE_PORT";
 
         [Verb("start", HelpText = "Starts the server listening on provided port")]
         class ServerOptions
@@ -18,30 +21,35 @@ namespace cartservice
             [Option('h', "hostname", HelpText = "The ip on which the server is running. If not provided, CART_SERVICE_ADDR environment variable value will be used. If not defined, localhost is used")]
             public string Host { get; set; }
 
-            [Option('p', "port", HelpText = "The port on for running the server", Required = true)]
+            [Option('p', "port", HelpText = "The port on for running the server")]
             public int Port { get; set; }
 
             [Option('r', "redis", HelpText = "The ip of redis cache")]
             public string Redis { get; set; }
-
         }
 
         static object StartServer(string host, int port, string redisAddress)
         {
-            var store = new RedisCartStore(redisAddress);
-            Server server = new Server
+            // Run the server in a separate thread and make the main thread busy waiting.
+            // The busy wait is because when we run in a container, we can't use techniques such as waiting on user input (Console.Readline())
+            Task.Run(() =>
             {
-                Services = { Hipstershop.CartService.BindService(new CartServiceImpl(store)) },
-                Ports = { new ServerPort(host, port, ServerCredentials.Insecure) }
-            };
+                var store = new RedisCartStore(redisAddress);
+                Server server = new Server
+                {
+                    Services = { Hipstershop.CartService.BindService(new CartServiceImpl(store)) },
+                    Ports = { new ServerPort(host, port, ServerCredentials.Insecure) }
+                };
 
-            Console.WriteLine($"Cart server is listening at {host}:{port}");
-            Console.WriteLine("Press any key to stop the server...");
-            server.Start();
+                Console.WriteLine($"Cart server is listening at {host}:{port}");
+                server.Start();
+            });
 
-            Console.ReadKey();
-
-            server.ShutdownAsync().Wait();
+            // Busy wait to keep the process alive
+            while(true)
+            {
+                Thread.Sleep(TimeSpan.FromMinutes(10));
+            }
 
             return null;
         }
@@ -60,25 +68,50 @@ namespace cartservice
                     Parser.Default.ParseArguments<ServerOptions>(args).MapResult(
                         (ServerOptions options) => 
                         {
-                            string host = options.Host;
-                            if (string.IsNullOrEmpty(host))
+                            // Set hostname/ip address
+                            string hostname = options.Host;
+                            if (string.IsNullOrEmpty(hostname))
                             {
-                                Console.WriteLine($"Reading host address from {CART_SERVICE_ADDRESS} environment variable...");
-                                host = Environment.GetEnvironmentVariable(CART_SERVICE_ADDRESS);
-                                if (string.IsNullOrEmpty(host))
+                                Console.WriteLine($"Reading host address from {CART_SERVICE_ADDRESS} environment variable");
+                                hostname = Environment.GetEnvironmentVariable(CART_SERVICE_ADDRESS);
+                                if (string.IsNullOrEmpty(hostname))
                                 {
-                                    Console.WriteLine("Setting the host to 127.0.0.1");
-                                    host = "127.0.0.1";
+                                    Console.WriteLine($"Environment variable {CART_SERVICE_ADDRESS} was not set. Setting the host to 127.0.0.1");
+                                    hostname = "127.0.0.1";
                                 }
                             }
 
+                            // Set the port
+                            int port = options.Port;
+                            if (options.Port <= 0)
+                            {
+                                Console.WriteLine($"Reading cart service port from {CART_SERVICE_ADDRESS} environment variable");
+                                string portStr = Environment.GetEnvironmentVariable(CART_SERVICE_PORT);
+                                if (string.IsNullOrEmpty(portStr))
+                                {
+                                    Console.WriteLine($"{CART_SERVICE_PORT} environment variable was not set. Setting the port to 8080");
+                                    port = 8080;
+                                }
+                                else    
+                                {
+                                    port = int.Parse(portStr);
+                                }
+                            }
+
+                            // Set redis cache host (hostname+port)
                             string redis = options.Redis;
                             if (string.IsNullOrEmpty(redis))
                             {
-                                Console.WriteLine("Reading redis cache address from environment variable");
+                                Console.WriteLine($"Reading redis cache address from environment variable {REDIS_ADDRESS}");
                                 redis = Environment.GetEnvironmentVariable(REDIS_ADDRESS);
+                                if (string.IsNullOrEmpty(redis))
+                                {
+                                    Console.WriteLine("Redis cache host(hostname+port) was not specified. It should be specified via command line or REDIS_ADDRESS environment variable.");
+                                    return -1;
+                                }
                             }
-                            return StartServer(host, options.Port, redis);
+
+                            return StartServer(hostname, port, redis);
                         },
                         errs => 1);
                     break;
