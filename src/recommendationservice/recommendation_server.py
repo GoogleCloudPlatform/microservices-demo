@@ -30,7 +30,9 @@ if __name__ == "__main__":
     # get port from $PORT envar
     port = os.environ.get('PORT', "8080")
     # get product catalog service address from $PRODUCT_CATALOG_SERVICE_ADDR envar
-    catalog_addr = os.environ.get('PRODUCT_CATALOG_SERVICE_ADDR', "localhost:8081")
+    catalog_addr = os.environ.get('PRODUCT_CATALOG_SERVICE_ADDR', '')
+    if catalog_addr == "":
+        raise Exception('PRODUCT_CATALOG_SERVICE_ADDR environment not set')
 
     print("product catalog address: " + catalog_addr)
     print("listening on port: " + port)
