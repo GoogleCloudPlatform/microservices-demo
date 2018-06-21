@@ -10,4 +10,4 @@ RUN apk add --no-cache \
   ca-certificates
 COPY --from=builder /catalogservice /catalogservice
 EXPOSE 5000
-ENTRYPOINT /catalogservice
+ENTRYPOINT ["/catalogservice"]

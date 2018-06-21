@@ -4,11 +4,11 @@ FROM grpc/python:1.0
 ENV PYTHONUNBUFFERED=0
 
 # add files into working directory
-ADD ./*.py /home/
+COPY . /home/
 WORKDIR /home
 
 # set listen port
 ENV PORT "8080"
 EXPOSE 8080
 
-ENTRYPOINT python /home/recommendation_server.py
+ENTRYPOINT ["python", "/home/recommendation_server.py"]
