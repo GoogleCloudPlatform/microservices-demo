@@ -167,7 +167,7 @@ func testRecommendationService() error {
 }
 
 func testPaymentService() error {
-	addr := os.Getenv("RECOMMENDATION_SERVICE_ADDR")
+	addr := os.Getenv("PAYMENT_SERVICE_ADDR")
 	conn, err := grpc.Dial(addr, grpc.WithInsecure())
 	if err != nil {
 		return err
@@ -184,13 +184,13 @@ func testPaymentService() error {
 				Fractional: 55},
 		},
 		CreditCard: &pb.CreditCardInfo{
-			CreditCardNumber:          "9999-9999-9999-9999",
+			CreditCardNumber:          "4444-4530-1092-6639",
 			CreditCardCvv:             612,
 			CreditCardExpirationYear:  2022,
 			CreditCardExpirationMonth: 10},
 	})
 	if err != nil {
-		return nil
+		return err
 	}
 	log.Printf("--> resp: %+v", resp)
 	return nil

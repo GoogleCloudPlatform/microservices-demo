@@ -1,6 +1,8 @@
 const grpc = require('grpc');
 const protoLoader = require('@grpc/proto-loader');
 
+const charge = require('./charge');
+
 class HipsterShopServer {
   constructor(protoFile, port = HipsterShopServer.DEFAULT_PORT) {
     this.port = port;
@@ -16,24 +18,18 @@ class HipsterShopServer {
    */
   static ChargeServiceHandler(call, callback) {
     try {
-      const response = this.charge(call.request)
+      console.log(`PaymentService#Charge invoked with request ${JSON.stringify(call.request)}`)
+      const response = charge(call.request)
       callback(null, response);
     } catch (err) {
+      console.warn(err);
       callback(err);
     }
   }
 
-  /**
-   * Charge function
-   * @param {*} request
-   * @return transaction_id
-   */
-  static charge(request) {
-    return { transaction_id: -1 }
-  }
-
   listen() {
     this.server.bind(`0.0.0.0:${this.port}`, grpc.ServerCredentials.createInsecure());
+    console.log(`PaymentService grpc server listening on ${this.port}`);
     this.server.start();
   }
 
