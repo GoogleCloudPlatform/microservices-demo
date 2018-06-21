@@ -1,0 +1,27 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: emailservice
+spec:
+  template:
+    metadata:
+      labels:
+        app: emailservice
+    spec:
+      containers:
+      - name: server
+        image: emailservice
+        ports:
+        - containerPort: 5000
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: emailservice
+spec:
+  type: ClusterIP
+  selector:
+    app: emailservice
+  ports:
+  - port: 5000
+    targetPort: 5000

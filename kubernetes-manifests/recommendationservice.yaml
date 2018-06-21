@@ -1,0 +1,30 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: recommendationservice
+spec:
+  template:
+    metadata:
+      labels:
+        app: recommendationservice
+    spec:
+      containers:
+      - name: server
+        image: recommendationservice
+        ports:
+        - containerPort: 8080
+        env:
+        - name: PRODUCT_CATALOG_SERVICE_ADDR
+          value: "productcatalogservice:3550"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: recommendationservice
+spec:
+  type: ClusterIP
+  selector:
+    app: recommendationservice
+  ports:
+  - port: 8080
+    targetPort: 8080

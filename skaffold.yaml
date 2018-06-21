@@ -1,0 +1,18 @@
+apiVersion: skaffold/v1alpha2
+kind: Config
+build:
+  artifacts:
+  - imageName: emailservice
+    workspace: src/emailservice
+  - imageName: productcatalogservice
+    workspace: src/productcatalogservice
+  - imageName: recommendationservice
+    workspace: src/recommendationservice
+  - imageName: shippingservice
+    workspace: src/shippingservice
+  - imageName: checkoutservice
+    workspace: src/checkoutservice
+deploy:
+  kubectl:
+    manifests:
+    - ./kubernetes-manifests/**.yaml
