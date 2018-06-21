@@ -11,6 +11,9 @@
     <PackageReference Include="Google.Protobuf.Tools" Version="3.5.1" />
     <PackageReference Include="grpc" Version="1.12.0" />
     <PackageReference Include="grpc.tools" Version="1.12.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration" Version="2.1.1" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="2.1.1" />
+    <PackageReference Include="StackExchange.Redis" Version="1.2.6" />
   </ItemGroup>
 
 </Project>
