@@ -12,6 +12,8 @@ build:
     workspace: src/shippingservice
   - imageName: checkoutservice
     workspace: src/checkoutservice
+  - imageName: paymentservice
+    workspace: src/paymentservice
 deploy:
   kubectl:
     manifests:

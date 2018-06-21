@@ -10,15 +10,19 @@ spec:
         app: checkoutservice
     spec:
       containers:
-      - name: server
-        image: checkoutservice
-        ports:
-        - containerPort: 5050
-        env:
-        - name: PRODUCT_CATALOG_SERVICE_ADDR
-          value: "productcatalogservice:3550"
-        - name: SHIPPING_SERVICE_ADDR
-          value: "shippingservice:50051"
+        - name: server
+          image: checkoutservice
+          ports:
+          - containerPort: 5050
+          env:
+          - name: PRODUCT_CATALOG_SERVICE_ADDR
+            value: "productcatalogservice:3550"
+          - name: SHIPPING_SERVICE_ADDR
+            value: "shippingservice:50051"
+          - name: PAYMENT_SERVICE_ADDR
+            value: "paymentservice:50051"
+          - name: EMAIL_SERVICE_ADDR
+            value: "emailservice:5000"
 ---
 apiVersion: v1
 kind: Service
