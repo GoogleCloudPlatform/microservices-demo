@@ -3,8 +3,8 @@ import demo_pb2
 import demo_pb2_grpc
 from concurrent import futures
 import time
-import sys
 import random
+import os
 
 class RecommendationService(demo_pb2_grpc.RecommendationServiceServicer):
     def ListRecommendations(self, request, context):
@@ -17,11 +17,13 @@ class RecommendationService(demo_pb2_grpc.RecommendationServiceServicer):
         return response
 
 if __name__ == "__main__":
-    # get port
-    if len(sys.argv) > 1:
-        port = sys.argv[1]
-    else:
-        port = "8080"
+    # get port from $PORT envar
+    port = os.environ.get('PORT', "8080")
+    # get product catalog service address from $PRODUCT_CATALOG_SERVICE_ADDR envar
+    catalog_addr = os.environ.get('PRODUCT_CATALOG_SERVICE_ADDR', "localhost:8081")
+
+    print("product catalog address: " + catalog_addr)
+    print("listening on port: " + port)
 
     # create gRPC server
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
@@ -30,7 +32,6 @@ if __name__ == "__main__":
     demo_pb2_grpc.add_RecommendationServiceServicer_to_server(RecommendationService(), server)
 
     # start server
-    print("Listening on port " + port)
     server.add_insecure_port('[::]:'+port)
     server.start()
 
