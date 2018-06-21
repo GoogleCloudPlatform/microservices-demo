@@ -254,7 +254,7 @@ func testEmailService() error {
 }
 
 func testCurrencyService() error {
-	addr := os.Getenv("EMAIL_SERVICE_ADDR")
+	addr := os.Getenv("CURRENCY_SERVICE_ADDR")
 	conn, err := grpc.Dial(addr, grpc.WithInsecure())
 	if err != nil {
 		return err
@@ -268,7 +268,9 @@ func testCurrencyService() error {
 	}
 	log.Printf("--> returned %d currency codes", len(listResp.GetCurrencyCodes()))
 	log.Printf("--> %v", listResp.GetCurrencyCodes())
-	convertResp, err := cl.Convert(context.TODO(), &pb.ConversionRequest{
+
+	log.Println("--- rpc Convert()")
+	convertResp, err := cl.Convert(context.TODO(), &pb.CurrencyConversionRequest{
 		From: &pb.Money{
 			CurrencyCode: "CAD",
 			Amount: &pb.MoneyAmount{
@@ -279,6 +281,6 @@ func testCurrencyService() error {
 	if err != nil {
 		return err
 	}
-	log.Printf("--> result: %+v", convertResp.GetResult())
+	log.Printf("--> result: %+v", convertResp)
 	return nil
 }
