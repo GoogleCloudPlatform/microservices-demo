@@ -283,8 +283,8 @@ class CurrencyServiceStub(object):
         )
     self.Convert = channel.unary_unary(
         '/hipstershop.CurrencyService/Convert',
-        request_serializer=demo__pb2.ConversionRequest.SerializeToString,
-        response_deserializer=demo__pb2.ConversionResponse.FromString,
+        request_serializer=demo__pb2.CurrencyConversionRequest.SerializeToString,
+        response_deserializer=demo__pb2.Money.FromString,
         )
 
 
@@ -317,8 +317,8 @@ def add_CurrencyServiceServicer_to_server(servicer, server):
       ),
       'Convert': grpc.unary_unary_rpc_method_handler(
           servicer.Convert,
-          request_deserializer=demo__pb2.ConversionRequest.FromString,
-          response_serializer=demo__pb2.ConversionResponse.SerializeToString,
+          request_deserializer=demo__pb2.CurrencyConversionRequest.FromString,
+          response_serializer=demo__pb2.Money.SerializeToString,
       ),
   }
   generic_handler = grpc.method_handlers_generic_handler(

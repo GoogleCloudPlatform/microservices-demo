@@ -8,6 +8,7 @@ ADD ./*.py /home/
 WORKDIR /home
 
 # set listen port
-ENV PORT=8080
+ENV PORT "8080"
+EXPOSE 8080
 
-ENTRYPOINT python /home/recommendation_server.py $PORT
+ENTRYPOINT python /home/recommendation_server.py
