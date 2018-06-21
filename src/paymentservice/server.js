@@ -13,24 +13,24 @@ class HipsterShopServer {
    * Handler for PaymentService.Charge.
    * @param {*} call  { ChargeRequest }
    * @param {*} callback  fn(err, ChargeResponse)
-  */
-    static ChargeServiceHandler(call, callback) {
-      try {
-        const response = this.charge(call.request)
-        callback(null, response);
-      } catch (err) {
-        callback(err);
-      }
+   */
+  static ChargeServiceHandler(call, callback) {
+    try {
+      const response = this.charge(call.request)
+      callback(null, response);
+    } catch (err) {
+      callback(err);
     }
+  }
 
   /**
    * Charge function
    * @param {*} request
    * @return transaction_id
    */
-    static charge(request) {
-        return { transaction_id: -1 }
-    }
+  static charge(request) {
+    return { transaction_id: -1 }
+  }
 
   listen() {
     this.server.bind(`0.0.0.0:${this.port}`, grpc.ServerCredentials.createInsecure());
