@@ -2,6 +2,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using cartservice.interfaces;
 using Grpc.Core;
 using Hipstershop;
 using static Hipstershop.CartService;
@@ -11,65 +12,29 @@ namespace cartservice
     // Cart wrapper to deal with grpc communication
     internal class CartServiceImpl : CartServiceBase
     {
-        private CartStore cartStore;
+        private ICartStore cartStore;
+        private readonly static Empty Empty = new Empty();
 
-        public CartServiceImpl(CartStore cartStore)
+        public CartServiceImpl(ICartStore cartStore)
         {
             this.cartStore = cartStore;
         }
 
-        public override Task<Empty> AddItem(AddItemRequest request, Grpc.Core.ServerCallContext context)
+        public async override Task<Empty> AddItem(AddItemRequest request, Grpc.Core.ServerCallContext context)
         {
-            cartStore.AddItem(request.UserId, request.Item.ProductId, request.Item.Quantity);
-            return Task.FromResult(new Empty());
+            await cartStore.AddItemAsync(request.UserId, request.Item.ProductId, request.Item.Quantity);
+            return Empty;
         }
 
-        public override Task<Empty> EmptyCart(EmptyCartRequest request, ServerCallContext context)
+        public async override Task<Empty> EmptyCart(EmptyCartRequest request, ServerCallContext context)
         {
-            cartStore.EmptyCart(request.UserId);
-            return Task.FromResult(new Empty());
+            await cartStore.EmptyCartAsync(request.UserId);
+            return Empty;
         }
 
-        public override Task<Hipstershop.Cart> GetCart(GetCartRequest request, ServerCallContext context)
+        public async override Task<Hipstershop.Cart> GetCart(GetCartRequest request, ServerCallContext context)
         {
-            var cart = cartStore.GetCart(request.UserId);
-            return Task.FromResult(cart.ToHipsterCart());
-        }
-    }
-
-    internal class CartStore
-    {
-        // Maps between user and their cart
-        private ConcurrentDictionary<string, Cart> userCartItems = new ConcurrentDictionary<string, Cart>();
-
-        public void AddItem(string userId, string productId, int quantity)
-        {
-            Cart cart;
-            if (!userCartItems.TryGetValue(userId, out cart))
-            {
-                cart = new Cart(userId);
-            }
-            else
-            {
-                cart = userCartItems[userId];
-            }
-            cart.AddItem(productId, quantity);
-        }
-
-        public void EmptyCart(string userId)
-        {
-            Cart cart;
-            if (userCartItems.TryGetValue(userId, out cart))
-            {
-                cart.EmptyCart();
-            }
-        }
-
-        public Cart GetCart(string userId)
-        {
-            Cart cart = null;
-            userCartItems.TryGetValue(userId, out cart);
-            return cart;
+            return await cartStore.GetCartAsync(request.UserId);
         }
     }
 

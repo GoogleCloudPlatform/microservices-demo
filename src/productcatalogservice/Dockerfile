@@ -5,7 +5,7 @@ RUN apk add --no-cache \
 WORKDIR /src/microservices-demo/productcatalogservice
 COPY . .
 RUN go get -d ./...
-RUN go build -v -o /productcatalogservice .
+RUN go build -o /productcatalogservice .
 
 FROM alpine as release
 RUN apk add --no-cache \
