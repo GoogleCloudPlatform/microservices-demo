@@ -8,9 +8,7 @@ ADD ./*.py /home/
 WORKDIR /home
 
 # set listen port
-ENV PORT="8080"
-
-#set product catalog address
-ENV PRODUCT_CATALOG_SERVICE_ADDR="localhost:8081"
+ENV PORT "8080"
+EXPOSE 8080
 
 ENTRYPOINT python /home/recommendation_server.py
