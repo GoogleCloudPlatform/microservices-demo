@@ -3,7 +3,7 @@ RUN apk add --no-cache ca-certificates git
 WORKDIR /src/microservices-demo/catalogservice
 COPY . .
 RUN go get -d ./...
-RUN go build -v -o /catalogservice .
+RUN go build -o /catalogservice .
 
 FROM alpine as release
 RUN apk add --no-cache \
