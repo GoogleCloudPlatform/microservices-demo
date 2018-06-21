@@ -1,3 +1,6 @@
+#!/bin/bash
+set -e
+
 # script to compile python protos
 #
 # requires gRPC tools:
