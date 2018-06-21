@@ -15,7 +15,7 @@ import (
 )
 
 const (
-	listenPort = "5000"
+	listenPort = "5050"
 )
 
 type checkoutService struct {

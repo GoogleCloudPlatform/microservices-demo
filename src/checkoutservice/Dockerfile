@@ -9,5 +9,5 @@ FROM alpine as release
 RUN apk add --no-cache \
   ca-certificates
 COPY --from=builder /catalogservice /catalogservice
-EXPOSE 5000
+EXPOSE 5050
 ENTRYPOINT ["/catalogservice"]

@@ -13,7 +13,7 @@ spec:
       - name: server
         image: checkoutservice
         ports:
-        - containerPort: 5000
+        - containerPort: 5050
         env:
         - name: PRODUCT_CATALOG_SERVICE_ADDR
           value: "productcatalogservice:3550"
@@ -29,5 +29,5 @@ spec:
   selector:
     app: checkoutservice
   ports:
-  - port: 5000
-    targetPort: 5000
+  - port: 5050
+    targetPort: 5050
