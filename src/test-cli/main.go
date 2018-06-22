@@ -270,17 +270,18 @@ func testCurrencyService() error {
 	log.Printf("--> %v", listResp.GetCurrencyCodes())
 
 	log.Println("--- rpc Convert()")
+	in := &pb.Money{
+		CurrencyCode: "CAD",
+		Amount: &pb.MoneyAmount{
+			Decimal:    12,
+			Fractional: 25},
+	}
 	convertResp, err := cl.Convert(context.TODO(), &pb.CurrencyConversionRequest{
-		From: &pb.Money{
-			CurrencyCode: "CAD",
-			Amount: &pb.MoneyAmount{
-				Decimal:    12,
-				Fractional: 25},
-		},
+		From:   in,
 		ToCode: "USD"})
 	if err != nil {
 		return err
 	}
-	log.Printf("--> result: %+v", convertResp)
+	log.Printf("--> in=%v result(USD): %+v", in, convertResp)
 	return nil
 }
