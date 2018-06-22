@@ -1,0 +1,14 @@
+{
+  "name": "grpc-currency-service",
+  "version": "0.1.0",
+  "description": "A gRPC currency conversion microservice",
+  "repository": "TODO",
+  "license": "Apache-2.0",
+  "dependencies": {
+    "async": "^1.5.2",
+    "google-protobuf": "^3.0.0",
+    "grpc": "^1.0.0",
+    "request": "^2.87.0",
+    "xml2js": "^0.4.19"
+  }
+}
