@@ -19,7 +19,7 @@
 const path = require('path');
 const grpc = require('grpc');
 
-const PROTO_PATH = path.join(__dirname, './proto/currency_service.proto');
+const PROTO_PATH = path.join(__dirname, './proto/demo.proto');
 const PORT = 31337;
 
 const shopProto = grpc.load(PROTO_PATH).hipstershop;
