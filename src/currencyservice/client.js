@@ -37,11 +37,22 @@ const request = {
   to_code: 'CHF'
 };
 
+function _moneyToString (m) {
+  return `${m.amount.decimal}.${m.amount.fractional} ${m.currency_code}`;
+}
+
+client.getSupportedCurrencies({}, (err, response) => {
+  if (err) {
+    console.error(`Error in getSupportedCurrencies: ${err}`);
+  } else {
+    console.log(`Currency codes: ${response.currency_codes}`);
+  }
+});
+
 client.convert(request, function (err, response) {
   if (err) {
-    console.error(err);
+    console.error(`Error in convert: ${err}`);
   } else {
-    const amount = response.amount;
-    console.log(`OUTPUT: ${amount.decimal}.${amount.fractional}`);
+    console.log(`Convert: ${_moneyToString(request.from)} to ${_moneyToString(response)}`);
   }
 });

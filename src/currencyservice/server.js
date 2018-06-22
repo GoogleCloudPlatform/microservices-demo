@@ -65,7 +65,7 @@ function _carry (amount) {
  */
 function getSupportedCurrencies (call, callback) {
   _getCurrencyData((data) => {
-    callback(null, {currency_codes: data.keys()});
+    callback(null, {currency_codes: Object.keys(data)});
   });
 }
 
@@ -91,7 +91,7 @@ function convert (call, callback) {
       });
       target.fractional = Math.round(target.fractional);
 
-      callback(null, {amount: target});
+      callback(null, {currency_code: request.to_code, amount: target});
     });
   } catch (err) {
     callback(err.message);
