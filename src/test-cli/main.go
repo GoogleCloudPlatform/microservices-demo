@@ -299,10 +299,6 @@ func testCartService() error {
 	defer conn.Close()
 	cl := pb.NewCartServiceClient(conn)
 
-	// AddItem(ctx context.Context, in *AddItemRequest, opts ...grpc.CallOption) (*Empty, error)
-	// GetCart(ctx context.Context, in *GetCartRequest, opts ...grpc.CallOption) (*Cart, error)
-	// EmptyCart(ctx context.Context, in *EmptyCartRequest, opts ...grpc.CallOption) (*Empty, error)
-
 	log.Println("--- rpc AddItem()")
 	userID := "smoke-test-user"
 	_, err = cl.AddItem(context.TODO(), &pb.AddItemRequest{
