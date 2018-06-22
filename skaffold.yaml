@@ -14,6 +14,8 @@ build:
     workspace: src/checkoutservice
   - imageName: paymentservice
     workspace: src/paymentservice
+  - imageName: currencyservice
+    workspace: src/currencyservicetemp
 deploy:
   kubectl:
     manifests:
