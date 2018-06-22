@@ -55,7 +55,7 @@ function _getCurrencyData (callback) {
  */
 function _carry (amount) {
   amount.fractional += (amount.decimal % 1) * 100;
-  amount.decimal = Math.floor(amount.decimal + amount.fractional / 100);
+  amount.decimal = Math.floor(amount.decimal) + Math.floor(amount.fractional / 100);
   amount.fractional = amount.fractional % 100;
   return amount;
 }
