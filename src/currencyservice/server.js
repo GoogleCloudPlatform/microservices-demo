@@ -103,7 +103,7 @@ function convert (call, callback) {
  * CurrencyConverter service at the sample server port
  */
 function main () {
-  var server = new grpc.Server();
+  const server = new grpc.Server();
   server.addService(shopProto.CurrencyService.service, {getSupportedCurrencies, convert});
   server.bind(`0.0.0.0:${PORT}`, grpc.ServerCredentials.createInsecure());
   server.start();
