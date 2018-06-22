@@ -12,7 +12,7 @@ spec:
       - name: server
         image: currencyservice
         ports:
-        - containerPort: 7000
+        - containerPort: 31337
         resources:
           requests:
             cpu: 100m
@@ -31,4 +31,4 @@ spec:
     app: currencyservice
   ports:
   - port: 7000
-    targetPort: 7000
+    targetPort: 31337
