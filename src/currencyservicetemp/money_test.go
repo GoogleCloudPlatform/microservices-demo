@@ -15,7 +15,7 @@ func Test_convert(t *testing.T) {
 	tests := []struct {
 		name string
 		args args
-		want *pb.MoneyAmount
+		want pb.MoneyAmount
 	}{
 		{
 			"0.33*3", args{pb.MoneyAmount{Decimal: 0, Fractional: 330}, 3}, pb.MoneyAmount{Decimal: 0, Fractional: 99},
@@ -25,6 +25,9 @@ func Test_convert(t *testing.T) {
 		},
 		{
 			"10.00*1.5", args{pb.MoneyAmount{Decimal: 10}, 1.5}, pb.MoneyAmount{Decimal: 15},
+		},
+		{
+			"10.00*1/3", args{pb.MoneyAmount{Decimal: 10}, 1.0 / 3}, pb.MoneyAmount{Decimal: 3, Fractional: 3},
 		},
 		{
 			"32.320*0.5 (trailing zero removed)", args{pb.MoneyAmount{Decimal: 32, Fractional: 32}, 0.5}, pb.MoneyAmount{Decimal: 16, Fractional: 16},
