@@ -40,6 +40,10 @@ var (
 			envs: []string{"CURRENCY_SERVICE_ADDR"},
 			f:    testCurrencyService,
 		},
+		"cartservice": {
+			envs: []string{"CART_SERVICE_ADDR"},
+			f:    testCartService,
+		},
 	}
 )
 
@@ -283,5 +287,57 @@ func testCurrencyService() error {
 		return err
 	}
 	log.Printf("--> in=%v result(USD): %+v", in, convertResp)
+	return nil
+}
+
+func testCartService() error {
+	addr := os.Getenv("CART_SERVICE_ADDR")
+	conn, err := grpc.Dial(addr, grpc.WithInsecure())
+	if err != nil {
+		return err
+	}
+	defer conn.Close()
+	cl := pb.NewCartServiceClient(conn)
+
+	// AddItem(ctx context.Context, in *AddItemRequest, opts ...grpc.CallOption) (*Empty, error)
+	// GetCart(ctx context.Context, in *GetCartRequest, opts ...grpc.CallOption) (*Cart, error)
+	// EmptyCart(ctx context.Context, in *EmptyCartRequest, opts ...grpc.CallOption) (*Empty, error)
+
+	log.Println("--- rpc AddItem()")
+	userID := "smoke-test-user"
+	_, err = cl.AddItem(context.TODO(), &pb.AddItemRequest{
+		UserId: userID,
+		Item:   &pb.CartItem{ProductId: "1", Quantity: 2},
+	})
+	if err != nil {
+		return err
+	}
+	log.Printf("--> added item")
+	_, err = cl.AddItem(context.TODO(), &pb.AddItemRequest{
+		UserId: userID,
+		Item:   &pb.CartItem{ProductId: "2", Quantity: 3},
+	})
+	if err != nil {
+		return err
+	}
+	log.Printf("--> added item")
+
+	log.Println("--- rpc GetCart()")
+	cartResp, err := cl.GetCart(context.TODO(), &pb.GetCartRequest{
+		UserId: userID})
+	if err != nil {
+		return err
+	}
+	log.Printf("--> %d items in cart for user %q", len(cartResp.Items), cartResp.UserId)
+	log.Printf("--> cart: %v", cartResp.Items)
+
+	log.Println("--- rpc EmptyCart()")
+	_, err = cl.EmptyCart(context.TODO(), &pb.EmptyCartRequest{
+		UserId: userID})
+	if err != nil {
+		return err
+	}
+	log.Printf("--> emptied the cart for user %q", userID)
+
 	return nil
 }
