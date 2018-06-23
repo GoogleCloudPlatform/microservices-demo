@@ -85,7 +85,7 @@ namespace cartservice
                             int port = options.Port;
                             if (options.Port <= 0)
                             {
-                                Console.WriteLine($"Reading cart service port from {CART_SERVICE_ADDRESS} environment variable");
+                                Console.WriteLine($"Reading cart service port from {CART_SERVICE_PORT} environment variable");
                                 string portStr = Environment.GetEnvironmentVariable(CART_SERVICE_PORT);
                                 if (string.IsNullOrEmpty(portStr))
                                 {
