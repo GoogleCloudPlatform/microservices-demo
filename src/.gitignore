@@ -1,0 +1,6 @@
+# block vgo cache dir
+v/
+# temp gopath
+github.com
+golang.org
+google.golang.org
