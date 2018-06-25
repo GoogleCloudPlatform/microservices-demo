@@ -28,26 +28,32 @@ const shopProto = grpc.load(PROTO_PATH).hipstershop;
  * Helper function that gets currency data from an XML webpage
  * Uses public data from European Central Bank
  */
+let _data;
 function _getCurrencyData (callback) {
-  request(DATA_URL, (err, res) => {
-    if (err) {
-      throw new Error(`Error getting data: ${err}`);
-    }
-
-    const body = res.body.split('\n').slice(7, -2).join('\n');
-    xml2js.parseString(body, (err, resJs) => {
+  if (!_data) {
+    request(DATA_URL, (err, res) => {
       if (err) {
-        throw new Error(`Error parsing HTML: ${err}`);
+        throw new Error(`Error getting data: ${err}`);
       }
 
-      const array = resJs['Cube']['Cube'].map(x => x['$']);
-      const results = array.reduce((acc, x) => {
-        acc[x['currency']] = x['rate'];
-        return acc;
-      }, { 'EUR': '1.0' });
-      callback(results);
+      const body = res.body.split('\n').slice(7, -2).join('\n');
+      xml2js.parseString(body, (err, resJs) => {
+        if (err) {
+          throw new Error(`Error parsing HTML: ${err}`);
+        }
+
+        const array = resJs['Cube']['Cube'].map(x => x['$']);
+        const results = array.reduce((acc, x) => {
+          acc[x['currency']] = x['rate'];
+          return acc;
+        }, { 'EUR': '1.0' });
+        _data = results;
+        callback(_data);
+      });
     });
-  });
+  } else {
+    callback(_data);
+  }
 }
 
 /**
