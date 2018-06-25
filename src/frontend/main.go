@@ -34,11 +34,11 @@ type frontendServer struct {
 	productCatalogSvcAddr string
 	productCatalogSvcConn *grpc.ClientConn
 
-	cartSvcAddr string
-	cartSvcConn *grpc.ClientConn
-
 	currencySvcAddr string
 	currencySvcConn *grpc.ClientConn
+
+	cartSvcAddr string
+	cartSvcConn *grpc.ClientConn
 }
 
 func main() {
@@ -49,14 +49,18 @@ func main() {
 		srvPort = os.Getenv("PORT")
 	}
 	svc := new(frontendServer)
-	// mustMapEnv(&svc.productCatalogSvcAddr, "PRODUCT_CATALOG_SERVICE_ADDR")
-	// mustMapEnv(&svc.cartSvcAddr, "CART_SERVICE_ADDR")
+	mustMapEnv(&svc.productCatalogSvcAddr, "PRODUCT_CATALOG_SERVICE_ADDR")
 	mustMapEnv(&svc.currencySvcAddr, "CURRENCY_SERVICE_ADDR")
+	// mustMapEnv(&svc.cartSvcAddr, "CART_SERVICE_ADDR")
 
 	var err error
 	svc.currencySvcConn, err = grpc.DialContext(ctx, svc.currencySvcAddr, grpc.WithInsecure())
 	if err != nil {
 		log.Fatalf("failed to connect currency service: %+v", err)
+	}
+	svc.productCatalogSvcConn, err = grpc.DialContext(ctx, svc.productCatalogSvcAddr, grpc.WithInsecure())
+	if err != nil {
+		log.Fatalf("failed to connect productcatalog service: %+v", err)
 	}
 
 	r := mux.NewRouter()
@@ -99,14 +103,23 @@ func (fe *frontendServer) homeHandler(w http.ResponseWriter, r *http.Request) {
 	log.Printf("[home] session_id=%+v", r.Context().Value(ctxKeySessionID{}))
 	currencies, err := fe.getCurrencies(r.Context())
 	if err != nil {
+		log.Println(err) // TODO(ahmetb) use structured logging
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 	log.Printf("currencies: %+v", currencies)
+	products, err := fe.getProducts(r.Context())
+	if err != nil {
+		log.Println(err)
+		w.WriteHeader(http.StatusInternalServerError)
+	}
+	log.Printf("# products: %d", len(products))
 }
 
 func (fe *frontendServer) logoutHandler(w http.ResponseWriter, r *http.Request) {
 	log.Printf("[home] session_id=%+v", r.Context().Value(ctxKeySessionID{}))
+
+	// clear all cookies
 	for _, c := range r.Cookies() {
 		c.MaxAge = -1
 		http.SetCookie(w, c)
@@ -141,6 +154,11 @@ func (fe *frontendServer) getCurrencies(ctx context.Context) ([]string, error) {
 		}
 	}
 	return out, nil
+}
+
+func (fe *frontendServer) getProducts(ctx context.Context) ([]*pb.Product, error) {
+	resp, err := pb.NewProductCatalogServiceClient(fe.productCatalogSvcConn).ListProducts(ctx, &pb.Empty{})
+	return resp.GetProducts(), err
 }
 
 func mustMapEnv(target *string, envKey string) {
