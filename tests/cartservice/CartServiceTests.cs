@@ -9,19 +9,20 @@ namespace cartservice
 {
     public class E2ETests
     {
-        private static string serverHostName = "172.17.0.2";
+        private static string serverHostName = "localhost";
         private static int port = 7070;
 
         [Fact]
         public async Task AddItem_ItemInserted()
         {
-            string userId = "user1";
+            string userId = Guid.NewGuid().ToString();
 
             // Construct server's Uri
             string targetUri = $"{serverHostName}:{port}";
 
             // Create a GRPC communication channel between the client and the server
             var channel = new Channel(targetUri, ChannelCredentials.Insecure);
+            
             //ar interceptorObject = new ObjecT();
             //var channel.Intercept(interceptorObject);
             // Create a proxy object to work with the server
@@ -37,6 +38,7 @@ namespace cartservice
                 }
             };
 
+/*
             for (int i = 0; i < 3; i++)
             {
                 try
@@ -47,18 +49,27 @@ namespace cartservice
                 }
                 catch (Exception)
                 {
+                    await Task.Delay(1000);
                     continue;
                 }
             }
-            
-            var getCardRequest = new GetCartRequest
+*/            
+            await client.AddItemAsync(request);
+            var getCartRequest = new GetCartRequest
             {
                 UserId = userId
             };
-            var cart = await client.GetCartAsync(getCardRequest);
+            //await client.EmptyCartAsync(nameof)
+            //await client.EmptyCartAsync(new EmptyCartRequest{ UserId = userId });
 
+            var cart = await client.GetCartAsync(getCartRequest);
+            Assert.NotNull(cart);
             Assert.Equal(userId, cart.UserId);
             Assert.Single(cart.Items);
+
+            await client.EmptyCartAsync(new EmptyCartRequest{ UserId = userId });
+            cart = await client.GetCartAsync(getCartRequest);
+            Assert.Empty(cart.Items);
         }
     }
 }

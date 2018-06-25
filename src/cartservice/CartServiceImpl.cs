@@ -32,54 +32,9 @@ namespace cartservice
             return Empty;
         }
 
-        public async override Task<Hipstershop.Cart> GetCart(GetCartRequest request, ServerCallContext context)
+        public override Task<Hipstershop.Cart> GetCart(GetCartRequest request, ServerCallContext context)
         {
-            return await cartStore.GetCartAsync(request.UserId);
-        }
-    }
-
-    internal static class CartUtils
-    {
-        public static Hipstershop.Cart ToHipsterCart(this Cart cart)
-        {
-            var hipsterCart = new Hipstershop.Cart
-            {
-                UserId = cart.UserId,
-                Items = { cart.Items.Select(i => new CartItem { ProductId = i.Key, Quantity = i.Value }) }
-            };
-            return hipsterCart;
-        }
-    }
-
-    // Actual implementation of the cart
-    internal class Cart
-    {
-        // Maps between productId and its quantity
-        private Dictionary<string, int> cart = new Dictionary<string, int>();
-
-        public Cart(string userId)
-        {
-            UserId = userId;
-        }
-
-        public string UserId { get; set; }
-
-        public void AddItem(string productId, int quantity)
-        {
-            cart.Add(productId, quantity);
-        }
-
-        public void EmptyCart()
-        {
-            cart.Clear();
-        }
-
-        public IReadOnlyDictionary<string, int> Items
-        {
-            get
-            {
-                return cart;
-            }
+            return cartStore.GetCartAsync(request.UserId);
         }
     }
 }

@@ -34,6 +34,7 @@ namespace cartservice
             // The busy wait is because when we run in a container, we can't use techniques such as waiting on user input (Console.Readline())
             Task.Run(() =>
             {
+                //var store = new LocalCartStore();
                 var store = new RedisCartStore(redisAddress);
                 Server server = new Server
                 {
@@ -50,8 +51,6 @@ namespace cartservice
             {
                 Thread.Sleep(TimeSpan.FromMinutes(10));
             }
-
-            return null;
         }
 
         static void Main(string[] args)

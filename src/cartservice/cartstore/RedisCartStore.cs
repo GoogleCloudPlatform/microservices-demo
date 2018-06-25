@@ -29,6 +29,8 @@ namespace cartservice.cartstore
 
         public async Task AddItemAsync(string userId, string productId, int quantity)
         {
+            Console.WriteLine($"AddItemAsync called with userId={userId}, productId={productId}, quantity={quantity}");
+
             var db = redis.GetDatabase();
             
             // Access the cart from the cache
@@ -44,11 +46,15 @@ namespace cartservice.cartstore
                 cart = Hipstershop.Cart.Parser.ParseFrom(value);
             }
 
+            cart.UserId = userId;
             cart.Items.Add(new Hipstershop.CartItem { ProductId = productId, Quantity = quantity });
+            await db.HashSetAsync(userId, new[]{ new HashEntry(CART_FIELD_NAME, cart.ToByteArray()) });
         }
 
         public async Task EmptyCartAsync(string userId)
         {
+            Console.WriteLine($"EmptyCartAsync called with userId={userId}");
+
             var db = redis.GetDatabase();
 
             // Update the cache with empty cart for given user
@@ -57,6 +63,7 @@ namespace cartservice.cartstore
 
         public async Task<Hipstershop.Cart> GetCartAsync(string userId)
         {
+            Console.WriteLine($"GetCartAsync called with userId={userId}");
             var db = redis.GetDatabase();
 
             // Access the cart from the cache

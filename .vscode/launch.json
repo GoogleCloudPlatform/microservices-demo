@@ -8,8 +8,7 @@
             "name": ".NET Core Launch (console)",
             "type": "coreclr",
             "request": "launch",
-            "preLaunchTask": "build",
-            // If you have changed target frameworks, make sure to update the program path.
+            "preLaunchTask": "build service",
             "program": "${workspaceFolder}/src/cartservice/bin/Debug/netcoreapp2.0/cartservice.dll",
             "args": [],
             "cwd": "${workspaceFolder}/src/cartservice",
@@ -17,6 +16,16 @@
             "console": "internalConsole",
             "stopAtEntry": false,
             "internalConsoleOptions": "openOnSessionStart"
+        },
+        {
+            "name": ".NET Core Launch (Tests)",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build test",
+            "program": "${workspaceRoot}/tests/cartservice/bin/Debug/netcoreapp2.0/cartservice.tests.dll",
+            "args": [],
+            "cwd": "${workspaceRoot}/tests/cartservice",
+            "stopAtEntry": false
         },
         {
             "name": ".NET Core Attach",
