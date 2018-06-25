@@ -2,11 +2,14 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"html/template"
 	"log"
 	"net/http"
 
 	"github.com/google/uuid"
+
+	pb "frontend/genproto"
 )
 
 var (
@@ -36,8 +39,7 @@ func ensureSessionID(next http.HandlerFunc) http.HandlerFunc {
 				MaxAge: cookieMaxAge,
 			})
 		} else if err != nil {
-			log.Printf("unrecognized cookie error: %+v", err)
-			w.WriteHeader(http.StatusInternalServerError)
+			http.Error(w, fmt.Sprintf("unrecognized cookie error: %+v", err), http.StatusInternalServerError)
 			return
 		} else {
 			sessionID = c.Value
@@ -59,16 +61,32 @@ func (fe *frontendServer) homeHandler(w http.ResponseWriter, r *http.Request) {
 	log.Printf("currencies: %+v", currencies)
 	products, err := fe.getProducts(r.Context())
 	if err != nil {
-		log.Println(err)
-		w.WriteHeader(http.StatusInternalServerError)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 	log.Printf("# products: %d", len(products))
 
+	type productView struct {
+		Item  *pb.Product
+		Price *pb.Money
+	}
+	ps := make([]productView, len(products))
+	for i, p := range products {
+		price, err := fe.convertCurrency(r.Context(), &pb.Money{
+			Amount:       p.PriceUsd,
+			CurrencyCode: defaultCurrency,
+		}, currentCurrency(r))
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		ps[i] = productView{p, price}
+	}
+
 	if err := homeTemplate.Execute(w, map[string]interface{}{
 		"user_currency": currentCurrency(r),
 		"currencies":    currencies,
-		"products":      products,
+		"products":      ps,
 	}); err != nil {
 		log.Println(err)
 	}
@@ -76,8 +94,6 @@ func (fe *frontendServer) homeHandler(w http.ResponseWriter, r *http.Request) {
 
 func (fe *frontendServer) logoutHandler(w http.ResponseWriter, r *http.Request) {
 	log.Printf("[home] session_id=%+v", r.Context().Value(ctxKeySessionID{}))
-
-	// clear all cookies
 	for _, c := range r.Cookies() {
 		c.MaxAge = -1
 		http.SetCookie(w, c)

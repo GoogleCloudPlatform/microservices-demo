@@ -17,7 +17,9 @@
         </select>
     </form>
     
-
     <p>{{ len $.products }} products</p>
+    {{range $.products }}
+    <p>{{.Item.Name}} -- <{{.Price}}></p>
+    {{end}}
 </body>
 </html>

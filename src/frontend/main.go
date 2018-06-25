@@ -40,6 +40,7 @@ type frontendServer struct {
 
 func main() {
 	ctx := context.Background()
+	log.SetFlags(log.Lshortfile | log.Ltime)
 
 	srvPort := port
 	if os.Getenv("PORT") != "" {
