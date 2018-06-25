@@ -31,6 +31,7 @@ const shopProto = grpc.load(PROTO_PATH).hipstershop;
 let _data;
 function _getCurrencyData (callback) {
   if (!_data) {
+    console.log('Fetching currency data...')
     request(DATA_URL, (err, res) => {
       if (err) {
         throw new Error(`Error getting data: ${err}`);
@@ -52,6 +53,7 @@ function _getCurrencyData (callback) {
       });
     });
   } else {
+    console.log('Using cached currency data...')
     callback(_data);
   }
 }
@@ -70,6 +72,7 @@ function _carry (amount) {
  * Lists the supported currencies
  */
 function getSupportedCurrencies (call, callback) {
+  console.log('Getting supported currencies...')
   _getCurrencyData((data) => {
     callback(null, {currency_codes: Object.keys(data)});
   });
@@ -79,6 +82,7 @@ function getSupportedCurrencies (call, callback) {
  * Converts between currencies
  */
 function convert (call, callback) {
+  console.log('Starting conversion request...')
   try {
     _getCurrencyData((data) => {
       const request = call.request;
@@ -97,9 +101,11 @@ function convert (call, callback) {
       });
       target.fractional = Math.round(target.fractional);
 
+      console.log('Conversion request successful.')
       callback(null, {currency_code: request.to_code, amount: target});
     });
   } catch (err) {
+    console.error('Conversion request failed.')
     callback(err.message);
   }
 }
@@ -109,6 +115,7 @@ function convert (call, callback) {
  * CurrencyConverter service at the sample server port
  */
 function main () {
+  console.log(`Starting gRPC server on port ${PORT}...`);
   const server = new grpc.Server();
   server.addService(shopProto.CurrencyService.service, {getSupportedCurrencies, convert});
   server.bind(`0.0.0.0:${PORT}`, grpc.ServerCredentials.createInsecure());
