@@ -1,0 +1,9 @@
+film-camera.jpg,CC0 Public Domain,https://pxhere.com/en/photo/829555
+camera-lens.jpg,CC0 Public Domain,https://pxhere.com/en/photo/670041
+air-plant.jpg,,https://unsplash.com/photos/uUwEAW5jFLE
+camp-mug.jpg,,https://unsplash.com/photos/h9VhRlMfVkg
+record-player.jpg,,https://unsplash.com/photos/pEEHFSX1vak
+city-bike.jpg,,https://unsplash.com/photos/Lpe9u9etwMU
+typewriter.jpg,,https://unsplash.com/photos/mk7D-4UCfmg
+barista-kit.jpg,,https://unsplash.com/photos/ZiRyGGIpRCw
+terrarium.jpg,,https://unsplash.com/photos/E9QYLj0724Y

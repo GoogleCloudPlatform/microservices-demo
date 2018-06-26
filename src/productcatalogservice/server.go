@@ -17,9 +17,69 @@ import (
 var port = flag.Int("port", 3550, "port to listen at")
 
 var catalog = []*pb.Product{
-	{Id: "1", Name: "shirt", Description: "nice shirt", Picture: "picture1", PriceUsd: &pb.MoneyAmount{Decimal: 53}},
-	{Id: "2", Name: "pants", Description: "nice pants", Picture: "picture2", PriceUsd: &pb.MoneyAmount{Decimal: 81}},
-	{Id: "3", Name: "hat", Description: "nice hat", Picture: "picture3", PriceUsd: &pb.MoneyAmount{Decimal: 20}},
+	{
+		Id:          "12",
+		Name:        "Vintage Typewriter",
+		Description: "This typewriter looks good in your living room.",
+		Picture:     "/static/img/products/typewriter.jpg",
+		PriceUsd:    &pb.MoneyAmount{Decimal: 67, Fractional: 99},
+	},
+	{
+		Id:          "14",
+		Name:        "Vintage Camera Lens",
+		Description: "You won't have a camera to use it and it probably doesn't work anyway.",
+		Picture:     "/static/img/products/camera-lens.jpg",
+		PriceUsd:    &pb.MoneyAmount{Decimal: 12, Fractional: 49},
+	},
+	{
+		Id:          "22",
+		Name:        "Home Barista Kit",
+		Description: "Always wanted to brew coffee with Chemex and Aeropress at home?",
+		Picture:     "/static/img/products/barista-kit.jpg",
+		PriceUsd:    &pb.MoneyAmount{Decimal: 124, Fractional: 0},
+	},
+	{
+		Id:          "56",
+		Name:        "Terrarium",
+		Description: "This terrarium will looks great in your white painted living room.",
+		Picture:     "/static/img/products/terrarium.jpg",
+		PriceUsd:    &pb.MoneyAmount{Decimal: 36, Fractional: 45},
+	},
+	{
+		Id:          "50",
+		Name:        "Film Camera",
+		Description: "This camera looks like it's a film camera, but it's actually digital.",
+		Picture:     "/static/img/products/film-camera.jpg",
+		PriceUsd:    &pb.MoneyAmount{Decimal: 2245, Fractional: 0},
+	},
+	{
+		Id:          "44",
+		Name:        "Vintage Record Player",
+		Description: "It still works.",
+		Picture:     "/static/img/products/record-player.jpg",
+		PriceUsd:    &pb.MoneyAmount{Decimal: 65, Fractional: 50},
+	},
+	{
+		Id:          "52",
+		Name:        "Metal Camping Mug",
+		Description: "You probably don't go camping that often but this is better than plastic cups.",
+		Picture:     "/static/img/products/camp-mug.jpg",
+		PriceUsd:    &pb.MoneyAmount{Decimal: 24, Fractional: 33},
+	},
+	{
+		Id:          "49",
+		Name:        "City Bike",
+		Description: "This single gear bike probably cannot climb the hills of San Francisco.",
+		Picture:     "/static/img/products/city-bike.jpg",
+		PriceUsd:    &pb.MoneyAmount{Decimal: 789, Fractional: 50},
+	},
+	{
+		Id:          "97",
+		Name:        "Air Plant",
+		Description: "Have you ever wondered whether air plants need water? Buy one and figure out.",
+		Picture:     "/static/img/products/air-plant.jpg",
+		PriceUsd:    &pb.MoneyAmount{Decimal: 12, Fractional: 30},
+	},
 }
 
 func main() {
