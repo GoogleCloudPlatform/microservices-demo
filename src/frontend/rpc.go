@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 
 	"google.golang.org/grpc/codes"
 
@@ -73,4 +74,24 @@ func (fe *frontendServer) convertCurrency(ctx context.Context, money *pb.Money, 
 		Convert(ctx, &pb.CurrencyConversionRequest{
 			From:   money,
 			ToCode: currency})
+}
+
+func (fe *frontendServer) getRecommendations(ctx context.Context, userID string, productIDs []string) ([]*pb.Product, error) {
+	resp, err := pb.NewRecommendationServiceClient(fe.recommendationSvcConn).ListRecommendations(ctx,
+		&pb.ListRecommendationsRequest{UserId: userID, ProductIds: productIDs})
+	if err != nil {
+		return nil, err
+	}
+	out := make([]*pb.Product, len(resp.GetProductIds()))
+	for i, v := range resp.GetProductIds() {
+		p, err := fe.getProduct(ctx, v)
+		if err != nil {
+			return nil, fmt.Errorf("failed to get recommended product info (#%s): %+v", v, err)
+		}
+		out[i] = p
+	}
+	if len(out) > 4 {
+		out = out[:4] // take only first four to fit the UI
+	}
+	return out, err
 }
