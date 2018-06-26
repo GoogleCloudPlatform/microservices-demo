@@ -1,0 +1,52 @@
+{{ define "product" }}
+    {{ template "header" . }}
+
+    <main role="main">
+        <div class="py-5">
+            <div class="container bg-light px-lg-5 py-lg-5">
+                <div class="row">
+                    <div class="col-12 col-lg-5">
+                            <img class="img-fluid" style="width: 100%;"
+                            src="{{$.product.Item.Picture}}" />
+                    </div>
+                    <div class="col-12 col-lg-7">
+                            <h2>{{$.product.Item.Name}}</h2>
+                            
+                            <p class="text-muted">
+                                {{$.product.Price.CurrencyCode}}
+                                {{$.product.Price.Amount.Decimal}}.
+                                {{- $.product.Price.Amount.Fractional}}{{- if lt $.product.Price.Amount.Fractional 10}}0{{end}}
+                            </p>
+                            <hr/>
+                            <p>
+                                <h6>Product Description:</h6>
+                                {{$.product.Item.Description}}
+                            </p>
+                            <hr/>
+
+                            <form method="POST" action="/addToCart" class="form-inline text-muted">
+                                <input type="hidden" name="product_id" value="{{$.product.Item.Id}}"/>
+                                <div class="input-group">
+                                    <div class="input-group-prepend">
+                                        <label class="input-group-text" for="quantity">Quantity</label>
+                                    </div>
+                                    <select name="quantity" id="quantity" class="custom-select">
+                                        <option>1</option>
+                                        <option>2</option>
+                                        <option>3</option>
+                                        <option>4</option>
+                                        <option>5</option>
+                                    </select>
+                                </div>
+                                <button type="submit" class="btn btn-secondary ml-3">Add to Cart</button>
+                            </form>
+                    </div>
+                </div>
+                
+                
+            </div>
+        </div>
+    </main>
+
+    {{ template "footer" . }}
+{{ end }}

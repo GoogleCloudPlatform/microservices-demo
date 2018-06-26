@@ -8,6 +8,7 @@ import (
 	"net/http"
 
 	"github.com/google/uuid"
+	"github.com/gorilla/mux"
 
 	pb "frontend/genproto"
 )
@@ -54,8 +55,7 @@ func (fe *frontendServer) homeHandler(w http.ResponseWriter, r *http.Request) {
 	log.Printf("[home] session_id=%+v", r.Context().Value(ctxKeySessionID{}))
 	currencies, err := fe.getCurrencies(r.Context())
 	if err != nil {
-		log.Println(err) // TODO(ahmetb) use structured logging
-		w.WriteHeader(http.StatusInternalServerError)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 	log.Printf("currencies: %+v", currencies)
@@ -87,6 +87,47 @@ func (fe *frontendServer) homeHandler(w http.ResponseWriter, r *http.Request) {
 		"user_currency": currentCurrency(r),
 		"currencies":    currencies,
 		"products":      ps,
+	}); err != nil {
+		log.Println(err)
+	}
+}
+
+func (fe *frontendServer) productHandler(w http.ResponseWriter, r *http.Request) {
+	id := mux.Vars(r)["id"]
+	if id == "" {
+		http.Error(w, "product id not specified", http.StatusBadRequest)
+		return
+	}
+	log.Printf("[productHandler] id=%s", id)
+	p, err := fe.getProduct(r.Context(), id)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("could not retrieve product: %+v", err), http.StatusInternalServerError)
+		return
+	}
+
+	currencies, err := fe.getCurrencies(r.Context())
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	price, err := fe.convertCurrency(r.Context(), &pb.Money{
+		Amount:       p.GetPriceUsd(),
+		CurrencyCode: defaultCurrency}, currentCurrency(r))
+	if err != nil {
+		http.Error(w, fmt.Sprintf("failed to convert currency: %+v", err), http.StatusInternalServerError)
+		return
+	}
+
+	product := struct {
+		Item  *pb.Product
+		Price *pb.Money
+	}{p, price}
+
+	if err := templates.ExecuteTemplate(w, "product", map[string]interface{}{
+		"user_currency": currentCurrency(r),
+		"currencies":    currencies,
+		"product":       product,
 	}); err != nil {
 		log.Println(err)
 	}

@@ -31,6 +31,12 @@ func (fe *frontendServer) getProducts(ctx context.Context) ([]*pb.Product, error
 	return resp.GetProducts(), err
 }
 
+func (fe *frontendServer) getProduct(ctx context.Context, id string) (*pb.Product, error) {
+	resp, err := pb.NewProductCatalogServiceClient(fe.productCatalogSvcConn).
+		GetProduct(ctx, &pb.GetProductRequest{Id: id})
+	return resp, err
+}
+
 func (fe *frontendServer) convertCurrency(ctx context.Context, money *pb.Money, currency string) (*pb.Money, error) {
 	if avoidNoopCurrencyConversionRPC && money.GetCurrencyCode() == currency {
 		return money, nil

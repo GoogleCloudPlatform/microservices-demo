@@ -16,22 +16,26 @@
             </div>
         </section>
 
-        <div class="album py-5 bg-light">
+        <div class="py-5 bg-light">
             <div class="container">
             <div class="row">
                 {{ range $.products }}
                 <div class="col-md-4">
                     <div class="card mb-4 box-shadow">
-                        <img class="card-img-top" alt =""
-                            style="width: auto; height: 225px"
-                            src="{{.Item.Picture}}">
+                        <a href="/product/{{.Item.Id}}">
+                            <img class="card-img-top" alt =""
+                                style="width: 100%; height: auto;"
+                                src="{{.Item.Picture}}">
+                        </a>
                         <div class="card-body">
                             <h5 class="card-title">
                                 {{ .Item.Name }}
                             </h5>
                             <div class="d-flex justify-content-between align-items-center">
                                 <div class="btn-group">
-                                <button type="button" class="btn btn-sm btn-outline-secondary">Buy</button>
+                                    <a href="/product/{{.Item.Id}}">
+                                        <button type="button" class="btn btn-sm btn-outline-secondary">Buy</button>
+                                    </a>
                                 </div>
                                 <small class="text-muted">
                                     {{.Price.CurrencyCode}}
