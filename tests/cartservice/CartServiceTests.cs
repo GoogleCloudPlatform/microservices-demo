@@ -13,6 +13,29 @@ namespace cartservice
         private static int port = 7070;
 
         [Fact]
+        public async Task GetItem_NoAddItemBefore_EmptyCartReturned()
+        {
+            string userId = Guid.NewGuid().ToString();
+
+            // Construct server's Uri
+            string targetUri = $"{serverHostName}:{port}";
+
+            // Create a GRPC communication channel between the client and the server
+            var channel = new Channel(targetUri, ChannelCredentials.Insecure);
+
+            var client = new CartServiceClient(channel);
+
+            var request = new GetCartRequest
+            {
+                UserId = userId,
+            };
+            var cart = await client.GetCartAsync(request);
+            Assert.NotNull(cart);
+            // All grpc objects implement IEquitable, so we can compare equality with by-value semantics
+            Assert.Equal(new Cart(), cart);
+        }
+
+        [Fact]
         public async Task AddItem_ItemInserted()
         {
             string userId = Guid.NewGuid().ToString();

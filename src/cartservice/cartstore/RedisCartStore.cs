@@ -69,13 +69,13 @@ namespace cartservice.cartstore
             // Access the cart from the cache
             var value = await db.HashGetAsync(userId, CART_FIELD_NAME);
 
-            Hipstershop.Cart cart = null;
             if (!value.IsNull)
             {
-                cart = Hipstershop.Cart.Parser.ParseFrom(value);
+                return Hipstershop.Cart.Parser.ParseFrom(value);
             }
 
-            return cart;
+            // We decided to return empty cart in cases when user wasn't in the cache before
+            return new Hipstershop.Cart();
         }
     }
 }
