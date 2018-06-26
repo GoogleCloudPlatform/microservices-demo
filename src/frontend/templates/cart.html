@@ -14,8 +14,8 @@
                 {{ range $.items }}
                 <div class="row pt-2 mb-2">
                     <div class="col text-right">
-                            <img class="img-fluid" style="width: auto; max-height: 60px;"
-                                src="{{.Item.Picture}}" />
+                            <a href="/product/{{.Item.Id}}"><img class="img-fluid" style="width: auto; max-height: 60px;"
+                                src="{{.Item.Picture}}" /></a>
                     </div>
                     <div class="col align-middle">
                         <strong>{{.Item.Name}}</strong><br/>
@@ -43,6 +43,11 @@
                         </div>
                     </div>
                 </div>
+                {{ end }}
+
+                {{ if $.recommendations}}
+                    <hr/>
+                    {{ template "recommendations" $.recommendations }}
                 {{ end }}
 
             </div>

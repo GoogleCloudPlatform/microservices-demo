@@ -6,7 +6,7 @@
             <div class="container bg-light py-3 px-lg-5 py-lg-5">
                 <div class="row">
                     <div class="col-12 col-lg-5">
-                            <img class="img-fluid" style="width: 100%;"
+                            <img class="img-fluid border" style="width: 100%;"
                             src="{{$.product.Item.Picture}}" />
                     </div>
                     <div class="col-12 col-lg-7">
@@ -43,6 +43,10 @@
                     </div>
                 </div>
                 
+                {{ if $.recommendations}}
+                    <hr/>
+                    {{ template "recommendations" $.recommendations }}
+                {{ end }}
                 
             </div>
         </div>

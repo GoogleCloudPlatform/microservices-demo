@@ -1,0 +1,21 @@
+{{ define "recommendations" }}
+<h5 class="text-muted">Similar products</h5>
+<div class="row">
+    {{range . }}
+        <div class="col-3">
+            <div class="card mb-3 box-shadow">
+                <a href="/product/{{.Id}}">
+                    <img class="card-img-top border-bottom" alt =""
+                        style="width: 100%; height: auto;"
+                        src="{{.Picture}}">
+                </a>
+                <div class="card-body text-center py-2">
+                    <small class="card-title text-muted">
+                        {{ .Name }}
+                    </small>
+                </div>
+            </div>
+        </div>
+    {{ end }}
+</div>
+{{ end }}
