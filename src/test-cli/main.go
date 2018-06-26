@@ -299,8 +299,16 @@ func testCartService() error {
 	defer conn.Close()
 	cl := pb.NewCartServiceClient(conn)
 
-	log.Println("--- rpc AddItem()")
 	userID := "smoke-test-user"
+	log.Println("--- rpc GetCart()")
+	cartResp, err := cl.GetCart(context.TODO(), &pb.GetCartRequest{
+		UserId: userID})
+	if err != nil {
+		return err
+	}
+	log.Printf("--> %d items in cart for user %q", len(cartResp.Items), cartResp.UserId)
+
+	log.Println("--- rpc AddItem()")
 	_, err = cl.AddItem(context.TODO(), &pb.AddItemRequest{
 		UserId: userID,
 		Item:   &pb.CartItem{ProductId: "1", Quantity: 2},
@@ -319,14 +327,13 @@ func testCartService() error {
 	log.Printf("--> added item")
 
 	log.Println("--- rpc GetCart()")
-	cartResp, err := cl.GetCart(context.TODO(), &pb.GetCartRequest{
+	cartResp, err = cl.GetCart(context.TODO(), &pb.GetCartRequest{
 		UserId: userID})
 	if err != nil {
 		return err
 	}
 	log.Printf("--> %d items in cart for user %q", len(cartResp.Items), cartResp.UserId)
 	log.Printf("--> cart: %v", cartResp.Items)
-
 	log.Println("--- rpc EmptyCart()")
 	_, err = cl.EmptyCart(context.TODO(), &pb.EmptyCartRequest{
 		UserId: userID})

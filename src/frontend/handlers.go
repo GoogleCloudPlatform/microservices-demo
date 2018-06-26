@@ -43,15 +43,20 @@ func ensureSessionID(next http.HandlerFunc) http.HandlerFunc {
 }
 
 func (fe *frontendServer) homeHandler(w http.ResponseWriter, r *http.Request) {
-	log.Printf("[home] session_id=%+v", r.Context().Value(ctxKeySessionID{}))
+	log.Printf("[home] session_id=%+v", sessionID(r))
 	currencies, err := fe.getCurrencies(r.Context())
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		http.Error(w, fmt.Sprintf("could not retrieve currencies: %+v", err), http.StatusInternalServerError)
 		return
 	}
 	products, err := fe.getProducts(r.Context())
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		http.Error(w, fmt.Sprintf("could not retrieve products: %+v", err), http.StatusInternalServerError)
+		return
+	}
+	cart, err := fe.getCart(r.Context(), sessionID(r))
+	if err != nil {
+		http.Error(w, fmt.Sprintf("could not retrieve cart: %+v", err), http.StatusInternalServerError)
 		return
 	}
 
@@ -76,7 +81,8 @@ func (fe *frontendServer) homeHandler(w http.ResponseWriter, r *http.Request) {
 		"user_currency": currentCurrency(r),
 		"currencies":    currencies,
 		"products":      ps,
-		"session_id":    r.Context().Value(ctxKeySessionID{}),
+		"session_id":    sessionID(r),
+		"cart_size":     len(cart),
 	}); err != nil {
 		log.Println(err)
 	}
@@ -97,7 +103,7 @@ func (fe *frontendServer) productHandler(w http.ResponseWriter, r *http.Request)
 
 	currencies, err := fe.getCurrencies(r.Context())
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		http.Error(w, fmt.Sprintf("could not retrieve currencies: %+v", err), http.StatusInternalServerError)
 		return
 	}
 
@@ -118,14 +124,14 @@ func (fe *frontendServer) productHandler(w http.ResponseWriter, r *http.Request)
 		"user_currency": currentCurrency(r),
 		"currencies":    currencies,
 		"product":       product,
-		"session_id":    r.Context().Value(ctxKeySessionID{}),
+		"session_id":    sessionID(r),
 	}); err != nil {
 		log.Println(err)
 	}
 }
 
 func (fe *frontendServer) logoutHandler(w http.ResponseWriter, r *http.Request) {
-	log.Printf("[home] session_id=%+v", r.Context().Value(ctxKeySessionID{}))
+	log.Printf("[home] session_id=%+v", sessionID(r))
 	for _, c := range r.Cookies() {
 		c.Expires = time.Now().Add(-time.Hour * 24 * 365)
 		c.MaxAge = -1
@@ -137,7 +143,7 @@ func (fe *frontendServer) logoutHandler(w http.ResponseWriter, r *http.Request) 
 
 func (fe *frontendServer) setCurrencyHandler(w http.ResponseWriter, r *http.Request) {
 	cur := r.FormValue("currency_code")
-	log.Printf("[setCurrency] session_id=%+v code=%s", r.Context().Value(ctxKeySessionID{}), cur)
+	log.Printf("[setCurrency] session_id=%+v code=%s", sessionID(r), cur)
 	if cur != "" {
 		http.SetCookie(w, &http.Cookie{
 			Name:   cookieCurrency,
@@ -159,4 +165,12 @@ func currentCurrency(r *http.Request) string {
 		return c.Value
 	}
 	return defaultCurrency
+}
+
+func sessionID(r *http.Request) string {
+	v := r.Context().Value(ctxKeySessionID{})
+	if v != nil {
+		return v.(string)
+	}
+	return ""
 }

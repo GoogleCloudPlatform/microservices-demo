@@ -3,7 +3,11 @@ package main
 import (
 	"context"
 
+	"google.golang.org/grpc/codes"
+
 	pb "frontend/genproto"
+
+	"google.golang.org/grpc/status"
 )
 
 const (
@@ -35,6 +39,15 @@ func (fe *frontendServer) getProduct(ctx context.Context, id string) (*pb.Produc
 	resp, err := pb.NewProductCatalogServiceClient(fe.productCatalogSvcConn).
 		GetProduct(ctx, &pb.GetProductRequest{Id: id})
 	return resp, err
+}
+
+func (fe *frontendServer) getCart(ctx context.Context, userID string) ([]*pb.CartItem, error) {
+	resp, err := pb.NewCartServiceClient(fe.cartSvcConn).GetCart(ctx, &pb.GetCartRequest{UserId: userID})
+	if status.Code(err) == codes.Canceled {
+		// TODO(ahmetb) remove this workaround when cartservice returns ok response to GetCart() with non-existing users
+		return nil, nil
+	}
+	return resp.GetItems(), err
 }
 
 func (fe *frontendServer) convertCurrency(ctx context.Context, money *pb.Money, currency string) (*pb.Money, error) {
