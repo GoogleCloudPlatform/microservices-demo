@@ -16,8 +16,9 @@ const (
 	defaultCurrency = "USD"
 	cookieMaxAge    = 60 * 60 * 48
 
-	cookieSessionID = "session-id"
-	cookieCurrency  = "currency"
+	cookiePrefix    = "shop_"
+	cookieSessionID = cookiePrefix + "session-id"
+	cookieCurrency  = cookiePrefix + "currency"
 )
 
 var (
@@ -62,18 +63,11 @@ func main() {
 	}
 
 	r := mux.NewRouter()
-	r.HandleFunc("/", refreshCookies(
-		ensureSessionID(
-			svc.homeHandler))).Methods(http.MethodGet, http.MethodHead)
-	r.HandleFunc("/product/{id}", refreshCookies(
-		ensureSessionID(
-			svc.productHandler))).Methods(http.MethodGet, http.MethodHead)
-	r.PathPrefix("/static/").Handler(http.StripPrefix("/static/",
-		http.FileServer(http.Dir("./static/"))))
+	r.HandleFunc("/", ensureSessionID(svc.homeHandler)).Methods(http.MethodGet, http.MethodHead)
+	r.HandleFunc("/product/{id}", ensureSessionID(svc.productHandler)).Methods(http.MethodGet, http.MethodHead)
+	r.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir("./static/"))))
 	r.HandleFunc("/logout", svc.logoutHandler).Methods(http.MethodGet)
-	r.HandleFunc("/setCurrency", refreshCookies(
-		ensureSessionID(
-			svc.setCurrencyHandler))).Methods(http.MethodPost)
+	r.HandleFunc("/setCurrency", ensureSessionID(svc.setCurrencyHandler)).Methods(http.MethodPost)
 	log.Printf("starting server on :" + srvPort)
 	log.Fatal(http.ListenAndServe("localhost:"+srvPort, r))
 }

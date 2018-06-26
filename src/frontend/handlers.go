@@ -6,6 +6,7 @@ import (
 	"html/template"
 	"log"
 	"net/http"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/gorilla/mux"
@@ -16,16 +17,6 @@ import (
 var (
 	templates = template.Must(template.ParseGlob("templates/*.html"))
 )
-
-func refreshCookies(next http.HandlerFunc) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		for _, c := range r.Cookies() {
-			c.MaxAge = cookieMaxAge
-			http.SetCookie(w, c)
-		}
-		next(w, r)
-	}
-}
 
 func ensureSessionID(next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
@@ -58,13 +49,11 @@ func (fe *frontendServer) homeHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	log.Printf("currencies: %+v", currencies)
 	products, err := fe.getProducts(r.Context())
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	log.Printf("# products: %d", len(products))
 
 	type productView struct {
 		Item  *pb.Product
@@ -87,6 +76,7 @@ func (fe *frontendServer) homeHandler(w http.ResponseWriter, r *http.Request) {
 		"user_currency": currentCurrency(r),
 		"currencies":    currencies,
 		"products":      ps,
+		"session_id":    r.Context().Value(ctxKeySessionID{}),
 	}); err != nil {
 		log.Println(err)
 	}
@@ -98,7 +88,7 @@ func (fe *frontendServer) productHandler(w http.ResponseWriter, r *http.Request)
 		http.Error(w, "product id not specified", http.StatusBadRequest)
 		return
 	}
-	log.Printf("[productHandler] id=%s", id)
+	log.Printf("[productHandler] id=%s currency=%s", id, currentCurrency(r))
 	p, err := fe.getProduct(r.Context(), id)
 	if err != nil {
 		http.Error(w, fmt.Sprintf("could not retrieve product: %+v", err), http.StatusInternalServerError)
@@ -128,6 +118,7 @@ func (fe *frontendServer) productHandler(w http.ResponseWriter, r *http.Request)
 		"user_currency": currentCurrency(r),
 		"currencies":    currencies,
 		"product":       product,
+		"session_id":    r.Context().Value(ctxKeySessionID{}),
 	}); err != nil {
 		log.Println(err)
 	}
@@ -136,6 +127,7 @@ func (fe *frontendServer) productHandler(w http.ResponseWriter, r *http.Request)
 func (fe *frontendServer) logoutHandler(w http.ResponseWriter, r *http.Request) {
 	log.Printf("[home] session_id=%+v", r.Context().Value(ctxKeySessionID{}))
 	for _, c := range r.Cookies() {
+		c.Expires = time.Now().Add(-time.Hour * 24 * 365)
 		c.MaxAge = -1
 		http.SetCookie(w, c)
 	}
@@ -144,8 +136,8 @@ func (fe *frontendServer) logoutHandler(w http.ResponseWriter, r *http.Request) 
 }
 
 func (fe *frontendServer) setCurrencyHandler(w http.ResponseWriter, r *http.Request) {
-	log.Printf("[setCurrency] session_id=%+v", r.Context().Value(ctxKeySessionID{}))
 	cur := r.FormValue("currency_code")
+	log.Printf("[setCurrency] session_id=%+v code=%s", r.Context().Value(ctxKeySessionID{}), cur)
 	if cur != "" {
 		http.SetCookie(w, &http.Cookie{
 			Name:   cookieCurrency,
@@ -153,7 +145,11 @@ func (fe *frontendServer) setCurrencyHandler(w http.ResponseWriter, r *http.Requ
 			MaxAge: cookieMaxAge,
 		})
 	}
-	w.Header().Set("Location", "/")
+	referer := r.Header.Get("referer")
+	if referer == "" {
+		referer = "/"
+	}
+	w.Header().Set("Location", referer)
 	w.WriteHeader(http.StatusFound)
 }
 
