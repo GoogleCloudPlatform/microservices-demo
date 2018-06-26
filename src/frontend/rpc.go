@@ -50,6 +50,21 @@ func (fe *frontendServer) getCart(ctx context.Context, userID string) ([]*pb.Car
 	return resp.GetItems(), err
 }
 
+func (fe *frontendServer) emptyCart(ctx context.Context, userID string) error {
+	_, err := pb.NewCartServiceClient(fe.cartSvcConn).EmptyCart(ctx, &pb.EmptyCartRequest{UserId: userID})
+	return err
+}
+
+func (fe *frontendServer) insertCart(ctx context.Context, userID, productID string, quantity int32) error {
+	_, err := pb.NewCartServiceClient(fe.cartSvcConn).AddItem(ctx, &pb.AddItemRequest{
+		UserId: userID,
+		Item: &pb.CartItem{
+			ProductId: productID,
+			Quantity:  quantity},
+	})
+	return err
+}
+
 func (fe *frontendServer) convertCurrency(ctx context.Context, money *pb.Money, currency string) (*pb.Money, error) {
 	if avoidNoopCurrencyConversionRPC && money.GetCurrencyCode() == currency {
 		return money, nil

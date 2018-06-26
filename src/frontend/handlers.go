@@ -6,6 +6,7 @@ import (
 	"html/template"
 	"log"
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/google/uuid"
@@ -43,7 +44,7 @@ func ensureSessionID(next http.HandlerFunc) http.HandlerFunc {
 }
 
 func (fe *frontendServer) homeHandler(w http.ResponseWriter, r *http.Request) {
-	log.Printf("[home] session_id=%+v", sessionID(r))
+	log.Printf("[home] session_id=%+v currency=%s", sessionID(r), currentCurrency(r))
 	currencies, err := fe.getCurrencies(r.Context())
 	if err != nil {
 		http.Error(w, fmt.Sprintf("could not retrieve currencies: %+v", err), http.StatusInternalServerError)
@@ -100,10 +101,14 @@ func (fe *frontendServer) productHandler(w http.ResponseWriter, r *http.Request)
 		http.Error(w, fmt.Sprintf("could not retrieve product: %+v", err), http.StatusInternalServerError)
 		return
 	}
-
 	currencies, err := fe.getCurrencies(r.Context())
 	if err != nil {
 		http.Error(w, fmt.Sprintf("could not retrieve currencies: %+v", err), http.StatusInternalServerError)
+		return
+	}
+	cart, err := fe.getCart(r.Context(), sessionID(r))
+	if err != nil {
+		http.Error(w, fmt.Sprintf("could not retrieve cart: %+v", err), http.StatusInternalServerError)
 		return
 	}
 
@@ -125,6 +130,92 @@ func (fe *frontendServer) productHandler(w http.ResponseWriter, r *http.Request)
 		"currencies":    currencies,
 		"product":       product,
 		"session_id":    sessionID(r),
+		"cart_size":     len(cart),
+	}); err != nil {
+		log.Println(err)
+	}
+}
+
+func (fe *frontendServer) addToCartHandler(w http.ResponseWriter, r *http.Request) {
+	quantity, _ := strconv.ParseUint(r.FormValue("quantity"), 10, 32)
+	productID := r.FormValue("product_id")
+	if productID == "" || quantity == 0 {
+		http.Error(w, "invalid form input", http.StatusBadRequest)
+		return
+	}
+	log.Printf("[addToCart] product_id=%s qty=%d session_id=%+v", productID, quantity, sessionID(r))
+
+	p, err := fe.getProduct(r.Context(), productID)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("could not retrieve product: %+v", err), http.StatusInternalServerError)
+		return
+	}
+
+	if err := fe.insertCart(r.Context(), sessionID(r), p.GetId(), int32(quantity)); err != nil {
+		http.Error(w, fmt.Sprintf("failed to add to cart: %+v", err), http.StatusInternalServerError)
+		return
+	}
+	w.Header().Set("location", "/cart")
+	w.WriteHeader(http.StatusFound)
+}
+
+func (fe *frontendServer) emptyCartHandler(w http.ResponseWriter, r *http.Request) {
+	log.Printf("[emptyCart] session_id=%+v", sessionID(r))
+
+	if err := fe.emptyCart(r.Context(), sessionID(r)); err != nil {
+		http.Error(w, fmt.Sprintf("failed to empty cart: %+v", err), http.StatusInternalServerError)
+		return
+	}
+	w.Header().Set("location", "/")
+	w.WriteHeader(http.StatusFound)
+}
+
+func (fe *frontendServer) viewCartHandler(w http.ResponseWriter, r *http.Request) {
+	log.Printf("[viewCart] session_id=%+v", sessionID(r))
+	currencies, err := fe.getCurrencies(r.Context())
+	if err != nil {
+		http.Error(w, fmt.Sprintf("could not retrieve currencies: %+v", err), http.StatusInternalServerError)
+		return
+	}
+	cart, err := fe.getCart(r.Context(), sessionID(r))
+	if err != nil {
+		http.Error(w, fmt.Sprintf("could not retrieve cart: %+v", err), http.StatusInternalServerError)
+		return
+	}
+
+	type cartItemView struct {
+		Item     *pb.Product
+		Quantity int32
+		Price    *pb.Money
+	}
+	items := make([]cartItemView, len(cart))
+	for i, item := range cart {
+		p, err := fe.getProduct(r.Context(), item.GetProductId())
+		if err != nil {
+			http.Error(w, fmt.Sprintf("could not retrieve product #%s: %+v", item.GetProductId(), err), http.StatusInternalServerError)
+			return
+		}
+		price, err := fe.convertCurrency(r.Context(), &pb.Money{
+			Amount:       p.GetPriceUsd(),
+			CurrencyCode: defaultCurrency}, currentCurrency(r))
+		if err != nil {
+			http.Error(w, fmt.Sprintf("could not convert currency for product #%s: %+v", item.GetProductId(), err), http.StatusInternalServerError)
+			return
+		}
+
+		multPrice := multMoney(*price.GetAmount(), uint32(item.GetQuantity()))
+		items[i] = cartItemView{
+			Item:     p,
+			Quantity: item.GetQuantity(),
+			Price:    &pb.Money{Amount: &multPrice, CurrencyCode: price.GetCurrencyCode()}}
+	}
+
+	if err := templates.ExecuteTemplate(w, "cart", map[string]interface{}{
+		"user_currency": currentCurrency(r),
+		"currencies":    currencies,
+		"session_id":    sessionID(r),
+		"cart_size":     len(cart),
+		"items":         items,
 	}); err != nil {
 		log.Println(err)
 	}

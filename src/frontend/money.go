@@ -3,10 +3,23 @@ package main
 import (
 	"math"
 
-	pb "./genproto"
+	pb "frontend/genproto"
 )
 
+// TODO(ahmetb): any logic below is flawed because I just realized we have no
+// way of representing amounts like 17.07 because Fractional cannot store 07.
+func multMoney(m pb.MoneyAmount, n uint32) pb.MoneyAmount {
+	out := m
+	for n > 1 {
+		out = sum(out, m)
+		n--
+	}
+	return out
+}
+
 func sum(m1, m2 pb.MoneyAmount) pb.MoneyAmount {
+	// TODO(ahmetb) this is copied from ./checkoutservice/money.go, find a
+	// better mult function.
 	f1, f2 := float64(m1.Fractional), float64(m2.Fractional)
 	lg1 := math.Max(1, math.Ceil(math.Log10(f1)))
 	if f1 == math.Pow(10, lg1) {
@@ -34,11 +47,4 @@ func sum(m1, m2 pb.MoneyAmount) pb.MoneyAmount {
 	return pb.MoneyAmount{
 		Decimal:    dSum,
 		Fractional: uint32(fSum)}
-}
-
-func sumMoney(m1, m2 pb.Money) pb.Money {
-	s := sum(*m1.Amount, *m2.Amount)
-	return pb.Money{
-		Amount:       &s,
-		CurrencyCode: m1.CurrencyCode}
 }
