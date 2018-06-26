@@ -37,6 +37,9 @@ type frontendServer struct {
 
 	cartSvcAddr string
 	cartSvcConn *grpc.ClientConn
+
+	recommendationSvcAddr string
+	recommendationSvcConn *grpc.ClientConn
 }
 
 func main() {
@@ -51,6 +54,7 @@ func main() {
 	mustMapEnv(&svc.productCatalogSvcAddr, "PRODUCT_CATALOG_SERVICE_ADDR")
 	mustMapEnv(&svc.currencySvcAddr, "CURRENCY_SERVICE_ADDR")
 	mustMapEnv(&svc.cartSvcAddr, "CART_SERVICE_ADDR")
+	mustMapEnv(&svc.recommendationSvcAddr, "RECOMMENDATION_SERVICE_ADDR")
 
 	var err error
 	svc.currencySvcConn, err = grpc.DialContext(ctx, svc.currencySvcAddr, grpc.WithInsecure())
@@ -64,6 +68,10 @@ func main() {
 	svc.cartSvcConn, err = grpc.DialContext(ctx, svc.cartSvcAddr, grpc.WithInsecure())
 	if err != nil {
 		log.Fatalf("failed to connect cart service at %s: %+v", svc.cartSvcAddr, err)
+	}
+	svc.recommendationSvcConn, err = grpc.DialContext(ctx, svc.recommendationSvcAddr, grpc.WithInsecure())
+	if err != nil {
+		log.Fatalf("failed to connect recommendation service at %s: %+v", svc.recommendationSvcConn, err)
 	}
 
 	r := mux.NewRouter()

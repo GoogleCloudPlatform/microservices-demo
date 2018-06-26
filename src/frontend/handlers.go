@@ -95,7 +95,7 @@ func (fe *frontendServer) productHandler(w http.ResponseWriter, r *http.Request)
 		http.Error(w, "product id not specified", http.StatusBadRequest)
 		return
 	}
-	log.Printf("[productHandler] id=%s currency=%s", id, currentCurrency(r))
+	log.Printf("[productHandler] id=%s currency=%s session=%s", id, currentCurrency(r), sessionID(r))
 	p, err := fe.getProduct(r.Context(), id)
 	if err != nil {
 		http.Error(w, fmt.Sprintf("could not retrieve product: %+v", err), http.StatusInternalServerError)
@@ -106,6 +106,7 @@ func (fe *frontendServer) productHandler(w http.ResponseWriter, r *http.Request)
 		http.Error(w, fmt.Sprintf("could not retrieve currencies: %+v", err), http.StatusInternalServerError)
 		return
 	}
+
 	cart, err := fe.getCart(r.Context(), sessionID(r))
 	if err != nil {
 		http.Error(w, fmt.Sprintf("could not retrieve cart: %+v", err), http.StatusInternalServerError)
@@ -120,17 +121,25 @@ func (fe *frontendServer) productHandler(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
+	recommendations, err := fe.getRecommendations(r.Context(), sessionID(r), []string{id})
+	if err != nil {
+		http.Error(w, fmt.Sprintf("failed to get product recommendations: %+v", err), http.StatusInternalServerError)
+		return
+	}
+	log.Printf("cart size=%d", len(cart))
+
 	product := struct {
 		Item  *pb.Product
 		Price *pb.Money
 	}{p, price}
 
 	if err := templates.ExecuteTemplate(w, "product", map[string]interface{}{
-		"user_currency": currentCurrency(r),
-		"currencies":    currencies,
-		"product":       product,
-		"session_id":    sessionID(r),
-		"cart_size":     len(cart),
+		"user_currency":   currentCurrency(r),
+		"currencies":      currencies,
+		"product":         product,
+		"session_id":      sessionID(r),
+		"recommendations": recommendations,
+		"cart_size":       len(cart),
 	}); err != nil {
 		log.Println(err)
 	}
@@ -183,6 +192,12 @@ func (fe *frontendServer) viewCartHandler(w http.ResponseWriter, r *http.Request
 		return
 	}
 
+	recommendations, err := fe.getRecommendations(r.Context(), sessionID(r), cartIDs(cart))
+	if err != nil {
+		http.Error(w, fmt.Sprintf("failed to get product recommendations: %+v", err), http.StatusInternalServerError)
+		return
+	}
+
 	type cartItemView struct {
 		Item     *pb.Product
 		Quantity int32
@@ -211,11 +226,12 @@ func (fe *frontendServer) viewCartHandler(w http.ResponseWriter, r *http.Request
 	}
 
 	if err := templates.ExecuteTemplate(w, "cart", map[string]interface{}{
-		"user_currency": currentCurrency(r),
-		"currencies":    currencies,
-		"session_id":    sessionID(r),
-		"cart_size":     len(cart),
-		"items":         items,
+		"user_currency":   currentCurrency(r),
+		"currencies":      currencies,
+		"session_id":      sessionID(r),
+		"recommendations": recommendations,
+		"cart_size":       len(cart),
+		"items":           items,
 	}); err != nil {
 		log.Println(err)
 	}
@@ -264,4 +280,12 @@ func sessionID(r *http.Request) string {
 		return v.(string)
 	}
 	return ""
+}
+
+func cartIDs(c []*pb.CartItem) []string {
+	out := make([]string, len(c))
+	for i, v := range c {
+		out[i] = v.GetProductId()
+	}
+	return out
 }
