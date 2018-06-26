@@ -13,7 +13,7 @@ import (
 )
 
 var (
-	homeTemplate = template.Must(template.ParseFiles("templates/home.html"))
+	templates = template.Must(template.ParseGlob("templates/*.html"))
 )
 
 func refreshCookies(next http.HandlerFunc) http.HandlerFunc {
@@ -83,7 +83,7 @@ func (fe *frontendServer) homeHandler(w http.ResponseWriter, r *http.Request) {
 		ps[i] = productView{p, price}
 	}
 
-	if err := homeTemplate.Execute(w, map[string]interface{}{
+	if err := templates.ExecuteTemplate(w, "home", map[string]interface{}{
 		"user_currency": currentCurrency(r),
 		"currencies":    currencies,
 		"products":      ps,

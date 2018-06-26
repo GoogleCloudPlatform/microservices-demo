@@ -65,7 +65,9 @@ func main() {
 	r.HandleFunc("/", refreshCookies(
 		ensureSessionID(
 			svc.homeHandler))).
-		Methods(http.MethodGet)
+		Methods(http.MethodGet, http.MethodHead)
+	r.PathPrefix("/static/").Handler(http.StripPrefix("/static/",
+		http.FileServer(http.Dir("./static/"))))
 	r.HandleFunc("/logout", svc.logoutHandler).
 		Methods(http.MethodGet)
 	r.HandleFunc("/setCurrency", refreshCookies(

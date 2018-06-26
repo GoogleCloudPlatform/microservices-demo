@@ -1,0 +1,33 @@
+{{ define "header" }}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Hipster Shop</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-WskhaSGFgHYWDcbwN70/dfYBj47jz9qbsMId/iRN3ewGhXQFZCSftd1LZCfmhktB" crossorigin="anonymous">
+</head>
+<body>
+
+    <header>
+        <div class="navbar navbar-dark bg-dark box-shadow">
+            <div class="container d-flex justify-content-between">
+                <a href="/" class="navbar-brand d-flex align-items-center">
+                    Hipster Shop
+                </a>
+                <form class="form-inline ml-auto" method="POST" action="/setCurrency" id="currency_form">
+                    <select name="currency_code" class="form-control"
+                    onchange="document.getElementById('currency_form').submit();">
+                    {{range $.currencies}}
+                        <option value="{{.}}" {{if eq . $.user_currency}}selected="selected"{{end}}>{{.}}</option>
+                    {{end}}
+                    </select>
+                    <a class="btn btn-primary ml-1" href="/cart" role="button">View Cart</a>
+                </form>
+            </div>
+        </div>
+    </header>
+
+
+{{end}}

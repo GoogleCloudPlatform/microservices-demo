@@ -1,25 +1,54 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Hipster Shop</title>
-</head>
-<body>
+{{ define "home" }}
 
-    <form method="post" action="/setCurrency" id="currencySelector">
-        <select name="currency_code"
-            onchange="document.getElementById('currencySelector').submit()">
-            {{ range $.currencies }}
-            <option {{ if (eq . $.user_currency)}}selected="selected"{{end}}>{{.}}</option>
-            {{ end}}
-        </select>
-    </form>
-    
-    <p>{{ len $.products }} products</p>
-    {{range $.products }}
-    <p>{{.Item.Name}} -- <{{.Price}}></p>
-    {{end}}
-</body>
-</html>
+    {{ template "header" . }}
+    <main role="main">
+        <section class="jumbotron text-center mb-0">
+            <div class="container">
+                <h1 class="jumbotron-heading">
+                    One-stop for Hipster Fashion &amp; Style Online
+                </h1>
+                <p class="lead text-muted">
+                    Tired of mainstream fashion ideas, popular trends and
+                    societal norms? This line of lifestyle products will help
+                    you catch up with the hipster trend and express your
+                    personal style. Start shopping hip and vintage items now!
+                </p>
+            </div>
+        </section>
+
+        <div class="album py-5 bg-light">
+            <div class="container">
+            <div class="row">
+                {{ range $.products }}
+                <div class="col-md-4">
+                    <div class="card mb-4 box-shadow">
+                        <img class="card-img-top" alt =""
+                            style="width: auto; height: 225px"
+                            src="{{.Item.Picture}}">
+                        <div class="card-body">
+                            <h5 class="card-title">
+                                {{ .Item.Name }}
+                            </h5>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div class="btn-group">
+                                <button type="button" class="btn btn-sm btn-outline-secondary">Buy</button>
+                                </div>
+                                <small class="text-muted">
+                                    {{.Price.CurrencyCode}}
+                                    <strong>{{.Price.Amount.Decimal}}.{{.Price.Amount.Fractional}}
+                                        {{- if lt .Price.Amount.Fractional 10}}0{{end}}
+                                    </strong>
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {{ end }}
+            </div>
+            </div>
+        </div>
+    </main>
+
+    {{ template "footer" . }}
+
+{{ end }}
