@@ -5,7 +5,7 @@ import (
 	"reflect"
 	"testing"
 
-	pb "../genproto"
+	pb "checkoutservice/genproto"
 )
 
 func mmc(u int64, n int32, c string) pb.Money { return pb.Money{Units: u, Nanos: n, CurrencyCode: c} }

@@ -3,7 +3,7 @@ package money
 import (
 	"errors"
 
-	pb "../genproto"
+	pb "checkoutservice/genproto"
 )
 
 const (
