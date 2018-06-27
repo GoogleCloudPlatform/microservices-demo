@@ -63,7 +63,7 @@ message Product {
     string name = 2;
     string description = 3;
     string picture = 4;
-    MoneyAmount price_usd = 5;
+    Money price_usd = 5;
 }
 
 message ListProductsResponse {
@@ -95,7 +95,7 @@ message GetQuoteRequest {
 }
 
 message GetQuoteResponse {
-    MoneyAmount cost_usd = 1;
+    Money cost_usd = 1;
 }
 
 message ShipOrderRequest {
@@ -122,18 +122,22 @@ service CurrencyService {
     rpc Convert(CurrencyConversionRequest) returns (Money) {}
 }
 
-
-// Describes a money amount without currency. For example, decimal=2 and
-// fractional=500 (or fractional=5) makes up 2.5 units.
-message MoneyAmount {
-    uint32 decimal = 1;
-    uint32 fractional = 2;
-}
-
+// Represents an amount of money with its currency type.
 message Money {
     // The 3-letter currency code defined in ISO 4217.
     string currency_code = 1;
-    MoneyAmount amount = 2;
+
+    // The whole units of the amount.
+    // For example if `currencyCode` is `"USD"`, then 1 unit is one US dollar.
+    int64 units = 2;
+
+    // Number of nano (10^-9) units of the amount.
+    // The value must be between -999,999,999 and +999,999,999 inclusive.
+    // If `units` is positive, `nanos` must be positive or zero.
+    // If `units` is zero, `nanos` can be positive, zero, or negative.
+    // If `units` is negative, `nanos` must be negative or zero.
+    // For example $-1.75 is represented as `units`=-1 and `nanos`=-750,000,000.
+    int32 nanos = 3;
 }
 
 message GetSupportedCurrenciesResponse {

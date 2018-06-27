@@ -29,10 +29,8 @@ const client = new shopProto.CurrencyService(`localhost:${PORT}`,
 const request = {
   from: {
     currency_code: 'USD',
-    amount: {
-      decimal: 300,
-      fractional: 0
-    }
+    units: 300,
+    nanos: 500000000
   },
   to_code: 'CHF'
 };
