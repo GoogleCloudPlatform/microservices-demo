@@ -34,10 +34,10 @@ func (s *server) GetQuote(ctx context.Context, in *pb.GetQuoteRequest) (*pb.GetQ
 
 	// 3. Generate a response.
 	return &pb.GetQuoteResponse{
-		CostUsd: &pb.MoneyAmount{
-			Decimal:    quote.Dollars,
-			Fractional: quote.Cents,
-		},
+		CostUsd: &pb.Money{
+			CurrencyCode: "USD",
+			Units:        int64(quote.Dollars),
+			Nanos:        int32(quote.Cents * 10000000)},
 	}, nil
 
 }
