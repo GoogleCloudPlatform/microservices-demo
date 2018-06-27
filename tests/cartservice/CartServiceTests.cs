@@ -36,7 +36,7 @@ namespace cartservice
         }
 
         [Fact]
-        public async Task AddItem_ItemInserted()
+        public async Task AddItem_ItemExists_Udpated()
         {
             string userId = Guid.NewGuid().ToString();
 
@@ -46,8 +46,48 @@ namespace cartservice
             // Create a GRPC communication channel between the client and the server
             var channel = new Channel(targetUri, ChannelCredentials.Insecure);
             
-            //ar interceptorObject = new ObjecT();
-            //var channel.Intercept(interceptorObject);
+            var client = new CartServiceClient(channel);
+            var request = new AddItemRequest
+            {
+                UserId = userId,
+                Item = new CartItem
+                {
+                    ProductId = "1",
+                    Quantity = 1
+                }
+            };
+
+            // First add - nothing should fail
+            await client.AddItemAsync(request);
+
+            // Second add of existing product - quantity should be updated
+            await client.AddItemAsync(request);
+            
+            var getCartRequest = new GetCartRequest
+            {
+                UserId = userId
+            };
+            var cart = await client.GetCartAsync(getCartRequest);
+            Assert.NotNull(cart);
+            Assert.Equal(userId, cart.UserId);
+            Assert.Single(cart.Items);
+            Assert.Equal(2, cart.Items[0].Quantity);
+
+            // Cleanup
+            await client.EmptyCartAsync(new EmptyCartRequest{ UserId = userId });
+        }
+
+        [Fact]
+        public async Task AddItem_New_Inserted()
+        {
+            string userId = Guid.NewGuid().ToString();
+
+            // Construct server's Uri
+            string targetUri = $"{serverHostName}:{port}";
+
+            // Create a GRPC communication channel between the client and the server
+            var channel = new Channel(targetUri, ChannelCredentials.Insecure);
+            
             // Create a proxy object to work with the server
             var client = new CartServiceClient(channel);
 
@@ -61,30 +101,12 @@ namespace cartservice
                 }
             };
 
-/*
-            for (int i = 0; i < 3; i++)
-            {
-                try
-                {
-                    Console.WriteLine("Try " + i+1);
-                    await client.AddItemAsync(request);
-                    break;
-                }
-                catch (Exception)
-                {
-                    await Task.Delay(1000);
-                    continue;
-                }
-            }
-*/            
             await client.AddItemAsync(request);
+
             var getCartRequest = new GetCartRequest
             {
                 UserId = userId
             };
-            //await client.EmptyCartAsync(nameof)
-            //await client.EmptyCartAsync(new EmptyCartRequest{ UserId = userId });
-
             var cart = await client.GetCartAsync(getCartRequest);
             Assert.NotNull(cart);
             Assert.Equal(userId, cart.UserId);

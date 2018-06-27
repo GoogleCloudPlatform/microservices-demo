@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using cartservice.interfaces;
 using Google.Protobuf;
@@ -40,14 +41,23 @@ namespace cartservice.cartstore
             if (value.IsNull)
             {
                 cart = new Hipstershop.Cart();
+                cart.UserId = userId;
+                cart.Items.Add(new Hipstershop.CartItem { ProductId = productId, Quantity = quantity });
             }
             else
             {
                 cart = Hipstershop.Cart.Parser.ParseFrom(value);
+                var existingItem = cart.Items.SingleOrDefault(i => i.ProductId == productId);
+                if (existingItem == null)
+                {
+                    cart.Items.Add(new Hipstershop.CartItem { ProductId = productId, Quantity = quantity });
+                }
+                else
+                {
+                    existingItem.Quantity += quantity;
+                }
             }
 
-            cart.UserId = userId;
-            cart.Items.Add(new Hipstershop.CartItem { ProductId = productId, Quantity = quantity });
             await db.HashSetAsync(userId, new[]{ new HashEntry(CART_FIELD_NAME, cart.ToByteArray()) });
         }
 
