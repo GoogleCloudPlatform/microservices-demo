@@ -13,6 +13,7 @@ import (
 	"google.golang.org/grpc/status"
 
 	pb "./genproto"
+	money "./money"
 )
 
 const (
@@ -71,10 +72,7 @@ func (cs *checkoutService) CreateOrder(ctx context.Context, req *pb.CreateOrderR
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "shipping quote failure: %+v", err)
 	}
-	resp.ShippingCost = &pb.Money{
-		Amount:       shippingQuoteUSD,
-		CurrencyCode: "USD",
-	}
+	resp.ShippingCost = shippingQuoteUSD
 	// TODO(ahmetb) convert to req.UserCurrency
 	// TODO(ahmetb) calculate resp.OrderItem with req.UserCurrency
 	return resp, nil
@@ -102,20 +100,20 @@ func (cs *checkoutService) PlaceOrder(ctx context.Context, req *pb.PlaceOrderReq
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "shipping quote failure: %+v", err)
 	}
-	shippingPrice, err := cs.convertCurrency(ctx, &pb.Money{
-		Amount:       shippingUsd,
-		CurrencyCode: usdCurrency}, req.UserCurrency)
+	shippingPrice, err := cs.convertCurrency(ctx, shippingUsd, req.UserCurrency)
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "failed to convert shipping cost to currency: %+v", err)
 	}
 
-	var totalPrice pb.Money
-	totalPrice = sumMoney(totalPrice, *shippingPrice)
+	total := pb.Money{CurrencyCode: req.UserCurrency,
+		Units: 0,
+		Nanos: 0}
+	total = money.Must(money.Sum(total, *shippingPrice))
 	for _, it := range orderItems {
-		totalPrice = sumMoney(totalPrice, *it.Cost)
+		total = money.Must(money.Sum(total, *it.Cost))
 	}
 
-	txID, err := cs.chargeCard(ctx, &totalPrice, req.CreditCard)
+	txID, err := cs.chargeCard(ctx, &total, req.CreditCard)
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "failed to charge card: %+v", err)
 	}
@@ -143,7 +141,7 @@ func (cs *checkoutService) PlaceOrder(ctx context.Context, req *pb.PlaceOrderReq
 	return resp, nil
 }
 
-func (cs *checkoutService) quoteShipping(ctx context.Context, address *pb.Address, items []*pb.CartItem) (*pb.MoneyAmount, error) {
+func (cs *checkoutService) quoteShipping(ctx context.Context, address *pb.Address, items []*pb.CartItem) (*pb.Money, error) {
 	conn, err := grpc.DialContext(ctx, cs.shippingSvcAddr, grpc.WithInsecure())
 	if err != nil {
 		return nil, fmt.Errorf("could not connect shipping service: %+v", err)
@@ -189,10 +187,7 @@ func (cs *checkoutService) prepOrderItems(ctx context.Context, items []*pb.CartI
 		if err != nil {
 			return nil, fmt.Errorf("failed to get product #%q", item.GetProductId())
 		}
-		usdPrice := &pb.Money{
-			Amount:       product.GetPriceUsd(),
-			CurrencyCode: usdCurrency}
-		price, err := cs.convertCurrency(ctx, usdPrice, userCurrency)
+		price, err := cs.convertCurrency(ctx, product.GetPriceUsd(), userCurrency)
 		if err != nil {
 			return nil, fmt.Errorf("failed to convert price of %q to %s", item.GetProductId(), userCurrency)
 		}
