@@ -11,7 +11,9 @@
                 {{ else }}
 
                     <h3>{{ len $.items }} item {{- if gt (len $.items) 1}}s{{end}}
-                        in your Shopping Cart</h3>
+                        in your Shopping Cart</h3> <form method="POST" action="/cart/empty">
+                            <button class="btn btn-secondary" type="submit">Empty Cart</button>
+                        </form>
                 
                     {{ range $.items }}
                     <div class="row pt-2 mb-2">
@@ -68,12 +70,7 @@
                                 </div>
                             </div>
                             <div class="form-row">
-                                <div class="col-12 d-flex justify-content-between align-items-center">
-                                    <form method="POST" action="/cart/empty">
-                                        <button class="btn btn-secondary" type="submit">Empty Cart</button>
-                                    </form>     
-                                    <a class="btn btn-primary" href="/checkout" role="button">Proceed to Checkout &rarr;</a>
-                                </div>
+                                <a class="btn btn-primary" href="/checkout" role="button">Proceed to Checkout &rarr;</a>
                             </div>
                             </form>
                         </div>
