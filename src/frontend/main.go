@@ -71,7 +71,7 @@ func main() {
 	}
 	svc.recommendationSvcConn, err = grpc.DialContext(ctx, svc.recommendationSvcAddr, grpc.WithInsecure())
 	if err != nil {
-		log.Fatalf("failed to connect recommendation service at %s: %+v", svc.recommendationSvcConn, err)
+		log.Fatalf("failed to connect recommendation service at %s: %+v", svc.recommendationSvcAddr, err)
 	}
 
 	r := mux.NewRouter()
