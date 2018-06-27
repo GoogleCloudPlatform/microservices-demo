@@ -4,11 +4,13 @@
     <main role="main">
         <div class="py-5">
             <div class="container bg-light py-3 px-lg-5 py-lg-5">
-                <h1>Shopping Cart</h1>
-
                 {{ if eq (len $.items) 0 }}
-                <p>Your shopping cart is empty.</p>
-                <a class="btn btn-primary" href="/" role="button">Browse Products</a>
+                <h3>Your shopping cart is empty!</h3>
+                <p>Items you add to your shopping cart will appear here.</p>
+                <a class="btn btn-primary" href="/" role="button">Browse Products &rarr; </a>
+                {{ else }}
+                <h3>{{ len $.items }} item {{- if gt (len $.items) 0}}s{{end}}
+                    in your Shopping Cart</h3>
                 {{ end }}
 
                 {{ range $.items }}
@@ -39,7 +41,7 @@
                                 <form method="POST" action="/cart/empty">
                                     <button class="btn btn-secondary" type="submit">Empty Cart</button>
                                 </form>     
-                                <a class="btn btn-primary" href="/checkout" role="button">Proceed to Checkout</a>
+                                <a class="btn btn-primary" href="/checkout" role="button">Proceed to Checkout &rarr;</a>
                         </div>
                     </div>
                 </div>
