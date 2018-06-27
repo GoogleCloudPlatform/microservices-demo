@@ -15,10 +15,10 @@ func TestGetQuote(t *testing.T) {
 	// A basic test case to test logic and protobuf interactions.
 	req := &pb.GetQuoteRequest{
 		Address: &pb.Address{
-			StreetAddress_1: "Muffin Man",
-			StreetAddress_2: "Drury Lane",
-			City:            "London",
-			Country:         "England",
+			StreetAddress: "Muffin Man",
+			City:          "London",
+			State:         "",
+			Country:       "England",
 		},
 		Items: []*pb.CartItem{
 			{
@@ -48,10 +48,10 @@ func TestShipOrder(t *testing.T) {
 	// A basic test case to test logic and protobuf interactions.
 	req := &pb.ShipOrderRequest{
 		Address: &pb.Address{
-			StreetAddress_1: "Muffin Man",
-			StreetAddress_2: "Drury Lane",
-			City:            "London",
-			Country:         "England",
+			StreetAddress: "Muffin Man",
+			City:          "London",
+			State:         "",
+			Country:       "England",
 		},
 		Items: []*pb.CartItem{
 			{

@@ -108,9 +108,9 @@ message ShipOrderResponse {
 }
 
 message Address {
-    string street_address_1 = 1;
-    string street_address_2 = 2;
-    string city= 3;
+    string street_address = 1;
+    string city = 2;
+    string state = 3;
     string country = 4;
     int32 zip_code = 5;
 }
