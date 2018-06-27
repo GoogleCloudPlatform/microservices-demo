@@ -38,10 +38,8 @@
                                     </a>
                                 </div>
                                 <small class="text-muted">
-                                    {{.Price.CurrencyCode}}
-                                    <strong>{{.Price.Amount.Decimal}}.{{.Price.Amount.Fractional}}
-                                        {{- if lt .Price.Amount.Fractional 10}}0{{end}}
-                                    </strong>
+                                    {{ renderMoney .Price }} 
+                                </strong>
                                 </small>
                             </div>
                         </div>
