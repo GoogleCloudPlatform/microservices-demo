@@ -5,45 +5,80 @@
         <div class="py-5">
             <div class="container bg-light py-3 px-lg-5 py-lg-5">
                 {{ if eq (len $.items) 0 }}
-                <h3>Your shopping cart is empty!</h3>
-                <p>Items you add to your shopping cart will appear here.</p>
-                <a class="btn btn-primary" href="/" role="button">Browse Products &rarr; </a>
+                    <h3>Your shopping cart is empty!</h3>
+                    <p>Items you add to your shopping cart will appear here.</p>
+                    <a class="btn btn-primary" href="/" role="button">Browse Products &rarr; </a>
                 {{ else }}
-                <h3>{{ len $.items }} item {{- if gt (len $.items) 0}}s{{end}}
-                    in your Shopping Cart</h3>
-                {{ end }}
 
-                {{ range $.items }}
-                <div class="row pt-2 mb-2">
-                    <div class="col text-right">
-                            <a href="/product/{{.Item.Id}}"><img class="img-fluid" style="width: auto; max-height: 60px;"
-                                src="{{.Item.Picture}}" /></a>
-                    </div>
-                    <div class="col align-middle">
-                        <strong>{{.Item.Name}}</strong><br/>
-                        <small class="text-muted">SKU: #{{.Item.Id}}</small>
-                    </div>
-                    <div class="col text-left">
-                        Qty: {{.Quantity}}<br/>
-                        <strong>
-                            {{ renderMoney .Price}}
-                        </strong>
-                    </div>
-                </div>
-                {{ end }}
-
-                {{ if $.items }}
-                <div class="row mt-5">
-                    <div class="col-8 offset-2">
-                        <div class="d-flex justify-content-between align-items-center">
-                                <form method="POST" action="/cart/empty">
-                                    <button class="btn btn-secondary" type="submit">Empty Cart</button>
-                                </form>     
-                                <a class="btn btn-primary" href="/checkout" role="button">Proceed to Checkout &rarr;</a>
+                    <h3>{{ len $.items }} item {{- if gt (len $.items) 1}}s{{end}}
+                        in your Shopping Cart</h3>
+                
+                    {{ range $.items }}
+                    <div class="row pt-2 mb-2">
+                        <div class="col text-right">
+                                <a href="/product/{{.Item.Id}}"><img class="img-fluid" style="width: auto; max-height: 60px;"
+                                    src="{{.Item.Picture}}" /></a>
+                        </div>
+                        <div class="col align-middle">
+                            <strong>{{.Item.Name}}</strong><br/>
+                            <small class="text-muted">SKU: #{{.Item.Id}}</small>
+                        </div>
+                        <div class="col text-left">
+                            Qty: {{.Quantity}}<br/>
+                            <strong>
+                                {{ renderMoney .Price}}
+                            </strong>
                         </div>
                     </div>
-                </div>
-                {{ end }}
+                    {{ end }} <!-- range $.items-->
+
+                    <hr/>
+                    <div class="row py-3 my-2">
+                        <div class="col-12 col-lg-8 offset-lg-2">
+                            <h3>Prepare to checkout</h3>
+                            <form class="needs-validation">
+                            <div class="form-row">
+                                <div class="col-md-5 mb-3">
+                                    <label for="street_address_1">Street Address</label>
+                                    <input type="text" class="form-control" id="street_address_1"
+                                        value="1600 Amphitheatre Parkway" required>
+                                </div>
+                                <div class="col-md-5 mb-3">
+                                    <label for="street_address_2">Street Address (cont.)</label>
+                                    <input type="text" class="form-control" id="street_address_2" placeholder="...your address here">
+                                </div>
+                                <div class="col-md-2 mb-3">
+                                    <label for="zip_code">Zip Code</label>
+                                    <input type="text" class="form-control" id="zip_code" value="94043" required>
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="city">City</label>
+                                    <input type="text" class="form-control" id="city" placeholder="City" value="Mountain View" required>
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <label for="state">State</label>
+                                    <input type="text" class="form-control" id="state" placeholder="State" value="CA" required>
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <label for="country">Country</label>
+                                    <input type="text" class="form-control" id="country" placeholder="Country Name" 
+                                        value="United States" required>
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="col-12 d-flex justify-content-between align-items-center">
+                                    <form method="POST" action="/cart/empty">
+                                        <button class="btn btn-secondary" type="submit">Empty Cart</button>
+                                    </form>     
+                                    <a class="btn btn-primary" href="/checkout" role="button">Proceed to Checkout &rarr;</a>
+                                </div>
+                            </div>
+                            </form>
+                        </div>
+                    </div>
+                {{ end }} <!-- end if $.items -->
 
                 {{ if $.recommendations}}
                     <hr/>

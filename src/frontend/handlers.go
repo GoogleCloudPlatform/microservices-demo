@@ -233,6 +233,28 @@ func (fe *frontendServer) viewCartHandler(w http.ResponseWriter, r *http.Request
 	}
 }
 
+func (fe *frontendServer) prepareCheckoutHandler(w http.ResponseWriter, r *http.Request) {
+	streetAddress1 := r.FormValue("street_address_1")
+	streetAddress2 := r.FormValue("street_address_2")
+	city := r.FormValue("city")
+	country := r.FormValue("country")
+	zipCode, _ := strconv.ParseInt(r.FormValue("country"), 10, 32)
+
+	log.Printf("[prepareCheckout] session_id=%+v", sessionID(r))
+	_, _ = pb.NewCheckoutServiceClient(fe.checkoutSvcConn).CreateOrder(r.Context(),
+		&pb.CreateOrderRequest{
+			UserId:       sessionID(r),
+			UserCurrency: currentCurrency(r),
+			Address: &pb.Address{
+				StreetAddress_1: streetAddress1,
+				StreetAddress_2: streetAddress2,
+				City:            city,
+				ZipCode:         int32(zipCode),
+				Country:         country,
+			},
+		})
+}
+
 func (fe *frontendServer) logoutHandler(w http.ResponseWriter, r *http.Request) {
 	log.Printf("[home] session_id=%+v", sessionID(r))
 	for _, c := range r.Cookies() {
