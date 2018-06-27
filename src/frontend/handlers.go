@@ -17,7 +17,10 @@ import (
 )
 
 var (
-	templates = template.Must(template.ParseGlob("templates/*.html"))
+	templates = template.Must(template.New("").
+		Funcs(template.FuncMap{
+			"renderMoney": renderMoney,
+		}).ParseGlob("templates/*.html"))
 )
 
 func ensureSessionID(next http.HandlerFunc) http.HandlerFunc {
@@ -281,4 +284,8 @@ func cartIDs(c []*pb.CartItem) []string {
 		out[i] = v.GetProductId()
 	}
 	return out
+}
+
+func renderMoney(money pb.Money) string {
+	return fmt.Sprintf("%s %d.%02d", money.GetCurrencyCode(), money.GetUnits(), money.GetNanos()/10000000)
 }
