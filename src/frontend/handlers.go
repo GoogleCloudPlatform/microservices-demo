@@ -126,7 +126,6 @@ func (fe *frontendServer) productHandler(w http.ResponseWriter, r *http.Request)
 		http.Error(w, fmt.Sprintf("failed to get product recommendations: %+v", err), http.StatusInternalServerError)
 		return
 	}
-	log.Printf("cart size=%d", len(cart))
 
 	product := struct {
 		Item  *pb.Product
