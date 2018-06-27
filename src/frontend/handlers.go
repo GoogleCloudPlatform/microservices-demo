@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"frontend/money"
 	"html/template"
 	"log"
 	"net/http"
@@ -67,10 +68,7 @@ func (fe *frontendServer) homeHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	ps := make([]productView, len(products))
 	for i, p := range products {
-		price, err := fe.convertCurrency(r.Context(), &pb.Money{
-			Amount:       p.PriceUsd,
-			CurrencyCode: defaultCurrency,
-		}, currentCurrency(r))
+		price, err := fe.convertCurrency(r.Context(), p.GetPriceUsd(), currentCurrency(r))
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
@@ -113,9 +111,7 @@ func (fe *frontendServer) productHandler(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	price, err := fe.convertCurrency(r.Context(), &pb.Money{
-		Amount:       p.GetPriceUsd(),
-		CurrencyCode: defaultCurrency}, currentCurrency(r))
+	price, err := fe.convertCurrency(r.Context(), p.GetPriceUsd(), currentCurrency(r))
 	if err != nil {
 		http.Error(w, fmt.Sprintf("failed to convert currency: %+v", err), http.StatusInternalServerError)
 		return
@@ -209,19 +205,17 @@ func (fe *frontendServer) viewCartHandler(w http.ResponseWriter, r *http.Request
 			http.Error(w, fmt.Sprintf("could not retrieve product #%s: %+v", item.GetProductId(), err), http.StatusInternalServerError)
 			return
 		}
-		price, err := fe.convertCurrency(r.Context(), &pb.Money{
-			Amount:       p.GetPriceUsd(),
-			CurrencyCode: defaultCurrency}, currentCurrency(r))
+		price, err := fe.convertCurrency(r.Context(), p.GetPriceUsd(), currentCurrency(r))
 		if err != nil {
 			http.Error(w, fmt.Sprintf("could not convert currency for product #%s: %+v", item.GetProductId(), err), http.StatusInternalServerError)
 			return
 		}
 
-		multPrice := multMoney(*price.GetAmount(), uint32(item.GetQuantity()))
+		multPrice := money.MultiplySlow(*price, uint32(item.GetQuantity()))
 		items[i] = cartItemView{
 			Item:     p,
 			Quantity: item.GetQuantity(),
-			Price:    &pb.Money{Amount: &multPrice, CurrencyCode: price.GetCurrencyCode()}}
+			Price:    &multPrice}
 	}
 
 	if err := templates.ExecuteTemplate(w, "cart", map[string]interface{}{
