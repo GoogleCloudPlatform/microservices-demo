@@ -183,10 +183,8 @@ func testPaymentService() error {
 	resp, err := cl.Charge(context.TODO(), &pb.ChargeRequest{
 		Amount: &pb.Money{
 			CurrencyCode: "USD",
-			Amount: &pb.MoneyAmount{
-				Decimal:    10,
-				Fractional: 55},
-		},
+			Units:        10,
+			Nanos:        550000000},
 		CreditCard: &pb.CreditCardInfo{
 			CreditCardNumber:          "4444-4530-1092-6639",
 			CreditCardCvv:             612,
@@ -216,10 +214,8 @@ func testEmailService() error {
 			ShippingTrackingId: "000-123-456",
 			ShippingCost: &pb.Money{
 				CurrencyCode: "CAD",
-				Amount: &pb.MoneyAmount{
-					Decimal:    10,
-					Fractional: 55},
-			},
+				Units:        10,
+				Nanos:        550000000},
 			ShippingAddress: &pb.Address{
 				StreetAddress_1: "Muffin Man",
 				StreetAddress_2: "Drury Lane",
@@ -233,9 +229,8 @@ func testEmailService() error {
 						Quantity:  4},
 					Cost: &pb.Money{
 						CurrencyCode: "CAD",
-						Amount: &pb.MoneyAmount{
-							Decimal:    120,
-							Fractional: 0}},
+						Units:        120,
+						Nanos:        0},
 				},
 				&pb.OrderItem{
 					Item: &pb.CartItem{
@@ -243,9 +238,8 @@ func testEmailService() error {
 						Quantity:  1},
 					Cost: &pb.Money{
 						CurrencyCode: "CAD",
-						Amount: &pb.MoneyAmount{
-							Decimal:    12,
-							Fractional: 25}},
+						Units:        12,
+						Nanos:        250000000},
 				},
 			},
 		},
@@ -276,10 +270,8 @@ func testCurrencyService() error {
 	log.Println("--- rpc Convert()")
 	in := &pb.Money{
 		CurrencyCode: "CAD",
-		Amount: &pb.MoneyAmount{
-			Decimal:    12,
-			Fractional: 25},
-	}
+		Units:        12,
+		Nanos:        250000000}
 	convertResp, err := cl.Convert(context.TODO(), &pb.CurrencyConversionRequest{
 		From:   in,
 		ToCode: "USD"})
