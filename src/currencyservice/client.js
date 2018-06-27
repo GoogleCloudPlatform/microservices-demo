@@ -18,6 +18,7 @@
 
 const path = require('path');
 const grpc = require('grpc');
+const leftPad = require('left-pad');
 
 const PROTO_PATH = path.join(__dirname, './proto/demo.proto');
 const PORT = 31337;
@@ -28,15 +29,15 @@ const client = new shopProto.CurrencyService(`localhost:${PORT}`,
 
 const request = {
   from: {
-    currency_code: 'USD',
+    currency_code: 'CHF',
     units: 300,
-    nanos: 500000000
+    nanos: 0
   },
-  to_code: 'CHF'
+  to_code: 'EUR'
 };
 
 function _moneyToString (m) {
-  return `${m.amount.decimal}.${m.amount.fractional} ${m.currency_code}`;
+  return `${m.units}.${leftPad(m.nanos, 9, '0')} ${m.currency_code}`;
 }
 
 client.getSupportedCurrencies({}, (err, response) => {
