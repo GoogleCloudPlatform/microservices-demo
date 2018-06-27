@@ -111,10 +111,10 @@ func testShippingService() error {
 	defer conn.Close()
 
 	address := &pb.Address{
-		StreetAddress_1: "Muffin Man",
-		StreetAddress_2: "Drury Lane",
-		City:            "London",
-		Country:         "United Kingdom",
+		StreetAddress: "Muffin Man",
+		State:         "",
+		City:          "London",
+		Country:       "United Kingdom",
 	}
 	items := []*pb.CartItem{
 		{
@@ -217,10 +217,10 @@ func testEmailService() error {
 				Units:        10,
 				Nanos:        550000000},
 			ShippingAddress: &pb.Address{
-				StreetAddress_1: "Muffin Man",
-				StreetAddress_2: "Drury Lane",
-				City:            "London",
-				Country:         "United Kingdom",
+				StreetAddress: "Muffin Man",
+				State:         "XX",
+				City:          "London",
+				Country:       "United Kingdom",
 			},
 			Items: []*pb.OrderItem{
 				&pb.OrderItem{

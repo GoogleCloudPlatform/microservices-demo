@@ -46,7 +46,7 @@ func (s *server) GetQuote(ctx context.Context, in *pb.GetQuoteRequest) (*pb.GetQ
 // It supplies a tracking ID for notional lookup of shipment delivery status.
 func (s *server) ShipOrder(ctx context.Context, in *pb.ShipOrderRequest) (*pb.ShipOrderResponse, error) {
 	// 1. Create a Tracking ID
-	baseAddress := fmt.Sprintf("%s, %s, %s", in.Address.StreetAddress_1, in.Address.StreetAddress_2, in.Address.City)
+	baseAddress := fmt.Sprintf("%s, %s, %s", in.Address.StreetAddress, in.Address.City, in.Address.State)
 	id := CreateTrackingId(baseAddress)
 
 	// 2. Generate a response.

@@ -234,9 +234,9 @@ func (fe *frontendServer) viewCartHandler(w http.ResponseWriter, r *http.Request
 }
 
 func (fe *frontendServer) prepareCheckoutHandler(w http.ResponseWriter, r *http.Request) {
-	streetAddress1 := r.FormValue("street_address_1")
-	streetAddress2 := r.FormValue("street_address_2")
+	streetAddress := r.FormValue("street_address")
 	city := r.FormValue("city")
+	state := r.FormValue("state")
 	country := r.FormValue("country")
 	zipCode, _ := strconv.ParseInt(r.FormValue("country"), 10, 32)
 
@@ -246,11 +246,11 @@ func (fe *frontendServer) prepareCheckoutHandler(w http.ResponseWriter, r *http.
 			UserId:       sessionID(r),
 			UserCurrency: currentCurrency(r),
 			Address: &pb.Address{
-				StreetAddress_1: streetAddress1,
-				StreetAddress_2: streetAddress2,
-				City:            city,
-				ZipCode:         int32(zipCode),
-				Country:         country,
+				StreetAddress: streetAddress,
+				City:          city,
+				State:         state,
+				ZipCode:       int32(zipCode),
+				Country:       country,
 			},
 		})
 }
