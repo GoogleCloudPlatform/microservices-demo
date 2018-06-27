@@ -58,7 +58,7 @@ module.exports = function charge(request) {
     throw new ExpiredCreditCard(cardNumber.replace('-', ''), month, year);
 
   console.log(`Transaction processed: ${cardType} ending ${cardNumber.substr(-4)} \
-    Amount: ${amount.currency_code}${amount.amount.decimal}.${amount.amount.fractional}`)
+    Amount: ${amount.currency_code}${amount.units}.${amount.nanos}`)
 
   return { transaction_id: uuid() }
 }
