@@ -73,7 +73,7 @@ func (fe *frontendServer) homeHandler(w http.ResponseWriter, r *http.Request) {
 	for i, p := range products {
 		price, err := fe.convertCurrency(r.Context(), p.GetPriceUsd(), currentCurrency(r))
 		if err != nil {
-			renderHTTPError(w, err, http.StatusInternalServerError)
+			renderHTTPError(w, fmt.Errorf("failed to do currency conversion for product %s: %+v", p.GetId(), err), http.StatusInternalServerError)
 			return
 		}
 		ps[i] = productView{p, price}
