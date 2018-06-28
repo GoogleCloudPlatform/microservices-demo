@@ -11,14 +11,14 @@ namespace cartservice
 {
     class Program
     {
-        const string CART_SERVICE_ADDRESS = "CART_SERVICE_ADDR";
+        const string CART_SERVICE_ADDRESS = "LISTEN_ADDR";
         const string REDIS_ADDRESS = "REDIS_ADDR";
-        const string CART_SERVICE_PORT = "CART_SERVICE_PORT";
+        const string CART_SERVICE_PORT = "PORT";
 
         [Verb("start", HelpText = "Starts the server listening on provided port")]
         class ServerOptions
         {
-            [Option('h', "hostname", HelpText = "The ip on which the server is running. If not provided, CART_SERVICE_ADDR environment variable value will be used. If not defined, localhost is used")]
+            [Option('h', "hostname", HelpText = "The ip on which the server is running. If not provided, LISTEN_ADDR environment variable value will be used. If not defined, localhost is used")]
             public string Host { get; set; }
 
             [Option('p', "port", HelpText = "The port on for running the server")]

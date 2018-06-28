@@ -9,8 +9,8 @@ GOTO End1
 :local
   set REDIS_PORT=6379
   set REDIS_ADDR=localhost:%REDIS_PORT%
-  set CART_SERVICE_ADDR=127.0.0.1
-  set CART_SERVICE_PORT=7070
+  set LISTEN_ADDR=127.0.0.1
+  set PORT=7070
 
   echo running redis emulator locally on a separate window
   taskkill /f /im "redis-server.exe"
@@ -24,8 +24,8 @@ GOTO End1
 :docker_local
   set REDIS_PORT=6379
   set REDIS_ADDR=redis:%REDIS_PORT%
-  set CART_SERVICE_ADDR=127.0.0.1
-  set CART_SERVICE_PORT=7070
+  set LISTEN_ADDR=127.0.0.1
+  set PORT=7070
 
   echo run docker container with redis
   docker run -d --name=redis -p %REDIS_PORT%:%REDIS_PORT% redis
@@ -34,7 +34,7 @@ GOTO End1
   docker build -t cartservice ..\.
 
   echo run container image for cart service
-  docker run -it --rm -e REDIS_ADDR=%REDIS_ADDR% -e CART_SERVICE_ADDR=%CART_SERVICE_ADDR% -e CART_SERVICE_PORT=%CART_SERVICE_PORT% -p %CART_SERVICE_PORT%:%CART_SERVICE_PORT% cartservice
+  docker run -it --rm -e REDIS_ADDR=%REDIS_ADDR% -e LISTEN_ADDR=%LISTEN_ADDR% -e PORT=%PORT% -p %PORT%:%PORT% cartservice
 
 GOTO End1
 
