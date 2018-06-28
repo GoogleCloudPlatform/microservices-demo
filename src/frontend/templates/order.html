@@ -3,15 +3,32 @@
 
     <main role="main">
         <div class="py-5">
-            <div class="container bg-light py-3 px-lg-5 py-lg-5">
-                <h3>
-                    Your order is complete!
-                </h3>
-                <p>
-                    Order Confirmation ID: {{ $.order }}
-                </p>
+            <div class="container bg-light py-3 px-lg-5">
+                <div class="row mt-5 py-2">
+                    <div class="col">
+                    <h3>
+                        Your order is complete!
+                    </h3>
+                    <p>
+                        Order Confirmation ID: <strong>{{.order.OrderId}}</strong>
+                        <br>
+                        Shipping Tracking ID: <strong>{{.order.ShippingTrackingId}}</strong>
+                    </p>
+                    <p>
+                        Shipping Cost: <strong>{{renderMoney .order.ShippingCost}}</strong>
+                        <br>
+                        Total Paid: <strong>{{renderMoney .total_paid}}</strong>
+                    </p>
+                    <a class="btn btn-primary" href="/" role="button">Browse other products &rarr; </a>
+                    </div>
+                </div>
+                <hr/>
 
-                {{ template "recommendations" $.recommendations }}
+                {{ if $.recommendations }}
+                <div class="row mt-5 py-2">
+                    {{ template "recommendations" $.recommendations }}
+                </div>
+                {{ end }}
             </div>
         </div>
     </main>

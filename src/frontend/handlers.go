@@ -288,13 +288,23 @@ func (fe *frontendServer) placeOrderHandler(w http.ResponseWriter, r *http.Reque
 	order.GetOrder().GetItems()
 	recommendations, _ := fe.getRecommendations(r.Context(), sessionID(r), nil)
 
+	totalPaid := *order.GetOrder().GetShippingCost()
+	for _, v := range order.GetOrder().GetItems() {
+		totalPaid = money.Must(money.Sum(totalPaid, *v.GetCost()))
+	}
+
 	if err := templates.ExecuteTemplate(w, "order", map[string]interface{}{
 		"session_id":      sessionID(r),
 		"user_currency":   currentCurrency(r),
 		"order":           order.GetOrder(),
+		"total_paid":      &totalPaid,
 		"recommendations": recommendations,
 	}); err != nil {
 		log.Println(err)
+	}
+
+	if err := fe.emptyCart(r.Context(), sessionID(r)); err != nil {
+		log.Printf("WARN: failed to empty user (%s) cart after checkout: %+v", sessionID(r), err)
 	}
 }
 

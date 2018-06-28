@@ -123,7 +123,11 @@
                                             <label for="credit_card_expiration_year">Year</label>
                                             <select name="credit_card_expiration_year" id="credit_card_expiration_year"
                                                 class="form-control">
-                                            {{range $.expiration_years}}<option value="{{.}}">{{.}}</option>{{end}}
+                                            {{ range $i, $y := $.expiration_years}}<option value="{{$y}}"
+                                                {{if eq $i 1 -}}
+                                                    selected="selected"
+                                                {{- end}}
+                                            >{{$y}}</option>{{end}}
                                             </select>
                                         </div>
                                     <div class="col-md-2 mb-3">

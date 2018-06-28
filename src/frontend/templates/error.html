@@ -1,0 +1,17 @@
+{{ define "error" }}
+    {{ template "header" }}
+
+    <main role="main">
+        <div class="py-5">
+            <div class="container bg-light py-3 px-lg-5 py-lg-5">
+                <h1>Uh, oh!</h1>
+                <p>Something has failed. Below are some details for debugging.</p>
+                <pre>
+                    {{.errorMsg}}
+                </pre>
+            </div>
+        </div>
+    </main>
+
+    {{ template "footer" }}
+{{ end }}
