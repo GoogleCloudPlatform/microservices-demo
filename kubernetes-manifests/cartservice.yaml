@@ -18,6 +18,8 @@ spec:
           value: "redis-cart:6379"
         - name: CART_SERVICE_PORT
           value: "7070"
+        - name: CART_SERVICE_ADDR
+          value: "127.0.0.1"
         resources:
           requests:
             cpu: 200m
