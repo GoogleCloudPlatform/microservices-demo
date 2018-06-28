@@ -76,6 +76,21 @@ func (fe *frontendServer) convertCurrency(ctx context.Context, money *pb.Money, 
 			ToCode: currency})
 }
 
+func (fe *frontendServer) getShippingQuote(ctx context.Context, items []*pb.CartItem, currency string) (*pb.Money, error) {
+	quote, err := pb.NewShippingServiceClient(fe.currencySvcConn).GetQuote(ctx,
+		&pb.GetQuoteRequest{
+			Address: nil,
+			Items:   items})
+	if err != nil {
+		return nil, err
+	}
+	localized, err := fe.convertCurrency(ctx, quote.GetCostUsd(), currency)
+	if err != nil {
+		return nil, fmt.Errorf("failed to convert currency for shipping cost: %+v", err)
+	}
+	return localized, nil
+}
+
 func (fe *frontendServer) getRecommendations(ctx context.Context, userID string, productIDs []string) ([]*pb.Product, error) {
 	resp, err := pb.NewRecommendationServiceClient(fe.recommendationSvcConn).ListRecommendations(ctx,
 		&pb.ListRecommendationsRequest{UserId: userID, ProductIds: productIDs})
