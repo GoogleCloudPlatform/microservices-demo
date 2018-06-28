@@ -64,20 +64,6 @@ func mustMapEnv(target *string, envKey string) {
 	*target = v
 }
 
-func (cs *checkoutService) CreateOrder(ctx context.Context, req *pb.CreateOrderRequest) (*pb.CreateOrderResponse, error) {
-	log.Printf("[CreateOrder] user_id=%q user_currency=%q", req.UserId, req.UserCurrency)
-	resp := new(pb.CreateOrderResponse)
-
-	prep, err := cs.prepareOrderItemsAndShippingQuoteFromCart(ctx, req.UserId, req.UserCurrency, req.Address)
-	if err != nil {
-		return nil, status.Errorf(codes.Internal, err.Error())
-	}
-
-	resp.Items = prep.orderItems
-	resp.ShippingCost = prep.shippingCostLocalized
-	return resp, nil
-}
-
 func (cs *checkoutService) PlaceOrder(ctx context.Context, req *pb.PlaceOrderRequest) (*pb.PlaceOrderResponse, error) {
 	log.Printf("[PlaceOrder] user_id=%q user_currency=%q", req.UserId, req.UserCurrency)
 
