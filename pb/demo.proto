@@ -202,19 +202,7 @@ message SendOrderConfirmationRequest {
 // -------------Checkout service-----------------
 
 service CheckoutService {
-    rpc CreateOrder(CreateOrderRequest) returns (CreateOrderResponse) {}
     rpc PlaceOrder(PlaceOrderRequest) returns (PlaceOrderResponse) {}
-}
-
-message CreateOrderRequest {
-    string user_id = 1;
-    string user_currency = 2;
-    Address address = 3;
-}
-
-message CreateOrderResponse {
-    repeated OrderItem items = 1;
-    Money shipping_cost = 2;
 }
 
 message PlaceOrderRequest {

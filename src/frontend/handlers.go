@@ -302,32 +302,6 @@ func (fe *frontendServer) placeOrderHandler(w http.ResponseWriter, r *http.Reque
 	}); err != nil {
 		log.Println(err)
 	}
-
-	if err := fe.emptyCart(r.Context(), sessionID(r)); err != nil {
-		log.Printf("WARN: failed to empty user (%s) cart after checkout: %+v", sessionID(r), err)
-	}
-}
-
-func (fe *frontendServer) prepareCheckoutHandler(w http.ResponseWriter, r *http.Request) {
-	streetAddress := r.FormValue("street_address")
-	city := r.FormValue("city")
-	state := r.FormValue("state")
-	country := r.FormValue("country")
-	zipCode, _ := strconv.ParseInt(r.FormValue("country"), 10, 32)
-
-	log.Printf("[prepareCheckout] session_id=%+v", sessionID(r))
-	_, _ = pb.NewCheckoutServiceClient(fe.checkoutSvcConn).CreateOrder(r.Context(),
-		&pb.CreateOrderRequest{
-			UserId:       sessionID(r),
-			UserCurrency: currentCurrency(r),
-			Address: &pb.Address{
-				StreetAddress: streetAddress,
-				City:          city,
-				State:         state,
-				ZipCode:       int32(zipCode),
-				Country:       country,
-			},
-		})
 }
 
 func (fe *frontendServer) logoutHandler(w http.ResponseWriter, r *http.Request) {
