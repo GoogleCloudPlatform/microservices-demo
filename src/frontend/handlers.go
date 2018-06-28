@@ -360,6 +360,7 @@ func (fe *frontendServer) setCurrencyHandler(w http.ResponseWriter, r *http.Requ
 }
 
 func renderHTTPError(w http.ResponseWriter, err error, code int) {
+	log.Printf("[error] %+v (code=%d)", err, code)
 	w.WriteHeader(code)
 	templates.ExecuteTemplate(w, "error", map[string]interface{}{
 		"error":       err.Error(),
