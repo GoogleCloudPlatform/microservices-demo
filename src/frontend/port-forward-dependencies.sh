@@ -6,6 +6,7 @@ kubectl port-forward $(kubectl get pods -l app=recommendationservice -o=name | h
 kubectl port-forward $(kubectl get pods -l app=cartservice -o=name | head -n 1) 7070:7070 &
 kubectl port-forward $(kubectl get pods -l app=productcatalogservice -o=name | head -n 1) 3550:3550 &
 kubectl port-forward $(kubectl get pods -l app=checkoutservice -o=name | head -n 1) 5050:5050 &
+kubectl port-forward $(kubectl get pods -l app=shippingservice -o=name | head -n 1) 50051:50051 &
 
 set +x
 trap "exit" INT TERM ERR
