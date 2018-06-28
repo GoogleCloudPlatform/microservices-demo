@@ -96,6 +96,8 @@ func (cs *checkoutService) PlaceOrder(ctx context.Context, req *pb.PlaceOrderReq
 		return nil, status.Errorf(codes.Unavailable, "shipping error: %+v", err)
 	}
 
+	_ = cs.emptyUserCart(ctx, req.UserId)
+
 	orderResult := &pb.OrderResult{
 		OrderId:            orderID.String(),
 		ShippingTrackingId: shippingTrackingID,
@@ -173,6 +175,19 @@ func (cs *checkoutService) getUserCart(ctx context.Context, userID string) ([]*p
 		return nil, fmt.Errorf("failed to get user cart during checkout: %+v", err)
 	}
 	return cart.GetItems(), nil
+}
+
+func (cs *checkoutService) emptyUserCart(ctx context.Context, userID string) error {
+	conn, err := grpc.DialContext(ctx, cs.cartSvcAddr, grpc.WithInsecure())
+	if err != nil {
+		return fmt.Errorf("could not connect cart service: %+v", err)
+	}
+	defer conn.Close()
+
+	if _, err = pb.NewCartServiceClient(conn).EmptyCart(ctx, &pb.EmptyCartRequest{UserId: userID}); err != nil {
+		return fmt.Errorf("failed to empty user cart during checkout: %+v", err)
+	}
+	return nil
 }
 
 func (cs *checkoutService) prepOrderItems(ctx context.Context, items []*pb.CartItem, userCurrency string) ([]*pb.OrderItem, error) {
