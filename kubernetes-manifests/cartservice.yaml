@@ -19,7 +19,7 @@ spec:
         - name: CART_SERVICE_PORT
           value: "7070"
         - name: CART_SERVICE_ADDR
-          value: "127.0.0.1"
+          value: "0.0.0.0"
         resources:
           requests:
             cpu: 200m

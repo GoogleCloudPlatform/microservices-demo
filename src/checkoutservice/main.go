@@ -184,7 +184,7 @@ func (cs *checkoutService) getUserCart(ctx context.Context, userID string) ([]*p
 
 	cart, err := pb.NewCartServiceClient(conn).GetCart(ctx, &pb.GetCartRequest{UserId: userID})
 	if err != nil {
-		return nil, fmt.Errorf("failed to get user cart: %+v", err)
+		return nil, fmt.Errorf("failed to get user cart during checkout: %+v", err)
 	}
 	return cart.GetItems(), nil
 }
