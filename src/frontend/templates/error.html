@@ -6,8 +6,11 @@
             <div class="container bg-light py-3 px-lg-5 py-lg-5">
                 <h1>Uh, oh!</h1>
                 <p>Something has failed. Below are some details for debugging.</p>
-                <pre>
-                    {{.errorMsg}}
+                
+                <p><strong>HTTP Status:</strong> {{.status_code}} {{.status}}</p>
+                <pre class="border border-danger"
+                    style="white-space: pre-wrap; word-break: keep-all;">
+                    {{- .error -}}
                 </pre>
             </div>
         </div>
