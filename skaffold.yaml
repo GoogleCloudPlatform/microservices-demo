@@ -18,6 +18,8 @@ build:
     workspace: src/currencyservice
   - imageName: cartservice
     workspace: src/cartservice
+  - imageName: frontend
+    workspace: src/frontend
 deploy:
   kubectl:
     manifests:
