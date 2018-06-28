@@ -16,6 +16,7 @@
                 <a href="/" class="navbar-brand d-flex align-items-center">
                     Hipster Shop
                 </a>
+                {{ if $.currencies }}
                 <form class="form-inline ml-auto" method="POST" action="/setCurrency" id="currency_form">
                     <select name="currency_code" class="form-control"
                     onchange="document.getElementById('currency_form').submit();">
@@ -23,8 +24,9 @@
                         <option value="{{.}}" {{if eq . $.user_currency}}selected="selected"{{end}}>{{.}}</option>
                     {{end}}
                     </select>
-                    <a class="btn btn-primary ml-2" href="/cart" role="button">View Cart ({{$.cart_size}})</a>
+                    <a class="btn btn-primary btn-light ml-2" href="/cart" role="button">View Cart ({{$.cart_size}})</a>
                 </form>
+                {{ end }}
             </div>
         </div>
     </header>

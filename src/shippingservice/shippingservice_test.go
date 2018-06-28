@@ -15,10 +15,10 @@ func TestGetQuote(t *testing.T) {
 	// A basic test case to test logic and protobuf interactions.
 	req := &pb.GetQuoteRequest{
 		Address: &pb.Address{
-			StreetAddress_1: "Muffin Man",
-			StreetAddress_2: "Drury Lane",
-			City:            "London",
-			Country:         "England",
+			StreetAddress: "Muffin Man",
+			City:          "London",
+			State:         "",
+			Country:       "England",
 		},
 		Items: []*pb.CartItem{
 			{
@@ -36,8 +36,8 @@ func TestGetQuote(t *testing.T) {
 	if err != nil {
 		t.Errorf("TestGetQuote (%v) failed", err)
 	}
-	if res.CostUsd.Decimal != 11 || res.CostUsd.Fractional != 22 {
-		t.Errorf("TestGetQuote: Quote value '%d.%d' does not match expected '%s'", res.CostUsd.Decimal, res.CostUsd.Fractional, "11.22")
+	if res.CostUsd.GetUnits() != 11 || res.CostUsd.GetNanos() != 220000000 {
+		t.Errorf("TestGetQuote: Quote value '%d.%d' does not match expected '%s'", res.CostUsd.GetUnits(), res.CostUsd.GetNanos(), "11.220000000")
 	}
 }
 
@@ -48,10 +48,10 @@ func TestShipOrder(t *testing.T) {
 	// A basic test case to test logic and protobuf interactions.
 	req := &pb.ShipOrderRequest{
 		Address: &pb.Address{
-			StreetAddress_1: "Muffin Man",
-			StreetAddress_2: "Drury Lane",
-			City:            "London",
-			Country:         "England",
+			StreetAddress: "Muffin Man",
+			City:          "London",
+			State:         "",
+			Country:       "England",
 		},
 		Items: []*pb.CartItem{
 			{

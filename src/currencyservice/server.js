@@ -31,7 +31,7 @@ const shopProto = grpc.load(PROTO_PATH).hipstershop;
 let _data;
 function _getCurrencyData (callback) {
   if (!_data) {
-    console.log('Fetching currency data...')
+    console.log('Fetching currency data...');
     request(DATA_URL, (err, res) => {
       if (err) {
         throw new Error(`Error getting data: ${err}`);
@@ -53,7 +53,7 @@ function _getCurrencyData (callback) {
       });
     });
   } else {
-    console.log('Using cached currency data...')
+    console.log('Using cached currency data...');
     callback(_data);
   }
 }
@@ -62,9 +62,10 @@ function _getCurrencyData (callback) {
  * Helper function that handles decimal/fractional carrying
  */
 function _carry (amount) {
-  amount.fractional += (amount.decimal % 1) * 100;
-  amount.decimal = Math.floor(amount.decimal) + Math.floor(amount.fractional / 100);
-  amount.fractional = amount.fractional % 100;
+  const fractionSize = Math.pow(10, 9);
+  amount.nanos += (amount.units % 1) * fractionSize;
+  amount.units = Math.floor(amount.units) + Math.floor(amount.nanos / fractionSize);
+  amount.nanos = amount.nanos % fractionSize;
   return amount;
 }
 
@@ -72,7 +73,7 @@ function _carry (amount) {
  * Lists the supported currencies
  */
 function getSupportedCurrencies (call, callback) {
-  console.log('Getting supported currencies...')
+  console.log('Getting supported currencies...');
   _getCurrencyData((data) => {
     callback(null, {currency_codes: Object.keys(data)});
   });
@@ -82,7 +83,7 @@ function getSupportedCurrencies (call, callback) {
  * Converts between currencies
  */
 function convert (call, callback) {
-  console.log('Starting conversion request...')
+  console.log('Starting conversion request...');
   try {
     _getCurrencyData((data) => {
       const request = call.request;
@@ -90,22 +91,28 @@ function convert (call, callback) {
       // Convert: from_currency --> EUR
       const from = request.from;
       const euros = _carry({
-        decimal: from.amount.decimal / data[from.currency_code],
-        fractional: from.amount.fractional / data[from.currency_code]
+        units: from.units / data[from.currency_code],
+        nanos: from.nanos / data[from.currency_code]
       });
+
+      euros.nanos = Math.round(euros.nanos);
 
       // Convert: EUR --> to_currency
-      const target = _carry({
-        decimal: euros.decimal * data[request.to_code],
-        fractional: euros.fractional * data[request.to_code]
+      const result = _carry({
+        units: euros.units * data[request.to_code],
+        nanos: euros.nanos * data[request.to_code]
       });
-      target.fractional = Math.round(target.fractional);
 
-      console.log('Conversion request successful.')
-      callback(null, {currency_code: request.to_code, amount: target});
+      result.units = Math.floor(result.units)
+      result.nanos = Math.floor(result.nanos)
+      result.currency_code = request.to_code;
+
+      console.log(`Conversion request successful ${result.nanos}..${result.nanos}`);
+      callback(null, result);
     });
   } catch (err) {
-    console.error('Conversion request failed.')
+    console.error('Conversion request failed.');
+    console.error(err);
     callback(err.message);
   }
 }

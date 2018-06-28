@@ -29,11 +29,11 @@ func TestServer(t *testing.T) {
 		t.Error(diff)
 	}
 
-	got, err := client.GetProduct(ctx, &pb.GetProductRequest{Id: "2"})
+	got, err := client.GetProduct(ctx, &pb.GetProductRequest{Id: "OLJCESPC7Z"})
 	if err != nil {
 		t.Fatal(err)
 	}
-	if want := catalog[1]; !proto.Equal(got, want) {
+	if want := catalog[0]; !proto.Equal(got, want) {
 		t.Errorf("got %v, want %v", got, want)
 	}
 	_, err = client.GetProduct(ctx, &pb.GetProductRequest{Id: "N/A"})
@@ -41,11 +41,11 @@ func TestServer(t *testing.T) {
 		t.Errorf("got %s, want %s", got, want)
 	}
 
-	sres, err := client.SearchProducts(ctx, &pb.SearchProductsRequest{Query: "nice"})
+	sres, err := client.SearchProducts(ctx, &pb.SearchProductsRequest{Query: "typewriter"})
 	if err != nil {
 		t.Fatal(err)
 	}
-	if diff := cmp.Diff(sres.Results, catalog, cmp.Comparer(proto.Equal)); diff != "" {
+	if diff := cmp.Diff(sres.Results, []*pb.Product{catalog[0]}, cmp.Comparer(proto.Equal)); diff != "" {
 		t.Error(diff)
 	}
 }
