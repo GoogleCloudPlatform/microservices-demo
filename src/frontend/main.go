@@ -101,7 +101,7 @@ func main() {
 	r.HandleFunc("/cart/checkout", ensureSessionID(svc.placeOrderHandler)).Methods(http.MethodPost)
 	r.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir("./static/"))))
 	log.Printf("starting server on :" + srvPort)
-	log.Fatal(http.ListenAndServe("localhost:"+srvPort, r))
+	log.Fatal(http.ListenAndServe(":"+srvPort, r))
 }
 
 func mustMapEnv(target *string, envKey string) {

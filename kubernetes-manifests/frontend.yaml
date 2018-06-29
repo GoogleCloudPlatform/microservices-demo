@@ -13,6 +13,16 @@ spec:
           image: frontend
           ports:
           - containerPort: 8080
+          readinessProbe:
+            initialDelaySeconds: 10
+            httpGet:
+              path: "/"
+              port: 8080
+          livenessProbe:
+            initialDelaySeconds: 10
+            httpGet:
+              path: "/"
+              port: 8080
           env:
           - name: PRODUCT_CATALOG_SERVICE_ADDR
             value: "productcatalogservice:3550"
