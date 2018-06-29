@@ -11,6 +11,13 @@ namespace cartservice.cartstore
         // Maps between user and their cart
         private ConcurrentDictionary<string, Hipstershop.Cart> userCartItems = new ConcurrentDictionary<string, Hipstershop.Cart>();
 
+        public Task InitializeAsync()
+        {
+            Console.WriteLine("Local Cart Store was initialized");
+
+            return Task.CompletedTask;
+        }
+
         public Task AddItemAsync(string userId, string productId, int quantity)
         {
             Console.WriteLine($"AddItemAsync called with userId={userId}, productId={productId}, quantity={quantity}");

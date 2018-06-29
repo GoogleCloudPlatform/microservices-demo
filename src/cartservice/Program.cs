@@ -3,6 +3,7 @@ using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using cartservice.cartstore;
+using cartservice.interfaces;
 using CommandLine;
 using Grpc.Core;
 using Microsoft.Extensions.Configuration;
@@ -28,22 +29,23 @@ namespace cartservice
             public string Redis { get; set; }
         }
 
-        static object StartServer(string host, int port, string redisAddress)
+        static object StartServer(string host, int port, ICartStore cartStore)
         {
             // Run the server in a separate thread and make the main thread busy waiting.
             // The busy wait is because when we run in a container, we can't use techniques such as waiting on user input (Console.Readline())
-            Task.Run(() =>
+            Task.Run(async () =>
             {
-                //var store = new LocalCartStore();
-                var store = new RedisCartStore(redisAddress);
+                Console.WriteLine($"Trying to start a grpc server at  {host}:{port}");
                 Server server = new Server
                 {
-                    Services = { Hipstershop.CartService.BindService(new CartServiceImpl(store)) },
+                    Services = { Hipstershop.CartService.BindService(new CartServiceImpl(cartStore)) },
                     Ports = { new ServerPort(host, port, ServerCredentials.Insecure) }
                 };
 
                 Console.WriteLine($"Cart server is listening at {host}:{port}");
                 server.Start();
+
+                await cartStore.InitializeAsync();
             });
 
             // Busy wait to keep the process alive
@@ -75,8 +77,8 @@ namespace cartservice
                                 hostname = Environment.GetEnvironmentVariable(CART_SERVICE_ADDRESS);
                                 if (string.IsNullOrEmpty(hostname))
                                 {
-                                    Console.WriteLine($"Environment variable {CART_SERVICE_ADDRESS} was not set. Setting the host to 127.0.0.1");
-                                    hostname = "127.0.0.1";
+                                    Console.WriteLine($"Environment variable {CART_SERVICE_ADDRESS} was not set. Setting the host to 0.0.0.0");
+                                    hostname = "0.0.0.0";
                                 }
                             }
 
@@ -98,19 +100,23 @@ namespace cartservice
                             }
 
                             // Set redis cache host (hostname+port)
-                            string redis = options.Redis;
-                            if (string.IsNullOrEmpty(redis))
+                            ICartStore cartStore;
+                            string redis = ReadRedisAddress(options.Redis);
+
+                            // Redis was specified via command line or environment variable
+                            if (!string.IsNullOrEmpty(redis))
                             {
-                                Console.WriteLine($"Reading redis cache address from environment variable {REDIS_ADDRESS}");
-                                redis = Environment.GetEnvironmentVariable(REDIS_ADDRESS);
-                                if (string.IsNullOrEmpty(redis))
-                                {
-                                    Console.WriteLine("Redis cache host(hostname+port) was not specified. It should be specified via command line or REDIS_ADDRESS environment variable.");
-                                    return -1;
-                                }
+                                cartStore = new RedisCartStore(redis);
+                                return StartServer(hostname, port, cartStore);
+                            }
+                            else
+                            {
+                                Console.WriteLine("Redis cache host(hostname+port) was not specified. Starting a cart service using local store");
+                                Console.WriteLine("If you wanted to use Redis Cache as a backup store, you should provide its address via command line or REDIS_ADDRESS environment variable.");
+                                cartStore = new LocalCartStore();
                             }
 
-                            return StartServer(hostname, port, redis);
+                            return StartServer(hostname, port, cartStore);
                         },
                         errs => 1);
                     break;
@@ -118,6 +124,23 @@ namespace cartservice
                     Console.WriteLine("Invalid command");
                     break;
             }
+        }
+
+        private static string ReadRedisAddress(string address)
+        {
+            if (!string.IsNullOrEmpty(address))
+            {
+                return address;
+            }
+
+            Console.WriteLine($"Reading redis cache address from environment variable {REDIS_ADDRESS}");
+            string redis = Environment.GetEnvironmentVariable(REDIS_ADDRESS);
+            if (!string.IsNullOrEmpty(redis))
+            {
+                return redis;
+            }
+
+            return null;
         }
     }
 }
