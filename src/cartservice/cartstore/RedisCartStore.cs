@@ -16,8 +16,13 @@ namespace cartservice.cartstore
         private static ConnectionMultiplexer redis;
 
         private readonly byte[] emptyCartBytes;
+<<<<<<< HEAD
         private readonly string connectionString;
         private readonly string redisAddr;
+||||||| merged common ancestors
+=======
+        private readonly string connectionString;
+>>>>>>> origin
 
         public RedisCartStore(string redisAddress)
         {
@@ -29,14 +34,32 @@ namespace cartservice.cartstore
             Console.WriteLine($"Going to use Redis cache at this address: {connectionString}");
         }
 
+<<<<<<< HEAD
         public Task InitializeAsync()
         {
+||||||| merged common ancestors
+            string connectionString = $"{redisAddress},ssl=false,allowAdmin=true";
+=======
+            connectionString = $"{redisAddress},ssl=false,allowAdmin=true";
+            Console.WriteLine($"Going to use Redis cache at this address: {connectionString}");
+        }
+
+        public async Task InitializeAsync()
+        {
+>>>>>>> origin
             Console.WriteLine("Connecting to Redis: " + connectionString);
+<<<<<<< HEAD
 
             redis = ConnectionMultiplexer.Connect(connectionString);
             Console.WriteLine("Connected successfully to Redis");
 
             return Task.CompletedTask;
+||||||| merged common ancestors
+            redis = ConnectionMultiplexer.Connect(connectionString);
+=======
+            redis = await ConnectionMultiplexer.ConnectAsync(connectionString, Console.Out);
+            Console.WriteLine("Connected successfully to Redis");
+>>>>>>> origin
         }
 
         public async Task AddItemAsync(string userId, string productId, int quantity)
@@ -85,12 +108,28 @@ namespace cartservice.cartstore
         public async Task<Hipstershop.Cart> GetCartAsync(string userId)
         {
             Console.WriteLine($"GetCartAsync called with userId={userId}");
+<<<<<<< HEAD
             try
             {
                 var db = redis.GetDatabase();
                 // Access the cart from the cache
+||||||| merged common ancestors
+            var db = redis.GetDatabase();
+=======
+            try
+            {
+                var db = redis.GetDatabase();
+>>>>>>> origin
 
+<<<<<<< HEAD
                 var value = await db.HashGetAsync(userId, CART_FIELD_NAME);
+||||||| merged common ancestors
+            // Access the cart from the cache
+            var value = await db.HashGetAsync(userId, CART_FIELD_NAME);
+=======
+                // Access the cart from the cache
+                var value = await db.HashGetAsync(userId, CART_FIELD_NAME);
+>>>>>>> origin
 
                 if (!value.IsNull)
                 {
