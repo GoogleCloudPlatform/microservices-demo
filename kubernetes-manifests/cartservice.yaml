@@ -27,6 +27,12 @@ spec:
           limits:
             cpu: 300m
             memory: 128Mi
+        readinessProbe:
+          tcpSocket:
+             port: 7070
+        livenessProbe:
+          tcpSocket:
+             port: 7070
 ---
 apiVersion: v1
 kind: Service

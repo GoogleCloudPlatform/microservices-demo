@@ -13,6 +13,14 @@ spec:
           image: checkoutservice
           ports:
           - containerPort: 5050
+          readinessProbe:
+            periodSeconds: 5
+            tcpSocket:
+              port: 5050
+          livenessProbe:
+            periodSeconds: 5
+            tcpSocket:
+              port: 5050
           env:
           - name: PRODUCT_CATALOG_SERVICE_ADDR
             value: "productcatalogservice:3550"

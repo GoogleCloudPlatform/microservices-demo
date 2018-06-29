@@ -12,7 +12,15 @@ spec:
       - name: server
         image: emailservice
         ports:
-        - containerPort: 5000
+        - containerPort: 8080
+        readinessProbe:
+          periodSeconds: 5
+          tcpSocket:
+            port: 8080
+        livenessProbe:
+          periodSeconds: 5
+          tcpSocket:
+            port: 8080
         resources:
           requests:
             cpu: 100m

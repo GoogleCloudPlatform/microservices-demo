@@ -13,6 +13,14 @@ spec:
         image: productcatalogservice
         ports:
         - containerPort: 3550
+        readinessProbe:
+          periodSeconds: 5
+          tcpSocket:
+            port: 3550
+        livenessProbe:
+          periodSeconds: 5
+          tcpSocket:
+            port: 3550
         resources:
           requests:
             cpu: 100m
