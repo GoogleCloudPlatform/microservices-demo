@@ -1,6 +1,8 @@
 apiVersion: skaffold/v1alpha2
 kind: Config
 build:
+  tagPolicy:
+    gitCommit: {}
   artifacts:
   - imageName: emailservice
     workspace: src/emailservice
