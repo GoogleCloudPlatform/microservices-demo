@@ -81,14 +81,21 @@ namespace cartservice.cartstore
         public async Task<Hipstershop.Cart> GetCartAsync(string userId)
         {
             Console.WriteLine($"GetCartAsync called with userId={userId}");
-            var db = redis.GetDatabase();
-
-            // Access the cart from the cache
-            var value = await db.HashGetAsync(userId, CART_FIELD_NAME);
-
-            if (!value.IsNull)
+            try
             {
-                return Hipstershop.Cart.Parser.ParseFrom(value);
+                var db = redis.GetDatabase();
+
+                // Access the cart from the cache
+                var value = await db.HashGetAsync(userId, CART_FIELD_NAME);
+
+                if (!value.IsNull)
+                {
+                    return Hipstershop.Cart.Parser.ParseFrom(value);
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
             }
 
             // We decided to return empty cart in cases when user wasn't in the cache before
