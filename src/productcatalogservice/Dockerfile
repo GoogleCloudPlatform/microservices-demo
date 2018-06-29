@@ -3,7 +3,13 @@ RUN apk add --no-cache \
   ca-certificates \
   git
 WORKDIR /src/microservices-demo/productcatalogservice
+# get known dependencies
+RUN go get -d google.golang.org/grpc \
+    google.golang.org/grpc/codes \
+    google.golang.org/grpc/status
+
 COPY . .
+# get remaining dependencies
 RUN go get -d ./...
 RUN go build -o /productcatalogservice .
 
