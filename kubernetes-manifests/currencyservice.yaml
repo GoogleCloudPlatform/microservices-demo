@@ -13,15 +13,15 @@ spec:
       - name: server
         image: currencyservice
         ports:
-        - containerPort: 31337
+        - containerPort: 7000
         readinessProbe:
           periodSeconds: 5
           tcpSocket:
-            port: 31337
+            port: 7000
         livenessProbe:
           periodSeconds: 5
           tcpSocket:
-            port: 31337
+            port: 7000
         resources:
           requests:
             cpu: 100m
@@ -40,4 +40,4 @@ spec:
     app: currencyservice
   ports:
   - port: 7000
-    targetPort: 31337
+    targetPort: 7000

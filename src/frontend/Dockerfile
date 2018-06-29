@@ -22,7 +22,8 @@ RUN go install .
 # ---
 
 FROM alpine as release
-RUN apk add --no-cache ca-certificates
+RUN apk add --no-cache ca-certificates \
+    busybox-extras net-tools bind-tools
 WORKDIR /frontend
 COPY --from=builder /go/bin/frontend /frontend/server
 COPY ./templates ./templates
