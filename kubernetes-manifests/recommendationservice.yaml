@@ -8,6 +8,7 @@ spec:
       labels:
         app: recommendationservice
     spec:
+      terminationGracePeriodSeconds: 5
       containers:
       - name: server
         image: recommendationservice
