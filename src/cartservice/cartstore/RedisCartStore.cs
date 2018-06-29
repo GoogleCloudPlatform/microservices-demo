@@ -17,22 +17,26 @@ namespace cartservice.cartstore
 
         private readonly byte[] emptyCartBytes;
         private readonly string connectionString;
+        private readonly string redisAddr;
 
         public RedisCartStore(string redisAddress)
         {
             // Serialize empty cart into byte array.
             var cart = new Hipstershop.Cart();
             emptyCartBytes = cart.ToByteArray();
-
-            connectionString = $"{redisAddress},ssl=false,allowAdmin=true";
+            this.redisAddr = redisAddress;
+            connectionString = $"{redisAddress},ssl=false,allowAdmin=true,connectRetry=5";
             Console.WriteLine($"Going to use Redis cache at this address: {connectionString}");
         }
 
-        public async Task InitializeAsync()
+        public Task InitializeAsync()
         {
             Console.WriteLine("Connecting to Redis: " + connectionString);
-            redis = await ConnectionMultiplexer.ConnectAsync(connectionString, Console.Out);
+
+            redis = ConnectionMultiplexer.Connect(connectionString);
             Console.WriteLine("Connected successfully to Redis");
+
+            return Task.CompletedTask;
         }
 
         public async Task AddItemAsync(string userId, string productId, int quantity)
@@ -84,8 +88,8 @@ namespace cartservice.cartstore
             try
             {
                 var db = redis.GetDatabase();
-
                 // Access the cart from the cache
+
                 var value = await db.HashGetAsync(userId, CART_FIELD_NAME);
 
                 if (!value.IsNull)
