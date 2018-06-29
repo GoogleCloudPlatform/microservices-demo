@@ -5,6 +5,7 @@ WORKDIR /go/src/frontend
 # fetch known dependencies for caching
 RUN go get -d github.com/google/uuid \
     github.com/gorilla/mux \
+    github.com/pkg/errors \
     google.golang.org/grpc \
     google.golang.org/grpc/codes \
     google.golang.org/grpc/status
