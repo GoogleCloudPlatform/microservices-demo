@@ -2,13 +2,10 @@ package main
 
 import (
 	"context"
-	"fmt"
-
-	"google.golang.org/grpc/codes"
 
 	pb "frontend/genproto"
 
-	"google.golang.org/grpc/status"
+	"github.com/pkg/errors"
 )
 
 const (
@@ -44,10 +41,6 @@ func (fe *frontendServer) getProduct(ctx context.Context, id string) (*pb.Produc
 
 func (fe *frontendServer) getCart(ctx context.Context, userID string) ([]*pb.CartItem, error) {
 	resp, err := pb.NewCartServiceClient(fe.cartSvcConn).GetCart(ctx, &pb.GetCartRequest{UserId: userID})
-	if status.Code(err) == codes.Canceled {
-		// TODO(ahmetb) remove this workaround when cartservice returns ok response to GetCart() with non-existing users
-		return nil, nil
-	}
 	return resp.GetItems(), err
 }
 
@@ -85,10 +78,7 @@ func (fe *frontendServer) getShippingQuote(ctx context.Context, items []*pb.Cart
 		return nil, err
 	}
 	localized, err := fe.convertCurrency(ctx, quote.GetCostUsd(), currency)
-	if err != nil {
-		return nil, fmt.Errorf("failed to convert currency for shipping cost: %+v", err)
-	}
-	return localized, nil
+	return localized, errors.Wrap(err, "failed to convert currency for shipping cost")
 }
 
 func (fe *frontendServer) getRecommendations(ctx context.Context, userID string, productIDs []string) ([]*pb.Product, error) {
@@ -101,7 +91,7 @@ func (fe *frontendServer) getRecommendations(ctx context.Context, userID string,
 	for i, v := range resp.GetProductIds() {
 		p, err := fe.getProduct(ctx, v)
 		if err != nil {
-			return nil, fmt.Errorf("failed to get recommended product info (#%s): %+v", v, err)
+			return nil, errors.Wrapf(err, "failed to get recommended product info (#%s)", v)
 		}
 		out[i] = p
 	}

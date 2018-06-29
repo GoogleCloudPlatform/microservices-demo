@@ -3,7 +3,7 @@ RUN apt update && apt install net-tools telnet
 WORKDIR /app
 COPY . .
 RUN dotnet restore && \
-    dotnet build \
+    dotnet build && \
     dotnet publish
 WORKDIR /app/bin/Debug/netcoreapp2.0
 ENTRYPOINT ["dotnet", "cartservice.dll", "start"]
