@@ -23,12 +23,13 @@ GOTO End1
 
 :docker_local
   set REDIS_PORT=6379
-  set REDIS_ADDR=0.0.0.0:%REDIS_PORT%
+  set REDIS_ADDR=redis:%REDIS_PORT%
   set LISTEN_ADDR=0.0.0.0
   set PORT=7070
 
   echo run docker container with redis
-  start docker run -d --name=redis -p %REDIS_PORT%:%REDIS_PORT% redis
+  docker rm --force redis
+  start "" docker run -d --name=redis -p %REDIS_PORT%:%REDIS_PORT% redis
 
   echo building container image for cart service
   docker build -t cartservice ..\.
