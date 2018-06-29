@@ -22,6 +22,8 @@ build:
     workspace: src/cartservice
   - imageName: frontend
     workspace: src/frontend
+  - imageName: loadgenerator
+    workspace: src/loadgenerator
 deploy:
   kubectl:
     manifests:

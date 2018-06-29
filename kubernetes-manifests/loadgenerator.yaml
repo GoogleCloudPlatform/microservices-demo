@@ -1,0 +1,27 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: loadgenerator
+spec:
+  template:
+    metadata:
+      labels:
+        app: loadgenerator
+    spec:
+      initContainers:
+      - name: wait-frontend
+        image: alpine:3.6
+        command: ['sh', '-c', 'until wget -qO- "http://${FRONTEND_ADDR}"; do echo "waiting for ${FRONTEND_ADDR}"; sleep 2; done;']
+      containers:
+      - name: server
+        image: loadgenerator
+        env:
+        - name: FRONTEND_ADDR
+          value: "frontend:8080"
+        resources:
+          requests:
+            cpu: 100m
+            memory: 64Mi
+          limits:
+            cpu: 200m
+            memory: 128Mi
