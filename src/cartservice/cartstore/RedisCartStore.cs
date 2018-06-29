@@ -13,9 +13,10 @@ namespace cartservice.cartstore
     {
         private const string CART_FIELD_NAME = "cart";
 
-        private readonly ConnectionMultiplexer redis;
+        private static ConnectionMultiplexer redis;
 
         private readonly byte[] emptyCartBytes;
+        private readonly string connectionString;
 
         public RedisCartStore(string redisAddress)
         {
@@ -23,9 +24,15 @@ namespace cartservice.cartstore
             var cart = new Hipstershop.Cart();
             emptyCartBytes = cart.ToByteArray();
 
-            string connectionString = $"{redisAddress},ssl=false,allowAdmin=true";
+            connectionString = $"{redisAddress},ssl=false,allowAdmin=true";
+            Console.WriteLine($"Going to use Redis cache at this address: {connectionString}");
+        }
+
+        public async Task InitializeAsync()
+        {
             Console.WriteLine("Connecting to Redis: " + connectionString);
-            redis = ConnectionMultiplexer.Connect(connectionString);
+            redis = await ConnectionMultiplexer.ConnectAsync(connectionString, Console.Out);
+            Console.WriteLine("Connected successfully to Redis");
         }
 
         public async Task AddItemAsync(string userId, string productId, int quantity)
