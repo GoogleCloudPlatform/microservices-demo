@@ -20,7 +20,7 @@ const request = require('request');
 const xml2js = require('xml2js');
 
 const PROTO_PATH = path.join(__dirname, './proto/demo.proto');
-const PORT = 31337;
+const PORT = 7000;
 const DATA_URL = 'http://www.ecb.europa.eu/stats/eurofxref/eurofxref-daily.xml';
 const shopProto = grpc.load(PROTO_PATH).hipstershop;
 
