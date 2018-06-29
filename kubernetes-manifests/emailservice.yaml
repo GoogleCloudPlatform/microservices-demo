@@ -8,6 +8,7 @@ spec:
       labels:
         app: emailservice
     spec:
+      terminationGracePeriodSeconds: 5
       containers:
       - name: server
         image: emailservice
