@@ -8,6 +8,7 @@ spec:
       labels:
         app: paymentservice
     spec:
+      terminationGracePeriodSeconds: 5
       containers:
       - name: server
         image: paymentservice

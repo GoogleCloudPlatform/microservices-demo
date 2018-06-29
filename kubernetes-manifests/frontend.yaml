@@ -18,11 +18,17 @@ spec:
             httpGet:
               path: "/"
               port: 8080
+              httpHeaders:
+              - name: "Cookie"
+                value: "shop_session-id=x-readiness-probe"
           livenessProbe:
             initialDelaySeconds: 10
             httpGet:
               path: "/"
               port: 8080
+              httpHeaders:
+              - name: "Cookie"
+                value: "shop_session-id=x-liveness-probe"
           env:
           - name: PRODUCT_CATALOG_SERVICE_ADDR
             value: "productcatalogservice:3550"
@@ -65,5 +71,5 @@ spec:
   selector:
     app: frontend
   ports:
-  - port: 80
+  - port: 8081
     targetPort: 8080
