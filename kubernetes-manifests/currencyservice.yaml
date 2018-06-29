@@ -13,6 +13,14 @@ spec:
         image: currencyservice
         ports:
         - containerPort: 31337
+        readinessProbe:
+          periodSeconds: 5
+          tcpSocket:
+            port: 31337
+        livenessProbe:
+          periodSeconds: 5
+          tcpSocket:
+            port: 31337
         resources:
           requests:
             cpu: 100m
