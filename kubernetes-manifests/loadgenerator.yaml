@@ -9,6 +9,7 @@ spec:
       labels:
         app: loadgenerator
     spec:
+      terminationGracePeriodSeconds: 5
       restartPolicy: Always
       initContainers:
       - name: wait-frontend
