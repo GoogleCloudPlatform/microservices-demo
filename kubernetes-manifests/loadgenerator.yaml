@@ -3,21 +3,32 @@ kind: Deployment
 metadata:
   name: loadgenerator
 spec:
+  replicas: 1
   template:
     metadata:
       labels:
         app: loadgenerator
     spec:
+      restartPolicy: Always
       initContainers:
       - name: wait-frontend
         image: alpine:3.6
-        command: ['sh', '-c', 'until wget -qO- "http://${FRONTEND_ADDR}"; do echo "waiting for ${FRONTEND_ADDR}"; sleep 2; done;']
+        command: ['sh', '-c', 'set -x;  apk add --no-cache curl; 
+          until curl -f "http://${FRONTEND_ADDR}"; do 
+            echo "waiting for http://${FRONTEND_ADDR}"; 
+            sleep 2;
+          done;']
+        env:
+        - name: FRONTEND_ADDR
+          value: "frontend:80"
       containers:
-      - name: server
+      - name: main
         image: loadgenerator
         env:
         - name: FRONTEND_ADDR
-          value: "frontend:8080"
+          value: "frontend:80"
+        - name: USERS
+          value: "1"
         resources:
           requests:
             cpu: 100m
