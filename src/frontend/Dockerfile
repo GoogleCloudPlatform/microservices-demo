@@ -6,6 +6,7 @@ WORKDIR /go/src/frontend
 RUN go get -d github.com/google/uuid \
     github.com/gorilla/mux \
     github.com/pkg/errors \
+    github.com/sirupsen/logrus \
     google.golang.org/grpc \
     google.golang.org/grpc/codes \
     google.golang.org/grpc/status

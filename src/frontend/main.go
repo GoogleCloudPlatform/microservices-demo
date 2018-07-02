@@ -3,14 +3,13 @@ package main
 import (
 	"context"
 	"fmt"
-	"log"
 	"net/http"
 	"os"
 	"time"
 
-	"github.com/pkg/errors"
-
 	"github.com/gorilla/mux"
+	"github.com/pkg/errors"
+	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
 )
 
@@ -53,7 +52,9 @@ type frontendServer struct {
 
 func main() {
 	ctx := context.Background()
-	log.SetFlags(log.Lshortfile | log.Ltime)
+	log := logrus.New()
+	log.Level = logrus.DebugLevel
+	log.Formatter = &logrus.TextFormatter{}
 
 	srvPort := port
 	if os.Getenv("PORT") != "" {
@@ -85,8 +86,10 @@ func main() {
 	r.HandleFunc("/logout", svc.logoutHandler).Methods(http.MethodGet)
 	r.HandleFunc("/cart/checkout", ensureSessionID(svc.placeOrderHandler)).Methods(http.MethodPost)
 	r.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir("./static/"))))
-	log.Printf("starting server on " + addr + ":" + srvPort)
-	log.Fatal(http.ListenAndServe(addr+":"+srvPort, r))
+
+	log.Infof("starting server on " + addr + ":" + srvPort)
+	loggedHandler := &logHandler{log: log, next: r}
+	log.Fatal(http.ListenAndServe(addr+":"+srvPort, loggedHandler))
 }
 
 func mustMapEnv(target *string, envKey string) {
