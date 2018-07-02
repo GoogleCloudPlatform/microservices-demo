@@ -45,9 +45,6 @@ func (lh *logHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		"http.req.path":   r.URL.Path,
 		"http.req.method": r.Method,
 	})
-	if v, ok := r.Context().Value(ctxKeySessionID{}).(string); ok {
-		log = log.WithField("session_id", v)
-	}
 	log.Debug("request started")
 	defer func() {
 		log.WithFields(logrus.Fields{
