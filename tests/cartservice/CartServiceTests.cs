@@ -29,15 +29,16 @@ namespace cartservice
             {
                 UserId = userId,
             };
+
             var cart = await client.GetCartAsync(request);
             Assert.NotNull(cart);
-            
+
             // All grpc objects implement IEquitable, so we can compare equality with by-value semantics
             Assert.Equal(new Cart(), cart);
         }
 
         [Fact]
-        public async Task AddItem_ItemExists_Udpated()
+        public async Task AddItem_ItemExists_Updated()
         {
             string userId = Guid.NewGuid().ToString();
 

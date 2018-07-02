@@ -4,3 +4,5 @@ pkg/
 *.pyc
 *.swp
 *~
+.vs/slnx.sqlite
+.vs/microservices-demo/v15/.suo

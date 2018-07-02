@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Concurrent;
 using System.Threading.Tasks;
+using System.Linq;
 using cartservice.interfaces;
 using Hipstershop;
 
@@ -10,6 +11,7 @@ namespace cartservice.cartstore
     {
         // Maps between user and their cart
         private ConcurrentDictionary<string, Hipstershop.Cart> userCartItems = new ConcurrentDictionary<string, Hipstershop.Cart>();
+        private readonly Hipstershop.Cart emptyCart = new Hipstershop.Cart();
 
         public Task InitializeAsync()
         {
@@ -29,8 +31,17 @@ namespace cartservice.cartstore
             userCartItems.AddOrUpdate(userId, newCart,
             (k, exVal) =>
             {
-                // Currently we assume that we only add to the cart
-                exVal.Items.Add(new Hipstershop.CartItem { ProductId = productId, Quantity = quantity });
+                // If the item exists, we update its quantity
+                var existingItem = exVal.Items.SingleOrDefault(item => item.ProductId == productId);
+                if (existingItem != null)
+                {
+                    existingItem.Quantity += quantity;
+                }
+                else
+                {
+                    exVal.Items.Add(new Hipstershop.CartItem { ProductId = productId, Quantity = quantity });
+                }
+
                 return exVal;
             });
 
@@ -40,7 +51,7 @@ namespace cartservice.cartstore
         public Task EmptyCartAsync(string userId)
         {
             Console.WriteLine($"EmptyCartAsync called with userId={userId}");
-            userCartItems[userId] = new Hipstershop.Cart();
+            userCartItems[userId] = emptyCart;
 
             return Task.CompletedTask;
         }
@@ -52,7 +63,9 @@ namespace cartservice.cartstore
             if (!userCartItems.TryGetValue(userId, out cart))
             {
                 Console.WriteLine($"No carts for user {userId}");
+                return Task.FromResult(emptyCart);
             }
+
             return Task.FromResult(cart);
         }
     }
