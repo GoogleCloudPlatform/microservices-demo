@@ -15,7 +15,7 @@ add them to the cart, and purchase them.
    to all `imageName:` fields.
 
 2. Edit the Deployment manifests at `kubernetes-manifests` directory and update
-   the image names to match the changes you made in the previous step.
+   the `image` fields to match the changes you made in the previous step.
 
 3. Install [Skaffold] and `skaffold run`. This builds the container
    images, pushes them to GFR, and deploys the application to Kubernetes.
