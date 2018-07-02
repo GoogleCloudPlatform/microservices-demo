@@ -77,19 +77,20 @@ func main() {
 	mustConnGRPC(ctx, &svc.checkoutSvcConn, svc.checkoutSvcAddr)
 
 	r := mux.NewRouter()
-	r.HandleFunc("/", ensureSessionID(svc.homeHandler)).Methods(http.MethodGet, http.MethodHead)
-	r.HandleFunc("/product/{id}", ensureSessionID(svc.productHandler)).Methods(http.MethodGet, http.MethodHead)
-	r.HandleFunc("/cart", ensureSessionID(svc.viewCartHandler)).Methods(http.MethodGet, http.MethodHead)
-	r.HandleFunc("/cart", ensureSessionID(svc.addToCartHandler)).Methods(http.MethodPost)
-	r.HandleFunc("/cart/empty", ensureSessionID(svc.emptyCartHandler)).Methods(http.MethodPost)
-	r.HandleFunc("/setCurrency", ensureSessionID(svc.setCurrencyHandler)).Methods(http.MethodPost)
+	r.HandleFunc("/", svc.homeHandler).Methods(http.MethodGet, http.MethodHead)
+	r.HandleFunc("/product/{id}", svc.productHandler).Methods(http.MethodGet, http.MethodHead)
+	r.HandleFunc("/cart", svc.viewCartHandler).Methods(http.MethodGet, http.MethodHead)
+	r.HandleFunc("/cart", svc.addToCartHandler).Methods(http.MethodPost)
+	r.HandleFunc("/cart/empty", svc.emptyCartHandler).Methods(http.MethodPost)
+	r.HandleFunc("/setCurrency", svc.setCurrencyHandler).Methods(http.MethodPost)
 	r.HandleFunc("/logout", svc.logoutHandler).Methods(http.MethodGet)
-	r.HandleFunc("/cart/checkout", ensureSessionID(svc.placeOrderHandler)).Methods(http.MethodPost)
+	r.HandleFunc("/cart/checkout", svc.placeOrderHandler).Methods(http.MethodPost)
 	r.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir("./static/"))))
 
 	log.Infof("starting server on " + addr + ":" + srvPort)
 	loggedHandler := &logHandler{log: log, next: r}
-	log.Fatal(http.ListenAndServe(addr+":"+srvPort, loggedHandler))
+	log.Fatal(http.ListenAndServe(addr+":"+srvPort,
+		http.HandlerFunc(ensureSessionID(loggedHandler))))
 }
 
 func mustMapEnv(target *string, envKey string) {

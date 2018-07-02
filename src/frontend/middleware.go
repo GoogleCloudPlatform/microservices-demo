@@ -10,6 +10,7 @@ import (
 )
 
 type ctxKeyLog struct{}
+type ctxKeyRequestID struct{}
 
 type logHandler struct {
 	log  *logrus.Logger
@@ -39,12 +40,20 @@ func (r *responseRecorder) WriteHeader(statusCode int) {
 }
 
 func (lh *logHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	requestID, _ := uuid.NewRandom()
+	ctx = context.WithValue(ctx, ctxKeyRequestID{}, requestID.String())
+
 	start := time.Now()
 	rr := &responseRecorder{w: w}
 	log := lh.log.WithFields(logrus.Fields{
 		"http.req.path":   r.URL.Path,
 		"http.req.method": r.Method,
+		"http.req.id":     requestID.String(),
 	})
+	if v, ok := r.Context().Value(ctxKeySessionID{}).(string); ok {
+		log = log.WithField("session", v)
+	}
 	log.Debug("request started")
 	defer func() {
 		log.WithFields(logrus.Fields{
@@ -53,12 +62,12 @@ func (lh *logHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			"http.resp.bytes":   rr.b}).Debugf("request complete")
 	}()
 
-	ctx := context.WithValue(r.Context(), ctxKeyLog{}, log)
+	ctx = context.WithValue(ctx, ctxKeyLog{}, log)
 	r = r.WithContext(ctx)
 	lh.next.ServeHTTP(rr, r)
 }
 
-func ensureSessionID(next http.HandlerFunc) http.HandlerFunc {
+func ensureSessionID(next http.Handler) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var sessionID string
 		c, err := r.Cookie(cookieSessionID)
@@ -77,6 +86,6 @@ func ensureSessionID(next http.HandlerFunc) http.HandlerFunc {
 		}
 		ctx := context.WithValue(r.Context(), ctxKeySessionID{}, sessionID)
 		r = r.WithContext(ctx)
-		next(w, r)
+		next.ServeHTTP(w, r)
 	}
 }
