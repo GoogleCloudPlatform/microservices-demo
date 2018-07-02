@@ -6,6 +6,7 @@ WORKDIR /go/src/frontend
 RUN go get -d github.com/google/uuid \
     github.com/gorilla/mux \
     github.com/pkg/errors \
+    github.com/sirupsen/logrus \
     google.golang.org/grpc \
     google.golang.org/grpc/codes \
     google.golang.org/grpc/status
@@ -22,7 +23,8 @@ RUN go install .
 # ---
 
 FROM alpine as release
-RUN apk add --no-cache ca-certificates
+RUN apk add --no-cache ca-certificates \
+    busybox-extras net-tools bind-tools
 WORKDIR /frontend
 COPY --from=builder /go/bin/frontend /frontend/server
 COPY ./templates ./templates

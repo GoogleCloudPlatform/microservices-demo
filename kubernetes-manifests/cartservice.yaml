@@ -8,6 +8,20 @@ spec:
       labels:
         app: cartservice
     spec:
+      terminationGracePeriodSeconds: 5
+      initContainers:
+      - name: wait-redis
+        image: redis:alpine
+        command: ['sh', '-c', 'set -x;
+          until timeout -t 5 redis-cli -h "${REDIS_HOST}" -p "${REDIS_PORT}" ping; do
+            echo "waiting for redis at ${REDIS_HOST}:${REDIS_PORT}...";
+            sleep 2;
+          done;']
+        env:
+        - name: REDIS_HOST
+          value: "redis-cart"
+        - name: REDIS_PORT
+          value: "6379"
       containers:
       - name: server
         image: cartservice
@@ -20,10 +34,10 @@ spec:
           value: "7070"
         - name: LISTEN_ADDR
           value: "0.0.0.0"
-        - name: GRPC_TRACE
-          value: "all"
-        - name: GRPC_VERBOSITY
-          value: "debug"
+        # - name: GRPC_TRACE
+        #   value: "all"
+        # - name: GRPC_VERBOSITY
+        #   value: "debug"
         resources:
           requests:
             cpu: 200m
