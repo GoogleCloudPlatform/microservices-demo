@@ -19,7 +19,7 @@
                 {{ if $.currencies }}
                 <form class="form-inline ml-auto" method="POST" action="/setCurrency" id="currency_form">
                     <select name="currency_code" class="form-control"
-                    onchange="document.getElementById('currency_form').submit();">
+                    onchange="document.getElementById('currency_form').submit();" style="width:auto;">
                     {{range $.currencies}}
                         <option value="{{.}}" {{if eq . $.user_currency}}selected="selected"{{end}}>{{.}}</option>
                     {{end}}
