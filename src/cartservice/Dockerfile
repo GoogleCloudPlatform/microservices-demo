@@ -1,4 +1,13 @@
+# cartservice_probe
+FROM golang:1.10 as builder
+WORKDIR /src/microservices-demo/cartservice/probe
+COPY probe/ .
+RUN go get -d ./...
+RUN go build -o /cartservice_probe .
+
+# cartservice
 FROM gcr.io/google-appengine/aspnetcore:2.1.0
+COPY --from=builder /cartservice_probe /cartservice_probe
 RUN apt update && apt install net-tools telnet
 WORKDIR /app
 COPY . .
