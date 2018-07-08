@@ -34,10 +34,6 @@ spec:
           value: "7070"
         - name: LISTEN_ADDR
           value: "0.0.0.0"
-        # - name: GRPC_TRACE
-        #   value: "all"
-        # - name: GRPC_VERBOSITY
-        #   value: "debug"
         resources:
           requests:
             cpu: 200m
@@ -46,11 +42,14 @@ spec:
             cpu: 300m
             memory: 128Mi
         readinessProbe:
-          tcpSocket:
-             port: 7070
+          initialDelaySeconds: 5
+          exec:
+            command: ["/cartservice_probe"]
         livenessProbe:
-          tcpSocket:
-             port: 7070
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          exec:
+            command: ["/cartservice_probe"]
 ---
 apiVersion: v1
 kind: Service
@@ -61,5 +60,6 @@ spec:
   selector:
     app: cartservice
   ports:
-  - port: 7070
+  - name: grpc
+    port: 7070
     targetPort: 7070
