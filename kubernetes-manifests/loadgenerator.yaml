@@ -24,7 +24,7 @@ spec:
           value: "frontend:80"
       containers:
       - name: main
-        image: loadgenerator
+        image: gcr.io/istio-next/loadgenerator
         env:
         - name: FRONTEND_ADDR
           value: "frontend:80"

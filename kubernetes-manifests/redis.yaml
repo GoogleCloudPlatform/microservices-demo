@@ -41,8 +41,9 @@ metadata:
   name: redis-cart
 spec:
   type: ClusterIP
-  ports:
-  - port: 6379
-    targetPort: 6379
   selector:
     app: redis-cart
+  ports:
+  - name: redis
+    port: 6379
+    targetPort: 6379

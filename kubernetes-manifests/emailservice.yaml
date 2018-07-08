@@ -11,7 +11,7 @@ spec:
       terminationGracePeriodSeconds: 5
       containers:
       - name: server
-        image: emailservice
+        image: gcr.io/istio-next/emailservice
         ports:
         - containerPort: 8080
         readinessProbe:
@@ -39,5 +39,6 @@ spec:
   selector:
     app: emailservice
   ports:
-  - port: 5000
+  - name: grpc
+    port: 5000
     targetPort: 8080

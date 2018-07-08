@@ -11,7 +11,7 @@ spec:
       terminationGracePeriodSeconds: 5
       containers:
       - name: server
-        image: paymentservice
+        image: gcr.io/istio-next/paymentservice
         ports:
         - containerPort: 50051
         readinessProbe:
@@ -39,5 +39,6 @@ spec:
   selector:
     app: paymentservice
   ports:
-  - port: 50051
+  - name: grpc
+    port: 50051
     targetPort: 50051

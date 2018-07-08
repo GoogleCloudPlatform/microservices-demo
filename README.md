@@ -25,7 +25,7 @@ add them to the cart, and purchase them.
        gcloud auth configure-docker -q
 
 1. Edit `skaffold.yaml`, prepend your GCR registry host (`gcr.io/YOUR_PROJECT/`)
-   to all `imageName:` fields.
+   to all `imageName:` fields (or update the existing project name).
 
 1. Edit the Deployment manifests at `kubernetes-manifests` directory and update
    the `image` fields to match the changes you made in the previous step.
@@ -39,3 +39,20 @@ add them to the cart, and purchase them.
 
     then visit the application on your browser to confirm
     installation.
+
+### Istio Deployment
+
+1. Create a GKE cluster.
+
+2. Install Istio **without mutual TLS** enablement.
+
+3. Install the automatic sidecar injection (annotate the `default` namespace
+   with the label):
+
+       kubectl label namespace default istio-injection=enabled
+
+4. Deploy the application.
+
+5. Apply the manifests in [`./istio-manifests`](./istio-manifests) directory.
+
+       kubectl apply -f ./istio-manifests

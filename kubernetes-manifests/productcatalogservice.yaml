@@ -11,7 +11,7 @@ spec:
       terminationGracePeriodSeconds: 5
       containers:
       - name: server
-        image: productcatalogservice
+        image: gcr.io/istio-next/productcatalogservice
         ports:
         - containerPort: 3550
         readinessProbe:
@@ -39,5 +39,6 @@ spec:
   selector:
     app: productcatalogservice
   ports:
-  - port: 3550
+  - name: grpc
+    port: 3550
     targetPort: 3550

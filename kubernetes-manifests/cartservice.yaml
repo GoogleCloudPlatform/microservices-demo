@@ -24,7 +24,7 @@ spec:
           value: "6379"
       containers:
       - name: server
-        image: cartservice
+        image: gcr.io/istio-next/cartservice
         ports:
         - containerPort: 7070
         env:

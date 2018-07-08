@@ -10,7 +10,7 @@ spec:
     spec:
       containers:
         - name: server
-          image: frontend
+          image: gcr.io/istio-next/frontend
           ports:
           - containerPort: 8080
           readinessProbe:
@@ -59,7 +59,8 @@ spec:
   selector:
     app: frontend
   ports:
-  - port: 80
+  - name: http
+    port: 80
     targetPort: 8080
 ---
 apiVersion: v1

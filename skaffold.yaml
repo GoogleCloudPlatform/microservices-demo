@@ -4,25 +4,25 @@ build:
   tagPolicy:
     gitCommit: {}
   artifacts:
-  - imageName: emailservice
+  - imageName: gcr.io/istio-next/emailservice
     workspace: src/emailservice
-  - imageName: productcatalogservice
+  - imageName: gcr.io/istio-next/productcatalogservice
     workspace: src/productcatalogservice
-  - imageName: recommendationservice
+  - imageName: gcr.io/istio-next/recommendationservice
     workspace: src/recommendationservice
-  - imageName: shippingservice
+  - imageName: gcr.io/istio-next/shippingservice
     workspace: src/shippingservice
-  - imageName: checkoutservice
+  - imageName: gcr.io/istio-next/checkoutservice
     workspace: src/checkoutservice
-  - imageName: paymentservice
+  - imageName: gcr.io/istio-next/paymentservice
     workspace: src/paymentservice
-  - imageName: currencyservice
+  - imageName: gcr.io/istio-next/currencyservice
     workspace: src/currencyservice
-  - imageName: cartservice
+  - imageName: gcr.io/istio-next/cartservice
     workspace: src/cartservice
-  - imageName: frontend
+  - imageName: gcr.io/istio-next/frontend
     workspace: src/frontend
-  - imageName: loadgenerator
+  - imageName: gcr.io/istio-next/loadgenerator
     workspace: src/loadgenerator
 deploy:
   kubectl:

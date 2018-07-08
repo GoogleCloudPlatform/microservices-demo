@@ -11,9 +11,10 @@ spec:
       terminationGracePeriodSeconds: 5
       containers:
       - name: server
-        image: currencyservice
+        image: gcr.io/istio-next/currencyservice
         ports:
-        - containerPort: 7000
+        - name: grpc
+          containerPort: 7000
         readinessProbe:
           periodSeconds: 5
           tcpSocket:
@@ -39,5 +40,6 @@ spec:
   selector:
     app: currencyservice
   ports:
-  - port: 7000
+  - name: grpc
+    port: 7000
     targetPort: 7000

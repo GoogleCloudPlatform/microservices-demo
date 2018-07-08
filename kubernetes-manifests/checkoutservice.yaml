@@ -10,7 +10,7 @@ spec:
     spec:
       containers:
         - name: server
-          image: checkoutservice
+          image: gcr.io/istio-next/checkoutservice
           ports:
           - containerPort: 5050
           readinessProbe:
@@ -51,5 +51,6 @@ spec:
   selector:
     app: checkoutservice
   ports:
-  - port: 5050
+  - name: grpc
+    port: 5050
     targetPort: 5050

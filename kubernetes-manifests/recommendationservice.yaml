@@ -11,7 +11,7 @@ spec:
       terminationGracePeriodSeconds: 5
       containers:
       - name: server
-        image: recommendationservice
+        image: gcr.io/istio-next/recommendationservice
         ports:
         - containerPort: 8080
         readinessProbe:
@@ -42,5 +42,6 @@ spec:
   selector:
     app: recommendationservice
   ports:
-  - port: 8080
+  - name: grpc
+    port: 8080
     targetPort: 8080
