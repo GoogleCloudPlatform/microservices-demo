@@ -9,19 +9,6 @@ spec:
         app: cartservice
     spec:
       terminationGracePeriodSeconds: 5
-      initContainers:
-      - name: wait-redis
-        image: redis:alpine
-        command: ['sh', '-c', 'set -x;
-          until timeout -t 5 redis-cli -h "${REDIS_HOST}" -p "${REDIS_PORT}" ping; do
-            echo "waiting for redis at ${REDIS_HOST}:${REDIS_PORT}...";
-            sleep 2;
-          done;']
-        env:
-        - name: REDIS_HOST
-          value: "redis-cart"
-        - name: REDIS_PORT
-          value: "6379"
       containers:
       - name: server
         image: gcr.io/istio-next/cartservice
@@ -42,11 +29,11 @@ spec:
             cpu: 300m
             memory: 128Mi
         readinessProbe:
-          initialDelaySeconds: 5
+          initialDelaySeconds: 15
           exec:
             command: ["/cartservice_probe"]
         livenessProbe:
-          initialDelaySeconds: 10
+          initialDelaySeconds: 15
           periodSeconds: 10
           exec:
             command: ["/cartservice_probe"]

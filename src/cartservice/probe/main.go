@@ -19,10 +19,10 @@ func main() {
 	log.Printf("probe executing on port %q", port)
 
 	conn, err := grpc.DialContext(context.TODO(),
-		"localhost:"+port,
+		"127.0.0.1:"+port,
 		grpc.WithInsecure(),
 		grpc.WithBlock(),
-		grpc.WithTimeout(time.Second*1))
+		grpc.WithTimeout(time.Second*3))
 	if err != nil {
 		log.Fatalf("probe failed: failed to connect: %+v", err)
 	}
