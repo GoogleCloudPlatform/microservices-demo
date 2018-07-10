@@ -37,6 +37,8 @@ namespace cartservice
             {
                 try
                 {
+                    await cartStore.InitializeAsync();
+
                     Console.WriteLine($"Trying to start a grpc server at  {host}:{port}");
                     Server server = new Server
                     {
@@ -47,7 +49,6 @@ namespace cartservice
                     Console.WriteLine($"Cart server is listening at {host}:{port}");
                     server.Start();
 
-                    await cartStore.InitializeAsync();
                     Console.WriteLine("Initialization completed");
 
                     // Keep the server up and running
