@@ -9,6 +9,7 @@
   "author": "Jonathan Lui",
   "license": "ISC",
   "dependencies": {
+    "@google-cloud/trace-agent": "^2.11.0",
     "@grpc/proto-loader": "^0.1.0",
     "grpc": "^1.12.3",
     "simple-card-validator": "^1.1.0",

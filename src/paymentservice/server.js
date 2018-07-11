@@ -1,3 +1,4 @@
+require('@google-cloud/trace-agent').start();
 const grpc = require('grpc');
 const protoLoader = require('@grpc/proto-loader');
 
