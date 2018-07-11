@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"microservices-demo/src/internal"
 	"testing"
 
 	pb "./genproto"
@@ -15,7 +16,7 @@ import (
 func TestServer(t *testing.T) {
 	ctx := context.Background()
 	addr := run(0)
-	conn, err := grpc.Dial(addr, grpc.WithInsecure())
+	conn, err := grpc.Dial(addr, internal.DefaultDialOptions())
 	if err != nil {
 		t.Fatal(err)
 	}

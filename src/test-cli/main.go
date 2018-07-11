@@ -5,7 +5,10 @@ import (
 	"log"
 	"os"
 
+	"microservices-demo/src/internal"
+
 	pb "./genproto"
+
 	"google.golang.org/grpc"
 )
 
@@ -69,7 +72,7 @@ func main() {
 
 func testProductCatalogService() error {
 	addr := os.Getenv("PRODUCT_CATALOG_SERVICE_ADDR")
-	conn, err := grpc.Dial(addr, grpc.WithInsecure())
+	conn, err := grpc.Dial(addr, internal.DefaultDialOptions())
 	if err != nil {
 		return err
 	}
@@ -104,7 +107,7 @@ func testProductCatalogService() error {
 
 func testShippingService() error {
 	addr := os.Getenv("SHIPPING_SERVICE_ADDR")
-	conn, err := grpc.Dial(addr, grpc.WithInsecure())
+	conn, err := grpc.Dial(addr, internal.DefaultDialOptions())
 	if err != nil {
 		return err
 	}
@@ -150,7 +153,7 @@ func testShippingService() error {
 
 func testRecommendationService() error {
 	addr := os.Getenv("RECOMMENDATION_SERVICE_ADDR")
-	conn, err := grpc.Dial(addr, grpc.WithInsecure())
+	conn, err := grpc.Dial(addr, internal.DefaultDialOptions())
 	if err != nil {
 		return err
 	}
@@ -172,7 +175,7 @@ func testRecommendationService() error {
 
 func testPaymentService() error {
 	addr := os.Getenv("PAYMENT_SERVICE_ADDR")
-	conn, err := grpc.Dial(addr, grpc.WithInsecure())
+	conn, err := grpc.Dial(addr, internal.DefaultDialOptions())
 	if err != nil {
 		return err
 	}
@@ -200,7 +203,7 @@ func testPaymentService() error {
 
 func testEmailService() error {
 	addr := os.Getenv("EMAIL_SERVICE_ADDR")
-	conn, err := grpc.Dial(addr, grpc.WithInsecure())
+	conn, err := grpc.Dial(addr, internal.DefaultDialOptions())
 	if err != nil {
 		return err
 	}
@@ -253,7 +256,7 @@ func testEmailService() error {
 
 func testCurrencyService() error {
 	addr := os.Getenv("CURRENCY_SERVICE_ADDR")
-	conn, err := grpc.Dial(addr, grpc.WithInsecure())
+	conn, err := grpc.Dial(addr, internal.DefaultDialOptions())
 	if err != nil {
 		return err
 	}
@@ -284,7 +287,7 @@ func testCurrencyService() error {
 
 func testCartService() error {
 	addr := os.Getenv("CART_SERVICE_ADDR")
-	conn, err := grpc.Dial(addr, grpc.WithInsecure())
+	conn, err := grpc.Dial(addr, internal.DefaultDialOptions())
 	if err != nil {
 		return err
 	}

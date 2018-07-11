@@ -6,6 +6,8 @@ import (
 	"os"
 	"time"
 
+	"microservices-demo/src/internal"
+
 	pb "./genproto"
 
 	"google.golang.org/grpc"
@@ -20,9 +22,10 @@ func main() {
 
 	conn, err := grpc.DialContext(context.TODO(),
 		"127.0.0.1:"+port,
-		grpc.WithInsecure(),
 		grpc.WithBlock(),
-		grpc.WithTimeout(time.Second*3))
+		grpc.WithTimeout(time.Second*3),
+		internal.DefaultDialOptions(),
+	)
 	if err != nil {
 		log.Fatalf("probe failed: failed to connect: %+v", err)
 	}

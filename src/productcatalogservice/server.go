@@ -8,6 +8,8 @@ import (
 	"net"
 	"strings"
 
+	"microservices-demo/src/internal"
+
 	pb "./genproto"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
@@ -93,7 +95,7 @@ func run(port int) string {
 	if err != nil {
 		log.Fatal(err)
 	}
-	srv := grpc.NewServer()
+	srv := grpc.NewServer(internal.DefaultServerOptions()...)
 	pb.RegisterProductCatalogServiceServer(srv, &productCatalog{})
 	go srv.Serve(l)
 	return l.Addr().String()

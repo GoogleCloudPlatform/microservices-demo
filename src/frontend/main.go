@@ -7,9 +7,13 @@ import (
 	"os"
 	"time"
 
+	"microservices-demo/src/internal"
+
 	"github.com/gorilla/mux"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
+	"go.opencensus.io/plugin/ochttp"
+	"go.opencensus.io/plugin/ochttp/propagation/b3"
 	"google.golang.org/grpc"
 )
 
@@ -94,8 +98,13 @@ func main() {
 
 	log.Infof("starting server on " + addr + ":" + srvPort)
 	loggedHandler := &logHandler{log: log, next: r}
-	log.Fatal(http.ListenAndServe(addr+":"+srvPort,
-		http.HandlerFunc(ensureSessionID(loggedHandler))))
+	log.Fatal(http.ListenAndServe(
+		addr+":"+srvPort,
+		&ochttp.Handler{
+			Handler:     http.HandlerFunc(ensureSessionID(loggedHandler)),
+			Propagation: &b3.HTTPFormat{},
+		},
+	))
 }
 
 func mustMapEnv(target *string, envKey string) {
@@ -108,7 +117,7 @@ func mustMapEnv(target *string, envKey string) {
 
 func mustConnGRPC(ctx context.Context, conn **grpc.ClientConn, addr string) {
 	var err error
-	*conn, err = grpc.DialContext(ctx, addr, grpc.WithInsecure(), grpc.WithTimeout(time.Second*3))
+	*conn, err = grpc.DialContext(ctx, addr, grpc.WithTimeout(time.Second*3), internal.DefaultDialOptions()...)
 	if err != nil {
 		panic(errors.Wrapf(err, "grpc: failed to connect %s", addr))
 	}

@@ -6,6 +6,8 @@ import (
 	"net"
 	"os"
 
+	"microservices-demo/src/internal"
+
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
@@ -70,7 +72,7 @@ func main() {
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
 	}
-	s := grpc.NewServer()
+	s := grpc.NewServer(internal.DefaultServerOptions()...)
 	pb.RegisterShippingServiceServer(s, &server{})
 	log.Printf("Shipping Service listening on port %s", port)
 
