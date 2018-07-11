@@ -95,15 +95,15 @@ func main() {
 	r.HandleFunc("/cart/checkout", svc.placeOrderHandler).Methods(http.MethodPost)
 	r.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir("./static/"))))
 
+	var handler http.Handler = r
+	handler = &logHandler{log: log, next: handler} // add logging
+	handler = ensureSessionID(handler)             // add session ID
+	handler = &ochttp.Handler{                     // add opencensus instrumentation
+		Handler:     handler,
+		Propagation: &b3.HTTPFormat{}}
+
 	log.Infof("starting server on " + addr + ":" + srvPort)
-	loggedHandler := &logHandler{log: log, next: r}
-	log.Fatal(http.ListenAndServe(
-		addr+":"+srvPort,
-		&ochttp.Handler{
-			Handler:     http.HandlerFunc(ensureSessionID(loggedHandler)),
-			Propagation: &b3.HTTPFormat{},
-		},
-	))
+	log.Fatal(http.ListenAndServe(addr+":"+srvPort, handler))
 }
 
 func mustMapEnv(target *string, envKey string) {
