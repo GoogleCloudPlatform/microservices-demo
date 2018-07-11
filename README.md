@@ -4,14 +4,31 @@ This project contains a 10-tier microservices application. The application is a
 web-based e-commerce app called “Hipster Shop” where users can browse items,
 add them to the cart, and purchase them.
 
-### Setup on GKE
+### Running locally
 
 1. Install:
 
-   - [gcloud](https://cloud.google.com/sdk/) + sign in to your account/project.
    - kubectl (can be installed via `gcloud components install kubectl`)
-   - Docker (on Mac/Windows, install Docker for Desktop CE)
-   - [Skaffold](https://github.com/GoogleContainerTools/skaffold/#installation)
+   - Docker for Desktop (Mac/Windows): **Download the Edge release**; not the
+     stable. Edge release provides Kubernetes support as [noted
+     here](https://docs.docker.com/docker-for-mac/kubernetes/).
+   - [skaffold](https://github.com/GoogleContainerTools/skaffold/#installation)
+
+1. Launch Docker for Desktop. Go to Preferences and choose “Enable Kubernetes”.
+
+1. Run `kubectl get nodes` to verify you're connected to Kubernetes on Docker.
+
+1. Run `skaffold run` (first time will be slow). This will build and deploy the
+   application. If you need to rebuild the images automatically as you refactor
+   the code, run `skaffold dev` command.
+
+1. Run `kubectl get pods` to verify the Pods are ready and running. The
+   application frontend should be available at http://localhost:80 on your
+   machine.
+
+### Setup on GKE
+
+1. Install tools specified in the previous section (Docker, kubectl, skaffold)
 
 1. Create a Google Kubernetes Engine cluster and make sure `kubectl` is pointing
    to the cluster.
