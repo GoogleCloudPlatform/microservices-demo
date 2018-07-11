@@ -6,10 +6,9 @@ import (
 	"os"
 	"time"
 
-	"microservices-demo/src/internal"
-
 	pb "./genproto"
 
+	"go.opencensus.io/plugin/ocgrpc"
 	"google.golang.org/grpc"
 )
 
@@ -24,7 +23,8 @@ func main() {
 		"127.0.0.1:"+port,
 		grpc.WithBlock(),
 		grpc.WithTimeout(time.Second*3),
-		internal.DefaultDialOptions(),
+		grpc.WithInsecure(),
+		grpc.WithStatsHandler(&ocgrpc.ClientHandler{}),
 	)
 	if err != nil {
 		log.Fatalf("probe failed: failed to connect: %+v", err)

@@ -5,8 +5,10 @@ RUN apk add --no-cache \
 WORKDIR /src/microservices-demo/shippingservice
 # get known dependencies
 RUN go get -d golang.org/x/net/context \
-google.golang.org/grpc \
-google.golang.org/grpc/reflection
+  google.golang.org/grpc \
+  google.golang.org/grpc/reflection \
+  go.opencensus.io/plugin/ocgrpc
+
 COPY . .
 # get other dependencies
 RUN go get -d ./...

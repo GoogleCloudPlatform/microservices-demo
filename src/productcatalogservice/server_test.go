@@ -2,12 +2,12 @@ package main
 
 import (
 	"context"
-	"microservices-demo/src/internal"
 	"testing"
 
 	pb "./genproto"
 	"github.com/golang/protobuf/proto"
 	"github.com/google/go-cmp/cmp"
+	"go.opencensus.io/plugin/ocgrpc"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -16,7 +16,9 @@ import (
 func TestServer(t *testing.T) {
 	ctx := context.Background()
 	addr := run(0)
-	conn, err := grpc.Dial(addr, internal.DefaultDialOptions())
+	conn, err := grpc.Dial(addr,
+		grpc.WithInsecure(),
+		grpc.WithStatsHandler(&ocgrpc.ClientHandler{}))
 	if err != nil {
 		t.Fatal(err)
 	}

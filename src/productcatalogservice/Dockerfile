@@ -6,7 +6,8 @@ WORKDIR /src/microservices-demo/productcatalogservice
 # get known dependencies
 RUN go get -d google.golang.org/grpc \
     google.golang.org/grpc/codes \
-    google.golang.org/grpc/status
+    google.golang.org/grpc/status \
+    go.opencensus.io/plugin/ocgrpc
 
 COPY . .
 # get remaining dependencies

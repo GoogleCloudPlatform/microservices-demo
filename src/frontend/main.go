@@ -7,11 +7,10 @@ import (
 	"os"
 	"time"
 
-	"microservices-demo/src/internal"
-
 	"github.com/gorilla/mux"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
+	"go.opencensus.io/plugin/ocgrpc"
 	"go.opencensus.io/plugin/ochttp"
 	"go.opencensus.io/plugin/ochttp/propagation/b3"
 	"google.golang.org/grpc"
@@ -117,7 +116,10 @@ func mustMapEnv(target *string, envKey string) {
 
 func mustConnGRPC(ctx context.Context, conn **grpc.ClientConn, addr string) {
 	var err error
-	*conn, err = grpc.DialContext(ctx, addr, grpc.WithTimeout(time.Second*3), internal.DefaultDialOptions()...)
+	*conn, err = grpc.DialContext(ctx, addr,
+		grpc.WithInsecure(),
+		grpc.WithTimeout(time.Second*3),
+		grpc.WithStatsHandler(&ocgrpc.ClientHandler{}))
 	if err != nil {
 		panic(errors.Wrapf(err, "grpc: failed to connect %s", addr))
 	}

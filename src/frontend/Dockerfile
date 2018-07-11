@@ -9,7 +9,9 @@ RUN go get -d github.com/google/uuid \
     github.com/sirupsen/logrus \
     google.golang.org/grpc \
     google.golang.org/grpc/codes \
-    google.golang.org/grpc/status
+    google.golang.org/grpc/status \
+    go.opencensus.io/plugin/ochttp \
+    go.opencensus.io/plugin/ochttp/propagation/b3
 
 # copy go-only part of the build
 COPY *.go ./

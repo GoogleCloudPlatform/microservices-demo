@@ -8,9 +8,8 @@ import (
 	"net"
 	"strings"
 
-	"microservices-demo/src/internal"
-
 	pb "./genproto"
+	"go.opencensus.io/plugin/ocgrpc"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -95,7 +94,7 @@ func run(port int) string {
 	if err != nil {
 		log.Fatal(err)
 	}
-	srv := grpc.NewServer(internal.DefaultServerOptions()...)
+	srv := grpc.NewServer(grpc.StatsHandler(&ocgrpc.ServerHandler{}))
 	pb.RegisterProductCatalogServiceServer(srv, &productCatalog{})
 	go srv.Serve(l)
 	return l.Addr().String()

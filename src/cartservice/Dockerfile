@@ -8,7 +8,7 @@ RUN go build -o /cartservice_probe .
 # cartservice
 FROM gcr.io/google-appengine/aspnetcore:2.1.0
 COPY --from=builder /cartservice_probe /cartservice_probe
-RUN apt update && apt install net-tools telnet
+RUN apt-get update && apt-get install net-tools telnet
 WORKDIR /app
 COPY . .
 RUN dotnet restore && \
