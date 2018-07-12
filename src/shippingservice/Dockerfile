@@ -7,7 +7,9 @@ WORKDIR /src/microservices-demo/shippingservice
 RUN go get -d golang.org/x/net/context \
   google.golang.org/grpc \
   google.golang.org/grpc/reflection \
-  go.opencensus.io/plugin/ocgrpc
+  go.opencensus.io/exporter/stackdriver \
+  go.opencensus.io/plugin/ocgrpc \
+	go.opencensus.io/trace
 
 COPY . .
 # get other dependencies

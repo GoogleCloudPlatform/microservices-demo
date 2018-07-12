@@ -6,7 +6,9 @@ import (
 	"net"
 	"os"
 
+	"go.opencensus.io/exporter/stackdriver"
 	"go.opencensus.io/plugin/ocgrpc"
+	"go.opencensus.io/trace"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
@@ -15,7 +17,7 @@ import (
 )
 
 const (
-	default_port = "50051"
+	defaultPort = "50051"
 )
 
 // server controls RPC service responses.
@@ -61,11 +63,20 @@ func (s *server) ShipOrder(ctx context.Context, in *pb.ShipOrderRequest) (*pb.Sh
 }
 
 func main() {
-	port := default_port
+	port := defaultPort
 	if value, ok := os.LookupEnv("APP_PORT"); ok {
 		port = value
 	}
 	port = fmt.Sprintf(":%s", port)
+
+	exporter, err := stackdriver.NewExporter(stackdriver.Options{})
+	if err != nil {
+		log.Printf("failed to initialize stackdriver exporter: %+v", err)
+		log.Println("skipping uploading traces to stackdriver")
+	} else {
+		trace.RegisterExporter(exporter)
+		log.Println("registered stackdriver tracing")
+	}
 
 	lis, err := net.Listen("tcp", port)
 	if err != nil {
