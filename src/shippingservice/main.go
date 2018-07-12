@@ -75,6 +75,7 @@ func main() {
 		log.Println("skipping uploading traces to stackdriver")
 	} else {
 		trace.RegisterExporter(exporter)
+		trace.ApplyConfig(trace.Config{DefaultSampler: trace.AlwaysSample()})
 		log.Println("registered stackdriver tracing")
 	}
 
