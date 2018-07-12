@@ -8,7 +8,9 @@ import (
 	"os"
 
 	"github.com/google/uuid"
+	"go.opencensus.io/exporter/stackdriver"
 	"go.opencensus.io/plugin/ocgrpc"
+	"go.opencensus.io/trace"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -37,6 +39,8 @@ func main() {
 		port = os.Getenv("PORT")
 	}
 
+	initTracing()
+
 	svc := new(checkoutService)
 	mustMapEnv(&svc.shippingSvcAddr, "SHIPPING_SERVICE_ADDR")
 	mustMapEnv(&svc.productCatalogSvcAddr, "PRODUCT_CATALOG_SERVICE_ADDR")
@@ -55,6 +59,18 @@ func main() {
 	pb.RegisterCheckoutServiceServer(srv, svc)
 	log.Printf("starting to listen on tcp: %q", lis.Addr().String())
 	log.Fatal(srv.Serve(lis))
+}
+
+func initTracing() {
+	exporter, err := stackdriver.NewExporter(stackdriver.Options{})
+	if err != nil {
+		log.Printf("failed to initialize stackdriver exporter: %+v", err)
+		log.Println("skipping uploading traces to stackdriver")
+	} else {
+		trace.RegisterExporter(exporter)
+		trace.ApplyConfig(trace.Config{DefaultSampler: trace.AlwaysSample()})
+		log.Println("registered stackdriver tracing")
+	}
 }
 
 func mustMapEnv(target *string, envKey string) {

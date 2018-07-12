@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"log"
 	"net/http"
 	"os"
 	"time"
@@ -10,9 +11,11 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
+	"go.opencensus.io/exporter/stackdriver"
 	"go.opencensus.io/plugin/ocgrpc"
 	"go.opencensus.io/plugin/ochttp"
 	"go.opencensus.io/plugin/ochttp/propagation/b3"
+	"go.opencensus.io/trace"
 	"google.golang.org/grpc"
 )
 
@@ -64,6 +67,8 @@ func main() {
 	log.Level = logrus.DebugLevel
 	log.Formatter = &logrus.TextFormatter{}
 
+	initTracing()
+
 	srvPort := port
 	if os.Getenv("PORT") != "" {
 		srvPort = os.Getenv("PORT")
@@ -104,6 +109,18 @@ func main() {
 
 	log.Infof("starting server on " + addr + ":" + srvPort)
 	log.Fatal(http.ListenAndServe(addr+":"+srvPort, handler))
+}
+
+func initTracing() {
+	exporter, err := stackdriver.NewExporter(stackdriver.Options{})
+	if err != nil {
+		log.Printf("failed to initialize stackdriver exporter: %+v", err)
+		log.Println("skipping uploading traces to stackdriver")
+	} else {
+		trace.RegisterExporter(exporter)
+		trace.ApplyConfig(trace.Config{DefaultSampler: trace.AlwaysSample()})
+		log.Println("registered stackdriver tracing")
+	}
 }
 
 func mustMapEnv(target *string, envKey string) {

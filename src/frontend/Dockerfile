@@ -11,7 +11,9 @@ RUN go get -d github.com/google/uuid \
     google.golang.org/grpc/codes \
     google.golang.org/grpc/status \
     go.opencensus.io/plugin/ochttp \
-    go.opencensus.io/plugin/ochttp/propagation/b3
+    go.opencensus.io/plugin/ochttp/propagation/b3 \
+    go.opencensus.io/exporter/stackdriver \
+    go.opencensus.io/trace
 
 # copy go-only part of the build
 COPY *.go ./
