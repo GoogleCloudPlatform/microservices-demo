@@ -9,7 +9,9 @@ import (
 	"strings"
 
 	pb "./genproto"
+	"go.opencensus.io/exporter/stackdriver"
 	"go.opencensus.io/plugin/ocgrpc"
+	"go.opencensus.io/trace"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -85,6 +87,17 @@ var catalog = []*pb.Product{
 
 func main() {
 	flag.Parse()
+
+	exporter, err := stackdriver.NewExporter(stackdriver.Options{})
+	if err != nil {
+		log.Printf("failed to initialize stackdriver exporter: %+v", err)
+		log.Println("skipping uploading traces to stackdriver")
+	} else {
+		trace.RegisterExporter(exporter)
+		log.Println("registered stackdriver")
+	}
+
+	log.Printf("starting grpc server at :%d", *port)
 	run(*port)
 	select {}
 }

@@ -4,3 +4,5 @@ v/
 github.com
 golang.org
 google.golang.org
+cloud.google.com
+go.opencensus.io
