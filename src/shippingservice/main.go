@@ -69,15 +69,7 @@ func main() {
 	}
 	port = fmt.Sprintf(":%s", port)
 
-	exporter, err := stackdriver.NewExporter(stackdriver.Options{})
-	if err != nil {
-		log.Printf("failed to initialize stackdriver exporter: %+v", err)
-		log.Println("skipping uploading traces to stackdriver")
-	} else {
-		trace.RegisterExporter(exporter)
-		trace.ApplyConfig(trace.Config{DefaultSampler: trace.AlwaysSample()})
-		log.Println("registered stackdriver tracing")
-	}
+	initTrace()
 
 	lis, err := net.Listen("tcp", port)
 	if err != nil {
@@ -91,5 +83,17 @@ func main() {
 	reflection.Register(s)
 	if err := s.Serve(lis); err != nil {
 		log.Fatalf("failed to serve: %v", err)
+	}
+}
+
+func initTrace() {
+	exporter, err := stackdriver.NewExporter(stackdriver.Options{})
+	if err != nil {
+		log.Printf("failed to initialize stackdriver exporter: %+v", err)
+		log.Println("skipping uploading traces to stackdriver")
+	} else {
+		trace.RegisterExporter(exporter)
+		trace.ApplyConfig(trace.Config{DefaultSampler: trace.AlwaysSample()})
+		log.Println("registered stackdriver tracing")
 	}
 }
