@@ -5,6 +5,7 @@ import (
 	"log"
 	"net"
 	"os"
+	"time"
 
 	"go.opencensus.io/exporter/stackdriver"
 	"go.opencensus.io/plugin/ocgrpc"
@@ -19,6 +20,30 @@ import (
 const (
 	defaultPort = "50051"
 )
+
+func main() {
+	port := defaultPort
+	if value, ok := os.LookupEnv("APP_PORT"); ok {
+		port = value
+	}
+	port = fmt.Sprintf(":%s", port)
+
+	go initTracing()
+
+	lis, err := net.Listen("tcp", port)
+	if err != nil {
+		log.Fatalf("failed to listen: %v", err)
+	}
+	s := grpc.NewServer(grpc.StatsHandler(&ocgrpc.ServerHandler{}))
+	pb.RegisterShippingServiceServer(s, &server{})
+	log.Printf("Shipping Service listening on port %s", port)
+
+	// Register reflection service on gRPC server.
+	reflection.Register(s)
+	if err := s.Serve(lis); err != nil {
+		log.Fatalf("failed to serve: %v", err)
+	}
+}
 
 // server controls RPC service responses.
 type server struct{}
@@ -62,38 +87,22 @@ func (s *server) ShipOrder(ctx context.Context, in *pb.ShipOrderRequest) (*pb.Sh
 	}, nil
 }
 
-func main() {
-	port := defaultPort
-	if value, ok := os.LookupEnv("APP_PORT"); ok {
-		port = value
-	}
-	port = fmt.Sprintf(":%s", port)
-
-	initTracing()
-
-	lis, err := net.Listen("tcp", port)
-	if err != nil {
-		log.Fatalf("failed to listen: %v", err)
-	}
-	s := grpc.NewServer(grpc.StatsHandler(&ocgrpc.ServerHandler{}))
-	pb.RegisterShippingServiceServer(s, &server{})
-	log.Printf("Shipping Service listening on port %s", port)
-
-	// Register reflection service on gRPC server.
-	reflection.Register(s)
-	if err := s.Serve(lis); err != nil {
-		log.Fatalf("failed to serve: %v", err)
-	}
-}
-
 func initTracing() {
-	exporter, err := stackdriver.NewExporter(stackdriver.Options{})
-	if err != nil {
-		log.Printf("failed to initialize stackdriver exporter: %+v", err)
-		log.Println("skipping uploading traces to stackdriver")
-	} else {
-		trace.RegisterExporter(exporter)
-		trace.ApplyConfig(trace.Config{DefaultSampler: trace.AlwaysSample()})
-		log.Println("registered stackdriver tracing")
+	// TODO(ahmetb) this method is duplicated in other microservices using Go
+	// since they are not sharing packages.
+	for i := 1; i <= 3; i++ {
+		exporter, err := stackdriver.NewExporter(stackdriver.Options{})
+		if err != nil {
+			log.Printf("info: failed to initialize stackdriver exporter: %+v", err)
+		} else {
+			trace.RegisterExporter(exporter)
+			trace.ApplyConfig(trace.Config{DefaultSampler: trace.AlwaysSample()})
+			log.Print("registered stackdriver tracing")
+			return
+		}
+		d := time.Second * 10 * time.Duration(i)
+		log.Printf("sleeping %v to retry initializing stackdriver exporter", d)
+		time.Sleep(d)
 	}
+	log.Printf("warning: could not initialize stackdriver exporter after retrying, giving up")
 }

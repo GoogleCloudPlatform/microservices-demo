@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"fmt"
-	"log"
 	"net/http"
 	"os"
 	"time"
@@ -67,7 +66,7 @@ func main() {
 	log.Level = logrus.DebugLevel
 	log.Formatter = &logrus.TextFormatter{}
 
-	initTracing()
+	go initTracing(log)
 
 	srvPort := port
 	if os.Getenv("PORT") != "" {
@@ -111,16 +110,25 @@ func main() {
 	log.Fatal(http.ListenAndServe(addr+":"+srvPort, handler))
 }
 
-func initTracing() {
-	exporter, err := stackdriver.NewExporter(stackdriver.Options{})
-	if err != nil {
-		log.Printf("failed to initialize stackdriver exporter: %+v", err)
-		log.Println("skipping uploading traces to stackdriver")
-	} else {
-		trace.RegisterExporter(exporter)
-		trace.ApplyConfig(trace.Config{DefaultSampler: trace.AlwaysSample()})
-		log.Println("registered stackdriver tracing")
+func initTracing(log logrus.FieldLogger) {
+	// TODO(ahmetb) this method is duplicated in other microservices using Go
+	// since they are not sharing packages.
+	for i := 1; i <= 3; i++ {
+		log = log.WithField("retry", i)
+		exporter, err := stackdriver.NewExporter(stackdriver.Options{})
+		if err != nil {
+			log.Warnf("failed to initialize stackdriver exporter: %+v", err)
+		} else {
+			trace.RegisterExporter(exporter)
+			trace.ApplyConfig(trace.Config{DefaultSampler: trace.AlwaysSample()})
+			log.Info("registered stackdriver tracing")
+			return
+		}
+		d := time.Second * 20 * time.Duration(i)
+		log.Debugf("sleeping %v to retry initializing stackdriver exporter", d)
+		time.Sleep(d)
 	}
+	log.Warn("could not initialize stackdriver exporter after retrying, giving up")
 }
 
 func mustMapEnv(target *string, envKey string) {

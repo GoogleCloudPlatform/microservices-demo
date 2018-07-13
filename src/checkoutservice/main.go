@@ -6,6 +6,7 @@ import (
 	"log"
 	"net"
 	"os"
+	"time"
 
 	"github.com/google/uuid"
 	"go.opencensus.io/exporter/stackdriver"
@@ -39,7 +40,7 @@ func main() {
 		port = os.Getenv("PORT")
 	}
 
-	initTracing()
+	go initTracing()
 
 	svc := new(checkoutService)
 	mustMapEnv(&svc.shippingSvcAddr, "SHIPPING_SERVICE_ADDR")
@@ -62,15 +63,23 @@ func main() {
 }
 
 func initTracing() {
-	exporter, err := stackdriver.NewExporter(stackdriver.Options{})
-	if err != nil {
-		log.Printf("failed to initialize stackdriver exporter: %+v", err)
-		log.Println("skipping uploading traces to stackdriver")
-	} else {
-		trace.RegisterExporter(exporter)
-		trace.ApplyConfig(trace.Config{DefaultSampler: trace.AlwaysSample()})
-		log.Println("registered stackdriver tracing")
+	// TODO(ahmetb) this method is duplicated in other microservices using Go
+	// since they are not sharing packages.
+	for i := 1; i <= 3; i++ {
+		exporter, err := stackdriver.NewExporter(stackdriver.Options{})
+		if err != nil {
+			log.Printf("info: failed to initialize stackdriver exporter: %+v", err)
+		} else {
+			trace.RegisterExporter(exporter)
+			trace.ApplyConfig(trace.Config{DefaultSampler: trace.AlwaysSample()})
+			log.Print("registered stackdriver tracing")
+			return
+		}
+		d := time.Second * 10 * time.Duration(i)
+		log.Printf("sleeping %v to retry initializing stackdriver exporter", d)
+		time.Sleep(d)
 	}
+	log.Printf("warning: could not initialize stackdriver exporter after retrying, giving up")
 }
 
 func mustMapEnv(target *string, envKey string) {

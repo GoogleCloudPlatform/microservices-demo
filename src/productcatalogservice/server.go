@@ -7,6 +7,7 @@ import (
 	"log"
 	"net"
 	"strings"
+	"time"
 
 	pb "./genproto"
 	"go.opencensus.io/exporter/stackdriver"
@@ -88,7 +89,7 @@ var catalog = []*pb.Product{
 func main() {
 	flag.Parse()
 
-	initTracing()
+	go initTracing()
 
 	log.Printf("starting grpc server at :%d", *port)
 	run(*port)
@@ -107,15 +108,23 @@ func run(port int) string {
 }
 
 func initTracing() {
-	exporter, err := stackdriver.NewExporter(stackdriver.Options{})
-	if err != nil {
-		log.Printf("failed to initialize stackdriver exporter: %+v", err)
-		log.Println("skipping uploading traces to stackdriver")
-	} else {
-		trace.RegisterExporter(exporter)
-		trace.ApplyConfig(trace.Config{DefaultSampler: trace.AlwaysSample()})
-		log.Println("registered stackdriver")
+	// TODO(ahmetb) this method is duplicated in other microservices using Go
+	// since they are not sharing packages.
+	for i := 1; i <= 3; i++ {
+		exporter, err := stackdriver.NewExporter(stackdriver.Options{})
+		if err != nil {
+			log.Printf("info: failed to initialize stackdriver exporter: %+v", err)
+		} else {
+			trace.RegisterExporter(exporter)
+			trace.ApplyConfig(trace.Config{DefaultSampler: trace.AlwaysSample()})
+			log.Print("registered stackdriver tracing")
+			return
+		}
+		d := time.Second * 10 * time.Duration(i)
+		log.Printf("sleeping %v to retry initializing stackdriver exporter", d)
+		time.Sleep(d)
 	}
+	log.Printf("warning: could not initialize stackdriver exporter after retrying, giving up")
 }
 
 type productCatalog struct{}
