@@ -88,15 +88,7 @@ var catalog = []*pb.Product{
 func main() {
 	flag.Parse()
 
-	exporter, err := stackdriver.NewExporter(stackdriver.Options{})
-	if err != nil {
-		log.Printf("failed to initialize stackdriver exporter: %+v", err)
-		log.Println("skipping uploading traces to stackdriver")
-	} else {
-		trace.RegisterExporter(exporter)
-		trace.ApplyConfig(trace.Config{DefaultSampler: trace.AlwaysSample()})
-		log.Println("registered stackdriver")
-	}
+	initTracing()
 
 	log.Printf("starting grpc server at :%d", *port)
 	run(*port)
@@ -112,6 +104,18 @@ func run(port int) string {
 	pb.RegisterProductCatalogServiceServer(srv, &productCatalog{})
 	go srv.Serve(l)
 	return l.Addr().String()
+}
+
+func initTracing() {
+	exporter, err := stackdriver.NewExporter(stackdriver.Options{})
+	if err != nil {
+		log.Printf("failed to initialize stackdriver exporter: %+v", err)
+		log.Println("skipping uploading traces to stackdriver")
+	} else {
+		trace.RegisterExporter(exporter)
+		trace.ApplyConfig(trace.Config{DefaultSampler: trace.AlwaysSample()})
+		log.Println("registered stackdriver")
+	}
 }
 
 type productCatalog struct{}

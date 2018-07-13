@@ -69,7 +69,7 @@ func main() {
 	}
 	port = fmt.Sprintf(":%s", port)
 
-	initTrace()
+	initTracing()
 
 	lis, err := net.Listen("tcp", port)
 	if err != nil {
@@ -86,7 +86,7 @@ func main() {
 	}
 }
 
-func initTrace() {
+func initTracing() {
 	exporter, err := stackdriver.NewExporter(stackdriver.Options{})
 	if err != nil {
 		log.Printf("failed to initialize stackdriver exporter: %+v", err)
