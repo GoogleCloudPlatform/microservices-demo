@@ -17,6 +17,7 @@ RUN go get -d ./...
 RUN go build -o /shippingservice .
 
 FROM alpine as release
+RUN apk add --no-cache ca-certificates
 COPY --from=builder /shippingservice /shippingservice
 ENV APP_PORT=50051
 EXPOSE 50051

@@ -17,8 +17,7 @@ RUN go get -d ./...
 RUN go build -o /productcatalogservice .
 
 FROM alpine as release
-RUN apk add --no-cache \
-  ca-certificates
+RUN apk add --no-cache ca-certificates
 COPY --from=builder /productcatalogservice /productcatalogservice
 EXPOSE 3550
 ENTRYPOINT ["/productcatalogservice"]
