@@ -1,5 +1,6 @@
 #!/bin/bash
 set -e
+trap "exit" TERM
 
 if [[ -z "${FRONTEND_ADDR}" ]]; then
     echo >&2 "FRONTEND_ADDR not specified"
