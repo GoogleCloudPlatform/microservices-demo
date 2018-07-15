@@ -7,4 +7,5 @@ if [[ -z "${FRONTEND_ADDR}" ]]; then
 fi
 
 set -x
-locust --host="http://${FRONTEND_ADDR}" --no-web -c "${USERS:-10}"
+# add "timeout 3600" because locust locks up/freezes for some reason
+timeout 3600 locust --host="http://${FRONTEND_ADDR}" --no-web -c "${USERS:-10}" -r 10 
