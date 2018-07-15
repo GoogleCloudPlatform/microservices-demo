@@ -48,7 +48,7 @@ add them to the cart, and purchase them.
    the `image` fields to match the changes you made in the previous step.
 
 1. Run `skaffold run`. This builds the container
-   images, pushes them to GFR, and deploys the application to Kubernetes.
+   images, pushes them to GCR, and deploys the application to Kubernetes.
 
 1.  Find the IP address of your application:
 
