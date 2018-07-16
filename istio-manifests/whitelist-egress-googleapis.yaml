@@ -12,5 +12,7 @@ spec:
   ports:
   - number: 80
     protocol: HTTP
+    name: http
   - number: 443
     protocol: HTTPS
+    name: https
