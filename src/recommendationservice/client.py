@@ -14,9 +14,12 @@ if __name__ == "__main__":
     else:
         port = "8080"
 
-    exporter = stackdriver_exporter.StackdriverExporter()
-    tracer = Tracer(exporter=exporter)
-    tracer_interceptor = client_interceptor.OpenCensusClientInterceptor(tracer, host_port='localhost:'+port)
+    try:
+        exporter = stackdriver_exporter.StackdriverExporter()
+        tracer = Tracer(exporter=exporter)
+        tracer_interceptor = client_interceptor.OpenCensusClientInterceptor(tracer, host_port='localhost:'+port)
+    except:
+        tracer_interceptor = client_interceptor.OpenCensusClientInterceptor()
 
     # set up server stub
     channel = grpc.insecure_channel('localhost:'+port)

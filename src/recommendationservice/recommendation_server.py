@@ -9,6 +9,9 @@ import os
 from opencensus.trace.ext.grpc import server_interceptor
 from opencensus.trace.samplers import always_on
 from opencensus.trace.exporters import stackdriver_exporter
+from opencensus.trace.exporters import print_exporter
+
+import googleclouddebugger
 
 class RecommendationService(demo_pb2_grpc.RecommendationServiceServicer):
     def ListRecommendations(self, request, context):
@@ -29,18 +32,20 @@ class RecommendationService(demo_pb2_grpc.RecommendationServiceServicer):
         response.product_ids.extend(prod_list)
         return response
 if __name__ == "__main__":
-    # sampler = always_on.AlwaysOnSampler()
-    # exporter = stackdriver_exporter.StackdriverExporter()
-    # tracer_interceptor = server_interceptor.OpenCensusServerInterceptor(sampler, exporter)
+    try:
+        sampler = always_on.AlwaysOnSampler()
+        exporter = stackdriver_exporter.StackdriverExporter()
+        tracer_interceptor = server_interceptor.OpenCensusServerInterceptor(sampler, exporter)
+    except:
+        tracer_interceptor = server_interceptor.OpenCensusServerInterceptor()
 
-    # try:
-    #     import googleclouddebugger
-    #     googleclouddebugger.enable(
-    #         module='recommendationserver',
-    #         version='[VERSION]'
-    #     )
-    # except ImportError:
-    #     pass
+    try:
+        googleclouddebugger.enable(
+            module='recommendationserver',
+            version='[VERSION]'
+        )
+    except:
+        pass
 
     # get port from $PORT envar
     port = os.environ.get('PORT', "8080")
@@ -54,7 +59,7 @@ if __name__ == "__main__":
     channel = grpc.insecure_channel(catalog_addr)
     stub = demo_pb2_grpc.ProductCatalogServiceStub(channel)
     # create gRPC server
-    server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))#,interceptors=(tracer_interceptor))
+    server = grpc.server(futures.ThreadPoolExecutor(max_workers=10),interceptors=(tracer_interceptor,))
     # add class to gRPC server
     demo_pb2_grpc.add_RecommendationServiceServicer_to_server(RecommendationService(), server)
     # start server
