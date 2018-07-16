@@ -43,9 +43,9 @@ func main() {
 		// ProjectID must be set if not running on GCP.
 		// ProjectID: "my-project",
 	}); err != nil {
-			// TODO: Handle error.
+		log.Fatalf("failed to start profiler: %+v", err)
 	}
-	
+
 	port := listenPort
 	if os.Getenv("PORT") != "" {
 		port = os.Getenv("PORT")

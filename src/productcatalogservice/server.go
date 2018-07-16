@@ -94,7 +94,7 @@ func main() {
 		// ProjectID must be set if not running on GCP.
 		// ProjectID: "my-project",
 	}); err != nil {
-		// TODO: Handle error.
+		log.Fatalf("failed to start profiler: %+v", err)
 	}
 
 	flag.Parse()

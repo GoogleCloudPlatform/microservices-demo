@@ -29,14 +29,13 @@ func main() {
 	}
 	port = fmt.Sprintf(":%s", port)
 
-	// Profiler initialization, best done as early as possible.
 	if err := profiler.Start(profiler.Config{
 		Service:        "shippingservice",
 		ServiceVersion: "1.0.0",
 		// ProjectID must be set if not running on GCP.
 		// ProjectID: "my-project",
 	}); err != nil {
-		// TODO: Handle error.
+		log.Fatalf("failed to start profiler: %+v", err)
 	}
 
 	go initTracing()

@@ -42,7 +42,7 @@ if __name__ == "__main__":
     try:
         googleclouddebugger.enable(
             module='recommendationserver',
-            version='[VERSION]'
+            version='1.0.0'
         )
     except:
         pass

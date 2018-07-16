@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"log"
 	"net/http"
 	"os"
 	"time"
@@ -62,14 +63,13 @@ type frontendServer struct {
 }
 
 func main() {
-	// Profiler initialization, best done as early as possible.
 	if err := profiler.Start(profiler.Config{
 		Service:        "frontendservice",
 		ServiceVersion: "1.0.0",
 		// ProjectID must be set if not running on GCP.
 		// ProjectID: "my-project",
 	}); err != nil {
-		// TODO: Handle error.
+		log.Fatalf("failed to start profiler: %+v", err)
 	}
 
 	ctx := context.Background()
