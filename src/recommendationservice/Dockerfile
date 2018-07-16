@@ -7,6 +7,11 @@ ENV PYTHONUNBUFFERED=0
 COPY . /home/
 WORKDIR /home
 
+# get packages
+RUN apt-get update && apt-get install python3-pip -y
+RUN pip install opencensus
+RUN pip install google-python-cloud-debugger
+
 # set listen port
 ENV PORT "8080"
 EXPOSE 8080

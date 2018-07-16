@@ -1,2 +1,4 @@
 grpcio-tools
 googleapis-common-protos
+opencensus
+google-cloud-trace

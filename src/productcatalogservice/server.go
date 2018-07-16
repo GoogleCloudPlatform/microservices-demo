@@ -10,6 +10,7 @@ import (
 	"time"
 
 	pb "./genproto"
+	"cloud.google.com/go/profiler"
 	"go.opencensus.io/exporter/stackdriver"
 	"go.opencensus.io/plugin/ocgrpc"
 	"go.opencensus.io/trace"
@@ -87,6 +88,15 @@ var catalog = []*pb.Product{
 }
 
 func main() {
+	if err := profiler.Start(profiler.Config{
+		Service:        "productcatalogservice",
+		ServiceVersion: "1.0.0",
+		// ProjectID must be set if not running on GCP.
+		// ProjectID: "my-project",
+	}); err != nil {
+		// TODO: Handle error.
+	}
+
 	flag.Parse()
 
 	go initTracing()

@@ -7,6 +7,7 @@ import (
 	"os"
 	"time"
 
+	"cloud.google.com/go/profiler"
 	"go.opencensus.io/exporter/stackdriver"
 	"go.opencensus.io/plugin/ocgrpc"
 	"go.opencensus.io/trace"
@@ -27,6 +28,16 @@ func main() {
 		port = value
 	}
 	port = fmt.Sprintf(":%s", port)
+
+	// Profiler initialization, best done as early as possible.
+	if err := profiler.Start(profiler.Config{
+		Service:        "shippingservice",
+		ServiceVersion: "1.0.0",
+		// ProjectID must be set if not running on GCP.
+		// ProjectID: "my-project",
+	}); err != nil {
+		// TODO: Handle error.
+	}
 
 	go initTracing()
 

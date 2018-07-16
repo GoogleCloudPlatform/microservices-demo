@@ -18,6 +18,8 @@ import (
 
 	pb "checkoutservice/genproto"
 	money "checkoutservice/money"
+
+	"cloud.google.com/go/profiler"
 )
 
 const (
@@ -35,6 +37,15 @@ type checkoutService struct {
 }
 
 func main() {
+	if err := profiler.Start(profiler.Config{
+		Service:        "cartservice",
+		ServiceVersion: "1.0.0",
+		// ProjectID must be set if not running on GCP.
+		// ProjectID: "my-project",
+	}); err != nil {
+			// TODO: Handle error.
+	}
+	
 	port := listenPort
 	if os.Getenv("PORT") != "" {
 		port = os.Getenv("PORT")

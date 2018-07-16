@@ -7,6 +7,7 @@ import (
 	"os"
 	"time"
 
+	"cloud.google.com/go/profiler"
 	"github.com/gorilla/mux"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
@@ -61,6 +62,16 @@ type frontendServer struct {
 }
 
 func main() {
+	// Profiler initialization, best done as early as possible.
+	if err := profiler.Start(profiler.Config{
+		Service:        "frontendservice",
+		ServiceVersion: "1.0.0",
+		// ProjectID must be set if not running on GCP.
+		// ProjectID: "my-project",
+	}); err != nil {
+		// TODO: Handle error.
+	}
+
 	ctx := context.Background()
 	log := logrus.New()
 	log.Level = logrus.DebugLevel

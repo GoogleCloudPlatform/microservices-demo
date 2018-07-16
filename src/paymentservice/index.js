@@ -16,6 +16,15 @@
 
 'use strict';
 
+require('@google-cloud/profiler').start({
+    serviceContext: {
+        service: 'paymentservice',
+        version: '1.0.0'
+    }
+  });
+require('@google-cloud/trace-agent').start();
+require('@google-cloud/debug-agent').start();
+
 const HipsterShopServer = require('./server');
 
 const PORT = process.env['PORT'];

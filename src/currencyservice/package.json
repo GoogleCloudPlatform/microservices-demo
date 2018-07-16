@@ -5,6 +5,8 @@
   "repository": "TODO",
   "license": "Apache-2.0",
   "dependencies": {
+    "@google-cloud/debug-agent": "^2.6.0",
+    "@google-cloud/profiler": "^0.1.14",
     "@google-cloud/trace-agent": "^2.11.0",
     "async": "^1.5.2",
     "google-protobuf": "^3.0.0",

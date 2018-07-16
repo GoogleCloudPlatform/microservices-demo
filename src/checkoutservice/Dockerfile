@@ -9,11 +9,12 @@ RUN go get -d github.com/google/uuid \
     google.golang.org/grpc/status \
     go.opencensus.io/plugin/ocgrpc \
     go.opencensus.io/exporter/stackdriver \
-	go.opencensus.io/trace
+	go.opencensus.io/trace \
+    cloud.google.com/go/profiler
 COPY . .
 # get remaining dependencies
 RUN go get -d ./...
-RUN go build -o /checkoutservice .
+RUN go build -gcflags='-N -l' -o /checkoutservice .
 
 FROM alpine as release
 RUN apk add --no-cache ca-certificates

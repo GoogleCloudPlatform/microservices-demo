@@ -13,7 +13,8 @@ RUN go get -d github.com/google/uuid \
     go.opencensus.io/plugin/ochttp \
     go.opencensus.io/plugin/ochttp/propagation/b3 \
     go.opencensus.io/exporter/stackdriver \
-    go.opencensus.io/trace
+    go.opencensus.io/trace \
+    cloud.google.com/go/profiler
 
 # copy go-only part of the build
 COPY *.go ./

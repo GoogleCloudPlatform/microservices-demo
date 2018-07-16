@@ -9,7 +9,8 @@ RUN go get -d google.golang.org/grpc \
     google.golang.org/grpc/status \
     go.opencensus.io/plugin/ocgrpc \
     go.opencensus.io/trace \
-    go.opencensus.io/exporter/stackdriver
+    go.opencensus.io/exporter/stackdriver \
+    cloud.google.com/go/profiler
 
 COPY . .
 # get remaining dependencies
