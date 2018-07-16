@@ -42,6 +42,8 @@ spec:
             value: "shippingservice:50051"
           - name: CHECKOUT_SERVICE_ADDR
             value: "checkoutservice:5050"
+          - name: LISTEN_ADDR
+            value: "0.0.0.0"
           resources:
             requests:
               cpu: 100m

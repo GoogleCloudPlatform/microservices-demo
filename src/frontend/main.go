@@ -107,9 +107,17 @@ func main() {
 		Handler:     handler,
 		Propagation: &b3.HTTPFormat{}}
 
-	log.Infof("starting server on " + addr + ":" + srvPort)
-	go log.Fatal(http.ListenAndServe(addr+":"+secondaryPort, handler))
-	log.Fatal(http.ListenAndServe(addr+":"+srvPort, handler))
+	go func() {
+		log.Infof("starting server on " + addr + ":" + srvPort)
+		log.Fatal(http.ListenAndServe(addr+":"+srvPort, handler))
+	}()
+
+	go func() {
+		log.Infof("starting healthcheck server on " + addr + ":" + secondaryPort)
+		log.Fatal(http.ListenAndServe(addr+":"+secondaryPort, handler))
+	}()
+
+	select {}
 }
 
 func initTracing(log logrus.FieldLogger) {
