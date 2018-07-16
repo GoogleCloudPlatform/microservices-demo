@@ -6,9 +6,9 @@ import time
 import random
 import os
 
-# from opencensus.trace.ext.grpc import server_interceptor
-# from opencensus.trace.samplers import always_on
-# from opencensus.trace.exporters import stackdriver_exporter
+from opencensus.trace.ext.grpc import server_interceptor
+from opencensus.trace.samplers import always_on
+from opencensus.trace.exporters import stackdriver_exporter
 
 class RecommendationService(demo_pb2_grpc.RecommendationServiceServicer):
     def ListRecommendations(self, request, context):
