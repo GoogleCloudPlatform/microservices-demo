@@ -20,7 +20,6 @@ import (
 
 const (
 	port            = "8080"
-	secondaryPort   = "8090" // TODO(ahmetb) remove this, currently used by health checks in Istio mTLS case.
 	defaultCurrency = "USD"
 	cookieMaxAge    = 60 * 60 * 48
 
@@ -108,7 +107,6 @@ func main() {
 		Propagation: &b3.HTTPFormat{}}
 
 	log.Infof("starting server on " + addr + ":" + srvPort)
-	go log.Fatal(http.ListenAndServe(addr+":"+secondaryPort, handler))
 	log.Fatal(http.ListenAndServe(addr+":"+srvPort, handler))
 }
 
