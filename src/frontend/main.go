@@ -63,13 +63,13 @@ type frontendServer struct {
 }
 
 func main() {
-	go initProfiling(frontend, "1.0.0")
-	go initTracing(log)
-
 	ctx := context.Background()
 	log := logrus.New()
 	log.Level = logrus.DebugLevel
 	log.Formatter = &logrus.TextFormatter{}
+
+	go initProfiling(frontend, "1.0.0")
+	go initTracing(log)
 
 	srvPort := port
 	if os.Getenv("PORT") != "" {
