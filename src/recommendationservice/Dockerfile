@@ -7,6 +7,9 @@ ENV PYTHONUNBUFFERED=0
 WORKDIR /recommendationservice
 COPY requirements.txt requirements.txt
 RUN pip install -r requirements.txt
+RUN pip install opencensus
+RUN pip install google-cloud-trace
+RUN pip install google-python-cloud-debugger
 
 # add files into working directory
 COPY . .
