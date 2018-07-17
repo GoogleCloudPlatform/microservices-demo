@@ -21,7 +21,12 @@ require('@google-cloud/profiler').start({
   }
 });
  require('@google-cloud/trace-agent').start();
- require('@google-cloud/debug-agent').start();
+ require('@google-cloud/debug-agent').start({
+  serviceContext: {
+    service: 'currencyservice',
+    version: 'VERSION'
+  }
+})
 
 const path = require('path');
 const grpc = require('grpc');
