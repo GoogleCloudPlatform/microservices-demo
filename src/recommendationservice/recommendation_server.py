@@ -31,7 +31,9 @@ class RecommendationService(demo_pb2_grpc.RecommendationServiceServicer):
         response = demo_pb2.ListRecommendationsResponse()
         response.product_ids.extend(prod_list)
         return response
+
 if __name__ == "__main__":
+    print("starting recommendationservice")
     try:
         sampler = always_on.AlwaysOnSampler()
         exporter = stackdriver_exporter.StackdriverExporter()
