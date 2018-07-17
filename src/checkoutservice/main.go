@@ -8,6 +8,7 @@ import (
 	"os"
 	"time"
 
+	"cloud.google.com/go/profiler"
 	"github.com/google/uuid"
 	"go.opencensus.io/exporter/stackdriver"
 	"go.opencensus.io/plugin/ocgrpc"
@@ -18,8 +19,6 @@ import (
 
 	pb "checkoutservice/genproto"
 	money "checkoutservice/money"
-
-	"cloud.google.com/go/profiler"
 )
 
 const (
@@ -37,21 +36,13 @@ type checkoutService struct {
 }
 
 func main() {
-	if err := profiler.Start(profiler.Config{
-		Service:        "cartservice",
-		ServiceVersion: "1.0.0",
-		// ProjectID must be set if not running on GCP.
-		// ProjectID: "my-project",
-	}); err != nil {
-		log.Fatalf("failed to start profiler: %+v", err)
-	}
+	go initTracing()
+	go initProfiling("checkoutservice", "1.0.0")
 
 	port := listenPort
 	if os.Getenv("PORT") != "" {
 		port = os.Getenv("PORT")
 	}
-
-	go initTracing()
 
 	svc := new(checkoutService)
 	mustMapEnv(&svc.shippingSvcAddr, "SHIPPING_SERVICE_ADDR")
@@ -91,6 +82,25 @@ func initTracing() {
 		time.Sleep(d)
 	}
 	log.Printf("warning: could not initialize stackdriver exporter after retrying, giving up")
+}
+
+func initProfiling(service, version string) {
+	// TODO(ahmetb) this method is duplicated in other microservices using Go
+	// since they are not sharing packages.
+	for i := 1; i <= 3; i++ {
+		if err := profiler.Start(profiler.Config{
+			Service:        service,
+			ServiceVersion: version,
+			// ProjectID must be set if not running on GCP.
+			// ProjectID: "my-project",
+		}); err != nil {
+			log.Printf("warn: failed to start profiler: %+v", err)
+		}
+		d := time.Second * 10 * time.Duration(i)
+		log.Printf("sleeping %v to retry initializing stackdriver profiler", d)
+		time.Sleep(d)
+	}
+	log.Printf("warning: could not initialize stackdriver profiler after retrying, giving up")
 }
 
 func mustMapEnv(target *string, envKey string) {

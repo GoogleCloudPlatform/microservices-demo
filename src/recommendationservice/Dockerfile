@@ -3,15 +3,13 @@ FROM grpc/python:1.0
 # show python logs as they occur
 ENV PYTHONUNBUFFERED=0
 
-# add files into working directory
-COPY . /home/
-WORKDIR /home
-
 # get packages
-RUN apt-get update && apt-get install python3-pip -y
-RUN pip install opencensus
-RUN pip install google-cloud-trace
-RUN pip install google-python-cloud-debugger
+WORKDIR /recommendationservice
+COPY requirements.txt requirements.txt
+RUN pip install -r requirements.txt
+
+# add files into working directory
+COPY . .
 
 # set listen port
 ENV PORT "8080"

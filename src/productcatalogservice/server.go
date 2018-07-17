@@ -88,18 +88,9 @@ var catalog = []*pb.Product{
 }
 
 func main() {
-	if err := profiler.Start(profiler.Config{
-		Service:        "productcatalogservice",
-		ServiceVersion: "1.0.0",
-		// ProjectID must be set if not running on GCP.
-		// ProjectID: "my-project",
-	}); err != nil {
-		log.Fatalf("failed to start profiler: %+v", err)
-	}
-
-	flag.Parse()
-
 	go initTracing()
+	go initProfiling("productcatalogservice", "1.0.0")
+	flag.Parse()
 
 	log.Printf("starting grpc server at :%d", *port)
 	run(*port)
@@ -135,6 +126,25 @@ func initTracing() {
 		time.Sleep(d)
 	}
 	log.Printf("warning: could not initialize stackdriver exporter after retrying, giving up")
+}
+
+func initProfiling(service, version string) {
+	// TODO(ahmetb) this method is duplicated in other microservices using Go
+	// since they are not sharing packages.
+	for i := 1; i <= 3; i++ {
+		if err := profiler.Start(profiler.Config{
+			Service:        service,
+			ServiceVersion: version,
+			// ProjectID must be set if not running on GCP.
+			// ProjectID: "my-project",
+		}); err != nil {
+			log.Printf("warn: failed to start profiler: %+v", err)
+		}
+		d := time.Second * 10 * time.Duration(i)
+		log.Printf("sleeping %v to retry initializing stackdriver profiler", d)
+		time.Sleep(d)
+	}
+	log.Printf("warning: could not initialize stackdriver profiler after retrying, giving up")
 }
 
 type productCatalog struct{}
