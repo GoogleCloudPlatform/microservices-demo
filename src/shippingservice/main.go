@@ -32,15 +32,6 @@ func main() {
 	}
 	port = fmt.Sprintf(":%s", port)
 
-	if err := profiler.Start(profiler.Config{
-		Service:        "shippingservice",
-		ServiceVersion: "1.0.0",
-		// ProjectID must be set if not running on GCP.
-		// ProjectID: "my-project",
-	}); err != nil {
-		log.Fatalf("failed to start profiler: %+v", err)
-	}
-
 	lis, err := net.Listen("tcp", port)
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)

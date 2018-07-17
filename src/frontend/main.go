@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"fmt"
-	"log"
 	"net/http"
 	"os"
 	"time"
@@ -68,7 +67,7 @@ func main() {
 	log.Level = logrus.DebugLevel
 	log.Formatter = &logrus.TextFormatter{}
 
-	go initProfiling("frontend", "1.0.0")
+	go initProfiling(log, "frontend", "1.0.0")
 	go initTracing(log)
 
 	srvPort := port
@@ -134,23 +133,24 @@ func initTracing(log logrus.FieldLogger) {
 	log.Warn("could not initialize stackdriver exporter after retrying, giving up")
 }
 
-func initProfiling(service, version string) {
+func initProfiling(log logrus.FieldLogger, service, version string) {
 	// TODO(ahmetb) this method is duplicated in other microservices using Go
 	// since they are not sharing packages.
 	for i := 1; i <= 3; i++ {
+		log = log.WithField("retry", i)
 		if err := profiler.Start(profiler.Config{
 			Service:        service,
 			ServiceVersion: version,
 			// ProjectID must be set if not running on GCP.
 			// ProjectID: "my-project",
 		}); err != nil {
-			log.Printf("warn: failed to start profiler: %+v", err)
+			log.Warnf("warn: failed to start profiler: %+v", err)
 		}
 		d := time.Second * 10 * time.Duration(i)
-		log.Printf("sleeping %v to retry initializing stackdriver profiler", d)
+		log.Debugf("sleeping %v to retry initializing stackdriver profiler", d)
 		time.Sleep(d)
 	}
-	log.Printf("warning: could not initialize stackdriver profiler after retrying, giving up")
+	log.Warn("warning: could not initialize stackdriver profiler after retrying, giving up")
 }
 
 func mustMapEnv(target *string, envKey string) {
