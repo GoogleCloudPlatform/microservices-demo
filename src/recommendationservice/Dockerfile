@@ -15,4 +15,4 @@ COPY . .
 ENV PORT "8080"
 EXPOSE 8080
 
-ENTRYPOINT ["python", "/home/recommendation_server.py"]
+ENTRYPOINT ["python", "/recommendationservice/recommendation_server.py"]
