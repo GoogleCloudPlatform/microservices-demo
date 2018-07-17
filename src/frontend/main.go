@@ -63,21 +63,13 @@ type frontendServer struct {
 }
 
 func main() {
-	if err := profiler.Start(profiler.Config{
-		Service:        "frontendservice",
-		ServiceVersion: "1.0.0",
-		// ProjectID must be set if not running on GCP.
-		// ProjectID: "my-project",
-	}); err != nil {
-		log.Fatalf("failed to start profiler: %+v", err)
-	}
+	go initProfiling(frontend, "1.0.0")
+	go initTracing(log)
 
 	ctx := context.Background()
 	log := logrus.New()
 	log.Level = logrus.DebugLevel
 	log.Formatter = &logrus.TextFormatter{}
-
-	go initTracing(log)
 
 	srvPort := port
 	if os.Getenv("PORT") != "" {
@@ -140,6 +132,25 @@ func initTracing(log logrus.FieldLogger) {
 		time.Sleep(d)
 	}
 	log.Warn("could not initialize stackdriver exporter after retrying, giving up")
+}
+
+func initProfiling(service, version string) {
+	// TODO(ahmetb) this method is duplicated in other microservices using Go
+	// since they are not sharing packages.
+	for i := 1; i <= 3; i++ {
+		if err := profiler.Start(profiler.Config{
+			Service:        service,
+			ServiceVersion: version,
+			// ProjectID must be set if not running on GCP.
+			// ProjectID: "my-project",
+		}); err != nil {
+			log.Printf("warn: failed to start profiler: %+v", err)
+		}
+		d := time.Second * 10 * time.Duration(i)
+		log.Printf("sleeping %v to retry initializing stackdriver profiler", d)
+		time.Sleep(d)
+	}
+	log.Printf("warning: could not initialize stackdriver profiler after retrying, giving up")
 }
 
 func mustMapEnv(target *string, envKey string) {
