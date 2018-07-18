@@ -19,7 +19,9 @@ RUN go build -o /productcatalogservice .
 
 FROM alpine as release
 RUN apk add --no-cache ca-certificates
-COPY --from=builder /productcatalogservice /productcatalogservice
+WORKDIR /productcatalogservice
+COPY --from=builder /productcatalogservice ./server
+COPY products.json .
 EXPOSE 3550
-ENTRYPOINT ["/productcatalogservice"]
+ENTRYPOINT ["/productcatalogservice/server"]
 

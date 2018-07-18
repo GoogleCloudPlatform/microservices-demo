@@ -1,9 +1,11 @@
 package main
 
 import (
+	"bytes"
 	"context"
 	"flag"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"net"
 	"strings"
@@ -21,109 +23,20 @@ import (
 	"google.golang.org/grpc/status"
 )
 
-var port = flag.Int("port", 3550, "port to listen at")
+var (
+	catalogJSON []byte
 
-const catalogJSON = `{
-	"products": [
-  	{
-    	"id": "OLJCESPC7Z",
-    	"name": "Vintage Typewriter",
-    	"description": "This typewriter looks good in your living room.",
-    	"picture": "/static/img/products/typewriter.jpg",
-    	"priceUsd": {
-      	"currencyCode": "USD",
-      	"units": 67,
-      	"nanos": 990000000
-    	}
-  	},
-  	{
-    	"id": "66VCHSJNUP",
-    	"name": "Vintage Camera Lens",
-    	"description": "You won't have a camera to use it and it probably doesn't work anyway.",
-    	"picture": "/static/img/products/camera-lens.jpg",
-    	"priceUsd": {
-      	"currencyCode": "USD",
-      	"units": 12,
-      	"nanos": 490000000
-    	}
-  	},
-  	{
-    	"id": "1YMWWN1N4O",
-    	"name": "Home Barista Kit",
-    	"description": "Always wanted to brew coffee with Chemex and Aeropress at home?",
-    	"picture": "/static/img/products/barista-kit.jpg",
-    	"priceUsd": {
-      	"currencyCode": "USD",
-      	"units": 124
-    	}
-  	},
-  	{
-    	"id": "L9ECAV7KIM",
-    	"name": "Terrarium",
-    	"description": "This terrarium will looks great in your white painted living room.",
-    	"picture": "/static/img/products/terrarium.jpg",
-    	"priceUsd": {
-      	"currencyCode": "USD",
-      	"units": 36,
-      	"nanos": 450000000
-    	}
-  	},
-  	{
-    	"id": "2ZYFJ3GM2N",
-    	"name": "Film Camera",
-    	"description": "This camera looks like it's a film camera, but it's actually digital.",
-    	"picture": "/static/img/products/film-camera.jpg",
-    	"priceUsd": {
-      	"currencyCode": "USD",
-      	"units": 2245
-    	}
-  	},
-  	{
-    	"id": "0PUK6V6EV0",
-    	"name": "Vintage Record Player",
-    	"description": "It still works.",
-    	"picture": "/static/img/products/record-player.jpg",
-    	"priceUsd": {
-      	"currencyCode": "USD",
-      	"units": 65,
-      	"nanos": 500000000
-    	}
-  	},
-  	{
-    	"id": "LS4PSXUNUM",
-    	"name": "Metal Camping Mug",
-    	"description": "You probably don't go camping that often but this is better than plastic cups.",
-    	"picture": "/static/img/products/camp-mug.jpg",
-    	"priceUsd": {
-      	"currencyCode": "USD",
-      	"units": 24,
-      	"nanos": 330000000
-    	}
-  	},
-  	{
-    	"id": "9SIQT8TOJO",
-    	"name": "City Bike",
-    	"description": "This single gear bike probably cannot climb the hills of San Francisco.",
-    	"picture": "/static/img/products/city-bike.jpg",
-    	"priceUsd": {
-      	"currencyCode": "USD",
-      	"units": 789,
-      	"nanos": 500000000
-    	}
-  	},
-  	{
-    	"id": "6E92ZMYYFZ",
-    	"name": "Air Plant",
-    	"description": "Have you ever wondered whether air plants need water? Buy one and figure out.",
-    	"picture": "/static/img/products/air-plant.jpg",
-    	"priceUsd": {
-      	"currencyCode": "USD",
-      	"units": 12,
-      	"nanos": 300000000
-    	}
-  	}
-	]
-}`
+	port = flag.Int("port", 3550, "port to listen at")
+)
+
+func init() {
+	c, err := ioutil.ReadFile("products.json")
+	if err != nil {
+		log.Fatalf("failed to open product catalog json file: %v", err)
+	}
+	catalogJSON = c
+	log.Printf("successfully parsed product catalog json")
+}
 
 func main() {
 	go initTracing()
@@ -174,7 +87,7 @@ func initProfiling(service, version string) {
 			Service:        service,
 			ServiceVersion: version,
 			// ProjectID must be set if not running on GCP.
-			ProjectID: "oval-time-515",
+			// ProjectID: "my-project",
 		}); err != nil {
 			log.Printf("warn: failed to start profiler: %+v", err)
 			d := time.Second * 10 * time.Duration(i)
@@ -189,24 +102,25 @@ func initProfiling(service, version string) {
 
 type productCatalog struct{}
 
-func (p *productCatalog) catalog() []*pb.Product {
+func parseCatalog() []*pb.Product {
 	var cat pb.ListProductsResponse
-	if err := jsonpb.UnmarshalString(catalogJSON, &cat); err != nil {
-		log.Printf("warning: failed to parse the product catalog: %v", err)
+
+	if err := jsonpb.Unmarshal(bytes.NewReader(catalogJSON), &cat); err != nil {
+		log.Printf("warning: failed to parse the catalog JSON: %v", err)
 		return nil
 	}
 	return cat.Products
 }
 
 func (p *productCatalog) ListProducts(context.Context, *pb.Empty) (*pb.ListProductsResponse, error) {
-	return &pb.ListProductsResponse{Products: p.catalog()}, nil
+	return &pb.ListProductsResponse{Products: parseCatalog()}, nil
 }
 
 func (p *productCatalog) GetProduct(ctx context.Context, req *pb.GetProductRequest) (*pb.Product, error) {
 	var found *pb.Product
-	for i := 0; i < len(p.catalog()); i++ {
-		if req.Id == p.catalog()[i].Id {
-			found = p.catalog()[i]
+	for i := 0; i < len(parseCatalog()); i++ {
+		if req.Id == parseCatalog()[i].Id {
+			found = parseCatalog()[i]
 		}
 	}
 	if found == nil {
@@ -218,7 +132,7 @@ func (p *productCatalog) GetProduct(ctx context.Context, req *pb.GetProductReque
 func (p *productCatalog) SearchProducts(ctx context.Context, req *pb.SearchProductsRequest) (*pb.SearchProductsResponse, error) {
 	// Intepret query as a substring match in name or description.
 	var ps []*pb.Product
-	for _, p := range p.catalog() {
+	for _, p := range parseCatalog() {
 		if strings.Contains(strings.ToLower(p.Name), strings.ToLower(req.Query)) ||
 			strings.Contains(strings.ToLower(p.Description), strings.ToLower(req.Query)) {
 			ps = append(ps, p)
