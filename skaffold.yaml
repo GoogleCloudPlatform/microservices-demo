@@ -28,8 +28,3 @@ deploy:
   kubectl:
     manifests:
     - ./kubernetes-manifests/**.yaml
-profiles:
-- name: gcb
-  build:
-    googleCloudBuild:
-      projectId: istio-next
