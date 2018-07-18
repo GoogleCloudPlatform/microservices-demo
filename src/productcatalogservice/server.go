@@ -90,12 +90,13 @@ func initProfiling(service, version string) {
 			// ProjectID: "my-project",
 		}); err != nil {
 			log.Printf("warn: failed to start profiler: %+v", err)
-			d := time.Second * 10 * time.Duration(i)
-			log.Printf("sleeping %v to retry initializing stackdriver profiler", d)
-			time.Sleep(d)
-			continue
+		} else {
+			log.Print("started stackdriver profiler")
+			return
 		}
-		return
+		d := time.Second * 10 * time.Duration(i)
+		log.Debugf("sleeping %v to retry initializing stackdriver profiler", d)
+		time.Sleep(d)
 	}
 	log.Printf("warning: could not initialize stackdriver profiler after retrying, giving up")
 }

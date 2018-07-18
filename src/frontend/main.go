@@ -145,6 +145,9 @@ func initProfiling(log logrus.FieldLogger, service, version string) {
 			// ProjectID: "my-project",
 		}); err != nil {
 			log.Warnf("warn: failed to start profiler: %+v", err)
+		} else {
+			log.Info("started stackdriver profiler")
+			return
 		}
 		d := time.Second * 10 * time.Duration(i)
 		log.Debugf("sleeping %v to retry initializing stackdriver profiler", d)
