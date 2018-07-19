@@ -2,7 +2,11 @@
 
     {{ template "header" . }}
     <main role="main">
-        <section class="jumbotron text-center mb-0">
+        <section class="jumbotron text-center mb-0"
+		 {{ with $.banner_color }}
+		     style="background-color: {{.}};"
+		 {{ end }}
+		>
             <div class="container">
                 <h1 class="jumbotron-heading">
                     One-stop for Hipster Fashion &amp; Style Online

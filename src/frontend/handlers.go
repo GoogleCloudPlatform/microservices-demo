@@ -5,6 +5,7 @@ import (
 	"frontend/money"
 	"html/template"
 	"net/http"
+	"os"
 	"strconv"
 	"time"
 
@@ -62,6 +63,7 @@ func (fe *frontendServer) homeHandler(w http.ResponseWriter, r *http.Request) {
 		"currencies":    currencies,
 		"products":      ps,
 		"cart_size":     len(cart),
+		"banner_color":  os.Getenv("BANNER_COLOR"), // illustrates canary deployments
 	}); err != nil {
 		log.Error(err)
 	}
