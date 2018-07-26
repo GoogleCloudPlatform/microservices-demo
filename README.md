@@ -4,9 +4,12 @@ This project contains a 10-tier microservices application. The application is a
 web-based e-commerce app called “Hipster Shop” where users can browse items,
 add them to the cart, and purchase them.
 
+Google has used this application to demonstrate Kubernetes, GKE, Istio,
+Stackdriver, gRPC and similar cloud-native technologies.
+
 ### Running locally
 
-1. Install:
+1. Install tools to run a Kubernetes cluster locally:
 
    - kubectl (can be installed via `gcloud components install kubectl`)
    - Docker for Desktop (Mac/Windows): **Download the Edge release**; not the
@@ -14,9 +17,9 @@ add them to the cart, and purchase them.
      here](https://docs.docker.com/docker-for-mac/kubernetes/).
    - [skaffold](https://github.com/GoogleContainerTools/skaffold/#installation)
 
-1. Launch Docker for Desktop. Go to Preferences and choose “Enable Kubernetes”.
+1. Launch “Docker for Desktop”. Go to Preferences and choose “Enable Kubernetes”.
 
-1. Run `kubectl get nodes` to verify you're connected to Kubernetes on Docker.
+1. Run `kubectl get nodes` to verify you're connected to “Kubernetes on Docker”.
 
 1. Run `skaffold run` (first time will be slow). This will build and deploy the
    application. If you need to rebuild the images automatically as you refactor
@@ -61,15 +64,22 @@ add them to the cart, and purchase them.
 
 1. Create a GKE cluster.
 
-2. Install Istio **without mutual TLS** enablement.
+2. Install Istio **without mutual TLS** option. (Istio mTLS is not yet supported
+   on this demo.)
 
 3. Install the automatic sidecar injection (annotate the `default` namespace
    with the label):
 
        kubectl label namespace default istio-injection=enabled
 
-4. Deploy the application.
+4. Deploy the application with.
 
 5. Apply the manifests in [`./istio-manifests`](./istio-manifests) directory.
 
        kubectl apply -f ./istio-manifests
+
+6. Run `kubectl get pods` to see pods are in a healthy and ready state.
+
+---
+
+This is not an official Google project.
