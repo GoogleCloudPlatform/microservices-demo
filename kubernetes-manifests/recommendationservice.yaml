@@ -25,7 +25,7 @@ spec:
       terminationGracePeriodSeconds: 5
       containers:
       - name: server
-        image: gcr.io/istio-next/recommendationservice
+        image: gcr.io/microservices-demo-app/recommendationservice
         ports:
         - containerPort: 8080
         readinessProbe:

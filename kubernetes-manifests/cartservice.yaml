@@ -25,7 +25,7 @@ spec:
       terminationGracePeriodSeconds: 5
       containers:
       - name: server
-        image: gcr.io/istio-next/cartservice
+        image: gcr.io/microservices-demo-app/cartservice
         ports:
         - containerPort: 7070
         env:

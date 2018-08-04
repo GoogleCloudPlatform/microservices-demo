@@ -24,7 +24,7 @@ spec:
     spec:
       containers:
         - name: server
-          image: gcr.io/istio-next/frontend
+          image: gcr.io/microservices-demo-app/frontend
           ports:
           - containerPort: 8080
           readinessProbe:

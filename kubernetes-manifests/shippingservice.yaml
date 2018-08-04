@@ -24,7 +24,7 @@ spec:
     spec:
       containers:
       - name: server
-        image: gcr.io/istio-next/shippingservice
+        image: gcr.io/microservices-demo-app/shippingservice
         ports:
         - containerPort: 50051
         readinessProbe:

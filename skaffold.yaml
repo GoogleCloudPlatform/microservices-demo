@@ -18,25 +18,25 @@ build:
   tagPolicy:
     gitCommit: {}
   artifacts:
-  - imageName: gcr.io/istio-next/emailservice
+  - imageName: gcr.io/microservices-demo-app/emailservice
     workspace: src/emailservice
-  - imageName: gcr.io/istio-next/productcatalogservice
+  - imageName: gcr.io/microservices-demo-app/productcatalogservice
     workspace: src/productcatalogservice
-  - imageName: gcr.io/istio-next/recommendationservice
+  - imageName: gcr.io/microservices-demo-app/recommendationservice
     workspace: src/recommendationservice
-  - imageName: gcr.io/istio-next/shippingservice
+  - imageName: gcr.io/microservices-demo-app/shippingservice
     workspace: src/shippingservice
-  - imageName: gcr.io/istio-next/checkoutservice
+  - imageName: gcr.io/microservices-demo-app/checkoutservice
     workspace: src/checkoutservice
-  - imageName: gcr.io/istio-next/paymentservice
+  - imageName: gcr.io/microservices-demo-app/paymentservice
     workspace: src/paymentservice
-  - imageName: gcr.io/istio-next/currencyservice
+  - imageName: gcr.io/microservices-demo-app/currencyservice
     workspace: src/currencyservice
-  - imageName: gcr.io/istio-next/cartservice
+  - imageName: gcr.io/microservices-demo-app/cartservice
     workspace: src/cartservice
-  - imageName: gcr.io/istio-next/frontend
+  - imageName: gcr.io/microservices-demo-app/frontend
     workspace: src/frontend
-  - imageName: gcr.io/istio-next/loadgenerator
+  - imageName: gcr.io/microservices-demo-app/loadgenerator
     workspace: src/loadgenerator
 deploy:
   kubectl:
