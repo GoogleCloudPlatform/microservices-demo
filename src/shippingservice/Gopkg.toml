@@ -26,8 +26,20 @@
 
 
 [[constraint]]
+  name = "cloud.google.com/go"
+  version = "0.25.0"
+
+[[constraint]]
+  name = "contrib.go.opencensus.io/exporter/stackdriver"
+  version = "0.5.0"
+
+[[constraint]]
   name = "github.com/golang/protobuf"
   version = "1.1.0"
+
+[[constraint]]
+  name = "go.opencensus.io"
+  version = "0.14.0"
 
 [[constraint]]
   branch = "master"
@@ -35,7 +47,7 @@
 
 [[constraint]]
   name = "google.golang.org/grpc"
-  version = "1.13.0"
+  version = "1.14.0"
 
 [prune]
   go-tests = true

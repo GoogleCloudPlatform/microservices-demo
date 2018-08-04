@@ -26,24 +26,8 @@
 
 
 [[constraint]]
-  name = "cloud.google.com/go"
-  version = "0.25.0"
-
-[[constraint]]
-  name = "contrib.go.opencensus.io/exporter/stackdriver"
-  version = "0.5.0"
-
-[[constraint]]
   name = "github.com/golang/protobuf"
   version = "1.1.0"
-
-[[constraint]]
-  name = "github.com/google/uuid"
-  version = "0.2.0"
-
-[[constraint]]
-  name = "go.opencensus.io"
-  version = "0.14.0"
 
 [[constraint]]
   branch = "master"

@@ -17,7 +17,7 @@ package main
 import (
 	"context"
 
-	pb "frontend/genproto"
+	pb "github.com/GoogleCloudPlatform/microservices-demo/src/frontend/genproto"
 
 	"github.com/pkg/errors"
 )

@@ -20,9 +20,8 @@ import (
 	"os"
 	"time"
 
-	pb "./genproto"
+	pb "github.com/GoogleCloudPlatform/microservices-demo/src/cartservice/probe/genproto"
 
-	"go.opencensus.io/plugin/ocgrpc"
 	"google.golang.org/grpc"
 )
 
@@ -38,7 +37,6 @@ func main() {
 		grpc.WithBlock(),
 		grpc.WithTimeout(time.Second*3),
 		grpc.WithInsecure(),
-		grpc.WithStatsHandler(&ocgrpc.ClientHandler{}),
 	)
 	if err != nil {
 		log.Fatalf("probe failed: failed to connect: %+v", err)

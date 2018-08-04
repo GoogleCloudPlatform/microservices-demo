@@ -1,31 +1,16 @@
 FROM golang:1.10-alpine as builder
-RUN apk add --no-cache ca-certificates git
-WORKDIR /go/src/frontend
+RUN apk add --no-cache ca-certificates git && \
+      wget -qO/go/bin/dep https://github.com/golang/dep/releases/download/v0.5.0/dep-linux-amd64 && \
+      chmod +x /go/bin/dep
 
-# fetch known dependencies for caching
-RUN go get -d github.com/google/uuid \
-    github.com/gorilla/mux \
-    github.com/pkg/errors \
-    github.com/sirupsen/logrus \
-    google.golang.org/grpc \
-    google.golang.org/grpc/codes \
-    google.golang.org/grpc/status \
-    go.opencensus.io/plugin/ochttp \
-    go.opencensus.io/plugin/ochttp/propagation/b3 \
-    go.opencensus.io/exporter/stackdriver \
-    go.opencensus.io/trace \
-    cloud.google.com/go/profiler
+ENV PROJECT github.com/GoogleCloudPlatform/microservices-demo/src/frontend
+WORKDIR /go/src/$PROJECT
 
-# copy go-only part of the build
-COPY *.go ./
-COPY ./genproto ./genproto
-COPY ./money    ./money
-
-# fetch other dependencies might not have listed above (ideally noop)
-RUN go get -d ./...
+# restore dependencies
+COPY Gopkg.* ./
+RUN dep ensure --vendor-only -v
+COPY . .
 RUN go install .
-
-# ---
 
 FROM alpine as release
 RUN apk add --no-cache ca-certificates \

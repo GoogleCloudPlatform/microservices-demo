@@ -19,7 +19,7 @@ import (
 
 	"golang.org/x/net/context"
 
-	pb "./genproto"
+	pb "github.com/GoogleCloudPlatform/microservices-demo/src/shippingservice/genproto"
 )
 
 // TestGetQuote is a basic check on the GetQuote RPC service.

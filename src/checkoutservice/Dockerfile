@@ -1,19 +1,16 @@
 FROM golang:1.10-alpine as builder
-RUN apk add --no-cache ca-certificates git
-WORKDIR /go/src/checkoutservice
+RUN apk add --no-cache ca-certificates git && \
+      wget -qO/go/bin/dep https://github.com/golang/dep/releases/download/v0.5.0/dep-linux-amd64 && \
+      chmod +x /go/bin/dep
 
-# get known dependencies
-RUN go get -d github.com/google/uuid \
-    google.golang.org/grpc \
-    google.golang.org/grpc/codes \
-    google.golang.org/grpc/status \
-    go.opencensus.io/plugin/ocgrpc \
-    go.opencensus.io/exporter/stackdriver \
-	go.opencensus.io/trace \
-    cloud.google.com/go/profiler
+ENV PROJECT github.com/GoogleCloudPlatform/microservices-demo/src/checkoutservice
+WORKDIR /go/src/$PROJECT
+
+# restore dependencies
+COPY Gopkg.* ./
+RUN dep ensure --vendor-only -v
+
 COPY . .
-# get remaining dependencies
-RUN go get -d ./...
 RUN go build -gcflags='-N -l' -o /checkoutservice .
 
 FROM alpine as release

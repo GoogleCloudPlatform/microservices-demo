@@ -23,16 +23,16 @@ import (
 	"time"
 
 	"cloud.google.com/go/profiler"
+	"contrib.go.opencensus.io/exporter/stackdriver"
 	"github.com/google/uuid"
-	"go.opencensus.io/exporter/stackdriver"
 	"go.opencensus.io/plugin/ocgrpc"
 	"go.opencensus.io/trace"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
-	pb "checkoutservice/genproto"
-	money "checkoutservice/money"
+	pb "github.com/GoogleCloudPlatform/microservices-demo/src/checkoutservice/genproto"
+	money "github.com/GoogleCloudPlatform/microservices-demo/src/checkoutservice/money"
 )
 
 const (

@@ -22,14 +22,14 @@ import (
 	"time"
 
 	"cloud.google.com/go/profiler"
-	"go.opencensus.io/exporter/stackdriver"
+	"contrib.go.opencensus.io/exporter/stackdriver"
 	"go.opencensus.io/plugin/ocgrpc"
 	"go.opencensus.io/trace"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 
-	pb "./genproto"
+	pb "github.com/GoogleCloudPlatform/microservices-demo/src/shippingservice/genproto"
 )
 
 const (

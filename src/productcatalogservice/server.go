@@ -25,11 +25,11 @@ import (
 	"strings"
 	"time"
 
-	pb "./genproto"
+	pb "github.com/GoogleCloudPlatform/microservices-demo/src/productcatalogservice/genproto"
 
 	"cloud.google.com/go/profiler"
+	"contrib.go.opencensus.io/exporter/stackdriver"
 	"github.com/golang/protobuf/jsonpb"
-	"go.opencensus.io/exporter/stackdriver"
 	"go.opencensus.io/plugin/ocgrpc"
 	"go.opencensus.io/trace"
 	"google.golang.org/grpc"

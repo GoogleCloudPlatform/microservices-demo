@@ -14,6 +14,15 @@
   version = "v0.25.0"
 
 [[projects]]
+  name = "contrib.go.opencensus.io/exporter/stackdriver"
+  packages = [
+    ".",
+    "propagation"
+  ]
+  revision = "37aa2801fbf0205003e15636096ebf0373510288"
+  version = "v0.5.0"
+
+[[projects]]
   name = "github.com/golang/protobuf"
   packages = [
     "proto",
@@ -51,8 +60,6 @@
   name = "go.opencensus.io"
   packages = [
     ".",
-    "exporter/stackdriver",
-    "exporter/stackdriver/propagation",
     "internal",
     "internal/tagencoding",
     "plugin/ocgrpc",
@@ -82,7 +89,7 @@
     "internal/timeseries",
     "trace"
   ]
-  revision = "a0f8a16cb08c06df97cbdf9c47f4731ba548c33c"
+  revision = "f4c29de78a2a91c00474a2e689954305c350adf9"
 
 [[projects]]
   branch = "master"
@@ -101,6 +108,12 @@
   name = "golang.org/x/sync"
   packages = ["semaphore"]
   revision = "1d60e4601c6fd243af51cc01ddf169918a5407ca"
+
+[[projects]]
+  branch = "master"
+  name = "golang.org/x/sys"
+  packages = ["unix"]
+  revision = "0ffbfd41fbef8ffcf9b62b0b0aa3a5873ed7a4fe"
 
 [[projects]]
   name = "golang.org/x/text"
@@ -136,7 +149,7 @@
     "transport/grpc",
     "transport/http"
   ]
-  revision = "31ca0e01cd791f07750cb23fc99327721f753290"
+  revision = "f6d94689cbd71030af1108ddac733886fcae1d75"
 
 [[projects]]
   name = "google.golang.org/appengine"
@@ -173,7 +186,7 @@
     "googleapis/rpc/status",
     "protobuf/field_mask"
   ]
-  revision = "2a72893556e4d1f6c795a4c039314c9fa751eedb"
+  revision = "daca94659cb50e9f37c1b834680f2e46358f10b0"
 
 [[projects]]
   name = "google.golang.org/grpc"
@@ -192,7 +205,9 @@
     "internal",
     "internal/backoff",
     "internal/channelz",
+    "internal/envconfig",
     "internal/grpcrand",
+    "internal/transport",
     "keepalive",
     "metadata",
     "naming",
@@ -202,15 +217,14 @@
     "resolver/passthrough",
     "stats",
     "status",
-    "tap",
-    "transport"
+    "tap"
   ]
-  revision = "168a6198bcb0ef175f7dacec0b8691fc141dc9b8"
-  version = "v1.13.0"
+  revision = "32fb0ac620c32ba40a4626ddf94d90d12cce3455"
+  version = "v1.14.0"
 
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "73bafb0f18bd463b549babecf99cc93904602a143a87e666f7f8f1a3790c5a3b"
+  inputs-digest = "54254ec0ccf29fb2b490b54b12e5f3eb752ab9b8f9d4f5ab097d60f96eeed9d9"
   solver-name = "gps-cdcl"
   solver-version = 1

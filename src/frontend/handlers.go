@@ -16,7 +16,6 @@ package main
 
 import (
 	"fmt"
-	"frontend/money"
 	"html/template"
 	"net/http"
 	"os"
@@ -27,7 +26,8 @@ import (
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 
-	pb "frontend/genproto"
+	pb "github.com/GoogleCloudPlatform/microservices-demo/src/frontend/genproto"
+	"github.com/GoogleCloudPlatform/microservices-demo/src/frontend/money"
 )
 
 var (
