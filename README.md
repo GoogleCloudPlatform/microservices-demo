@@ -12,8 +12,7 @@ Stackdriver, gRPC and similar cloud-native technologies.
 1. Install tools to run a Kubernetes cluster locally:
 
    - kubectl (can be installed via `gcloud components install kubectl`)
-   - Docker for Desktop (Mac/Windows): **Download the Edge release**; not the
-     stable. Edge release provides Kubernetes support as [noted
+   - Docker for Desktop (Mac/Windows): It provides Kubernetes support as [noted
      here](https://docs.docker.com/docker-for-mac/kubernetes/).
    - [skaffold](https://github.com/GoogleContainerTools/skaffold/#installation)
 
