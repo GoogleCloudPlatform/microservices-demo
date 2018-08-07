@@ -27,7 +27,7 @@
 
 [[constraint]]
   name = "cloud.google.com/go"
-  version = "0.25.0"
+  version = "0.26.0"
 
 [[constraint]]
   name = "contrib.go.opencensus.io/exporter/stackdriver"

@@ -10,8 +10,8 @@
     "profiler",
     "trace/apiv2"
   ]
-  revision = "aad3f485ee528456e0768f20397b4d9dd941e755"
-  version = "v0.25.0"
+  revision = "64a2037ec6be8a4b0c1d1f706ed35b428b989239"
+  version = "v0.26.0"
 
 [[projects]]
   name = "contrib.go.opencensus.io/exporter/stackdriver"
@@ -42,7 +42,7 @@
   branch = "master"
   name = "github.com/google/pprof"
   packages = ["profile"]
-  revision = "ef437552946f69f7e3bdf1fd81c385c29530944d"
+  revision = "cf6d271c80826ef4d30d55512b5a77b115bd4b9c"
 
 [[projects]]
   name = "github.com/googleapis/gax-go"
@@ -83,7 +83,7 @@
     "internal/timeseries",
     "trace"
   ]
-  revision = "f4c29de78a2a91c00474a2e689954305c350adf9"
+  revision = "19491d39cadbd9cd33f26ca22cc89ba4ba38251c"
 
 [[projects]]
   branch = "master"
@@ -107,7 +107,7 @@
   branch = "master"
   name = "golang.org/x/sys"
   packages = ["unix"]
-  revision = "0ffbfd41fbef8ffcf9b62b0b0aa3a5873ed7a4fe"
+  revision = "acbc56fc7007d2a01796d5bde54f39e3b3e95945"
 
 [[projects]]
   name = "golang.org/x/text"
@@ -143,7 +143,7 @@
     "transport/grpc",
     "transport/http"
   ]
-  revision = "f6d94689cbd71030af1108ddac733886fcae1d75"
+  revision = "9bdf771af19ab16b6a5084e5d542a7e04cb97004"
 
 [[projects]]
   name = "google.golang.org/appengine"
@@ -196,6 +196,7 @@
     "encoding",
     "encoding/proto",
     "grpclog",
+    "health/grpc_health_v1",
     "internal",
     "internal/backoff",
     "internal/channelz",
@@ -221,6 +222,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "3f4776192cec97ef87c4d20a52c9752d106a298befc139e5bca176bf915ed63b"
+  inputs-digest = "e2a0b47948cf03a5d2a05d2baf26b0a1f4da4102b2c7bbba377d46c1095444f9"
   solver-name = "gps-cdcl"
   solver-version = 1
