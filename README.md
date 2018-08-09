@@ -20,9 +20,9 @@ Stackdriver, gRPC and similar cloud-native technologies.
 
 1. Run `kubectl get nodes` to verify you're connected to “Kubernetes on Docker”.
 
-1. Run `skaffold run` (first time will be slow). This will build and deploy the
-   application. If you need to rebuild the images automatically as you refactor
-   the code, run `skaffold dev` command.
+1. Run `skaffold run` (first time will be slow, it can take ~20-30 minutes).
+   This will build and deploy the application. If you need to rebuild the images
+   automatically as you refactor he code, run `skaffold dev` command.
 
 1. Run `kubectl get pods` to verify the Pods are ready and running. The
    application frontend should be available at http://localhost:80 on your
