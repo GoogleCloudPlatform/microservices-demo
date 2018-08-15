@@ -34,6 +34,8 @@ build:
     workspace: src/currencyservice
   - imageName: gcr.io/microservices-demo-app/cartservice
     workspace: src/cartservice
+  - imageName: gcr.io/istio-next/adsservice
+    workspace: src/adsservice
   - imageName: gcr.io/microservices-demo-app/frontend
     workspace: src/frontend
   - imageName: gcr.io/microservices-demo-app/loadgenerator
