@@ -1,18 +1,3 @@
-/*
- * Copyright 2018, OpenCensus Authors
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 
 package hipstershop;
 
@@ -49,7 +34,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.annotation.Nullable;
 
-/** A simple client that requests a greeting from the {@link AdsServiceClient}. */
+/** A simple client that requests ads from the Ads Service. */
 public class AdsServiceClient {
   private static final Logger logger = Logger.getLogger(AdsServiceClient.class.getName());
 
@@ -58,7 +43,7 @@ public class AdsServiceClient {
   private final ManagedChannel channel;
   private final hipstershop.AdsServiceGrpc.AdsServiceBlockingStub blockingStub;
 
-  /** Construct client connecting to HelloWorld server at {@code host:port}. */
+  /** Construct client connecting to Ad Service at {@code host:port}. */
   public AdsServiceClient(String host, int port) {
     this(
         ManagedChannelBuilder.forAddress(host, port)
@@ -78,7 +63,7 @@ public class AdsServiceClient {
     channel.shutdown().awaitTermination(5, TimeUnit.SECONDS);
   }
 
-  /** Say hello to server. */
+  /** Get Ads from Server. */
   public void getAds(String contextKey) {
     logger.info("Get Ads with context " + contextKey + " ...");
     AdsRequest request = AdsRequest.newBuilder().addContextKeys(contextKey).build();
@@ -129,8 +114,8 @@ public class AdsServiceClient {
   }
 
   /**
-   * Greet server. If provided, the first element of {@code args} is the name to use in the
-   * greeting.
+   * Ads Service Client main. If provided, the first element of {@code args} is the context key to
+   * get the ads from the Ads Service
    */
   public static void main(String[] args) throws IOException, InterruptedException {
     // Add final keyword to pass checkStyle.

@@ -41,7 +41,7 @@ public class AdsService {
   private void start() throws IOException {
     int port = Integer.parseInt(System.getenv("PORT"));
     server = ServerBuilder.forPort(port).addService(new AdsServiceImpl()).build().start();
-    logger.info("Server started, listening on " + port);
+    logger.info("Ads Service started, listening on " + port);
     Runtime.getRuntime()
         .addShutdownHook(
             new Thread() {
@@ -138,7 +138,6 @@ public class AdsService {
   }
 
   static void initializeAds() {
-    // TODO: Replace localhost with
     String adsUrl = System.getenv("ADS_URL");
     cacheMap.put("camera", Ads.newBuilder().setRedirectUrl(adsUrl + "/camera")
         .setText("MyPro camera for sale. 50% off.").build());
