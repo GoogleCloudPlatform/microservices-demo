@@ -95,31 +95,42 @@ Find **Protocol Buffers Descriptions** at the [`./pb` directory](./pb).
 1. Create a Google Kubernetes Engine cluster and make sure `kubectl` is pointing
    to the cluster.
 
-1. Enable Google Container Registry (GCR) on your GCP project:
+        gcloud services enable container.googleapis.com
+
+        gcloud container clusters create demo --enable-autoupgrade \
+            --enable-autoscaling --min-nodes=3 --max-nodes=10 --num-nodes=5
+
+        kubectl get nodes
+
+2. Enable Google Container Registry (GCR) on your GCP project and configure the
+   `docker` CLI to authenticate to GCR:
 
        gcloud services enable containerregistry.googleapis.com
 
-1. Configure docker to authenticate to GCR:
-
        gcloud auth configure-docker -q
 
-1. Edit `skaffold.yaml`, prepend your GCR registry host (`gcr.io/YOUR_PROJECT/`)
+3. Edit `skaffold.yaml`, prepend your GCR registry host (`gcr.io/YOUR_PROJECT/`)
    to all `imageName:` fields (or update the existing project name).
 
-1. Edit the Deployment manifests at `kubernetes-manifests` directory and update
-   the `image` fields to match the changes you made in the previous step.
+4. Edit the Deployment manifests in
+   [`./kubernetes-manifests`](./kubernetes-manifests) directory and update the
+   `image:` fields to match the changes you made in the previous step.
 
-1. Run `skaffold run`. This builds the container
-   images, pushes them to GCR, and deploys the application to Kubernetes.
+5. Run `skaffold run` from the root of this repository. This command:
+   - builds the container images
+   - pushes them to GCR
+   - applies the `./kubernetes-manifests` deploying the application to
+     Kubernetes.
 
-1.  Find the IP address of your application then visit the application on your
+6.  Find the IP address of your application, then visit the application on your
     browser to confirm installation.
 
         kubectl get service frontend-external
 
 ### (Optional) Deploying on a Istio-installed cluster
 
-> If you followed steps above, run `skaffold delete` to delete what's deployed.
+> **Note:** you followed GKE deployment steps above, run `skaffold delete` first
+> to delete what's deployed.
 
 1. Create a GKE cluster.
 
@@ -131,19 +142,29 @@ Find **Protocol Buffers Descriptions** at the [`./pb` directory](./pb).
 
        kubectl label namespace default istio-injection=enabled
 
-4. Deploy the application with `skaffold run`.
-
-5. Apply the manifests in [`./istio-manifests`](./istio-manifests) directory.
+4. Apply the manifests in [`./istio-manifests`](./istio-manifests) directory.
 
        kubectl apply -f ./istio-manifests
 
     This is required only once.
 
+5. Deploy the application with `skaffold run`.
+
 6. Run `kubectl get pods` to see pods are in a healthy and ready state.
 
-1. Find the IP address of your istio gateway Ingress or Service, and visit the
+7. Find the IP address of your istio gateway Ingress or Service, and visit the
    application.
 
+       INGRESS_HOST="$(kubectl -n istio-system get service istio-ingressgateway -o jsonpath='{.status.loadBalancer.ingress[0].ip}')"
+
+       echo "$INGRESS_HOST"
+
+       curl -v "http://$INGRESS_HOST"
+
 ---
+
+**Note to fellow Googlers:** Please fill out the form at
+[go/microservices-demo](http://go/microservices-demo) if you are using this
+application.
 
 This is not an official Google project.
