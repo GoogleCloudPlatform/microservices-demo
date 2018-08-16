@@ -217,3 +217,27 @@ message PlaceOrderRequest {
 message PlaceOrderResponse {
     OrderResult order = 1;
 }
+
+// ------------Ads service------------------
+
+service AdsService {
+    rpc GetAds(AdsRequest) returns (AdsResponse) {}
+}
+
+message AdsRequest {
+    // List of important key words from the current page describing the context.
+    repeated string context_keys = 1;
+}
+
+message AdsResponse {
+    repeated Ads ads = 1;
+}
+
+message Ads {
+    // url to redirect to when an ad is clicked.
+    string redirect_url = 1;
+
+    // Optional text to display.
+    // Should not be more than 100 characters.
+    string text = 2;
+}
