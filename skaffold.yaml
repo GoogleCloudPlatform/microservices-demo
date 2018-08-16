@@ -17,6 +17,8 @@ kind: Config
 build:
   tagPolicy:
     gitCommit: {}
+  googleCloudBuild:
+    diskSizeGb: 300
   artifacts:
   - imageName: gcr.io/microservices-demo-app/emailservice
     workspace: src/emailservice
