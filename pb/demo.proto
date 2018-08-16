@@ -230,14 +230,13 @@ message AdsRequest {
 }
 
 message AdsResponse {
-    repeated Ads ads = 1;
+    repeated Ad ads = 1;
 }
 
-message Ads {
+message Ad {
     // url to redirect to when an ad is clicked.
     string redirect_url = 1;
 
-    // Optional text to display.
-    // Should not be more than 100 characters.
+    // short advertisement text to display.
     string text = 2;
 }
