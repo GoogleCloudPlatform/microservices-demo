@@ -114,3 +114,22 @@ func (fe *frontendServer) getRecommendations(ctx context.Context, userID string,
 	}
 	return out, err
 }
+
+func (fe *frontendServer) getAd(ctx context.Context) ([]*pb.Ad, error) {
+	return []*pb.Ad{
+		&pb.Ad{
+			Text:        "Try this OG insta camera from 1960s!",
+			RedirectUrl: "https://en.wikipedia.org/wiki/Instant_camera#Polaroid_cameras",
+		},
+		&pb.Ad{
+			Text:        "Check out the new instagrammy vacation destinations!",
+			RedirectUrl: "https://en.wikipedia.org/wiki/Italy",
+		},
+	}, nil
+
+	// TODO(rghetia): uncomment below and revove the code above
+	// resp, err := pb.NewAdsServiceClient(fe.adSvcConn).GetAds(ctx, &pb.AdsRequest{
+	// 	ContextKeys: nil,
+	// })
+	// return resp.GetAds(), errors.Wrap(err, "failed to get ads")
+}

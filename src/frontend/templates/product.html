@@ -47,9 +47,10 @@
                     {{ template "recommendations" $.recommendations }}
                 {{ end }}
                 
+                {{ with $.ad }}{{ template "text_ad" . }}{{ end}}
             </div>
         </div>
+    
     </main>
-
     {{ template "footer" . }}
 {{ end }}
