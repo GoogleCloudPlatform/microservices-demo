@@ -15,8 +15,10 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"html/template"
+	"math/rand"
 	"net/http"
 	"os"
 	"strconv"
@@ -78,6 +80,7 @@ func (fe *frontendServer) homeHandler(w http.ResponseWriter, r *http.Request) {
 		"products":      ps,
 		"cart_size":     len(cart),
 		"banner_color":  os.Getenv("BANNER_COLOR"), // illustrates canary deployments
+		"ad":              fe.chooseAd(r.Context(), log),
 	}); err != nil {
 		log.Error(err)
 	}
@@ -130,6 +133,7 @@ func (fe *frontendServer) productHandler(w http.ResponseWriter, r *http.Request)
 	if err := templates.ExecuteTemplate(w, "product", map[string]interface{}{
 		"session_id":      sessionID(r),
 		"request_id":      r.Context().Value(ctxKeyRequestID{}),
+		"ad":              fe.chooseAd(r.Context(), log),
 		"user_currency":   currentCurrency(r),
 		"currencies":      currencies,
 		"product":         product,
@@ -338,6 +342,17 @@ func (fe *frontendServer) setCurrencyHandler(w http.ResponseWriter, r *http.Requ
 	}
 	w.Header().Set("Location", referer)
 	w.WriteHeader(http.StatusFound)
+}
+
+// chooseAd queries for advertisements available and randomly chooses one, if
+// available. It ignores the error retrieving the ad since it is not critical.
+func (fe *frontendServer) chooseAd(ctx context.Context, log logrus.FieldLogger) *pb.Ad {
+	ads, err := fe.getAd(ctx)
+	if err != nil {
+		log.WithField("error", err).Warn("failed to retrieve ads")
+		return nil
+	}
+	return ads[rand.Intn(len(ads))]
 }
 
 func renderHTTPError(log logrus.FieldLogger, r *http.Request, w http.ResponseWriter, err error, code int) {
