@@ -18,27 +18,27 @@ build:
   tagPolicy:
     gitCommit: {}
   artifacts:
-  - imageName: gcr.io/microservices-demo-app/emailservice
+  - imageName: gcr.io/opencensus-java-stats-demo-app/emailservice
     workspace: src/emailservice
-  - imageName: gcr.io/microservices-demo-app/productcatalogservice
+  - imageName: gcr.io/opencensus-java-stats-demo-app/productcatalogservice
     workspace: src/productcatalogservice
-  - imageName: gcr.io/microservices-demo-app/recommendationservice
+  - imageName: gcr.io/opencensus-java-stats-demo-app/recommendationservice
     workspace: src/recommendationservice
-  - imageName: gcr.io/microservices-demo-app/shippingservice
+  - imageName: gcr.io/opencensus-java-stats-demo-app/shippingservice
     workspace: src/shippingservice
-  - imageName: gcr.io/microservices-demo-app/checkoutservice
+  - imageName: gcr.io/opencensus-java-stats-demo-app/checkoutservice
     workspace: src/checkoutservice
-  - imageName: gcr.io/microservices-demo-app/paymentservice
+  - imageName: gcr.io/opencensus-java-stats-demo-app/paymentservice
     workspace: src/paymentservice
-  - imageName: gcr.io/microservices-demo-app/currencyservice
+  - imageName: gcr.io/opencensus-java-stats-demo-app/currencyservice
     workspace: src/currencyservice
-  - imageName: gcr.io/microservices-demo-app/cartservice
+  - imageName: gcr.io/opencensus-java-stats-demo-app/cartservice
     workspace: src/cartservice
-  - imageName: gcr.io/istio-next/adsservice
-    workspace: src/adsservice
-  - imageName: gcr.io/microservices-demo-app/frontend
+  - imageName: gcr.io/opencensus-java-stats-demo-app/adservice
+    workspace: src/adservice
+  - imageName: gcr.io/opencensus-java-stats-demo-app/frontend
     workspace: src/frontend
-  - imageName: gcr.io/microservices-demo-app/loadgenerator
+  - imageName: gcr.io/opencensus-java-stats-demo-app/loadgenerator
     workspace: src/loadgenerator
 deploy:
   kubectl:

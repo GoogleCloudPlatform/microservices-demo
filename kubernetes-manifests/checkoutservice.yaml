@@ -24,7 +24,7 @@ spec:
     spec:
       containers:
         - name: server
-          image: gcr.io/microservices-demo-app/checkoutservice
+          image: gcr.io/opencensus-java-stats-demo-app/checkoutservice
           ports:
           - containerPort: 5050
           readinessProbe:

@@ -15,17 +15,17 @@
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
-  name: adsservice
+  name: adservice
 spec:
   template:
     metadata:
       labels:
-        app: adsservice
+        app: adservice
     spec:
       terminationGracePeriodSeconds: 5
       containers:
       - name: server
-        image: gcr.io/istio-next/adsservice
+        image: gcr.io/opencensus-java-stats-demo-app/adservice
         ports:
         - containerPort: 9555
         env:
@@ -56,11 +56,11 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: adsservice
+  name: adservice
 spec:
   type: ClusterIP
   selector:
-    app: adsservice
+    app: adservice
   ports:
   - name: grpc
     port: 9555

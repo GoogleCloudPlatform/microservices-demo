@@ -1,28 +1,36 @@
+/*
+ * Copyright 2018, Google LLC.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 package hipstershop;
 
 
-import com.google.common.collect.ImmutableMap;
-import hipstershop.Demo.Ads;
-import hipstershop.Demo.AdsRequest;
-import hipstershop.Demo.AdsResponse;
+import hipstershop.Demo.Ad;
+import hipstershop.Demo.AdRequest;
+import hipstershop.Demo.AdResponse;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
-import io.grpc.Server;
-import io.grpc.ServerBuilder;
 import io.grpc.StatusRuntimeException;
-import io.grpc.stub.StreamObserver;
 import io.opencensus.common.Duration;
 import io.opencensus.common.Scope;
 import io.opencensus.contrib.grpc.metrics.RpcViews;
-import io.opencensus.exporter.stats.prometheus.PrometheusStatsCollector;
 import io.opencensus.exporter.trace.logging.LoggingTraceExporter;
 import io.opencensus.exporter.stats.stackdriver.StackdriverStatsConfiguration;
 import io.opencensus.exporter.stats.stackdriver.StackdriverStatsExporter;
 import io.opencensus.exporter.trace.stackdriver.StackdriverTraceConfiguration;
 import io.opencensus.exporter.trace.stackdriver.StackdriverTraceExporter;
-import io.opencensus.trace.AttributeValue;
-import io.opencensus.trace.Span;
 import io.opencensus.trace.SpanBuilder;
 import io.opencensus.trace.Status.CanonicalCode;
 import io.opencensus.trace.Tracer;
@@ -35,16 +43,16 @@ import java.util.logging.Logger;
 import javax.annotation.Nullable;
 
 /** A simple client that requests ads from the Ads Service. */
-public class AdsServiceClient {
-  private static final Logger logger = Logger.getLogger(AdsServiceClient.class.getName());
+public class AdServiceClient {
+  private static final Logger logger = Logger.getLogger(AdServiceClient.class.getName());
 
   private static final Tracer tracer = Tracing.getTracer();
 
   private final ManagedChannel channel;
-  private final hipstershop.AdsServiceGrpc.AdsServiceBlockingStub blockingStub;
+  private final hipstershop.AdServiceGrpc.AdServiceBlockingStub blockingStub;
 
   /** Construct client connecting to Ad Service at {@code host:port}. */
-  public AdsServiceClient(String host, int port) {
+  public AdServiceClient(String host, int port) {
     this(
         ManagedChannelBuilder.forAddress(host, port)
             // Channels are secure by default (via SSL/TLS). For the example we disable TLS to avoid
@@ -54,9 +62,9 @@ public class AdsServiceClient {
   }
 
   /** Construct client for accessing RouteGuide server using the existing channel. */
-  AdsServiceClient(ManagedChannel channel) {
+  AdServiceClient(ManagedChannel channel) {
     this.channel = channel;
-    blockingStub = hipstershop.AdsServiceGrpc.newBlockingStub(channel);
+    blockingStub = hipstershop.AdServiceGrpc.newBlockingStub(channel);
   }
 
   public void shutdown() throws InterruptedException {
@@ -66,8 +74,8 @@ public class AdsServiceClient {
   /** Get Ads from Server. */
   public void getAds(String contextKey) {
     logger.info("Get Ads with context " + contextKey + " ...");
-    AdsRequest request = AdsRequest.newBuilder().addContextKeys(contextKey).build();
-    AdsResponse response;
+    AdRequest request = AdRequest.newBuilder().addContextKeys(contextKey).build();
+    AdResponse response;
 
     SpanBuilder spanBuilder =
         tracer.spanBuilder("AdsClient").setRecordEvents(true).setSampler(Samplers.alwaysSample());
@@ -85,7 +93,7 @@ public class AdsServiceClient {
       logger.log(Level.WARNING, "RPC failed: {0}", e.getStatus());
       return;
     }
-    for(Ads ads: response.getAdsList()) {
+    for(Ad ads: response.getAdsList()) {
       logger.info("Ads: " + ads.getText());
     }
   }
@@ -146,13 +154,13 @@ public class AdsServiceClient {
     // Register Prometheus exporters and export metrics to a Prometheus HTTPServer.
     //PrometheusStatsCollector.createAndRegister();
 
-    AdsServiceClient client = new AdsServiceClient(host, serverPort);
+    AdServiceClient client = new AdServiceClient(host, serverPort);
     try {
       client.getAds(contextKeys);
     } finally {
       client.shutdown();
     }
 
-    logger.info("Exiting AdsServiceClient...");
+    logger.info("Exiting AdServiceClient...");
   }
 }

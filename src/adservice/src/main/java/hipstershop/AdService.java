@@ -1,0 +1,212 @@
+/*
+ * Copyright 2018, Google LLC.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package hipstershop;
+
+import com.google.common.collect.ImmutableMap;
+import hipstershop.Demo.Ad;
+import hipstershop.Demo.AdRequest;
+import hipstershop.Demo.AdResponse;
+import io.grpc.Server;
+import io.grpc.ServerBuilder;
+import io.grpc.StatusRuntimeException;
+import io.grpc.stub.StreamObserver;
+import io.opencensus.common.Duration;
+import io.opencensus.common.Scope;
+import io.opencensus.contrib.grpc.metrics.RpcViews;
+import io.opencensus.exporter.stats.prometheus.PrometheusStatsCollector;
+import io.opencensus.exporter.trace.logging.LoggingTraceExporter;
+import io.opencensus.exporter.stats.stackdriver.StackdriverStatsConfiguration;
+import io.opencensus.exporter.stats.stackdriver.StackdriverStatsExporter;
+import io.opencensus.exporter.trace.stackdriver.StackdriverTraceConfiguration;
+import io.opencensus.exporter.trace.stackdriver.StackdriverTraceExporter;
+import io.opencensus.trace.AttributeValue;
+import io.opencensus.trace.BlankSpan;
+import io.opencensus.trace.Span;
+import io.opencensus.trace.SpanBuilder;
+import io.opencensus.trace.Status.CanonicalCode;
+import io.opencensus.trace.Tracer;
+import io.opencensus.trace.Tracing;
+import io.opencensus.trace.samplers.Samplers;
+import java.io.IOException;
+import java.rmi.server.ExportException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+public class AdService {
+  private static final Logger logger = Logger.getLogger(AdService.class.getName());
+
+  private static final Tracer tracer = Tracing.getTracer();
+
+  private int MAX_ADS_TO_SERVE = 2;
+  private Server server;
+
+  static final AdService service = new AdService();
+  private void start() throws IOException {
+    int port = Integer.parseInt(System.getenv("PORT"));
+    server = ServerBuilder.forPort(port).addService(new AdServiceImpl()).build().start();
+    logger.info("Ad Service started, listening on " + port);
+    Runtime.getRuntime()
+        .addShutdownHook(
+            new Thread() {
+              @Override
+              public void run() {
+                // Use stderr here since the logger may have been reset by its JVM shutdown hook.
+                System.err.println("*** shutting down gRPC ads server since JVM is shutting down");
+                AdService.this.stop();
+                System.err.println("*** server shut down");
+              }
+            });
+  }
+
+  private void stop() {
+    if (server != null) {
+      server.shutdown();
+    }
+  }
+
+  static class AdServiceImpl extends hipstershop.AdServiceGrpc.AdServiceImplBase {
+
+    /**
+     * Retrieves ads based on context provided in the request {@code AdRequest}.
+     *
+     * @param req the request containing context.
+     * @param responseObserver the stream observer which gets notified with the value of
+     *     {@code AdResponse}
+     */
+    @Override
+    public void getAds(AdRequest req, StreamObserver<AdResponse> responseObserver) {
+      AdService service = AdService.getInstance();
+      Span parentSpan = tracer.getCurrentSpan();
+      SpanBuilder spanBuilder =
+          tracer
+              .spanBuilderWithExplicitParent("Retrieve Ads", parentSpan)
+              .setRecordEvents(true)
+              .setSampler(Samplers.alwaysSample());
+      try (Scope scope = spanBuilder.startScopedSpan()) {
+        Span span = tracer.getCurrentSpan();
+        span.putAttribute("method", AttributeValue.stringAttributeValue("getAds"));
+        List<Ad> ads = new ArrayList<>();
+        if (req.getContextKeysCount() > 0) {
+          span.addAnnotation(
+              "Constructing Ads using context",
+              ImmutableMap.of(
+                  "Context Keys",
+                  AttributeValue.stringAttributeValue(req.getContextKeysList().toString()),
+                  "Context Keys length",
+                  AttributeValue.longAttributeValue(req.getContextKeysCount())));
+          for (int i = 0; i < req.getContextKeysCount(); i++) {
+            Ad ad = service.getAdsByKey(req.getContextKeys(i));
+            if (ad != null) {
+              ads.add(ad);
+            }
+          }
+        } else {
+          span.addAnnotation("No Context provided. Constructing random Ads.");
+          ads = service.getDefaultAds();
+        }
+        if (ads.isEmpty()) {
+          // Serve default ads.
+          span.addAnnotation("No Ads found based on context. Constructing random Ads.");
+          ads = service.getDefaultAds();
+        }
+        AdResponse reply = AdResponse.newBuilder().addAllAds(ads).build();
+        responseObserver.onNext(reply);
+        responseObserver.onCompleted();
+      } catch (StatusRuntimeException e) {
+        logger.log(Level.WARNING, "GetAds Failed", e.getStatus());
+        return;
+      }
+    }
+  }
+
+  static final HashMap<String, Ad> cacheMap = new HashMap<String, Ad>();
+
+  Ad getAdsByKey(String key) {
+    return cacheMap.get(key);
+  }
+
+
+  public List<Ad> getDefaultAds() {
+    List<Ad> ads = new ArrayList<>(MAX_ADS_TO_SERVE);
+    Object[] keys = cacheMap.keySet().toArray();
+    for (int i=0; i<MAX_ADS_TO_SERVE; i++) {
+      ads.add(cacheMap.get(keys[new Random().nextInt(keys.length)]));
+    }
+    return ads;
+  }
+
+  public static AdService getInstance() {
+    return service;
+  }
+
+  /** Await termination on the main thread since the grpc library uses daemon threads. */
+  private void blockUntilShutdown() throws InterruptedException {
+    if (server != null) {
+      server.awaitTermination();
+    }
+  }
+
+  static void initializeAds() {
+    String adsUrl = System.getenv("ADS_URL");
+    cacheMap.put("camera", Ad.newBuilder().setRedirectUrl(adsUrl + "/camera")
+        .setText("MyPro camera for sale. 50% off.").build());
+    cacheMap.put("bike", Ad.newBuilder().setRedirectUrl(adsUrl + "/bike")
+        .setText("ZoomZoom bike for sale. 10% off.").build());
+    cacheMap.put("kitchen", Ad.newBuilder().setRedirectUrl(adsUrl + "/kitchen")
+        .setText("CutPro knife for sale. Buy one, get second set for free").build());
+    logger.info("Default Ads initialized");
+  }
+
+  /** Main launches the server from the command line. */
+  public static void main(String[] args) throws IOException, InterruptedException {
+    // Add final keyword to pass checkStyle.
+
+    initializeAds();
+
+    // Registers all RPC views.
+    RpcViews.registerAllViews();
+
+    // Registers logging trace exporter.
+    LoggingTraceExporter.register();
+
+    try {
+      StackdriverTraceExporter.createAndRegister(
+          StackdriverTraceConfiguration.builder().build());
+      StackdriverStatsExporter.createAndRegister(
+          StackdriverStatsConfiguration.builder()
+              .setExportInterval(Duration.create(15, 0))
+              .build());
+    } catch (ExportException e) {
+      logger.info("Error registering Stackdriver Exporter " + e.toString());
+    }
+
+    // Register Prometheus exporters and export metrics to a Prometheus HTTPServer.
+    PrometheusStatsCollector.createAndRegister();
+
+    // Start the RPC server. You shouldn't see any output from gRPC before this.
+    logger.info("AdService starting.");
+    final AdService service = AdService.getInstance();
+    service.start();
+    service.blockUntilShutdown();
+  }
+}
