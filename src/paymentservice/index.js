@@ -33,7 +33,7 @@ require('@google-cloud/debug-agent').start({
 const HipsterShopServer = require('./server');
 
 const PORT = process.env['PORT'];
-const PROTO_PATH = __dirname + '/proto/demo.proto';
+const PROTO_PATH = __dirname + '/proto/';
 
 const server = new HipsterShopServer(PROTO_PATH, PORT);
 

@@ -32,11 +32,33 @@ const path = require('path');
 const grpc = require('grpc');
 const request = require('request');
 const xml2js = require('xml2js');
+const protoLoader = require('@grpc/proto-loader');
 
-const PROTO_PATH = path.join(__dirname, './proto/demo.proto');
+const MAIN_PROTO_PATH = path.join(__dirname, './proto/demo.proto');
+const HEALTH_PROTO_PATH = path.join(__dirname, './proto/grpc/health/v1/health.proto');
+
 const PORT = 7000;
 const DATA_URL = 'http://www.ecb.europa.eu/stats/eurofxref/eurofxref-daily.xml';
-const shopProto = grpc.load(PROTO_PATH).hipstershop;
+
+const shopProto = _loadProto(MAIN_PROTO_PATH).hipstershop;
+const healthProto = _loadProto(HEALTH_PROTO_PATH).grpc.health.v1;
+
+/**
+ * Helper function that loads a protobuf file.
+ */
+function _loadProto (path) {
+  const packageDefinition = protoLoader.loadSync(
+    path,
+    {
+      keepCase: true,
+      longs: String,
+      enums: String,
+      defaults: true,
+      oneofs: true
+    }
+  );
+  return grpc.loadPackageDefinition(packageDefinition);
+}
 
 /**
  * Helper function that gets currency data from an XML webpage
@@ -134,7 +156,7 @@ function convert (call, callback) {
  * Endpoint for health checks
  */
 function check (call, callback) {
-  callback(null);
+  callback(null, { status: 'SERVING' });
 }
 
 /**
@@ -144,7 +166,8 @@ function check (call, callback) {
 function main () {
   console.log(`Starting gRPC server on port ${PORT}...`);
   const server = new grpc.Server();
-  server.addService(shopProto.CurrencyService.service, {getSupportedCurrencies, convert, check});
+  server.addService(shopProto.CurrencyService.service, {getSupportedCurrencies, convert});
+  server.addService(healthProto.Health.service, {check});
   server.bind(`0.0.0.0:${PORT}`, grpc.ServerCredentials.createInsecure());
   server.start();
 }

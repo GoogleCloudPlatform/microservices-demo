@@ -12,17 +12,23 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+const path = require('path');
 const grpc = require('grpc');
 const protoLoader = require('@grpc/proto-loader');
 
 const charge = require('./charge');
 
 class HipsterShopServer {
-  constructor(protoFile, port = HipsterShopServer.DEFAULT_PORT) {
+  constructor(protoRoot, port = HipsterShopServer.DEFAULT_PORT) {
     this.port = port;
 
+    this.packages = {
+      hipsterShop: this.loadProtoFile(path.join(protoRoot, 'demo.proto')),
+      health: this.loadProtoFile(path.join(protoRoot, 'grpc/health/v1/health.proto'))
+    };
+
     this.server = new grpc.Server();
-    this.loadProto(protoFile);
+    this.loadAllProtos(protoRoot);
   }
 
   /**
@@ -42,7 +48,7 @@ class HipsterShopServer {
   }
 
   static CheckHandler(call, callback) {
-    callback(null);
+    callback(null, { status: 'SERVING' });
   }
 
   listen() {
@@ -62,17 +68,23 @@ class HipsterShopServer {
         oneofs: true,
       }
     );
-    const protoDescriptor = grpc.loadPackageDefinition(packageDefinition);
-    const hipsterShopPackage = protoDescriptor.hipstershop;
-
-    this.addProtoService(hipsterShopPackage.PaymentService.service);
+    return grpc.loadPackageDefinition(packageDefinition);
   }
 
-  addProtoService(service) {
+  loadAllProtos(protoRoot) {
+    const hipsterShopPackage = this.packages.hipsterShop.hipstershop;
+    const healthPackage = this.packages.health.grpc.health.v1;
+
     this.server.addService(
-      service,
+      hipsterShopPackage.PaymentService.service,
       {
         charge: HipsterShopServer.ChargeServiceHandler.bind(this),
+      }
+    );
+
+    this.server.addService(
+      healthPackage.Health.service,
+      {
         check: HipsterShopServer.CheckHandler.bind(this)
       }
     );
