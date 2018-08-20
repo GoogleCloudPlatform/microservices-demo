@@ -17,8 +17,6 @@ kind: Config
 build:
   tagPolicy:
     gitCommit: {}
-  googleCloudBuild:
-    diskSizeGb: 300
   artifacts:
   - imageName: gcr.io/microservices-demo-app/emailservice
     workspace: src/emailservice
@@ -44,3 +42,9 @@ deploy:
   kubectl:
     manifests:
     - ./kubernetes-manifests/**.yaml
+profiles:
+  - name: gcb
+    build:
+      googleCloudBuild:
+        diskSizeGb: 300
+        machineType: "N1_HIGHCPU_32"
