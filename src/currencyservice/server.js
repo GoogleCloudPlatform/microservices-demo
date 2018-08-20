@@ -16,17 +16,17 @@
 
 require('@google-cloud/profiler').start({
   serviceContext: {
-      service: 'currencyservice',
-      version: '1.0.0'
+    service: 'currencyservice',
+    version: '1.0.0'
   }
 });
- require('@google-cloud/trace-agent').start();
- require('@google-cloud/debug-agent').start({
+require('@google-cloud/trace-agent').start();
+require('@google-cloud/debug-agent').start({
   serviceContext: {
     service: 'currencyservice',
     version: 'VERSION'
   }
-})
+});
 
 const path = require('path');
 const grpc = require('grpc');
@@ -116,8 +116,8 @@ function convert (call, callback) {
         nanos: euros.nanos * data[request.to_code]
       });
 
-      result.units = Math.floor(result.units)
-      result.nanos = Math.floor(result.nanos)
+      result.units = Math.floor(result.units);
+      result.nanos = Math.floor(result.nanos);
       result.currency_code = request.to_code;
 
       console.log(`conversion request successful`);
@@ -131,13 +131,20 @@ function convert (call, callback) {
 }
 
 /**
+ * Endpoint for health checks
+ */
+function check (call, callback) {
+  callback(null);
+}
+
+/**
  * Starts an RPC server that receives requests for the
  * CurrencyConverter service at the sample server port
  */
 function main () {
   console.log(`Starting gRPC server on port ${PORT}...`);
   const server = new grpc.Server();
-  server.addService(shopProto.CurrencyService.service, {getSupportedCurrencies, convert});
+  server.addService(shopProto.CurrencyService.service, {getSupportedCurrencies, convert, check});
   server.bind(`0.0.0.0:${PORT}`, grpc.ServerCredentials.createInsecure());
   server.start();
 }

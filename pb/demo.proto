@@ -120,6 +120,7 @@ message Address {
 service CurrencyService {
     rpc GetSupportedCurrencies(Empty) returns (GetSupportedCurrenciesResponse) {}
     rpc Convert(CurrencyConversionRequest) returns (Money) {}
+    rpc Check(Empty) returns (Empty) {}
 }
 
 // Represents an amount of money with its currency type.
@@ -156,6 +157,7 @@ message CurrencyConversionRequest {
 
 service PaymentService {
     rpc Charge(ChargeRequest) returns (ChargeResponse) {}
+    rpc Check(Empty) returns (Empty) {}
 }
 
 message CreditCardInfo {

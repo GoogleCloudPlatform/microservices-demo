@@ -30,13 +30,11 @@ spec:
         - name: grpc
           containerPort: 7000
         readinessProbe:
-          periodSeconds: 5
-          tcpSocket:
-            port: 7000
+          exec:
+            command: ["/bin/grpc_health_probe", "-addr=:7000"]
         livenessProbe:
-          periodSeconds: 5
-          tcpSocket:
-            port: 7000
+          exec:
+            command: ["/bin/grpc_health_probe", "-addr=:7000"]
         resources:
           requests:
             cpu: 100m

@@ -41,6 +41,10 @@ class HipsterShopServer {
     }
   }
 
+  static CheckHandler(call, callback) {
+    callback(null);
+  }
+
   listen() {
     this.server.bind(`0.0.0.0:${this.port}`, grpc.ServerCredentials.createInsecure());
     console.log(`PaymentService grpc server listening on ${this.port}`);
@@ -56,7 +60,7 @@ class HipsterShopServer {
         enums: String,
         defaults: true,
         oneofs: true,
-      },
+      }
     );
     const protoDescriptor = grpc.loadPackageDefinition(packageDefinition);
     const hipsterShopPackage = protoDescriptor.hipstershop;
@@ -69,7 +73,8 @@ class HipsterShopServer {
       service,
       {
         charge: HipsterShopServer.ChargeServiceHandler.bind(this),
-      },
+        check: HipsterShopServer.CheckHandler.bind(this)
+      }
     );
   }
 }

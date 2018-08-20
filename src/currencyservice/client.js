@@ -49,10 +49,18 @@ client.getSupportedCurrencies({}, (err, response) => {
   }
 });
 
-client.convert(request, function (err, response) {
+client.convert(request, (err, response) => {
   if (err) {
     console.error(`Error in convert: ${err}`);
   } else {
     console.log(`Convert: ${_moneyToString(request.from)} to ${_moneyToString(response)}`);
   }
 });
+
+client.check({}, (err, response) => {
+  if (err) {
+    console.log(`Error in check: ${err}`);
+  } else {
+    console.log(`Health check successful!`);
+  }
+})
