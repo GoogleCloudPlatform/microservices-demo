@@ -42,3 +42,18 @@ deploy:
   kubectl:
     manifests:
     - ./kubernetes-manifests/**.yaml
+    
+# "gcb" profile allows building and pushing the images
+# on Google Container Builder without requiring docker
+# installed on the developer machine. However, note that
+# since GCB does not cache the builds, each build will
+# start from scratch and therefore take a long time.
+#
+# This is not used by default. To use it, run:
+#     skaffold run -p gcb
+profiles:
+  - name: gcb
+    build:
+      googleCloudBuild:
+        diskSizeGb: 300
+        machineType: "N1_HIGHCPU_32"
