@@ -23,8 +23,8 @@ class HipsterShopServer {
     this.port = port;
 
     this.packages = {
-      hipsterShop: this.loadProtoFile(path.join(protoRoot, 'demo.proto')),
-      health: this.loadProtoFile(path.join(protoRoot, 'grpc/health/v1/health.proto'))
+      hipsterShop: this.loadProto(path.join(protoRoot, 'demo.proto')),
+      health: this.loadProto(path.join(protoRoot, 'grpc/health/v1/health.proto'))
     };
 
     this.server = new grpc.Server();
