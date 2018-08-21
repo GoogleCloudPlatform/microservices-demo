@@ -142,13 +142,18 @@ public class AdServiceClient {
 
     // Registers Stackdriver exporters.
     if (cloudProjectId != null) {
-      StackdriverTraceExporter.createAndRegister(
-          StackdriverTraceConfiguration.builder().setProjectId(cloudProjectId).build());
-      StackdriverStatsExporter.createAndRegister(
-          StackdriverStatsConfiguration.builder()
-              .setProjectId(cloudProjectId)
-              .setExportInterval(Duration.create(15, 0))
-              .build());
+      try {
+        StackdriverTraceExporter.createAndRegister(
+            StackdriverTraceConfiguration.builder().setProjectId(cloudProjectId).build());
+        StackdriverStatsExporter.createAndRegister(
+            StackdriverStatsConfiguration.builder()
+                .setProjectId(cloudProjectId)
+                .setExportInterval(Duration.create(15, 0))
+                .build());
+      } catch (Exception e) {
+        logger.log(Level.WARNING, "Failed to register Stackdriver Exporter." +
+            " Census tracing and stats data will not reported to Stackdriver. Error message: " + e.toString());
+      }
     }
 
     // Register Prometheus exporters and export metrics to a Prometheus HTTPServer.

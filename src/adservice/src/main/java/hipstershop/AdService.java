@@ -34,20 +34,15 @@ import io.opencensus.exporter.stats.stackdriver.StackdriverStatsExporter;
 import io.opencensus.exporter.trace.stackdriver.StackdriverTraceConfiguration;
 import io.opencensus.exporter.trace.stackdriver.StackdriverTraceExporter;
 import io.opencensus.trace.AttributeValue;
-import io.opencensus.trace.BlankSpan;
 import io.opencensus.trace.Span;
 import io.opencensus.trace.SpanBuilder;
-import io.opencensus.trace.Status.CanonicalCode;
 import io.opencensus.trace.Tracer;
 import io.opencensus.trace.Tracing;
 import io.opencensus.trace.samplers.Samplers;
 import java.io.IOException;
-import java.rmi.server.ExportException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Random;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -196,8 +191,9 @@ public class AdService {
           StackdriverStatsConfiguration.builder()
               .setExportInterval(Duration.create(15, 0))
               .build());
-    } catch (ExportException e) {
-      logger.info("Error registering Stackdriver Exporter " + e.toString());
+    } catch (Exception e) {
+      logger.log(Level.WARNING, "Failed to register Stackdriver Exporter." +
+          " Census tracing and stats data will not reported to Stackdriver. Error message: " + e.toString());
     }
 
     // Register Prometheus exporters and export metrics to a Prometheus HTTPServer.
