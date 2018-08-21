@@ -38,6 +38,8 @@ build:
     workspace: src/frontend
   - imageName: gcr.io/microservices-demo-app/loadgenerator
     workspace: src/loadgenerator
+  - imageName: gcr.io/microservices-demo-app/adservice
+    workspace: src/adservice
 deploy:
   kubectl:
     manifests:
