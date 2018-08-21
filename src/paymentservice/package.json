@@ -2,9 +2,11 @@
   "name": "paymentservice",
   "version": "0.0.1",
   "description": "Payment Microservice demo",
+  "repository": "https://github.com/GoogleCloudPlatform/microservices-demo",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "lint": "semistandard *.js"
   },
   "author": "Jonathan Lui",
   "license": "ISC",
@@ -16,5 +18,8 @@
     "grpc": "^1.12.3",
     "simple-card-validator": "^1.1.0",
     "uuid": "^3.2.1"
+  },
+  "devDependencies": {
+    "semistandard": "^12.0.1"
   }
 }

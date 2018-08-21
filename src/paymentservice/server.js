@@ -19,7 +19,7 @@ const protoLoader = require('@grpc/proto-loader');
 const charge = require('./charge');
 
 class HipsterShopServer {
-  constructor(protoRoot, port = HipsterShopServer.DEFAULT_PORT) {
+  constructor (protoRoot, port = HipsterShopServer.DEFAULT_PORT) {
     this.port = port;
 
     this.packages = {
@@ -36,10 +36,10 @@ class HipsterShopServer {
    * @param {*} call  { ChargeRequest }
    * @param {*} callback  fn(err, ChargeResponse)
    */
-  static ChargeServiceHandler(call, callback) {
+  static ChargeServiceHandler (call, callback) {
     try {
-      console.log(`PaymentService#Charge invoked with request ${JSON.stringify(call.request)}`)
-      const response = charge(call.request)
+      console.log(`PaymentService#Charge invoked with request ${JSON.stringify(call.request)}`);
+      const response = charge(call.request);
       callback(null, response);
     } catch (err) {
       console.warn(err);
@@ -47,17 +47,17 @@ class HipsterShopServer {
     }
   }
 
-  static CheckHandler(call, callback) {
+  static CheckHandler (call, callback) {
     callback(null, { status: 'SERVING' });
   }
 
-  listen() {
+  listen () {
     this.server.bind(`0.0.0.0:${this.port}`, grpc.ServerCredentials.createInsecure());
     console.log(`PaymentService grpc server listening on ${this.port}`);
     this.server.start();
   }
 
-  loadProto(path) {
+  loadProto (path) {
     const packageDefinition = protoLoader.loadSync(
       path,
       {
@@ -65,20 +65,20 @@ class HipsterShopServer {
         longs: String,
         enums: String,
         defaults: true,
-        oneofs: true,
+        oneofs: true
       }
     );
     return grpc.loadPackageDefinition(packageDefinition);
   }
 
-  loadAllProtos(protoRoot) {
+  loadAllProtos (protoRoot) {
     const hipsterShopPackage = this.packages.hipsterShop.hipstershop;
     const healthPackage = this.packages.health.grpc.health.v1;
 
     this.server.addService(
       hipsterShopPackage.PaymentService.service,
       {
-        charge: HipsterShopServer.ChargeServiceHandler.bind(this),
+        charge: HipsterShopServer.ChargeServiceHandler.bind(this)
       }
     );
 
