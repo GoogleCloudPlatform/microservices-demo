@@ -44,6 +44,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -101,6 +102,7 @@ public class AdService {
         Span span = tracer.getCurrentSpan();
         span.putAttribute("method", AttributeValue.stringAttributeValue("getAds"));
         List<Ad> ads = new ArrayList<>();
+        logger.info("received ad request (context_words=" + req.getContextKeysCount() + ")");
         if (req.getContextKeysCount() > 0) {
           span.addAnnotation(
               "Constructing Ads using context",
@@ -162,13 +164,12 @@ public class AdService {
   }
 
   static void initializeAds() {
-    String adsUrl = System.getenv("ADS_URL");
-    cacheMap.put("camera", Ad.newBuilder().setRedirectUrl(adsUrl + "/camera")
-        .setText("MyPro camera for sale. 50% off.").build());
-    cacheMap.put("bike", Ad.newBuilder().setRedirectUrl(adsUrl + "/bike")
-        .setText("ZoomZoom bike for sale. 10% off.").build());
-    cacheMap.put("kitchen", Ad.newBuilder().setRedirectUrl(adsUrl + "/kitchen")
-        .setText("CutPro knife for sale. Buy one, get second set for free").build());
+    cacheMap.put("camera", Ad.newBuilder().setRedirectUrl( "/product/2ZYFJ3GM2N")
+        .setText("Film camera for sale. 50% off.").build());
+    cacheMap.put("bike", Ad.newBuilder().setRedirectUrl("/product/9SIQT8TOJO")
+        .setText("City Bike for sale. 10% off.").build());
+    cacheMap.put("kitchen", Ad.newBuilder().setRedirectUrl("/product/1YMWWN1N4O")
+        .setText("Home Barista kitchen kit for sale. Buy one, get second kit for free").build());
     logger.info("Default Ads initialized");
   }
 
@@ -183,17 +184,31 @@ public class AdService {
 
     // Registers logging trace exporter.
     LoggingTraceExporter.register();
+    long sleepTime = 10; /* seconds */
+    int maxAttempts = 3;
 
-    try {
-      StackdriverTraceExporter.createAndRegister(
-          StackdriverTraceConfiguration.builder().build());
-      StackdriverStatsExporter.createAndRegister(
-          StackdriverStatsConfiguration.builder()
-              .setExportInterval(Duration.create(15, 0))
-              .build());
-    } catch (Exception e) {
-      logger.log(Level.WARNING, "Failed to register Stackdriver Exporter." +
-          " Census tracing and stats data will not reported to Stackdriver. Error message: " + e.toString());
+    for (int i=0; i<maxAttempts; i++) {
+      try {
+        StackdriverTraceExporter.createAndRegister(
+            StackdriverTraceConfiguration.builder().build());
+        StackdriverStatsExporter.createAndRegister(
+            StackdriverStatsConfiguration.builder()
+                .setExportInterval(Duration.create(15, 0))
+                .build());
+      } catch (Exception e) {
+        if (i==(maxAttempts-1)) {
+          logger.log(Level.WARNING, "Failed to register Stackdriver Exporter." +
+              " Tracing and Stats data will not reported to Stackdriver. Error message: " + e
+              .toString());
+        } else {
+          logger.info("Attempt to register Stackdriver Exporter in " + sleepTime + " seconds ");
+          try {
+            Thread.sleep(TimeUnit.SECONDS.toMillis(sleepTime));
+          } catch (Exception se) {
+            logger.log(Level.WARNING, "Exception while sleeping" + se.toString());
+          }
+        }
+      }
     }
 
     // Register Prometheus exporters and export metrics to a Prometheus HTTPServer.

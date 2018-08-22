@@ -31,10 +31,6 @@ spec:
         env:
         - name: PORT
           value: "9555"
-        - name: LISTEN_ADDR
-          value: "0.0.0.0"
-        - name: ADS_URL
-          value: "http://localhost:10010/ads/"
         resources:
           requests:
             cpu: 200m
