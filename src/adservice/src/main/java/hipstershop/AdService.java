@@ -23,7 +23,9 @@ import hipstershop.Demo.AdResponse;
 import io.grpc.Server;
 import io.grpc.ServerBuilder;
 import io.grpc.StatusRuntimeException;
+import io.grpc.health.v1.HealthCheckResponse.ServingStatus;
 import io.grpc.stub.StreamObserver;
+import io.grpc.services.*;
 import io.opencensus.common.Duration;
 import io.opencensus.common.Scope;
 import io.opencensus.contrib.grpc.metrics.RpcViews;
@@ -55,11 +57,15 @@ public class AdService {
 
   private int MAX_ADS_TO_SERVE = 2;
   private Server server;
+  private HealthStatusManager healthMgr;
 
   static final AdService service = new AdService();
   private void start() throws IOException {
     int port = Integer.parseInt(System.getenv("PORT"));
-    server = ServerBuilder.forPort(port).addService(new AdServiceImpl()).build().start();
+    healthMgr = new HealthStatusManager();
+
+    server = ServerBuilder.forPort(port).addService(new AdServiceImpl())
+        .addService(healthMgr.getHealthService()).build().start();
     logger.info("Ad Service started, listening on " + port);
     Runtime.getRuntime()
         .addShutdownHook(
@@ -72,10 +78,12 @@ public class AdService {
                 System.err.println("*** server shut down");
               }
             });
+    healthMgr.setStatus("", ServingStatus.SERVING);
   }
 
   private void stop() {
     if (server != null) {
+      healthMgr.clearStatus("");
       server.shutdown();
     }
   }
@@ -173,11 +181,8 @@ public class AdService {
     logger.info("Default Ads initialized");
   }
 
-  /** Main launches the server from the command line. */
-  public static void main(String[] args) throws IOException, InterruptedException {
-    // Add final keyword to pass checkStyle.
-
-    initializeAds();
+  public static void initStackdriver() {
+    logger.info("Initialize StackDriver");
 
     // Registers all RPC views.
     RpcViews.registerAllViews();
@@ -210,6 +215,20 @@ public class AdService {
         }
       }
     }
+    logger.info("StackDriver initialization complete.");
+  }
+
+  /** Main launches the server from the command line. */
+  public static void main(String[] args) throws IOException, InterruptedException {
+    // Add final keyword to pass checkStyle.
+
+    initializeAds();
+
+    new Thread( new Runnable() {
+      public void run(){
+        initStackdriver();
+      }
+    }).start();
 
     // Register Prometheus exporters and export metrics to a Prometheus HTTPServer.
     PrometheusStatsCollector.createAndRegister();

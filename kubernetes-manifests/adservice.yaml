@@ -41,12 +41,12 @@ spec:
         readinessProbe:
           tcpSocket:
             port: 9555
-          initialDelaySeconds: 15
+          initialDelaySeconds: 5
           periodSeconds: 10
         livenessProbe:
           tcpSocket:
             port: 9555
-          initialDelaySeconds: 15
+          initialDelaySeconds: 10
           periodSeconds: 10
 ---
 apiVersion: v1
