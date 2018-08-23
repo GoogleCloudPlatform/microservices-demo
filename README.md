@@ -34,6 +34,7 @@ Find **Protocol Buffers Descriptions** at the [`./pb` directory](./pb).
 | [emailservice](./src/emailservice) | Python | Sends users an order confirmation email (hypothetically😇). |
 | [checkoutservice](./src/checkoutservice) | Go | Retrieves user cart, prepares order and orchestrates the payment, shipping and the email notification. |
 | [recommendationservice](./src/recommendationservice) | Python | Recommends other products based on what's given in the cart. |
+| [adservice](./src/adservice) | Java | Provides text ads based on given context words. |
 | [loadgenerator](./src/loadgenerator) | Python/Locust | Continuously sends requests imitating realistic user shopping flows to the frontend. |
 
 
