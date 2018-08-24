@@ -17,18 +17,21 @@ package main
 import (
 	"context"
 	"fmt"
+	"log"
 	"net/http"
 	"os"
 	"time"
 
 	"cloud.google.com/go/profiler"
 	"contrib.go.opencensus.io/exporter/stackdriver"
+	"contrib.go.opencensus.io/exporter/stackdriver/monitoredresource"
 	"github.com/gorilla/mux"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"go.opencensus.io/plugin/ocgrpc"
 	"go.opencensus.io/plugin/ochttp"
 	"go.opencensus.io/plugin/ochttp/propagation/b3"
+	"go.opencensus.io/stats/view"
 	"go.opencensus.io/trace"
 	"google.golang.org/grpc"
 )
@@ -132,18 +135,37 @@ func main() {
 	log.Fatal(http.ListenAndServe(addr+":"+srvPort, handler))
 }
 
+func initStats(log logrus.FieldLogger, exporter *stackdriver.Exporter) {
+	view.RegisterExporter(exporter)
+	if err := view.Register(ochttp.DefaultServerViews...); err != nil {
+		log.Warn("Error registering http default server views")
+	} else {
+		log.Info("Registered http default server views");
+	}
+	if err := view.Register(ocgrpc.DefaultClientViews...); err != nil {
+		log.Warn("Error registering grpc default client views")
+	} else {
+		log.Info("Registered grpc default client views");
+	}
+}
+
 func initTracing(log logrus.FieldLogger) {
 	// TODO(ahmetb) this method is duplicated in other microservices using Go
 	// since they are not sharing packages.
 	for i := 1; i <= 3; i++ {
 		log = log.WithField("retry", i)
-		exporter, err := stackdriver.NewExporter(stackdriver.Options{})
+		exporter, err := stackdriver.NewExporter(stackdriver.Options{
+			MonitoredResource: monitoredresource.Autodetect(),
+		})
 		if err != nil {
 			log.Warnf("failed to initialize stackdriver exporter: %+v", err)
 		} else {
 			trace.RegisterExporter(exporter)
 			trace.ApplyConfig(trace.Config{DefaultSampler: trace.AlwaysSample()})
 			log.Info("registered stackdriver tracing")
+
+			// Register the views to collect server stats.
+			initStats(exporter)
 			return
 		}
 		d := time.Second * 20 * time.Duration(i)
