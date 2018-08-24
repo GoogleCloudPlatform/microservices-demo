@@ -80,7 +80,7 @@ func (fe *frontendServer) homeHandler(w http.ResponseWriter, r *http.Request) {
 		"products":      ps,
 		"cart_size":     len(cart),
 		"banner_color":  os.Getenv("BANNER_COLOR"), // illustrates canary deployments
-		"ad":              fe.chooseAd(r.Context(), log),
+		"ad":            fe.chooseAd(r.Context(), log),
 	}); err != nil {
 		log.Error(err)
 	}
