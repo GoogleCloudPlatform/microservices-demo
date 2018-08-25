@@ -17,7 +17,6 @@ package main
 import (
 	"context"
 	"fmt"
-	"log"
 	"net/http"
 	"os"
 	"time"
@@ -140,12 +139,12 @@ func initStats(log logrus.FieldLogger, exporter *stackdriver.Exporter) {
 	if err := view.Register(ochttp.DefaultServerViews...); err != nil {
 		log.Warn("Error registering http default server views")
 	} else {
-		log.Info("Registered http default server views");
+		log.Info("Registered http default server views")
 	}
 	if err := view.Register(ocgrpc.DefaultClientViews...); err != nil {
 		log.Warn("Error registering grpc default client views")
 	} else {
-		log.Info("Registered grpc default client views");
+		log.Info("Registered grpc default client views")
 	}
 }
 
@@ -165,7 +164,7 @@ func initTracing(log logrus.FieldLogger) {
 			log.Info("registered stackdriver tracing")
 
 			// Register the views to collect server stats.
-			initStats(exporter)
+			initStats(log, exporter)
 			return
 		}
 		d := time.Second * 20 * time.Duration(i)
