@@ -34,10 +34,10 @@ spec:
         resources:
           requests:
             cpu: 200m
-            memory: 64Mi
+            memory: 180Mi
           limits:
             cpu: 300m
-            memory: 128Mi
+            memory: 300Mi
         readinessProbe:
           tcpSocket:
             port: 9555
