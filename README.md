@@ -112,12 +112,12 @@ Find **Protocol Buffers Descriptions** at the [`./pb` directory](./pb).
 
 3. Set your project ID on image names:
 
-    - Edit `skaffold.yaml`, update the `imageName:` fields that look lik
+    - Edit `skaffold.yaml`, update the `imageName:` fields that look like
       `gcr.io/[PROJECT_ID]` with your own GCP project ID.
 
     - Similarly, edit all Kubernetes Deployment manifests in the
       [`./kubernetes-manifests`](./kubernetes-manifests) directory. Find the
-      `image:` fields with `gcr.io/...` and change them to your own GCP project
+      `image:` fields with `gcr.io/[...]` and change them to your own GCP project
       ID.
 
 5. Run `skaffold run` from the root of this repository. This command:
