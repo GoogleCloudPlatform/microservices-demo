@@ -41,7 +41,7 @@ Find **Protocol Buffers Descriptions** at the [`./pb` directory](./pb).
 ## Features
 
 - **[Kubernetes](https://kubernetes.io)/[GKE](https://cloud.google.com/kubernetes-engine/):**
-  The app is designed to run on Kubernetes (both locally on "Docker for
+  The app is designed to run on Kubernetes (both locally on Minikube and "Docker for
   Desktop", as well as on the cloud with GKE).
 - **[gRPC](https://grpc.io):** Microservices use a high volume of gRPC calls to
   communicate to each other.
@@ -71,13 +71,17 @@ Find **Protocol Buffers Descriptions** at the [`./pb` directory](./pb).
 1. Install tools to run a Kubernetes cluster locally:
 
    - kubectl (can be installed via `gcloud components install kubectl`)
-   - Docker for Desktop (Mac/Windows): It provides Kubernetes support as [noted
+   - One of the tools that deploy Kubernetes cluster locally:
+    - Minikube (Linux/Mac/Wimdows). It's the open source, cross-platrorm tool, developed by the Kubernetes community. Installation instructions and documentation can be found [here](https://github.com/kubernetes/minikube).
+    - Docker for Desktop (Mac/Windows): It provides Kubernetes support as [noted
      here](https://docs.docker.com/docker-for-mac/kubernetes/).
    - [skaffold](https://github.com/GoogleContainerTools/skaffold/#installation)
 
-1. Launch “Docker for Desktop”. Go to Preferences and choose “Enable Kubernetes”.
+1. Launch the local Kubernetes cluster:
+    - Launch Minikube with `minikube start` command. More details can be found [here](https://github.com/kubernetes/minikube#quickstart).
+    - Launch “Docker for Desktop”. Go to Preferences and choose “Enable Kubernetes”.
 
-1. Run `kubectl get nodes` to verify you're connected to “Kubernetes on Docker”.
+1. Run `kubectl get nodes` to verify that the local cluster works properly.
 
 1. Run `skaffold run` (first time will be slow, it can take ~20-30 minutes).
    This will build and deploy the application. If you need to rebuild the images
