@@ -30,7 +30,7 @@ spec:
           readinessProbe:
             initialDelaySeconds: 10
             httpGet:
-              path: "/"
+              path: "/_healthz"
               port: 8080
               httpHeaders:
               - name: "Cookie"
