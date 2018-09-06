@@ -41,8 +41,7 @@ Find **Protocol Buffers Descriptions** at the [`./pb` directory](./pb).
 ## Features
 
 - **[Kubernetes](https://kubernetes.io)/[GKE](https://cloud.google.com/kubernetes-engine/):**
-  The app is designed to run on Kubernetes (both locally on "Docker for
-  Desktop", as well as on the cloud with GKE).
+  The app is designed to run on Kubernetes (locally on Minikube, as well as on the cloud with GKE).
 - **[gRPC](https://grpc.io):** Microservices use a high volume of gRPC calls to
   communicate to each other.
 - **[Istio](https://istio.io):** Application works on Istio service mesh.
@@ -64,20 +63,18 @@ Find **Protocol Buffers Descriptions** at the [`./pb` directory](./pb).
 > **Note:** that the first build can take up to 20-30 minutes. Consequent builds
 > will be faster.
 
-### Option 1: Running locally with “Docker for Desktop”
+### Option 1: Running locally with Minikube 
 
 > 💡 Recommended if you're planning to develop the application.
 
 1. Install tools to run a Kubernetes cluster locally:
 
    - kubectl (can be installed via `gcloud components install kubectl`)
-   - Docker for Desktop (Mac/Windows): It provides Kubernetes support as [noted
-     here](https://docs.docker.com/docker-for-mac/kubernetes/).
+   - Minikube (Linux/Mac/Windows). It's the open source, cross-platrorm tool, developed by the Kubernetes community. Installation instructions and documentation can be found [here](https://github.com/kubernetes/minikube).
    - [skaffold](https://github.com/GoogleContainerTools/skaffold/#installation)
 
-1. Launch “Docker for Desktop”. Go to Preferences and choose “Enable Kubernetes”.
-
-1. Run `kubectl get nodes` to verify you're connected to “Kubernetes on Docker”.
+1. Launch the local Kubernetes cluster with `minikube start` command. More details can be found [here](https://github.com/kubernetes/minikube#quickstart).
+1. Run `kubectl get nodes` to verify that the local cluster works properly.
 
 1. Run `skaffold run` (first time will be slow, it can take ~20-30 minutes).
    This will build and deploy the application. If you need to rebuild the images
@@ -91,7 +88,7 @@ Find **Protocol Buffers Descriptions** at the [`./pb` directory](./pb).
 
 > 💡  Recommended for demos and making it available publicly.
 
-1. Install tools specified in the previous section (Docker, kubectl, skaffold)
+1. Install tools specified in the previous section (kubectl, skaffold)
 
 1. Create a Google Kubernetes Engine cluster and make sure `kubectl` is pointing
    to the cluster.
