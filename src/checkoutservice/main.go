@@ -32,7 +32,6 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
-	"contrib.go.opencensus.io/exporter/stackdriver/monitoredresource"
 	pb "github.com/GoogleCloudPlatform/microservices-demo/src/checkoutservice/genproto"
 	money "github.com/GoogleCloudPlatform/microservices-demo/src/checkoutservice/money"
 )
@@ -85,7 +84,7 @@ func initStats(exporter *stackdriver.Exporter) {
 	if err := view.Register(ocgrpc.DefaultServerViews...); err != nil {
 		log.Printf("Error registering default server views")
 	} else {
-		log.Printf("Registered default server views");
+		log.Printf("Registered default server views")
 	}
 }
 
@@ -93,9 +92,7 @@ func initTracing() {
 	// TODO(ahmetb) this method is duplicated in other microservices using Go
 	// since they are not sharing packages.
 	for i := 1; i <= 3; i++ {
-		exporter, err := stackdriver.NewExporter(stackdriver.Options{
-			MonitoredResource: monitoredresource.Autodetect(),
-		})
+		exporter, err := stackdriver.NewExporter(stackdriver.Options{})
 		if err != nil {
 			log.Printf("info: failed to initialize stackdriver exporter: %+v", err)
 		} else {

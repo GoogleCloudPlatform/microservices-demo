@@ -29,7 +29,6 @@ import (
 
 	"cloud.google.com/go/profiler"
 	"contrib.go.opencensus.io/exporter/stackdriver"
-	"contrib.go.opencensus.io/exporter/stackdriver/monitoredresource"
 	"github.com/golang/protobuf/jsonpb"
 	"go.opencensus.io/plugin/ocgrpc"
 	"go.opencensus.io/stats/view"
@@ -80,7 +79,7 @@ func initStats(exporter *stackdriver.Exporter) {
 	if err := view.Register(ocgrpc.DefaultServerViews...); err != nil {
 		log.Printf("Error registering default server views")
 	} else {
-		log.Printf("Registered default server views");
+		log.Printf("Registered default server views")
 	}
 }
 
@@ -88,9 +87,7 @@ func initTracing() {
 	// TODO(ahmetb) this method is duplicated in other microservices using Go
 	// since they are not sharing packages.
 	for i := 1; i <= 3; i++ {
-		exporter, err := stackdriver.NewExporter(stackdriver.Options{
-			MonitoredResource: monitoredresource.Autodetect(),
-		})
+		exporter, err := stackdriver.NewExporter(stackdriver.Options{})
 		if err != nil {
 			log.Printf("info: failed to initialize stackdriver exporter: %+v", err)
 		} else {
