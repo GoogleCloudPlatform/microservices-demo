@@ -34,6 +34,7 @@ Find **Protocol Buffers Descriptions** at the [`./pb` directory](./pb).
 | [emailservice](./src/emailservice) | Python | Sends users an order confirmation email (hypothetically😇). |
 | [checkoutservice](./src/checkoutservice) | Go | Retrieves user cart, prepares order and orchestrates the payment, shipping and the email notification. |
 | [recommendationservice](./src/recommendationservice) | Python | Recommends other products based on what's given in the cart. |
+| [adservice](./src/adservice) | Java | Provides text ads based on given context words. |
 | [loadgenerator](./src/loadgenerator) | Python/Locust | Continuously sends requests imitating realistic user shopping flows to the frontend. |
 
 
@@ -109,12 +110,15 @@ Find **Protocol Buffers Descriptions** at the [`./pb` directory](./pb).
 
        gcloud auth configure-docker -q
 
-3. Edit `skaffold.yaml`, prepend your GCR registry host (`gcr.io/YOUR_PROJECT/`)
-   to all `imageName:` fields (or update the existing project name).
+3. Set your project ID on image names:
 
-4. Edit the Deployment manifests in
-   [`./kubernetes-manifests`](./kubernetes-manifests) directory and update the
-   `image:` fields to match the changes you made in the previous step.
+    - Edit `skaffold.yaml`, update the `imageName:` fields that look like
+      `gcr.io/[PROJECT_ID]` with your own GCP project ID.
+
+    - Similarly, edit all Kubernetes Deployment manifests in the
+      [`./kubernetes-manifests`](./kubernetes-manifests) directory. Find the
+      `image:` fields with `gcr.io/[...]` and change them to your own GCP project
+      ID.
 
 5. Run `skaffold run` from the root of this repository. This command:
    - builds the container images

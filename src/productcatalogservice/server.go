@@ -32,6 +32,7 @@ import (
 	"contrib.go.opencensus.io/exporter/stackdriver"
 	"github.com/golang/protobuf/jsonpb"
 	"go.opencensus.io/plugin/ocgrpc"
+	"go.opencensus.io/stats/view"
 	"go.opencensus.io/trace"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
@@ -76,6 +77,15 @@ func run(port int) string {
 	return l.Addr().String()
 }
 
+func initStats(exporter *stackdriver.Exporter) {
+	view.RegisterExporter(exporter)
+	if err := view.Register(ocgrpc.DefaultServerViews...); err != nil {
+		log.Printf("Error registering default server views")
+	} else {
+		log.Printf("Registered default server views")
+	}
+}
+
 func initTracing() {
 	// TODO(ahmetb) this method is duplicated in other microservices using Go
 	// since they are not sharing packages.
@@ -87,6 +97,9 @@ func initTracing() {
 			trace.RegisterExporter(exporter)
 			trace.ApplyConfig(trace.Config{DefaultSampler: trace.AlwaysSample()})
 			log.Print("registered stackdriver tracing")
+
+			// Register the views to collect server stats.
+			initStats(exporter)
 			return
 		}
 		d := time.Second * 10 * time.Duration(i)
