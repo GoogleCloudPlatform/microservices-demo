@@ -22,7 +22,7 @@ const grpc = require('grpc');
 const leftPad = require('left-pad');
 
 const PROTO_PATH = path.join(__dirname, './proto/demo.proto');
-const PORT = 31337;
+const PORT = 7000;
 
 const shopProto = grpc.load(PROTO_PATH).hipstershop;
 const client = new shopProto.CurrencyService(`localhost:${PORT}`,
@@ -49,7 +49,7 @@ client.getSupportedCurrencies({}, (err, response) => {
   }
 });
 
-client.convert(request, function (err, response) {
+client.convert(request, (err, response) => {
   if (err) {
     console.error(`Error in convert: ${err}`);
   } else {
