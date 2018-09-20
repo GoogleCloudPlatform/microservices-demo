@@ -26,6 +26,7 @@ import (
 	"time"
 
 	pb "github.com/GoogleCloudPlatform/microservices-demo/src/productcatalogservice/genproto"
+	healthpb "google.golang.org/grpc/health/grpc_health_v1"
 
 	"cloud.google.com/go/profiler"
 	"contrib.go.opencensus.io/exporter/stackdriver"
@@ -69,7 +70,9 @@ func run(port int) string {
 		log.Fatal(err)
 	}
 	srv := grpc.NewServer(grpc.StatsHandler(&ocgrpc.ServerHandler{}))
-	pb.RegisterProductCatalogServiceServer(srv, &productCatalog{})
+	svc := &productCatalog{}
+	pb.RegisterProductCatalogServiceServer(srv, svc)
+	healthpb.RegisterHealthServer(srv, svc)
 	go srv.Serve(l)
 	return l.Addr().String()
 }
@@ -138,6 +141,10 @@ func parseCatalog() []*pb.Product {
 		return nil
 	}
 	return cat.Products
+}
+
+func (p *productCatalog) Check(ctx context.Context, req *healthpb.HealthCheckRequest) (*healthpb.HealthCheckResponse, error) {
+	return &healthpb.HealthCheckResponse{Status: healthpb.HealthCheckResponse_SERVING}, nil
 }
 
 func (p *productCatalog) ListProducts(context.Context, *pb.Empty) (*pb.ListProductsResponse, error) {
