@@ -197,5 +197,20 @@ namespace cartservice.cartstore
                 throw new RpcException(new Status(StatusCode.FailedPrecondition, $"Can't access cart storage. {ex}"));
             }
         }
+
+        public bool Ping()
+        {
+            try
+            {
+                var redis = ConnectionMultiplexer.Connect(redisConnectionOptions);
+                var cache = redis.GetDatabase();
+                var res = cache.Ping();
+                return res != TimeSpan.Zero;
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+        }
     }
 }
