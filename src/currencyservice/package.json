@@ -2,17 +2,25 @@
   "name": "grpc-currency-service",
   "version": "0.1.0",
   "description": "A gRPC currency conversion microservice",
-  "repository": "TODO",
+  "repository": "https://github.com/GoogleCloudPlatform/microservices-demo",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "lint": "semistandard *.js"
+  },
   "license": "Apache-2.0",
   "dependencies": {
     "@google-cloud/debug-agent": "^2.6.0",
     "@google-cloud/profiler": "^0.1.14",
     "@google-cloud/trace-agent": "^2.11.0",
+    "@grpc/proto-loader": "^0.3.0",
     "async": "^1.5.2",
     "google-protobuf": "^3.0.0",
     "grpc": "^1.0.0",
     "left-pad": "^1.3.0",
     "request": "^2.87.0",
     "xml2js": "^0.4.19"
+  },
+  "devDependencies": {
+    "semistandard": "^12.0.1"
   }
 }

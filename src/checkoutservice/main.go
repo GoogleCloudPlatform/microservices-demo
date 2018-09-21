@@ -26,6 +26,7 @@ import (
 	"contrib.go.opencensus.io/exporter/stackdriver"
 	"github.com/google/uuid"
 	"go.opencensus.io/plugin/ocgrpc"
+	"go.opencensus.io/stats/view"
 	"go.opencensus.io/trace"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
@@ -33,6 +34,7 @@ import (
 
 	pb "github.com/GoogleCloudPlatform/microservices-demo/src/checkoutservice/genproto"
 	money "github.com/GoogleCloudPlatform/microservices-demo/src/checkoutservice/money"
+	healthpb "google.golang.org/grpc/health/grpc_health_v1"
 )
 
 const (
@@ -74,8 +76,18 @@ func main() {
 	}
 	srv := grpc.NewServer(grpc.StatsHandler(&ocgrpc.ServerHandler{}))
 	pb.RegisterCheckoutServiceServer(srv, svc)
+	healthpb.RegisterHealthServer(srv, svc)
 	log.Printf("starting to listen on tcp: %q", lis.Addr().String())
 	log.Fatal(srv.Serve(lis))
+}
+
+func initStats(exporter *stackdriver.Exporter) {
+	view.RegisterExporter(exporter)
+	if err := view.Register(ocgrpc.DefaultServerViews...); err != nil {
+		log.Printf("Error registering default server views")
+	} else {
+		log.Printf("Registered default server views")
+	}
 }
 
 func initTracing() {
@@ -89,6 +101,9 @@ func initTracing() {
 			trace.RegisterExporter(exporter)
 			trace.ApplyConfig(trace.Config{DefaultSampler: trace.AlwaysSample()})
 			log.Print("registered stackdriver tracing")
+
+			// Register the views to collect server stats.
+			initStats(exporter)
 			return
 		}
 		d := time.Second * 10 * time.Duration(i)
@@ -126,6 +141,10 @@ func mustMapEnv(target *string, envKey string) {
 		panic(fmt.Sprintf("environment variable %q not set", envKey))
 	}
 	*target = v
+}
+
+func (cs *checkoutService) Check(ctx context.Context, req *healthpb.HealthCheckRequest) (*healthpb.HealthCheckResponse, error) {
+	return &healthpb.HealthCheckResponse{Status: healthpb.HealthCheckResponse_SERVING}, nil
 }
 
 func (cs *checkoutService) PlaceOrder(ctx context.Context, req *pb.PlaceOrderRequest) (*pb.PlaceOrderResponse, error) {

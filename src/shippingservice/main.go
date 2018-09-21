@@ -24,12 +24,14 @@ import (
 	"cloud.google.com/go/profiler"
 	"contrib.go.opencensus.io/exporter/stackdriver"
 	"go.opencensus.io/plugin/ocgrpc"
+	"go.opencensus.io/stats/view"
 	"go.opencensus.io/trace"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 
 	pb "github.com/GoogleCloudPlatform/microservices-demo/src/shippingservice/genproto"
+	healthpb "google.golang.org/grpc/health/grpc_health_v1"
 )
 
 const (
@@ -50,19 +52,26 @@ func main() {
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
 	}
-	s := grpc.NewServer(grpc.StatsHandler(&ocgrpc.ServerHandler{}))
-	pb.RegisterShippingServiceServer(s, &server{})
+	srv := grpc.NewServer(grpc.StatsHandler(&ocgrpc.ServerHandler{}))
+	svc := &server{}
+	pb.RegisterShippingServiceServer(srv, svc)
+	healthpb.RegisterHealthServer(srv, svc)
 	log.Printf("Shipping Service listening on port %s", port)
 
 	// Register reflection service on gRPC server.
-	reflection.Register(s)
-	if err := s.Serve(lis); err != nil {
+	reflection.Register(srv)
+	if err := srv.Serve(lis); err != nil {
 		log.Fatalf("failed to serve: %v", err)
 	}
 }
 
 // server controls RPC service responses.
 type server struct{}
+
+// Check is for health checking.
+func (s *server) Check(ctx context.Context, req *healthpb.HealthCheckRequest) (*healthpb.HealthCheckResponse, error) {
+	return &healthpb.HealthCheckResponse{Status: healthpb.HealthCheckResponse_SERVING}, nil
+}
 
 // GetQuote produces a shipping quote (cost) in USD.
 func (s *server) GetQuote(ctx context.Context, in *pb.GetQuoteRequest) (*pb.GetQuoteResponse, error) {
@@ -103,6 +112,15 @@ func (s *server) ShipOrder(ctx context.Context, in *pb.ShipOrderRequest) (*pb.Sh
 	}, nil
 }
 
+func initStats(exporter *stackdriver.Exporter) {
+	view.RegisterExporter(exporter)
+	if err := view.Register(ocgrpc.DefaultServerViews...); err != nil {
+		log.Printf("Error registering default server views")
+	} else {
+		log.Printf("Registered default server views")
+	}
+}
+
 func initTracing() {
 	// TODO(ahmetb) this method is duplicated in other microservices using Go
 	// since they are not sharing packages.
@@ -114,6 +132,9 @@ func initTracing() {
 			trace.RegisterExporter(exporter)
 			trace.ApplyConfig(trace.Config{DefaultSampler: trace.AlwaysSample()})
 			log.Print("registered stackdriver tracing")
+
+			// Register the views to collect server stats.
+			initStats(exporter)
 			return
 		}
 		d := time.Second * 10 * time.Duration(i)

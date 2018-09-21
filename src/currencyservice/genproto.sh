@@ -14,7 +14,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-#!/bin/bash -e
 # protos are loaded dynamically for node, simply copies over the proto.
-mkdir -p proto && \
-cp ../../pb/demo.proto proto
+mkdir -p proto
+cp -r ../../pb/* ./proto

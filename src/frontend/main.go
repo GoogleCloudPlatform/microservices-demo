@@ -29,6 +29,7 @@ import (
 	"go.opencensus.io/plugin/ocgrpc"
 	"go.opencensus.io/plugin/ochttp"
 	"go.opencensus.io/plugin/ochttp/propagation/b3"
+	"go.opencensus.io/stats/view"
 	"go.opencensus.io/trace"
 	"google.golang.org/grpc"
 )
@@ -73,6 +74,9 @@ type frontendServer struct {
 
 	shippingSvcAddr string
 	shippingSvcConn *grpc.ClientConn
+
+	adSvcAddr string
+	adSvcConn *grpc.ClientConn
 }
 
 func main() {
@@ -96,6 +100,7 @@ func main() {
 	mustMapEnv(&svc.recommendationSvcAddr, "RECOMMENDATION_SERVICE_ADDR")
 	mustMapEnv(&svc.checkoutSvcAddr, "CHECKOUT_SERVICE_ADDR")
 	mustMapEnv(&svc.shippingSvcAddr, "SHIPPING_SERVICE_ADDR")
+	mustMapEnv(&svc.adSvcAddr, "AD_SERVICE_ADDR")
 
 	mustConnGRPC(ctx, &svc.currencySvcConn, svc.currencySvcAddr)
 	mustConnGRPC(ctx, &svc.productCatalogSvcConn, svc.productCatalogSvcAddr)
@@ -103,6 +108,7 @@ func main() {
 	mustConnGRPC(ctx, &svc.recommendationSvcConn, svc.recommendationSvcAddr)
 	mustConnGRPC(ctx, &svc.shippingSvcConn, svc.shippingSvcAddr)
 	mustConnGRPC(ctx, &svc.checkoutSvcConn, svc.checkoutSvcAddr)
+	mustConnGRPC(ctx, &svc.adSvcConn, svc.adSvcAddr)
 
 	r := mux.NewRouter()
 	r.HandleFunc("/", svc.homeHandler).Methods(http.MethodGet, http.MethodHead)
@@ -114,6 +120,8 @@ func main() {
 	r.HandleFunc("/logout", svc.logoutHandler).Methods(http.MethodGet)
 	r.HandleFunc("/cart/checkout", svc.placeOrderHandler).Methods(http.MethodPost)
 	r.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir("./static/"))))
+	r.HandleFunc("/robots.txt", func(w http.ResponseWriter, _ *http.Request) { fmt.Fprint(w, "User-agent: *\nDisallow: /") })
+	r.HandleFunc("/_healthz", func(w http.ResponseWriter, _ *http.Request) { fmt.Fprint(w, "ok") })
 
 	var handler http.Handler = r
 	handler = &logHandler{log: log, next: handler} // add logging
@@ -124,6 +132,20 @@ func main() {
 
 	log.Infof("starting server on " + addr + ":" + srvPort)
 	log.Fatal(http.ListenAndServe(addr+":"+srvPort, handler))
+}
+
+func initStats(log logrus.FieldLogger, exporter *stackdriver.Exporter) {
+	view.RegisterExporter(exporter)
+	if err := view.Register(ochttp.DefaultServerViews...); err != nil {
+		log.Warn("Error registering http default server views")
+	} else {
+		log.Info("Registered http default server views")
+	}
+	if err := view.Register(ocgrpc.DefaultClientViews...); err != nil {
+		log.Warn("Error registering grpc default client views")
+	} else {
+		log.Info("Registered grpc default client views")
+	}
 }
 
 func initTracing(log logrus.FieldLogger) {
@@ -138,6 +160,9 @@ func initTracing(log logrus.FieldLogger) {
 			trace.RegisterExporter(exporter)
 			trace.ApplyConfig(trace.Config{DefaultSampler: trace.AlwaysSample()})
 			log.Info("registered stackdriver tracing")
+
+			// Register the views to collect server stats.
+			initStats(log, exporter)
 			return
 		}
 		d := time.Second * 20 * time.Duration(i)

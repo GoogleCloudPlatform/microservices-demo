@@ -15,15 +15,18 @@
 # limitations under the License.
 
 import grpc
-import demo_pb2
-import demo_pb2_grpc
 from concurrent import futures
 import time
 import traceback
 import random
 import os
-
 import googleclouddebugger
+
+import demo_pb2
+import demo_pb2_grpc
+from grpc_health.v1 import health_pb2
+from grpc_health.v1 import health_pb2_grpc
+
 
 # TODO(morganmclean,ahmetb) tracing currently disabled due to memory leak (see TODO below)
 # from opencensus.trace.ext.grpc import server_interceptor
@@ -35,7 +38,7 @@ class RecommendationService(demo_pb2_grpc.RecommendationServiceServicer):
     def ListRecommendations(self, request, context):
         max_responses = 5
         # fetch list of products from product catalog stub
-        cat_response = stub.ListProducts(demo_pb2.Empty())
+        cat_response = product_catalog_stub.ListProducts(demo_pb2.Empty())
         product_ids = [x.id for x in cat_response.products]
         filtered_products = list(set(product_ids)-set(request.product_ids))
         num_products = len(filtered_products)
@@ -49,6 +52,11 @@ class RecommendationService(demo_pb2_grpc.RecommendationServiceServicer):
         response = demo_pb2.ListRecommendationsResponse()
         response.product_ids.extend(prod_list)
         return response
+
+    def Check(self, request, context):
+        return health_pb2.HealthCheckResponse(
+            status=health_pb2.HealthCheckResponse.SERVING)
+
 
 if __name__ == "__main__":
     print("initializing recommendationservice")
@@ -78,16 +86,16 @@ if __name__ == "__main__":
     if catalog_addr == "":
         raise Exception('PRODUCT_CATALOG_SERVICE_ADDR environment variable not set')
     print("product catalog address: " + catalog_addr)
-
-    # stub for product catalog service
     channel = grpc.insecure_channel(catalog_addr)
-    stub = demo_pb2_grpc.ProductCatalogServiceStub(channel)
-    
+    product_catalog_stub = demo_pb2_grpc.ProductCatalogServiceStub(channel)
+
     # create gRPC server
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10)) # ,interceptors=(tracer_interceptor,))
 
     # add class to gRPC server
-    demo_pb2_grpc.add_RecommendationServiceServicer_to_server(RecommendationService(), server)
+    service = RecommendationService()
+    demo_pb2_grpc.add_RecommendationServiceServicer_to_server(service, server)
+    health_pb2_grpc.add_HealthServicer_to_server(service, server)
 
     # start server
     print("listening on port: " + port)
