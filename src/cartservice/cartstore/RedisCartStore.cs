@@ -202,8 +202,10 @@ namespace cartservice.cartstore
         {
             try
             {
-                EnsureRedisConnected();
-                return true;
+                var redis = ConnectionMultiplexer.Connect(redisConnectionOptions);
+                var cache = redis.GetDatabase();
+                var res = cache.Ping();
+                return res != TimeSpan.Zero;
             }
             catch (Exception)
             {
