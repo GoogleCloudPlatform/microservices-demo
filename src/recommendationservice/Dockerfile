@@ -1,5 +1,7 @@
-FROM grpc/python:1.0
-
+FROM python:2.7-slim
+RUN apt-get update -qqy && \
+	apt-get -qqy install wget && \
+	rm -rf /var/lib/apt/lists/*
 # show python logs as they occur
 ENV PYTHONUNBUFFERED=0
 
