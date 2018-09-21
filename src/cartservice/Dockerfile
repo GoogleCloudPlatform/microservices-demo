@@ -16,7 +16,7 @@ RUN dotnet restore && \
     dotnet publish -c release -r linux-musl-x64 -o /cartservice
 
 # cartservice
-FROM alpine:latest
+FROM alpine:3.8
 # Add the probe
 COPY --from=probe /cartservice_probe /cartservice_probe
 # Dependencies for runtime
