@@ -24,5 +24,7 @@ namespace cartservice.interfaces
         Task EmptyCartAsync(string userId);
 
         Task<Hipstershop.Cart> GetCartAsync(string userId);
+
+        bool Ping();
     }
 }
