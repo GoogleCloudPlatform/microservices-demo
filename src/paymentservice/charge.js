@@ -14,6 +14,15 @@
 
 const cardValidator = require('simple-card-validator');
 const uuid = require('uuid/v4');
+const pino = require('pino');
+
+const logger = pino({
+  name: 'paymentservice-charge',
+  messageKey: 'message',
+  changeLevelName: 'severity',
+  useLevelLabels: true
+});
+
 
 class CreditCardError extends Error {
   constructor (message) {
@@ -67,7 +76,7 @@ module.exports = function charge (request) {
   const { credit_card_expiration_year: year, credit_card_expiration_month: month } = creditCard;
   if ((currentYear * 12 + currentMonth) > (year * 12 + month)) { throw new ExpiredCreditCard(cardNumber.replace('-', ''), month, year); }
 
-  console.log(`Transaction processed: ${cardType} ending ${cardNumber.substr(-4)} \
+  logger.info(`Transaction processed: ${cardType} ending ${cardNumber.substr(-4)} \
     Amount: ${amount.currency_code}${amount.units}.${amount.nanos}`);
 
   return { transaction_id: uuid() };
