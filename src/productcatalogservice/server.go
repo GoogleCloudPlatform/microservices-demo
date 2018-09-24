@@ -20,8 +20,8 @@ import (
 	"flag"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"net"
+	"os"
 	"strings"
 	"time"
 
@@ -31,6 +31,7 @@ import (
 	"cloud.google.com/go/profiler"
 	"contrib.go.opencensus.io/exporter/stackdriver"
 	"github.com/golang/protobuf/jsonpb"
+	"github.com/sirupsen/logrus"
 	"go.opencensus.io/plugin/ocgrpc"
 	"go.opencensus.io/stats/view"
 	"go.opencensus.io/trace"
@@ -41,6 +42,7 @@ import (
 
 var (
 	catalogJSON []byte
+	log         *logrus.Logger
 
 	port = flag.Int("port", 3550, "port to listen at")
 )
@@ -51,7 +53,17 @@ func init() {
 		log.Fatalf("failed to open product catalog json file: %v", err)
 	}
 	catalogJSON = c
-	log.Printf("successfully parsed product catalog json")
+	log = logrus.New()
+	log.Formatter = &logrus.JSONFormatter{
+		FieldMap: logrus.FieldMap{
+			logrus.FieldKeyTime:  "timestamp",
+			logrus.FieldKeyLevel: "severity",
+			logrus.FieldKeyMsg:   "message",
+		},
+		TimestampFormat: time.RFC3339Nano,
+	}
+	log.Out = os.Stdout
+	log.Info("successfully parsed product catalog json")
 }
 
 func main() {
@@ -59,7 +71,7 @@ func main() {
 	go initProfiling("productcatalogservice", "1.0.0")
 	flag.Parse()
 
-	log.Printf("starting grpc server at :%d", *port)
+	log.Infof("starting grpc server at :%d", *port)
 	run(*port)
 	select {}
 }
@@ -80,9 +92,9 @@ func run(port int) string {
 func initStats(exporter *stackdriver.Exporter) {
 	view.RegisterExporter(exporter)
 	if err := view.Register(ocgrpc.DefaultServerViews...); err != nil {
-		log.Printf("Error registering default server views")
+		log.Info("Error registering default server views")
 	} else {
-		log.Printf("Registered default server views")
+		log.Info("Registered default server views")
 	}
 }
 
@@ -92,21 +104,21 @@ func initTracing() {
 	for i := 1; i <= 3; i++ {
 		exporter, err := stackdriver.NewExporter(stackdriver.Options{})
 		if err != nil {
-			log.Printf("info: failed to initialize stackdriver exporter: %+v", err)
+			log.Warnf("failed to initialize stackdriver exporter: %+v", err)
 		} else {
 			trace.RegisterExporter(exporter)
 			trace.ApplyConfig(trace.Config{DefaultSampler: trace.AlwaysSample()})
-			log.Print("registered stackdriver tracing")
+			log.Info("registered stackdriver tracing")
 
 			// Register the views to collect server stats.
 			initStats(exporter)
 			return
 		}
 		d := time.Second * 10 * time.Duration(i)
-		log.Printf("sleeping %v to retry initializing stackdriver exporter", d)
+		log.Infof("sleeping %v to retry initializing stackdriver exporter", d)
 		time.Sleep(d)
 	}
-	log.Printf("warning: could not initialize stackdriver exporter after retrying, giving up")
+	log.Warn("could not initialize stackdriver exporter after retrying, giving up")
 }
 
 func initProfiling(service, version string) {
@@ -119,16 +131,16 @@ func initProfiling(service, version string) {
 			// ProjectID must be set if not running on GCP.
 			// ProjectID: "my-project",
 		}); err != nil {
-			log.Printf("warn: failed to start profiler: %+v", err)
+			log.Warnf("failed to start profiler: %+v", err)
 		} else {
-			log.Print("started stackdriver profiler")
+			log.Info("started stackdriver profiler")
 			return
 		}
 		d := time.Second * 10 * time.Duration(i)
-		log.Printf("sleeping %v to retry initializing stackdriver profiler", d)
+		log.Infof("sleeping %v to retry initializing stackdriver profiler", d)
 		time.Sleep(d)
 	}
-	log.Printf("warning: could not initialize stackdriver profiler after retrying, giving up")
+	log.Warn("could not initialize stackdriver profiler after retrying, giving up")
 }
 
 type productCatalog struct{}
@@ -137,7 +149,7 @@ func parseCatalog() []*pb.Product {
 	var cat pb.ListProductsResponse
 
 	if err := jsonpb.Unmarshal(bytes.NewReader(catalogJSON), &cat); err != nil {
-		log.Printf("warning: failed to parse the catalog JSON: %v", err)
+		log.Warnf("failed to parse the catalog JSON: %v", err)
 		return nil
 	}
 	return cat.Products

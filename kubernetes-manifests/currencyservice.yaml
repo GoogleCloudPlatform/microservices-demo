@@ -25,7 +25,7 @@ spec:
       terminationGracePeriodSeconds: 5
       containers:
       - name: server
-        image: gcr.io/microservices-demo-app/currencyservice
+        image: gcr.io/yoshifumi-cloud-demo/currencyservice
         ports:
         - name: grpc
           containerPort: 7000

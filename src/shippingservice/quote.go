@@ -50,6 +50,6 @@ func quoteByCountFloat(count int) float64 {
 		return 0
 	}
 	count64 := float64(count)
-	var p float64 = 1 + (count64 * 0.2)
+	var p = 1 + (count64 * 0.2)
 	return count64 + math.Pow(3, p)
 }
