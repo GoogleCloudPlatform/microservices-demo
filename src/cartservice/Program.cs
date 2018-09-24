@@ -56,7 +56,14 @@ namespace cartservice
                     Console.WriteLine($"Trying to start a grpc server at  {host}:{port}");
                     Server server = new Server
                     {
-                        Services = { Hipstershop.CartService.BindService(new CartServiceImpl(cartStore)) },
+                        Services = 
+                        {
+                            // Cart Service Endpoint
+                             Hipstershop.CartService.BindService(new CartServiceImpl(cartStore)),
+
+                             // Health Endpoint
+                             Grpc.Health.V1.Health.BindService(new HealthImpl(cartStore))
+                        },
                         Ports = { new ServerPort(host, port, ServerCredentials.Insecure) }
                     };
 

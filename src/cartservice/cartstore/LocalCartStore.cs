@@ -82,5 +82,10 @@ namespace cartservice.cartstore
 
             return Task.FromResult(cart);
         }
+
+        public bool Ping()
+        {
+            return true;
+        }
     }
 }
