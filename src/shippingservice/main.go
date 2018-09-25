@@ -16,13 +16,13 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"net"
 	"os"
 	"time"
 
 	"cloud.google.com/go/profiler"
 	"contrib.go.opencensus.io/exporter/stackdriver"
+	"github.com/sirupsen/logrus"
 	"go.opencensus.io/plugin/ocgrpc"
 	"go.opencensus.io/stats/view"
 	"go.opencensus.io/trace"
@@ -37,6 +37,22 @@ import (
 const (
 	defaultPort = "50051"
 )
+
+var log *logrus.Logger
+
+func init() {
+	log = logrus.New()
+	log.Level = logrus.DebugLevel
+	log.Formatter = &logrus.JSONFormatter{
+		FieldMap: logrus.FieldMap{
+			logrus.FieldKeyTime:  "timestamp",
+			logrus.FieldKeyLevel: "severity",
+			logrus.FieldKeyMsg:   "message",
+		},
+		TimestampFormat: time.RFC3339Nano,
+	}
+	log.Out = os.Stdout
+}
 
 func main() {
 	go initTracing()
@@ -56,7 +72,7 @@ func main() {
 	svc := &server{}
 	pb.RegisterShippingServiceServer(srv, svc)
 	healthpb.RegisterHealthServer(srv, svc)
-	log.Printf("Shipping Service listening on port %s", port)
+	log.Infof("Shipping Service listening on port %s", port)
 
 	// Register reflection service on gRPC server.
 	reflection.Register(srv)
@@ -75,8 +91,8 @@ func (s *server) Check(ctx context.Context, req *healthpb.HealthCheckRequest) (*
 
 // GetQuote produces a shipping quote (cost) in USD.
 func (s *server) GetQuote(ctx context.Context, in *pb.GetQuoteRequest) (*pb.GetQuoteResponse, error) {
-	log.Printf("[GetQuote] received request")
-	defer log.Printf("[GetQuote] completed request")
+	log.Info("[GetQuote] received request")
+	defer log.Info("[GetQuote] completed request")
 
 	// 1. Our quote system requires the total number of items to be shipped.
 	count := 0
@@ -100,8 +116,8 @@ func (s *server) GetQuote(ctx context.Context, in *pb.GetQuoteRequest) (*pb.GetQ
 // ShipOrder mocks that the requested items will be shipped.
 // It supplies a tracking ID for notional lookup of shipment delivery status.
 func (s *server) ShipOrder(ctx context.Context, in *pb.ShipOrderRequest) (*pb.ShipOrderResponse, error) {
-	log.Printf("[ShipOrder] received request")
-	defer log.Printf("[ShipOrder] completed request")
+	log.Info("[ShipOrder] received request")
+	defer log.Info("[ShipOrder] completed request")
 	// 1. Create a Tracking ID
 	baseAddress := fmt.Sprintf("%s, %s, %s", in.Address.StreetAddress, in.Address.City, in.Address.State)
 	id := CreateTrackingId(baseAddress)
@@ -115,9 +131,9 @@ func (s *server) ShipOrder(ctx context.Context, in *pb.ShipOrderRequest) (*pb.Sh
 func initStats(exporter *stackdriver.Exporter) {
 	view.RegisterExporter(exporter)
 	if err := view.Register(ocgrpc.DefaultServerViews...); err != nil {
-		log.Printf("Error registering default server views")
+		log.Warn("Error registering default server views")
 	} else {
-		log.Printf("Registered default server views")
+		log.Info("Registered default server views")
 	}
 }
 
@@ -127,21 +143,21 @@ func initTracing() {
 	for i := 1; i <= 3; i++ {
 		exporter, err := stackdriver.NewExporter(stackdriver.Options{})
 		if err != nil {
-			log.Printf("info: failed to initialize stackdriver exporter: %+v", err)
+			log.Warnf("failed to initialize stackdriver exporter: %+v", err)
 		} else {
 			trace.RegisterExporter(exporter)
 			trace.ApplyConfig(trace.Config{DefaultSampler: trace.AlwaysSample()})
-			log.Print("registered stackdriver tracing")
+			log.Info("registered stackdriver tracing")
 
 			// Register the views to collect server stats.
 			initStats(exporter)
 			return
 		}
 		d := time.Second * 10 * time.Duration(i)
-		log.Printf("sleeping %v to retry initializing stackdriver exporter", d)
+		log.Infof("sleeping %v to retry initializing stackdriver exporter", d)
 		time.Sleep(d)
 	}
-	log.Printf("warning: could not initialize stackdriver exporter after retrying, giving up")
+	log.Warn("could not initialize stackdriver exporter after retrying, giving up")
 }
 
 func initProfiling(service, version string) {
@@ -154,14 +170,14 @@ func initProfiling(service, version string) {
 			// ProjectID must be set if not running on GCP.
 			// ProjectID: "my-project",
 		}); err != nil {
-			log.Printf("warn: failed to start profiler: %+v", err)
+			log.Warnf("failed to start profiler: %+v", err)
 		} else {
-			log.Print("started stackdriver profiler")
+			log.Info("started stackdriver profiler")
 			return
 		}
 		d := time.Second * 10 * time.Duration(i)
-		log.Printf("sleeping %v to retry initializing stackdriver profiler", d)
+		log.Infof("sleeping %v to retry initializing stackdriver profiler", d)
 		time.Sleep(d)
 	}
-	log.Printf("warning: could not initialize stackdriver profiler after retrying, giving up")
+	log.Warn("could not initialize stackdriver profiler after retrying, giving up")
 }
