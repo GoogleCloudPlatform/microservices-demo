@@ -1,4 +1,3 @@
-drive.web-frontend_20180920.00_p1
 asn1crypto==0.24.0
 cachetools==2.1.0
 certifi==2018.8.24
