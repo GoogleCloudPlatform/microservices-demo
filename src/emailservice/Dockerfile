@@ -27,9 +27,6 @@ RUN GRPC_HEALTH_PROBE_VERSION=v0.1.0-alpha.1 && \
     wget -qO/bin/grpc_health_probe https://github.com/grpc-ecosystem/grpc-health-probe/releases/download/${GRPC_HEALTH_PROBE_VERSION}/grpc_health_probe-linux-amd64 && \
     chmod +x /bin/grpc_health_probe
 
-# Show python logs as they occur
-ENV PYTHONUNBUFFERED=0
-
 WORKDIR /email_server
 
 # Grab packages from builder
@@ -42,4 +39,4 @@ RUN apk add --no-cache libstdc++
 COPY . .
 
 EXPOSE 8080
-ENTRYPOINT [ "python", "email_server.py" ]
+ENTRYPOINT [ "python", "-u", "email_server.py" ]
