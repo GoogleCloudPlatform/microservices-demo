@@ -1,8 +1,8 @@
-FROM python:2.7-alpine3.8 as base
+FROM python:3.7.0-alpine3.8 as base
 
 FROM base as builder
 
-# gRPC deps
+# gRPC and app deps
 RUN apk add --update --no-cache \
     gcc \
     linux-headers \
@@ -10,22 +10,15 @@ RUN apk add --update --no-cache \
     musl-dev \
     python-dev \
     g++ \
+    # App Deps
     cairo-dev \
     cairo \
     openssl-dev \ 
     gobject-introspection-dev
 
-ENV GRPC_PYTHON_VERSION 1.15.0
-
-# Install grpcio
-RUN python -m pip install --upgrade pip
-RUN pip install grpcio==${GRPC_PYTHON_VERSION} grpcio-tools==${GRPC_PYTHON_VERSION}
-
 # get packages
 COPY requirements.txt .
-
 RUN pip install -r requirements.txt
-
 
 FROM base as final
 
@@ -40,7 +33,7 @@ ENV PYTHONUNBUFFERED=0
 WORKDIR /email_server
 
 # Grab packages from builder
-COPY --from=builder /usr/local/lib/python2.7/ /usr/local/lib/python2.7/
+COPY --from=builder /usr/local/lib/python3.7/ /usr/local/lib/python3.7/
 
 # Need libstdc++ for grpc
 RUN apk add --no-cache libstdc++
