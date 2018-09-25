@@ -24,7 +24,7 @@ spec:
     spec:
       containers:
       - name: server
-        image: gcr.io/yoshifumi-cloud-demo/shippingservice
+        image: gcr.io/microservices-demo-app/shippingservice
         ports:
         - containerPort: 50051
         readinessProbe:
