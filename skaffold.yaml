@@ -18,27 +18,27 @@ build:
   tagPolicy:
     gitCommit: {}
   artifacts:
-  - imageName: gcr.io/yoshifumi-cloud-demo/emailservice
+  - imageName: gcr.io/microservices-demo-app/emailservice
     workspace: src/emailservice
-  - imageName: gcr.io/yoshifumi-cloud-demo/productcatalogservice
+  - imageName: gcr.io/microservices-demo-app/productcatalogservice
     workspace: src/productcatalogservice
-  - imageName: gcr.io/yoshifumi-cloud-demo/recommendationservice
+  - imageName: gcr.io/microservices-demo-app/recommendationservice
     workspace: src/recommendationservice
-  - imageName: gcr.io/yoshifumi-cloud-demo/shippingservice
+  - imageName: gcr.io/microservices-demo-app/shippingservice
     workspace: src/shippingservice
-  - imageName: gcr.io/yoshifumi-cloud-demo/checkoutservice
+  - imageName: gcr.io/microservices-demo-app/checkoutservice
     workspace: src/checkoutservice
-  - imageName: gcr.io/yoshifumi-cloud-demo/paymentservice
+  - imageName: gcr.io/microservices-demo-app/paymentservice
     workspace: src/paymentservice
-  - imageName: gcr.io/yoshifumi-cloud-demo/currencyservice
+  - imageName: gcr.io/microservices-demo-app/currencyservice
     workspace: src/currencyservice
-  - imageName: gcr.io/yoshifumi-cloud-demo/cartservice
+  - imageName: gcr.io/microservices-demo-app/cartservice
     workspace: src/cartservice
-  - imageName: gcr.io/yoshifumi-cloud-demo/frontend
+  - imageName: gcr.io/microservices-demo-app/frontend
     workspace: src/frontend
-  - imageName: gcr.io/yoshifumi-cloud-demo/loadgenerator
+  - imageName: gcr.io/microservices-demo-app/loadgenerator
     workspace: src/loadgenerator
-  - imageName: gcr.io/yoshifumi-cloud-demo/adservice
+  - imageName: gcr.io/microservices-demo-app/adservice
     workspace: src/adservice
 deploy:
   kubectl:
