@@ -26,7 +26,7 @@ group = "adservice"
 version = "0.1.0-SNAPSHOT" // CURRENT_OPENCENSUS_VERSION
 
 def opencensusVersion = "0.15.0" // LATEST_OPENCENSUS_RELEASE_VERSION
-def grpcVersion = "1.10.1" // CURRENT_GRPC_VERSION
+def grpcVersion = "1.15.0" // CURRENT_GRPC_VERSION
 def prometheusVersion = "0.3.0"
 
 tasks.withType(JavaCompile) {
