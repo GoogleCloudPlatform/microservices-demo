@@ -38,6 +38,10 @@
   version = "1.2.0"
 
 [[constraint]]
+  name = "github.com/sirupsen/logrus"
+  version = "1.0.6"
+
+[[constraint]]
   name = "go.opencensus.io"
   version = "0.16.0"
 
