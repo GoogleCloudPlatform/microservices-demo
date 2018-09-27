@@ -25,7 +25,7 @@ repositories {
 group = "adservice"
 version = "0.1.0-SNAPSHOT" // CURRENT_OPENCENSUS_VERSION
 
-def opencensusVersion = "0.15.0" // LATEST_OPENCENSUS_RELEASE_VERSION
+def opencensusVersion = "0.16.1" // LATEST_OPENCENSUS_RELEASE_VERSION
 def grpcVersion = "1.15.0" // CURRENT_GRPC_VERSION
 def prometheusVersion = "0.3.0"
 
@@ -54,7 +54,9 @@ dependencies {
                 "io.grpc:grpc-services:${grpcVersion}",
                 "io.prometheus:simpleclient_httpserver:${prometheusVersion}"
 
-        runtime "io.opencensus:opencensus-impl:${opencensusVersion}",
+        runtime "com.google.cloud:google-cloud-logging:1.45.0",
+                "io.opencensus:opencensus-impl:${opencensusVersion}",
+                "io.opencensus:opencensus-contrib-log-correlation-stackdriver:${opencensusVersion}",
                 "io.netty:netty-tcnative-boringssl-static:2.0.8.Final"
     }
 }
@@ -106,6 +108,7 @@ task adService(type: CreateStartScripts) {
     applicationName = 'AdService'
     outputDir = new File(project.buildDir, 'tmp')
     classpath = jar.outputs.files + project.configurations.runtime
+    defaultJvmOpts = ["-Djava.util.logging.config.file=./src/main/resources/logging.properties"]
 }
 
 task adServiceClient(type: CreateStartScripts) {
@@ -113,6 +116,7 @@ task adServiceClient(type: CreateStartScripts) {
     applicationName = 'AdServiceClient'
     outputDir = new File(project.buildDir, 'tmp')
     classpath = jar.outputs.files + project.configurations.runtime
+    defaultJvmOpts = ["-Djava.util.logging.config.file=./src/main/resources/logging.properties"]
 }
 
 applicationDistribution.into('bin') {
