@@ -9,7 +9,8 @@
                 "currencyCode": "USD",
                 "units": 67,
                 "nanos": 990000000
-            }
+            },
+            "categories": ["vintage"]
         },
         {
             "id": "66VCHSJNUP",
@@ -20,7 +21,8 @@
                 "currencyCode": "USD",
                 "units": 12,
                 "nanos": 490000000
-            }
+            },
+            "categories": ["photography", "vintage"]
         },
         {
             "id": "1YMWWN1N4O",
@@ -30,7 +32,8 @@
             "priceUsd": {
                 "currencyCode": "USD",
                 "units": 124
-            }
+            },
+            "categories": ["cookware"]
         },
         {
             "id": "L9ECAV7KIM",
@@ -41,7 +44,8 @@
                 "currencyCode": "USD",
                 "units": 36,
                 "nanos": 450000000
-            }
+            },
+            "categories": ["gardening"]
         },
         {
             "id": "2ZYFJ3GM2N",
@@ -51,7 +55,8 @@
             "priceUsd": {
                 "currencyCode": "USD",
                 "units": 2245
-            }
+            },
+            "categories": ["photography", "vintage"]
         },
         {
             "id": "0PUK6V6EV0",
@@ -62,7 +67,8 @@
                 "currencyCode": "USD",
                 "units": 65,
                 "nanos": 500000000
-            }
+            },
+            "categories": ["music", "vintage"]
         },
         {
             "id": "LS4PSXUNUM",
@@ -73,7 +79,8 @@
                 "currencyCode": "USD",
                 "units": 24,
                 "nanos": 330000000
-            }
+            },
+            "categories": ["cookware"]
         },
         {
             "id": "9SIQT8TOJO",
@@ -84,7 +91,8 @@
                 "currencyCode": "USD",
                 "units": 789,
                 "nanos": 500000000
-            }
+            },
+            "categories": ["cycling"]
         },
         {
             "id": "6E92ZMYYFZ",
@@ -95,7 +103,8 @@
                 "currencyCode": "USD",
                 "units": 12,
                 "nanos": 300000000
-            }
+            },
+            "categories": ["gardening"]
         }
     ]
 }

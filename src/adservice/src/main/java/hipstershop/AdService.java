@@ -17,6 +17,8 @@
 package hipstershop;
 
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableListMultimap;
+import com.google.common.collect.Iterables;
 import hipstershop.Demo.Ad;
 import hipstershop.Demo.AdRequest;
 import hipstershop.Demo.AdResponse;
@@ -42,6 +44,7 @@ import io.opencensus.trace.Tracer;
 import io.opencensus.trace.Tracing;
 import io.opencensus.trace.samplers.Samplers;
 import java.io.IOException;
+import java.util.Collection;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -109,8 +112,8 @@ public class AdService {
       try (Scope scope = spanBuilder.startScopedSpan()) {
         Span span = tracer.getCurrentSpan();
         span.putAttribute("method", AttributeValue.stringAttributeValue("getAds"));
-        List<Ad> ads = new ArrayList<>();
-        logger.info("received ad request (context_words=" + req.getContextKeysCount() + ")");
+        List<Ad> allAds = new ArrayList<>();
+        logger.info("received ad request (context_words=" + req.getContextKeysList() + ")");
         if (req.getContextKeysCount() > 0) {
           span.addAnnotation(
               "Constructing Ads using context",
@@ -120,21 +123,19 @@ public class AdService {
                   "Context Keys length",
                   AttributeValue.longAttributeValue(req.getContextKeysCount())));
           for (int i = 0; i < req.getContextKeysCount(); i++) {
-            Ad ad = service.getAdsByKey(req.getContextKeys(i));
-            if (ad != null) {
-              ads.add(ad);
-            }
+            Collection<Ad> ads = service.getAdsByCategory(req.getContextKeys(i));
+            allAds.addAll(ads);
           }
         } else {
           span.addAnnotation("No Context provided. Constructing random Ads.");
-          ads = service.getDefaultAds();
+          allAds = service.getRandomAds();
         }
-        if (ads.isEmpty()) {
-          // Serve default ads.
+        if (allAds.isEmpty()) {
+          // Serve random ads.
           span.addAnnotation("No Ads found based on context. Constructing random Ads.");
-          ads = service.getDefaultAds();
+          allAds = service.getRandomAds();
         }
-        AdResponse reply = AdResponse.newBuilder().addAllAds(ads).build();
+        AdResponse reply = AdResponse.newBuilder().addAllAds(allAds).build();
         responseObserver.onNext(reply);
         responseObserver.onCompleted();
       } catch (StatusRuntimeException e) {
@@ -144,18 +145,19 @@ public class AdService {
     }
   }
 
-  static final HashMap<String, Ad> cacheMap = new HashMap<String, Ad>();
+  static final ImmutableListMultimap<String, Ad> adsMap = createAdsMap();
 
-  Ad getAdsByKey(String key) {
-    return cacheMap.get(key);
+  Collection<Ad> getAdsByCategory(String category) {
+    return adsMap.get(category);
   }
 
+  private static final Random random = new Random();
 
-  public List<Ad> getDefaultAds() {
+  public List<Ad> getRandomAds() {
     List<Ad> ads = new ArrayList<>(MAX_ADS_TO_SERVE);
-    Object[] keys = cacheMap.keySet().toArray();
+    Collection<Ad> allAds = adsMap.values();
     for (int i=0; i<MAX_ADS_TO_SERVE; i++) {
-      ads.add(cacheMap.get(keys[new Random().nextInt(keys.length)]));
+      ads.add(Iterables.get(allAds, random.nextInt(allAds.size())));
     }
     return ads;
   }
@@ -171,14 +173,28 @@ public class AdService {
     }
   }
 
-  static void initializeAds() {
-    cacheMap.put("camera", Ad.newBuilder().setRedirectUrl( "/product/2ZYFJ3GM2N")
-        .setText("Film camera for sale. 50% off.").build());
-    cacheMap.put("bike", Ad.newBuilder().setRedirectUrl("/product/9SIQT8TOJO")
-        .setText("City Bike for sale. 10% off.").build());
-    cacheMap.put("kitchen", Ad.newBuilder().setRedirectUrl("/product/1YMWWN1N4O")
-        .setText("Home Barista kitchen kit for sale. Buy one, get second kit for free").build());
-    logger.info("Default Ads initialized");
+  static ImmutableListMultimap<String, Ad> createAdsMap() {
+    Ad camera = Ad.newBuilder().setRedirectUrl("/product/2ZYFJ3GM2N")
+        .setText("Film camera for sale. 50% off.").build();
+    Ad lens = Ad.newBuilder().setRedirectUrl("/product/66VCHSJNUP")
+        .setText("Vintage camera lens for sale. 20% off.").build();
+    Ad recordPlayer = Ad.newBuilder().setRedirectUrl("/product/0PUK6V6EV0")
+        .setText("Vintage record player for sale. 30% off.").build();
+    Ad bike = Ad.newBuilder().setRedirectUrl("/product/9SIQT8TOJO")
+        .setText("City Bike for sale. 10% off.").build();
+    Ad baristaKit = Ad.newBuilder().setRedirectUrl("/product/1YMWWN1N4O")
+        .setText("Home Barista kitchen kit for sale. Buy one, get second kit for free").build();
+    Ad airPlant = Ad.newBuilder().setRedirectUrl("/product/6E92ZMYYFZ")
+        .setText("Air plants for sale. Buy two, get third one for free").build();
+    Ad terrarium = Ad.newBuilder().setRedirectUrl("/product/L9ECAV7KIM")
+        .setText("Terrarium for sale. Buy one, get second one for free").build();
+    return ImmutableListMultimap.<String, Ad>builder()
+        .putAll("photography", camera, lens)
+        .putAll("vintage", camera, lens, recordPlayer)
+        .put("cycling", bike)
+        .put("cookware", baristaKit)
+        .putAll("gardening", airPlant, terrarium)
+        .build();
   }
 
   public static void initStackdriver() {
@@ -221,8 +237,6 @@ public class AdService {
   /** Main launches the server from the command line. */
   public static void main(String[] args) throws IOException, InterruptedException {
     // Add final keyword to pass checkStyle.
-
-    initializeAds();
 
     new Thread( new Runnable() {
       public void run(){
