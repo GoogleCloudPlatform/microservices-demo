@@ -64,6 +64,10 @@ message Product {
     string description = 3;
     string picture = 4;
     Money price_usd = 5;
+
+    // Categories such as "vintage" or "gardening" that can be used to look up
+    // other related products.
+    repeated string categories = 6;
 }
 
 message ListProductsResponse {
@@ -218,18 +222,18 @@ message PlaceOrderResponse {
     OrderResult order = 1;
 }
 
-// ------------Ads service------------------
+// ------------Ad service------------------
 
-service AdsService {
-    rpc GetAds(AdsRequest) returns (AdsResponse) {}
+service AdService {
+    rpc GetAds(AdRequest) returns (AdResponse) {}
 }
 
-message AdsRequest {
+message AdRequest {
     // List of important key words from the current page describing the context.
     repeated string context_keys = 1;
 }
 
-message AdsResponse {
+message AdResponse {
     repeated Ad ads = 1;
 }
 

@@ -1,13 +1,3 @@
-FROM golang:1.10 as probe
-RUN wget -qO/go/bin/dep https://github.com/golang/dep/releases/download/v0.5.0/dep-linux-amd64 && \
-    chmod +x /go/bin/dep
-ENV PROJECT github.com/GoogleCloudPlatform/microservices-demo/src/cartservice/probe
-WORKDIR /go/src/$PROJECT
-COPY probe/Gopkg.* ./
-RUN dep ensure --vendor-only -v
-COPY ./probe ./
-RUN go build -o /cartservice_probe .
-
 FROM microsoft/dotnet:2.1-sdk-alpine as builder
 WORKDIR /app
 COPY . .
@@ -17,8 +7,11 @@ RUN dotnet restore && \
 
 # cartservice
 FROM alpine:3.8
-# Add the probe
-COPY --from=probe /cartservice_probe /cartservice_probe
+
+RUN GRPC_HEALTH_PROBE_VERSION=v0.1.0-alpha.1 && \
+    wget -qO/bin/grpc_health_probe https://github.com/grpc-ecosystem/grpc-health-probe/releases/download/${GRPC_HEALTH_PROBE_VERSION}/grpc_health_probe-linux-amd64 && \
+    chmod +x /bin/grpc_health_probe
+
 # Dependencies for runtime
 # busybox-extras => telnet
 RUN apk add --no-cache \

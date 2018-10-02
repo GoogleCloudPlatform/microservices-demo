@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="WARN">
+  <Appenders>
+    <Console name="STDOUT" target="SYSTEM_OUT">
+
+      <!-- This is a JSON format that can be read by the Stackdriver Logging agent. The trace and
+           span IDs are interpreted by Stackdriver, and "traceSampled" is a custom field. -->
+      <JsonLayout compact="true" eventEol="true">
+        <KeyValuePair key="logging.googleapis.com/trace" value="$${ctx:opencensusTraceId}"/>
+        <KeyValuePair key="logging.googleapis.com/spanId" value="$${ctx:opencensusSpanId}"/>
+        <KeyValuePair key="traceSampled" value="$${ctx:opencensusTraceSampled}"/>
+     </JsonLayout>
+
+    </Console>
+  </Appenders>
+  <Loggers>
+    <Logger name="io.grpc.netty" level="INFO"/>
+    <Logger name="io.netty" level="INFO"/>
+    <Logger name="sun.net" level="INFO"/>
+    <Root level="TRACE">
+      <AppenderRef ref="STDOUT"/>
+    </Root>
+  </Loggers>
+</Configuration>
