@@ -38,13 +38,14 @@ import io.opencensus.trace.Tracing;
 import io.opencensus.trace.samplers.Samplers;
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.annotation.Nullable;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 /** A simple client that requests ads from the Ads Service. */
 public class AdServiceClient {
-  private static final Logger logger = Logger.getLogger(AdServiceClient.class.getName());
+  private static final Logger logger = LogManager.getLogger(AdServiceClient.class);
 
   private static final Tracer tracer = Tracing.getTracer();
 
@@ -90,7 +91,7 @@ public class AdServiceClient {
               CanonicalCode.valueOf(e.getStatus().getCode().name())
                   .toStatus()
                   .withDescription(e.getMessage()));
-      logger.log(Level.WARNING, "RPC failed: {0}", e.getStatus());
+      logger.log(Level.WARN, "RPC failed: {0}", e.getStatus());
       return;
     }
     for(Ad ads: response.getAdsList()) {
@@ -104,7 +105,7 @@ public class AdServiceClient {
       try {
         portNumber = Integer.parseInt(args[index]);
       } catch (NumberFormatException e) {
-        logger.warning(
+        logger.warn(
             String.format("Port %s is invalid, use default port %d.", args[index], defaultPort));
       }
     }
@@ -156,7 +157,7 @@ public class AdServiceClient {
                   .build());
         } catch (Exception e) {
           if (i==(maxAttempts-1)) {
-            logger.log(Level.WARNING, "Failed to register Stackdriver Exporter." +
+            logger.log(Level.WARN, "Failed to register Stackdriver Exporter." +
                 " Tracing and Stats data will not reported to Stackdriver. Error message: " + e
                 .toString());
           } else {
@@ -164,7 +165,7 @@ public class AdServiceClient {
             try {
               Thread.sleep(TimeUnit.SECONDS.toMillis(sleepTime));
             } catch (Exception se) {
-              logger.log(Level.WARNING, "Exception while sleeping" + e.toString());
+              logger.log(Level.WARN, "Exception while sleeping" + e.toString());
             }
           }
         }

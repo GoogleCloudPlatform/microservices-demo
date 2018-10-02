@@ -50,11 +50,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 public class AdService {
-  private static final Logger logger = Logger.getLogger(AdService.class.getName());
+  private static final Logger logger = LogManager.getLogger(AdService.class);
 
   private static final Tracer tracer = Tracing.getTracer();
 
@@ -139,7 +140,7 @@ public class AdService {
         responseObserver.onNext(reply);
         responseObserver.onCompleted();
       } catch (StatusRuntimeException e) {
-        logger.log(Level.WARNING, "GetAds Failed", e.getStatus());
+        logger.log(Level.WARN, "GetAds Failed", e.getStatus());
         return;
       }
     }
@@ -218,7 +219,7 @@ public class AdService {
                 .build());
       } catch (Exception e) {
         if (i==(maxAttempts-1)) {
-          logger.log(Level.WARNING, "Failed to register Stackdriver Exporter." +
+          logger.log(Level.WARN, "Failed to register Stackdriver Exporter." +
               " Tracing and Stats data will not reported to Stackdriver. Error message: " + e
               .toString());
         } else {
@@ -226,7 +227,7 @@ public class AdService {
           try {
             Thread.sleep(TimeUnit.SECONDS.toMillis(sleepTime));
           } catch (Exception se) {
-            logger.log(Level.WARNING, "Exception while sleeping" + se.toString());
+            logger.log(Level.WARN, "Exception while sleeping" + se.toString());
           }
         }
       }
