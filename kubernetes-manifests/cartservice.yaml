@@ -45,12 +45,12 @@ spec:
         readinessProbe:
           initialDelaySeconds: 15
           exec:
-            command: ["/cartservice_probe"]
+            command: ["/bin/grpc_health_probe", "-addr=:7070"]
         livenessProbe:
           initialDelaySeconds: 15
           periodSeconds: 10
           exec:
-            command: ["/cartservice_probe"]
+            command: ["/bin/grpc_health_probe", "-addr=:7070"]
 ---
 apiVersion: v1
 kind: Service
