@@ -27,17 +27,6 @@
   version = "v0.5.0"
 
 [[projects]]
-  branch = "master"
-  digest = "1:3ef905a7059a17712b7b27315692992f84f356e828d38f6ff0624e04103ec675"
-  name = "github.com/GoogleCloudPlatform/microservices-demo"
-  packages = [
-    "src/frontend/genproto",
-    "src/frontend/money",
-  ]
-  pruneopts = "UT"
-  revision = "6d969441585ade8c91c235115c7cdb12ac61354f"
-
-[[projects]]
   digest = "1:72856926f8208767b837bf51e3373f49139f61889b67dc7fd3c2a0fd711e3f7a"
   name = "github.com/golang/protobuf"
   packages = [
