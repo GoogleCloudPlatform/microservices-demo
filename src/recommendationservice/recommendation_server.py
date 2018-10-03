@@ -18,9 +18,8 @@ import grpc
 from concurrent import futures
 import time
 import traceback
-import random
 import os
-import logging
+import random
 import googleclouddebugger
 
 import demo_pb2
@@ -28,11 +27,8 @@ import demo_pb2_grpc
 from grpc_health.v1 import health_pb2
 from grpc_health.v1 import health_pb2_grpc
 
-from logger import JSONStreamHandler
-
-log = logging.getLogger('recommendationservice')
-log.setLevel(logging.INFO)
-log.addHandler(JSONStreamHandler())
+from logger import getJSONLogger
+logger = getJSONLogger('recommendationservice-server')
 
 # TODO(morganmclean,ahmetb) tracing currently disabled due to memory leak (see TODO below)
 # from opencensus.trace.ext.grpc import server_interceptor
@@ -53,7 +49,7 @@ class RecommendationService(demo_pb2_grpc.RecommendationServiceServicer):
         indices = random.sample(range(num_products), num_return)
         # fetch product ids from indices
         prod_list = [filtered_products[i] for i in indices]
-        log.info("[Recv ListRecommendations] product_ids={}".format(prod_list))
+        logger.info("[Recv ListRecommendations] product_ids={}".format(prod_list))
         # build and return response
         response = demo_pb2.ListRecommendationsResponse()
         response.product_ids.extend(prod_list)
@@ -65,7 +61,7 @@ class RecommendationService(demo_pb2_grpc.RecommendationServiceServicer):
 
 
 if __name__ == "__main__":
-    log.info("initializing recommendationservice")
+    logger.info("initializing recommendationservice")
 
     # TODO(morganmclean,ahmetb) enabling the tracing interceptor/sampler below
     # causes an unbounded memory leak eventually OOMing the container.
@@ -83,15 +79,15 @@ if __name__ == "__main__":
             version='1.0.0'
         )
     except Exception, err:
-        log.error("could not enable debugger")
-        log.error(traceback.print_exc())
+        logger.error("could not enable debugger")
+        logger.error(traceback.print_exc())
         pass
 
     port = os.environ.get('PORT', "8080")
     catalog_addr = os.environ.get('PRODUCT_CATALOG_SERVICE_ADDR', '')
     if catalog_addr == "":
         raise Exception('PRODUCT_CATALOG_SERVICE_ADDR environment variable not set')
-    log.info("product catalog address: " + catalog_addr)
+    logger.info("product catalog address: " + catalog_addr)
     channel = grpc.insecure_channel(catalog_addr)
     product_catalog_stub = demo_pb2_grpc.ProductCatalogServiceStub(channel)
 
@@ -104,7 +100,7 @@ if __name__ == "__main__":
     health_pb2_grpc.add_HealthServicer_to_server(service, server)
 
     # start server
-    log.info("listening on port: " + port)
+    logger.info("listening on port: " + port)
     server.add_insecure_port('[::]:'+port)
     server.start()
 

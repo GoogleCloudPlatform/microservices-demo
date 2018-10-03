@@ -16,7 +16,6 @@
 
 from concurrent import futures
 import argparse
-import logging
 import os
 import sys
 import time
@@ -28,8 +27,6 @@ import demo_pb2
 import demo_pb2_grpc
 from grpc_health.v1 import health_pb2
 from grpc_health.v1 import health_pb2_grpc
-
-from logger import JSONStreamHandler
 
 # from opencensus.trace.ext.grpc import server_interceptor
 # from opencensus.trace.samplers import always_on
@@ -53,9 +50,8 @@ from logger import JSONStreamHandler
 # except:
 #     pass
 
-log = logging.getLogger('emailservice')
-log.setLevel(logging.INFO)
-log.addHandler(JSONStreamHandler())
+from logger import getJSONLogger
+logger = getJSONLogger('emailservice-server')
 
 # Loads confirmation email template from file
 env = Environment(
@@ -92,7 +88,7 @@ class EmailService(BaseEmailService):
         "html_body": content
       }
     )
-    log.info("Message sent: {}".format(response.rfc822_message_id))
+    logger.info("Message sent: {}".format(response.rfc822_message_id))
 
   def SendOrderConfirmation(self, request, context):
     email = request.email
@@ -102,7 +98,7 @@ class EmailService(BaseEmailService):
       confirmation = template.render(order = order)
     except TemplateError as err:
       context.set_details("An error occurred when preparing the confirmation mail.")
-      log.error(err.message)
+      logger.error(err.message)
       context.set_code(grpc.StatusCode.INTERNAL)
       return demo_pb2.Empty()
 
@@ -118,7 +114,7 @@ class EmailService(BaseEmailService):
 
 class DummyEmailService(BaseEmailService):
   def SendOrderConfirmation(self, request, context):
-    log.info('A request to send order confirmation email to {} has been received.'.format(request.email))
+    logger.info('A request to send order confirmation email to {} has been received.'.format(request.email))
     return demo_pb2.Empty()
 
 class HealthCheck():
@@ -138,7 +134,7 @@ def start(dummy_mode):
   health_pb2_grpc.add_HealthServicer_to_server(service, server)
 
   port = os.environ.get('PORT', "8080")
-  log.info("listening on port: "+port)
+  logger.info("listening on port: "+port)
   server.add_insecure_port('[::]:'+port)
   server.start()
   try:
@@ -149,5 +145,5 @@ def start(dummy_mode):
 
 
 if __name__ == '__main__':
-  log.info('starting the email service in dummy mode.')
+  logger.info('starting the email service in dummy mode.')
   start(dummy_mode = True)

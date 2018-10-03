@@ -15,16 +15,12 @@
 # limitations under the License.
 
 import grpc
-import logging
 
 import demo_pb2
 import demo_pb2_grpc
 
-from logger import JSONStreamHandler
-
-log = logging.getLogger('emailservice')
-log.setLevel(logging.INFO)
-log.addHandler(JSONStreamHandler())
+from logger import getJSONLogger
+logger = getJSONLogger('emailservice-client')
 
 # from opencensus.trace.tracer import Tracer
 # from opencensus.trace.exporters import stackdriver_exporter
@@ -46,10 +42,10 @@ def send_confirmation_email(email, order):
       email = email,
       order = order
     ))
-    log.info('Request sent.')
+    logger.info('Request sent.')
   except grpc.RpcError as err:
-    log.error(err.details())
-    log.error('{}, {}'.format(err.code().name, err.code().value))
+    logger.error(err.details())
+    logger.error('{}, {}'.format(err.code().name, err.code().value))
 
 if __name__ == '__main__':
-  log.info('Client for email service.')
+  logger.info('Client for email service.')
