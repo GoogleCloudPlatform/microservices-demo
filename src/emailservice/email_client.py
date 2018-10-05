@@ -19,6 +19,9 @@ import grpc
 import demo_pb2
 import demo_pb2_grpc
 
+from logger import getJSONLogger
+logger = getJSONLogger('emailservice-client')
+
 # from opencensus.trace.tracer import Tracer
 # from opencensus.trace.exporters import stackdriver_exporter
 # from opencensus.trace.ext.grpc import client_interceptor
@@ -39,10 +42,10 @@ def send_confirmation_email(email, order):
       email = email,
       order = order
     ))
-    print('Request sent.')
+    logger.info('Request sent.')
   except grpc.RpcError as err:
-    print(err.details())
-    print('{}, {}'.format(err.code().name, err.code().value))
+    logger.error(err.details())
+    logger.error('{}, {}'.format(err.code().name, err.code().value))
 
 if __name__ == '__main__':
-  print('Client for email service.')
+  logger.info('Client for email service.')
