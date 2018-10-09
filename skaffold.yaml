@@ -12,11 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-apiVersion: skaffold/v1alpha2
+apiVersion: skaffold/v1alpha3
 kind: Config
 build:
-  tagPolicy:
-    gitCommit: {}
   artifacts:
   - imageName: gcr.io/microservices-demo-app/emailservice
     workspace: src/emailservice
@@ -40,30 +38,31 @@ build:
     workspace: src/loadgenerator
   - imageName: gcr.io/microservices-demo-app/adservice
     workspace: src/adservice
+  tagPolicy:
+    gitCommit: {}
 deploy:
   kubectl:
     manifests:
     - ./kubernetes-manifests/**.yaml
-    
-
 profiles:
-  # "travis-ci" profile is used to build the images without
-  # pushing them.
-  - name: travis-ci
-    build:
-      local:
-        skipPush: true
-  # "gcb" profile allows building and pushing the images
-  # on Google Container Builder without requiring docker
-  # installed on the developer machine. However, note that
-  # since GCB does not cache the builds, each build will
-  # start from scratch and therefore take a long time.
-  #
-  # This is not used by default. To use it, run:
-  #     skaffold run -p gcb
-  - name: gcb
-    build:
-      googleCloudBuild:
-        diskSizeGb: 300
-        machineType: "N1_HIGHCPU_32"
-        timeout: 4000s
+# "travis-ci" profile is used to build the images withou
+# pushing them.
+- name: travis-ci
+  build:
+    local:
+      skipPush: true
+# "gcb" profile allows building and pushing the images
+# on Google Container Builder without requiring docker
+# installed on the developer machine. However, note that
+# since GCB does not cache the builds, each build will
+# start from scratch and therefore take a long time.
+#
+# This is not used by default. To use it, run:
+#     skaffold run -p gcb
+- name: gcb
+  build:
+    googleCloudBuild:
+      projectId: ""
+      diskSizeGb: 300
+      machineType: N1_HIGHCPU_32
+      timeout: 4000s
