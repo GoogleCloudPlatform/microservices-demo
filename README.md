@@ -138,8 +138,14 @@ Find **Protocol Buffers Descriptions** at the [`./pb` directory](./pb).
 
 1. Create a GKE cluster.
 
-2. Install Istio **without mutual TLS** option. (Istio mTLS is not yet supported
-   on this demo.)
+2. Install Istio **without mutual TLS** authentication option.
+
+   > (Optional) If you'd like to enable mTLS in the demo app, you need to
+   > make a few changes to the deployment manifests:
+   >
+   > - `kubernetes-manifests/frontend.yaml`: delete "livenessProbe" and
+   >   "readinessProbe" fields.
+   > - `kubernetes-manifests/loadgenerator.yaml`: delete "initContainers" field.
 
 3. Install the automatic sidecar injection (annotate the `default` namespace
    with the label):
