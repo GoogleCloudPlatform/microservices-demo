@@ -12,32 +12,32 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-apiVersion: skaffold/v1alpha3
+apiVersion: skaffold/v1alpha4
 kind: Config
 build:
   artifacts:
-  - imageName: gcr.io/microservices-demo-app/emailservice
-    workspace: src/emailservice
-  - imageName: gcr.io/microservices-demo-app/productcatalogservice
-    workspace: src/productcatalogservice
-  - imageName: gcr.io/microservices-demo-app/recommendationservice
-    workspace: src/recommendationservice
-  - imageName: gcr.io/microservices-demo-app/shippingservice
-    workspace: src/shippingservice
-  - imageName: gcr.io/microservices-demo-app/checkoutservice
-    workspace: src/checkoutservice
-  - imageName: gcr.io/microservices-demo-app/paymentservice
-    workspace: src/paymentservice
-  - imageName: gcr.io/microservices-demo-app/currencyservice
-    workspace: src/currencyservice
-  - imageName: gcr.io/microservices-demo-app/cartservice
-    workspace: src/cartservice
-  - imageName: gcr.io/microservices-demo-app/frontend
-    workspace: src/frontend
-  - imageName: gcr.io/microservices-demo-app/loadgenerator
-    workspace: src/loadgenerator
-  - imageName: gcr.io/microservices-demo-app/adservice
-    workspace: src/adservice
+  - image: gcr.io/microservices-demo-app/emailservice
+    context: src/emailservice
+  - image: gcr.io/microservices-demo-app/productcatalogservice
+    context: src/productcatalogservice
+  - image: gcr.io/microservices-demo-app/recommendationservice
+    context: src/recommendationservice
+  - image: gcr.io/microservices-demo-app/shippingservice
+    context: src/shippingservice
+  - image: gcr.io/microservices-demo-app/checkoutservice
+    context: src/checkoutservice
+  - image: gcr.io/microservices-demo-app/paymentservice
+    context: src/paymentservice
+  - image: gcr.io/microservices-demo-app/currencyservice
+    context: src/currencyservice
+  - image: gcr.io/microservices-demo-app/cartservice
+    context: src/cartservice
+  - image: gcr.io/microservices-demo-app/frontend
+    context: src/frontend
+  - image: gcr.io/microservices-demo-app/loadgenerator
+    context: src/loadgenerator
+  - image: gcr.io/microservices-demo-app/adservice
+    context: src/adservice
   tagPolicy:
     gitCommit: {}
 deploy:
@@ -50,7 +50,7 @@ profiles:
 - name: travis-ci
   build:
     local:
-      skipPush: true
+      push: false
 # "gcb" profile allows building and pushing the images
 # on Google Container Builder without requiring docker
 # installed on the developer machine. However, note that
@@ -62,7 +62,6 @@ profiles:
 - name: gcb
   build:
     googleCloudBuild:
-      projectId: ""
       diskSizeGb: 300
       machineType: N1_HIGHCPU_32
       timeout: 4000s
