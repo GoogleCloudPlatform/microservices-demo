@@ -1,0 +1,17 @@
+# Cloudbuild.yaml to deploy to prod
+#
+# PREREQUISITES:
+# Skaffold builder image must be present in this project's container registry
+# (see https://github.com/GoogleCloudPlatform/cloud-builders-community/tree/master/skaffold)
+#
+# Cloud Build service account must have "Kubernetes Engine Developer" role
+
+steps:
+- name: gcr.io/$PROJECT_ID/skaffold
+  args: ['run', '-f=skaffold.yaml']
+  env:
+  - 'CLOUDSDK_COMPUTE_ZONE=us-central1-b'
+  - 'CLOUDSDK_CONTAINER_CLUSTER=demo-app-staging'
+timeout: 1800s
+options: # Add more power, and more time, for heavy Skaffold build
+  machineType: 'N1_HIGHCPU_8'
