@@ -61,6 +61,6 @@ client.convert(request, (err, response) => {
   if (err) {
     logger.error(`Error in convert: ${err}`);
   } else {
-    logger.log(`Convert: ${_moneyToString(request.from)} to ${_moneyToString(response)}`);
+    logger.info(`Convert: ${_moneyToString(request.from)} to ${_moneyToString(response)}`);
   }
 });

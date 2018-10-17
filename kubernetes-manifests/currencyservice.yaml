@@ -25,7 +25,8 @@ spec:
       terminationGracePeriodSeconds: 5
       containers:
       - name: server
-        image: gcr.io/microservices-demo-app/currencyservice
+        #image: gcr.io/microservices-demo-app/currencyservice
+        image: us.gcr.io/hipster-apim-demo/currencyservice
         ports:
         - name: grpc
           containerPort: 7000
@@ -42,6 +43,9 @@ spec:
           limits:
             cpu: 200m
             memory: 128Mi
+        env:
+          - name: DATA_URL
+            value: "http://amer-demo4-test.apigee.net/currency-service"
 ---
 apiVersion: v1
 kind: Service

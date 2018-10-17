@@ -19,6 +19,7 @@ metadata:
 spec:
   hosts:
   - www.ecb.europa.eu
+  - amer-demo4-test.apigee.net
   ports:
   - number: 80
     name: http

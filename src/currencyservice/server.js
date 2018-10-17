@@ -39,7 +39,7 @@ const MAIN_PROTO_PATH = path.join(__dirname, './proto/demo.proto');
 const HEALTH_PROTO_PATH = path.join(__dirname, './proto/grpc/health/v1/health.proto');
 
 const PORT = 7000;
-const DATA_URL = 'http://www.ecb.europa.eu/stats/eurofxref/eurofxref-daily.xml';
+const DATA_URL = process.env.DATA_URL //'http://www.ecb.europa.eu/stats/eurofxref/eurofxref-daily.xml';
 
 const shopProto = _loadProto(MAIN_PROTO_PATH).hipstershop;
 const healthProto = _loadProto(HEALTH_PROTO_PATH).grpc.health.v1;
