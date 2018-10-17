@@ -1,14 +1,14 @@
-# Cloudbuild.yaml to deploy to prod
+# This file is used to build and deploy the app into a GKE cluster using Google
+# Cloud Build.
 #
-# PREREQUISITES:
-# Skaffold builder image must be present in this project's container registry
-# (see https://github.com/GoogleCloudPlatform/cloud-builders-community/tree/master/skaffold)
-#
-# Cloud Build service account must have "Kubernetes Engine Developer" role
+# Requirements:
+# - Give the Google Cloud Build service account "Kubernetes Engine Developer"
+#   IAM role on the GCP project.
+# - Set up Google Cloud Build trigger on Cloud Console.
 
 steps:
-- name: gcr.io/$PROJECT_ID/skaffold
-  args: ['run', '-f=skaffold.yaml']
+- name: gcr.io/k8s-skaffold/skaffold:v0.16.0
+  args: ['skaffold', 'run', '-f=skaffold.yaml']
   env:
   - 'CLOUDSDK_COMPUTE_ZONE=us-central1-b'
   - 'CLOUDSDK_CONTAINER_CLUSTER=demo-app-staging'
