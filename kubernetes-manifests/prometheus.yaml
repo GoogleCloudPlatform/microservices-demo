@@ -1,0 +1,63 @@
+# Copyright 2018 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: prometheus
+spec:
+  template:
+    metadata:
+      labels:
+        app: prometheus
+    spec:
+      containers:
+      - name: prometheus
+        image: gcr.io/microservices-demo-app/prometheus
+        ports:
+        - containerPort: 9090
+        readinessProbe:
+          periodSeconds: 5
+          tcpSocket:
+            port: 9090
+        livenessProbe:
+          periodSeconds: 5
+          tcpSocket:
+            port: 9090
+        volumeMounts:
+        - mountPath: /data
+          name: prometheus-data
+        resources:
+          limits:
+            memory: 256Mi
+            cpu: 125m
+          requests:
+            cpu: 70m
+            memory: 200Mi
+      volumes:
+      - name: prometheus-data
+        emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: prometheus
+spec:
+  type: ClusterIP
+  selector:
+    app: prometheus
+  ports:
+  - name: prometheus
+    port: 9090
+    targetPort: 9090

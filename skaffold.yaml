@@ -38,6 +38,12 @@ build:
     context: src/loadgenerator
   - image: gcr.io/microservices-demo-app/adservice
     context: src/adservice
+  - image: gcr.io/microservices-demo-app/grafana
+    context: src/grafana
+  - image: gcr.io/microservices-demo-app/prometheus
+    context: src/prometheus
+  - image: gcr.io/microservices-demo-app/jaeger
+    context: src/jaeger
   tagPolicy:
     gitCommit: {}
 deploy:

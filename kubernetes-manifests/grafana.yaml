@@ -1,0 +1,78 @@
+# Copyright 2018 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: grafana
+spec:
+  template:
+    metadata:
+      labels:
+        app: grafana
+    spec:
+      containers:
+      - name: grafana
+        image: gcr.io/microservices-demo-app/grafana
+        ports:
+        - containerPort: 3000
+        readinessProbe:
+          periodSeconds: 5
+          tcpSocket:
+            port: 3000
+        livenessProbe:
+          periodSeconds: 5
+          tcpSocket:
+            port: 3000
+        volumeMounts:
+        - mountPath: /var/lib/grafana
+          name: grafana-data
+        resources:
+          limits:
+            memory: 256Mi
+            cpu: 125m
+          requests:
+            cpu: 70m
+            memory: 200Mi
+      volumes:
+      - name: grafana-data
+        emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: grafana
+spec:
+  type: ClusterIP
+  selector:
+    app: grafana
+  ports:
+  - name: grafana
+    port: 3000
+    targetPort: 3000
+# ---
+# TODO (rghetia): Grafana-external is disabled until password issue is resolved.
+#
+# apiVersion: v1
+# kind: Service
+# metadata:
+#   name: grafana-external
+# spec:
+#   type: LoadBalancer
+#   selector:
+#     app: grafana
+#   ports:
+#   - name: http
+#     port: 3000
+#     targetPort: 3000
