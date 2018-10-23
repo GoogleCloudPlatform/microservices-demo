@@ -22,7 +22,9 @@ import (
 	"io/ioutil"
 	"net"
 	"os"
+	"os/signal"
 	"strings"
+	"syscall"
 	"time"
 
 	pb "github.com/GoogleCloudPlatform/microservices-demo/src/productcatalogservice/genproto"
@@ -42,9 +44,12 @@ import (
 
 var (
 	catalogJSON []byte
+	cat         pb.ListProductsResponse
 	log         *logrus.Logger
 
 	port = flag.Int("port", 3550, "port to listen at")
+
+	reloadCatalog bool
 )
 
 func init() {
@@ -53,6 +58,9 @@ func init() {
 		log.Fatalf("failed to open product catalog json file: %v", err)
 	}
 	catalogJSON = c
+	if err := jsonpb.Unmarshal(bytes.NewReader(catalogJSON), &cat); err != nil {
+		log.Warnf("failed to parse the catalog JSON: %v", err)
+	}
 	log = logrus.New()
 	log.Formatter = &logrus.JSONFormatter{
 		FieldMap: logrus.FieldMap{
@@ -70,6 +78,22 @@ func main() {
 	go initTracing()
 	go initProfiling("productcatalogservice", "1.0.0")
 	flag.Parse()
+
+	sigs := make(chan os.Signal, 1)
+	signal.Notify(sigs, syscall.SIGUSR1, syscall.SIGUSR2)
+	go func() {
+		for {
+			sig := <-sigs
+			log.Printf("Received signal: %s", sig)
+			if sig == syscall.SIGUSR1 {
+				reloadCatalog = true
+				log.Infof("Enable catalog reloading")
+			} else {
+				reloadCatalog = false
+				log.Infof("Disable catalog reloading")
+			}
+		}
+	}()
 
 	log.Infof("starting grpc server at :%d", *port)
 	run(*port)
@@ -147,13 +171,22 @@ func initProfiling(service, version string) {
 type productCatalog struct{}
 
 func parseCatalog() []*pb.Product {
-	var cat pb.ListProductsResponse
-
-	if err := jsonpb.Unmarshal(bytes.NewReader(catalogJSON), &cat); err != nil {
-		log.Warnf("failed to parse the catalog JSON: %v", err)
-		return nil
+	if reloadCatalog {
+		var catalog pb.ListProductsResponse
+		c, err := ioutil.ReadFile("products.json")
+		if err != nil {
+			log.Fatalf("failed to open product catalog json file: %v", err)
+			return nil
+		}
+		if err := jsonpb.Unmarshal(bytes.NewReader(c), &catalog); err != nil {
+			log.Warnf("failed to parse the catalog JSON: %v", err)
+			return nil
+		}
+		log.Infof("Catalog reloaded")
+		return catalog.Products
+	} else {
+		return cat.Products
 	}
-	return cat.Products
 }
 
 func (p *productCatalog) Check(ctx context.Context, req *healthpb.HealthCheckRequest) (*healthpb.HealthCheckResponse, error) {
