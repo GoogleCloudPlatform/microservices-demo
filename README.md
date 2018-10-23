@@ -93,24 +93,30 @@ Find **Protocol Buffers Descriptions** at the [`./pb` directory](./pb).
 
 1. Install tools specified in the previous section (Docker, kubectl, skaffold)
 
-1. Create a Google Kubernetes Engine cluster and make sure `kubectl` is pointing
+2. Create a Google Kubernetes Engine cluster and make sure `kubectl` is pointing
    to the cluster.
 
         gcloud services enable container.googleapis.com
 
         gcloud container clusters create demo --enable-autoupgrade \
-            --enable-autoscaling --min-nodes=3 --max-nodes=10 --num-nodes=5
+            --enable-autoscaling --min-nodes=3 --max-nodes=10 --num-nodes=5 \
+            -- scopes https://www.googleapis.com/auth/cloud_debugger
 
         kubectl get nodes
 
-2. Enable Google Container Registry (GCR) on your GCP project and configure the
+3. Enable Google Container Registry (GCR) on your GCP project and configure the
    `docker` CLI to authenticate to GCR:
 
        gcloud services enable containerregistry.googleapis.com
 
        gcloud auth configure-docker -q
 
-3. Set your project ID on image names:
+4. (OPTIONAL) Allow GCP to access source code via Github. This step is necessary 
+ if you are using Stackdriver Debugger.
+      
+        gcloud debug source gen-repo-info-file --output-directory=./src/
+
+5. Set your project ID on image names:
 
     - Edit `skaffold.yaml`, update the `imageName:` fields that look like
       `gcr.io/[PROJECT_ID]` with your own GCP project ID.
@@ -120,13 +126,13 @@ Find **Protocol Buffers Descriptions** at the [`./pb` directory](./pb).
       `image:` fields with `gcr.io/[...]` and change them to your own GCP project
       ID.
 
-5. Run `skaffold run` from the root of this repository. This command:
+6. Run `skaffold run` from the root of this repository. This command:
    - builds the container images
    - pushes them to GCR
    - applies the `./kubernetes-manifests` deploying the application to
      Kubernetes.
 
-6.  Find the IP address of your application, then visit the application on your
+7.  Find the IP address of your application, then visit the application on your
     browser to confirm installation.
 
         kubectl get service frontend-external
