@@ -12,6 +12,7 @@ google-api-core==1.4.0
 google-auth==1.5.1
 google-cloud-core==0.28.1
 google-cloud-trace==0.19.0
+google-python-cloud-debugger==2.9
 googleapis-common-protos==1.5.3
 grpc-google-iam-v1==0.11.4
 grpcio==1.12.1
