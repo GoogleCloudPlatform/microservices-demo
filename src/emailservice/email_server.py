@@ -23,6 +23,9 @@ import grpc
 from jinja2 import Environment, FileSystemLoader, select_autoescape, TemplateError
 from google.api_core.exceptions import GoogleAPICallError
 
+import googleclouddebugger
+import traceback
+
 import demo_pb2
 import demo_pb2_grpc
 from grpc_health.v1 import health_pb2
@@ -33,22 +36,12 @@ from grpc_health.v1 import health_pb2_grpc
 # from opencensus.trace.exporters import stackdriver_exporter
 # from opencensus.trace.exporters import print_exporter
 
-# import googleclouddebugger
-
 # try:
 #     sampler = always_on.AlwaysOnSampler()
 #     exporter = stackdriver_exporter.StackdriverExporter()
 #     tracer_interceptor = server_interceptor.OpenCensusServerInterceptor(sampler, exporter)
 # except:
 #     tracer_interceptor = server_interceptor.OpenCensusServerInterceptor()
-
-# try:
-#     googleclouddebugger.enable(
-#         module='emailserver',
-#         version='1.0.0'
-#     )
-# except:
-#     pass
 
 from logger import getJSONLogger
 logger = getJSONLogger('emailservice-server')
@@ -145,5 +138,15 @@ def start(dummy_mode):
 
 
 if __name__ == '__main__':
+  try:
+    googleclouddebugger.enable(
+        module='emailserver',
+        version='1.0.0'
+    )
+  except:
+    logger.error("could not enable debugger")
+    logger.error(traceback.print_exc())
+    pass
+
   logger.info('starting the email service in dummy mode.')
   start(dummy_mode = True)
