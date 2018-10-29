@@ -1,5 +1,4 @@
 FROM gcr.io/dotnet-debugger/aspnetcore:2.1 as builder
-ENV d = 1
 WORKDIR /app
 COPY . .
 RUN dotnet restore && \
