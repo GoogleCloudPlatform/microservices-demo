@@ -10,3 +10,4 @@ pkg/
 .idea
 .skaffold-*.yaml
 .kubernetes-manifests-*/
+**/source-context.json

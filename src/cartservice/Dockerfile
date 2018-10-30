@@ -26,7 +26,8 @@ RUN GRPC_HEALTH_PROBE_VERSION=v0.2.0 && \
 
 WORKDIR /app
 COPY --from=builder /cartservice .
-COPY ./source-context.json /usr/share/dotnet-debugger/agent
+
+COPY Dockerfile ./source-context.json* /usr/share/dotnet-debugger/agent/
 
 ENV STACKDRIVER_DEBUGGER_MODULE=cartservice
 ENV STACKDRIVER_DEBUGGER_VERSION=1.0.0

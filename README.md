@@ -111,10 +111,9 @@ Find **Protocol Buffers Descriptions** at the [`./pb` directory](./pb).
 
        gcloud auth configure-docker -q
 
-4. (OPTIONAL) Allow GCP to access source code via Github. This step is necessary 
- if you are using Stackdriver Debugger.
-      
-        gcloud debug source gen-repo-info-file --output-directory=./src/
+4. (OPTIONAL) Run `./gen-debug-source-code.sh` if you want to use debugger.
+        This script will generate the source context for the project and populate
+        it to the root directory of all service modules.
 
 5. Set your project ID on image names:
 
@@ -126,14 +125,13 @@ Find **Protocol Buffers Descriptions** at the [`./pb` directory](./pb).
       `image:` fields with `gcr.io/[...]` and change them to your own GCP project
       ID.
 
-6. Run `./deploy.sh` from the root of this repository. This script:
-   - generates source context for cloud debugger
+6. Run `skaffold run` from the root of this repository. This script:
    - builds the container images
    - pushes them to GCR
    - applies the `./kubernetes-manifests` deploying the application to
      Kubernetes.
 
-7.  Find the IP address of your application, then visit the application on your
+7. Find the IP address of your application, then visit the application on your
     browser to confirm installation.
 
         kubectl get service frontend-external

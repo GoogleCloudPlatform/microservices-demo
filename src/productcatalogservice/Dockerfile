@@ -27,8 +27,7 @@ RUN wget -O go-cloud-debug https://storage.googleapis.com/cloud-debugger/compute
             && chmod 0755 go-cloud-debug
 
 COPY --from=builder /productcatalogservice ./server
-COPY products.json .
-COPY source-context.json .
+COPY products.json source-context.json* ./
 
 EXPOSE 3550
 ENTRYPOINT ["./go-cloud-debug", "-sourcecontext=source-context.json", \
