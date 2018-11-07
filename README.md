@@ -126,10 +126,20 @@ Find **Protocol Buffers Descriptions** at the [`./pb` directory](./pb).
    - applies the `./kubernetes-manifests` deploying the application to
      Kubernetes.
 
+   **Troubleshooting:** If you get "No space left on device" error on Google Cloud Shell,
+   you can build the images on Google Cloud Build:
+   [Enable the Cloud Build API](https://console.cloud.google.com/flows/enableapi?apiid=cloudbuild.googleapis.com), then run `skaffold run -p gcb` instead.
+
 6.  Find the IP address of your application, then visit the application on your
     browser to confirm installation.
 
         kubectl get service frontend-external
+
+    **Troubleshooting:** A Kubernetes bug (will be fixed in 1.12) combined with
+    a Skaffold [bug](https://github.com/GoogleContainerTools/skaffold/issues/887)
+    causes load balancer to not to work even after getting an IP address. If you
+    are seeing this, run `kubectl get service frontend-external -o=yaml | kubectl apply -f-`
+    to trigger load balancer reconfiguration.
 
 ### (Optional) Deploying on a Istio-installed cluster
 
