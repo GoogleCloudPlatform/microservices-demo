@@ -90,6 +90,7 @@ func run(port int) string {
 }
 
 func initStats(exporter *stackdriver.Exporter) {
+	view.SetReportingPeriod(60 * time.Second)
 	view.RegisterExporter(exporter)
 	if err := view.Register(ocgrpc.DefaultServerViews...); err != nil {
 		log.Info("Error registering default server views")
