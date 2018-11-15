@@ -28,19 +28,18 @@ import demo_pb2_grpc
 from grpc_health.v1 import health_pb2
 from grpc_health.v1 import health_pb2_grpc
 
-# from opencensus.trace.ext.grpc import server_interceptor
-# from opencensus.trace.samplers import always_on
-# from opencensus.trace.exporters import stackdriver_exporter
-# from opencensus.trace.exporters import print_exporter
+from opencensus.trace.exporters import stackdriver_exporter
+from opencensus.trace.ext.grpc import server_interceptor
+from opencensus.trace.samplers import always_on
 
 # import googleclouddebugger
 
-# try:
-#     sampler = always_on.AlwaysOnSampler()
-#     exporter = stackdriver_exporter.StackdriverExporter()
-#     tracer_interceptor = server_interceptor.OpenCensusServerInterceptor(sampler, exporter)
-# except:
-#     tracer_interceptor = server_interceptor.OpenCensusServerInterceptor()
+try:
+    sampler = always_on.AlwaysOnSampler()
+    exporter = stackdriver_exporter.StackdriverExporter()
+    tracer_interceptor = server_interceptor.OpenCensusServerInterceptor(sampler, exporter)
+except:
+    tracer_interceptor = server_interceptor.OpenCensusServerInterceptor()
 
 # try:
 #     googleclouddebugger.enable(
@@ -123,7 +122,8 @@ class HealthCheck():
       status=health_pb2.HealthCheckResponse.SERVING)
 
 def start(dummy_mode):
-  server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))#, interceptors=(tracer_interceptor,))
+  server = grpc.server(futures.ThreadPoolExecutor(max_workers=10),
+                       interceptors=(tracer_interceptor,))
   service = None
   if dummy_mode:
     service = DummyEmailService()

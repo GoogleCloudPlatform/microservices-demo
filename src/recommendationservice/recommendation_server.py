@@ -31,10 +31,10 @@ from logger import getJSONLogger
 logger = getJSONLogger('recommendationservice-server')
 
 # TODO(morganmclean,ahmetb) tracing currently disabled due to memory leak (see TODO below)
-# from opencensus.trace.ext.grpc import server_interceptor
-# from opencensus.trace.samplers import always_on
-# from opencensus.trace.exporters import stackdriver_exporter
-# from opencensus.trace.exporters import print_exporter
+from opencensus.trace.ext.grpc import server_interceptor
+from opencensus.trace.samplers import always_on
+from opencensus.trace.exporters import stackdriver_exporter
+from opencensus.trace.exporters import print_exporter
 
 class RecommendationService(demo_pb2_grpc.RecommendationServiceServicer):
     def ListRecommendations(self, request, context):
@@ -66,12 +66,12 @@ if __name__ == "__main__":
     # TODO(morganmclean,ahmetb) enabling the tracing interceptor/sampler below
     # causes an unbounded memory leak eventually OOMing the container.
     # ----
-    # try:
-    #     sampler = always_on.AlwaysOnSampler()
-    #     exporter = stackdriver_exporter.StackdriverExporter()
-    #     tracer_interceptor = server_interceptor.OpenCensusServerInterceptor(sampler, exporter)
-    # except:
-    #     tracer_interceptor = server_interceptor.OpenCensusServerInterceptor()
+    try:
+        sampler = always_on.AlwaysOnSampler()
+        exporter = stackdriver_exporter.StackdriverExporter()
+        tracer_interceptor = server_interceptor.OpenCensusServerInterceptor(sampler, exporter)
+    except:
+        tracer_interceptor = server_interceptor.OpenCensusServerInterceptor()
 
     try:
         googleclouddebugger.enable(
