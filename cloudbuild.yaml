@@ -1,17 +1,48 @@
-# This file is used to build and deploy the app into a GKE cluster using Google
-# Cloud Build.
+# Cloudbuild.yaml to deploy to staging
 #
-# Requirements:
-# - Give the Google Cloud Build service account "Kubernetes Engine Developer"
-#   IAM role on the GCP project.
-# - Set up Google Cloud Build trigger on Cloud Console.
+# PREREQUISITES:
+# - Cloud Build service account must have roles: "Kubernetes Engine Developer", "Storage Object Creator", \
+#   "Storage Object"
 
 steps:
-- name: gcr.io/k8s-skaffold/skaffold:v0.16.0
-  args: ['skaffold', 'run', '-f=skaffold.yaml']
+# modify skaffold config to deploy to cluster in *current* GCP project
+- id: 'Patch Skaffold config'
+  name: ubuntu
+  args:
+    - 'sed'
+    - '-i'
+    - 's/microservices-demo-app/$PROJECT_ID/g'
+    - 'skaffold.yaml'
+
+# authenticate to GKE cluster
+- id: 'Get GKE credentials'
+  name: gcr.io/cloud-builders/gcloud
+  args: ['container','clusters','get-credentials','demo-app-staging']
+  env:
+  - 'CLOUDSDK_COMPUTE_ZONE=us-central1-b'
+
+# make latest version of the Skaffold community builder available in this project
+- id: 'clone community builders repo'
+  name: gcr.io/cloud-builders/git
+  args: ['clone','https://github.com/GoogleCloudPlatform/cloud-builders-community']
+
+- id: 'build Skaffold builder'
+  name: gcr.io/cloud-builders/docker
+  args: 
+    - 'build'
+    - '-t' 
+    - 'gcr.io/$PROJECT_ID/skaffold'
+    - '/workspace/cloud-builders-community/skaffold/.'
+
+# push app code to cluster
+- id: 'Deploy to staging'
+  name: gcr.io/$PROJECT_ID/skaffold
+  args: ['run', '-f=skaffold.yaml']
   env:
   - 'CLOUDSDK_COMPUTE_ZONE=us-central1-b'
   - 'CLOUDSDK_CONTAINER_CLUSTER=demo-app-staging'
-timeout: 1800s
-options: # Add more power, and more time, for heavy Skaffold build
+
+# Add more power, and more time, for heavy Skaffold build
+timeout: 3600s
+options:
   machineType: 'N1_HIGHCPU_8'
