@@ -35,7 +35,7 @@ PyGObject==3.30.1
 python-json-logger==0.1.9
 pytz==2018.5
 pyxdg==0.26
-requests==2.19.1
+requests==2.20.0
 rsa==4.0
 SecretStorage==3.1.0
 six==1.11.0

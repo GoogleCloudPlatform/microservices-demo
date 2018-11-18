@@ -143,6 +143,7 @@ func main() {
 }
 
 func initStats(log logrus.FieldLogger, exporter *stackdriver.Exporter) {
+	view.SetReportingPeriod(60 * time.Second)
 	view.RegisterExporter(exporter)
 	if err := view.Register(ochttp.DefaultServerViews...); err != nil {
 		log.Warn("Error registering http default server views")

@@ -6,9 +6,9 @@
       <!-- This is a JSON format that can be read by the Stackdriver Logging agent. The trace and
            span IDs are interpreted by Stackdriver, and "traceSampled" is a custom field. -->
       <JsonLayout compact="true" eventEol="true">
-        <KeyValuePair key="logging.googleapis.com/trace" value="$${ctx:opencensusTraceId}"/>
-        <KeyValuePair key="logging.googleapis.com/spanId" value="$${ctx:opencensusSpanId}"/>
-        <KeyValuePair key="traceSampled" value="$${ctx:opencensusTraceSampled}"/>
+        <KeyValuePair key="logging.googleapis.com/trace" value="$${ctx:traceId}"/>
+        <KeyValuePair key="logging.googleapis.com/spanId" value="$${ctx:spanId}"/>
+        <KeyValuePair key="traceSampled" value="$${ctx:traceSampled}"/>
      </JsonLayout>
 
     </Console>

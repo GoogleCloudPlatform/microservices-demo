@@ -207,16 +207,24 @@ public class AdService {
     // Registers logging trace exporter.
     LoggingTraceExporter.register();
     long sleepTime = 10; /* seconds */
-    int maxAttempts = 3;
+    int maxAttempts = 5;
+    boolean statsExporterRegistered = false;
+    boolean traceExporterRegistered = false;
 
     for (int i=0; i<maxAttempts; i++) {
       try {
-        StackdriverTraceExporter.createAndRegister(
-            StackdriverTraceConfiguration.builder().build());
-        StackdriverStatsExporter.createAndRegister(
-            StackdriverStatsConfiguration.builder()
-                .setExportInterval(Duration.create(15, 0))
-                .build());
+        if (!traceExporterRegistered) {
+          StackdriverTraceExporter.createAndRegister(
+              StackdriverTraceConfiguration.builder().build());
+          traceExporterRegistered = true;
+        }
+        if (!statsExporterRegistered) {
+          StackdriverStatsExporter.createAndRegister(
+              StackdriverStatsConfiguration.builder()
+                  .setExportInterval(Duration.create(60, 0))
+                  .build());
+          statsExporterRegistered = true;
+        }
       } catch (Exception e) {
         if (i==(maxAttempts-1)) {
           logger.log(Level.WARN, "Failed to register Stackdriver Exporter." +

@@ -136,6 +136,12 @@ Find **Protocol Buffers Descriptions** at the [`./pb` directory](./pb).
 
         kubectl get service frontend-external
 
+    **Troubleshooting:** A Kubernetes bug (will be fixed in 1.12) combined with
+    a Skaffold [bug](https://github.com/GoogleContainerTools/skaffold/issues/887)
+    causes load balancer to not to work even after getting an IP address. If you
+    are seeing this, run `kubectl get service frontend-external -o=yaml | kubectl apply -f-`
+    to trigger load balancer reconfiguration.
+
 ### (Optional) Deploying on a Istio-installed cluster
 
 > **Note:** you followed GKE deployment steps above, run `skaffold delete` first

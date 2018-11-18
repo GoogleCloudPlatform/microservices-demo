@@ -5,8 +5,7 @@ pkg/
 *.swp
 *~
 .vscode/
-.vs/slnx.sqlite
-.vs/microservices-demo/v15/.suo
+.vs/
 .idea
 .skaffold-*.yaml
 .kubernetes-manifests-*/
