@@ -131,6 +131,10 @@ Find **Protocol Buffers Descriptions** at the [`./pb` directory](./pb).
    - applies the `./kubernetes-manifests` deploying the application to
      Kubernetes.
 
+   **Troubleshooting:** If you get "No space left on device" error on Google Cloud Shell,
+   you can build the images on Google Cloud Build:
+   [Enable the Cloud Build API](https://console.cloud.google.com/flows/enableapi?apiid=cloudbuild.googleapis.com), then run `skaffold run -p gcb` instead.
+
 7. Find the IP address of your application, then visit the application on your
     browser to confirm installation.
 
