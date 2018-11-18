@@ -125,7 +125,7 @@ Find **Protocol Buffers Descriptions** at the [`./pb` directory](./pb).
       `image:` fields with `gcr.io/[...]` and change them to your own GCP project
       ID.
 
-6. Run `skaffold run` from the root of this repository. This script:
+6. Run `skaffold run` from the root of this repository. This command:
    - builds the container images
    - pushes them to GCR
    - applies the `./kubernetes-manifests` deploying the application to
