@@ -24,7 +24,7 @@ spec:
     spec:
       terminationGracePeriodSeconds: 5
       containers:
-      - name: server
+      - name: recommendationservice
         image: gcr.io/microservices-demo-app/recommendationservice
         ports:
         - containerPort: 8080
