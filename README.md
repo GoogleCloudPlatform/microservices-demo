@@ -100,7 +100,7 @@ Find **Protocol Buffers Descriptions** at the [`./pb` directory](./pb).
 
         gcloud container clusters create demo --enable-autoupgrade \
             --enable-autoscaling --min-nodes=3 --max-nodes=10 --num-nodes=5 \
-            -- scopes https://www.googleapis.com/auth/cloud_debugger
+            --scopes https://www.googleapis.com/auth/cloud_debugger
 
         kubectl get nodes
 
