@@ -23,16 +23,16 @@ steps:
   args: 
     [
       'build',
-      '--tag', 'gcr.io/$PROJECT_ID/skaffold',
+      '--tag', 'skaffold',
       '/workspace/cloud-builders-community/skaffold/.',
     ]
 
 # push app code to cluster
 - id: 'Deploy to staging'
-  name: gcr.io/$PROJECT_ID/skaffold
+  name: skaffold
   args: ['run', '-f=skaffold.yaml']
   env:
-  - 'SKAFFOLD_DEFAULT_REPO=gcr.io/hipstershop-cicd'
+  - 'SKAFFOLD_DEFAULT_REPO=gcr.io/$PROJECT_ID'
   - 'CLOUDSDK_COMPUTE_ZONE=us-central1-b'
   - 'CLOUDSDK_CONTAINER_CLUSTER=demo-app-staging'
 
