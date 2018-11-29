@@ -21,10 +21,11 @@ steps:
 - id: 'build Skaffold builder'
   name: gcr.io/cloud-builders/docker
   args: 
-    - 'build'
-    - '-t' 
-    - 'gcr.io/$PROJECT_ID/skaffold'
-    - '/workspace/cloud-builders-community/skaffold/.'
+    [
+      'build',
+      '--tag', 'gcr.io/$PROJECT_ID/skaffold',
+      '/workspace/cloud-builders-community/skaffold/.',
+    ]
 
 # push app code to cluster
 - id: 'Deploy to staging'
