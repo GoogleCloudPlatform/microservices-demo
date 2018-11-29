@@ -4,15 +4,7 @@
 # - Cloud Build service account must have roles: "Kubernetes Engine Developer", "Storage Object Creator", \
 #   "Storage Object"
 
-# steps:
-# # modify skaffold config to deploy to cluster in *current* GCP project
-# - id: 'Patch Skaffold config'
-#   name: ubuntu
-#   args:
-#     - 'sed'
-#     - '-i'
-#     - 's/microservices-demo-app/$PROJECT_ID/g'
-#     - 'skaffold.yaml'
+steps:
 
 # authenticate to GKE cluster
 - id: 'Get GKE credentials'
@@ -44,6 +36,6 @@
   - 'CLOUDSDK_CONTAINER_CLUSTER=demo-app-staging'
 
 # Add more power, and more time, for heavy Skaffold build
-timeout: 3600s
+timeout: '3600s'
 options:
   machineType: 'N1_HIGHCPU_8'
