@@ -16,27 +16,31 @@ apiVersion: skaffold/v1alpha5
 kind: Config
 build:
   artifacts:
-  - image: gcr.io/microservices-demo-app/emailservice
+  # image tags are relative; to specify an image repo (e.g. GCR), you
+  # must provide a "default repo" using one of the methods described 
+  # here:
+  # https://github.com/GoogleContainerTools/skaffold/blob/master/docs/concepts.adoc#2-push
+  - image: emailservice
     context: src/emailservice
-  - image: gcr.io/microservices-demo-app/productcatalogservice
+  - image: productcatalogservice
     context: src/productcatalogservice
-  - image: gcr.io/microservices-demo-app/recommendationservice
+  - image: recommendationservice
     context: src/recommendationservice
-  - image: gcr.io/microservices-demo-app/shippingservice
+  - image: shippingservice
     context: src/shippingservice
-  - image: gcr.io/microservices-demo-app/checkoutservice
+  - image: checkoutservice
     context: src/checkoutservice
-  - image: gcr.io/microservices-demo-app/paymentservice
+  - image: paymentservice
     context: src/paymentservice
-  - image: gcr.io/microservices-demo-app/currencyservice
+  - image: currencyservice
     context: src/currencyservice
-  - image: gcr.io/microservices-demo-app/cartservice
+  - image: cartservice
     context: src/cartservice
-  - image: gcr.io/microservices-demo-app/frontend
+  - image: frontend
     context: src/frontend
-  - image: gcr.io/microservices-demo-app/loadgenerator
+  - image: loadgenerator
     context: src/loadgenerator
-  - image: gcr.io/microservices-demo-app/adservice
+  - image: adservice
     context: src/adservice
   tagPolicy:
     gitCommit: {}

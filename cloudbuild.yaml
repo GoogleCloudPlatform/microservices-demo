@@ -30,9 +30,13 @@ steps:
 # push app code to cluster
 - id: 'Deploy to staging'
   name: skaffold
-  args: ['run', '-f=skaffold.yaml']
+  args: 
+    [
+      'run', 
+      '-f=skaffold.yaml',
+      '--default-repo','gcr.io/$PROJECT_ID',
+    ]
   env:
-  - 'SKAFFOLD_DEFAULT_REPO=gcr.io/$PROJECT_ID'
   - 'CLOUDSDK_COMPUTE_ZONE=us-central1-b'
   - 'CLOUDSDK_CONTAINER_CLUSTER=demo-app-staging'
 
