@@ -1,44 +1,23 @@
 # Cloudbuild.yaml to deploy to staging
 #
 # PREREQUISITES:
-# - Cloud Build service account must have roles: "Kubernetes Engine Developer", "Storage Object Creator", \
-#   "Storage Object"
+# - Cloud Build service account must have roles: "Kubernetes Engine 
+# Developer", "Storage Object Creator", "Storage Object"
+
+# USAGE:
+# GCP zone and GKE target cluster must be specified as substitutions
+# Example invocation:
+# `gcloud builds submit --config=cloudbuild.yaml --substitutions=_ZONE=us-central1-b,_CLUSTER=demo-app-staging .`
 
 steps:
-
-# authenticate to GKE cluster
-- id: 'Get GKE credentials'
-  name: gcr.io/cloud-builders/gcloud
-  args: ['container','clusters','get-credentials','demo-app-staging']
-  env:
-  - 'CLOUDSDK_COMPUTE_ZONE=us-central1-b'
-
-# make latest version of the Skaffold community builder available in this project
-- id: 'clone community builders repo'
-  name: gcr.io/cloud-builders/git
-  args: ['clone','https://github.com/GoogleCloudPlatform/cloud-builders-community']
-
-- id: 'build Skaffold builder'
-  name: gcr.io/cloud-builders/docker
+- id: 'Deploy to app'
+  name: 'gcr.io/k8s-skaffold/skaffold'
+  entrypoint: 'bash'
   args: 
-    [
-      'build',
-      '--tag', 'skaffold',
-      '/workspace/cloud-builders-community/skaffold/.',
-    ]
-
-# push app code to cluster
-- id: 'Deploy to staging'
-  name: skaffold
-  args: 
-    [
-      'run', 
-      '-f=skaffold.yaml',
-      '--default-repo','gcr.io/$PROJECT_ID',
-    ]
-  env:
-  - 'CLOUDSDK_COMPUTE_ZONE=us-central1-b'
-  - 'CLOUDSDK_CONTAINER_CLUSTER=demo-app-staging'
+  - '-c'
+  - > 
+    gcloud container clusters get-credentials --zone=$_ZONE $_CLUSTER;
+    skaffold run -f=skaffold.yaml --default-repo=gcr.io/$PROJECT_ID;
 
 # Add more power, and more time, for heavy Skaffold build
 timeout: '3600s'
