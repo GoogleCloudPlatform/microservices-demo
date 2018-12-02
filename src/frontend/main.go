@@ -35,13 +35,15 @@ import (
 )
 
 const (
-	port            = "8080"
-	defaultCurrency = "USD"
-	cookieMaxAge    = 60 * 60 * 48
+	port                  = "8080"
+	defaultCurrency       = "USD"
+	cookieMaxAge          = 60 * 60 * 48
+	defaultApigeeClientID = "Add your Apigee Application Client ID here"
 
-	cookiePrefix    = "shop_"
-	cookieSessionID = cookiePrefix + "session-id"
-	cookieCurrency  = cookiePrefix + "currency"
+	cookiePrefix             = "shop_"
+	cookieSessionID          = cookiePrefix + "session-id"
+	cookieCurrency           = cookiePrefix + "currency"
+	apigeeClientIDHeaderName = "x-api-key"
 )
 
 var (
@@ -124,6 +126,8 @@ func main() {
 	r.HandleFunc("/cart", svc.viewCartHandler).Methods(http.MethodGet, http.MethodHead)
 	r.HandleFunc("/cart", svc.addToCartHandler).Methods(http.MethodPost)
 	r.HandleFunc("/cart/empty", svc.emptyCartHandler).Methods(http.MethodPost)
+	r.HandleFunc("/config", svc.viewConfigHandler).Methods(http.MethodGet, http.MethodHead)
+	r.HandleFunc("/config", svc.setConfigHandler).Methods(http.MethodPost)
 	r.HandleFunc("/setCurrency", svc.setCurrencyHandler).Methods(http.MethodPost)
 	r.HandleFunc("/logout", svc.logoutHandler).Methods(http.MethodGet)
 	r.HandleFunc("/cart/checkout", svc.placeOrderHandler).Methods(http.MethodPost)

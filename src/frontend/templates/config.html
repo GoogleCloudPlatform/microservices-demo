@@ -1,0 +1,36 @@
+{{ define "config" }}
+    {{ template "header" . }}
+
+    <main role="main">
+        <div class="py-5">
+            <div class="container bg-light py-3 px-lg-5 py-lg-5">
+                <div class="row py-3 my-2">
+                    <div class="col-12 col-lg-8 offset-lg-2">
+                        <h2>Hipster App Configuration</h2>
+                        <hr/>
+                        <form action="/config" method="POST">
+                            <div class="form-row">
+                              <div class="col-lg-3 mb-3 text-center">Apigee Client ID:</div>
+                                <div class="col-lg-8 mb-3">
+                                    <input type="text" class="form-control" id="apigee_client_id" name="apigee_client_id" value="{{ .apigee_client_id }}" required>
+                                </div>
+                            </div>
+                          <hr/>
+                            <div class="form-row">
+                              	<div class="col">
+                                </div>
+                                <div class="col-lg-5 mb-3">
+                                	<button class="btn btn-primary btn-block" type="submit">Save</button>
+                              	</div>
+                                <div class="col">
+                                </div>
+                            </div>
+                         </form>
+                     </div>
+                 </div>
+            </div>
+        </div>
+    </main>
+
+    {{ template "footer" . }}
+{{ end }}

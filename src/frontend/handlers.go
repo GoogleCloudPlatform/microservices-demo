@@ -344,6 +344,60 @@ func (fe *frontendServer) setCurrencyHandler(w http.ResponseWriter, r *http.Requ
 	w.WriteHeader(http.StatusFound)
 }
 
+// viewConfigHandler adds an endpoint for administrators to add custom configuration items.
+// I.E. apigeeClientID
+// TODO(phriscage) update for multiple config values
+func (fe *frontendServer) viewConfigHandler(w http.ResponseWriter, r *http.Request) {
+	log := r.Context().Value(ctxKeyLog{}).(logrus.FieldLogger)
+	currencies, err := fe.getCurrencies(r.Context())
+	if err != nil {
+		renderHTTPError(log, r, w, errors.Wrap(err, "could not retrieve currencies"), http.StatusInternalServerError)
+		return
+	}
+
+	cart, err := fe.getCart(r.Context(), sessionID(r))
+	if err != nil {
+		renderHTTPError(log, r, w, errors.Wrap(err, "could not retrieve cart"), http.StatusInternalServerError)
+		return
+	}
+
+	apigeeClientID := currentApigeeClientID(r)
+
+	if err := templates.ExecuteTemplate(w, "config", map[string]interface{}{
+		"session_id":       sessionID(r),
+		"request_id":       r.Context().Value(ctxKeyRequestID{}),
+		"user_currency":    currentCurrency(r),
+		"currencies":       currencies,
+		"apigee_client_id": apigeeClientID,
+		"cart_size":        len(cart),
+	}); err != nil {
+		log.Println(err)
+	}
+}
+
+// setConfigHandler we set the config variables from the FORM POST.
+// Currently utilizing Cookies until appropriate storage library is determined
+func (fe *frontendServer) setConfigHandler(w http.ResponseWriter, r *http.Request) {
+	log := r.Context().Value(ctxKeyLog{}).(logrus.FieldLogger)
+	apigeeClientID := r.FormValue("apigee_client_id")
+	log.WithField("apigee_client_id.new", apigeeClientID).WithField("apigeeClientID.old", currentApigeeClientID(r)).
+		Debug("setting apigee_client_id")
+
+	if apigeeClientID != "" {
+		http.SetCookie(w, &http.Cookie{
+			Name:   apigeeClientIDHeaderName,
+			Value:  apigeeClientID,
+			MaxAge: cookieMaxAge,
+		})
+	}
+	referer := r.Header.Get("referer")
+	if referer == "" {
+		referer = "/"
+	}
+	w.Header().Set("Location", referer)
+	w.WriteHeader(http.StatusFound)
+}
+
 // chooseAd queries for advertisements available and randomly chooses one, if
 // available. It ignores the error retrieving the ad since it is not critical.
 func (fe *frontendServer) chooseAd(ctx context.Context, ctxKeys []string, log logrus.FieldLogger) *pb.Ad {
@@ -374,6 +428,14 @@ func currentCurrency(r *http.Request) string {
 		return c.Value
 	}
 	return defaultCurrency
+}
+
+func currentApigeeClientID(r *http.Request) string {
+	c, _ := r.Cookie(apigeeClientIDHeaderName)
+	if c != nil {
+		return c.Value
+	}
+	return defaultApigeeClientID
 }
 
 func sessionID(r *http.Request) string {
