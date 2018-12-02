@@ -73,14 +73,15 @@ func (fe *frontendServer) homeHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := templates.ExecuteTemplate(w, "home", map[string]interface{}{
-		"session_id":    sessionID(r),
-		"request_id":    r.Context().Value(ctxKeyRequestID{}),
-		"user_currency": currentCurrency(r),
-		"currencies":    currencies,
-		"products":      ps,
-		"cart_size":     len(cart),
-		"banner_color":  os.Getenv("BANNER_COLOR"), // illustrates canary deployments
-		"ad":            fe.chooseAd(r.Context(), []string{}, log),
+		"session_id":       sessionID(r),
+		"request_id":       r.Context().Value(ctxKeyRequestID{}),
+		"apigee_client_id": currentApigeeClientID(r),
+		"user_currency":    currentCurrency(r),
+		"currencies":       currencies,
+		"products":         ps,
+		"cart_size":        len(cart),
+		"banner_color":     os.Getenv("BANNER_COLOR"), // illustrates canary deployments
+		"ad":               fe.chooseAd(r.Context(), []string{}, log),
 	}); err != nil {
 		log.Error(err)
 	}
@@ -131,14 +132,15 @@ func (fe *frontendServer) productHandler(w http.ResponseWriter, r *http.Request)
 	}{p, price}
 
 	if err := templates.ExecuteTemplate(w, "product", map[string]interface{}{
-		"session_id":      sessionID(r),
-		"request_id":      r.Context().Value(ctxKeyRequestID{}),
-		"ad":              fe.chooseAd(r.Context(), p.Categories, log),
-		"user_currency":   currentCurrency(r),
-		"currencies":      currencies,
-		"product":         product,
-		"recommendations": recommendations,
-		"cart_size":       len(cart),
+		"session_id":       sessionID(r),
+		"request_id":       r.Context().Value(ctxKeyRequestID{}),
+		"apigee_client_id": currentApigeeClientID(r),
+		"ad":               fe.chooseAd(r.Context(), p.Categories, log),
+		"user_currency":    currentCurrency(r),
+		"currencies":       currencies,
+		"product":          product,
+		"recommendations":  recommendations,
+		"cart_size":        len(cart),
 	}); err != nil {
 		log.Println(err)
 	}
@@ -238,6 +240,7 @@ func (fe *frontendServer) viewCartHandler(w http.ResponseWriter, r *http.Request
 	if err := templates.ExecuteTemplate(w, "cart", map[string]interface{}{
 		"session_id":       sessionID(r),
 		"request_id":       r.Context().Value(ctxKeyRequestID{}),
+		"apigee_client_id": currentApigeeClientID(r),
 		"user_currency":    currentCurrency(r),
 		"currencies":       currencies,
 		"recommendations":  recommendations,
@@ -300,12 +303,13 @@ func (fe *frontendServer) placeOrderHandler(w http.ResponseWriter, r *http.Reque
 	}
 
 	if err := templates.ExecuteTemplate(w, "order", map[string]interface{}{
-		"session_id":      sessionID(r),
-		"request_id":      r.Context().Value(ctxKeyRequestID{}),
-		"user_currency":   currentCurrency(r),
-		"order":           order.GetOrder(),
-		"total_paid":      &totalPaid,
-		"recommendations": recommendations,
+		"session_id":       sessionID(r),
+		"request_id":       r.Context().Value(ctxKeyRequestID{}),
+		"apigee_client_id": currentApigeeClientID(r),
+		"user_currency":    currentCurrency(r),
+		"order":            order.GetOrder(),
+		"total_paid":       &totalPaid,
+		"recommendations":  recommendations,
 	}); err != nil {
 		log.Println(err)
 	}
@@ -366,9 +370,9 @@ func (fe *frontendServer) viewConfigHandler(w http.ResponseWriter, r *http.Reque
 	if err := templates.ExecuteTemplate(w, "config", map[string]interface{}{
 		"session_id":       sessionID(r),
 		"request_id":       r.Context().Value(ctxKeyRequestID{}),
+		"apigee_client_id": apigeeClientID,
 		"user_currency":    currentCurrency(r),
 		"currencies":       currencies,
-		"apigee_client_id": apigeeClientID,
 		"cart_size":        len(cart),
 	}); err != nil {
 		log.Println(err)
@@ -415,11 +419,12 @@ func renderHTTPError(log logrus.FieldLogger, r *http.Request, w http.ResponseWri
 
 	w.WriteHeader(code)
 	templates.ExecuteTemplate(w, "error", map[string]interface{}{
-		"session_id":  sessionID(r),
-		"request_id":  r.Context().Value(ctxKeyRequestID{}),
-		"error":       errMsg,
-		"status_code": code,
-		"status":      http.StatusText(code)})
+		"session_id":       sessionID(r),
+		"request_id":       r.Context().Value(ctxKeyRequestID{}),
+		"apigee_client_id": currentApigeeClientID(r),
+		"error":            errMsg,
+		"status_code":      code,
+		"status":           http.StatusText(code)})
 }
 
 func currentCurrency(r *http.Request) string {
