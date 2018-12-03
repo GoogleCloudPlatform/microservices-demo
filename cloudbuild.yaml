@@ -1,4 +1,5 @@
-# Cloudbuild.yaml to deploy to staging
+# This configuration file is used to build and deploy the app into a 
+# GKE cluster using Google Cloud Build.
 #
 # PREREQUISITES:
 # - Cloud Build service account must have role: "Kubernetes Engine Developer"
