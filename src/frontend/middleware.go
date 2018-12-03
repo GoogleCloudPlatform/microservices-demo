@@ -21,6 +21,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/sirupsen/logrus"
+	"google.golang.org/grpc/metadata"
 )
 
 type ctxKeyLog struct{}
@@ -99,6 +100,17 @@ func ensureSessionID(next http.Handler) http.HandlerFunc {
 			sessionID = c.Value
 		}
 		ctx := context.WithValue(r.Context(), ctxKeySessionID{}, sessionID)
+		r = r.WithContext(ctx)
+		next.ServeHTTP(w, r)
+	}
+}
+
+// update context metadata with appropriate Apigee Authorization header
+func ensureApigeeClientID(next http.Handler) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		var apigeeClientID string
+		apigeeClientID = currentApigeeClientID(r)
+		ctx := metadata.AppendToOutgoingContext(r.Context(), apigeeClientIDHeaderName, apigeeClientID)
 		r = r.WithContext(ctx)
 		next.ServeHTTP(w, r)
 	}
