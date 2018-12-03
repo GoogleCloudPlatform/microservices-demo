@@ -1,8 +1,7 @@
 # Cloudbuild.yaml to deploy to staging
 #
 # PREREQUISITES:
-# - Cloud Build service account must have roles: "Kubernetes Engine 
-# Developer", "Storage Object Creator", "Storage Object"
+# - Cloud Build service account must have role: "Kubernetes Engine Developer"
 
 # USAGE:
 # GCP zone and GKE target cluster must be specified as substitutions
@@ -11,7 +10,7 @@
 
 steps:
 - id: 'Deploy application to cluster'
-  name: 'gcr.io/k8s-skaffold/skaffold'
+  name: 'gcr.io/k8s-skaffold/skaffold:v0.18.0'
   entrypoint: 'bash'
   args: 
   - '-c'
