@@ -16,7 +16,8 @@
             <small class="text-muted">
                 {{ if $.session_id }}session-id: {{ $.session_id }}</br>{{end}}
                 {{ if $.request_id }}request-id: {{ $.request_id }}</br>{{end}}
-                {{ if $.apigee_client_id }}<a href="/config#apigee_client_id">apigee-client-id:</a> {{ $.apigee_client_id }}</br>{{end}}
+                {{ if $.apigee_client_id }}apigee-client-id: <a href="/config#apigee_client_id">{{ $.apigee_client_id }}</a></br>
+                {{ else }}apigee-client-id: <a href="/config#apigee_client_id">{{ $.apigee_client_id_placeholder }}</a></br>{{end}}
             </small>
         </div>
     </footer>
