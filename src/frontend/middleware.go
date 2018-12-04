@@ -110,8 +110,10 @@ func ensureApigeeClientID(next http.Handler) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var apigeeClientID string
 		apigeeClientID = currentApigeeClientID(r)
-		ctx := metadata.AppendToOutgoingContext(r.Context(), apigeeClientIDHeaderName, apigeeClientID)
-		r = r.WithContext(ctx)
+		if apigeeClientID != "" {
+			ctx := metadata.AppendToOutgoingContext(r.Context(), apigeeClientIDHeaderName, apigeeClientID)
+			r = r.WithContext(ctx)
+		}
 		next.ServeHTTP(w, r)
 	}
 }
