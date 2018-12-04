@@ -35,15 +35,15 @@ import (
 )
 
 const (
-	port                  = "8080"
-	defaultCurrency       = "USD"
-	cookieMaxAge          = 60 * 60 * 48
-	defaultApigeeClientID = "Add your Apigee Application Client ID here"
+	port            = "8080"
+	defaultCurrency = "USD"
+	cookieMaxAge    = 60 * 60 * 48
 
-	cookiePrefix             = "shop_"
-	cookieSessionID          = cookiePrefix + "session-id"
-	cookieCurrency           = cookiePrefix + "currency"
-	apigeeClientIDHeaderName = "x-api-key"
+	cookiePrefix              = "shop_"
+	cookieSessionID           = cookiePrefix + "session-id"
+	cookieCurrency            = cookiePrefix + "currency"
+	apigeeClientIDHeaderName  = "x-api-key"
+	ApigeeClientIDPlaceholder = "Add your Apigee Application Client ID here"
 )
 
 var (
