@@ -14,8 +14,7 @@ RUN apk add --update --no-cache \
     cairo-dev \
     cairo \
     openssl-dev \
-    gobject-introspection-dev \
-    git
+    gobject-introspection-dev
 
 # get packages
 COPY requirements.txt .

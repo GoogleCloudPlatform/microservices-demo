@@ -23,7 +23,7 @@ Jinja2==2.10
 keyring==15.1.0
 keyrings.alt==3.1
 MarkupSafe==1.0
-git+https://github.com/census-instrumentation/opencensus-python.git@da40cb1#egg=opencensus
+opencensus[stackdriver]==0.1.10
 protobuf==3.6.1
 pyasn1==0.4.4
 pyasn1-modules==0.2.2
