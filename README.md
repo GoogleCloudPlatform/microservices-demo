@@ -103,24 +103,17 @@ Find **Protocol Buffers Descriptions** at the [`./pb` directory](./pb).
 
         kubectl get nodes
 
-2. Enable Google Container Registry (GCR) on your GCP project and configure the
+1. Enable Google Container Registry (GCR) on your GCP project and configure the
    `docker` CLI to authenticate to GCR:
 
        gcloud services enable containerregistry.googleapis.com
 
        gcloud auth configure-docker -q
 
-3. Set your project ID on image names:
-
-    - Edit `skaffold.yaml`, update the `imageName:` fields that look like
-      `gcr.io/[PROJECT_ID]` with your own GCP project ID.
-
-    - Similarly, edit all Kubernetes Deployment manifests in the
-      [`./kubernetes-manifests`](./kubernetes-manifests) directory. Find the
-      `image:` fields with `gcr.io/[...]` and change them to your own GCP project
-      ID.
-
-5. Run `skaffold run` from the root of this repository. This command:
+1. In the root of this repository, run `skaffold run --default-repo=gcr.io/[PROJECT_ID]`,
+   where [PROJECT_ID] is your GCP project ID.
+   
+   This command:
    - builds the container images
    - pushes them to GCR
    - applies the `./kubernetes-manifests` deploying the application to
@@ -128,9 +121,9 @@ Find **Protocol Buffers Descriptions** at the [`./pb` directory](./pb).
 
    **Troubleshooting:** If you get "No space left on device" error on Google Cloud Shell,
    you can build the images on Google Cloud Build:
-   [Enable the Cloud Build API](https://console.cloud.google.com/flows/enableapi?apiid=cloudbuild.googleapis.com), then run `skaffold run -p gcb` instead.
+   [Enable the Cloud Build API](https://console.cloud.google.com/flows/enableapi?apiid=cloudbuild.googleapis.com), then run `skaffold run -p gcb  --default-repo=gcr.io/[PROJECT_ID]` instead.
 
-6.  Find the IP address of your application, then visit the application on your
+1.  Find the IP address of your application, then visit the application on your
     browser to confirm installation.
 
         kubectl get service frontend-external
@@ -168,7 +161,7 @@ Find **Protocol Buffers Descriptions** at the [`./pb` directory](./pb).
 
     This is required only once.
 
-5. Deploy the application with `skaffold run`.
+5. Deploy the application with `skaffold run --default-repo=gcr.io/[PROJECT_ID]`.
 
 6. Run `kubectl get pods` to see pods are in a healthy and ready state.
 
