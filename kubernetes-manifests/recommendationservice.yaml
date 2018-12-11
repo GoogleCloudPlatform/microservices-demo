@@ -24,7 +24,7 @@ spec:
     spec:
       terminationGracePeriodSeconds: 5
       containers:
-      - name: recommendationservice
+      - name: server
         image: recommendationservice
         ports:
         - containerPort: 8080

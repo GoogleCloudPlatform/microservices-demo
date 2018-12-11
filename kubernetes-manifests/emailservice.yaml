@@ -24,7 +24,7 @@ spec:
     spec:
       terminationGracePeriodSeconds: 5
       containers:
-      - name: emailservice
+      - name: server
         image: emailservice
         ports:
         - containerPort: 8080

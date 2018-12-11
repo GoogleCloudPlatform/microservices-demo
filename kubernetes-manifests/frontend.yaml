@@ -23,7 +23,7 @@ spec:
         app: frontend
     spec:
       containers:
-        - name: frontend
+        - name: server
           image: frontend
           ports:
           - containerPort: 8080

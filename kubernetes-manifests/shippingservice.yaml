@@ -23,7 +23,7 @@ spec:
         app: shippingservice
     spec:
       containers:
-      - name: shippingservice
+      - name: server
         image: shippingservice
         ports:
         - containerPort: 50051
