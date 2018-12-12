@@ -13,7 +13,7 @@ RUN apk add --update --no-cache \
     # App Deps
     cairo-dev \
     cairo \
-    openssl-dev \ 
+    openssl-dev \
     gobject-introspection-dev
 
 # get packages

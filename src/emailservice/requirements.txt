@@ -8,13 +8,12 @@ cryptography==2.3.1
 entrypoints==0.2.3
 enum34==1.1.6
 futures==3.1.1
-google-api-core==1.4.0
-google-auth==1.5.1
-google-cloud-core==0.28.1
-google-cloud-trace==0.19.0
+google-api-core==1.6.0
+google-auth==1.6.1
+google-cloud-core==0.29.0
 googleapis-common-protos==1.5.3
 grpc-google-iam-v1==0.11.4
-grpcio==1.12.1
+grpcio==1.16.1
 grpcio-health-checking==1.12.1
 grpcio-tools==1.12.1
 idna==2.7
@@ -24,7 +23,7 @@ Jinja2==2.10
 keyring==15.1.0
 keyrings.alt==3.1
 MarkupSafe==1.0
-opencensus==0.1.7
+opencensus[stackdriver]==0.1.10
 protobuf==3.6.1
 pyasn1==0.4.4
 pyasn1-modules==0.2.2

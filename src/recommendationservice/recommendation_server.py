@@ -14,13 +14,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import grpc
-from concurrent import futures
-import time
-import traceback
 import os
 import random
+import time
+import traceback
+from concurrent import futures
+
 import googleclouddebugger
+import grpc
+from opencensus.trace.exporters import print_exporter
+from opencensus.trace.exporters import stackdriver_exporter
+from opencensus.trace.ext.grpc import server_interceptor
+from opencensus.trace.samplers import always_on
 
 import demo_pb2
 import demo_pb2_grpc
@@ -30,11 +35,6 @@ from grpc_health.v1 import health_pb2_grpc
 from logger import getJSONLogger
 logger = getJSONLogger('recommendationservice-server')
 
-# TODO(morganmclean,ahmetb) tracing currently disabled due to memory leak (see TODO below)
-# from opencensus.trace.ext.grpc import server_interceptor
-# from opencensus.trace.samplers import always_on
-# from opencensus.trace.exporters import stackdriver_exporter
-# from opencensus.trace.exporters import print_exporter
 
 class RecommendationService(demo_pb2_grpc.RecommendationServiceServicer):
     def ListRecommendations(self, request, context):
@@ -63,15 +63,12 @@ class RecommendationService(demo_pb2_grpc.RecommendationServiceServicer):
 if __name__ == "__main__":
     logger.info("initializing recommendationservice")
 
-    # TODO(morganmclean,ahmetb) enabling the tracing interceptor/sampler below
-    # causes an unbounded memory leak eventually OOMing the container.
-    # ----
-    # try:
-    #     sampler = always_on.AlwaysOnSampler()
-    #     exporter = stackdriver_exporter.StackdriverExporter()
-    #     tracer_interceptor = server_interceptor.OpenCensusServerInterceptor(sampler, exporter)
-    # except:
-    #     tracer_interceptor = server_interceptor.OpenCensusServerInterceptor()
+    try:
+        sampler = always_on.AlwaysOnSampler()
+        exporter = stackdriver_exporter.StackdriverExporter()
+        tracer_interceptor = server_interceptor.OpenCensusServerInterceptor(sampler, exporter)
+    except:
+        tracer_interceptor = server_interceptor.OpenCensusServerInterceptor()
 
     try:
         googleclouddebugger.enable(
