@@ -24,6 +24,7 @@ import (
 	"os"
 	"os/signal"
 	"strings"
+	"sync"
 	"syscall"
 	"time"
 
@@ -43,9 +44,9 @@ import (
 )
 
 var (
-	catalogJSON []byte
-	cat         pb.ListProductsResponse
-	log         *logrus.Logger
+	cat          pb.ListProductsResponse
+	catalogMutex *sync.Mutex
+	log          *logrus.Logger
 
 	port = flag.Int("port", 3550, "port to listen at")
 
@@ -53,14 +54,6 @@ var (
 )
 
 func init() {
-	c, err := ioutil.ReadFile("products.json")
-	if err != nil {
-		log.Fatalf("failed to open product catalog json file: %v", err)
-	}
-	catalogJSON = c
-	if err := jsonpb.Unmarshal(bytes.NewReader(catalogJSON), &cat); err != nil {
-		log.Warnf("failed to parse the catalog JSON: %v", err)
-	}
 	log = logrus.New()
 	log.Formatter = &logrus.JSONFormatter{
 		FieldMap: logrus.FieldMap{
@@ -71,7 +64,11 @@ func init() {
 		TimestampFormat: time.RFC3339Nano,
 	}
 	log.Out = os.Stdout
-	log.Info("successfully parsed product catalog json")
+	catalogMutex = &sync.Mutex{}
+	err := readCatalogFile(&cat)
+	if err != nil {
+		log.Warnf("could not parse product catalog")
+	}
 }
 
 func main() {
@@ -170,23 +167,30 @@ func initProfiling(service, version string) {
 
 type productCatalog struct{}
 
-func parseCatalog() []*pb.Product {
-	if reloadCatalog {
-		var catalog pb.ListProductsResponse
-		c, err := ioutil.ReadFile("products.json")
-		if err != nil {
-			log.Fatalf("failed to open product catalog json file: %v", err)
-			return nil
-		}
-		if err := jsonpb.Unmarshal(bytes.NewReader(c), &catalog); err != nil {
-			log.Warnf("failed to parse the catalog JSON: %v", err)
-			return nil
-		}
-		log.Infof("Catalog reloaded")
-		return catalog.Products
-	} else {
-		return cat.Products
+func readCatalogFile(catalog *pb.ListProductsResponse) error {
+	catalogMutex.Lock()
+	defer catalogMutex.Unlock()
+	catalogJSON, err := ioutil.ReadFile("products.json")
+	if err != nil {
+		log.Fatalf("failed to open product catalog json file: %v", err)
+		return err
 	}
+	if err := jsonpb.Unmarshal(bytes.NewReader(catalogJSON), catalog); err != nil {
+		log.Warnf("failed to parse the catalog JSON: %v", err)
+		return err
+	}
+	log.Info("successfully parsed product catalog json")
+	return nil
+}
+
+func parseCatalog() []*pb.Product {
+	if reloadCatalog || len(cat.Products) == 0 {
+		err := readCatalogFile(&cat)
+		if err != nil {
+			return []*pb.Product{}
+		}
+	}
+	return cat.Products
 }
 
 func (p *productCatalog) Check(ctx context.Context, req *healthpb.HealthCheckRequest) (*healthpb.HealthCheckResponse, error) {
