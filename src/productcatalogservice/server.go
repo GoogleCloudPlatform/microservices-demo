@@ -22,7 +22,10 @@ import (
 	"io/ioutil"
 	"net"
 	"os"
+	"os/signal"
 	"strings"
+	"sync"
+	"syscall"
 	"time"
 
 	pb "github.com/GoogleCloudPlatform/microservices-demo/src/productcatalogservice/genproto"
@@ -41,18 +44,16 @@ import (
 )
 
 var (
-	catalogJSON []byte
-	log         *logrus.Logger
+	cat          pb.ListProductsResponse
+	catalogMutex *sync.Mutex
+	log          *logrus.Logger
 
 	port = flag.Int("port", 3550, "port to listen at")
+
+	reloadCatalog bool
 )
 
 func init() {
-	c, err := ioutil.ReadFile("products.json")
-	if err != nil {
-		log.Fatalf("failed to open product catalog json file: %v", err)
-	}
-	catalogJSON = c
 	log = logrus.New()
 	log.Formatter = &logrus.JSONFormatter{
 		FieldMap: logrus.FieldMap{
@@ -63,13 +64,33 @@ func init() {
 		TimestampFormat: time.RFC3339Nano,
 	}
 	log.Out = os.Stdout
-	log.Info("successfully parsed product catalog json")
+	catalogMutex = &sync.Mutex{}
+	err := readCatalogFile(&cat)
+	if err != nil {
+		log.Warnf("could not parse product catalog")
+	}
 }
 
 func main() {
 	go initTracing()
 	go initProfiling("productcatalogservice", "1.0.0")
 	flag.Parse()
+
+	sigs := make(chan os.Signal, 1)
+	signal.Notify(sigs, syscall.SIGUSR1, syscall.SIGUSR2)
+	go func() {
+		for {
+			sig := <-sigs
+			log.Printf("Received signal: %s", sig)
+			if sig == syscall.SIGUSR1 {
+				reloadCatalog = true
+				log.Infof("Enable catalog reloading")
+			} else {
+				reloadCatalog = false
+				log.Infof("Disable catalog reloading")
+			}
+		}
+	}()
 
 	log.Infof("starting grpc server at :%d", *port)
 	run(*port)
@@ -146,12 +167,28 @@ func initProfiling(service, version string) {
 
 type productCatalog struct{}
 
-func parseCatalog() []*pb.Product {
-	var cat pb.ListProductsResponse
-
-	if err := jsonpb.Unmarshal(bytes.NewReader(catalogJSON), &cat); err != nil {
+func readCatalogFile(catalog *pb.ListProductsResponse) error {
+	catalogMutex.Lock()
+	defer catalogMutex.Unlock()
+	catalogJSON, err := ioutil.ReadFile("products.json")
+	if err != nil {
+		log.Fatalf("failed to open product catalog json file: %v", err)
+		return err
+	}
+	if err := jsonpb.Unmarshal(bytes.NewReader(catalogJSON), catalog); err != nil {
 		log.Warnf("failed to parse the catalog JSON: %v", err)
-		return nil
+		return err
+	}
+	log.Info("successfully parsed product catalog json")
+	return nil
+}
+
+func parseCatalog() []*pb.Product {
+	if reloadCatalog || len(cat.Products) == 0 {
+		err := readCatalogFile(&cat)
+		if err != nil {
+			return []*pb.Product{}
+		}
 	}
 	return cat.Products
 }
