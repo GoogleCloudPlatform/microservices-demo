@@ -22,6 +22,7 @@ RUN apk add --no-cache \
     libgcc \
     libstdc++ \
     libintl \
+    openssl \
     icu
 WORKDIR /app
 COPY --from=builder /cartservice .

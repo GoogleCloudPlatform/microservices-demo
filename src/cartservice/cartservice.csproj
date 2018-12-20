@@ -14,6 +14,8 @@
     <PackageReference Include="grpc.tools" Version="1.12.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration" Version="2.1.1" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="2.1.1" />
+    <PackageReference Include="OpenCensus" Version="0.1.0-alpha-33381" />
+    <PackageReference Include="OpenCensus.Exporter.Stackdriver" Version="0.1.0-alpha-33381" />
     <PackageReference Include="StackExchange.Redis" Version="1.2.6" />
   </ItemGroup>
 
