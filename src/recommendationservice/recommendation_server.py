@@ -40,7 +40,8 @@ class RecommendationService(demo_pb2_grpc.RecommendationServiceServicer):
     def ListRecommendations(self, request, context):
         max_responses = 5
         # fetch list of products from product catalog stub
-        cat_response = product_catalog_stub.ListProducts(demo_pb2.Empty())
+        metadata = context.invocation_metadata()
+        cat_response = product_catalog_stub.ListProducts(demo_pb2.Empty(), metadata=metadata)
         product_ids = [x.id for x in cat_response.products]
         filtered_products = list(set(product_ids)-set(request.product_ids))
         num_products = len(filtered_products)
