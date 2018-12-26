@@ -1,0 +1,19 @@
+# Defines rules to apply the Apigee mixer adapter to requests.
+# In the rule below, we apply Apigee authorization and analytics
+# as defined in the apigee-handler (handler.yaml) to all intra-mesh
+# requests.
+---
+apiVersion: config.istio.io/v1alpha2
+kind: rule
+metadata:
+  name: hipster-rule
+  namespace: istio-system
+spec:
+  match: context.reporter.kind == "inbound" && destination.namespace == "default"
+    && destination.service.name != "frontend"
+    && destination.service.name != "frontend-external"
+  actions:
+  - handler: apigee-handler.apigee.istio-system
+    instances:
+    - apigee.analytics
+    - apigee.authorization

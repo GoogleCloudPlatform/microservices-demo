@@ -174,6 +174,55 @@ Find **Protocol Buffers Descriptions** at the [`./pb` directory](./pb).
 
        curl -v "http://$INGRESS_HOST"
 
+
+### (Optional) Apigee Istio Demo
+
+> **Note:** Complete the [Optional Istio installation](#optional-deploying-on-a-istio-installed-cluster) above
+
+1. Create an Apigee Edge account [here](https://login.apigee.com/sign__up)
+
+2. Install Apigee Istio Mixer plugin [here](https://github.com/apigee/istio-mixer-adapter/releases)
+
+3. Configure the Apigee Istio Mixer plugin with your Apigee Edge *organization*, *environment*, *username*, and *password*:
+
+        apigee-istio provision -o [organization] -e [environment] -u [username] -p [password] > ./istio-manifests/apigee/handler.yaml
+
+4. Apply the Apigee manifests in [`./istio-manifests/apigee`](./istio-manifests/apigee) directory.
+
+       kubectl apply -f  -f ./istio-manifests/apigee
+
+    This is required only once.
+
+5.  Find the IP address of your application, then visit the application on your
+    browser to confirm installation.
+
+        kubectl get service frontend-external
+
+  _This will partially fail with HTTP 500 and HTTP 403 errors_
+
+![alt text](img/apigee/hipster-shop-landing-unauthorized.png)
+
+6. Create an Apigee Edge Developer and an API Product with the appropriate Hipster Shop service names [example](https://docs.apigee.com/api-platform/istio-adapter/installation#get_an_api_key). You will need to add at least the following to the API Product Istio Services:
+```
+productcatalogservice.default.svc.cluster.local
+recommendationservice.default.svc.cluster.local
+currencyservice.default.svc.cluster.local
+cartservice.default.svc.cluster.local
+shippingservice.default.svc.cluster.local
+```
+
+7. Create an Apigee Edge application with the above API Product either in the Management UI or an Apigee developer portal [example](https://docs.apigee.com/api-platform/istio-adapter/installation#4_create_a_developer_app)
+
+8. Copy the Apigee application Client ID above, add the Client ID to the Hipster Shop configuration, and click the **Save** button. `<Ingress URL>/config#apigee_client_id`
+
+![alt text](img/apigee/hipster-shop-configuration.png)
+
+9. Navigate around the Hipster Shop again in your browser!
+  * _This will succeed without any errors for the services you added to the API Product_
+
+10. Navigate around the Apigee Edge [Analytics](https://docs.apigee.com/api-platform/analytics/analytics-services-overview) to discover metrics about your application and Hipster Shop services!
+
+
 ---
 
 **Note to fellow Googlers:** Please fill out the form at

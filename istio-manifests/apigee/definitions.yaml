@@ -1,0 +1,84 @@
+# Defines the base structures and data map for the Apigee mixer adapter.
+# In general, these are static and should not need to be modified.
+# However, certain specific behaviors such as where to retrieve an API Key
+# could be changed here.
+---
+# declares the Apigee adapter
+kind: CustomResourceDefinition
+apiVersion: apiextensions.k8s.io/v1beta1
+metadata:
+  name: apigees.config.istio.io
+  namespace: istio-system
+  labels:
+    package: apigee
+    istio: mixer-adapter
+spec:
+  group: config.istio.io
+  names:
+    kind: apigee
+    plural: apigees
+    singular: apigee
+  scope: Namespaced
+  version: v1alpha2
+---
+# define template 'analytics'
+kind: CustomResourceDefinition
+apiVersion: apiextensions.k8s.io/v1beta1
+metadata:
+  name: analytics.config.istio.io
+  namespace: istio-system
+  labels:
+    package: analytics
+    istio: mixer-instance
+spec:
+  group: config.istio.io
+  names:
+    kind: analytics
+    plural: analytics
+    singular: analytics
+  scope: Namespaced
+  version: v1alpha2
+---
+# instance configuration for template 'apigee.analytics'
+apiVersion: config.istio.io/v1alpha2
+kind: analytics
+metadata:
+  name: apigee
+  namespace: istio-system
+spec:
+  api_key: request.api_key | request.headers["x-api-key"] | ""
+  api_proxy: api.service | destination.service.host | ""
+  response_status_code: response.code | 0
+  client_ip: source.ip | ip("0.0.0.0")
+  request_verb: request.method | ""
+  request_uri: request.path | ""
+  useragent: request.useragent | ""
+  client_received_start_timestamp: request.time
+  client_received_end_timestamp: request.time
+  target_sent_start_timestamp: request.time
+  target_sent_end_timestamp: request.time
+  target_received_start_timestamp: response.time
+  target_received_end_timestamp: response.time
+  client_sent_start_timestamp: response.time
+  client_sent_end_timestamp: response.time
+  api_claims: # from jwt
+    json_claims: request.auth.raw_claims | ""
+---
+# instance configuration for template 'apigee.authorization'
+apiVersion: config.istio.io/v1alpha2
+kind: authorization
+metadata:
+  name: apigee
+  namespace: istio-system
+spec:
+  subject:
+    user: ""
+    groups: ""
+    properties:
+      api_key: request.api_key | request.headers["x-api-key"] | ""
+      json_claims: request.auth.raw_claims | ""
+  action:
+    namespace: destination.namespace | "default"
+    service: api.service | destination.service.host | ""
+    path: api.operation | request.path | ""
+    method: request.method | ""
