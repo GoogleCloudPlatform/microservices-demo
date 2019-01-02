@@ -11,7 +11,7 @@ Stackdriver, gRPC** and similar cloud-native technologies nowadays.
 
 | Home Page | Checkout Screen |
 |-----------|-----------------|
-| [![Screenshot of store homepage](./img/hipster-shop-frontend-1.png)](./img/hipster-shop-frontend-1.png) | [![Screenshot of checkout screen](./img/hipster-shop-frontend-2.png)](./img/hipster-shop-frontend-2.png) |
+| [![Screenshot of store homepage](./docs/img/hipster-shop-frontend-1.png)](./docs/img/hipster-shop-frontend-1.png) | [![Screenshot of checkout screen](./docs/img/hipster-shop-frontend-2.png)](./docs/img/hipster-shop-frontend-2.png) |
 
 ## Service Architecture
 
@@ -19,7 +19,7 @@ Stackdriver, gRPC** and similar cloud-native technologies nowadays.
 languages that talk to each other over gRPC.
 
 [![Architecture of
-microservices](./img/architecture-diagram.png)](./img/architecture-diagram.png)
+microservices](./docs/img/architecture-diagram.png)](./docs/img/architecture-diagram.png)
 
 Find **Protocol Buffers Descriptions** at the [`./pb` directory](./pb).
 
