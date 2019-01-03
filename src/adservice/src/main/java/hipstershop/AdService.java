@@ -31,7 +31,6 @@ import io.grpc.services.*;
 import io.opencensus.common.Duration;
 import io.opencensus.common.Scope;
 import io.opencensus.contrib.grpc.metrics.RpcViews;
-import io.opencensus.exporter.stats.prometheus.PrometheusStatsCollector;
 import io.opencensus.exporter.trace.jaeger.JaegerTraceExporter;
 import io.opencensus.exporter.trace.logging.LoggingTraceExporter;
 import io.opencensus.exporter.stats.stackdriver.StackdriverStatsConfiguration;
@@ -44,11 +43,9 @@ import io.opencensus.trace.SpanBuilder;
 import io.opencensus.trace.Tracer;
 import io.opencensus.trace.Tracing;
 import io.opencensus.trace.samplers.Samplers;
-import io.prometheus.client.exporter.HTTPServer;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
@@ -251,17 +248,6 @@ public class AdService {
     }
   }
 
-  static void initPrometheus() throws IOException {
-    boolean enabled = Boolean.parseBoolean(System.getenv("PROMETHEUS_ENABLED"));
-    if (enabled) {
-      PrometheusStatsCollector.createAndRegister();
-      HTTPServer prometheusServer = new HTTPServer(9090, true);
-      logger.info("Prometheus initialization complete.");
-    } else {
-      logger.info("Prometheus initialization disabled.");
-    }
-  }
-
   /** Main launches the server from the command line. */
   public static void main(String[] args) throws IOException, InterruptedException {
     // Add final keyword to pass checkStyle.
@@ -277,9 +263,6 @@ public class AdService {
         initStackdriver();
       }
     }).start();
-
-    // Register Prometheus exporters and export metrics to a Prometheus HTTPServer.
-    initPrometheus();
 
     // Register Jaeger
     initJaeger();
