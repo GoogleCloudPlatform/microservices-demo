@@ -28,7 +28,6 @@ version = "0.1.0-SNAPSHOT" // CURRENT_OPENCENSUS_VERSION
 def opencensusVersion = "0.17.0" // LATEST_OPENCENSUS_RELEASE_VERSION
 def grpcVersion = "1.15.0" // CURRENT_GRPC_VERSION
 def jacksonVersion = "2.9.6"
-def prometheusVersion = "0.3.0"
 
 tasks.withType(JavaCompile) {
     sourceCompatibility = '1.8'
@@ -45,7 +44,7 @@ dependencies {
         compile fileTree(dir: offlineCompile, include: '*.jar')
     } else {
         compile "com.google.api.grpc:proto-google-common-protos:1.11.0",
-                "io.opencensus:opencensus-exporter-stats-prometheus:${opencensusVersion}",
+                "io.opencensus:opencensus-exporter-trace-jaeger:${opencensusVersion}",
                 "io.opencensus:opencensus-exporter-stats-stackdriver:${opencensusVersion}",
                 "io.opencensus:opencensus-exporter-trace-stackdriver:${opencensusVersion}",
                 "io.opencensus:opencensus-exporter-trace-logging:${opencensusVersion}",
@@ -53,7 +52,6 @@ dependencies {
                 "io.grpc:grpc-stub:${grpcVersion}",
                 "io.grpc:grpc-netty:${grpcVersion}",
                 "io.grpc:grpc-services:${grpcVersion}",
-                "io.prometheus:simpleclient_httpserver:${prometheusVersion}",
                 "org.apache.logging.log4j:log4j-core:2.11.1"
 
         runtime "com.fasterxml.jackson.core:jackson-core:${jacksonVersion}",

@@ -31,6 +31,8 @@ spec:
         env:
         - name: PORT
           value: "9555"
+        - name: JAEGER_ENABLED
+          value: "false"
         resources:
           requests:
             cpu: 200m
