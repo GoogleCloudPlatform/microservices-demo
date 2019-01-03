@@ -32,6 +32,7 @@ import io.opencensus.common.Duration;
 import io.opencensus.common.Scope;
 import io.opencensus.contrib.grpc.metrics.RpcViews;
 import io.opencensus.exporter.stats.prometheus.PrometheusStatsCollector;
+import io.opencensus.exporter.trace.jaeger.JaegerTraceExporter;
 import io.opencensus.exporter.trace.logging.LoggingTraceExporter;
 import io.opencensus.exporter.stats.stackdriver.StackdriverStatsConfiguration;
 import io.opencensus.exporter.stats.stackdriver.StackdriverStatsExporter;
@@ -43,6 +44,7 @@ import io.opencensus.trace.SpanBuilder;
 import io.opencensus.trace.Tracer;
 import io.opencensus.trace.Tracing;
 import io.opencensus.trace.samplers.Samplers;
+import io.prometheus.client.exporter.HTTPServer;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.ArrayList;
@@ -201,11 +203,6 @@ public class AdService {
   public static void initStackdriver() {
     logger.info("Initialize StackDriver");
 
-    // Registers all RPC views.
-    RpcViews.registerAllViews();
-
-    // Registers logging trace exporter.
-    LoggingTraceExporter.register();
     long sleepTime = 10; /* seconds */
     int maxAttempts = 5;
     boolean statsExporterRegistered = false;
@@ -243,9 +240,37 @@ public class AdService {
     logger.info("StackDriver initialization complete.");
   }
 
+  static void initJaeger() {
+    boolean enabled = Boolean.parseBoolean(System.getenv("JAEGER_ENABLED"));
+    if (enabled) {
+      // Register Jaeger Tracing.
+      JaegerTraceExporter.createAndRegister("http://jaeger-collector:14268/api/traces", "adservice");
+      logger.info("Jaeger initialization complete.");
+    } else {
+      logger.info("Jaeger initialization disabled.");
+    }
+  }
+
+  static void initPrometheus() throws IOException {
+    boolean enabled = Boolean.parseBoolean(System.getenv("PROMETHEUS_ENABLED"));
+    if (enabled) {
+      PrometheusStatsCollector.createAndRegister();
+      HTTPServer prometheusServer = new HTTPServer(9090, true);
+      logger.info("Prometheus initialization complete.");
+    } else {
+      logger.info("Prometheus initialization disabled.");
+    }
+  }
+
   /** Main launches the server from the command line. */
   public static void main(String[] args) throws IOException, InterruptedException {
     // Add final keyword to pass checkStyle.
+
+    // Registers all RPC views.
+    RpcViews.registerAllViews();
+
+    // Registers logging trace exporter.
+    LoggingTraceExporter.register();
 
     new Thread( new Runnable() {
       public void run(){
@@ -254,7 +279,10 @@ public class AdService {
     }).start();
 
     // Register Prometheus exporters and export metrics to a Prometheus HTTPServer.
-    PrometheusStatsCollector.createAndRegister();
+    initPrometheus();
+
+    // Register Jaeger
+    initJaeger();
 
     // Start the RPC server. You shouldn't see any output from gRPC before this.
     logger.info("AdService starting.");
