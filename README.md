@@ -5,7 +5,7 @@ web-based e-commerce app called **“Hipster Shop”** where users can browse it
 add them to the cart, and purchase them.
 
 **Google uses this application to demonstrate Kubernetes, GKE, Istio,
-Stackdriver, gRPC** and similar cloud-native technologies nowadays.
+Stackdriver, gRPC, OpenCensus** and similar cloud-native technologies.
 
 ## Screenshots
 
