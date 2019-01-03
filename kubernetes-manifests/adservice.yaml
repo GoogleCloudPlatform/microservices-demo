@@ -33,8 +33,6 @@ spec:
           value: "9555"
         - name: JAEGER_ENABLED
           value: "false"
-        - name: PROMETHEUS_ENABLED
-          value: "false"
         resources:
           requests:
             cpu: 200m
