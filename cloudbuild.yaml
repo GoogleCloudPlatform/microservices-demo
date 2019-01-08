@@ -10,14 +10,26 @@
 # `gcloud builds submit --config=cloudbuild.yaml --substitutions=_ZONE=us-central1-b,_CLUSTER=demo-app-staging .`
 
 steps:
+- id: 'Write git commit to frontend'
+  name: 'ubuntu'
+  entrypoint: 'bash'
+  args:
+  - '-c'
+  - |
+    tools/insert_git_commit_link.sh
+  env:
+  - "COMMIT_SHA=$COMMIT_SHA"
+  - "SHORT_SHA=$SHORT_SHA"
+
+steps:
 - id: 'Deploy application to cluster'
   name: 'gcr.io/k8s-skaffold/skaffold:v0.20.0'
   entrypoint: 'bash'
   args: 
   - '-c'
-  - > 
-    gcloud container clusters get-credentials --zone=$_ZONE $_CLUSTER;
-    skaffold run -f=skaffold.yaml --default-repo=gcr.io/$PROJECT_ID;
+  - |
+    gcloud container clusters get-credentials --zone=$_ZONE $_CLUSTER
+    skaffold run -f=skaffold.yaml --default-repo=gcr.io/$PROJECT_ID
 
 # Add more power, and more time, for heavy Skaffold build
 timeout: '3600s'
