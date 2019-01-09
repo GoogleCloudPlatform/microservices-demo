@@ -238,10 +238,11 @@ public class AdService {
   }
 
   static void initJaeger() {
-    boolean enabled = Boolean.parseBoolean(System.getenv("JAEGER_ENABLED"));
-    if (enabled) {
+    String jaegerAddr = System.getenv("JAEGER_SERVICE_ADDR");
+    if (jaegerAddr != null && !jaegerAddr.isEmpty()) {
+      String jaegerUrl = String.format("http://%s/api/traces", jaegerAddr);
       // Register Jaeger Tracing.
-      JaegerTraceExporter.createAndRegister("http://jaeger-collector:14268/api/traces", "adservice");
+      JaegerTraceExporter.createAndRegister(jaegerUrl, "adservice");
       logger.info("Jaeger initialization complete.");
     } else {
       logger.info("Jaeger initialization disabled.");
