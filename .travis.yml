@@ -4,7 +4,7 @@ services:
 - docker
 
 install:
-- curl -Lo skaffold https://storage.googleapis.com/skaffold/releases/v0.18.0/skaffold-linux-amd64
+- curl -Lo skaffold https://storage.googleapis.com/skaffold/releases/v0.20.0/skaffold-linux-amd64
 - chmod +x skaffold
 - sudo mv skaffold /usr/local/bin
 
