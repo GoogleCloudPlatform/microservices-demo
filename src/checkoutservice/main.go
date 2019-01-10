@@ -25,6 +25,7 @@ import (
 	"contrib.go.opencensus.io/exporter/stackdriver"
 	"github.com/google/uuid"
 	"github.com/sirupsen/logrus"
+	"go.opencensus.io/exporter/jaeger"
 	"go.opencensus.io/plugin/ocgrpc"
 	"go.opencensus.io/stats/view"
 	"go.opencensus.io/trace"
@@ -98,6 +99,28 @@ func main() {
 	log.Fatal(err)
 }
 
+func initJaegerTracing() {
+	svcAddr := os.Getenv("JAEGER_SERVICE_ADDR")
+	if svcAddr == "" {
+		log.Info("jaeger initialization disabled.")
+		return
+	}
+
+	// Register the Jaeger exporter to be able to retrieve
+	// the collected spans.
+	exporter, err := jaeger.NewExporter(jaeger.Options{
+		Endpoint: fmt.Sprintf("http://%s", svcAddr),
+		Process: jaeger.Process{
+			ServiceName: "checkoutservice",
+		},
+	})
+	if err != nil {
+		log.Fatal(err)
+	}
+	trace.RegisterExporter(exporter)
+	log.Info("jaeger initialization completed.")
+}
+
 func initStats(exporter *stackdriver.Exporter) {
 	view.SetReportingPeriod(60 * time.Second)
 	view.RegisterExporter(exporter)
@@ -108,7 +131,7 @@ func initStats(exporter *stackdriver.Exporter) {
 	}
 }
 
-func initTracing() {
+func initStackDriverTracing() {
 	// TODO(ahmetb) this method is duplicated in other microservices using Go
 	// since they are not sharing packages.
 	for i := 1; i <= 3; i++ {
@@ -117,7 +140,6 @@ func initTracing() {
 			log.Infof("failed to initialize stackdriver exporter: %+v", err)
 		} else {
 			trace.RegisterExporter(exporter)
-			trace.ApplyConfig(trace.Config{DefaultSampler: trace.AlwaysSample()})
 			log.Info("registered stackdriver tracing")
 
 			// Register the views to collect server stats.
@@ -129,6 +151,11 @@ func initTracing() {
 		time.Sleep(d)
 	}
 	log.Warn("could not initialize stackdriver exporter after retrying, giving up")
+}
+
+func initTracing() {
+	initJaegerTracing()
+	initStackDriverTracing()
 }
 
 func initProfiling(service, version string) {
