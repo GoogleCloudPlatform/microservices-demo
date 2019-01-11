@@ -1,14 +1,10 @@
-FROM python:3-alpine as base
+FROM python:3-slim as base
 
 FROM base as builder
 
-RUN apk add --update --no-cache \
-    gcc \
-    linux-headers \
-    make \
-    musl-dev \
-    python-dev \
-    g++
+RUN apt-get -qq update \
+    && apt-get install -y --no-install-recommends \
+        g++
 
 COPY requirements.txt .
 
