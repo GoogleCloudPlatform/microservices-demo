@@ -3,7 +3,7 @@
 #
 # PREREQUISITES:
 # - Cloud Build service account must have role: "Kubernetes Engine Developer"
-
+#
 # USAGE:
 # GCP zone and GKE target cluster must be specified as substitutions
 # Example invocation:
