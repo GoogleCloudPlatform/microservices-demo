@@ -4,7 +4,7 @@
 if [[ "$COMMIT_SHA" && "$SHORT_SHA" ]]; then
     target="<!--GIT_COMMIT_LINK-->"
     replace=" [<a href='https://github.com/GoogleCloudPlatform/microservices-demo/commit/${COMMIT_SHA}'\
-             style='font-size:80%'>${SHORT_SHA}</a>]#"
+             style='font-size:80%'>${SHORT_SHA}</a>]"
 
     sed -i'' -e "s^$target^$replace^g" src/frontend/templates/footer.html
 
