@@ -19,7 +19,7 @@ build:
   # image tags are relative; to specify an image repo (e.g. GCR), you
   # must provide a "default repo" using one of the methods described 
   # here:
-  # https://github.com/GoogleContainerTools/skaffold/blob/master/docs/concepts.adoc#2-push
+  # https://skaffold.dev/docs/concepts/#image-repository-handling
   - image: emailservice
     context: src/emailservice
   - image: productcatalogservice
