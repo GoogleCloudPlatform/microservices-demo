@@ -3,7 +3,7 @@
 #
 # PREREQUISITES:
 # - Cloud Build service account must have role: "Kubernetes Engine Developer"
-#
+
 # USAGE:
 # GCP zone and GKE target cluster must be specified as substitutions
 # Example invocation:
@@ -21,7 +21,6 @@ steps:
   - "COMMIT_SHA=$COMMIT_SHA"
   - "SHORT_SHA=$SHORT_SHA"
 
-steps:
 - id: 'Deploy application to cluster'
   name: 'gcr.io/k8s-skaffold/skaffold:v0.20.0'
   entrypoint: 'bash'
