@@ -8,5 +8,6 @@ if [[ "$COMMIT_SHA" && "$SHORT_SHA" ]]; then
 
     sed -i'' -e "s^$target^$replace^g" src/frontend/templates/footer.html
 
-    cat src/frontend/templates/footer.html
+    # echo 'debug: contents of footer.html:'
+    # cat src/frontend/templates/footer.html
 fi
