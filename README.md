@@ -80,15 +80,17 @@ Find **Protocol Buffers Descriptions** at the [`./pb` directory](./pb).
      here](https://docs.docker.com/docker-for-mac/kubernetes/).
    - [skaffold](https://github.com/GoogleContainerTools/skaffold/#installation)
 
-1. Launch “Docker for Desktop”. Go to Preferences and choose “Enable Kubernetes”.
+1. Launch “Docker for Desktop”. Go to Preferences:
+   - choose “Enable Kubernetes”,
+   - set CPUs to at least 3, and Memory to at least 6.0 GiB
 
-1. Run `kubectl get nodes` to verify you're connected to “Kubernetes on Docker”.
+3. Run `kubectl get nodes` to verify you're connected to “Kubernetes on Docker”.
 
-1. Run `skaffold run` (first time will be slow, it can take ~20-30 minutes).
+4. Run `skaffold run` (first time will be slow, it can take ~20-30 minutes).
    This will build and deploy the application. If you need to rebuild the images
    automatically as you refactor he code, run `skaffold dev` command.
 
-1. Run `kubectl get pods` to verify the Pods are ready and running. The
+5. Run `kubectl get pods` to verify the Pods are ready and running. The
    application frontend should be available at http://localhost:80 on your
    machine.
 
@@ -117,16 +119,18 @@ Find **Protocol Buffers Descriptions** at the [`./pb` directory](./pb).
 
 1. In the root of this repository, run `skaffold run --default-repo=gcr.io/[PROJECT_ID]`,
    where [PROJECT_ID] is your GCP project ID.
-   
+
    This command:
    - builds the container images
    - pushes them to GCR
    - applies the `./kubernetes-manifests` deploying the application to
      Kubernetes.
 
-   **Troubleshooting:** If you get "No space left on device" error on Google Cloud Shell,
-   you can build the images on Google Cloud Build:
-   [Enable the Cloud Build API](https://console.cloud.google.com/flows/enableapi?apiid=cloudbuild.googleapis.com), then run `skaffold run -p gcb  --default-repo=gcr.io/[PROJECT_ID]` instead.
+   **Troubleshooting:** If you get "No space left on device" error on Google
+   Cloud Shell, you can build the images on Google Cloud Build: [Enable the
+   Cloud Build
+   API](https://console.cloud.google.com/flows/enableapi?apiid=cloudbuild.googleapis.com),
+   then run `skaffold run -p gcb  --default-repo=gcr.io/[PROJECT_ID]` instead.
 
 1.  Find the IP address of your application, then visit the application on your
     browser to confirm installation.
@@ -139,38 +143,47 @@ Find **Protocol Buffers Descriptions** at the [`./pb` directory](./pb).
     are seeing this, run `kubectl get service frontend-external -o=yaml | kubectl apply -f-`
     to trigger load balancer reconfiguration.
 
-### (Optional) Deploying on a Istio-installed cluster
+### (Optional) Deploying on a Istio-installed GKE cluster
 
 > **Note:** you followed GKE deployment steps above, run `skaffold delete` first
 > to delete what's deployed.
 
-1. Create a GKE cluster.
+1. Create a GKE cluster (described above).
 
-2. Install Istio **without mutual TLS** authentication option.
+2. Use [Istio on GKE add-on](https://cloud.google.com/istio/docs/istio-on-gke/installing)
+   to install Istio to your existing GKE cluster.
 
-   > (Optional) If you'd like to enable mTLS in the demo app, you need to
-   > make a few changes to the deployment manifests:
+       gcloud beta container clusters update demo \
+           --zone=us-central1-a \
+           --update-addons=Istio=ENABLED \
+           --istio-config=auth=MTLS_PERMISSIVE
+
+   > NOTE: If you need to enable `MTLS_STRICT` mode, you will need to update
+   > several manifest files:
    >
    > - `kubernetes-manifests/frontend.yaml`: delete "livenessProbe" and
    >   "readinessProbe" fields.
    > - `kubernetes-manifests/loadgenerator.yaml`: delete "initContainers" field.
 
-3. Install the automatic sidecar injection (annotate the `default` namespace
+3. (Optional) Enable Stackdriver Tracing/Logging with Istio Stackdriver Adapter
+   by [following this guide](https://cloud.google.com/istio/docs/istio-on-gke/installing#enabling_tracing_and_logging).
+
+4. Install the automatic sidecar injection (annotate the `default` namespace
    with the label):
 
        kubectl label namespace default istio-injection=enabled
 
-4. Apply the manifests in [`./istio-manifests`](./istio-manifests) directory.
+5. Apply the manifests in [`./istio-manifests`](./istio-manifests) directory.
 
        kubectl apply -f ./istio-manifests
 
     This is required only once.
 
-5. Deploy the application with `skaffold run --default-repo=gcr.io/[PROJECT_ID]`.
+6. Deploy the application with `skaffold run --default-repo=gcr.io/[PROJECT_ID]`.
 
-6. Run `kubectl get pods` to see pods are in a healthy and ready state.
+7. Run `kubectl get pods` to see pods are in a healthy and ready state.
 
-7. Find the IP address of your istio gateway Ingress or Service, and visit the
+8. Find the IP address of your istio gateway Ingress or Service, and visit the
    application.
 
        INGRESS_HOST="$(kubectl -n istio-system get service istio-ingressgateway -o jsonpath='{.status.loadBalancer.ingress[0].ip}')"
@@ -179,12 +192,14 @@ Find **Protocol Buffers Descriptions** at the [`./pb` directory](./pb).
 
        curl -v "http://$INGRESS_HOST"
 
-## Conferences featuring Hipster Shop 
+## Conferences featuring Hipster Shop
 
-- [Google Cloud Next'18 London – Keynote](https://youtu.be/nIq2pkNcfEI?t=3071) showing Stackdriver Incident Response Management
+- [Google Cloud Next'18 London – Keynote](https://youtu.be/nIq2pkNcfEI?t=3071)
+  showing Stackdriver Incident Response Management
 - Google Cloud Next'18 SF
   - [Day 1  Keynote](https://youtu.be/vJ9OaAqfxo4?t=2416) showing GKE On-Prem
-  - [Day 3 – Keynote](https://youtu.be/JQPOPV_VH5w?t=815) showing Stackdriver APM (Tracing, Code Search, Profiler, Google Cloud Build)
+  - [Day 3 – Keynote](https://youtu.be/JQPOPV_VH5w?t=815) showing Stackdriver
+    APM (Tracing, Code Search, Profiler, Google Cloud Build)
   - [Introduction to Service Management with Istio](https://www.youtube.com/watch?v=wCJrdKdD6UM&feature=youtu.be&t=586)
 
 ---
