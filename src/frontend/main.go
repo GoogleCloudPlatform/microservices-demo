@@ -181,15 +181,7 @@ func initStats(log logrus.FieldLogger, exporter *stackdriver.Exporter) {
 	}
 }
 
-func initTracing(log logrus.FieldLogger) {
-	// This is a demo app with low QPS. trace.AlwaysSample() is used here
-	// to make sure traces are available for observation and analysis.
-	// In a production environment or high QPS setup please use
-	// trace.ProbabilitySampler set at the desired probability.
-	trace.ApplyConfig(trace.Config{DefaultSampler: trace.AlwaysSample()})
-
-	initJaegerTracing(log)
-
+func initStackDriverTracing(log logrus.FieldLogger) {
 	// TODO(ahmetb) this method is duplicated in other microservices using Go
 	// since they are not sharing packages.
 	for i := 1; i <= 3; i++ {
@@ -213,6 +205,18 @@ func initTracing(log logrus.FieldLogger) {
 		time.Sleep(d)
 	}
 	log.Warn("could not initialize stackdriver exporter after retrying, giving up")
+}
+
+func initTracing(log logrus.FieldLogger) {
+	// This is a demo app with low QPS. trace.AlwaysSample() is used here
+	// to make sure traces are available for observation and analysis.
+	// In a production environment or high QPS setup please use
+	// trace.ProbabilitySampler set at the desired probability.
+	trace.ApplyConfig(trace.Config{DefaultSampler: trace.AlwaysSample()})
+
+	initJaegerTracing(log)
+	initStackDriverTracing(log)
+
 }
 
 func initProfiling(log logrus.FieldLogger, service, version string) {
