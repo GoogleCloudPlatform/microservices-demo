@@ -3,12 +3,14 @@
   <Appenders>
     <Console name="STDOUT" target="SYSTEM_OUT">
 
-      <!-- This is a JSON format that can be read by the Stackdriver Logging agent. The trace and
-           span IDs are interpreted by Stackdriver, and "traceSampled" is a custom field. -->
+      <!-- This is a JSON format that can be read by the Stackdriver Logging agent. The trace ID,
+           span ID, and timestamp are interpreted by Stackdriver, and "traceSampled" is a custom
+           field. -->
       <JsonLayout compact="true" eventEol="true">
         <KeyValuePair key="logging.googleapis.com/trace" value="$${ctx:traceId}"/>
         <KeyValuePair key="logging.googleapis.com/spanId" value="$${ctx:spanId}"/>
         <KeyValuePair key="traceSampled" value="$${ctx:traceSampled}"/>
+        <KeyValuePair key="time" value="$${date:yyyy-MM-dd}T$${date:HH:mm:ss.SSS}Z"/>
      </JsonLayout>
 
     </Console>
