@@ -79,6 +79,7 @@ Find **Protocol Buffers Descriptions** at the [`./pb` directory](./pb).
    - Docker for Desktop (Mac/Windows): It provides Kubernetes support as [noted
      here](https://docs.docker.com/docker-for-mac/kubernetes/).
    - [skaffold](https://github.com/GoogleContainerTools/skaffold/#installation)
+     (ensure version ≥v0.20)
 
 1. Launch “Docker for Desktop”. Go to Preferences:
    - choose “Enable Kubernetes”,
