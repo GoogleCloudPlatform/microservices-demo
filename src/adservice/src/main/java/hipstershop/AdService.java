@@ -29,20 +29,16 @@ import io.grpc.health.v1.HealthCheckResponse.ServingStatus;
 import io.grpc.stub.StreamObserver;
 import io.grpc.services.*;
 import io.opencensus.common.Duration;
-import io.opencensus.common.Scope;
 import io.opencensus.contrib.grpc.metrics.RpcViews;
 import io.opencensus.exporter.trace.jaeger.JaegerTraceExporter;
-import io.opencensus.exporter.trace.logging.LoggingTraceExporter;
 import io.opencensus.exporter.stats.stackdriver.StackdriverStatsConfiguration;
 import io.opencensus.exporter.stats.stackdriver.StackdriverStatsExporter;
 import io.opencensus.exporter.trace.stackdriver.StackdriverTraceConfiguration;
 import io.opencensus.exporter.trace.stackdriver.StackdriverTraceExporter;
 import io.opencensus.trace.AttributeValue;
 import io.opencensus.trace.Span;
-import io.opencensus.trace.SpanBuilder;
 import io.opencensus.trace.Tracer;
 import io.opencensus.trace.Tracing;
-import io.opencensus.trace.samplers.Samplers;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.ArrayList;
@@ -53,16 +49,17 @@ import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
 
-public class AdService {
-  private static final Logger logger = LogManager.getLogger(AdService.class);
+public final class AdService {
 
+  private static final Logger logger = LogManager.getLogger(AdService.class);
   private static final Tracer tracer = Tracing.getTracer();
 
-  private int MAX_ADS_TO_SERVE = 2;
+  private static int MAX_ADS_TO_SERVE = 2;
   private Server server;
   private HealthStatusManager healthMgr;
 
-  static final AdService service = new AdService();
+  private static final AdService service = new AdService();
+
   private void start() throws IOException {
     int port = Integer.parseInt(System.getenv("PORT"));
     healthMgr = new HealthStatusManager();
@@ -91,26 +88,20 @@ public class AdService {
     }
   }
 
-  static class AdServiceImpl extends hipstershop.AdServiceGrpc.AdServiceImplBase {
+  private static class AdServiceImpl extends hipstershop.AdServiceGrpc.AdServiceImplBase {
 
     /**
      * Retrieves ads based on context provided in the request {@code AdRequest}.
      *
      * @param req the request containing context.
-     * @param responseObserver the stream observer which gets notified with the value of
-     *     {@code AdResponse}
+     * @param responseObserver the stream observer which gets notified with the value of {@code
+     * AdResponse}
      */
     @Override
     public void getAds(AdRequest req, StreamObserver<AdResponse> responseObserver) {
       AdService service = AdService.getInstance();
-      Span parentSpan = tracer.getCurrentSpan();
-      SpanBuilder spanBuilder =
-          tracer
-              .spanBuilderWithExplicitParent("Retrieve Ads", parentSpan)
-              .setRecordEvents(true)
-              .setSampler(Samplers.alwaysSample());
-      try (Scope scope = spanBuilder.startScopedSpan()) {
-        Span span = tracer.getCurrentSpan();
+      Span span = tracer.getCurrentSpan();
+      try {
         span.putAttribute("method", AttributeValue.stringAttributeValue("getAds"));
         List<Ad> allAds = new ArrayList<>();
         logger.info("received ad request (context_words=" + req.getContextKeysList() + ")");
@@ -140,40 +131,42 @@ public class AdService {
         responseObserver.onCompleted();
       } catch (StatusRuntimeException e) {
         logger.log(Level.WARN, "GetAds Failed", e.getStatus());
-        return;
+        responseObserver.onError(e);
       }
     }
   }
 
-  static final ImmutableListMultimap<String, Ad> adsMap = createAdsMap();
+  private static final ImmutableListMultimap<String, Ad> adsMap = createAdsMap();
 
-  Collection<Ad> getAdsByCategory(String category) {
+  private Collection<Ad> getAdsByCategory(String category) {
     return adsMap.get(category);
   }
 
   private static final Random random = new Random();
 
-  public List<Ad> getRandomAds() {
+  private List<Ad> getRandomAds() {
     List<Ad> ads = new ArrayList<>(MAX_ADS_TO_SERVE);
     Collection<Ad> allAds = adsMap.values();
-    for (int i=0; i<MAX_ADS_TO_SERVE; i++) {
+    for (int i = 0; i < MAX_ADS_TO_SERVE; i++) {
       ads.add(Iterables.get(allAds, random.nextInt(allAds.size())));
     }
     return ads;
   }
 
-  public static AdService getInstance() {
+  private static AdService getInstance() {
     return service;
   }
 
-  /** Await termination on the main thread since the grpc library uses daemon threads. */
+  /**
+   * Await termination on the main thread since the grpc library uses daemon threads.
+   */
   private void blockUntilShutdown() throws InterruptedException {
     if (server != null) {
       server.awaitTermination();
     }
   }
 
-  static ImmutableListMultimap<String, Ad> createAdsMap() {
+  private static ImmutableListMultimap<String, Ad> createAdsMap() {
     Ad camera = Ad.newBuilder().setRedirectUrl("/product/2ZYFJ3GM2N")
         .setText("Film camera for sale. 50% off.").build();
     Ad lens = Ad.newBuilder().setRedirectUrl("/product/66VCHSJNUP")
@@ -197,7 +190,7 @@ public class AdService {
         .build();
   }
 
-  public static void initStackdriver() {
+  private static void initStackdriver() {
     logger.info("Initialize StackDriver");
 
     long sleepTime = 10; /* seconds */
@@ -205,7 +198,7 @@ public class AdService {
     boolean statsExporterRegistered = false;
     boolean traceExporterRegistered = false;
 
-    for (int i=0; i<maxAttempts; i++) {
+    for (int i = 0; i < maxAttempts; i++) {
       try {
         if (!traceExporterRegistered) {
           StackdriverTraceExporter.createAndRegister(
@@ -220,7 +213,7 @@ public class AdService {
           statsExporterRegistered = true;
         }
       } catch (Exception e) {
-        if (i==(maxAttempts-1)) {
+        if (i == (maxAttempts - 1)) {
           logger.log(Level.WARN, "Failed to register Stackdriver Exporter." +
               " Tracing and Stats data will not reported to Stackdriver. Error message: " + e
               .toString());
@@ -237,7 +230,7 @@ public class AdService {
     logger.info("StackDriver initialization complete.");
   }
 
-  static void initJaeger() {
+  private static void initJaeger() {
     String jaegerAddr = System.getenv("JAEGER_SERVICE_ADDR");
     if (jaegerAddr != null && !jaegerAddr.isEmpty()) {
       String jaegerUrl = String.format("http://%s/api/traces", jaegerAddr);
@@ -249,18 +242,15 @@ public class AdService {
     }
   }
 
-  /** Main launches the server from the command line. */
+  /**
+   * Main launches the server from the command line.
+   */
   public static void main(String[] args) throws IOException, InterruptedException {
-    // Add final keyword to pass checkStyle.
-
     // Registers all RPC views.
-    RpcViews.registerAllViews();
+    RpcViews.registerAllGrpcViews();
 
-    // Registers logging trace exporter.
-    LoggingTraceExporter.register();
-
-    new Thread( new Runnable() {
-      public void run(){
+    new Thread(new Runnable() {
+      public void run() {
         initStackdriver();
       }
     }).start();
