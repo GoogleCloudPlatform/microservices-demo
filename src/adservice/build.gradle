@@ -10,12 +10,14 @@ buildscript {
     }
     dependencies {
         classpath 'com.google.protobuf:protobuf-gradle-plugin:0.8.3'
+        classpath "gradle.plugin.com.github.sherter.google-java-format:google-java-format-gradle-plugin:0.7.1"
     }
 }
 
 apply plugin: 'idea'
 apply plugin: 'java'
 apply plugin: 'com.google.protobuf'
+apply plugin: 'com.github.sherter.google-java-format'
 
 repositories {
     mavenCentral()
@@ -79,6 +81,10 @@ protobuf {
         }
         ofSourceSet('main')
     }
+}
+
+googleJavaFormat {
+    toolVersion '1.7'
 }
 
 // Inform IDEs like IntelliJ IDEA, Eclipse or NetBeans about the generated code.

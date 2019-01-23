@@ -16,7 +16,6 @@
 
 package hipstershop;
 
-
 import hipstershop.Demo.Ad;
 import hipstershop.Demo.AdRequest;
 import hipstershop.Demo.AdResponse;
@@ -38,12 +37,10 @@ import io.opencensus.trace.samplers.Samplers;
 import java.util.concurrent.TimeUnit;
 import javax.annotation.Nullable;
 import org.apache.logging.log4j.Level;
-import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
-/**
- * A simple client that requests ads from the Ads Service.
- */
+/** A simple client that requests ads from the Ads Service. */
 public class AdServiceClient {
 
   private static final Logger logger = LogManager.getLogger(AdServiceClient.class);
@@ -52,9 +49,7 @@ public class AdServiceClient {
   private final ManagedChannel channel;
   private final hipstershop.AdServiceGrpc.AdServiceBlockingStub blockingStub;
 
-  /**
-   * Construct client connecting to Ad Service at {@code host:port}.
-   */
+  /** Construct client connecting to Ad Service at {@code host:port}. */
   private AdServiceClient(String host, int port) {
     this(
         ManagedChannelBuilder.forAddress(host, port)
@@ -64,9 +59,7 @@ public class AdServiceClient {
             .build());
   }
 
-  /**
-   * Construct client for accessing RouteGuide server using the existing channel.
-   */
+  /** Construct client for accessing RouteGuide server using the existing channel. */
   private AdServiceClient(ManagedChannel channel) {
     this.channel = channel;
     blockingStub = hipstershop.AdServiceGrpc.newBlockingStub(channel);
@@ -76,25 +69,24 @@ public class AdServiceClient {
     channel.shutdown().awaitTermination(5, TimeUnit.SECONDS);
   }
 
-  /**
-   * Get Ads from Server.
-   */
+  /** Get Ads from Server. */
   public void getAds(String contextKey) {
     logger.info("Get Ads with context " + contextKey + " ...");
     AdRequest request = AdRequest.newBuilder().addContextKeys(contextKey).build();
     AdResponse response;
 
     Span span =
-        tracer.spanBuilder("AdsClient").setRecordEvents(true).setSampler(Samplers.alwaysSample())
+        tracer
+            .spanBuilder("AdsClient")
+            .setRecordEvents(true)
+            .setSampler(Samplers.alwaysSample())
             .startSpan();
     try (Scope scope = tracer.withSpan(span)) {
       tracer.getCurrentSpan().addAnnotation("Getting Ads");
       response = blockingStub.getAds(request);
       tracer.getCurrentSpan().addAnnotation("Received response from Ads Service.");
     } catch (StatusRuntimeException e) {
-      tracer
-          .getCurrentSpan()
-          .setStatus(StatusConverter.fromGrpcStatus(e.getStatus()));
+      tracer.getCurrentSpan().setStatus(StatusConverter.fromGrpcStatus(e.getStatus()));
       logger.log(Level.WARN, "RPC failed: " + e.getStatus());
       return;
     } finally {
@@ -117,7 +109,6 @@ public class AdServiceClient {
     }
     return portNumber;
   }
-
 
   private static String getStringOrDefaultFromArgs(
       String[] args, int index, @Nullable String defaultString) {
@@ -154,9 +145,11 @@ public class AdServiceClient {
                 .build());
       } catch (Exception e) {
         if (i == (maxAttempts - 1)) {
-          logger.log(Level.WARN, "Failed to register Stackdriver Exporter." +
-              " Tracing and Stats data will not reported to Stackdriver. Error message: " + e
-              .toString());
+          logger.log(
+              Level.WARN,
+              "Failed to register Stackdriver Exporter."
+                  + " Tracing and Stats data will not reported to Stackdriver. Error message: "
+                  + e.toString());
         } else {
           logger.info("Attempt to register Stackdriver Exporter in " + sleepTime + " seconds");
           try {
@@ -169,7 +162,7 @@ public class AdServiceClient {
     }
 
     // Register Prometheus exporters and export metrics to a Prometheus HTTPServer.
-    //PrometheusStatsCollector.createAndRegister();
+    // PrometheusStatsCollector.createAndRegister();
 
     AdServiceClient client = new AdServiceClient(host, serverPort);
     try {
