@@ -144,6 +144,21 @@ Find **Protocol Buffers Descriptions** at the [`./pb` directory](./pb).
     are seeing this, run `kubectl get service frontend-external -o=yaml | kubectl apply -f-`
     to trigger load balancer reconfiguration.
 
+### Option 3: Using Static Images 
+
+> 💡 Recommended for test-driving the application on an existing cluster. 
+
+**Prerequisite**: a running Kubernetes cluster. 
+
+1. Clone this repository.
+1. Deploy the application: `kubectl apply -f ./release/kubernetes-manifests`  
+1. Run `kubectl get pods` to see pods are in a healthy and ready state.
+1.  Find the IP address of your application, then visit the application on your
+    browser to confirm installation.
+
+        kubectl get service frontend-external
+
+
 ### (Optional) Deploying on a Istio-installed GKE cluster
 
 > **Note:** you followed GKE deployment steps above, run `skaffold delete` first
