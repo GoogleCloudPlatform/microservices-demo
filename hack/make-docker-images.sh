@@ -12,8 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Creates a new release by 1) building/pushing images, 2) injecting tag into YAML, 
-# 3) creating a new git tag, and 4) pushing tags/updated YAML to $BRANCH.
+# Builds and pushes docker image for each demo microservice. 
 
 #!/usr/bin/env bash
 set -euo pipefail
@@ -24,18 +23,17 @@ fail() { log "$1"; exit 1; }
 TAG="${TAG?TAG env variable must be specified}"
 REPO_PREFIX="${REPO_PREFIX?REPO_PREFIX env variable must be specified}"
 
-# build and push images 
-./hack/make-docker-images.sh
 
-# update yaml 
-./hack/make-release-artifacts.sh 
+for dir in ./src/*/    
+do
+    # build image  
+    svcname="$(basename $dir)"
+    image="$REPO_PREFIX/$svcname:$TAG"
+    echo "Building and pushing $image..." 
+    docker build -t $image -f $dir/Dockerfile $dir 
 
-# create git release / push to master 
-log "Pushing k8s manifests to master..."
-git tag "$TAG"
-git add release/
-git commit --allow-empty -m "Release $TAG"
-git push --tags
-git push origin master
+    # push image 
+    docker push $image 
+done
 
-log "Successfully tagged release $TAG."
+log "Successfully built and pushed images."

@@ -12,8 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Creates a new release by 1) building/pushing images, 2) injecting tag into YAML, 
-# 3) creating a new git tag, and 4) pushing tags/updated YAML to $BRANCH.
+# injects new image/tag into the images in ./release/kubernetes-manifests/demo.yaml 
 
 #!/usr/bin/env bash
 set -euo pipefail
@@ -24,18 +23,19 @@ fail() { log "$1"; exit 1; }
 TAG="${TAG?TAG env variable must be specified}"
 REPO_PREFIX="${REPO_PREFIX?REPO_PREFIX env variable must be specified}"
 
-# build and push images 
-./hack/make-docker-images.sh
 
-# update yaml 
-./hack/make-release-artifacts.sh 
+# inject new tag into the relevant k8s manifest
+manifestfile="./release/kubernetes-manifests/demo.yaml"
 
-# create git release / push to master 
-log "Pushing k8s manifests to master..."
-git tag "$TAG"
-git add release/
-git commit --allow-empty -m "Release $TAG"
-git push --tags
-git push origin master
+for dir in ./src/*/    
+do
+    svcname="$(basename $dir)"
+    image="$REPO_PREFIX/$svcname:$TAG"
 
-log "Successfully tagged release $TAG."
+    pattern=".*image:.*$svcname.*"
+    replace="        image: $image"
+    sed -i '' "s|$pattern|$replace|g" $manifestfile 
+done
+
+
+log "Successfully injected image tag into demo.yaml".

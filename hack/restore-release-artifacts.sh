@@ -12,8 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Creates a new release by 1) building/pushing images, 2) injecting tag into YAML, 
-# 3) creating a new git tag, and 4) pushing tags/updated YAML to $BRANCH.
+
+# Restores images ./release/kubernetes-manifests/demo.yaml to match ./kubernetes-manifests
 
 #!/usr/bin/env bash
 set -euo pipefail
@@ -21,21 +21,15 @@ set -euo pipefail
 log() { echo "$1" >&2; }
 fail() { log "$1"; exit 1; }
 
-TAG="${TAG?TAG env variable must be specified}"
-REPO_PREFIX="${REPO_PREFIX?REPO_PREFIX env variable must be specified}"
+manifestfile="./release/kubernetes-manifests/demo.yaml"
 
-# build and push images 
-./hack/make-docker-images.sh
+# restore release/ manifest images to skaffold default, eg. "adservice"
+for dir in ./src/*/    
+do
+    svcname=$(basename $dir)
+    pattern=".*image:.*$svcname.*"
+    replace="        image: $svcname"
+    sed -i '' "s|$pattern|$replace|g" $manifestfile 
+done
 
-# update yaml 
-./hack/make-release-artifacts.sh 
-
-# create git release / push to master 
-log "Pushing k8s manifests to master..."
-git tag "$TAG"
-git add release/
-git commit --allow-empty -m "Release $TAG"
-git push --tags
-git push origin master
-
-log "Successfully tagged release $TAG."
+log "Restored demo.yaml."
