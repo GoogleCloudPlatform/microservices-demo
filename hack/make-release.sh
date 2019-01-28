@@ -22,25 +22,15 @@ else
     exit 
 fi
 
-# iterate over all services: build + push image, inject tag into k8s manifest. 
-for dir in ./src/*/    
-do
-    # docker build + push 
-    svcname=$(basename $dir)
-    image="$DOCKER_REPO/$svcname:$TAG"
-    echo "Building and pushing $image..." 
-    docker build -t $image -f $dir/Dockerfile $dir 
-    docker push $image 
+# build and push images 
+./build-push.sh $DOCKER_REPO $TAG
 
-    # inject new tag into the relevant k8s manifest
-    pattern=".*image:.*"
-    replace="        image: $image"
-    manifestfile="./release/kubernetes-manifests/$svcname.yaml"
-    sed -i '' "s|$pattern|$replace|g" $manifestfile 
-done
- 
 
-# create + push new release tag 
+# update yaml 
+./inject-yaml.sh $DOCKER_REPO $TAG
+
+
+# git tag 
 echo "Pushing git tag..."
 git tag $TAG 
 git push --tags
