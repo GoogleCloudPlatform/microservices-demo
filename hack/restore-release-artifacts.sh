@@ -27,7 +27,7 @@ manifestfile="./release/kubernetes-manifests/demo.yaml"
 for dir in ./src/*/    
 do
     svcname=$(basename $dir)
-    pattern=".*image:.*$svcname.*"
+    pattern="^[[:blank:]]*image:.*$svcname.*"
     replace="        image: $svcname"
     sed -i '' "s|$pattern|$replace|g" $manifestfile 
 done

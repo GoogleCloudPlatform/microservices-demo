@@ -32,7 +32,7 @@ do
     svcname="$(basename $dir)"
     image="$REPO_PREFIX/$svcname:$TAG"
 
-    pattern=".*image:.*$svcname.*"
+    pattern="^[[:blank:]]*image:.*$svcname.*"
     replace="        image: $image"
     sed -i '' "s|$pattern|$replace|g" $manifestfile 
 done
