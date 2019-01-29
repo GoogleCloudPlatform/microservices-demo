@@ -15,6 +15,4 @@ releases.
 1. `./make-docker-images.sh`: builds and pushes images to the specified Docker repository.
 2. `./make-release-artifacts.sh`: injects updated images/tag into 
    `./release/kubernetes-manifests/demo.yaml`. 
-3. `./restore-release-artifacts.sh`: restores image names/tags in `demo.yaml` to defaults
-   (`adservice`, `cartservice`, etc.) 
-4. `./make-release.sh`: runs scripts 1 and 2, then runs `git tag` / pushes updated manifests to master.
+3. `./make-release.sh`: runs scripts 1 and 2, then runs `git tag` / pushes updated manifests to master.
