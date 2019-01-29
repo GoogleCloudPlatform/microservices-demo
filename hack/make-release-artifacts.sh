@@ -23,10 +23,25 @@ fail() { log "$1"; exit 1; }
 TAG="${TAG?TAG env variable must be specified}"
 REPO_PREFIX="${REPO_PREFIX?REPO_PREFIX env variable must be specified}"
 
-
-# inject new tag into the relevant k8s manifest
+# overwrite release/ with the latest manifests, adding "---" separator.
+src="./kubernetes-manifests/*"
 manifestfile="./release/kubernetes-manifests/demo.yaml"
+tmp="./release/kubernetes-manifests/tmp.yaml"
+[ -e $manifestfile ] && rm $manifestfile
+for f in $src; do (cat "${f}"; echo "---") >> $tmp; done
 
+# remove extra google headers 
+gsed -i '/^#/d' $tmp 
+
+# remove empty lines 
+gsed -r -i '/^\s*$/d' $tmp 
+
+# add 1 google header to the top 
+cat "./release/.googleheader" $tmp > $manifestfile 
+rm $tmp 
+
+
+# replace image repo, tag for each deployment  
 for dir in ./src/*/    
 do
     svcname="$(basename $dir)"
@@ -34,7 +49,7 @@ do
 
     pattern="^(\s*)image:\s.*$svcname(.*)(\s*)"
     replace="\1image: $image\3"  
-    gsed -r -i "s|$pattern|$replace|g" $manifestfile 
+    gsed -r -i "s|$pattern|$replace|g" $manifestfile
 done
 
-log "Successfully injected image tag into demo.yaml".
+log "Successfully added image tags > wrote to demo.yaml".

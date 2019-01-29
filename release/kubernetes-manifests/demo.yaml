@@ -11,8 +11,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
-
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
@@ -129,38 +127,38 @@ spec:
         app: checkoutservice
     spec:
       containers:
-      - name: server
-        image: checkoutservice
-        ports:
-        - containerPort: 5050
-        readinessProbe:
-          exec:
-            command: ["/bin/grpc_health_probe", "-addr=:5050"]
-        livenessProbe:
-          exec:
-            command: ["/bin/grpc_health_probe", "-addr=:5050"]
-        env:
-        - name: PRODUCT_CATALOG_SERVICE_ADDR
-          value: "productcatalogservice:3550"
-        - name: SHIPPING_SERVICE_ADDR
-          value: "shippingservice:50051"
-        - name: PAYMENT_SERVICE_ADDR
-          value: "paymentservice:50051"
-        - name: EMAIL_SERVICE_ADDR
-          value: "emailservice:5000"
-        - name: CURRENCY_SERVICE_ADDR
-          value: "currencyservice:7000"
-        - name: CART_SERVICE_ADDR
-          value: "cartservice:7070"
-        # - name: JAEGER_SERVICE_ADDR
-        #   value: "jaeger-collector:14268"
-        resources:
-          requests:
-            cpu: 100m
-            memory: 64Mi
-          limits:
-            cpu: 200m
-            memory: 128Mi
+        - name: server
+          image: checkoutservice
+          ports:
+          - containerPort: 5050
+          readinessProbe:
+            exec:
+              command: ["/bin/grpc_health_probe", "-addr=:5050"]
+          livenessProbe:
+            exec:
+              command: ["/bin/grpc_health_probe", "-addr=:5050"]
+          env:
+          - name: PRODUCT_CATALOG_SERVICE_ADDR
+            value: "productcatalogservice:3550"
+          - name: SHIPPING_SERVICE_ADDR
+            value: "shippingservice:50051"
+          - name: PAYMENT_SERVICE_ADDR
+            value: "paymentservice:50051"
+          - name: EMAIL_SERVICE_ADDR
+            value: "emailservice:5000"
+          - name: CURRENCY_SERVICE_ADDR
+            value: "currencyservice:7000"
+          - name: CART_SERVICE_ADDR
+            value: "cartservice:7070"
+          # - name: JAEGER_SERVICE_ADDR
+          #   value: "jaeger-collector:14268"
+          resources:
+            requests:
+              cpu: 100m
+              memory: 64Mi
+            limits:
+              cpu: 200m
+              memory: 128Mi
 ---
 apiVersion: v1
 kind: Service
@@ -275,50 +273,50 @@ spec:
         app: frontend
     spec:
       containers:
-      - name: server
-        image: frontend
-        ports:
-        - containerPort: 8080
-        readinessProbe:
-          initialDelaySeconds: 10
-          httpGet:
-            path: "/_healthz"
-            port: 8080
-            httpHeaders:
-            - name: "Cookie"
-              value: "shop_session-id=x-readiness-probe"
-        livenessProbe:
-          initialDelaySeconds: 10
-          httpGet:
-            path: "/_healthz"
-            port: 8080
-            httpHeaders:
-            - name: "Cookie"
-              value: "shop_session-id=x-liveness-probe"
-        env:
-        - name: PRODUCT_CATALOG_SERVICE_ADDR
-          value: "productcatalogservice:3550"
-        - name: CURRENCY_SERVICE_ADDR
-          value: "currencyservice:7000"
-        - name: CART_SERVICE_ADDR
-          value: "cartservice:7070"
-        - name: RECOMMENDATION_SERVICE_ADDR
-          value: "recommendationservice:8080"
-        - name: SHIPPING_SERVICE_ADDR
-          value: "shippingservice:50051"
-        - name: CHECKOUT_SERVICE_ADDR
-          value: "checkoutservice:5050"
-        - name: AD_SERVICE_ADDR
-          value: "adservice:9555"
-        # - name: JAEGER_SERVICE_ADDR
-        #   value: "jaeger-collector:14268"
-        resources:
-          requests:
-            cpu: 100m
-            memory: 64Mi
-          limits:
-            cpu: 200m
-            memory: 128Mi
+        - name: server
+          image: frontend
+          ports:
+          - containerPort: 8080
+          readinessProbe:
+            initialDelaySeconds: 10
+            httpGet:
+              path: "/_healthz"
+              port: 8080
+              httpHeaders:
+              - name: "Cookie"
+                value: "shop_session-id=x-readiness-probe"
+          livenessProbe:
+            initialDelaySeconds: 10
+            httpGet:
+              path: "/_healthz"
+              port: 8080
+              httpHeaders:
+              - name: "Cookie"
+                value: "shop_session-id=x-liveness-probe"
+          env:
+          - name: PRODUCT_CATALOG_SERVICE_ADDR
+            value: "productcatalogservice:3550"
+          - name: CURRENCY_SERVICE_ADDR
+            value: "currencyservice:7000"
+          - name: CART_SERVICE_ADDR
+            value: "cartservice:7070"
+          - name: RECOMMENDATION_SERVICE_ADDR
+            value: "recommendationservice:8080"
+          - name: SHIPPING_SERVICE_ADDR
+            value: "shippingservice:50051"
+          - name: CHECKOUT_SERVICE_ADDR
+            value: "checkoutservice:5050"
+          - name: AD_SERVICE_ADDR
+            value: "adservice:9555"
+          # - name: JAEGER_SERVICE_ADDR
+          #   value: "jaeger-collector:14268"
+          resources:
+            requests:
+              cpu: 100m
+              memory: 64Mi
+            limits:
+              cpu: 200m
+              memory: 128Mi
 ---
 apiVersion: v1
 kind: Service
@@ -361,7 +359,7 @@ spec:
       restartPolicy: Always
       initContainers:
       - name: wait-frontend
-        image: loadgenerator
+        image: alpine:3.6
         command: ['sh', '-c', 'set -x;  apk add --no-cache curl; 
           until timeout -t 2 curl -f "http://${FRONTEND_ADDR}"; do 
             echo "waiting for http://${FRONTEND_ADDR}"; 
@@ -451,9 +449,6 @@ spec:
         livenessProbe:
           exec:
             command: ["/bin/grpc_health_probe", "-addr=:3550"]
-#        env:
-#          - name: JAEGER_SERVICE_ADDR
-#            value: "jaeger-collector:14268"
         resources:
           requests:
             cpu: 100m
@@ -595,9 +590,6 @@ spec:
         livenessProbe:
           exec:
             command: ["/bin/grpc_health_probe", "-addr=:50051"]
-#        env:
-#          - name: JAEGER_SERVICE_ADDR
-#            value: "jaeger-collector:14268"
         resources:
           requests:
             cpu: 100m
@@ -618,3 +610,4 @@ spec:
   - name: grpc
     port: 50051
     targetPort: 50051
+---

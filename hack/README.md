@@ -13,6 +13,6 @@ releases.
 ### scripts 
 
 1. `./make-docker-images.sh`: builds and pushes images to the specified Docker repository.
-2. `./make-release-artifacts.sh`: injects updated images/tag into 
+2. `./make-release-artifacts.sh`: generates a combined YAML file with image $TAG at: 
    `./release/kubernetes-manifests/demo.yaml`. 
 3. `./make-release.sh`: runs scripts 1 and 2, then runs `git tag` / pushes updated manifests to master.
