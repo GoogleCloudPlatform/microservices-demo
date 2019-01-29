@@ -23,7 +23,6 @@ import (
 	"net"
 	"os"
 	"os/signal"
-	"strconv"
 	"strings"
 	"sync"
 	"syscall"
@@ -46,10 +45,10 @@ import (
 )
 
 var (
-	cat           pb.ListProductsResponse
-	catalogMutex  *sync.Mutex
-	log           *logrus.Logger
-	sleepDuration time.Duration
+	cat          pb.ListProductsResponse
+	catalogMutex *sync.Mutex
+	log          *logrus.Logger
+	sleep        time.Duration
 
 	port = flag.Int("port", 3550, "port to listen at")
 
@@ -147,26 +146,21 @@ func initStats(exporter *stackdriver.Exporter) {
 
 // sets the sleepSeconds variable, if env variable provided
 func initSleep() {
-	sleepTmp := os.Getenv("SLEEP_SECONDS")
-	if sleepTmp == "" {
-		sleepDuration = time.Duration(0)
+	s := ""
+	if s = os.Getenv("EXTRA_LATENCY"); s == "" {
+		sleep = time.Duration(0)
 		return
 	}
-	sleepInt, err := strconv.Atoi(sleepTmp)
+	v, err := time.ParseDuration(s)
 	if err != nil {
-		log.Error("invalid SLEEP_SECONDS var")
-		return
+		panic("Invalid EXTRA_LATENCY var, must be time.Duration")
 	}
-	if sleepInt < 1 {
-		log.Error("invalid SLEEP_SECONDS var, must be nonzero int")
-		return
-	}
-	sleepDuration = time.Second * time.Duration(sleepInt)
-	log.Infof("sleep enabled (%d seconds)", sleepInt)
+	sleep = v
+	log.Infof("extra latency enabled (duration: %v)", sleep)
 }
 
 func injectSleep() {
-	time.Sleep(sleepDuration)
+	time.Sleep(sleep)
 }
 
 func initStackDriverTracing() {
