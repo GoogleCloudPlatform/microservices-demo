@@ -1,3 +1,5 @@
+#!/usr/bin/env bash
+
 # Copyright 2019 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,7 +17,6 @@
 # Creates a new release by 1) building/pushing images, 2) injecting tag into YAML, 
 # 3) creating a new git tag, and 4) pushing tags/updated YAML to $BRANCH.
 
-#!/usr/bin/env bash
 set -euo pipefail
 
 log() { echo "$1" >&2; }
@@ -24,13 +25,13 @@ fail() { log "$1"; exit 1; }
 TAG="${TAG?TAG env variable must be specified}"
 REPO_PREFIX="${REPO_PREFIX?REPO_PREFIX env variable must be specified}"
 
-# build and push images 
+# build and push images
 ./hack/make-docker-images.sh
 
-# update yaml 
-./hack/make-release-artifacts.sh 
+# update yaml
+./hack/make-release-artifacts.sh
 
-# create git release / push to master 
+# create git release / push to master
 log "Pushing k8s manifests to master..."
 git tag "$TAG"
 git add release/
