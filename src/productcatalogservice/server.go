@@ -48,7 +48,7 @@ var (
 	cat          pb.ListProductsResponse
 	catalogMutex *sync.Mutex
 	log          *logrus.Logger
-	sleep        time.Duration
+	extraLatency time.Duration
 
 	port = flag.Int("port", 3550, "port to listen at")
 
@@ -74,10 +74,21 @@ func init() {
 }
 
 func main() {
-	go initSleep()
 	go initTracing()
 	go initProfiling("productcatalogservice", "1.0.0")
 	flag.Parse()
+
+	// set injected latency
+	if s := os.Getenv("EXTRA_LATENCY"); s != "" {
+		v, err := time.ParseDuration(s)
+		if err != nil {
+			panic("Invalid EXTRA_LATENCY var, must be time.Duration")
+		}
+		extraLatency = v
+		log.Infof("extra latency enabled (duration: %v)", extraLatency)
+	} else {
+		extraLatency = time.Duration(0)
+	}
 
 	sigs := make(chan os.Signal, 1)
 	signal.Notify(sigs, syscall.SIGUSR1, syscall.SIGUSR2)
@@ -142,25 +153,6 @@ func initStats(exporter *stackdriver.Exporter) {
 	} else {
 		log.Info("Registered default server views")
 	}
-}
-
-// sets the sleepSeconds variable, if env variable provided
-func initSleep() {
-	s := ""
-	if s = os.Getenv("EXTRA_LATENCY"); s == "" {
-		sleep = time.Duration(0)
-		return
-	}
-	v, err := time.ParseDuration(s)
-	if err != nil {
-		panic("Invalid EXTRA_LATENCY var, must be time.Duration")
-	}
-	sleep = v
-	log.Infof("extra latency enabled (duration: %v)", sleep)
-}
-
-func injectSleep() {
-	time.Sleep(sleep)
 }
 
 func initStackDriverTracing() {
@@ -246,12 +238,12 @@ func (p *productCatalog) Check(ctx context.Context, req *healthpb.HealthCheckReq
 }
 
 func (p *productCatalog) ListProducts(context.Context, *pb.Empty) (*pb.ListProductsResponse, error) {
-	injectSleep()
+	time.Sleep(extraLatency)
 	return &pb.ListProductsResponse{Products: parseCatalog()}, nil
 }
 
 func (p *productCatalog) GetProduct(ctx context.Context, req *pb.GetProductRequest) (*pb.Product, error) {
-	injectSleep()
+	time.Sleep(extraLatency)
 	var found *pb.Product
 	for i := 0; i < len(parseCatalog()); i++ {
 		if req.Id == parseCatalog()[i].Id {
@@ -265,7 +257,7 @@ func (p *productCatalog) GetProduct(ctx context.Context, req *pb.GetProductReque
 }
 
 func (p *productCatalog) SearchProducts(ctx context.Context, req *pb.SearchProductsRequest) (*pb.SearchProductsResponse, error) {
-	injectSleep()
+	time.Sleep(extraLatency)
 	// Intepret query as a substring match in name or description.
 	var ps []*pb.Product
 	for _, p := range parseCatalog() {
