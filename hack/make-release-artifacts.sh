@@ -32,10 +32,9 @@ do
     svcname="$(basename $dir)"
     image="$REPO_PREFIX/$svcname:$TAG"
 
-    pattern="^\([[:blank:]]*\)image:[[:blank:]].*$svcname\(.*\)\([[:blank:]]*\)"
+    pattern="^(\s*)image:\s.*$svcname(.*)(\s*)"
     replace="\1image: $image\3"  
-    sed -i '' "s|$pattern|$replace|g" $manifestfile 
+    gsed -r -i "s|$pattern|$replace|g" $manifestfile 
 done
-
 
 log "Successfully injected image tag into demo.yaml".
