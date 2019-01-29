@@ -1,3 +1,5 @@
+#!/usr/bin/env bash
+
 # Copyright 2019 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,42 +16,41 @@
 
 # injects new image/tag into the images in ./release/kubernetes-manifests/demo.yaml 
 
-#!/usr/bin/env bash
 set -euo pipefail
+SCRIPTDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 log() { echo "$1" >&2; }
-fail() { log "$1"; exit 1; }
 
 TAG="${TAG?TAG env variable must be specified}"
 REPO_PREFIX="${REPO_PREFIX?REPO_PREFIX env variable must be specified}"
+out_file="${SCRIPTDIR}/../release/kubernetes-manifests/demo.yaml"
 
-# overwrite release/ with the latest manifests, adding "---" separator.
-src="./kubernetes-manifests/*"
-manifestfile="./release/kubernetes-manifests/demo.yaml"
-tmp="./release/kubernetes-manifests/tmp.yaml"
-[ -e $manifestfile ] && rm $manifestfile
-for f in $src; do (cat "${f}"; echo "---") >> $tmp; done
+read_manifests() {
+    local src_manifest_dir
+    src_manifest_dir="${SCRIPTDIR}/../kubernetes-manifests"
 
-# remove extra google headers 
-gsed -i '/^#/d' $tmp 
+    while IFS= read -d $'\0' -r file; do
+        cat "${file}"
+        echo "---"
+    done < <(find "${src_manifest_dir}" -name '*.yaml' -type f -print0)
+}
 
-# remove empty lines 
-gsed -r -i '/^\s*$/d' $tmp 
+# read and merge all manifests
+out_manifest="$(read_manifests)"
 
-# add 1 google header to the top 
-cat "./release/.googleheader" $tmp > $manifestfile 
-rm $tmp 
-
-
-# replace image repo, tag for each deployment  
-for dir in ./src/*/    
+# replace "image" repo, tag for each service
+for dir in ./src/*/
 do
-    svcname="$(basename $dir)"
+    svcname="$(basename "${dir}")"
     image="$REPO_PREFIX/$svcname:$TAG"
 
     pattern="^(\s*)image:\s.*$svcname(.*)(\s*)"
-    replace="\1image: $image\3"  
-    gsed -r -i "s|$pattern|$replace|g" $manifestfile
+    replace="\1image: $image\3"
+    out_manifest="$(gsed -r "s|$pattern|$replace|g" <(echo "${out_manifest}") )"
 done
 
-log "Successfully added image tags > wrote to demo.yaml".
+rm -rf -- "${out_file}"
+mkdir -p "$(dirname "${out_file}")"
+echo "${out_manifest}" > "${out_file}"
+
+log "Successfully saved merged manifests to ${out_file}."
