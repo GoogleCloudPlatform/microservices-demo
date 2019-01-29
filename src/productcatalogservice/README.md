@@ -29,3 +29,11 @@ kubectl exec \
     $(kubectl get pods -l app=productcatalogservice -o jsonpath='{.items[0].metadata.name}') \
     -c server -- kill -USR2 1
 ```
+
+## Latency injection
+
+This service has an "inject sleep" toggle that will sleep for `n` seconds on every call to
+to the server.
+
+You can set this mode as an environment variable. For instance, to sleep for 3 seconds,
+use `SLEEP_SECONDS=3`.

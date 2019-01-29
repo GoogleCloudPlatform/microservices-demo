@@ -23,6 +23,7 @@ import (
 	"net"
 	"os"
 	"os/signal"
+	"strconv"
 	"strings"
 	"sync"
 	"syscall"
@@ -45,9 +46,10 @@ import (
 )
 
 var (
-	cat          pb.ListProductsResponse
-	catalogMutex *sync.Mutex
-	log          *logrus.Logger
+	cat           pb.ListProductsResponse
+	catalogMutex  *sync.Mutex
+	log           *logrus.Logger
+	sleepDuration time.Duration
 
 	port = flag.Int("port", 3550, "port to listen at")
 
@@ -73,6 +75,7 @@ func init() {
 }
 
 func main() {
+	go initSleep()
 	go initTracing()
 	go initProfiling("productcatalogservice", "1.0.0")
 	flag.Parse()
@@ -117,7 +120,6 @@ func initJaegerTracing() {
 		log.Info("jaeger initialization disabled.")
 		return
 	}
-
 	// Register the Jaeger exporter to be able to retrieve
 	// the collected spans.
 	exporter, err := jaeger.NewExporter(jaeger.Options{
@@ -141,6 +143,30 @@ func initStats(exporter *stackdriver.Exporter) {
 	} else {
 		log.Info("Registered default server views")
 	}
+}
+
+// sets the sleepSeconds variable, if env variable provided
+func initSleep() {
+	sleepTmp := os.Getenv("SLEEP_SECONDS")
+	if sleepTmp == "" {
+		sleepDuration = time.Duration(0)
+		return
+	}
+	sleepInt, err := strconv.Atoi(sleepTmp)
+	if err != nil {
+		log.Error("invalid SLEEP_SECONDS var")
+		return
+	}
+	if sleepInt < 1 {
+		log.Error("invalid SLEEP_SECONDS var, must be nonzero int")
+		return
+	}
+	sleepDuration = time.Second * time.Duration(sleepInt)
+	log.Infof("sleep enabled (%d seconds)", sleepInt)
+}
+
+func injectSleep() {
+	time.Sleep(sleepDuration)
 }
 
 func initStackDriverTracing() {
@@ -222,14 +248,17 @@ func parseCatalog() []*pb.Product {
 }
 
 func (p *productCatalog) Check(ctx context.Context, req *healthpb.HealthCheckRequest) (*healthpb.HealthCheckResponse, error) {
+	injectSleep()
 	return &healthpb.HealthCheckResponse{Status: healthpb.HealthCheckResponse_SERVING}, nil
 }
 
 func (p *productCatalog) ListProducts(context.Context, *pb.Empty) (*pb.ListProductsResponse, error) {
+	injectSleep()
 	return &pb.ListProductsResponse{Products: parseCatalog()}, nil
 }
 
 func (p *productCatalog) GetProduct(ctx context.Context, req *pb.GetProductRequest) (*pb.Product, error) {
+	injectSleep()
 	var found *pb.Product
 	for i := 0; i < len(parseCatalog()); i++ {
 		if req.Id == parseCatalog()[i].Id {
@@ -243,6 +272,7 @@ func (p *productCatalog) GetProduct(ctx context.Context, req *pb.GetProductReque
 }
 
 func (p *productCatalog) SearchProducts(ctx context.Context, req *pb.SearchProductsRequest) (*pb.SearchProductsResponse, error) {
+	injectSleep()
 	// Intepret query as a substring match in name or description.
 	var ps []*pb.Product
 	for _, p := range parseCatalog() {
