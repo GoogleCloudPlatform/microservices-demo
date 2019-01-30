@@ -82,7 +82,7 @@ func main() {
 	if s := os.Getenv("EXTRA_LATENCY"); s != "" {
 		v, err := time.ParseDuration(s)
 		if err != nil {
-			panic("Invalid EXTRA_LATENCY var, must be time.Duration")
+			log.Fatalf("failed to parse EXTRA_LATENCY (%s) as time.Duration: %+v", v, err)
 		}
 		extraLatency = v
 		log.Infof("extra latency enabled (duration: %v)", extraLatency)
