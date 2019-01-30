@@ -10,12 +10,14 @@ buildscript {
     }
     dependencies {
         classpath 'com.google.protobuf:protobuf-gradle-plugin:0.8.3'
+        classpath "gradle.plugin.com.github.sherter.google-java-format:google-java-format-gradle-plugin:0.7.1"
     }
 }
 
 apply plugin: 'idea'
 apply plugin: 'java'
 apply plugin: 'com.google.protobuf'
+apply plugin: 'com.github.sherter.google-java-format'
 
 repositories {
     mavenCentral()
@@ -23,10 +25,10 @@ repositories {
 }
 
 group = "adservice"
-version = "0.1.0-SNAPSHOT" // CURRENT_OPENCENSUS_VERSION
+version = "0.1.0-SNAPSHOT"
 
-def opencensusVersion = "0.17.0" // LATEST_OPENCENSUS_RELEASE_VERSION
-def grpcVersion = "1.15.0" // CURRENT_GRPC_VERSION
+def opencensusVersion = "0.18.0"
+def grpcVersion = "1.17.0"
 def jacksonVersion = "2.9.6"
 
 tasks.withType(JavaCompile) {
@@ -43,7 +45,9 @@ dependencies {
     if (speed) {
         compile fileTree(dir: offlineCompile, include: '*.jar')
     } else {
-        compile "com.google.api.grpc:proto-google-common-protos:1.11.0",
+        compile "com.google.api.grpc:proto-google-common-protos:1.12.0",
+                "io.opencensus:opencensus-api:${opencensusVersion}",
+                "io.opencensus:opencensus-contrib-grpc-util:${opencensusVersion}",
                 "io.opencensus:opencensus-exporter-trace-jaeger:${opencensusVersion}",
                 "io.opencensus:opencensus-exporter-stats-stackdriver:${opencensusVersion}",
                 "io.opencensus:opencensus-exporter-trace-stackdriver:${opencensusVersion}",
@@ -77,6 +81,10 @@ protobuf {
         }
         ofSourceSet('main')
     }
+}
+
+googleJavaFormat {
+    toolVersion '1.7'
 }
 
 // Inform IDEs like IntelliJ IDEA, Eclipse or NetBeans about the generated code.
