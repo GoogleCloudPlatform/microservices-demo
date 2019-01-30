@@ -29,3 +29,10 @@ kubectl exec \
     $(kubectl get pods -l app=productcatalogservice -o jsonpath='{.items[0].metadata.name}') \
     -c server -- kill -USR2 1
 ```
+
+## Latency injection
+
+This service has an `EXTRA_LATENCY` environment variable. This will inject a sleep for the specified [time.Duration](https://golang.org/pkg/time/#ParseDuration) on every call to
+to the server.
+
+For example, use `EXTRA_LATENCY="5.5s"` to sleep for 5.5 seconds on every request.
