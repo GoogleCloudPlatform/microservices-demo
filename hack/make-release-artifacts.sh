@@ -14,43 +14,60 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# injects new image/tag into the images in ./release/kubernetes-manifests/demo.yaml 
+# This script compiles manifest files with the image tags and places them in
+# /release/...
 
 set -euo pipefail
 SCRIPTDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+[[ -n "${DEBUG:-}" ]] && set -x
 
 log() { echo "$1" >&2; }
 
 TAG="${TAG?TAG env variable must be specified}"
 REPO_PREFIX="${REPO_PREFIX?REPO_PREFIX env variable must be specified}"
-out_file="${SCRIPTDIR}/../release/kubernetes-manifests/demo.yaml"
+OUT_DIR="${OUT_DIR:-${SCRIPTDIR}/../release}"
 
 read_manifests() {
-    local src_manifest_dir
-    src_manifest_dir="${SCRIPTDIR}/../kubernetes-manifests"
+    local dir
+    dir="$1"
 
     while IFS= read -d $'\0' -r file; do
         cat "${file}"
         echo "---"
-    done < <(find "${src_manifest_dir}" -name '*.yaml' -type f -print0)
+    done < <(find "${dir}" -name '*.yaml' -type f -print0)
 }
 
-# read and merge all manifests
-out_manifest="$(read_manifests)"
+mk_kubernetes_manifests() {
+    out_manifest="$(read_manifests "${SCRIPTDIR}/../kubernetes-manifests")"
 
-# replace "image" repo, tag for each service
-for dir in ./src/*/
-do
-    svcname="$(basename "${dir}")"
-    image="$REPO_PREFIX/$svcname:$TAG"
+    # replace "image" repo, tag for each service
+    for dir in ./src/*/
+    do
+        svcname="$(basename "${dir}")"
+        image="$REPO_PREFIX/$svcname:$TAG"
 
-    pattern="^(\s*)image:\s.*$svcname(.*)(\s*)"
-    replace="\1image: $image\3"
-    out_manifest="$(gsed -r "s|$pattern|$replace|g" <(echo "${out_manifest}") )"
-done
+        pattern="^(\s*)image:\s.*$svcname(.*)(\s*)"
+        replace="\1image: $image\3"
+        out_manifest="$(gsed -r "s|$pattern|$replace|g" <(echo "${out_manifest}") )"
+    done
+    echo "${out_manifest}"
+}
 
-rm -rf -- "${out_file}"
-mkdir -p "$(dirname "${out_file}")"
-echo "${out_manifest}" > "${out_file}"
+mk_istio_manifests() {
+    read_manifests "${SCRIPTDIR}/../istio-manifests"
+}
 
-log "Successfully saved merged manifests to ${out_file}."
+main() {
+    mkdir -p "${OUT_DIR}"
+    local k8s_manifests_file istio_manifests_file
+
+    k8s_manifests_file="${OUT_DIR}/kubernetes-manifests.yaml"
+    mk_kubernetes_manifests > "${k8s_manifests_file}"
+    log "Written ${k8s_manifests_file}"
+
+    istio_manifests_file="${OUT_DIR}/istio-manifests.yaml"
+    mk_istio_manifests > "${istio_manifests_file}"
+    log "Written ${istio_manifests_file}"
+}
+
+main
