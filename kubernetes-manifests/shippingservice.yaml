@@ -34,6 +34,9 @@ spec:
         livenessProbe:
           exec:
             command: ["/bin/grpc_health_probe", "-addr=:50051"]
+#        env:
+#          - name: JAEGER_SERVICE_ADDR
+#            value: "jaeger-collector:14268"
         resources:
           requests:
             cpu: 100m

@@ -35,6 +35,7 @@ import (
 	"contrib.go.opencensus.io/exporter/stackdriver"
 	"github.com/golang/protobuf/jsonpb"
 	"github.com/sirupsen/logrus"
+	"go.opencensus.io/exporter/jaeger"
 	"go.opencensus.io/plugin/ocgrpc"
 	"go.opencensus.io/stats/view"
 	"go.opencensus.io/trace"
@@ -47,6 +48,7 @@ var (
 	cat          pb.ListProductsResponse
 	catalogMutex *sync.Mutex
 	log          *logrus.Logger
+	extraLatency time.Duration
 
 	port = flag.Int("port", 3550, "port to listen at")
 
@@ -75,6 +77,18 @@ func main() {
 	go initTracing()
 	go initProfiling("productcatalogservice", "1.0.0")
 	flag.Parse()
+
+	// set injected latency
+	if s := os.Getenv("EXTRA_LATENCY"); s != "" {
+		v, err := time.ParseDuration(s)
+		if err != nil {
+			log.Fatalf("failed to parse EXTRA_LATENCY (%s) as time.Duration: %+v", v, err)
+		}
+		extraLatency = v
+		log.Infof("extra latency enabled (duration: %v)", extraLatency)
+	} else {
+		extraLatency = time.Duration(0)
+	}
 
 	sigs := make(chan os.Signal, 1)
 	signal.Notify(sigs, syscall.SIGUSR1, syscall.SIGUSR2)
@@ -110,6 +124,27 @@ func run(port int) string {
 	return l.Addr().String()
 }
 
+func initJaegerTracing() {
+	svcAddr := os.Getenv("JAEGER_SERVICE_ADDR")
+	if svcAddr == "" {
+		log.Info("jaeger initialization disabled.")
+		return
+	}
+	// Register the Jaeger exporter to be able to retrieve
+	// the collected spans.
+	exporter, err := jaeger.NewExporter(jaeger.Options{
+		Endpoint: fmt.Sprintf("http://%s", svcAddr),
+		Process: jaeger.Process{
+			ServiceName: "productcatalogservice",
+		},
+	})
+	if err != nil {
+		log.Fatal(err)
+	}
+	trace.RegisterExporter(exporter)
+	log.Info("jaeger initialization completed.")
+}
+
 func initStats(exporter *stackdriver.Exporter) {
 	view.SetReportingPeriod(60 * time.Second)
 	view.RegisterExporter(exporter)
@@ -120,7 +155,7 @@ func initStats(exporter *stackdriver.Exporter) {
 	}
 }
 
-func initTracing() {
+func initStackDriverTracing() {
 	// TODO(ahmetb) this method is duplicated in other microservices using Go
 	// since they are not sharing packages.
 	for i := 1; i <= 3; i++ {
@@ -141,6 +176,11 @@ func initTracing() {
 		time.Sleep(d)
 	}
 	log.Warn("could not initialize stackdriver exporter after retrying, giving up")
+}
+
+func initTracing() {
+	initJaegerTracing()
+	initStackDriverTracing()
 }
 
 func initProfiling(service, version string) {
@@ -198,10 +238,12 @@ func (p *productCatalog) Check(ctx context.Context, req *healthpb.HealthCheckReq
 }
 
 func (p *productCatalog) ListProducts(context.Context, *pb.Empty) (*pb.ListProductsResponse, error) {
+	time.Sleep(extraLatency)
 	return &pb.ListProductsResponse{Products: parseCatalog()}, nil
 }
 
 func (p *productCatalog) GetProduct(ctx context.Context, req *pb.GetProductRequest) (*pb.Product, error) {
+	time.Sleep(extraLatency)
 	var found *pb.Product
 	for i := 0; i < len(parseCatalog()); i++ {
 		if req.Id == parseCatalog()[i].Id {
@@ -215,6 +257,7 @@ func (p *productCatalog) GetProduct(ctx context.Context, req *pb.GetProductReque
 }
 
 func (p *productCatalog) SearchProducts(ctx context.Context, req *pb.SearchProductsRequest) (*pb.SearchProductsResponse, error) {
+	time.Sleep(extraLatency)
 	// Intepret query as a substring match in name or description.
 	var ps []*pb.Product
 	for _, p := range parseCatalog() {
