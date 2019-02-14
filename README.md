@@ -5,9 +5,9 @@ web-based e-commerce app called **“Hipster Shop”** where users can browse it
 add them to the cart, and purchase them.
 
 **Google uses this application to demonstrate use of technologies like
-Kubernetes/GKE, Istio, Stackdriver, gRPC and OpenCensus**. The demo app works
-both locally on your machine, as well as a Kubernetes cluster on Google Cloud
-Platform. It’s **easy to deploy with little to no configuration**.
+Kubernetes/GKE, Istio, Stackdriver, gRPC and OpenCensus**. This application
+works on any Kubernetes cluster (such as a local one), as well as Google
+Kubernetes Engine. It’s **easy to deploy with little to no configuration**.
 
 If you’re using this demo, please **★Star** this repository to show your interest!
 
