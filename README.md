@@ -4,13 +4,16 @@ This project contains a 10-tier microservices application. The application is a
 web-based e-commerce app called **“Hipster Shop”** where users can browse items,
 add them to the cart, and purchase them.
 
-**Google uses this application to demonstrate Kubernetes, GKE, Istio,
-Stackdriver, gRPC, OpenCensus** and similar cloud-native technologies.
+**Google uses this application to demonstrate use of technologies like
+Kubernetes/GKE, Istio, Stackdriver, gRPC and OpenCensus**. The demo app works
+both locally on your machine, as well as a Kubernetes cluster on Google Cloud
+Platform. It’s **easy to deploy with little to no configuration**.
 
-> **Note to Googlers:** Please fill out the form at
+If you’re using this demo, please **★Star** this repository to show your interest!
+
+> 👓**Note to Googlers:** Please fill out the form at
 [go/microservices-demo](http://go/microservices-demo) if you are using this
 application.
-
 
 ## Screenshots
 
@@ -34,9 +37,9 @@ Find **Protocol Buffers Descriptions** at the [`./pb` directory](./pb).
 | [cartservice](./src/cartservice) |  C# | Stores the items in the user's shipping cart in Redis and retrieves it. |
 | [productcatalogservice](./src/productcatalogservice) | Go | Provides the list of products from a JSON file and ability to search products and get individual products. |
 | [currencyservice](./src/currencyservice) | Node.js | Converts one money amount to another currency.  Uses real values fetched from European Central Bank. It's the highest QPS service. |
-| [paymentservice](./src/paymentservice) | Node.js | Charges the given credit card info (hypothetically😇) with the given amount and returns a transaction ID. |
-| [shippingservice](./src/shippingservice) | Go | Gives shipping cost estimates based on the shopping cart. Ships items to the given address (hypothetically😇) |
-| [emailservice](./src/emailservice) | Python | Sends users an order confirmation email (hypothetically😇). |
+| [paymentservice](./src/paymentservice) | Node.js | Charges the given credit card info (mock) with the given amount and returns a transaction ID. |
+| [shippingservice](./src/shippingservice) | Go | Gives shipping cost estimates based on the shopping cart. Ships items to the given address (mock) |
+| [emailservice](./src/emailservice) | Python | Sends users an order confirmation email (mock). |
 | [checkoutservice](./src/checkoutservice) | Go | Retrieves user cart, prepares order and orchestrates the payment, shipping and the email notification. |
 | [recommendationservice](./src/recommendationservice) | Python | Recommends other products based on what's given in the cart. |
 | [adservice](./src/adservice) | Java | Provides text ads based on given context words. |
