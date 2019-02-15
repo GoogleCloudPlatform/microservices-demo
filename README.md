@@ -92,7 +92,7 @@ Find **Protocol Buffers Descriptions** at the [`./pb` directory](./pb).
 
 4. Run `skaffold run` (first time will be slow, it can take ~20-30 minutes).
    This will build and deploy the application. If you need to rebuild the images
-   automatically as you refactor he code, run `skaffold dev` command.
+   automatically as you refactor the code, run `skaffold dev` command.
 
 5. Run `kubectl get pods` to verify the Pods are ready and running. The
    application frontend should be available at http://localhost:80 on your
