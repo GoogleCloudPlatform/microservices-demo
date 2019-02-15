@@ -49,7 +49,7 @@ deploy:
     manifests:
     - ./kubernetes-manifests/**.yaml
 profiles:
-# "travis-ci" profile is used to build the images withou
+# "travis-ci" profile is used to build the images without
 # pushing them.
 - name: travis-ci
   build:
