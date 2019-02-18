@@ -147,7 +147,8 @@ Find **Protocol Buffers Descriptions** at the [`./pb` directory](./pb).
     are seeing this, run `kubectl get service frontend-external -o=yaml | kubectl apply -f-`
     to trigger load balancer reconfiguration.
 
-### Option 3: Using Static Images 
+<!-- 
+### Option 3: Using Pre-Built Container Images 
 
 > 💡 Recommended for test-driving the application on an existing cluster. 
 
@@ -160,7 +161,7 @@ Find **Protocol Buffers Descriptions** at the [`./pb` directory](./pb).
     browser to confirm installation.
 
         kubectl get service frontend-external
-
+-->
 
 ### (Optional) Deploying on a Istio-installed GKE cluster
 
