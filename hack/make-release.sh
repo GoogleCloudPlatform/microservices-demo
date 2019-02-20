@@ -14,28 +14,37 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Creates a new release by 1) building/pushing images, 2) injecting tag into YAML, 
-# 3) creating a new git tag, and 4) pushing tags/updated YAML to $BRANCH.
+# This script creates a new release by:
+# - 1. building/pushing images
+# - 2. injecting tags into YAML manifests
+# - 3. creating a new git tag
+# - 4. pushing the tag/commit to master.
 
 set -euo pipefail
+SCRIPTDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+[[ -n "${DEBUG:-}" ]] && set -x
 
 log() { echo "$1" >&2; }
 fail() { log "$1"; exit 1; }
 
-TAG="${TAG?TAG env variable must be specified}"
-REPO_PREFIX="${REPO_PREFIX?REPO_PREFIX env variable must be specified}"
+TAG="${TAG:?TAG env variable must be specified}"
+REPO_PREFIX="${REPO_PREFIX:?REPO_PREFIX env variable must be specified e.g. gcr.io\/google-samples\/microservices-demo}"
+
+if [[ "$TAG" != v* ]]; then
+    fail "\$TAG must start with 'v', e.g. v0.1.0 (got: $TAG)"
+fi
 
 # build and push images
-./hack/make-docker-images.sh
+"${SCRIPTDIR}"/make-docker-images.sh
 
 # update yaml
-./hack/make-release-artifacts.sh
+"${SCRIPTDIR}"/make-release-artifacts.sh
 
 # create git release / push to master
+git add "${SCRIPTDIR}/../release/"
+git commit --allow-empty -m "Release $TAG"
 log "Pushing k8s manifests to master..."
 git tag "$TAG"
-git add release/
-git commit --allow-empty -m "Release $TAG"
 git push --tags
 git push origin master
 

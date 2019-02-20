@@ -23,8 +23,8 @@ SCRIPTDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 log() { echo "$1" >&2; }
 
-TAG="${TAG?TAG env variable must be specified}"
-REPO_PREFIX="${REPO_PREFIX?REPO_PREFIX env variable must be specified}"
+TAG="${TAG:?TAG env variable must be specified}"
+REPO_PREFIX="${REPO_PREFIX:?REPO_PREFIX env variable must be specified}"
 OUT_DIR="${OUT_DIR:-${SCRIPTDIR}/../release}"
 
 read_manifests() {
