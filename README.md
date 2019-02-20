@@ -69,12 +69,26 @@ Find **Protocol Buffers Descriptions** at the [`./pb` directory](./pb).
 
 ## Installation
 
-> **Note:** that the first build can take up to 20-30 minutes. Consequent builds
-> will be faster.
+We offer three installation methods:
+
+1. **Running locally with “Docker for Desktop”** (~20 minutes) You will build
+   and deploy microservices images to a single-node Kubernetes cluster running
+   on your development machine.
+
+2. **Running on Google Kubernetes Engine (GKE)”** (~30 minutes) You will build,
+   upload and deploy the container images to a Kubernetes cluster on Google
+   Cloud.
+
+3. **Using pre-built container images:** (~10 minutes, you will still need to
+   follow one of the steps above up until `skaffold run` command). With this
+   option, you will use pre-built container images that are available publicly,
+   instead of building them yourself, which takes a long time).
+
 
 ### Option 1: Running locally with “Docker for Desktop”
 
-> 💡 Recommended if you're planning to develop the application.
+> 💡 Recommended if you're planning to develop the application or giving it a
+> try on your local cluster.
 
 1. Install tools to run a Kubernetes cluster locally:
 
@@ -90,7 +104,7 @@ Find **Protocol Buffers Descriptions** at the [`./pb` directory](./pb).
 
 3. Run `kubectl get nodes` to verify you're connected to “Kubernetes on Docker”.
 
-4. Run `skaffold run` (first time will be slow, it can take ~20-30 minutes).
+4. Run `skaffold run` (first time will be slow, it can take ~20 minutes).
    This will build and deploy the application. If you need to rebuild the images
    automatically as you refactor the code, run `skaffold dev` command.
 
@@ -100,7 +114,8 @@ Find **Protocol Buffers Descriptions** at the [`./pb` directory](./pb).
 
 ### Option 2: Running on Google Kubernetes Engine (GKE)
 
-> 💡  Recommended for demos and making it available publicly.
+> 💡 Recommended if you're using Google Cloud Platform and want to try it on
+> a realistic cluster.
 
 1. Install tools specified in the previous section (Docker, kubectl, skaffold)
 
@@ -125,6 +140,7 @@ Find **Protocol Buffers Descriptions** at the [`./pb` directory](./pb).
    where [PROJECT_ID] is your GCP project ID.
 
    This command:
+
    - builds the container images
    - pushes them to GCR
    - applies the `./kubernetes-manifests` deploying the application to
@@ -147,28 +163,34 @@ Find **Protocol Buffers Descriptions** at the [`./pb` directory](./pb).
     are seeing this, run `kubectl get service frontend-external -o=yaml | kubectl apply -f-`
     to trigger load balancer reconfiguration.
 
-<!-- 
-### Option 3: Using Pre-Built Container Images 
+### Option 3: Using Pre-Built Container Images
 
-> 💡 Recommended for test-driving the application on an existing cluster. 
+> 💡 Recommended if you want to deploy the app faster in fewer steps to an
+> existing cluster.
 
-**Prerequisite**: a running Kubernetes cluster. 
+**NOTE:** If you need to create a Kubernetes cluster locally or on the cloud,
+follow "Option 1" or "Option 2" until you reach the `skaffold run` step.
 
-1. Clone this repository.
-1. Deploy the application: `kubectl apply -f ./release/kubernetes-manifests`  
-1. Run `kubectl get pods` to see pods are in a healthy and ready state.
-1.  Find the IP address of your application, then visit the application on your
+This option offers you pre-built public container images that are easy to deploy
+by deploying the [release manifest](./release) directly to an existing cluster.
+
+**Prerequisite**: a running Kubernetes cluster (either local or on cloud).
+
+1. Clone this repository, and go to the repository directory
+1. Run `kubectl apply -f ./release/kubernetes-manifests` to deploy the app.
+1. Run `kubectl get pods` to see pods are in a Ready state.
+1. Find the IP address of your application, then visit the application on your
     browser to confirm installation.
 
-        kubectl get service frontend-external
--->
+       kubectl get service/frontend-external
+
 
 ### (Optional) Deploying on a Istio-installed GKE cluster
 
 > **Note:** you followed GKE deployment steps above, run `skaffold delete` first
 > to delete what's deployed.
 
-1. Create a GKE cluster (described above).
+1. Create a GKE cluster (described in "Option 2").
 
 2. Use [Istio on GKE add-on](https://cloud.google.com/istio/docs/istio-on-gke/installing)
    to install Istio to your existing GKE cluster.
