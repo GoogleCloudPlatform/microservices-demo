@@ -186,7 +186,7 @@ by deploying the [release manifest](./release) directly to an existing cluster.
 **Prerequisite**: a running Kubernetes cluster (either local or on cloud).
 
 1. Clone this repository, and go to the repository directory
-1. Run `kubectl apply -f ./release/kubernetes-manifests` to deploy the app.
+1. Run `kubectl apply -f ./release/kubernetes-manifests.yaml` to deploy the app.
 1. Run `kubectl get pods` to see pods are in a Ready state.
 1. Find the IP address of your application, then visit the application on your
    browser to confirm installation.
