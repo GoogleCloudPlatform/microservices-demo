@@ -15,6 +15,7 @@ If you’re using this demo, please **★Star** this repository to show your int
 > [go/microservices-demo](http://go/microservices-demo) if you are using this
 > application.
 
+
 ## Screenshots
 
 | Home Page                                                                                                         | Checkout Screen                                                                                                    |
