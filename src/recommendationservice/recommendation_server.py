@@ -37,6 +37,36 @@ from logger import getJSONLogger
 logger = getJSONLogger('recommendationservice-server')
 
 
+def initStackdriverProfiling():
+  enable_profiler = None
+  project_id = None
+  try:
+    enable_profiler = os.environ["ENABLE_PROFILER"]
+    project_id = os.environ["GCP_PROJECT_ID"]
+  except KeyError:
+    # Environment variable not set
+    pass
+  if enable_profiler != "1":
+    logger.info("Skipping Stackdriver Profiler Python agent initialization. Set environment variable ENABLE_PROFILER=1 to enable.")
+    return
+
+  for retry in xrange(1,4):
+    try:
+      if project_id:
+        googlecloudprofiler.start(service='recommendation_server-out', service_version='1.0.0', verbose=0, project_id=project_id)
+      else:
+        googlecloudprofiler.start(service='recommendation_server-out', service_version='1.0.0', verbose=0)
+      logger.info("Successfully started Stackdriver Profiler.")
+      return
+    except (BaseException) as exc:
+      logger.info("Unable to start Stackdriver Profiler Python agent. " + str(exc))
+      if (retry < 4):
+        logger.info("Sleeping %d seconds to retry Stackdriver Profiler agent initialization"%(retry*10))
+        time.sleep (retry*10)
+      else:
+        logger.warning("Could not initialize Stackdriver Profiler after retrying, giving up")
+  return
+
 class RecommendationService(demo_pb2_grpc.RecommendationServiceServicer):
     def ListRecommendations(self, request, context):
         max_responses = 5
@@ -64,13 +94,7 @@ class RecommendationService(demo_pb2_grpc.RecommendationServiceServicer):
 if __name__ == "__main__":
     logger.info("initializing recommendationservice")
 
-    # Start the Stackdriver Profiler Python agent
-    try:
-        googlecloudprofiler.start(service='recommendation_server', service_version='1.0.0', verbose=0)
-    except (ValueError, NotImplementedError) as exc:
-        logger.info("Unable to start Stackdriver Profiler Python agent in recommendation_server.py.\n" +
-             str(exc))
-
+    initStackdriverProfiling()
 
     try:
         sampler = always_on.AlwaysOnSampler()

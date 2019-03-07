@@ -144,13 +144,38 @@ def start(dummy_mode):
   except KeyboardInterrupt:
     server.stop(0)
 
+def initStackdriverProfiling():
+  enable_profiler = None
+  project_id = None
+  try:
+    enable_profiler = os.environ["ENABLE_PROFILER"]
+    project_id = os.environ["GCP_PROJECT_ID"]
+  except KeyError:
+    # Environment variable not set
+    pass
+  if enable_profiler != "1":
+    logger.info("Skipping Stackdriver Profiler Python agent initialization. Set environment variable ENABLE_PROFILER=1 to enable.")
+    return
+
+  for retry in range(1,4):
+    try:
+      if project_id:
+        googlecloudprofiler.start(service='email_server', service_version='1.0.0', verbose=0, project_id=project_id)
+      else:
+        googlecloudprofiler.start(service='email_server', service_version='1.0.0', verbose=0)
+      logger.info("Successfully started Stackdriver Profiler.")
+      return
+    except (BaseException) as exc:
+      logger.info("Unable to start Stackdriver Profiler Python agent. " + str(exc))
+      if (retry < 4):
+        logger.info("Sleeping %d to retry initializing Stackdriver Profiler"%(retry*10))
+        time.sleep (retry*10)
+      else:
+        logger.warning("Could not initialize Stackdriver Profiler after retrying, giving up")
+  return
 
 if __name__ == '__main__':
   logger.info('starting the email service in dummy mode.')
-   # Start the Stackdriver Profiler Python agent
-  try:
-    googlecloudprofiler.start(service='email_server', service_version='1.0.1', verbose=0)
-  except (ValueError, NotImplementedError) as exc:
-    logger.info("Unable to start Stackdriver Profiler Python agent in email_server.py.\n" + str(exc))
+  initStackdriverProfiling()
 
   start(dummy_mode = True)
