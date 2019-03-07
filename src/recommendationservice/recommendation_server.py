@@ -66,7 +66,7 @@ if __name__ == "__main__":
 
     # Start the Stackdriver Profiler Python agent
     try:
-        googlecloudprofiler.start(service='recommendation_server', service_version='1.0.1', verbose=0)
+        googlecloudprofiler.start(service='recommendation_server', service_version='1.0.0', verbose=0)
     except (ValueError, NotImplementedError) as exc:
         logger.info("Unable to start Stackdriver Profiler Python agent in recommendation_server.py.\n" +
              str(exc))
