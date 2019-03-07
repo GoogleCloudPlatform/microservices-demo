@@ -93,7 +93,7 @@ We offer three installation methods:
    - kubectl (can be installed via `gcloud components install kubectl`)
    - Docker for Desktop (Mac/Windows): It provides Kubernetes support as [noted
      here](https://docs.docker.com/docker-for-mac/kubernetes/).
-   - [skaffold](https://github.com/GoogleContainerTools/skaffold/#installation)
+   - [skaffold](https://skaffold.dev/docs/getting-started/#installing-skaffold)
      (ensure version ≥v0.20)
 
 1. Launch “Docker for Desktop”. Go to Preferences:
