@@ -21,6 +21,7 @@ import traceback
 from concurrent import futures
 
 import googleclouddebugger
+import googlecloudprofiler
 import grpc
 from opencensus.trace.exporters import print_exporter
 from opencensus.trace.exporters import stackdriver_exporter
@@ -62,6 +63,14 @@ class RecommendationService(demo_pb2_grpc.RecommendationServiceServicer):
 
 if __name__ == "__main__":
     logger.info("initializing recommendationservice")
+
+    # Start the Stackdriver Profiler Python agent
+    try:
+        googlecloudprofiler.start(service='recommendation_server', service_version='1.0.1', verbose=0)
+    except (ValueError, NotImplementedError) as exc:
+        logger.info("Unable to start Stackdriver Profiler Python agent in recommendation_server.py.\n" +
+             str(exc))
+
 
     try:
         sampler = always_on.AlwaysOnSampler()

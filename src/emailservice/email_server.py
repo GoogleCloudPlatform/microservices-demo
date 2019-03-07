@@ -33,6 +33,7 @@ from opencensus.trace.ext.grpc import server_interceptor
 from opencensus.trace.samplers import always_on
 
 # import googleclouddebugger
+import googlecloudprofiler
 
 try:
     sampler = always_on.AlwaysOnSampler()
@@ -146,4 +147,10 @@ def start(dummy_mode):
 
 if __name__ == '__main__':
   logger.info('starting the email service in dummy mode.')
+   # Start the Stackdriver Profiler Python agent
+  try:
+    googlecloudprofiler.start(service='email_server', service_version='1.0.1', verbose=0)
+  except (ValueError, NotImplementedError) as exc:
+    logger.info("Unable to start Stackdriver Profiler Python agent in email_server.py.\n" + str(exc))
+
   start(dummy_mode = True)
