@@ -37,6 +37,21 @@ from logger import getJSONLogger
 logger = getJSONLogger('recommendationservice-server')
 
 
+def InitProfiler():
+  for retry in xrange(3):
+    try:
+      googlecloudprofiler.start(service='recommendation_server', service_version='1.0.0', verbose=0)
+      logger.info("Successfully started Stackdriver Profiler.")
+      return
+    except (BaseException) as exc:
+      logger.info("Unable to start Stackdriver Profiler Python agent in recommendation_server.py.\n" + str(exc))
+      if (retry < 3):
+        logger.info("Sleeping %d to retry initializing Stackdriver Profiler"%(retry*10))
+        time.sleep (retry*10)
+      else:
+        logger.warning("Could not initialize Stackdriver Profiler after retrying, giving up")
+  return
+
 class RecommendationService(demo_pb2_grpc.RecommendationServiceServicer):
     def ListRecommendations(self, request, context):
         max_responses = 5
@@ -65,12 +80,7 @@ if __name__ == "__main__":
     logger.info("initializing recommendationservice")
 
     # Start the Stackdriver Profiler Python agent
-    try:
-        googlecloudprofiler.start(service='recommendation_server', service_version='1.0.0', verbose=0)
-    except (ValueError, NotImplementedError) as exc:
-        logger.info("Unable to start Stackdriver Profiler Python agent in recommendation_server.py.\n" +
-             str(exc))
-
+    InitProfiler()
 
     try:
         sampler = always_on.AlwaysOnSampler()

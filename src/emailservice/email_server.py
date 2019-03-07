@@ -144,13 +144,24 @@ def start(dummy_mode):
   except KeyboardInterrupt:
     server.stop(0)
 
+def InitProfiler():
+  for retry in range(3):
+    try:
+      googlecloudprofiler.start(service='email_server', service_version='1.0.0', verbose=0)
+      logger.info("Successfully started Stackdriver Profiler.")
+      return
+    except (BaseException) as exc:
+      logger.info("Unable to start Stackdriver Profiler Python agent in email_server.py.\n" + str(exc))
+      if (retry < 3):
+        logger.info("Sleeping %d to retry initializing Stackdriver Profiler"%(retry*10))
+        time.sleep (retry *10)
+      else:
+        logger.warning("could not initialize stackdriver profiler after retrying, giving up")
+  return
 
 if __name__ == '__main__':
   logger.info('starting the email service in dummy mode.')
-   # Start the Stackdriver Profiler Python agent
-  try:
-    googlecloudprofiler.start(service='email_server', service_version='1.0.1', verbose=0)
-  except (ValueError, NotImplementedError) as exc:
-    logger.info("Unable to start Stackdriver Profiler Python agent in email_server.py.\n" + str(exc))
+  # Start the Stackdriver Profiler Python agent
+  InitProfiler()
 
   start(dummy_mode = True)

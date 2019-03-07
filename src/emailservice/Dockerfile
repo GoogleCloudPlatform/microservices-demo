@@ -1,18 +1,22 @@
 FROM python:3-slim as base
 
 FROM base as builder
-FROM base as final
 
 RUN apt-get -qq update \
     && apt-get install -y --no-install-recommends \
-        wget g++
+        g++
 
 # get packages
 COPY requirements.txt .
 RUN pip install -r requirements.txt
 
+FROM base as final
 # Enable unbuffered logging
 ENV PYTHONUNBUFFERED=1
+
+RUN apt-get -qq update \
+    && apt-get install -y --no-install-recommends \
+        wget
 
 # Download the grpc health probe
 RUN GRPC_HEALTH_PROBE_VERSION=v0.2.0 && \
