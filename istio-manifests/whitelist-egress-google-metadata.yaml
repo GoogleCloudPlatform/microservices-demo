@@ -15,15 +15,16 @@
 apiVersion: networking.istio.io/v1alpha3
 kind: ServiceEntry
 metadata:
-  name: whitelist-egress-googleapis
+  name: whitelist-egress-google-metadata
 spec:
   hosts:
-  - "accounts.google.com" # Used to get token
-  - "*.googleapis.com"
+  - metadata.google.internal
+  addresses:
+  - 169.254.169.254 # GCE metadata server
   ports:
   - number: 80
-    protocol: HTTP
     name: http
+    protocol: HTTP
   - number: 443
-    protocol: HTTPS
     name: https
+    protocol: HTTPS
