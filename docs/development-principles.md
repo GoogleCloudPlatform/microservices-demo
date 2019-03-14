@@ -5,7 +5,7 @@
 
 ### Minimal configuration
 
-Running the demo locally or on GCP should not require minimal to no
+Running the demo locally or on GCP should require minimal to no
 configuration unless absolutely necessary to run critical parts of the demo.
 
 Configuration that takes multiple steps, especially such as creating service
