@@ -100,6 +100,7 @@ We offer three installation methods:
 
    - choose “Enable Kubernetes”,
    - set CPUs to at least 3, and Memory to at least 6.0 GiB
+   - on the "Disk" tab, set at least 32 GB disk space
 
 1. Run `kubectl get nodes` to verify you're connected to “Kubernetes on Docker”.
 
