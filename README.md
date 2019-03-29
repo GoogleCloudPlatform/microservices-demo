@@ -254,13 +254,14 @@ by deploying the [release manifest](./release) directly to an existing cluster.
    curl -v "http://$INGRESS_HOST"
    ```
 
-## Cleanup
+### Cleanup
 
-- To remove the application from the Kubernetes cluster, run:
+If you've deployed the application with `skaffold run` command, you can run
+`skaffold delete` to clean up the deployed resources.
 
-    ```sh
-    skaffold delete
-    ```
+If you've deployed the application with `kubectl apply -f [...]`, you can
+run `kubectl delete -f [...]` with the same argument to clean up the deployed
+resources.
 
 ## Conferences featuring Hipster Shop
 
