@@ -254,6 +254,14 @@ by deploying the [release manifest](./release) directly to an existing cluster.
    curl -v "http://$INGRESS_HOST"
    ```
 
+## Cleanup
+
+- To remove the application from the Kubernetes cluster, run:
+
+    ```sh
+    skaffold delete
+    ```
+
 ## Conferences featuring Hipster Shop
 
 - [Google Cloud Next'18 London – Keynote](https://youtu.be/nIq2pkNcfEI?t=3071)
