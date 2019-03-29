@@ -1,0 +1,66 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: oc-agent-conf
+  labels:
+    app: opencensus
+    component: oc-agent-conf
+data:
+  oc-agent-config: |
+    receivers:
+      opencensus:
+        address: "0.0.0.0:55678"
+      jaeger: {}
+      zipkin: {}
+    exporters:
+      stackdriver:
+        # TODO: find a different way to specify project-id
+        project: "microservices-demo-app"
+        enable_tracing: true
+        enable_metrics: true
+---
+apiVersion: extensions/v1beta1
+kind: DaemonSet
+metadata:
+  name: oc-agent
+  labels:
+    app: opencensus
+    component: oc-agent
+spec:
+  template:
+    metadata:
+      labels:
+        app: opencensus
+        component: oc-agent
+    spec:
+      containers:
+      - name: oc-agent
+        image: omnition/opencensus-agent:0.1.5
+        resources:
+          limits:
+            cpu: 100m
+            memory: 500Mi
+        command:
+          - "/ocagent_linux"
+          - "--config=/conf/oc-agent-config.yaml"
+        ports:
+        - containerPort: 55678
+          hostPort: 55678
+          protocol: TCP
+        - containerPort: 55679
+          hostPort: 55679
+          protocol: TCP
+#        - containerPort: 14267
+#        - containerPort: 14268
+#        - containerPort: 9411
+        volumeMounts:
+        - name: oc-agent-config-vol
+          mountPath: /conf
+      volumes:
+        - configMap:
+            name: oc-agent-conf
+            items:
+              - key: oc-agent-config
+                path: oc-agent-config.yaml
+          name: oc-agent-config-vol

@@ -22,11 +22,10 @@ import (
 	"time"
 
 	"cloud.google.com/go/profiler"
-	"contrib.go.opencensus.io/exporter/stackdriver"
+	"contrib.go.opencensus.io/exporter/ocagent"
 	"github.com/gorilla/mux"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
-	"go.opencensus.io/exporter/jaeger"
 	"go.opencensus.io/plugin/ocgrpc"
 	"go.opencensus.io/plugin/ochttp"
 	"go.opencensus.io/plugin/ochttp/propagation/b3"
@@ -95,7 +94,7 @@ func main() {
 	log.Out = os.Stdout
 
 	go initProfiling(log, "frontend", "1.0.0")
-	go initTracing(log)
+	go initTracingAndStats(log)
 
 	srvPort := port
 	if os.Getenv("PORT") != "" {
@@ -143,32 +142,27 @@ func main() {
 	log.Fatal(http.ListenAndServe(addr+":"+srvPort, handler))
 }
 
-func initJaegerTracing(log logrus.FieldLogger) {
-
-	svcAddr := os.Getenv("JAEGER_SERVICE_ADDR")
-	if svcAddr == "" {
-		log.Info("jaeger initialization disabled.")
+func registerOcAgentExporter(log logrus.FieldLogger) {
+	ocaHost := os.Getenv("OC_AGENT_HOST")
+	if ocaHost == "" {
+		log.Info("oc-agent initialization disabled.")
 		return
 	}
+	ocaAddr := fmt.Sprintf("%s:%s", ocaHost, "55678")
 
-	// Register the Jaeger exporter to be able to retrieve
-	// the collected spans.
-	exporter, err := jaeger.NewExporter(jaeger.Options{
-		Endpoint: fmt.Sprintf("http://%s", svcAddr),
-		Process: jaeger.Process{
-			ServiceName: "frontend",
-		},
-	})
+	oce, err := ocagent.NewExporter(ocagent.WithInsecure(),
+		ocagent.WithAddress(ocaAddr))
 	if err != nil {
-		log.Fatal(err)
+		log.Warnf("Failed to create ocagent-exporter: %v", err)
 	}
-	trace.RegisterExporter(exporter)
-	log.Info("jaeger initialization completed.")
+	trace.RegisterExporter(oce)
+	view.RegisterExporter(oce)
+
+	log.Infof("oc-agent exporter initialization completed. Endpoint %s\n", ocaAddr)
 }
 
-func initStats(log logrus.FieldLogger, exporter *stackdriver.Exporter) {
+func registerViews(log logrus.FieldLogger) {
 	view.SetReportingPeriod(60 * time.Second)
-	view.RegisterExporter(exporter)
 	if err := view.Register(ochttp.DefaultServerViews...); err != nil {
 		log.Warn("Error registering http default server views")
 	} else {
@@ -181,42 +175,18 @@ func initStats(log logrus.FieldLogger, exporter *stackdriver.Exporter) {
 	}
 }
 
-func initStackdriverTracing(log logrus.FieldLogger) {
-	// TODO(ahmetb) this method is duplicated in other microservices using Go
-	// since they are not sharing packages.
-	for i := 1; i <= 3; i++ {
-		log = log.WithField("retry", i)
-		exporter, err := stackdriver.NewExporter(stackdriver.Options{})
-		if err != nil {
-			// log.Warnf is used since there are multiple backends (stackdriver & jaeger)
-			// to store the traces. In production setup most likely you would use only one backend.
-			// In that case you should use log.Fatalf.
-			log.Warnf("failed to initialize stackdriver exporter: %+v", err)
-		} else {
-			trace.RegisterExporter(exporter)
-			log.Info("registered stackdriver tracing")
-
-			// Register the views to collect server stats.
-			initStats(log, exporter)
-			return
-		}
-		d := time.Second * 20 * time.Duration(i)
-		log.Debugf("sleeping %v to retry initializing stackdriver exporter", d)
-		time.Sleep(d)
-	}
-	log.Warn("could not initialize stackdriver exporter after retrying, giving up")
-}
-
-func initTracing(log logrus.FieldLogger) {
+func initTracingAndStats(log logrus.FieldLogger) {
 	// This is a demo app with low QPS. trace.AlwaysSample() is used here
 	// to make sure traces are available for observation and analysis.
 	// In a production environment or high QPS setup please use
 	// trace.ProbabilitySampler set at the desired probability.
 	trace.ApplyConfig(trace.Config{DefaultSampler: trace.AlwaysSample()})
 
-	initJaegerTracing(log)
-	initStackdriverTracing(log)
+	// Register pre-defined views.
+	registerViews(log)
 
+	// registerExporter
+	registerOcAgentExporter(log)
 }
 
 func initProfiling(log logrus.FieldLogger, service, version string) {

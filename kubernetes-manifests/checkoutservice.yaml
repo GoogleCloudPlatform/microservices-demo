@@ -49,8 +49,10 @@ spec:
             value: "currencyservice:7000"
           - name: CART_SERVICE_ADDR
             value: "cartservice:7070"
-          # - name: JAEGER_SERVICE_ADDR
-          #   value: "jaeger-collector:14268"
+          - name: OC_AGENT_HOST
+            valueFrom:
+              fieldRef:
+                fieldPath: status.hostIP
           resources:
             requests:
               cpu: 100m

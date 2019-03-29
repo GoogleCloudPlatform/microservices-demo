@@ -30,8 +30,8 @@
   version = "0.27.0"
 
 [[constraint]]
-  name = "contrib.go.opencensus.io/exporter/stackdriver"
-  version = "0.5.0"
+  name = "contrib.go.opencensus.io/exporter/ocagent"
+  version = "0.4.10"
 
 [[constraint]]
   name = "github.com/golang/protobuf"
@@ -47,7 +47,7 @@
 
 [[constraint]]
   name = "go.opencensus.io"
-  version = "0.16.0"
+  version = "0.20.0"
 
 [[constraint]]
   branch = "master"

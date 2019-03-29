@@ -9,3 +9,4 @@ pkg/
 .idea
 .skaffold-*.yaml
 .kubernetes-manifests-*/
+*.iml

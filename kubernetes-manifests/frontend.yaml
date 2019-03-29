@@ -61,8 +61,10 @@ spec:
             value: "checkoutservice:5050"
           - name: AD_SERVICE_ADDR
             value: "adservice:9555"
-          # - name: JAEGER_SERVICE_ADDR
-          #   value: "jaeger-collector:14268"
+          - name: OC_AGENT_HOST
+            valueFrom:
+              fieldRef:
+                fieldPath: status.hostIP
           resources:
             requests:
               cpu: 100m

@@ -37,9 +37,11 @@ spec:
         livenessProbe:
           exec:
             command: ["/bin/grpc_health_probe", "-addr=:3550"]
-#        env:
-#          - name: JAEGER_SERVICE_ADDR
-#            value: "jaeger-collector:14268"
+        env:
+          - name: OC_AGENT_HOST
+            valueFrom:
+              fieldRef:
+                fieldPath: status.hostIP
         resources:
           requests:
             cpu: 100m
