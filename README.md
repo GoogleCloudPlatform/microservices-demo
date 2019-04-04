@@ -93,13 +93,14 @@ We offer three installation methods:
    - kubectl (can be installed via `gcloud components install kubectl`)
    - Docker for Desktop (Mac/Windows): It provides Kubernetes support as [noted
      here](https://docs.docker.com/docker-for-mac/kubernetes/).
-   - [skaffold](https://github.com/GoogleContainerTools/skaffold/#installation)
+   - [skaffold](https://skaffold.dev/docs/getting-started/#installing-skaffold)
      (ensure version ≥v0.20)
 
 1. Launch “Docker for Desktop”. Go to Preferences:
 
    - choose “Enable Kubernetes”,
    - set CPUs to at least 3, and Memory to at least 6.0 GiB
+   - on the "Disk" tab, set at least 32 GB disk space
 
 1. Run `kubectl get nodes` to verify you're connected to “Kubernetes on Docker”.
 
@@ -252,6 +253,15 @@ by deploying the [release manifest](./release) directly to an existing cluster.
    ```sh
    curl -v "http://$INGRESS_HOST"
    ```
+
+### Cleanup
+
+If you've deployed the application with `skaffold run` command, you can run
+`skaffold delete` to clean up the deployed resources.
+
+If you've deployed the application with `kubectl apply -f [...]`, you can
+run `kubectl delete -f [...]` with the same argument to clean up the deployed
+resources.
 
 ## Conferences featuring Hipster Shop
 
