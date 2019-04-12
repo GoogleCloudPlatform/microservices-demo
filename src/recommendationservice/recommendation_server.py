@@ -36,7 +36,6 @@ from grpc_health.v1 import health_pb2_grpc
 from logger import getJSONLogger
 logger = getJSONLogger('recommendationservice-server')
 
-
 def initStackdriverProfiling():
   enable_profiler = None
   project_id = None
@@ -95,7 +94,6 @@ if __name__ == "__main__":
     logger.info("initializing recommendationservice")
 
     initStackdriverProfiling()
-
     try:
         sampler = always_on.AlwaysOnSampler()
         exporter = stackdriver_exporter.StackdriverExporter()
