@@ -60,7 +60,7 @@ Find **Protocol Buffers Descriptions** at the [`./pb` directory](./pb).
   addition to these, using Istio enables features like Request/Response
   **Metrics** and **Context Graph** out of the box. When it is running out of
   Google Cloud, this code path remains inactive.
-- **[Skaffold](https://github.com/GoogleContainerTools/skaffold):** Application
+- **[Skaffold](https://skaffold.dev):** Application
   is deployed to Kubernetes with a single command using Skaffold.
 - **Synthetic Load Generation:** The application demo comes with a background
   job that creates realistic usage patterns on the website using
