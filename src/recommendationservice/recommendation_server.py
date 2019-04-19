@@ -37,17 +37,12 @@ from logger import getJSONLogger
 logger = getJSONLogger('recommendationservice-server')
 
 def initStackdriverProfiling():
-  enable_profiler = None
   project_id = None
   try:
-    enable_profiler = os.environ["ENABLE_PROFILER"]
     project_id = os.environ["GCP_PROJECT_ID"]
   except KeyError:
     # Environment variable not set
     pass
-  if enable_profiler != "1":
-    logger.info("Skipping Stackdriver Profiler Python agent initialization. Set environment variable ENABLE_PROFILER=1 to enable.")
-    return
 
   for retry in xrange(1,4):
     try:
@@ -61,7 +56,7 @@ def initStackdriverProfiling():
       logger.info("Unable to start Stackdriver Profiler Python agent. " + str(exc))
       if (retry < 4):
         logger.info("Sleeping %d seconds to retry Stackdriver Profiler agent initialization"%(retry*10))
-        time.sleep (retry*10)
+        time.sleep (1)
       else:
         logger.warning("Could not initialize Stackdriver Profiler after retrying, giving up")
   return
@@ -93,7 +88,15 @@ class RecommendationService(demo_pb2_grpc.RecommendationServiceServicer):
 if __name__ == "__main__":
     logger.info("initializing recommendationservice")
 
-    initStackdriverProfiling()
+    try:
+      enable_profiler = os.environ["ENABLE_PROFILER"]
+      if enable_profiler != "1":
+        raise KeyError()
+      else:
+        initStackdriverProfiling()
+    except KeyError:
+      logger.info("Skipping Stackdriver Profiler Python agent initialization. Set environment variable ENABLE_PROFILER=1 to enable.")
+
     try:
         sampler = always_on.AlwaysOnSampler()
         exporter = stackdriver_exporter.StackdriverExporter()
