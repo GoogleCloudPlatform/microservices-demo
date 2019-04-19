@@ -52,9 +52,9 @@ def initStackdriverProfiling():
   for retry in xrange(1,4):
     try:
       if project_id:
-        googlecloudprofiler.start(service='recommendation_server-out', service_version='1.0.0', verbose=0, project_id=project_id)
+        googlecloudprofiler.start(service='recommendation_server', service_version='1.0.0', verbose=0, project_id=project_id)
       else:
-        googlecloudprofiler.start(service='recommendation_server-out', service_version='1.0.0', verbose=0)
+        googlecloudprofiler.start(service='recommendation_server', service_version='1.0.0', verbose=0)
       logger.info("Successfully started Stackdriver Profiler.")
       return
     except (BaseException) as exc:
