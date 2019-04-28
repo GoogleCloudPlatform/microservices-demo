@@ -15,8 +15,8 @@ data:
       zipkin: {}
     exporters:
       stackdriver:
-        # TODO: find a different way to specify project-id
-        project: "microservices-demo-app"
+        # on GCP project is auto detected.
+        # project: "your-project-id"
         enable_tracing: true
         enable_metrics: true
 ---
@@ -36,7 +36,7 @@ spec:
     spec:
       containers:
       - name: oc-agent
-        image: omnition/opencensus-agent:0.1.5
+        image: omnition/opencensus-agent:0.1.6
         resources:
           limits:
             cpu: 100m
