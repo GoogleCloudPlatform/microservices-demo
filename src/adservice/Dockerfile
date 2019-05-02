@@ -11,9 +11,14 @@ COPY . .
 RUN chmod +x gradlew
 RUN ./gradlew installDist
 
-FROM openjdk:8-alpine
+FROM openjdk:8-slim
 
-RUN apk add --no-cache libc6-compat
+# Download Stackdriver Profiler Java agent
+RUN apt-get update
+RUN apt-get install -qq wget
+RUN mkdir -p /opt/cprof && \
+    wget -q -O- https://storage.googleapis.com/cloud-profiler/java/latest/profiler_java_agent.tar.gz \
+    | tar xzv -C /opt/cprof
 
 RUN GRPC_HEALTH_PROBE_VERSION=v0.2.1 && \
     wget -qO/bin/grpc_health_probe https://github.com/grpc-ecosystem/grpc-health-probe/releases/download/${GRPC_HEALTH_PROBE_VERSION}/grpc_health_probe-linux-amd64 && \
