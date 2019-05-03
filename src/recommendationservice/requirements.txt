@@ -7,13 +7,12 @@
 cachetools==3.1.0         # via google-auth
 certifi==2018.11.29       # via requests
 chardet==3.0.4            # via requests
-enum34==1.1.6             # via grpcio
-futures==3.2.0            # via google-api-core, grpcio
 google-api-core[grpc]==1.6.0
-google-api-python-client==1.7.8  # via google-python-cloud-debugger
-google-auth-httplib2==0.0.3  # via google-api-python-client, google-python-cloud-debugger
-google-auth==1.6.2        # via google-api-core, google-api-python-client, google-auth-httplib2, google-python-cloud-debugger
+google-api-python-client==1.7.8  # via google-cloud-profiler, google-python-cloud-debugger
+google-auth-httplib2==0.0.3  # via google-api-python-client, google-cloud-profiler, google-python-cloud-debugger
+google-auth==1.6.2        # via google-api-core, google-api-python-client, google-auth-httplib2, google-cloud-profiler, google-python-cloud-debugger
 google-cloud-core==0.29.1  # via google-cloud-trace
+google-cloud-profiler==1.0.8
 google-cloud-trace==0.20.2  # via opencensus
 google-python-cloud-debugger==2.9
 googleapis-common-protos==1.5.6  # via google-api-core
@@ -22,13 +21,13 @@ grpcio==1.16.1
 httplib2==0.12.0          # via google-api-python-client, google-auth-httplib2
 idna==2.8                 # via requests
 opencensus[stackdriver]==0.1.10
-protobuf==3.6.1           # via google-api-core, googleapis-common-protos, grpcio-health-checking
+protobuf==3.6.1           # via google-api-core, google-cloud-profiler, googleapis-common-protos, grpcio-health-checking
 pyasn1-modules==0.2.4     # via google-auth
 pyasn1==0.4.5             # via pyasn1-modules, rsa
 python-json-logger==0.1.9
 pytz==2018.9              # via google-api-core
 pyyaml==3.13              # via google-python-cloud-debugger
-requests==2.21.0          # via google-api-core
+requests==2.21.0          # via google-api-core, google-cloud-profiler
 rsa==4.0                  # via google-auth
 six==1.12.0               # via google-api-core, google-api-python-client, google-auth, google-python-cloud-debugger, grpcio, protobuf
 uritemplate==3.0.0        # via google-api-python-client

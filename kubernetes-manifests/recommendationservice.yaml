@@ -42,6 +42,8 @@ spec:
         env:
         - name: PRODUCT_CATALOG_SERVICE_ADDR
           value: "productcatalogservice:3550"
+        - name: ENABLE_PROFILER
+          value: "0"
         resources:
           requests:
             cpu: 100m
