@@ -12,11 +12,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-apiVersion: extensions/v1beta1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: adservice
 spec:
+  selector:
+    matchLabels:
+      app: adservice
   template:
     metadata:
       labels:
@@ -25,12 +28,14 @@ spec:
       terminationGracePeriodSeconds: 5
       containers:
       - name: server
-        image: gcr.io/microservices-demo-app/adservice
+        image: adservice
         ports:
         - containerPort: 9555
         env:
         - name: PORT
           value: "9555"
+        #- name: JAEGER_SERVICE_ADDR
+        #  value: "jaeger-collector:14268"
         resources:
           requests:
             cpu: 200m
@@ -40,12 +45,12 @@ spec:
             memory: 300Mi
         readinessProbe:
           initialDelaySeconds: 20
-          periodSeconds: 5
+          periodSeconds: 15
           exec:
             command: ["/bin/grpc_health_probe", "-addr=:9555"]
         livenessProbe:
           initialDelaySeconds: 20
-          periodSeconds: 5
+          periodSeconds: 15
           exec:
             command: ["/bin/grpc_health_probe", "-addr=:9555"]
 ---

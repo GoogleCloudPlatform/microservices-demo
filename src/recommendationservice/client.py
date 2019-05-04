@@ -14,14 +14,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import sys
 import grpc
 import demo_pb2
 import demo_pb2_grpc
-import sys
 
 from opencensus.trace.tracer import Tracer
 from opencensus.trace.exporters import stackdriver_exporter
 from opencensus.trace.ext.grpc import client_interceptor
+
+from logger import getJSONLogger
+logger = getJSONLogger('recommendationservice-server')
 
 if __name__ == "__main__":
     # get port
@@ -45,4 +48,4 @@ if __name__ == "__main__":
     request = demo_pb2.ListRecommendationsRequest(user_id="test", product_ids=["test"])
     # make call to server
     response = stub.ListRecommendations(request)
-    print(response)
+    logger.info(response)

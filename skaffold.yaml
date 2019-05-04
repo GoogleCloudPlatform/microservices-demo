@@ -12,57 +12,60 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-apiVersion: skaffold/v1alpha2
+apiVersion: skaffold/v1beta2
 kind: Config
 build:
+  artifacts:
+  # image tags are relative; to specify an image repo (e.g. GCR), you
+  # must provide a "default repo" using one of the methods described 
+  # here:
+  # https://skaffold.dev/docs/concepts/#image-repository-handling
+  - image: emailservice
+    context: src/emailservice
+  - image: productcatalogservice
+    context: src/productcatalogservice
+  - image: recommendationservice
+    context: src/recommendationservice
+  - image: shippingservice
+    context: src/shippingservice
+  - image: checkoutservice
+    context: src/checkoutservice
+  - image: paymentservice
+    context: src/paymentservice
+  - image: currencyservice
+    context: src/currencyservice
+  - image: cartservice
+    context: src/cartservice
+  - image: frontend
+    context: src/frontend
+  - image: loadgenerator
+    context: src/loadgenerator
+  - image: adservice
+    context: src/adservice
   tagPolicy:
     gitCommit: {}
-  artifacts:
-  - imageName: gcr.io/microservices-demo-app/emailservice
-    workspace: src/emailservice
-  - imageName: gcr.io/microservices-demo-app/productcatalogservice
-    workspace: src/productcatalogservice
-  - imageName: gcr.io/microservices-demo-app/recommendationservice
-    workspace: src/recommendationservice
-  - imageName: gcr.io/microservices-demo-app/shippingservice
-    workspace: src/shippingservice
-  - imageName: gcr.io/microservices-demo-app/checkoutservice
-    workspace: src/checkoutservice
-  - imageName: gcr.io/microservices-demo-app/paymentservice
-    workspace: src/paymentservice
-  - imageName: gcr.io/microservices-demo-app/currencyservice
-    workspace: src/currencyservice
-  - imageName: gcr.io/microservices-demo-app/cartservice
-    workspace: src/cartservice
-  - imageName: gcr.io/microservices-demo-app/frontend
-    workspace: src/frontend
-  - imageName: gcr.io/microservices-demo-app/loadgenerator
-    workspace: src/loadgenerator
-  - imageName: gcr.io/microservices-demo-app/adservice
-    workspace: src/adservice
 deploy:
   kubectl:
     manifests:
     - ./kubernetes-manifests/**.yaml
-    
-
 profiles:
-  # "travis-ci" profile is used to build the images without
-  # pushing them.
-  - name: travis-ci
-    build:
-      local:
-        skipPush: true
-  # "gcb" profile allows building and pushing the images
-  # on Google Container Builder without requiring docker
-  # installed on the developer machine. However, note that
-  # since GCB does not cache the builds, each build will
-  # start from scratch and therefore take a long time.
-  #
-  # This is not used by default. To use it, run:
-  #     skaffold run -p gcb
-  - name: gcb
-    build:
-      googleCloudBuild:
-        diskSizeGb: 300
-        machineType: "N1_HIGHCPU_32"
+# "travis-ci" profile is used to build the images without
+# pushing them.
+- name: travis-ci
+  build:
+    local:
+      push: false
+# "gcb" profile allows building and pushing the images
+# on Google Container Builder without requiring docker
+# installed on the developer machine. However, note that
+# since GCB does not cache the builds, each build will
+# start from scratch and therefore take a long time.
+#
+# This is not used by default. To use it, run:
+#     skaffold run -p gcb
+- name: gcb
+  build:
+    googleCloudBuild:
+      diskSizeGb: 300
+      machineType: N1_HIGHCPU_32
+      timeout: 4000s

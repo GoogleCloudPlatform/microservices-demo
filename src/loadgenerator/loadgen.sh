@@ -1,4 +1,4 @@
-#!/bin/bash -eu
+#!/bin/sh -eu
 #
 # Copyright 2018 Google LLC
 #

@@ -14,9 +14,17 @@
 
 const path = require('path');
 const grpc = require('grpc');
+const pino = require('pino');
 const protoLoader = require('@grpc/proto-loader');
 
 const charge = require('./charge');
+
+const logger = pino({
+  name: 'paymentservice-server',
+  messageKey: 'message',
+  changeLevelName: 'severity',
+  useLevelLabels: true
+});
 
 class HipsterShopServer {
   constructor (protoRoot, port = HipsterShopServer.DEFAULT_PORT) {
@@ -38,7 +46,7 @@ class HipsterShopServer {
    */
   static ChargeServiceHandler (call, callback) {
     try {
-      console.log(`PaymentService#Charge invoked with request ${JSON.stringify(call.request)}`);
+      logger.info(`PaymentService#Charge invoked with request ${JSON.stringify(call.request)}`);
       const response = charge(call.request);
       callback(null, response);
     } catch (err) {
@@ -53,7 +61,7 @@ class HipsterShopServer {
 
   listen () {
     this.server.bind(`0.0.0.0:${this.port}`, grpc.ServerCredentials.createInsecure());
-    console.log(`PaymentService grpc server listening on ${this.port}`);
+    logger.info(`PaymentService grpc server listening on ${this.port}`);
     this.server.start();
   }
 

@@ -22,7 +22,10 @@ import (
 	"io/ioutil"
 	"net"
 	"os"
+	"os/signal"
 	"strings"
+	"sync"
+	"syscall"
 	"time"
 
 	pb "github.com/GoogleCloudPlatform/microservices-demo/src/productcatalogservice/genproto"
@@ -32,6 +35,7 @@ import (
 	"contrib.go.opencensus.io/exporter/stackdriver"
 	"github.com/golang/protobuf/jsonpb"
 	"github.com/sirupsen/logrus"
+	"go.opencensus.io/exporter/jaeger"
 	"go.opencensus.io/plugin/ocgrpc"
 	"go.opencensus.io/stats/view"
 	"go.opencensus.io/trace"
@@ -41,18 +45,17 @@ import (
 )
 
 var (
-	catalogJSON []byte
-	log         *logrus.Logger
+	cat          pb.ListProductsResponse
+	catalogMutex *sync.Mutex
+	log          *logrus.Logger
+	extraLatency time.Duration
 
 	port = flag.Int("port", 3550, "port to listen at")
+
+	reloadCatalog bool
 )
 
 func init() {
-	c, err := ioutil.ReadFile("products.json")
-	if err != nil {
-		log.Fatalf("failed to open product catalog json file: %v", err)
-	}
-	catalogJSON = c
 	log = logrus.New()
 	log.Formatter = &logrus.JSONFormatter{
 		FieldMap: logrus.FieldMap{
@@ -63,13 +66,45 @@ func init() {
 		TimestampFormat: time.RFC3339Nano,
 	}
 	log.Out = os.Stdout
-	log.Info("successfully parsed product catalog json")
+	catalogMutex = &sync.Mutex{}
+	err := readCatalogFile(&cat)
+	if err != nil {
+		log.Warnf("could not parse product catalog")
+	}
 }
 
 func main() {
 	go initTracing()
 	go initProfiling("productcatalogservice", "1.0.0")
 	flag.Parse()
+
+	// set injected latency
+	if s := os.Getenv("EXTRA_LATENCY"); s != "" {
+		v, err := time.ParseDuration(s)
+		if err != nil {
+			log.Fatalf("failed to parse EXTRA_LATENCY (%s) as time.Duration: %+v", v, err)
+		}
+		extraLatency = v
+		log.Infof("extra latency enabled (duration: %v)", extraLatency)
+	} else {
+		extraLatency = time.Duration(0)
+	}
+
+	sigs := make(chan os.Signal, 1)
+	signal.Notify(sigs, syscall.SIGUSR1, syscall.SIGUSR2)
+	go func() {
+		for {
+			sig := <-sigs
+			log.Printf("Received signal: %s", sig)
+			if sig == syscall.SIGUSR1 {
+				reloadCatalog = true
+				log.Infof("Enable catalog reloading")
+			} else {
+				reloadCatalog = false
+				log.Infof("Disable catalog reloading")
+			}
+		}
+	}()
 
 	log.Infof("starting grpc server at :%d", *port)
 	run(*port)
@@ -89,7 +124,29 @@ func run(port int) string {
 	return l.Addr().String()
 }
 
+func initJaegerTracing() {
+	svcAddr := os.Getenv("JAEGER_SERVICE_ADDR")
+	if svcAddr == "" {
+		log.Info("jaeger initialization disabled.")
+		return
+	}
+	// Register the Jaeger exporter to be able to retrieve
+	// the collected spans.
+	exporter, err := jaeger.NewExporter(jaeger.Options{
+		Endpoint: fmt.Sprintf("http://%s", svcAddr),
+		Process: jaeger.Process{
+			ServiceName: "productcatalogservice",
+		},
+	})
+	if err != nil {
+		log.Fatal(err)
+	}
+	trace.RegisterExporter(exporter)
+	log.Info("jaeger initialization completed.")
+}
+
 func initStats(exporter *stackdriver.Exporter) {
+	view.SetReportingPeriod(60 * time.Second)
 	view.RegisterExporter(exporter)
 	if err := view.Register(ocgrpc.DefaultServerViews...); err != nil {
 		log.Info("Error registering default server views")
@@ -98,7 +155,7 @@ func initStats(exporter *stackdriver.Exporter) {
 	}
 }
 
-func initTracing() {
+func initStackDriverTracing() {
 	// TODO(ahmetb) this method is duplicated in other microservices using Go
 	// since they are not sharing packages.
 	for i := 1; i <= 3; i++ {
@@ -119,6 +176,11 @@ func initTracing() {
 		time.Sleep(d)
 	}
 	log.Warn("could not initialize stackdriver exporter after retrying, giving up")
+}
+
+func initTracing() {
+	initJaegerTracing()
+	initStackDriverTracing()
 }
 
 func initProfiling(service, version string) {
@@ -145,12 +207,28 @@ func initProfiling(service, version string) {
 
 type productCatalog struct{}
 
-func parseCatalog() []*pb.Product {
-	var cat pb.ListProductsResponse
-
-	if err := jsonpb.Unmarshal(bytes.NewReader(catalogJSON), &cat); err != nil {
+func readCatalogFile(catalog *pb.ListProductsResponse) error {
+	catalogMutex.Lock()
+	defer catalogMutex.Unlock()
+	catalogJSON, err := ioutil.ReadFile("products.json")
+	if err != nil {
+		log.Fatalf("failed to open product catalog json file: %v", err)
+		return err
+	}
+	if err := jsonpb.Unmarshal(bytes.NewReader(catalogJSON), catalog); err != nil {
 		log.Warnf("failed to parse the catalog JSON: %v", err)
-		return nil
+		return err
+	}
+	log.Info("successfully parsed product catalog json")
+	return nil
+}
+
+func parseCatalog() []*pb.Product {
+	if reloadCatalog || len(cat.Products) == 0 {
+		err := readCatalogFile(&cat)
+		if err != nil {
+			return []*pb.Product{}
+		}
 	}
 	return cat.Products
 }
@@ -160,10 +238,12 @@ func (p *productCatalog) Check(ctx context.Context, req *healthpb.HealthCheckReq
 }
 
 func (p *productCatalog) ListProducts(context.Context, *pb.Empty) (*pb.ListProductsResponse, error) {
+	time.Sleep(extraLatency)
 	return &pb.ListProductsResponse{Products: parseCatalog()}, nil
 }
 
 func (p *productCatalog) GetProduct(ctx context.Context, req *pb.GetProductRequest) (*pb.Product, error) {
+	time.Sleep(extraLatency)
 	var found *pb.Product
 	for i := 0; i < len(parseCatalog()); i++ {
 		if req.Id == parseCatalog()[i].Id {
@@ -177,6 +257,7 @@ func (p *productCatalog) GetProduct(ctx context.Context, req *pb.GetProductReque
 }
 
 func (p *productCatalog) SearchProducts(ctx context.Context, req *pb.SearchProductsRequest) (*pb.SearchProductsResponse, error) {
+	time.Sleep(extraLatency)
 	// Intepret query as a substring match in name or description.
 	var ps []*pb.Product
 	for _, p := range parseCatalog() {

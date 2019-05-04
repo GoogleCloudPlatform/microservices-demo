@@ -12,11 +12,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-apiVersion: extensions/v1beta1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: checkoutservice
 spec:
+  selector:
+    matchLabels:
+      app: checkoutservice
   template:
     metadata:
       labels:
@@ -24,7 +27,7 @@ spec:
     spec:
       containers:
         - name: server
-          image: gcr.io/microservices-demo-app/checkoutservice
+          image: checkoutservice
           ports:
           - containerPort: 5050
           readinessProbe:
@@ -46,6 +49,8 @@ spec:
             value: "currencyservice:7000"
           - name: CART_SERVICE_ADDR
             value: "cartservice:7070"
+          # - name: JAEGER_SERVICE_ADDR
+          #   value: "jaeger-collector:14268"
           resources:
             requests:
               cpu: 100m

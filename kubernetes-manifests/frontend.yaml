@@ -12,11 +12,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-apiVersion: extensions/v1beta1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: frontend
 spec:
+  selector:
+    matchLabels:
+      app: frontend
   template:
     metadata:
       labels:
@@ -24,7 +27,7 @@ spec:
     spec:
       containers:
         - name: server
-          image: gcr.io/microservices-demo-app/frontend
+          image: frontend
           ports:
           - containerPort: 8080
           readinessProbe:
@@ -38,7 +41,7 @@ spec:
           livenessProbe:
             initialDelaySeconds: 10
             httpGet:
-              path: "/"
+              path: "/_healthz"
               port: 8080
               httpHeaders:
               - name: "Cookie"
@@ -58,6 +61,8 @@ spec:
             value: "checkoutservice:5050"
           - name: AD_SERVICE_ADDR
             value: "adservice:9555"
+          # - name: JAEGER_SERVICE_ADDR
+          #   value: "jaeger-collector:14268"
           resources:
             requests:
               cpu: 100m

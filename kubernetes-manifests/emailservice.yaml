@@ -12,11 +12,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-apiVersion: extensions/v1beta1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: emailservice
 spec:
+  selector:
+    matchLabels:
+      app: emailservice
   template:
     metadata:
       labels:
@@ -25,7 +28,7 @@ spec:
       terminationGracePeriodSeconds: 5
       containers:
       - name: server
-        image: gcr.io/microservices-demo-app/emailservice
+        image: emailservice
         ports:
         - containerPort: 8080
         readinessProbe:
@@ -36,6 +39,9 @@ spec:
           periodSeconds: 5
           exec:
             command: ["/bin/grpc_health_probe", "-addr=:8080"]
+        env:
+        - name: ENABLE_PROFILER
+          value: "0"
         resources:
           requests:
             cpu: 100m

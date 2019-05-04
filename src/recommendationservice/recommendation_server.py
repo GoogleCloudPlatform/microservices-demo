@@ -14,25 +14,52 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import grpc
-from concurrent import futures
+import os
+import random
 import time
 import traceback
-import random
-import os
+from concurrent import futures
+
 import googleclouddebugger
+import googlecloudprofiler
+import grpc
+from opencensus.trace.exporters import print_exporter
+from opencensus.trace.exporters import stackdriver_exporter
+from opencensus.trace.ext.grpc import server_interceptor
+from opencensus.trace.samplers import always_on
 
 import demo_pb2
 import demo_pb2_grpc
 from grpc_health.v1 import health_pb2
 from grpc_health.v1 import health_pb2_grpc
 
+from logger import getJSONLogger
+logger = getJSONLogger('recommendationservice-server')
 
-# TODO(morganmclean,ahmetb) tracing currently disabled due to memory leak (see TODO below)
-# from opencensus.trace.ext.grpc import server_interceptor
-# from opencensus.trace.samplers import always_on
-# from opencensus.trace.exporters import stackdriver_exporter
-# from opencensus.trace.exporters import print_exporter
+def initStackdriverProfiling():
+  project_id = None
+  try:
+    project_id = os.environ["GCP_PROJECT_ID"]
+  except KeyError:
+    # Environment variable not set
+    pass
+
+  for retry in xrange(1,4):
+    try:
+      if project_id:
+        googlecloudprofiler.start(service='recommendation_server', service_version='1.0.0', verbose=0, project_id=project_id)
+      else:
+        googlecloudprofiler.start(service='recommendation_server', service_version='1.0.0', verbose=0)
+      logger.info("Successfully started Stackdriver Profiler.")
+      return
+    except (BaseException) as exc:
+      logger.info("Unable to start Stackdriver Profiler Python agent. " + str(exc))
+      if (retry < 4):
+        logger.info("Sleeping %d seconds to retry Stackdriver Profiler agent initialization"%(retry*10))
+        time.sleep (1)
+      else:
+        logger.warning("Could not initialize Stackdriver Profiler after retrying, giving up")
+  return
 
 class RecommendationService(demo_pb2_grpc.RecommendationServiceServicer):
     def ListRecommendations(self, request, context):
@@ -47,7 +74,7 @@ class RecommendationService(demo_pb2_grpc.RecommendationServiceServicer):
         indices = random.sample(range(num_products), num_return)
         # fetch product ids from indices
         prod_list = [filtered_products[i] for i in indices]
-        print("[Recv ListRecommendations] product_ids={}".format(prod_list))
+        logger.info("[Recv ListRecommendations] product_ids={}".format(prod_list))
         # build and return response
         response = demo_pb2.ListRecommendationsResponse()
         response.product_ids.extend(prod_list)
@@ -59,17 +86,23 @@ class RecommendationService(demo_pb2_grpc.RecommendationServiceServicer):
 
 
 if __name__ == "__main__":
-    print("initializing recommendationservice")
+    logger.info("initializing recommendationservice")
 
-    # TODO(morganmclean,ahmetb) enabling the tracing interceptor/sampler below
-    # causes an unbounded memory leak eventually OOMing the container.
-    # ----
-    # try:
-    #     sampler = always_on.AlwaysOnSampler()
-    #     exporter = stackdriver_exporter.StackdriverExporter()
-    #     tracer_interceptor = server_interceptor.OpenCensusServerInterceptor(sampler, exporter)
-    # except:
-    #     tracer_interceptor = server_interceptor.OpenCensusServerInterceptor()
+    try:
+      enable_profiler = os.environ["ENABLE_PROFILER"]
+      if enable_profiler != "1":
+        raise KeyError()
+      else:
+        initStackdriverProfiling()
+    except KeyError:
+      logger.info("Skipping Stackdriver Profiler Python agent initialization. Set environment variable ENABLE_PROFILER=1 to enable.")
+
+    try:
+        sampler = always_on.AlwaysOnSampler()
+        exporter = stackdriver_exporter.StackdriverExporter()
+        tracer_interceptor = server_interceptor.OpenCensusServerInterceptor(sampler, exporter)
+    except:
+        tracer_interceptor = server_interceptor.OpenCensusServerInterceptor()
 
     try:
         googleclouddebugger.enable(
@@ -77,15 +110,15 @@ if __name__ == "__main__":
             version='1.0.0'
         )
     except Exception, err:
-        print("could not enable debugger")
-        traceback.print_exc()
+        logger.error("could not enable debugger")
+        logger.error(traceback.print_exc())
         pass
 
     port = os.environ.get('PORT', "8080")
     catalog_addr = os.environ.get('PRODUCT_CATALOG_SERVICE_ADDR', '')
     if catalog_addr == "":
         raise Exception('PRODUCT_CATALOG_SERVICE_ADDR environment variable not set')
-    print("product catalog address: " + catalog_addr)
+    logger.info("product catalog address: " + catalog_addr)
     channel = grpc.insecure_channel(catalog_addr)
     product_catalog_stub = demo_pb2_grpc.ProductCatalogServiceStub(channel)
 
@@ -98,7 +131,7 @@ if __name__ == "__main__":
     health_pb2_grpc.add_HealthServicer_to_server(service, server)
 
     # start server
-    print("listening on port: " + port)
+    logger.info("listening on port: " + port)
     server.add_insecure_port('[::]:'+port)
     server.start()
 

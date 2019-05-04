@@ -1,27 +1,36 @@
+FROM python:3-slim as base
 
+FROM base as builder
 
-# Use the grpc.io provided Python image as the base image
-FROM grpc/python:1.0
+RUN apt-get -qq update \
+    && apt-get install -y --no-install-recommends \
+        g++ \
+    && rm -rf /var/lib/apt/lists/*
 
-# download the grpc health probe
-RUN GRPC_HEALTH_PROBE_VERSION=v0.1.0-alpha.1 && \
+# get packages
+COPY requirements.txt .
+RUN pip install -r requirements.txt
+
+FROM base as final
+# Enable unbuffered logging
+ENV PYTHONUNBUFFERED=1
+
+RUN apt-get -qq update \
+    && apt-get install -y --no-install-recommends \
+        wget
+
+# Download the grpc health probe
+RUN GRPC_HEALTH_PROBE_VERSION=v0.2.0 && \
     wget -qO/bin/grpc_health_probe https://github.com/grpc-ecosystem/grpc-health-probe/releases/download/${GRPC_HEALTH_PROBE_VERSION}/grpc_health_probe-linux-amd64 && \
     chmod +x /bin/grpc_health_probe
 
-# show python logs as they occur
-ENV PYTHONUNBUFFERED=0
-
-# install pip for python3
-RUN apt-get -qqy update && \
-        apt-get -qqy install python3-pip
-
-# get packages
 WORKDIR /email_server
-COPY requirements.txt .
-RUN pip3 install -r requirements.txt
+
+# Grab packages from builder
+COPY --from=builder /usr/local/lib/python3.7/ /usr/local/lib/python3.7/
 
 # Add the application
 COPY . .
 
 EXPOSE 8080
-ENTRYPOINT [ "python3", "email_server.py" ]
+ENTRYPOINT [ "python", "email_server.py" ]

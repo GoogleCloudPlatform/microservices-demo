@@ -30,18 +30,23 @@ require('@google-cloud/debug-agent').start({
 
 const path = require('path');
 const grpc = require('grpc');
-const request = require('request');
-const xml2js = require('xml2js');
+const pino = require('pino');
 const protoLoader = require('@grpc/proto-loader');
 
 const MAIN_PROTO_PATH = path.join(__dirname, './proto/demo.proto');
 const HEALTH_PROTO_PATH = path.join(__dirname, './proto/grpc/health/v1/health.proto');
 
 const PORT = 7000;
-const DATA_URL = 'http://www.ecb.europa.eu/stats/eurofxref/eurofxref-daily.xml';
 
 const shopProto = _loadProto(MAIN_PROTO_PATH).hipstershop;
 const healthProto = _loadProto(HEALTH_PROTO_PATH).grpc.health.v1;
+
+const logger = pino({
+  name: 'currencyservice-server',
+  messageKey: 'message',
+  changeLevelName: 'severity',
+  useLevelLabels: true
+});
 
 /**
  * Helper function that loads a protobuf file.
@@ -61,36 +66,12 @@ function _loadProto (path) {
 }
 
 /**
- * Helper function that gets currency data from an XML webpage
+ * Helper function that gets currency data from a stored JSON file
  * Uses public data from European Central Bank
  */
-let _data;
 function _getCurrencyData (callback) {
-  if (!_data) {
-    console.log('Fetching currency data...');
-    request(DATA_URL, (err, res) => {
-      if (err) {
-        throw new Error(`Error getting data: ${err}`);
-      }
-
-      const body = res.body.split('\n').slice(7, -2).join('\n');
-      xml2js.parseString(body, (err, resJs) => {
-        if (err) {
-          throw new Error(`Error parsing HTML: ${err}`);
-        }
-
-        const array = resJs['Cube']['Cube'].map(x => x['$']);
-        const results = array.reduce((acc, x) => {
-          acc[x['currency']] = x['rate'];
-          return acc;
-        }, { 'EUR': '1.0' });
-        _data = results;
-        callback(_data);
-      });
-    });
-  } else {
-    callback(_data);
-  }
+  const data = require('./data/currency_conversion.json');
+  callback(data);
 }
 
 /**
@@ -108,7 +89,7 @@ function _carry (amount) {
  * Lists the supported currencies
  */
 function getSupportedCurrencies (call, callback) {
-  console.log('Getting supported currencies...');
+  logger.info('Getting supported currencies...');
   _getCurrencyData((data) => {
     callback(null, {currency_codes: Object.keys(data)});
   });
@@ -118,7 +99,7 @@ function getSupportedCurrencies (call, callback) {
  * Converts between currencies
  */
 function convert (call, callback) {
-  console.log('received conversion request');
+  logger.info('received conversion request');
   try {
     _getCurrencyData((data) => {
       const request = call.request;
@@ -142,12 +123,11 @@ function convert (call, callback) {
       result.nanos = Math.floor(result.nanos);
       result.currency_code = request.to_code;
 
-      console.log(`conversion request successful`);
+      logger.info(`conversion request successful`);
       callback(null, result);
     });
   } catch (err) {
-    console.error('conversion request failed.');
-    console.error(err);
+    logger.error(`conversion request failed: ${err}`);
     callback(err.message);
   }
 }
@@ -164,7 +144,7 @@ function check (call, callback) {
  * CurrencyConverter service at the sample server port
  */
 function main () {
-  console.log(`Starting gRPC server on port ${PORT}...`);
+  logger.info(`Starting gRPC server on port ${PORT}...`);
   const server = new grpc.Server();
   server.addService(shopProto.CurrencyService.service, {getSupportedCurrencies, convert});
   server.addService(healthProto.Health.service, {check});

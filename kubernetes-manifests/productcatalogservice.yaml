@@ -12,11 +12,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-apiVersion: extensions/v1beta1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: productcatalogservice
 spec:
+  selector:
+    matchLabels:
+      app: productcatalogservice
   template:
     metadata:
       labels:
@@ -25,7 +28,7 @@ spec:
       terminationGracePeriodSeconds: 5
       containers:
       - name: server
-        image: gcr.io/microservices-demo-app/productcatalogservice
+        image: productcatalogservice
         ports:
         - containerPort: 3550
         readinessProbe:
@@ -34,6 +37,9 @@ spec:
         livenessProbe:
           exec:
             command: ["/bin/grpc_health_probe", "-addr=:3550"]
+#        env:
+#          - name: JAEGER_SERVICE_ADDR
+#            value: "jaeger-collector:14268"
         resources:
           requests:
             cpu: 100m
