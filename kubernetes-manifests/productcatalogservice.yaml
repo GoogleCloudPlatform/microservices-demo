@@ -32,8 +32,8 @@ spec:
         ports:
         - containerPort: 3550
         env:
-          - name: PORT
-            value: "3550"
+        - name: PORT
+          value: "3550"
         readinessProbe:
           exec:
             command: ["/bin/grpc_health_probe", "-addr=:3550"]
