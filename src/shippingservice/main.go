@@ -60,7 +60,7 @@ func main() {
 	go initProfiling("shippingservice", "1.0.0")
 
 	port := defaultPort
-	if value, ok := os.LookupEnv("APP_PORT"); ok {
+	if value, ok := os.LookupEnv("PORT"); ok {
 		port = value
 	}
 	port = fmt.Sprintf(":%s", port)

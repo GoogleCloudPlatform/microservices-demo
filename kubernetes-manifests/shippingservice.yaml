@@ -30,6 +30,9 @@ spec:
         image: shippingservice
         ports:
         - containerPort: 50051
+        env:
+        - name: PORT
+          value: "50051"
         readinessProbe:
           periodSeconds: 5
           exec:
