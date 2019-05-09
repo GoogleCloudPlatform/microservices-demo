@@ -31,6 +31,9 @@ spec:
         image: paymentservice
         ports:
         - containerPort: 50051
+        env:
+        - name: PORT
+          value: "50051"
         readinessProbe:
           exec:
             command: ["/bin/grpc_health_probe", "-addr=:50051"]

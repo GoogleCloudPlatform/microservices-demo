@@ -40,6 +40,8 @@ spec:
           exec:
             command: ["/bin/grpc_health_probe", "-addr=:8080"]
         env:
+        - name: PORT
+          value: "8080"
         - name: PRODUCT_CATALOG_SERVICE_ADDR
           value: "productcatalogservice:3550"
         - name: ENABLE_PROFILER

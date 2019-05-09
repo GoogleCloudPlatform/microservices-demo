@@ -31,6 +31,9 @@ spec:
         image: emailservice
         ports:
         - containerPort: 8080
+        env:
+        - name: PORT
+          value: "8080"
         readinessProbe:
           periodSeconds: 5
           exec:
