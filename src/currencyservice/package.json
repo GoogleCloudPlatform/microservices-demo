@@ -19,7 +19,7 @@
     "pino": "^5.6.2",
     "request": "^2.87.0",
     "xml2js": "^0.4.19"
-  },
+  }, 
   "devDependencies": {
     "semistandard": "^12.0.1"
   }
