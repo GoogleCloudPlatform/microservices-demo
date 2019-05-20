@@ -17,6 +17,7 @@ kind: Deployment
 metadata:
   name: adservice
 spec:
+  replicas: 5
   selector:
     matchLabels:
       app: adservice
