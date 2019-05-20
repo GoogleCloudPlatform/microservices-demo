@@ -71,7 +71,13 @@ function _loadProto (path) {
  */
 function _getCurrencyData (callback) {
   const data = require('./data/currency_conversion.json');
-  callback(data);
+  // Currency conversion API slows down during peak hours.
+  let delay = 0;
+  const hour = new Date().getHours();
+  if (hour > 8 && hour < 17) {
+    delay = 100; // add 100ms slowdown
+  }
+  setTimeout(callback(data), delay);
 }
 
 /**
