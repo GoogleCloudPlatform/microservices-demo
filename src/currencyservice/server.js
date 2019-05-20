@@ -77,7 +77,7 @@ function _getCurrencyData (callback) {
   if (hour > 8 && hour < 17) {
     delay = 100; // add 100ms slowdown
   }
-  setTimeout(callback(data), delay);
+  setTimeout(() => callback(data), delay);
 }
 
 /**
