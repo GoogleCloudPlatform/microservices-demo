@@ -46,7 +46,7 @@ const request = {
 };
 
 function _moneyToString (m) {
-  return `${m.units}.${leftPad(m.nanos, 9, '0')} ${m.currency_code}`;
+  return `${m.units}.${m.nanos.toString().padStart(9,'0')} ${m.currency_code}`;
 }
 
 client.getSupportedCurrencies({}, (err, response) => {
