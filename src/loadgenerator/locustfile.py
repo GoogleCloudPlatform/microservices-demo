@@ -75,7 +75,7 @@ def checkout(l):
 
 class UserBehavior(TaskSet):
     min_wait = 500
-    max_wait = 1500
+    max_wait = 15000
 
     tasks = {index: 1,
              setCurrency: 2,
@@ -88,8 +88,11 @@ class UserBehavior(TaskSet):
         index(self)
 
     def wait_function(self):
-        # Compute user's activity rate (wait time between actions) so traffic is
-        # diurnal; minimum at hrs=0.0|24.0 and maximum at hrs=12.0.
+        """Wait time between user activity is diurnal.
+
+        Compute user's activity rate (wait time between actions) so traffic is
+        minimum at hrs=0.0|24.0 and maximum at hrs=12.0.
+        """
         now = time.localtime()
         hrs = now.tm_hour + now.tm_min/60.0
         # Compute scale factor is between 0 and 1.
