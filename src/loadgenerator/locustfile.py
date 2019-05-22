@@ -14,7 +14,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import math
 import random
+import time
 from locust import HttpLocust, TaskSet
 
 products = [
@@ -65,9 +67,23 @@ def checkout(l):
     })
 
 class UserBehavior(TaskSet):
+    min_wait = 1000
+    max_wait = 20000
 
     def on_start(self):
         index(self)
+
+    def wait_function(self):
+        # Compute user's activity rate (wait time between actions) so traffic is
+        # diurnal; minimum at hrs=0.0|24.0 and maximum at hrs=12.0.
+        now = time.localtime()
+        hrs = now.tm_hour + now.tm_min/60.0
+        # Compute scale factor is between 0 and 1.
+        traffic_scaler = -1.0 * math.cos(2.0 * math.pi * hrs / 24)
+        traffic_scaler = (traffic_scaler + 1) / 2.0
+
+        # Scale traffic between minimum and maximum wait times.
+        return self.max_wait + (self.min_wait - self.max_wait) * traffic_scaler
 
     tasks = {index: 1,
         setCurrency: 2,
@@ -78,5 +94,3 @@ class UserBehavior(TaskSet):
 
 class WebsiteUser(HttpLocust):
     task_set = UserBehavior
-    min_wait = 1000
-    max_wait = 10000
