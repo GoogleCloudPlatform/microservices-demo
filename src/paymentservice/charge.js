@@ -15,6 +15,7 @@
 const cardValidator = require('simple-card-validator');
 const uuid = require('uuid/v4');
 const pino = require('pino');
+const grpc = require('grpc');
 
 const logger = pino({
   name: 'paymentservice-charge',
@@ -28,6 +29,7 @@ class CreditCardError extends Error {
   constructor (message) {
     super(message);
     this.code = 400; // Invalid argument error
+    this.status = grpc.status.INVALID_ARGUMENT;
   }
 }
 

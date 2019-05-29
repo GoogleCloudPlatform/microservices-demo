@@ -59,6 +59,10 @@ def addToCart(l):
 
 def checkout(l):
     addToCart(l)
+    # For five minutes every other hour, credit cards passed by the user will be
+    # invalid and the paymentservice will fail.
+    now = time.localtime()
+    expiration_year = '2015' if (now.tm_hour % 2) & (now.tm_min < 5) else '2060'
     l.client.post("/cart/checkout", {
         'email': 'someone@example.com',
         'street_address': '1600 Amphitheatre Parkway',
@@ -68,7 +72,7 @@ def checkout(l):
         'country': 'United States',
         'credit_card_number': '4432-8015-6152-0454',
         'credit_card_expiration_month': '1',
-        'credit_card_expiration_year': '2039',
+        'credit_card_expiration_year': expiration_year,
         'credit_card_cvv': '672',
     })
 
