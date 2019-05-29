@@ -33,7 +33,8 @@ spec:
         - containerPort: 7070
         env:
         - name: REDIS_ADDR
-          value: "redis-cart:6379"
+#          value: "redis-cart:6379"
+          value: "eks-demo-redis.dowsgo.ng.0001.usw2.cache.amazonaws.com:6379"
         - name: PORT
           value: "7070"
         - name: LISTEN_ADDR
