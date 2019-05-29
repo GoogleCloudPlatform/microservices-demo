@@ -30,26 +30,32 @@ products = [
     'LS4PSXUNUM',
     'OLJCESPC7Z']
 
+
 def index(l):
     l.client.get("/")
+
 
 def setCurrency(l):
     currencies = ['EUR', 'USD', 'JPY', 'CAD']
     l.client.post("/setCurrency",
-        {'currency_code': random.choice(currencies)})
+                  {'currency_code': random.choice(currencies)})
+
 
 def browseProduct(l):
     l.client.get("/product/" + random.choice(products))
 
+
 def viewCart(l):
     l.client.get("/cart")
+
 
 def addToCart(l):
     product = random.choice(products)
     l.client.get("/product/" + product)
     l.client.post("/cart", {
         'product_id': product,
-        'quantity': random.choice([1,2,3,4,5,10])})
+        'quantity': random.choice([1, 2, 3, 4, 5, 10])})
+
 
 def checkout(l):
     addToCart(l)
@@ -66,16 +72,27 @@ def checkout(l):
         'credit_card_cvv': '672',
     })
 
+
 class UserBehavior(TaskSet):
-    min_wait = 1000
-    max_wait = 20000
+    min_wait = 500
+    max_wait = 15000
+
+    tasks = {index: 1,
+             setCurrency: 2,
+             browseProduct: 10,
+             addToCart: 2,
+             viewCart: 3,
+             checkout: 1}
 
     def on_start(self):
         index(self)
 
     def wait_function(self):
-        # Compute user's activity rate (wait time between actions) so traffic is
-        # diurnal; minimum at hrs=0.0|24.0 and maximum at hrs=12.0.
+        """Wait time between user activity is diurnal.
+
+        Compute user's activity rate (wait time between actions) so traffic is
+        minimum at hrs=0.0|24.0 and maximum at hrs=12.0.
+        """
         now = time.localtime()
         hrs = now.tm_hour + now.tm_min/60.0
         # Compute scale factor is between 0 and 1.
@@ -83,14 +100,9 @@ class UserBehavior(TaskSet):
         traffic_scaler = (traffic_scaler + 1) / 2.0
 
         # Scale traffic between minimum and maximum wait times.
-        return self.max_wait + (self.min_wait - self.max_wait) * traffic_scaler
+        wait = self.max_wait + (self.min_wait - self.max_wait) * traffic_scaler
+        return round(wait)
 
-    tasks = {index: 1,
-        setCurrency: 2,
-        browseProduct: 10,
-        addToCart: 2,
-        viewCart: 3,
-        checkout: 1}
 
 class WebsiteUser(HttpLocust):
     task_set = UserBehavior
