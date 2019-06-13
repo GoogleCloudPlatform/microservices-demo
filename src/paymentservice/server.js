@@ -27,7 +27,7 @@ const logger = pino({
 });
 
 class HipsterShopServer {
-  constructor (protoRoot, port = HipsterShopServer.DEFAULT_PORT) {
+  constructor (protoRoot, port = HipsterShopServer.PORT) {
     this.port = port;
 
     this.packages = {
@@ -99,6 +99,6 @@ class HipsterShopServer {
   }
 }
 
-HipsterShopServer.DEFAULT_PORT = 50051;
+HipsterShopServer.PORT = process.env.PORT;
 
 module.exports = HipsterShopServer;

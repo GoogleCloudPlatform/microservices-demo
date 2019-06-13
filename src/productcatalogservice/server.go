@@ -50,7 +50,7 @@ var (
 	log          *logrus.Logger
 	extraLatency time.Duration
 
-	port = flag.Int("port", 3550, "port to listen at")
+	port = "3550"
 
 	reloadCatalog bool
 )
@@ -106,13 +106,16 @@ func main() {
 		}
 	}()
 
-	log.Infof("starting grpc server at :%d", *port)
-	run(*port)
+	if os.Getenv("PORT") != "" {
+		port = os.Getenv("PORT")
+	}
+	log.Infof("starting grpc server at :%s", port)
+	run(port)
 	select {}
 }
 
-func run(port int) string {
-	l, err := net.Listen("tcp", fmt.Sprintf(":%d", port))
+func run(port string) string {
+	l, err := net.Listen("tcp", fmt.Sprintf(":%s", port))
 	if err != nil {
 		log.Fatal(err)
 	}
