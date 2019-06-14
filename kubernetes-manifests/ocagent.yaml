@@ -30,13 +30,15 @@ metadata:
 spec:
   template:
     metadata:
+      annotations:
+        sidecar.istio.io/inject: "false"
       labels:
         app: opencensus
         component: oc-agent
     spec:
       containers:
       - name: oc-agent
-        image: omnition/opencensus-agent:0.1.6
+        image: omnition/opencensus-agent:0.1.8.1
         resources:
           limits:
             cpu: 100m
