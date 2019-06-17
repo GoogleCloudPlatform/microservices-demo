@@ -9,6 +9,7 @@ WORKDIR /go/src/$PROJECT
 # restore dependencies
 COPY Gopkg.* ./
 RUN dep ensure --vendor-only -v
+RUN go get github.com/prometheus/client_golang/prometheus/promhttp
 COPY . .
 RUN go install .
 
