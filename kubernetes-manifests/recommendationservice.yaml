@@ -99,6 +99,7 @@ spec:
             limits:
               cpu: 200m
               memory: 450Mi
+  revisionHistoryLimit: 1
 ---
 apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService
