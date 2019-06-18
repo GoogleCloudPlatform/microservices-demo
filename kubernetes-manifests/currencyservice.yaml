@@ -17,6 +17,7 @@ kind: Deployment
 metadata:
   name: currencyservice
 spec:
+  revisionHistoryLimit: 1
   selector:
     matchLabels:
       app: currencyservice

@@ -17,6 +17,7 @@ kind: Deployment
 metadata:
   name: redis-cart
 spec:
+  revisionHistoryLimit: 1
   selector:
     matchLabels:
       app: redis-cart
