@@ -23,6 +23,7 @@ import (
 
 	"cloud.google.com/go/profiler"
 	"contrib.go.opencensus.io/exporter/ocagent"
+	"contrib.go.opencensus.io/resource/gke"
 
 	"github.com/google/uuid"
 	"github.com/sirupsen/logrus"
@@ -108,6 +109,7 @@ func registerOcAgentExporter() {
 	ocaAddr := fmt.Sprintf("%s:%s", ocaHost, "55678")
 
 	oce, err := ocagent.NewExporter(ocagent.WithInsecure(),
+		ocagent.WithResourceDetector(gke.Detect),
 		ocagent.WithAddress(ocaAddr))
 	if err != nil {
 		log.Warnf("Failed to create ocagent-exporter: %v", err)
@@ -165,6 +167,11 @@ func mustMapEnv(target *string, envKey string) {
 		panic(fmt.Sprintf("environment variable %q not set", envKey))
 	}
 	*target = v
+}
+
+// Watch is unimplemented interface for health checking.
+func (s *checkoutService) Watch(in *healthpb.HealthCheckRequest, stream healthpb.Health_WatchServer) error {
+        return status.Error(codes.Unimplemented, codes.Unimplemented.String())
 }
 
 func (cs *checkoutService) Check(ctx context.Context, req *healthpb.HealthCheckRequest) (*healthpb.HealthCheckResponse, error) {

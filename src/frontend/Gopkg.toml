@@ -31,11 +31,13 @@
 
 [[constraint]]
   name = "contrib.go.opencensus.io/exporter/ocagent"
-  version = "0.4.10"
+  revision = "f9129169651c35ecbdc1186c3ba4aa876ee62e1e"
+#  version = "0.4.12"
 
 [[constraint]]
   name = "github.com/golang/protobuf"
-  version = "1.2.0"
+  revision = "318d17de72747ed1c16502681db4b2bb709a92d0"
+#  version = "1.2.0"
 
 [[constraint]]
   name = "github.com/google/uuid"
@@ -55,7 +57,7 @@
 
 [[constraint]]
   name = "go.opencensus.io"
-  version = "0.20.0"
+  version = "0.22.0"
 
 [[constraint]]
   branch = "master"

@@ -33,6 +33,8 @@ import (
 
 	"cloud.google.com/go/profiler"
 	"contrib.go.opencensus.io/exporter/ocagent"
+	"contrib.go.opencensus.io/resource/gke"
+
 	"github.com/golang/protobuf/jsonpb"
 	"github.com/sirupsen/logrus"
 	"go.opencensus.io/plugin/ocgrpc"
@@ -132,6 +134,7 @@ func registerOcAgentExporter() {
 	ocaAddr := fmt.Sprintf("%s:%s", ocaHost, "55678")
 
 	oce, err := ocagent.NewExporter(ocagent.WithInsecure(),
+		ocagent.WithResourceDetector(gke.Detect),
 		ocagent.WithAddress(ocaAddr))
 	if err != nil {
 		log.Warnf("Failed to create ocagent-exporter: %v", err)
@@ -209,6 +212,11 @@ func parseCatalog() []*pb.Product {
 		}
 	}
 	return cat.Products
+}
+
+// Watch is unimplemented interface for health checking.
+func (p *productCatalog) Watch(in *healthpb.HealthCheckRequest, stream healthpb.Health_WatchServer) error {
+        return status.Error(codes.Unimplemented, codes.Unimplemented.String())
 }
 
 func (p *productCatalog) Check(ctx context.Context, req *healthpb.HealthCheckRequest) (*healthpb.HealthCheckResponse, error) {

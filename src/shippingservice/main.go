@@ -21,15 +21,19 @@ import (
 	"time"
 
 	"cloud.google.com/go/profiler"
+	"contrib.go.opencensus.io/exporter/ocagent"
+	"contrib.go.opencensus.io/resource/gke"
+
 	"github.com/sirupsen/logrus"
 	"go.opencensus.io/plugin/ocgrpc"
 	"go.opencensus.io/stats/view"
 	"go.opencensus.io/trace"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/reflection"
+	"google.golang.org/grpc/status"
 
-	"contrib.go.opencensus.io/exporter/ocagent"
 	pb "github.com/GoogleCloudPlatform/microservices-demo/src/shippingservice/genproto"
 	healthpb "google.golang.org/grpc/health/grpc_health_v1"
 )
@@ -84,6 +88,11 @@ func main() {
 // server controls RPC service responses.
 type server struct{}
 
+// Watch is unimplemented interface for health checking.
+func (s *server) Watch(in *healthpb.HealthCheckRequest, stream healthpb.Health_WatchServer) error {
+	return status.Error(codes.Unimplemented, codes.Unimplemented.String())
+}
+
 // Check is for health checking.
 func (s *server) Check(ctx context.Context, req *healthpb.HealthCheckRequest) (*healthpb.HealthCheckResponse, error) {
 	return &healthpb.HealthCheckResponse{Status: healthpb.HealthCheckResponse_SERVING}, nil
@@ -137,6 +146,7 @@ func registerOcAgentExporter() {
 	ocaAddr := fmt.Sprintf("%s:%s", ocaHost, "55678")
 
 	oce, err := ocagent.NewExporter(ocagent.WithInsecure(),
+		ocagent.WithResourceDetector(gke.Detect),
 		ocagent.WithAddress(ocaAddr))
 	if err != nil {
 		log.Warnf("Failed to create ocagent-exporter: %v", err)

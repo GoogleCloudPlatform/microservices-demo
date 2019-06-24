@@ -23,6 +23,8 @@ import (
 
 	"cloud.google.com/go/profiler"
 	"contrib.go.opencensus.io/exporter/ocagent"
+	"contrib.go.opencensus.io/resource/gke"
+
 	"github.com/gorilla/mux"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
@@ -151,6 +153,7 @@ func registerOcAgentExporter(log logrus.FieldLogger) {
 	ocaAddr := fmt.Sprintf("%s:%s", ocaHost, "55678")
 
 	oce, err := ocagent.NewExporter(ocagent.WithInsecure(),
+		ocagent.WithResourceDetector(gke.Detect),
 		ocagent.WithAddress(ocaAddr))
 	if err != nil {
 		log.Warnf("Failed to create ocagent-exporter: %v", err)
