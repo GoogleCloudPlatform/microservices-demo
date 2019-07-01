@@ -1,0 +1,18 @@
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: pinger-job
+spec:
+  schedule: "*/5 * * * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+            - name: main
+              image: pingjob
+              env:
+                - name: FRONTEND_ADDR
+                  value: "frontend:80"
+          restartPolicy: OnFailure
+
