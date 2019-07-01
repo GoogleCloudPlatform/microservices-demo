@@ -13,6 +13,11 @@ spec:
               image: pingjob
               env:
                 - name: FRONTEND_ADDR
-                  value: "frontend:80"
+                  value: "http://35.202.74.89"
           restartPolicy: OnFailure
+        metadata:
+          labels:
+            custom-job: pinger
+
+
 
