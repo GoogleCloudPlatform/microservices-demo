@@ -85,7 +85,7 @@ spec:
     spec:
       containers:
         - name: server
-          image: gcr.io/mokeefe/checkoutservice/flake:latest
+          image: gcr.io/google-samples/microservices-demo/checkoutservice:v0.1.1
           ports:
           - containerPort: 5050
           readinessProbe:
@@ -202,7 +202,7 @@ spec:
     spec:
       containers:
         - name: server
-          image: gcr.io/mokeefe/frontend/flake:latest
+          image: gcr.io/google-samples/microservices-demo/frontend:v0.1.1
           ports:
           - containerPort: 8080
           readinessProbe:
@@ -339,8 +339,7 @@ spec:
       terminationGracePeriodSeconds: 5
       containers:
       - name: server
-        imagePullPolicy: Always
-        image:  gcr.io/mokeefe/productcatalogservice/flake:latest
+        image: gcr.io/google-samples/microservices-demo/productcatalogservice:v0.1.1
         ports:
         - containerPort: 3550
         env:
@@ -540,7 +539,7 @@ spec:
     spec:
       containers:
       - name: server
-        image: gcr.io/mokeefe/shippingservice/flake:latest
+        image: gcr.io/google-samples/microservices-demo/shippingservice:v0.1.1
         ports:
         - containerPort: 50051
         env:
