@@ -193,7 +193,7 @@ func (cs *checkoutService) Check(ctx context.Context, req *healthpb.HealthCheckR
 }
 
 func (cs *checkoutService) Watch(req *healthpb.HealthCheckRequest, ws healthpb.Health_WatchServer) error {
-	return nil
+	return status.Errorf(codes.Unimplemented, "health check via Watch not implemented")
 }
 
 func (cs *checkoutService) PlaceOrder(ctx context.Context, req *pb.PlaceOrderRequest) (*pb.PlaceOrderResponse, error) {

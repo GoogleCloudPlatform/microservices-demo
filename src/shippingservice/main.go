@@ -91,7 +91,7 @@ func (s *server) Check(ctx context.Context, req *healthpb.HealthCheckRequest) (*
 }
 
 func (s *server) Watch(req *healthpb.HealthCheckRequest, ws healthpb.Health_WatchServer) error {
-	return nil
+	return status.Errorf(codes.Unimplemented, "health check via Watch not implemented")
 }
 
 // GetQuote produces a shipping quote (cost) in USD.
