@@ -90,6 +90,10 @@ func (s *server) Check(ctx context.Context, req *healthpb.HealthCheckRequest) (*
 	return &healthpb.HealthCheckResponse{Status: healthpb.HealthCheckResponse_SERVING}, nil
 }
 
+func (s *server) Watch(req *healthpb.HealthCheckRequest, ws healthpb.Health_WatchServer) error {
+	return nil
+}
+
 // GetQuote produces a shipping quote (cost) in USD.
 func (s *server) GetQuote(ctx context.Context, in *pb.GetQuoteRequest) (*pb.GetQuoteResponse, error) {
 	log.Info("[GetQuote] received request")
