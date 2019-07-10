@@ -18,6 +18,7 @@ metadata:
   name: cartservice
 spec:
   revisionHistoryLimit: 1
+  replicas: 10
   selector:
     matchLabels:
       app: cartservice
@@ -42,10 +43,10 @@ spec:
         resources:
           requests:
             cpu: 200m
-            memory: 64Mi
+            memory: 128Mi
           limits:
             cpu: 300m
-            memory: 128Mi
+            memory: 256Mi
         readinessProbe:
           initialDelaySeconds: 15
           exec:
