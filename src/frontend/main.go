@@ -191,20 +191,20 @@ func initStackdriverTracing(log logrus.FieldLogger) {
 			// log.Warnf is used since there are multiple backends (stackdriver & jaeger)
 			// to store the traces. In production setup most likely you would use only one backend.
 			// In that case you should use log.Fatalf.
-			log.Warnf("failed to initialize stackdriver exporter: %+v", err)
+			log.Warnf("failed to initialize Stackdriver exporter: %+v", err)
 		} else {
 			trace.RegisterExporter(exporter)
-			log.Info("registered stackdriver tracing")
+			log.Info("registered Stackdriver tracing")
 
 			// Register the views to collect server stats.
 			initStats(log, exporter)
 			return
 		}
 		d := time.Second * 20 * time.Duration(i)
-		log.Debugf("sleeping %v to retry initializing stackdriver exporter", d)
+		log.Debugf("sleeping %v to retry initializing Stackdriver exporter", d)
 		time.Sleep(d)
 	}
-	log.Warn("could not initialize stackdriver exporter after retrying, giving up")
+	log.Warn("could not initialize Stackdriver exporter after retrying, giving up")
 }
 
 func initTracing(log logrus.FieldLogger) {
@@ -232,14 +232,14 @@ func initProfiling(log logrus.FieldLogger, service, version string) {
 		}); err != nil {
 			log.Warnf("warn: failed to start profiler: %+v", err)
 		} else {
-			log.Info("started stackdriver profiler")
+			log.Info("started Stackdriver profiler")
 			return
 		}
 		d := time.Second * 10 * time.Duration(i)
-		log.Debugf("sleeping %v to retry initializing stackdriver profiler", d)
+		log.Debugf("sleeping %v to retry initializing Stackdriver profiler", d)
 		time.Sleep(d)
 	}
-	log.Warn("warning: could not initialize stackdriver profiler after retrying, giving up")
+	log.Warn("warning: could not initialize Stackdriver profiler after retrying, giving up")
 }
 
 func mustMapEnv(target *string, envKey string) {

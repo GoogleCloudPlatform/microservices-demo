@@ -214,7 +214,7 @@ public final class AdService {
   }
 
   private static void initStackdriver() {
-    logger.info("Initialize StackDriver");
+    logger.info("Initialize Stackdriver");
 
     long sleepTime = 10; /* seconds */
     int maxAttempts = 5;
@@ -252,7 +252,7 @@ public final class AdService {
         }
       }
     }
-    logger.info("StackDriver initialization complete.");
+    logger.info("Stackdriver initialization complete.");
   }
 
   private static void initJaeger() {
