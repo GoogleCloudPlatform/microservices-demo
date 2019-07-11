@@ -11,11 +11,11 @@
   "author": "Jonathan Lui",
   "license": "ISC",
   "dependencies": {
-    "@google-cloud/debug-agent": "^2.6.0",
-    "@google-cloud/profiler": "^0.1.14",
-    "@google-cloud/trace-agent": "^2.11.0",
+    "@google-cloud/debug-agent": "^4.0.1",
+    "@google-cloud/profiler": "^2.0.2",
+    "@google-cloud/trace-agent": "4.0.1",
     "@grpc/proto-loader": "^0.1.0",
-    "grpc": "^1.12.3",
+    "grpc": "^1.22.2",
     "pino": "^5.6.2",
     "simple-card-validator": "^1.1.0",
     "uuid": "^3.2.1"
