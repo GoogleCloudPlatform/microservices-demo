@@ -9,13 +9,13 @@
   },
   "license": "Apache-2.0",
   "dependencies": {
-    "@google-cloud/debug-agent": "^2.6.0",
-    "@google-cloud/profiler": "^0.1.14",
-    "@google-cloud/trace-agent": "^2.11.0",
+    "@google-cloud/debug-agent": "^4.0.1",
+    "@google-cloud/profiler": "^2.0.2",
+    "@google-cloud/trace-agent": "4.0.1",
     "@grpc/proto-loader": "^0.3.0",
     "async": "^1.5.2",
     "google-protobuf": "^3.0.0",
-    "grpc": "^1.0.0",
+    "grpc": "^1.22.2",
     "pino": "^5.6.2",
     "request": "^2.87.0",
     "xml2js": "^0.4.19"
