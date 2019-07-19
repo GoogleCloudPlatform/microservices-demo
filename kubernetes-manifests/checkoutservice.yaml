@@ -26,7 +26,7 @@ spec:
         app: checkoutservice
     spec:
       containers:
-        - name: server
+        - name: checkoutserver
           image: checkoutservice
           ports:
           - containerPort: 5050

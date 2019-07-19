@@ -26,7 +26,7 @@ spec:
         app: frontend
     spec:
       containers:
-        - name: server
+        - name: frontendserver
           image: frontend
           ports:
           - containerPort: 8080
@@ -63,8 +63,14 @@ spec:
             value: "checkoutservice:5050"
           - name: AD_SERVICE_ADDR
             value: "adservice:9555"
-          # - name: JAEGER_SERVICE_ADDR
-          #   value: "jaeger-collector:14268"
+          - name: JAEGER_SERVICE_HOST
+            valueFrom:
+              fieldRef:
+                fieldPath: spec.nodeName
+          - name: JAEGER_SERVICE_PORT
+            value: "42699"
+          - name: JAEGER_SERVICE_PATH
+            value: "/com.instana.plugin.jaeger.trace"
           resources:
             requests:
               cpu: 100m

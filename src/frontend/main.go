@@ -145,16 +145,21 @@ func main() {
 
 func initJaegerTracing(log logrus.FieldLogger) {
 
-	svcAddr := os.Getenv("JAEGER_SERVICE_ADDR")
-	if svcAddr == "" {
+	svcHost := os.Getenv("JAEGER_SERVICE_HOST")
+	if svcHost == "" {
 		log.Info("jaeger initialization disabled.")
 		return
 	}
 
+	svcPort := os.Getenv("JAEGER_SERVICE_PORT")
+	svcPath := os.Getenv("JAEGER_SERVICE_PATH")
+        svcFull := fmt.Sprintf("http://%s:%s%s", svcHost, svcPort, svcPath)
+
 	// Register the Jaeger exporter to be able to retrieve
 	// the collected spans.
 	exporter, err := jaeger.NewExporter(jaeger.Options{
-		Endpoint: fmt.Sprintf("http://%s", svcAddr),
+		// Endpoint: fmt.Sprintf("http://%s:%s%s", svcHost, svcPort, svcPath),
+		Endpoint: svcFull,
 		Process: jaeger.Process{
 			ServiceName: "frontend",
 		},
@@ -163,7 +168,7 @@ func initJaegerTracing(log logrus.FieldLogger) {
 		log.Fatal(err)
 	}
 	trace.RegisterExporter(exporter)
-	log.Info("jaeger initialization completed.")
+	log.Info("jaeger initialization completed. connected to ", svcFull)
 }
 
 func initStats(log logrus.FieldLogger, exporter *stackdriver.Exporter) {
