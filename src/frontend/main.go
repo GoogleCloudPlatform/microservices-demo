@@ -20,6 +20,7 @@ import (
 	"net/http"
 	"os"
 	"time"
+	"strconv"
 
 	"cloud.google.com/go/profiler"
 	"contrib.go.opencensus.io/exporter/stackdriver"
@@ -78,6 +79,8 @@ type frontendServer struct {
 
 	adSvcAddr string
 	adSvcConn *grpc.ClientConn
+
+	errorRate int
 }
 
 func main() {
@@ -110,6 +113,13 @@ func main() {
 	mustMapEnv(&svc.checkoutSvcAddr, "CHECKOUT_SERVICE_ADDR")
 	mustMapEnv(&svc.shippingSvcAddr, "SHIPPING_SERVICE_ADDR")
 	mustMapEnv(&svc.adSvcAddr, "AD_SERVICE_ADDR")
+	i, err := strconv.Atoi(os.Getenv("HTTP_500_PERCENT"))
+	if err == nil { 
+		svc.errorRate = i 
+		log.Infof("HTTP 500 Error Rate set to " + strconv.Itoa(svc.errorRate))
+	} else {
+		svc.errorRate = 0
+	}
 
 	mustConnGRPC(ctx, &svc.currencySvcConn, svc.currencySvcAddr)
 	mustConnGRPC(ctx, &svc.productCatalogSvcConn, svc.productCatalogSvcAddr)

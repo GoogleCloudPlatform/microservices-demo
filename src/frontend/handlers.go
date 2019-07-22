@@ -45,11 +45,10 @@ func (fe *frontendServer) homeHandler(w http.ResponseWriter, r *http.Request) {
 	currencies, err := fe.getCurrencies(r.Context())
 
 	// NOTE: This artificially injects failures in a fixed percentage of the responess
-	if (rand.Intn(100) < 3) {
+	if (rand.Intn(100) < fe.errorRate) { 
 		renderHTTPError(log, r, w, errors.Wrap(err, "Random artificial 500 error"), http.StatusInternalServerError)
 		return
-	}
-	
+	} 
 	if err != nil {
 		renderHTTPError(log, r, w, errors.Wrap(err, "could not retrieve currencies"), http.StatusInternalServerError)
 		return
