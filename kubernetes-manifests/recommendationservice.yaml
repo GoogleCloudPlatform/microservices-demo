@@ -17,6 +17,7 @@ kind: Deployment
 metadata:
   name: recommendationservice-v1
 spec:
+  revisionHistoryLimit: 1
   selector:
     matchLabels:
       app: recommendationservice
@@ -99,6 +100,7 @@ spec:
             limits:
               cpu: 200m
               memory: 450Mi
+  revisionHistoryLimit: 1
 ---
 apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService

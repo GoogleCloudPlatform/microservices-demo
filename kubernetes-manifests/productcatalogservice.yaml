@@ -17,6 +17,7 @@ kind: Deployment
 metadata:
   name: productcatalogservice
 spec:
+  revisionHistoryLimit: 1
   selector:
     matchLabels:
       app: productcatalogservice
