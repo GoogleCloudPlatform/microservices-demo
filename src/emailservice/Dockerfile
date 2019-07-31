@@ -14,6 +14,8 @@ RUN pip install -r requirements.txt
 FROM base as final
 # Enable unbuffered logging
 ENV PYTHONUNBUFFERED=1
+# Enable Profiler
+ENV ENABLE_PROFILER=1
 
 RUN apt-get -qq update \
     && apt-get install -y --no-install-recommends \
