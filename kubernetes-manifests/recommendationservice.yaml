@@ -102,6 +102,8 @@ spec:
               memory: 450Mi
   revisionHistoryLimit: 1
 ---
+#In order for istio to route traffic correctly, it needs a kubernetes service to route traffic to
+#the workloads in question.
 apiVersion: v1
 kind: Service
 metadata:
