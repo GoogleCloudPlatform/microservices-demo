@@ -102,6 +102,21 @@ spec:
               memory: 450Mi
   revisionHistoryLimit: 1
 ---
+#In order for istio to route traffic correctly, it needs a kubernetes service to route traffic to
+#the workloads in question.
+apiVersion: v1
+kind: Service
+metadata:
+  name: recommendationservice
+spec:
+  type: ClusterIP
+  selector:
+    app: recommendationservice
+  ports:
+    - name: grpc
+      port: 8080
+      targetPort: 8080
+---
 apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService
 metadata:
