@@ -38,7 +38,7 @@ spec:
     spec:
       containers:
       - name: oc-agent
-        image: omnition/opencensus-agent:0.1.8.2
+        image: omnition/opencensus-agent:0.1.9
         resources:
           limits:
             cpu: 100m
