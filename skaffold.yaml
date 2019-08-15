@@ -42,8 +42,6 @@ build:
     context: src/loadgenerator
   - image: adservice
     context: src/adservice
-  - image: pingjob
-    context: src/pingjob
   tagPolicy:
     gitCommit: {}
 deploy:
