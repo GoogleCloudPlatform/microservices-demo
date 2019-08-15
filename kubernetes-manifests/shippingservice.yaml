@@ -25,6 +25,7 @@ spec:
     metadata:
       labels:
         app: shippingservice
+        version: deployment
     spec:
       containers:
       - name: server
@@ -51,6 +52,47 @@ spec:
           limits:
             cpu: 200m
             memory: 128Mi
+---
+apiVersion: apps/v1
+kind: ReplicaSet
+metadata:
+  name: shippingservice-rs
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: shippingservice
+      owner: rs
+  template:
+    metadata:
+      labels:
+        app: shippingservice
+        owner: rs
+    spec:
+      containers:
+        - name: server
+          image: shippingservice
+          ports:
+            - containerPort: 50051
+          env:
+            - name: PORT
+              value: "50051"
+          readinessProbe:
+            periodSeconds: 5
+            exec:
+              command: ["/bin/grpc_health_probe", "-addr=:50051"]
+          livenessProbe:
+            exec:
+              command: ["/bin/grpc_health_probe", "-addr=:50051"]
+          #        env:
+          #          - name: JAEGER_SERVICE_ADDR
+          #            value: "jaeger-collector:14268"
+          resources:
+            requests:
+              cpu: 100m
+              memory: 64Mi
+            limits:
+              cpu: 200m
 ---
 apiVersion: v1
 kind: Service
