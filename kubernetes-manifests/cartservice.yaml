@@ -48,12 +48,12 @@ spec:
         readinessProbe:
           initialDelaySeconds: 15
           exec:
-            command: ["/bin/grpc_health_probe", "-addr=:7070"]
+            command: ["/bin/grpc_health_probe", "-addr=:7070", "-rpc-timeout=5s"]
         livenessProbe:
           initialDelaySeconds: 15
           periodSeconds: 10
           exec:
-            command: ["/bin/grpc_health_probe", "-addr=:7070"]
+            command: ["/bin/grpc_health_probe", "-addr=:7070", "-rpc-timeout=5s"]
 ---
 apiVersion: v1
 kind: Service
