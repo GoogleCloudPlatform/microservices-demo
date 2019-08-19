@@ -45,13 +45,13 @@ namespace cartservice.cartstore
             var cart = new Hipstershop.Cart();
             emptyCartBytes = cart.ToByteArray();
             connectionString = $"{redisAddress},ssl=false,allowAdmin=true,connectRetry=5";
-            
+
             redisConnectionOptions = ConfigurationOptions.Parse(connectionString);
 
             // Try to reconnect if first retry failed (up to 5 times with exponential backoff)
             redisConnectionOptions.ConnectRetry = REDIS_RETRY_NUM;
             redisConnectionOptions.ReconnectRetryPolicy = new ExponentialRetry(100);
-            
+
             redisConnectionOptions.KeepAlive = 180;
         }
 
@@ -78,11 +78,11 @@ namespace cartservice.cartstore
 
                 Console.WriteLine("Connecting to Redis: " + connectionString);
                 redis = ConnectionMultiplexer.Connect(redisConnectionOptions);
-                
+
                 if (redis == null || !redis.IsConnected)
                 {
                     Console.WriteLine("Wasn't able to connect to redis");
-                    
+
                     // We weren't able to connect to redis despite 5 retries with exponential backoff
                     throw new ApplicationException("Wasn't able to connect to redis");
                 }
@@ -96,14 +96,14 @@ namespace cartservice.cartstore
                 Console.WriteLine($"Small test result: {res}");
 
                 redis.InternalError += (o, e) => { Console.WriteLine(e.Exception); };
-                redis.ConnectionRestored += (o, e) => 
+                redis.ConnectionRestored += (o, e) =>
                 {
                     isRedisConnectionOpened = true;
-                    Console.WriteLine("Connection to redis was retored successfully"); 
+                    Console.WriteLine("Connection to redis was retored successfully");
                 };
-                redis.ConnectionFailed += (o, e) => 
+                redis.ConnectionFailed += (o, e) =>
                 {
-                    Console.WriteLine("Connection failed. Disposing the object"); 
+                    Console.WriteLine("Connection failed. Disposing the object");
                     isRedisConnectionOpened = false;
                 };
 
@@ -118,9 +118,9 @@ namespace cartservice.cartstore
             try
             {
                 EnsureRedisConnected();
-                
+
                 var db = redis.GetDatabase();
-                
+
                 // Access the cart from the cache
                 var value = await db.HashGetAsync(userId, CART_FIELD_NAME);
 
@@ -202,7 +202,6 @@ namespace cartservice.cartstore
         {
             try
             {
-                var redis = ConnectionMultiplexer.Connect(redisConnectionOptions);
                 var cache = redis.GetDatabase();
                 var res = cache.Ping();
                 return res != TimeSpan.Zero;
