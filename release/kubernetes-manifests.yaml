@@ -391,7 +391,7 @@ spec:
       terminationGracePeriodSeconds: 5
       containers:
       - name: server
-        image: gcr.io/mokeefe/cartservice:august
+        image: gcr.io/google-samples/microservices-demo/cartservice:v0.1.1
         imagePullPolicy: Always
         ports:
         - containerPort: 7070

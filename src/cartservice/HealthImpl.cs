@@ -14,10 +14,10 @@ namespace cartservice {
         }
 
         public override Task<HealthCheckResponse> Check(HealthCheckRequest request, ServerCallContext context){
-            var result = Task.FromResult(new HealthCheckResponse {
+            Console.WriteLine ("Checking CartService Health");
+            return Task.FromResult(new HealthCheckResponse {
                 Status = dependency.Ping() ? HealthCheckResponse.Types.ServingStatus.Serving : HealthCheckResponse.Types.ServingStatus.NotServing
             });
-            return result;
         }
     }
 }
