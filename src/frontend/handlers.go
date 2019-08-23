@@ -286,7 +286,7 @@ func (fe *frontendServer) placeOrderHandler(w http.ResponseWriter, r *http.Reque
 				Country:       country},
 		})
 	if err != nil {
-		renderHTTPError(log, r, w, errors.Wrap(err, "failed to complete the order"), http.StatusInternalServerError)
+		renderHTTPError(log, r, w, errors.Wrap(err, "failed to complete the order"), http.StatusBadRequest)
 		return
 	}
 	log.WithField("order", order.GetOrder().GetOrderId()).Info("order placed")
