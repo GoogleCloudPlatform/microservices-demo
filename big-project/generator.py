@@ -53,6 +53,8 @@ flags.DEFINE_integer('workload_server_port', '8080',
                      'Port to expose from the workload server image.')
 flags.DEFINE_float('qps_per_edge', 0.1,
                    'QPS for every pairing of pod to service.')
+flags.DEFINE_string('output_file', None,
+                    'the output file to write the config to')
 
 flags.mark_flag_as_required('service')
 flags.mark_flag_as_required('connections_per_service')
@@ -69,25 +71,26 @@ CONFIG_SEPARATOR = '\n---\n'
 
 # kubectl get deployments --all-namespaces -o custom-columns=NAME:.metadata.name,REPLICAS:.spec.replicas,CPU:.spec.template.spec.containers[*].resources.requests.cpu,MEM:.spec.template.spec.containers[*].resources.requests.memory,CPU_LIM:.spec.template.spec.containers[*].resources.limits.cpu,MEM_LIM:.spec.template.spec.containers[*].resources.limits.memory
 
-NODE_AVAIL_mCPU = 1930 - 100 - 1 - 100  # allocatable - daemon_used
+NODE_AVAIL_mCPU = 63770 - 100 - 1 - 100  # allocatable - daemon_used
 ISTIO_USED_mCPU = 10 + 10 + 100 + 500 + 100 + 10 + 100 + 10 + 1000 + 100 + 10 + 13 + 50 + (
       100 + 150 + 10) * 2 + 20 + 10 + 43 + 5 + 40
 DEFAULT_WORKLOAD_mCPU = 100
 
-NODE_AVAIL_MEM_Mi = 5642 - 20 - 200  # allocatable - daemon_used
+NODE_AVAIL_MEM_Mi = 55250 - 20 - 200  # allocatable - daemon_used
 ISTIO_USED_MEM_Mi = 128 + 2048 + 128 + 128 + 1024 + 128 + 120 + 91 + (
       70 + 20 + 20) * 2 + 10 + 20 + 55 + 50 + 50
 DEFAULT_WORKLOAD_MEM_Mi = 140
 
 used_rand_chars = set()
 
+count = 1
 
-def get_rand_chars(length):
-  while True:
-    ret = uuid4().urn[-length - 1:-1].lower()
-    if ret not in used_rand_chars:
-      used_rand_chars.add(ret)
-      return ret
+
+def get_next_name():
+  global count
+  new_name = "service" + str(count)
+  count += 1
+  return new_name
 
 
 class Namespace:
@@ -273,9 +276,8 @@ def main(argv):
     for i in range(0, count):
       total_services += 1
       total_pods += service.pods
-      name = '%s' % get_rand_chars(4)
       cur_service = deepcopy(service)
-      cur_service.name += '-%s' % get_rand_chars(4)
+      cur_service.name += '-%s' % get_next_name()
       services.append(cur_service)
   k = min(FLAGS.connections_per_service, len(services))
   focus_services = None
@@ -309,7 +311,9 @@ def main(argv):
            NODE_AVAIL_MEM_Mi))
 
   print(max(nodes_needed_for_cpu, nodes_needed_for_mem))
-  print(CONFIG_SEPARATOR.join(output_config))
+  with open(FLAGS.output_file, 'w') as output:
+    output.write(CONFIG_SEPARATOR.join(output_config))
+  print('done')
 
 
 if __name__ == '__main__':
