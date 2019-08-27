@@ -1,0 +1,2 @@
+ python generator.py --service 150x2 --service 50x25 --service 10x50 --service 290x3 --connections_per_service 3 --output_file big.yaml
+
