@@ -1,0 +1,1 @@
+This cluster requires a node pool of 50 n1-highmem-16 nodes to run easily. Further optimization may be possible.
