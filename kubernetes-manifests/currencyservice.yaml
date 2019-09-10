@@ -62,3 +62,22 @@ spec:
   - name: grpc
     port: 7000
     targetPort: 7000
+---
+apiVersion: autoscaling/v2beta1
+kind: HorizontalPodAutoscaler
+metadata:
+  name: currencyservice
+  labels:
+    app: currencyservice
+spec:
+  maxReplicas: 7
+  minReplicas: 1
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: currencyservice
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        targetAverageUtilization: 19
