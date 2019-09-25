@@ -22,5 +22,5 @@ PROTODIR=../../pb
 # enter this directory
 CWD="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
-protoc --csharp_out=$CWD/grpc_genproto -I $PROTODIR $PROTODIR/demo.proto
+protoc --csharp_out=$CWD/grpc_generated --grpc_out=$CWD/grpc_generated -I $PROTODIR $PROTODIR/demo.proto
 
