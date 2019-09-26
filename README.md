@@ -27,7 +27,7 @@ If you’re using this demo, please **★Star** this repository to show your int
 languages that talk to each other over gRPC.
 
 [![Architecture of
-microservices](./docs/img/architecture-diagram.png)](./docs/img/architecture-diagram.png)
+microservices](./docs/img/architecture-diagram-1.png)](./docs/img/architecture-diagram-1.png)
 
 Find **Protocol Buffers Descriptions** at the [`./pb` directory](./pb).
 
