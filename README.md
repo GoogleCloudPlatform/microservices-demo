@@ -79,11 +79,11 @@ We offer the following installation methods:
    - [Docker for Desktop](https://www.docker.com/products/docker-desktop).
      Recommended for Mac/Windows.
 
-2. **Running on Google Kubernetes Engine (GKE)”** (~30 minutes) You will build,
+1. **Running on Google Kubernetes Engine (GKE)”** (~30 minutes) You will build,
    upload and deploy the container images to a Kubernetes cluster on Google
    Cloud.
 
-3. **Using pre-built container images:** (~10 minutes, you will still need to
+1. **Using pre-built container images:** (~10 minutes, you will still need to
    follow one of the steps above up until `skaffold run` command). With this
    option, you will use pre-built container images that are available publicly,
    instead of building them yourself, which takes a long time).
@@ -109,7 +109,7 @@ We offer the following installation methods:
     - Launch Minikube (tested with Ubuntu Linux). Please, ensure that the
        local Kubernetes cluster has at least:
         - 4 CPU's
-        - 4GB RAM
+        - 4.0 GiB memory
 
         To run a Kubernetes cluster with Minikube using the described configuration, please run:
 
