@@ -1,7 +1,3 @@
----
-
----
-
 # Ballerina hackathon - KubeCon North America 2019
 
 Ballerina hackathon is an open invitation to all the KubeCon NA 2019 attendees to use their Ballerina skills with Kubernetes to complete a series of coding challenges and win amazing prizes. 
