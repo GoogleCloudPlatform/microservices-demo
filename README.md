@@ -25,7 +25,9 @@ These coding challenges are all about having fun, learning a new programming lan
 
 ## Challenges
 
-The challenges are based on the “[Hipster Shop: Cloud-Native Microservices Demo Application](https://github.com/GoogleCloudPlatform/microservices-demo)” developed by Google Cloud. It is a web-based e-commerce application with 10 microservices written in different programming languages. 
+The challenges are based on the “[Hipster Shop: Cloud-Native Microservices Demo Application](https://github.com/GoogleCloudPlatform/microservices-demo)” developed by Google Cloud. It is a web-based e-commerce application with 10 microservices written in different programming languages. You can refer to the original [README.md](https://github.com/GoogleCloudPlatform/microservices-demo/blob/master/README.md) file to learn more about this application.
+
+In this hackathon your task is to rewrite following microservices in Ballerina. We expect you to implement the exact same 
 
 - The “**currencyservice**” microservice
 
