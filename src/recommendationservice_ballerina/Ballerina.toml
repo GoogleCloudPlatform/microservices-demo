@@ -1,0 +1,5 @@
+[project]
+org-name= "recommendationservice"
+version= "1.0"
+
+[dependencies]
