@@ -1,0 +1,24 @@
+syntax = "proto3";
+
+package hipstershop;
+
+
+// -------------Checkout service-----------------
+
+service CheckoutService {
+    rpc PlaceOrder(PlaceOrderRequest) returns (PlaceOrderResponse) {}
+}
+
+message PlaceOrderRequest {
+    string user_id = 1;
+    string user_currency = 2;
+
+    Address address = 3;
+    string email = 5;
+    CreditCardInfo credit_card = 6;
+}
+
+message PlaceOrderResponse {
+    OrderResult order = 1;
+}
+
