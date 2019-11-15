@@ -81,7 +81,29 @@ Make sure that you've Docker and Kubernetes installed locally. We recommend you 
 
 **[TODO]**
 
+For each microservice you write in Ballerina, you can follow the following steps.
 
+- Create a Ballerina project in the src/ directory.
+
+    `ballerina new recommendationservice_ballerina`
+
+- Move into the directory created for the project
+
+    `cd recommendationservice_ballerina`
+
+- Add a new Ballerina module
+
+    `ballerina add recommendationservice`
+
+- Remove the default content added. Generate the client/service stub and optionally a service/client template using 
+the relevant .proto file
+
+    `ballerina grpc --input <project_root>/pb/services/recommendationservice.proto --output src/recommendationservice --mode service`
+
+    Ensure you specify the output path to point to the module created. 
+
+- Once you’ve completed a service, update the setup.sh file, to use the Ballerina implementation of your service. You 
+can replace the current command for the particular service with the ballerina commands for them instead.
 
 ## Submission guidelines
 
