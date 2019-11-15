@@ -27,17 +27,25 @@ These coding challenges are all about having fun, learning a new programming lan
 
 The challenges are based on the “[Hipster Shop: Cloud-Native Microservices Demo Application](https://github.com/GoogleCloudPlatform/microservices-demo)” developed by Google Cloud. It is a web-based e-commerce application with 10 microservices written in different programming languages. You can refer to the original [README.md](https://github.com/GoogleCloudPlatform/microservices-demo/blob/master/README.md) file to learn more about this application.
 
-In this hackathon your task is to rewrite following microservices in Ballerina. We expect you to implement the exact same 
+In this hackathon your task is to implement following microservices in Ballerina. We expect you to look at the original source code and rewrite the same logic in Ballerina. You can refer to the [Getting started](#Getting-started) section for more details on how to complete these challenges.
 
-- The “**currencyservice**” microservice
+- The “**[currencyservice](./src/currencyservice)**” microservice
+    - Language: Node.js
+    - Description: Converts one money amount to another currency. Uses real values fetched from European Central Bank. It's the highest QPS service.
 
-- The “**adservice**” microservice 
+- The “**[adservice](./src/adservice)**” microservice 
+    - Language: Java
+    - Description: Provides text ads based on given context words.
+- The “**[productcatalogservice](./src/productcatalogservice)**” microservice
+    - Language: Go
+    - Description: Provides the list of products from a JSON file and ability to search products and get individual products.
+- The “**[cartservice](./src/cartservice)**” microservice
+    - Language: C#
+    - Description: Stores the items in the user's shopping cart in Redis and retrieves it.
 
-- The “**productcatalogservice**” microservice
-
-- The “**cartservice**” microservice
-
-- The “**checkoutservice**” microservice
+- The “**[checkoutservice](./src/checkoutservice)**” microservice
+    - Language: Go
+    - Description: Retrieves user cart, prepares order and orchestrates the payment, shipping and the email notification.
 
 ## Prizes
 There are 5 challenges in this Ballerina hackathon. You need to complete all 5 challenges to be eligible for a prize.
@@ -58,6 +66,16 @@ There are 5 challenges in this Ballerina hackathon. You need to complete all 5 c
 ## Getting started
 
 Start with a GitHub Repository in your account. You can clone this repository to your workstation and then push it to your repository. If you directly fork this repository, you won't be able to make it private. It is up to you to keep this repo as a private repo during the hackathon. 
+
+## GitHub repository
+
+1.  Create a private GitHub repository in your personal account. Do not folk this repository if you want to keep your code private during the hackathon. An example repository name would be "ballerina-hackathon-kubecon-na-19"
+
+2. Clone this repository to your machine and then push it your private Git repository.
+
+## Installation
+
+Make sure that you've Docker and Kubernetes installed locally. We recommend you to use the pre-built container images of all the microservices that are available publicly, instead of building yourself. 
 
 ### Building and running this application
 
