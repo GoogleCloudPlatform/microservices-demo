@@ -24,28 +24,33 @@ These coding challenges are all about having fun, learning a new programming lan
 - Winners will be announced by Nov 21, 209 3.00 PM
 
 ## Challenges
+The challenges are based on the “[Hipster Shop: Cloud-Native Microservices Demo Application](https://github.com/GoogleCloudPlatform/microservices-demo)” developed by Google Cloud. It is a web-based e-commerce application with 10 microservices written in different programming languages that talk to each other over gRPC. You can refer to the original [README.md](https://github.com/GoogleCloudPlatform/microservices-demo/blob/master/README.md) file to learn more about this application. Here is a brief overview of the service architecture.
 
-The challenges are based on the “[Hipster Shop: Cloud-Native Microservices Demo Application](https://github.com/GoogleCloudPlatform/microservices-demo)” developed by Google Cloud. It is a web-based e-commerce application with 10 microservices written in different programming languages. You can refer to the original [README.md](https://github.com/GoogleCloudPlatform/microservices-demo/blob/master/README.md) file to learn more about this application.
+[![Architecture of microservices](./docs/img/architecture-diagram.png)](./docs/img/architecture-diagram.png)
 
-In this hackathon your task is to implement following microservices in Ballerina. We expect you to look at the original source code and rewrite the same logic in Ballerina. You can refer to the [Getting started](#Getting-started) section for more details on how to complete these challenges.
+In this hackathon, your task is to implement the following microservices in Ballerina. We calculated the level of difficulty based on the Ballerina knowledge required as well as the LOC. 
 
-- The “**[currencyservice](./src/currencyservice)**” microservice
-    - Language: Node.js
-    - Description: Converts one money amount to another currency. Uses real values fetched from European Central Bank. It's the highest QPS service.
+| Service                                              | Level of Difficulty |Language      | Description                                                                                                                       |
+| ---------------------------------------------------- | ------------------- |------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| [currencyservice](./src/currencyservice)             | Easy                | Node.js       | Converts one money amount to another currency. Uses real values fetched from European Central Bank. It's the highest QPS service. |
+| [productcatalogservice](./src/productcatalogservice) | Easy                | Go            | Provides the list of products from a JSON file and ability to search products and get individual products.|
+| [adservice](./src/adservice)                         | Easy                | Java          | Provides text ads based on given context words.|
+| [cartservice](./src/cartservice)                     | Eedium              | C#            | Stores the items in the user's cart and retrieves it.|
+| [checkoutservice](./src/checkoutservice)             | Hard                | C#            | Retrieves user cart, prepares order and orchestrates the payment, shipping and the email notification.|
 
-- The “**[adservice](./src/adservice)**” microservice 
-    - Language: Java
-    - Description: Provides text ads based on given context words.
-- The “**[productcatalogservice](./src/productcatalogservice)**” microservice
-    - Language: Go
-    - Description: Provides the list of products from a JSON file and ability to search products and get individual products.
-- The “**[cartservice](./src/cartservice)**” microservice
-    - Language: C#
-    - Description: Stores the items in the user's shopping cart in Redis and retrieves it.
+### Implementation Instructions
+We expect you to go through the instructions for each service before implementing the logic. You can refer to the original source code for more information.
 
-- The “**[checkoutservice](./src/checkoutservice)**” microservice
-    - Language: Go
-    - Description: Retrieves user cart, prepares order and orchestrates the payment, shipping and the email notification.
+| Service                                              | Instructions                                                                                                                       |
+| ---------------------------------------------------- | --------------------------------------------------------------------------- |
+| [currencyservice](./src/currencyservice)             | <ol><li>Read the conversion data in /src/currencyservice/data/currency_conversion.json (you can copy it to your ballerina project)</li><li>Then implement the logic to output the correct conversion based on the ratios in JSON data.</li><li>The `GetSupportedCurrencies` and `Convert` resources have to be implemented.</li></ol> |
+| [productcatalogservice](./src/productcatalogservice) | <ol><li>Read the product.json using IO operations. Convert the JSON[] in to Product record[].</li><li>Then implement  ‘ListProducts’, ‘GetProduct’, and ‘SearchProducts’ resources.</li></ol> |
+| [adservice](./src/adservice)                         | <ol><li>Implement service to generate ads based on given context keys.</li></ol> |
+| [cartservice](./src/cartservice)                     | <ol><li>Implement the logic to update the user’s cart (add/remove) items or retrieve the cart.</li><li> Instead of the Redis store in the original implementation, you can use a `map<Cart>` as an in-memory store for the Ballerina implementation.</li></ol> |
+| [checkoutservice](./src/checkoutservice)             | <ol><li>This microservice is a service chaining example where you need to integrate with services, including payment, email, shipping, currency, cart, and product catalog services.</ol> |
+                                                                                                                
+Read the product.json using IO operations. Convert the JSON[] in to Product record[].
+Then implement  ‘ListProducts’, ‘GetProduct’, and ‘SearchProducts’ resources.
 
 ## Prizes
 There are 5 challenges in this Ballerina hackathon. You need to complete all 5 challenges to be eligible for a prize.
