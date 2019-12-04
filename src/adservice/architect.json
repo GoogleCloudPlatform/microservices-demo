@@ -1,0 +1,20 @@
+{
+  "name": "architect/adservice",
+  "dependencies": {},
+  "parameters": {
+    "PORT": {
+      "description": "port to run the server"
+    }
+  },
+  "datastores": {},
+  "api": {
+    "type": "grpc",
+    "definitions": []
+  },
+  "subscriptions": {},
+  "description": "",
+  "keywords": [
+    ""
+  ],
+  "language": "java"
+}

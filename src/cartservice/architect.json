@@ -1,0 +1,31 @@
+{
+  "name": "architect/cartservice",
+  "dependencies": {},
+  "parameters": {
+    "REDIS_ADDR": {
+      "description": "location of redis cache"
+    },
+    "PORT": {
+      "description": "port to run the service on"
+    },
+    "LISTEN_ADDR": {
+      "description": "listen address of the server"
+    }
+  },
+  "datastores": {
+    "primary": {
+      "image": "redis",
+      "port": 6379
+    }
+  },
+  "api": {
+    "type": "grpc",
+    "definitions": []
+  },
+  "subscriptions": {},
+  "description": "",
+  "keywords": [
+    ""
+  ],
+  "language": "csharp"
+}

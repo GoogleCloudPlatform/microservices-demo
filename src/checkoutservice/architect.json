@@ -1,0 +1,45 @@
+{
+  "name": "architect/checkoutservice",
+  "dependencies": {
+    "architect/emailservice": "latest",
+    "architect/paymentservice": "latest",
+    "architect/shippingservice": "latest",
+    "architect/currencyservice": "latest",
+    "architect/productcatalogservice": "latest",
+    "architect/cartservice": "latest"
+  },
+  "parameters": {
+    "PORT": {
+      "description": "port to run the server on"
+    },
+    "PRODUCT_CATALOG_SERVICE_ADDR": {
+      "description": "host and port of the product catalog service"
+    },
+    "SHIPPING_SERVICE_ADDR": {
+      "description": "host and port of the shipping service"
+    },
+    "PAYMENT_SERVICE_ADDR": {
+      "description": "host and port of the payment service"
+    },
+    "EMAIL_SERVICE_ADDR": {
+      "description": "host and port of the email service"
+    },
+    "CURRENCY_SERVICE_ADDR": {
+      "description": "host and port of the currency service"
+    },
+    "CART_SERVICE_ADDR": {
+      "descrption": "host and port of the cart service"
+    }
+  },
+  "datastores": {},
+  "api": {
+    "type": "grpc",
+    "definitions": []
+  },
+  "subscriptions": {},
+  "description": "",
+  "keywords": [
+    ""
+  ],
+  "language": "go"
+}

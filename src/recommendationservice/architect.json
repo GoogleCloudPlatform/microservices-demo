@@ -1,0 +1,28 @@
+{
+  "name": "architect/recommendationservice",
+  "dependencies": {
+    "architect/productcatalogservice": "latest"
+  },
+  "parameters": {
+    "PORT": {
+      "description": "port to run the service on"
+    },
+    "PRODUCT_CATALOG_SERVICE_ADDR": {
+      "description": "host and port of the product catalog service"
+    },
+    "ENABLE_PROFILER": {
+      "description": "whether or not to enable the profiler"
+    }
+  },
+  "datastores": {},
+  "api": {
+    "type": "grpc",
+    "definitions": []
+  },
+  "subscriptions": {},
+  "description": "",
+  "keywords": [
+    ""
+  ],
+  "language": "python"
+}

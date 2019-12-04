@@ -1,0 +1,46 @@
+{
+  "name": "architect/frontend",
+  "dependencies": {
+    "architect/cartservice": "latest",
+    "architect/recommendationservice": "latest",
+    "architect/productcatalogservice": "latest",
+    "architect/currencyservice": "latest",
+    "architect/shippingservice": "latest",
+    "architect/checkoutservice": "latest",
+    "architect/adservice": "latest"
+  },
+  "parameters": {
+    "PRODUCT_CATALOG_SERVICE_ADDR": {
+      "description": "host and port of product catalog service"
+    },
+    "CURRENCY_SERVICE_ADDR": {
+      "description": "host and port of the currency service"
+    },
+    "CART_SERVICE_ADDR": {
+      "description": "host and port of the cart service"
+    },
+    "RECOMMENDATION_SERVICE_ADDR": {
+      "desecription": "host and port of the recommendation service"
+    },
+    "SHIPPING_SERVICE_ADDR": {
+      "description": "host and port of the shipping service"
+    },
+    "CHECKOUT_SERVICE_ADDR": {
+      "description": "host and port of the checkout service"
+    },
+    "AD_SERVICE_ADDR": {
+      "description": "host and port of the ad service"
+    }
+  },
+  "datastores": {},
+  "api": {
+    "type": "grpc",
+    "definitions": []
+  },
+  "subscriptions": {},
+  "description": "",
+  "keywords": [
+    ""
+  ],
+  "language": "go"
+}
