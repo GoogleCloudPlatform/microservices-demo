@@ -4,11 +4,14 @@
     "architect/productcatalogservice": "latest"
   },
   "parameters": {
-    "PORT": {
-      "description": "port to run the service on"
-    },
     "PRODUCT_CATALOG_SERVICE_ADDR": {
-      "description": "host and port of the product catalog service"
+      "description": "host and port of the product catalog service",
+      "default": {
+        "valueFrom": {
+          "dependency": "architect/productcatalogservice:latest",
+          "value": "$HOST:$PORT"
+        }
+      }
     },
     "ENABLE_PROFILER": {
       "description": "whether or not to enable the profiler"

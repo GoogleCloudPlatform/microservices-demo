@@ -2,14 +2,23 @@
   "name": "architect/cartservice",
   "dependencies": {},
   "parameters": {
-    "REDIS_ADDR": {
-      "description": "location of redis cache"
-    },
-    "PORT": {
-      "description": "port to run the service on"
-    },
     "LISTEN_ADDR": {
-      "description": "listen address of the server"
+      "description": "listen address of the server",
+      "default": {
+        "valueFrom": {
+          "dependency": "architect/cartservice:latest",
+          "value": "$HOST"
+        }
+      }
+    },
+    "REDIS_ADDR": {
+      "description": "location of redis cache",
+      "default": {
+        "valueFrom": {
+          "datastore": "primary",
+          "value": "$HOST:$PORT"
+        }
+      }
     }
   },
   "datastores": {

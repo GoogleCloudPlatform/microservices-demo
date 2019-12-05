@@ -1,11 +1,7 @@
 {
   "name": "architect/adservice",
   "dependencies": {},
-  "parameters": {
-    "PORT": {
-      "description": "port to run the server"
-    }
-  },
+  "parameters": {},
   "datastores": {},
   "api": {
     "type": "grpc",

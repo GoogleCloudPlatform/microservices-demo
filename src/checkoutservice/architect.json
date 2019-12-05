@@ -9,26 +9,59 @@
     "architect/cartservice": "latest"
   },
   "parameters": {
-    "PORT": {
-      "description": "port to run the server on"
-    },
     "PRODUCT_CATALOG_SERVICE_ADDR": {
-      "description": "host and port of the product catalog service"
+      "description": "host and port of the product catalog service",
+      "default": {
+        "valueFrom": {
+          "dependency": "architect/productcatalogservice:latest",
+          "value": "$HOST:$PORT"
+        }
+      }
     },
     "SHIPPING_SERVICE_ADDR": {
-      "description": "host and port of the shipping service"
+      "description": "host and port of the shipping service",
+      "default": {
+        "valueFrom": {
+          "dependency": "architect/shippingservice:latest",
+          "value": "$HOST:$PORT"
+        }
+      }
     },
     "PAYMENT_SERVICE_ADDR": {
-      "description": "host and port of the payment service"
+      "description": "host and port of the payment service",
+      "default": {
+        "valueFrom": {
+          "dependency": "architect/paymentservice:latest",
+          "value": "$HOST:$PORT"
+        }
+      }
     },
     "EMAIL_SERVICE_ADDR": {
-      "description": "host and port of the email service"
+      "description": "host and port of the email service",
+      "default": {
+        "valueFrom": {
+          "dependency": "architect/emailservice:latest",
+          "value": "$HOST:$PORT"
+        }
+      }
     },
     "CURRENCY_SERVICE_ADDR": {
-      "description": "host and port of the currency service"
+      "description": "host and port of the currency service",
+      "default": {
+        "valueFrom": {
+          "dependency": "architect/currencyservice:latest",
+          "value": "$HOST:$PORT"
+        }
+      }
     },
     "CART_SERVICE_ADDR": {
-      "descrption": "host and port of the cart service"
+      "descrption": "host and port of the cart service",
+      "default": {
+        "valueFrom": {
+          "dependency": "architect/cartservice:latest",
+          "value": "$HOST:$PORT"
+        }
+      }
     }
   },
   "datastores": {},

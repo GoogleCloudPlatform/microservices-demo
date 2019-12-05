@@ -1,11 +1,7 @@
 {
   "name": "architect/shippingservice",
   "dependencies": {},
-  "parameters": {
-    "PORT": {
-      "description": "port to run the service on"
-    }
-  },
+  "parameters": {},
   "datastores": {},
   "api": {
     "type": "grpc",
