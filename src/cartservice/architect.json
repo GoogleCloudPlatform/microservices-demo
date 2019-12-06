@@ -2,6 +2,17 @@
   "name": "architect/cartservice",
   "dependencies": {},
   "parameters": {
+    "DEFAULT_TEST": {
+      "default": "test_val"
+    },
+    "INHERITED_TO": {
+      "default": {
+        "valueFrom": {
+          "dependency": "architect/cartservice:latest",
+          "value": "$DEFAULT_TEST+nonsense"
+        }
+      }
+    },
     "LISTEN_ADDR": {
       "description": "listen address of the server",
       "default": {

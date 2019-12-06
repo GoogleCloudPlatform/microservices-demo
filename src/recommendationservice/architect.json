@@ -14,7 +14,8 @@
       }
     },
     "ENABLE_PROFILER": {
-      "description": "whether or not to enable the profiler"
+      "description": "whether or not to enable the profiler",
+      "default": "0"
     }
   },
   "datastores": {},
