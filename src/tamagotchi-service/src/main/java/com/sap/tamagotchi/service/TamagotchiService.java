@@ -10,7 +10,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.sap.tamagotchi.model.Device;
-import com.sap.tamagotchi.model.IoTMessage;
 import com.sap.tamagotchi.publisher.PublisherService;
 
 @Service
@@ -37,18 +36,12 @@ public class TamagotchiService {
         return deviceRegistry.keySet();
     }
 
-    public void createDevice(Device device) {
+    public Device createDevice(Device device) {
         deviceRegistry.put(device.getDeviceId(), device);
+        return device;
     }
 
     private void processDeviceEvents() {
-        deviceRegistry
-                .values()
-                .parallelStream()
-                .filter(d -> d.hasMessages())
-                .forEach(d -> {
-                    Collection<IoTMessage> messages = d.getMessages();
 
-                });
     }
 }
