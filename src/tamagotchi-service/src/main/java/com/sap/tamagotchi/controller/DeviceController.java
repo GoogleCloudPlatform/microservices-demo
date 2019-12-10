@@ -6,6 +6,7 @@ import com.sap.tamagotchi.service.TamagotchiService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -23,18 +24,18 @@ public class DeviceController {
         this.tamagotchiService = tamagotchiService;
     }
 
-    @RequestMapping("devices/{deviceId}")
+    @RequestMapping("/devices/{deviceId}")
     public Device getDevice(String deviceId) {
         return tamagotchiService.getDevice(deviceId);
     }
 
-    @RequestMapping("devices")
+    @RequestMapping("/devices")
     public Collection<Device> getDevices() {
         return tamagotchiService.getDevices();
     }
 
-    @PostMapping
-    public ResponseEntity createDevice(CreateDevicePayload payload) {
+    @PostMapping("/devices")
+    public ResponseEntity createDevice(@RequestBody CreateDevicePayload payload) {
         return ok(tamagotchiService.createDevice(new Device(payload.getOwner(), payload.getColor()))).build();
     }
 }
