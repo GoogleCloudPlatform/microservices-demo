@@ -8,12 +8,15 @@ import java.util.Set;
 
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import com.sap.tamagotchi.model.Device;
 import com.sap.tamagotchi.publisher.PublisherService;
 
 @Service
+@EnableScheduling
 public class TamagotchiService {
 
     private static final long DEVICE_EVENT_PROCESSOR_SCHEDULE = 5_000;
@@ -28,7 +31,6 @@ public class TamagotchiService {
     public TamagotchiService(PublisherService publisherService, Logger logger) {
         this.publisherService = publisherService;
         this.logger = logger;
-        startDeviceEventProcessor();
     }
 
     public Device getDevice(String deviceId) {
@@ -49,8 +51,8 @@ public class TamagotchiService {
         return device;
     }
 
+    @Scheduled(fixedDelay = DEVICE_EVENT_PROCESSOR_SCHEDULE)
     private void processDeviceEvents() {
-
         deviceRegistry
                 .values()
                 .parallelStream()
@@ -60,21 +62,9 @@ public class TamagotchiService {
                     try {
                         publisherService.publish(message);
                     } catch (Exception ex) {
+                        logger.error("processing device events failed: {}", ex.getMessage());
                         throw new RuntimeException(ex);
                     }
                 });
-    }
-
-    public void startDeviceEventProcessor() {
-        new Thread(() -> {
-            try {
-                while (true) {
-                    processDeviceEvents();
-                    Thread.sleep(DEVICE_EVENT_PROCESSOR_SCHEDULE);
-                }
-            } catch (InterruptedException e) {
-                logger.error("DeviceEventProcessor failed: {}", e.getMessage());
-            }
-        }).start();
     }
 }
