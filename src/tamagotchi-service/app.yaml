@@ -1,0 +1,2 @@
+runtime: java11
+entrypoint: java -jar target/tamagotchi-service-0.1.0.jar
