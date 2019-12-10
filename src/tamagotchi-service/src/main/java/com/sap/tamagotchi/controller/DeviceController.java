@@ -10,7 +10,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 import static org.springframework.http.ResponseEntity.ok;
 
@@ -35,7 +37,11 @@ public class DeviceController {
     }
 
     @PostMapping("/devices")
-    public ResponseEntity createDevice(@RequestBody CreateDevicePayload payload) {
-        return ok(tamagotchiService.createDevice(new Device(payload.getOwner(), payload.getColor())));
+    public ResponseEntity createDevice(@RequestBody Collection<CreateDevicePayload> payload) {
+        List<Device> devices = new ArrayList<>();
+        for (CreateDevicePayload p : payload) {
+            devices.add(tamagotchiService.createDevice(new Device(p.getOwner(), p.getColor())));
+        }
+        return ok(devices);
     }
 }
