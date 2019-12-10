@@ -12,6 +12,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
+import com.sap.tamagotchi.model.Care;
 import com.sap.tamagotchi.model.Device;
 import com.sap.tamagotchi.publisher.PublisherService;
 
@@ -50,8 +51,13 @@ public class TamagotchiService {
         return device;
     }
 
+    public void takeCare(String decifeId, Care care) {
+
+    }
+
     @Scheduled(fixedDelay = DEVICE_EVENT_PROCESSOR_SCHEDULE)
     private void processDeviceEvents() {
+        // Set<String> deadList = Collections.synchronizedSet(new HashSet());
         deviceRegistry
                 .values()
                 .parallelStream()
