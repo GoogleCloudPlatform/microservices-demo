@@ -22,6 +22,8 @@ public class Device {
     private final Color color;
     @JsonProperty("born")
     private final Instant born = Instant.now();
+    @JsonProperty("healthScore")
+    private int healthScore = 100;
     private final Queue<IoTMessage> messages = new ConcurrentLinkedQueue<>();
 
     public Device(String owner, Color color) {
@@ -47,6 +49,21 @@ public class Device {
     @JsonProperty("born")
     public Instant getBorn() {
         return born;
+    }
+
+    @JsonProperty("healthScore")
+    public int getHealthScore() {
+        return healthScore;
+    }
+
+    @JsonProperty("isAlive")
+    public boolean isAlive() {
+        return healthScore > 1;
+    }
+
+    @JsonIgnore
+    public void changeHealthScore(int delta) {
+        this.healthScore += delta;
     }
 
     @JsonIgnore
