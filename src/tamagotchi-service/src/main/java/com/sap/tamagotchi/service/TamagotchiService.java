@@ -22,7 +22,7 @@ import com.sap.tamagotchi.publisher.PublisherService;
 @EnableScheduling
 public class TamagotchiService {
 
-    private static final long DEVICE_EVENT_PROCESSOR_SCHEDULE = 5000;
+    public static final long DEVICE_EVENT_PROCESSOR_SCHEDULE = 5000;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 

@@ -8,6 +8,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
+import static com.sap.tamagotchi.service.TamagotchiService.DEVICE_EVENT_PROCESSOR_SCHEDULE;
+
 @Service
 public class Owner {
 
@@ -18,7 +20,7 @@ public class Owner {
         this.tamagotchiService = tamagotchiService;
     }
 
-    @Scheduled(fixedDelay = 5000)
+    @Scheduled(fixedDelay = DEVICE_EVENT_PROCESSOR_SCHEDULE)
     public void setData() {
         for (Device d : tamagotchiService.getDevices()) {
             double random = Math.random();
