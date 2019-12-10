@@ -18,8 +18,6 @@ import com.sap.tamagotchi.model.Care;
 import com.sap.tamagotchi.model.Device;
 import com.sap.tamagotchi.publisher.PublisherService;
 
-import static jdk.nashorn.internal.objects.Global.print;
-
 @Service
 @EnableScheduling
 public class TamagotchiService {
