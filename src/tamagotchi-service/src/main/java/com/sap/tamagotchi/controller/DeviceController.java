@@ -1,20 +1,21 @@
 package com.sap.tamagotchi.controller;
 
-import java.util.Collection;
-import java.util.concurrent.atomic.AtomicLong;
-
+import com.sap.tamagotchi.model.CreateDevicePayload;
+import com.sap.tamagotchi.model.Device;
+import com.sap.tamagotchi.service.TamagotchiService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.sap.tamagotchi.model.Device;
-import com.sap.tamagotchi.service.TamagotchiService;
+import java.util.Collection;
+
+import static org.springframework.http.ResponseEntity.ok;
 
 @RestController
 public class DeviceController {
 
-    private static final String template = "Hello !!!!!, %s!";
-    private final AtomicLong counter = new AtomicLong();
     private final TamagotchiService tamagotchiService;
 
     @Autowired
@@ -31,8 +32,9 @@ public class DeviceController {
     public Collection<Device> getDevices() {
         return tamagotchiService.getDevices();
     }
-    // TODO postmapping create
-    // request payload
-    // owner String
-    // color
+
+    @PostMapping
+    public ResponseEntity createDevice(CreateDevicePayload payload) {
+        return ok(tamagotchiService.createDevice(new Device(payload.getOwner(), payload.getColor()))).build();
+    }
 }
