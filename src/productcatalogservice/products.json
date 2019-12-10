@@ -105,6 +105,18 @@
                 "nanos": 300000000
             },
             "categories": ["gardening"]
-        }
+        },
+        {
+            "id": "7E31ZMYYFZ",
+            "name": "Tamagotchi",
+            "description": "Bandai Tamagotchi Elektronisches Spiel, durchscheinend blau.",
+            "picture": "/static/img/products/tamagotchi.jpg",
+            "priceUsd": {
+                "currencyCode": "USD",
+                "units": 12,
+                "nanos": 300000000
+            },
+            "categories": ["toy"]
+        }        
     ]
 }
