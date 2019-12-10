@@ -36,6 +36,6 @@ public class DeviceController {
 
     @PostMapping("/devices")
     public ResponseEntity createDevice(@RequestBody CreateDevicePayload payload) {
-        return ok(tamagotchiService.createDevice(new Device(payload.getOwner(), payload.getColor()))).build();
+        return ok(tamagotchiService.createDevice(new Device(payload.getOwner(), payload.getColor())));
     }
 }
