@@ -1,5 +1,6 @@
 package com.sap.tamagotchi.controller;
 
+import java.util.Collection;
 import java.util.concurrent.atomic.AtomicLong;
 
 import com.sap.tamagotchi.model.Device;
@@ -25,4 +26,13 @@ public class DeviceController {
     public Device getDevice(String deviceId) {
         return tamagotchiService.getDevice(deviceId);
     }
+
+    @RequestMapping("devices")
+    public Collection<Device> getDevices() {
+        return tamagotchiService.getDevices();
+    }
+    //TODO postmapping create
+    //request payload
+    // owner String
+    // color
 }
