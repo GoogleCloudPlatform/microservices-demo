@@ -46,7 +46,6 @@ public class TamagotchiService {
     }
 
     public Device createDevice(Device device) {
-        device.start();
         deviceRegistry.put(device.getDeviceId(), device);
         return device;
     }
