@@ -52,7 +52,9 @@ public class TamagotchiService {
     }
 
     public void takeCare(String deviceId, Care care) {
-
+        Device device = deviceRegistry.get(deviceId);
+        device.changeHealthScore(care.getFeed());
+        device.changeHealthScore(care.getPet());
     }
 
     @Scheduled(fixedDelay = DEVICE_EVENT_PROCESSOR_SCHEDULE)
