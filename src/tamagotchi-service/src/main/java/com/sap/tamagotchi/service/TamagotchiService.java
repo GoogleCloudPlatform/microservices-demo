@@ -51,7 +51,7 @@ public class TamagotchiService {
         return device;
     }
 
-    public void takeCare(String decifeId, Care care) {
+    public void takeCare(String deviceId, Care care) {
 
     }
 
