@@ -5,8 +5,6 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Queue;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -15,7 +13,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 public class Device {
 
     @JsonProperty("id")
-    private final String getDeviceId = UUID.randomUUID().toString();
+    private final String id = UUID.randomUUID().toString();
     @JsonProperty("owner")
     private final String owner;
     @JsonProperty("color")
@@ -32,8 +30,8 @@ public class Device {
     }
 
     @JsonProperty("id")
-    public String getDeviceId() {
-        return getDeviceId;
+    public String getId() {
+        return id;
     }
 
     @JsonProperty("owner")
@@ -63,7 +61,12 @@ public class Device {
 
     @JsonIgnore
     public void changeHealthScore(int delta) {
-        this.healthScore += delta;
+        if (healthScore >= 1) {
+            healthScore += delta;
+            if (healthScore > 150)
+                healthScore /= 10;
+        }
+        messages.add(new DeviceEvent(id, owner, color, born, healthScore, Instant.now()));
     }
 
     @JsonIgnore
@@ -72,11 +75,7 @@ public class Device {
     }
 
     @JsonIgnore
-    public Collection<IoTMessage> getMessages() {
-        ArrayList<IoTMessage> m = new ArrayList<>();
-        while (!messages.isEmpty()) {
-            m.add(messages.poll());
-        }
-        return m;
+    public Queue<IoTMessage> getMessages() {
+        return messages;
     }
 }

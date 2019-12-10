@@ -1,5 +1,6 @@
 package com.sap.tamagotchi.service;
 
+import java.lang.invoke.MethodHandles;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -7,6 +8,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -16,22 +18,23 @@ import com.sap.tamagotchi.model.Care;
 import com.sap.tamagotchi.model.Device;
 import com.sap.tamagotchi.publisher.PublisherService;
 
+import static jdk.nashorn.internal.objects.Global.print;
+
 @Service
 @EnableScheduling
 public class TamagotchiService {
 
-    private static final long DEVICE_EVENT_PROCESSOR_SCHEDULE = 5_000;
+    private static final long DEVICE_EVENT_PROCESSOR_SCHEDULE = 5000;
 
-    private final Logger logger;
+    private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
     private final PublisherService publisherService;
 
     private final Map<String, Device> deviceRegistry = Collections.synchronizedMap(new HashMap<>());
 
     @Autowired
-    public TamagotchiService(PublisherService publisherService, Logger logger) {
+    public TamagotchiService(PublisherService publisherService) {
         this.publisherService = publisherService;
-        this.logger = logger;
     }
 
     public Device getDevice(String deviceId) {
@@ -47,30 +50,32 @@ public class TamagotchiService {
     }
 
     public Device createDevice(Device device) {
-        deviceRegistry.put(device.getDeviceId(), device);
+        deviceRegistry.put(device.getId(), device);
         return device;
     }
 
     public void takeCare(String deviceId, Care care) {
         Device device = deviceRegistry.get(deviceId);
+        if (device == null)
+            return;
         device.changeHealthScore(care.getFeed());
         device.changeHealthScore(care.getPet());
     }
 
     @Scheduled(fixedDelay = DEVICE_EVENT_PROCESSOR_SCHEDULE)
     private void processDeviceEvents() {
-        // Set<String> deadList = Collections.synchronizedSet(new HashSet());
         deviceRegistry
                 .values()
                 .parallelStream()
-                .filter(device -> device.hasMessages())
-                .flatMap(device -> device.getMessages().stream())
-                .forEach(message -> {
-                    try {
-                        publisherService.publish(message);
-                    } catch (Exception ex) {
-                        logger.error("processing device events failed: {}", ex.getMessage());
-                        throw new RuntimeException(ex);
+                .filter(Device::hasMessages)
+                .forEach(device -> {
+                    while (device.getMessages().peek() != null) {
+                        try {
+                            publisherService.publish(device.getMessages().peek());
+                            device.getMessages().poll();
+                        } catch (Exception ex) {
+                            LOGGER.error("processing device events failed: {}", ex.getMessage());
+                        }
                     }
                 });
     }
