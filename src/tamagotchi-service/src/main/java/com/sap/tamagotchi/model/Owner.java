@@ -4,7 +4,9 @@
 package com.sap.tamagotchi.model;
 
 import static com.sap.tamagotchi.service.TamagotchiService.DEVICE_EVENT_PROCESSOR_SCHEDULE;
+
 import java.util.Collection;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -52,7 +54,7 @@ public class Owner {
 
         Collection<Device> devices = tamagotchiService.getDevices();
 
-        if (devices != null) {
+        if (devices != null && devices.iterator().hasNext()) {
             Device first = devices.iterator().next();
             Care care = new Care();
             care.setFeed(-100000);
