@@ -15,6 +15,17 @@
 const cardValidator = require('simple-card-validator');
 const uuid = require('uuid/v4');
 const pino = require('pino');
+const { BigQuery } = require('@google-cloud/bigquery');
+
+
+// gcp credentails can be found in /config/team2-bg.json
+process.env['GOOGLE_APPLICATION_CREDENTIALS'] = '/config/team2-bg.json';
+const datasetId = 'hipstertamagochi';
+const tableId = 'payments';
+
+// Create a client
+const bigqueryClient = new BigQuery();
+
 
 const logger = pino({
   name: 'paymentservice-charge',
@@ -76,7 +87,28 @@ module.exports = function charge (request) {
   const { credit_card_expiration_year: year, credit_card_expiration_month: month } = creditCard;
   if ((currentYear * 12 + currentMonth) > (year * 12 + month)) { throw new ExpiredCreditCard(cardNumber.replace('-', ''), month, year); }
 
-  logger.info(`Transaction processed: ${cardType} ending ${cardNumber.substr(-4)} \
+  // publish transaction to our bigquery database - if we have a bigquery client
+
+  if (bigqueryClient) {
+    logger.info('sending data to Big Query');
+    const rows = [
+      {
+        "amount": amount.units + (amount.nanos / 1000000000),
+        "amount_currency_code": amount.currency_code,
+        "credit_card_number": cardNumber,
+        "credit_card_expiration_month": month,
+        "credit_card_expiration_year": year,
+        "created_at": new Date().getTime() / 1000
+      }]
+  
+  
+    bigqueryClient
+      .dataset(datasetId)
+      .table(tableId)
+      .insert(rows);
+  }
+
+  logger.info(`XXXTransaction processed: ${cardType} ending ${cardNumber.substr(-4)} \
     Amount: ${amount.currency_code}${amount.units}.${amount.nanos}`);
 
   return { transaction_id: uuid() };

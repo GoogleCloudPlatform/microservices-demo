@@ -47,6 +47,13 @@ spec:
           limits:
             cpu: 200m
             memory: 128Mi
+        volumeMounts:
+        - name: team2-credentials
+          mountPath: /config
+      volumes: 
+        - name: team2-credentials
+          configMap: 
+              name: team2-credentials
 ---
 apiVersion: v1
 kind: Service
