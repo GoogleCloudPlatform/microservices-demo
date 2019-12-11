@@ -40,9 +40,9 @@ func registerDevicesFromOrder(req *pb.PlaceOrderRequest, order *pb.OrderResult, 
 
 	url := "https://hackathon-sap19-wal-1025.appspot.com/devices"
 
-	httpRequest, httpError := http.NewRequest("POST", url, devicesJSON)
+	httpRequest, httpError := http.NewRequest("POST", url, bytes.NewBuffer(devicesJSON))
 	if httpError == nil {
-		httpRequest.Header.Set("Context-Type", "application/json")
+		httpRequest.Header.Set("Content-Type", "application/json")
 		httpClient := &http.Client{}
 
 		log.Infof("Device registration, http request: %+v", httpRequest)
