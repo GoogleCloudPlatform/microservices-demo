@@ -14,6 +14,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sap.tamagotchi.model.Care;
 import com.sap.tamagotchi.model.Device;
 import com.sap.tamagotchi.model.IoTMessage;
@@ -95,6 +96,7 @@ public class TamagotchiService {
 
         IoTMessage m = new IoTMessage() {
 
+            @JsonProperty("message")
             private String message = String.format("Tamagotchi %s of %s passed away",
                     device.getOwner(), device.getOwner());
 
