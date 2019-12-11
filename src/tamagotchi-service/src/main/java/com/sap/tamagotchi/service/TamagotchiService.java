@@ -84,8 +84,8 @@ public class TamagotchiService {
                 .parallelStream()
                 .filter(device -> !device.isAlive())
                 .forEach(device -> {
-                    deviceRegistry.remove(device.getId());
                     sendTamagotchiDefunctNotifiction(device.getId());
+                    deviceRegistry.remove(device.getId());
                     LOGGER.info("{} has died", device.getId());
                 });
     }
@@ -93,6 +93,9 @@ public class TamagotchiService {
     private void sendTamagotchiDefunctNotifiction(String id) {
 
         Device device = deviceRegistry.get(id);
+        if (device == null) {
+            return;
+        }
         String defunctMessage = String.format("Tamagotchi %s of %s passed away", device.getOwner(), device.getOwner());
         DefunctNotification defunctNotification = new DefunctNotification(defunctMessage);
         try {
