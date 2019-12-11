@@ -1,110 +1,76 @@
 {
     "products": [
         {
-            "id": "OLJCESPC7Z",
-            "name": "Vintage Typewriter",
-            "description": "This typewriter looks good in your living room.",
-            "picture": "/static/img/products/typewriter.jpg",
-            "priceUsd": {
-                "currencyCode": "USD",
-                "units": 67,
-                "nanos": 990000000
-            },
-            "categories": ["vintage"]
-        },
-        {
-            "id": "66VCHSJNUP",
-            "name": "Vintage Camera Lens",
-            "description": "You won't have a camera to use it and it probably doesn't work anyway.",
-            "picture": "/static/img/products/camera-lens.jpg",
-            "priceUsd": {
-                "currencyCode": "USD",
-                "units": 12,
-                "nanos": 490000000
-            },
-            "categories": ["photography", "vintage"]
-        },
-        {
-            "id": "1YMWWN1N4O",
-            "name": "Home Barista Kit",
-            "description": "Always wanted to brew coffee with Chemex and Aeropress at home?",
-            "picture": "/static/img/products/barista-kit.jpg",
-            "priceUsd": {
-                "currencyCode": "USD",
-                "units": 124
-            },
-            "categories": ["cookware"]
-        },
-        {
-            "id": "L9ECAV7KIM",
-            "name": "Terrarium",
-            "description": "This terrarium will looks great in your white painted living room.",
-            "picture": "/static/img/products/terrarium.jpg",
-            "priceUsd": {
-                "currencyCode": "USD",
-                "units": 36,
-                "nanos": 450000000
-            },
-            "categories": ["gardening"]
-        },
-        {
-            "id": "2ZYFJ3GM2N",
-            "name": "Film Camera",
-            "description": "This camera looks like it's a film camera, but it's actually digital.",
-            "picture": "/static/img/products/film-camera.jpg",
-            "priceUsd": {
-                "currencyCode": "USD",
-                "units": 2245
-            },
-            "categories": ["photography", "vintage"]
-        },
-        {
-            "id": "0PUK6V6EV0",
-            "name": "Vintage Record Player",
-            "description": "It still works.",
-            "picture": "/static/img/products/record-player.jpg",
-            "priceUsd": {
-                "currencyCode": "USD",
-                "units": 65,
-                "nanos": 500000000
-            },
-            "categories": ["music", "vintage"]
-        },
-        {
-            "id": "LS4PSXUNUM",
-            "name": "Metal Camping Mug",
-            "description": "You probably don't go camping that often but this is better than plastic cups.",
-            "picture": "/static/img/products/camp-mug.jpg",
-            "priceUsd": {
-                "currencyCode": "USD",
-                "units": 24,
-                "nanos": 330000000
-            },
-            "categories": ["cookware"]
-        },
-        {
-            "id": "9SIQT8TOJO",
-            "name": "City Bike",
-            "description": "This single gear bike probably cannot climb the hills of San Francisco.",
-            "picture": "/static/img/products/city-bike.jpg",
-            "priceUsd": {
-                "currencyCode": "USD",
-                "units": 789,
-                "nanos": 500000000
-            },
-            "categories": ["cycling"]
-        },
-        {
-            "id": "6E92ZMYYFZ",
-            "name": "Air Plant",
-            "description": "Have you ever wondered whether air plants need water? Buy one and figure out.",
-            "picture": "/static/img/products/air-plant.jpg",
+            "id": "0000000001",
+            "name": "Tamagotchi schwarz Blau",
+            "description": "Bandai Tamagotchi Elektronisches Spiel, durchscheinend blau.",
+            "picture": "/static/img/products/tamagotchi_dark_blue.jpg",
             "priceUsd": {
                 "currencyCode": "USD",
                 "units": 12,
                 "nanos": 300000000
             },
-            "categories": ["gardening"]
-        }
+            "categories": ["toy"]
+        },
+        {
+            "id": "0000000002",
+            "name": "Tamagotchi Red",
+            "description": "Nice red tamagotchi",
+            "picture": "/static/img/products/tamagotchi_red.jpg",
+            "priceUsd": {
+                "currencyCode": "EUR",
+                "units": 10,
+                "nanos": 300000000
+            },
+            "categories": ["toy"]
+        },
+        {
+            "id": "0000000003",
+            "name": "Tamagotchi Yellow",
+            "description": "Boring yellow tamagotchi",
+            "picture": "/static/img/products/tamagotchi_yellow.jpg",
+            "priceUsd": {
+                "currencyCode": "EUR",
+                "units": 10,
+                "nanos": 300000000
+            },
+            "categories": ["toy"]
+        },
+        {
+            "id": "0000000004",
+            "name": "Tamagotchi Blue",
+            "description": "New blue tamagotchi",
+            "picture": "/static/img/products/tamagotchi_blue.jpg",
+            "priceUsd": {
+                "currencyCode": "JPY",
+                "units": 1001,
+                "nanos": 300000000
+            },
+            "categories": ["toy"]
+        },
+        {
+            "id": "0000000005",
+            "name": "Tamagotchi Purple",
+            "description": "Useless purple tamagotchi",
+            "picture": "/static/img/products/tamagotchi_purple.jpg",
+            "priceUsd": {
+                "currencyCode": "CAD",
+                "units": 20,
+                "nanos": 300000000
+            },
+            "categories": ["toy"]
+        },
+        {
+            "id": "0000000006",
+            "name": "Tamagotchi Pink",
+            "description": "Pikachu pink tamagotchi",
+            "picture": "/static/img/products/tamagotchi_pink.jpg",
+            "priceUsd": {
+                "currencyCode": "EUR",
+                "units": 40,
+                "nanos": 300000000
+            },
+            "categories": ["toy"]
+        }                 
     ]
 }
