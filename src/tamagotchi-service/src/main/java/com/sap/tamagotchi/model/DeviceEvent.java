@@ -11,6 +11,8 @@ public class DeviceEvent implements IoTMessage {
 
     @JsonProperty("id")
     private final String id;
+    @JsonProperty("productId")
+    private final String productId;
     @JsonProperty("owner")
     private final String owner;
     @JsonProperty("color")
@@ -24,8 +26,9 @@ public class DeviceEvent implements IoTMessage {
     @JsonProperty("eventTime")
     private final Instant eventTime;
 
-    public DeviceEvent(String id, String owner, Color color, Instant born, Integer healthScore, Integer lastHealthScore, Instant eventTime) {
+    public DeviceEvent(String id, String productId, String owner, Color color, Instant born, Integer healthScore, Integer lastHealthScore, Instant eventTime) {
         this.id = id;
+        this.productId = productId;
         this.owner = owner;
         this.color = color;
         this.born = born;
@@ -37,6 +40,11 @@ public class DeviceEvent implements IoTMessage {
     @JsonProperty("id")
     public String getId() {
         return id;
+    }
+
+    @JsonProperty("productId")
+    public String getProductId() {
+        return productId;
     }
 
     @JsonProperty("owner")

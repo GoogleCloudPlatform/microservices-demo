@@ -92,7 +92,7 @@ public class TamagotchiService {
 
     private void sendTamagotchiDefunctNotifiction(String id) {
 
-        Device device = deviceRegistry.get(id);
+_        Device device = deviceRegistry.get(id);
         if (device == null || device.getId() == null || device.getOwner() == null) {
             return;
         }

@@ -1,5 +1,8 @@
 package com.sap.tamagotchi.controller;
 
+import static com.sap.tamagotchi.model.Color.BLUE;
+import static com.sap.tamagotchi.model.Color.PINK;
+import static com.sap.tamagotchi.model.Color.PURPLE;
 import static com.sap.tamagotchi.model.Color.RED;
 import static com.sap.tamagotchi.model.Color.YELLOW;
 import static org.springframework.http.ResponseEntity.ok;
@@ -32,8 +35,18 @@ public class DeviceController {
 
     private static Color mapColor(String productId) {
         switch (productId) {
-            case "66VCHSJNUP":
+            case "0000000001":
+                return BLUE;
+            case "0000000002":
                 return RED;
+            case "0000000003":
+                return YELLOW;
+            case "0000000004":
+                return BLUE;
+            case "0000000005":
+                return PURPLE;
+            case "0000000006":
+                return PINK;
             default:
                 return YELLOW;
         }
@@ -53,7 +66,7 @@ public class DeviceController {
     public ResponseEntity createDevice(@RequestBody Collection<CreateDevicePayload> payload) {
         List<Device> devices = new ArrayList<>();
         for (CreateDevicePayload p : payload) {
-            devices.add(tamagotchiService.createDevice(new Device(p.getOwner(), mapColor(p.getProductId()))));
+            devices.add(tamagotchiService.createDevice(new Device(p.getProductId(), p.getOwner(), mapColor(p.getProductId()))));
         }
         return ok(devices);
     }

@@ -14,6 +14,8 @@ public class Device {
 
     @JsonProperty("id")
     private final String id = UUID.randomUUID().toString();
+    @JsonProperty("productId")
+    private final String productId;
     @JsonProperty("owner")
     private final String owner;
     @JsonProperty("color")
@@ -24,7 +26,8 @@ public class Device {
     private int healthScore = 100;
     private final Queue<IoTMessage> messages = new ConcurrentLinkedQueue<>();
 
-    public Device(String owner, Color color) {
+    public Device(String productId, String owner, Color color) {
+        this.productId = productId;
         this.owner = owner;
         this.color = color;
     }
@@ -32,6 +35,11 @@ public class Device {
     @JsonProperty("id")
     public String getId() {
         return id;
+    }
+
+    @JsonProperty("productId")
+    public String getProductId() {
+        return productId;
     }
 
     @JsonProperty("owner")
@@ -70,9 +78,9 @@ public class Device {
 
         if (healthScore < 1) {
             healthScore = 0;
-            messages.add(new DeviceEvent(id, owner, color, born, healthScore, oldScore, Instant.now()));
+            messages.add(new DeviceEvent(id, productId, owner, color, born, healthScore, oldScore, Instant.now()));
         } else
-            messages.add(new DeviceEvent(id, owner, color, born, healthScore, null, Instant.now()));
+            messages.add(new DeviceEvent(id, productId, owner, color, born, healthScore, null, Instant.now()));
     }
 
     @JsonIgnore
