@@ -93,7 +93,7 @@ public class TamagotchiService {
     private void sendTamagotchiDefunctNotifiction(String id) {
 
         Device device = deviceRegistry.get(id);
-        if (device == null) {
+        if (device == null || device.getId() == null || device.getOwner() == null) {
             return;
         }
         String defunctMessage = String.format("Tamagotchi %s of %s passed away", device.getId(), device.getOwner());
