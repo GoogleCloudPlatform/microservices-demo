@@ -52,6 +52,7 @@ func registerDevicesFromOrder(req *pb.PlaceOrderRequest, order *pb.OrderResult, 
 			log.Errorf("Device registration, http request preparation failed, err: %+v", httpResponseError)
 		}
 		log.Infof("Device registration, http response: %+v", httpResponse)
+		log.Infof("Device registration, http response Body: %+v", httpResponse.Body)
 		defer httpResponse.Body.Close()
 	} else {
 		log.Errorf("Device registration, http request preparation failed, err: %+v, URL: %+v", httpError, url)
