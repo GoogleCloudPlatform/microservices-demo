@@ -45,8 +45,8 @@ public class Device {
     }
 
     @JsonProperty("born")
-    public Instant getBorn() {
-        return born;
+    public String getBorn() {
+        return born.toString();
     }
 
     @JsonProperty("healthScore")
