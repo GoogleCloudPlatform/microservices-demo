@@ -3,14 +3,15 @@
  */
 package com.sap.tamagotchi.model;
 
-import com.sap.tamagotchi.service.TamagotchiService;
+import static com.sap.tamagotchi.service.TamagotchiService.DEVICE_EVENT_PROCESSOR_SCHEDULE;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
-
-import static com.sap.tamagotchi.service.TamagotchiService.DEVICE_EVENT_PROCESSOR_SCHEDULE;
+import com.sap.tamagotchi.service.TamagotchiService;
 
 @Service
+@EnableScheduling
 public class Owner {
 
     private TamagotchiService tamagotchiService;
@@ -23,13 +24,23 @@ public class Owner {
     @Scheduled(fixedDelay = DEVICE_EVENT_PROCESSOR_SCHEDULE)
     public void setData() {
         for (Device d : tamagotchiService.getDevices()) {
-            double random = Math.random();
+
+            String userName = d.getOwner().substring(0, d.getOwner().indexOf("@")).toUpperCase();
+
+            int careAboutThePet = 0;
+
+            for (int i = 0; i < userName.length(); i++) {
+                if (d.getColor().toString().indexOf(userName.charAt(i)) != -1) {
+                    careAboutThePet++;
+                }
+            }
+
             Care care = new Care();
 
-            if (random <= 0.5) {
-                care.setFeed(-(int) (random * 10));
+            if (careAboutThePet == 0) {
+                care.setFeed(-5);
             } else {
-                care.setFeed((int) (random * 10));
+                care.setFeed(5);
             }
             tamagotchiService.takeCare(d.getId(), care);
         }
