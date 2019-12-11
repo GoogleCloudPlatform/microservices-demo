@@ -1,6 +1,7 @@
 package com.sap.tamagotchi.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.time.Instant;
@@ -18,15 +19,18 @@ public class DeviceEvent implements IoTMessage {
     private final Instant born;
     @JsonProperty("healthScore")
     private final Integer healthScore;
+    @JsonProperty("lastHealthScore")
+    private final Integer lastHealthScore;
     @JsonProperty("eventTime")
     private final Instant eventTime;
 
-    public DeviceEvent(String id, String owner, Color color, Instant born, Integer healthScore, Instant eventTime) {
+    public DeviceEvent(String id, String owner, Color color, Instant born, Integer healthScore, Integer lastHealthScore, Instant eventTime) {
         this.id = id;
         this.owner = owner;
         this.color = color;
         this.born = born;
         this.healthScore = healthScore;
+        this.lastHealthScore = lastHealthScore;
         this.eventTime = eventTime;
     }
 
@@ -53,6 +57,12 @@ public class DeviceEvent implements IoTMessage {
     @JsonProperty("healthScore")
     public Integer getHealthScore() {
         return healthScore;
+    }
+
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    @JsonProperty("lastHealthScore")
+    public Integer getLastHealthScore() {
+        return lastHealthScore;
     }
 
     @JsonProperty("eventTime")

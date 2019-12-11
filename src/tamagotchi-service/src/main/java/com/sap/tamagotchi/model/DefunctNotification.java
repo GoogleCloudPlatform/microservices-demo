@@ -1,5 +1,6 @@
 package com.sap.tamagotchi.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class DefunctNotification implements IoTMessage {
@@ -11,6 +12,7 @@ public class DefunctNotification implements IoTMessage {
         this.message = message;
     }
 
+    @JsonIgnore
     @Override
     public String getTopic() {
         return "tamagotchi-defunct";
