@@ -87,6 +87,7 @@ public class TamagotchiService {
                 .forEach(device -> {
                     deviceRegistry.remove(device.getId());
                     sendTamagotchiDefunctNotifiction(device.getId());
+                    LOGGER.info("{} has died", device.getId());
                 });
     }
 
@@ -112,6 +113,7 @@ public class TamagotchiService {
 
         try {
             publisherService.publish(m);
+            LOGGER.info("defunct notification sent for {}", device.getId());
         } catch (Exception ex) {
             LOGGER.error("sendTamagotchiDefunctNotifiction failed: {}", ex.getMessage());
         }
