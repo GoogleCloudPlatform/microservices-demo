@@ -47,6 +47,7 @@ public class Owner {
         }
     }
 
+    @Scheduled(fixedDelay = 30000)
     public void killRendomDevice() {
 
         Collection<Device> devices = tamagotchiService.getDevices();
