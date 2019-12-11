@@ -54,7 +54,7 @@ public class Owner {
         if (devices != null) {
             Device first = devices.iterator().next();
             Care care = new Care();
-            care.setFeed(-1000);
+            care.setFeed(-100000);
             tamagotchiService.takeCare(first.getId(), care);
         }
     }

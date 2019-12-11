@@ -65,6 +65,8 @@ public class Device {
             healthScore += delta;
             if (healthScore > 150)
                 healthScore /= 10;
+        } else {
+            healthScore = 0;
         }
         messages.add(new DeviceEvent(id, owner, color, born, healthScore, Instant.now()));
     }
