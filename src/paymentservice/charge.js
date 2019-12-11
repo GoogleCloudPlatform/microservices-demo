@@ -20,7 +20,7 @@ const { BigQuery } = require('@google-cloud/bigquery');
 
 // gcp credentails can be found in /config/team2-bg.json
 process.env['GOOGLE_APPLICATION_CREDENTIALS'] = '/config/team2-bg.json';
-const datasetId = 'hipstershop_gcp_1210';
+const datasetId = 'hipstertamagochi';
 const tableId = 'payments';
 
 // Create a client
