@@ -90,6 +90,7 @@ module.exports = function charge (request) {
   // publish transaction to our bigquery database - if we have a bigquery client
 
   if (bigqueryClient) {
+    logger.info('sending data to Big Query');
     const rows = [
       {
         "amount": amount.units + (amount.nanos / 1000000000),
@@ -107,7 +108,7 @@ module.exports = function charge (request) {
       .insert(rows);
   }
 
-  logger.info(`Transaction processed: ${cardType} ending ${cardNumber.substr(-4)} \
+  logger.info(`XXXTransaction processed: ${cardType} ending ${cardNumber.substr(-4)} \
     Amount: ${amount.currency_code}${amount.units}.${amount.nanos}`);
 
   return { transaction_id: uuid() };
