@@ -97,8 +97,7 @@ public class TamagotchiService {
         IoTMessage m = new IoTMessage() {
 
             @JsonProperty("message")
-            private String message = String.format("Tamagotchi %s of %s passed away",
-                    device.getOwner(), device.getOwner());
+            private String message = String.format("Tamagotchi %s of %s passed away", device.getOwner(), device.getOwner());
 
             @Override
             public String getTopic() {
