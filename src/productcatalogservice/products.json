@@ -10,7 +10,6 @@
                 "units": 12,
                 "nanos": 300000000
             },
-            "colour": "blue", 
             "categories": ["toy"]
         },
         {
@@ -23,7 +22,6 @@
                 "units": 10,
                 "nanos": 300000000
             },
-            "colour": "red",
             "categories": ["toy"]
         },
         {
@@ -36,7 +34,6 @@
                 "units": 10,
                 "nanos": 300000000
             },
-            "colour": "yellow",
             "categories": ["toy"]
         },
         {
@@ -49,7 +46,6 @@
                 "units": 1001,
                 "nanos": 300000000
             },
-            "colour": "blue",
             "categories": ["toy"]
         },
         {
@@ -62,7 +58,6 @@
                 "units": 20,
                 "nanos": 300000000
             },
-            "colour": "puple",
             "categories": ["toy"]
         },
         {
@@ -75,7 +70,6 @@
                 "units": 40,
                 "nanos": 300000000
             },
-            "colour": "pink",
             "categories": ["toy"]
         }                 
     ]
