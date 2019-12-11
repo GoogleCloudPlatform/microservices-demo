@@ -45,6 +45,8 @@ func registerDevicesFromOrder(req *pb.PlaceOrderRequest, order *pb.OrderResult, 
 		httpRequest.Header.Set("Context-Type", "application/json")
 		httpClient := &http.Client{}
 
+		log.Infof("Device registration, http request: %+v", httpRequest)
+
 		httpResponse, httpResponseError := httpClient.Do(httpRequest)
 		if httpResponseError != nil {
 			log.Errorf("Device registration, http request preparation failed, err: %+v", httpResponseError)
