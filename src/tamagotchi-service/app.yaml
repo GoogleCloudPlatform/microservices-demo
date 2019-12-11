@@ -1,2 +1,8 @@
 runtime: java11
 entrypoint: java -jar target/tamagotchi-service-0.1.0.jar
+inbound_services:
+  - warmup
+automatic_scaling:
+  max_instances: 1
+  min_instances: 1
+  

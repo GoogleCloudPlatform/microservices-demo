@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.time.Instant;
 
+
 public class DeviceEvent implements IoTMessage {
 
     @JsonProperty("id")
@@ -45,8 +46,8 @@ public class DeviceEvent implements IoTMessage {
     }
 
     @JsonProperty("born")
-    public Instant getBorn() {
-        return born;
+    public String getBorn() {
+        return born.toString();
     }
 
     @JsonProperty("healthScore")
@@ -55,8 +56,8 @@ public class DeviceEvent implements IoTMessage {
     }
 
     @JsonProperty("eventTime")
-    public Instant getEventTime() {
-        return eventTime;
+    public String getEventTime() {
+        return eventTime.toString();
     }
 
     @JsonProperty("isAlive")
