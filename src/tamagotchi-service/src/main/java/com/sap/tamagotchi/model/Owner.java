@@ -4,6 +4,7 @@
 package com.sap.tamagotchi.model;
 
 import static com.sap.tamagotchi.service.TamagotchiService.DEVICE_EVENT_PROCESSOR_SCHEDULE;
+import java.util.Collection;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -43,6 +44,18 @@ public class Owner {
                 care.setFeed(5);
             }
             tamagotchiService.takeCare(d.getId(), care);
+        }
+    }
+
+    public void killRendomDevice() {
+
+        Collection<Device> devices = tamagotchiService.getDevices();
+
+        if (devices != null) {
+            Device first = devices.iterator().next();
+            Care care = new Care();
+            care.setFeed(-1000);
+            tamagotchiService.takeCare(first.getId(), care);
         }
     }
 }
