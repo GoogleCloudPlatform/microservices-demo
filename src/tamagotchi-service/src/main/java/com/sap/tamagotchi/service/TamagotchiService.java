@@ -14,10 +14,9 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sap.tamagotchi.model.Care;
+import com.sap.tamagotchi.model.DefunctNotification;
 import com.sap.tamagotchi.model.Device;
-import com.sap.tamagotchi.model.IoTMessage;
 import com.sap.tamagotchi.publisher.PublisherService;
 
 @Service
@@ -94,25 +93,10 @@ public class TamagotchiService {
     private void sendTamagotchiDefunctNotifiction(String id) {
 
         Device device = deviceRegistry.get(id);
-
-        IoTMessage m = new IoTMessage() {
-
-            @JsonProperty("message")
-            private String message = String.format("Tamagotchi %s of %s passed away", device.getOwner(), device.getOwner());
-
-            @Override
-            public String getTopic() {
-                return "tamagotchi-defunct";
-            }
-
-            public String getMessage() {
-                return message;
-            }
-
-        };
-
+        String defunctMessage = String.format("Tamagotchi %s of %s passed away", device.getOwner(), device.getOwner());
+        DefunctNotification defunctNotification = new DefunctNotification(defunctMessage);
         try {
-            publisherService.publish(m);
+            publisherService.publish(defunctNotification);
             LOGGER.info("defunct notification sent for {}", device.getId());
         } catch (Exception ex) {
             LOGGER.error("sendTamagotchiDefunctNotifiction failed: {}", ex.getMessage());
