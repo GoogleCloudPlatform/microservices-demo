@@ -1,11 +1,14 @@
 package com.sap.tamagotchi.controller;
 
+import static com.sap.tamagotchi.model.Color.RED;
+import static com.sap.tamagotchi.model.Color.YELLOW;
 import static org.springframework.http.ResponseEntity.ok;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import com.sap.tamagotchi.model.Color;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -27,6 +30,15 @@ public class DeviceController {
         this.tamagotchiService = tamagotchiService;
     }
 
+    private static Color mapColor(String productId) {
+        switch (productId) {
+            case "66VCHSJNUP":
+                return RED;
+            default:
+                return YELLOW;
+        }
+    }
+
     @RequestMapping("/devices/{deviceId}")
     public Device getDevice(String deviceId) {
         return tamagotchiService.getDevice(deviceId);
@@ -41,7 +53,7 @@ public class DeviceController {
     public ResponseEntity createDevice(@RequestBody Collection<CreateDevicePayload> payload) {
         List<Device> devices = new ArrayList<>();
         for (CreateDevicePayload p : payload) {
-            devices.add(tamagotchiService.createDevice(new Device(p.getOwner(), p.getColor())));
+            devices.add(tamagotchiService.createDevice(new Device(p.getOwner(), mapColor(p.getProductId()))));
         }
         return ok(devices);
     }
@@ -50,5 +62,4 @@ public class DeviceController {
     public String warmup() {
         return "warming up";
     }
-
 }
