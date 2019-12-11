@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 
 import com.sap.tamagotchi.model.Care;
 import com.sap.tamagotchi.model.Device;
+import com.sap.tamagotchi.model.IoTMessage;
 import com.sap.tamagotchi.publisher.PublisherService;
 
 @Service
@@ -82,7 +83,37 @@ public class TamagotchiService {
                 .values()
                 .parallelStream()
                 .filter(device -> !device.isAlive())
-                .forEach(device -> deviceRegistry.remove(device.getId()));
+                .forEach(device -> {
+                    deviceRegistry.remove(device.getId());
+                    sendTamagotchiDefunctNotifiction(device.getId());
+                });
+    }
+
+    private void sendTamagotchiDefunctNotifiction(String id) {
+
+        Device device = deviceRegistry.get(id);
+
+        IoTMessage m = new IoTMessage() {
+
+            private String message = String.format("Tamagotchi %s of %s passed away",
+                    device.getOwner(), device.getOwner());
+
+            @Override
+            public String getTopic() {
+                return "tamagotchi-defunct";
+            }
+
+            public String getMessage() {
+                return message;
+            }
+
+        };
+
+        try {
+            publisherService.publish(m);
+        } catch (Exception ex) {
+            LOGGER.error("sendTamagotchiDefunctNotifiction failed: {}", ex.getMessage());
+        }
     }
 
 }
