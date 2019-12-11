@@ -26,9 +26,9 @@ public class TamagotchiService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
-    private final PublisherService publisherService;
+    private static final Map<String, Device> deviceRegistry = Collections.synchronizedMap(new HashMap<>());
 
-    private final Map<String, Device> deviceRegistry = Collections.synchronizedMap(new HashMap<>());
+    private final PublisherService publisherService;
 
     @Autowired
     public TamagotchiService(PublisherService publisherService) {
@@ -54,8 +54,9 @@ public class TamagotchiService {
 
     public void takeCare(String deviceId, Care care) {
         Device device = deviceRegistry.get(deviceId);
-        if (device == null)
+        if (device == null) {
             return;
+        }
         device.changeHealthScore(care.getFeed());
         device.changeHealthScore(care.getPet());
     }
@@ -69,12 +70,19 @@ public class TamagotchiService {
                 .forEach(device -> {
                     while (device.getMessages().peek() != null) {
                         try {
-                            publisherService.publish(device.getMessages().peek());
-                            device.getMessages().poll();
+                            publisherService.publish(device.getMessages().poll());
                         } catch (Exception ex) {
                             LOGGER.error("processing device events failed: {}", ex.getMessage());
                         }
                     }
                 });
+
+        // remove dead devices
+        deviceRegistry
+                .values()
+                .parallelStream()
+                .filter(device -> !device.isAlive())
+                .forEach(device -> deviceRegistry.remove(device.getId()));
     }
+
 }
