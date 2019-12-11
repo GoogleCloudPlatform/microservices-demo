@@ -61,14 +61,18 @@ public class Device {
 
     @JsonIgnore
     public void changeHealthScore(int delta) {
+        int oldScore = healthScore;
         if (healthScore >= 1) {
             healthScore += delta;
             if (healthScore > 150)
                 healthScore /= 10;
-        } else {
-            healthScore = 0;
         }
-        messages.add(new DeviceEvent(id, owner, color, born, healthScore, Instant.now()));
+
+        if (healthScore < 1) {
+            healthScore = 0;
+            messages.add(new DeviceEvent(id, owner, color, born, healthScore, oldScore, Instant.now()));
+        } else
+            messages.add(new DeviceEvent(id, owner, color, born, healthScore, null, Instant.now()));
     }
 
     @JsonIgnore
