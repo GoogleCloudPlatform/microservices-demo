@@ -453,7 +453,7 @@ spec:
       restartPolicy: Always
       containers:
       - name: main
-        image: gcr.io/megandemo/loadgen:failcurl
+        image: gcr.io/google-samples/microservices-demo/loadgenerator:v0.1.2
         env:
         - name: FRONTEND_ADDR
           value: "frontend:80"
