@@ -99,7 +99,9 @@ if __name__ == "__main__":
 
     try:
         sampler = always_on.AlwaysOnSampler()
-        exporter = stackdriver_exporter.StackdriverExporter()
+        exporter = stackdriver_exporter.StackdriverExporter(
+            project_id=os.environ.get('GCP_PROJECT_ID'),
+            transport=AsyncTransport)
         tracer_interceptor = server_interceptor.OpenCensusServerInterceptor(sampler, exporter)
     except:
         tracer_interceptor = server_interceptor.OpenCensusServerInterceptor()
@@ -123,7 +125,8 @@ if __name__ == "__main__":
     product_catalog_stub = demo_pb2_grpc.ProductCatalogServiceStub(channel)
 
     # create gRPC server
-    server = grpc.server(futures.ThreadPoolExecutor(max_workers=10)) # ,interceptors=(tracer_interceptor,))
+    server = grpc.server(futures.ThreadPoolExecutor(max_workers=10),
+                      interceptors=(tracer_interceptor,))
 
     # add class to gRPC server
     service = RecommendationService()
