@@ -11,7 +11,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -30,9 +29,6 @@ spec:
     spec:
       terminationGracePeriodSeconds: 5
       restartPolicy: Always
-        env:
-        - name: FRONTEND_ADDR
-          value: "frontend:80"
       containers:
       - name: main
         image: loadgenerator

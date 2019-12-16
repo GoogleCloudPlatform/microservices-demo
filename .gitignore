@@ -9,7 +9,3 @@ pkg/
 .idea
 .skaffold-*.yaml
 .kubernetes-manifests-*/
-istio-1.*/
-install-istio.sh
-mtls.yaml
-istio.yaml
