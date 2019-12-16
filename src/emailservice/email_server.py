@@ -37,9 +37,6 @@ import googlecloudprofiler
 
 try:
     sampler = always_on.AlwaysOnSampler()
-    exporter = stackdriver_exporter.StackdriverExporter(
-        project_id=os.environ.get('GCP_PROJECT_ID'),
-        transport=AsyncTransport)
     exporter = stackdriver_exporter.StackdriverExporter()
     tracer_interceptor = server_interceptor.OpenCensusServerInterceptor(sampler, exporter)
 except:
