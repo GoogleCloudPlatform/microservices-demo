@@ -34,8 +34,6 @@ spec:
         env:
         - name: PORT
           value: "8080"
-        - name: GCP_PROJECT_ID
-          value: "thinmint"
         - name: ENABLE_PROFILER
           value: "0"
         readinessProbe:
