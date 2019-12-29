@@ -1,39 +1,27 @@
-description = 'Ad Service'
-
-buildscript {
-    repositories {
-        mavenCentral()
-        mavenLocal()
-        maven {
-            url "https://plugins.gradle.org/m2/"
-        }
-    }
-    dependencies {
-        classpath 'com.google.protobuf:protobuf-gradle-plugin:0.8.3'
-        classpath "gradle.plugin.com.github.sherter.google-java-format:google-java-format-gradle-plugin:0.7.1"
-    }
+plugins {
+    id 'com.google.protobuf' version '0.8.11'
+    id 'com.github.sherter.google-java-format' version '0.8'
+    id 'idea'
+    id 'application'
 }
-
-apply plugin: 'idea'
-apply plugin: 'java'
-apply plugin: 'com.google.protobuf'
-apply plugin: 'com.github.sherter.google-java-format'
 
 repositories {
     mavenCentral()
     mavenLocal()
 }
 
+description = 'Ad Service'
 group = "adservice"
 version = "0.1.0-SNAPSHOT"
 
-def opencensusVersion = "0.18.0"
-def grpcVersion = "1.17.0"
-def jacksonVersion = "2.9.6"
+def opencensusVersion = "0.25.0"
+def grpcVersion = "1.26.0"
+def jacksonVersion = "2.10.2"
+def protocVersion = "3.11.4"
 
 tasks.withType(JavaCompile) {
-    sourceCompatibility = '1.8'
-    targetCompatibility = '1.8'
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
 }
 
 ext {
@@ -43,9 +31,9 @@ ext {
 
 dependencies {
     if (speed) {
-        compile fileTree(dir: offlineCompile, include: '*.jar')
+        implementation fileTree(dir: offlineCompile, include: '*.jar')
     } else {
-        compile "com.google.api.grpc:proto-google-common-protos:1.12.0",
+        implementation "com.google.api.grpc:proto-google-common-protos:1.17.0",
                 "io.opencensus:opencensus-api:${opencensusVersion}",
                 "io.opencensus:opencensus-contrib-grpc-util:${opencensusVersion}",
                 "io.opencensus:opencensus-exporter-trace-jaeger:${opencensusVersion}",
@@ -56,19 +44,19 @@ dependencies {
                 "io.grpc:grpc-stub:${grpcVersion}",
                 "io.grpc:grpc-netty:${grpcVersion}",
                 "io.grpc:grpc-services:${grpcVersion}",
-                "org.apache.logging.log4j:log4j-core:2.11.1"
+                "org.apache.logging.log4j:log4j-core:2.13.0"
 
-        runtime "com.fasterxml.jackson.core:jackson-core:${jacksonVersion}",
+        runtimeOnly "com.fasterxml.jackson.core:jackson-core:${jacksonVersion}",
                 "com.fasterxml.jackson.core:jackson-databind:${jacksonVersion}",
                 "io.opencensus:opencensus-contrib-log-correlation-log4j2:${opencensusVersion}",
                 "io.opencensus:opencensus-impl:${opencensusVersion}",
-                "io.netty:netty-tcnative-boringssl-static:2.0.8.Final"
+                "io.netty:netty-tcnative-boringssl-static:2.0.26.Final"
     }
 }
 
 protobuf {
     protoc {
-        artifact = 'com.google.protobuf:protoc:3.5.1-1'
+        artifact = "com.google.protobuf:protoc:${protocVersion}"
     }
     plugins {
         grpc {
@@ -98,9 +86,6 @@ sourceSets {
     }
 }
 
-// Provide convenience executables for trying out the examples.
-apply plugin: 'application'
-
 startScripts.enabled = false
 
 // This to cache dependencies during Docker image building. First build will take time.
@@ -116,20 +101,20 @@ task adService(type: CreateStartScripts) {
     mainClassName = 'hipstershop.AdService'
     applicationName = 'AdService'
     outputDir = new File(project.buildDir, 'tmp')
-    classpath = jar.outputs.files + project.configurations.runtime
+    classpath = startScripts.classpath
     defaultJvmOpts =
-        ["-Dlog4j2.contextDataInjector=io.opencensus.contrib.logcorrelation.log4j2.OpenCensusTraceContextDataInjector",
-	"-agentpath:/opt/cprof/profiler_java_agent.so=-cprof_service=adservice,-cprof_service_version=1.0.0"]
+            ["-Dlog4j2.contextDataInjector=io.opencensus.contrib.logcorrelation.log4j2.OpenCensusTraceContextDataInjector",
+             "-agentpath:/opt/cprof/profiler_java_agent.so=-cprof_service=adservice,-cprof_service_version=1.0.0"]
 }
 
 task adServiceClient(type: CreateStartScripts) {
     mainClassName = 'hipstershop.AdServiceClient'
     applicationName = 'AdServiceClient'
     outputDir = new File(project.buildDir, 'tmp')
-    classpath = jar.outputs.files + project.configurations.runtime
+    classpath = startScripts.classpath
     defaultJvmOpts =
-        ["-Dlog4j2.contextDataInjector=io.opencensus.contrib.logcorrelation.log4j2.OpenCensusTraceContextDataInjector",
-	"-agentpath:/opt/cprof/profiler_java_agent.so=-cprof_service=adserviceclient,-cprof_service_version=1.0.0"]
+            ["-Dlog4j2.contextDataInjector=io.opencensus.contrib.logcorrelation.log4j2.OpenCensusTraceContextDataInjector",
+             "-agentpath:/opt/cprof/profiler_java_agent.so=-cprof_service=adserviceclient,-cprof_service_version=1.0.0"]
 }
 
 applicationDistribution.into('bin') {
