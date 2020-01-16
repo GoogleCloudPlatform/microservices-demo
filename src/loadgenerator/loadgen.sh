@@ -1,4 +1,4 @@
-#!/bin/sh -eu
+#!/bin/bash
 #
 # Copyright 2018 Google LLC
 #
@@ -14,7 +14,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-#!/bin/bash
 set -e
 trap "exit" TERM
 
