@@ -34,7 +34,7 @@ Find **Protocol Buffers Descriptions** at the [`./pb` directory](./pb).
 | Service                                              | Language      | Description                                                                                                                       |
 | ---------------------------------------------------- | ------------- | --------------------------------------------------------------------------------------------------------------------------------- |
 | [frontend](./src/frontend)                           | Go            | Exposes an HTTP server to serve the website. Does not require signup/login and generates session IDs for all users automatically. |
-| [cartservice](./src/cartservice)                     | C#            | Stores the items in the user's shipping cart in Redis and retrieves it.                                                           |
+| [cartservice](./src/cartservice)                     | C#            | Stores the items in the user's shopping cart in Redis and retrieves it.                                                           |
 | [productcatalogservice](./src/productcatalogservice) | Go            | Provides the list of products from a JSON file and ability to search products and get individual products.                        |
 | [currencyservice](./src/currencyservice)             | Node.js       | Converts one money amount to another currency. Uses real values fetched from European Central Bank. It's the highest QPS service. |
 | [paymentservice](./src/paymentservice)               | Node.js       | Charges the given credit card info (mock) with the given amount and returns a transaction ID.                                     |
@@ -93,8 +93,7 @@ We offer three installation methods:
    - kubectl (can be installed via `gcloud components install kubectl`)
    - Docker for Desktop (Mac/Windows): It provides Kubernetes support as [noted
      here](https://docs.docker.com/docker-for-mac/kubernetes/).
-   - [skaffold](https://skaffold.dev/docs/getting-started/#installing-skaffold)
-     (ensure version ≥v0.20)
+   - [skaffold]( https://skaffold.dev/docs/install/) (ensure version ≥v0.20)
 
 1. Launch “Docker for Desktop”. Go to Preferences:
 
@@ -213,35 +212,28 @@ by deploying the [release manifest](./release) directly to an existing cluster.
        --istio-config=auth=MTLS_PERMISSIVE
    ```
 
-   > NOTE: If you need to enable `MTLS_STRICT` mode, you will need to update
-   > several manifest files:
-   >
-   > - `kubernetes-manifests/frontend.yaml`: delete "livenessProbe" and
-   >   "readinessProbe" fields.
-   > - `kubernetes-manifests/loadgenerator.yaml`: delete "initContainers" field.
-
-1. (Optional) Enable Stackdriver Tracing/Logging with Istio Stackdriver Adapter
+2. (Optional) Enable Stackdriver Tracing/Logging with Istio Stackdriver Adapter
    by [following this guide](https://cloud.google.com/istio/docs/istio-on-gke/installing#enabling_tracing_and_logging).
 
-1. Install the automatic sidecar injection (annotate the `default` namespace
+3. Install the automatic sidecar injection (annotate the `default` namespace
    with the label):
 
    ```sh
    kubectl label namespace default istio-injection=enabled
    ```
 
-1. Apply the manifests in [`./istio-manifests`](./istio-manifests) directory.
+4. Apply the manifests in [`./istio-manifests`](./istio-manifests) directory.
    (This is required only once.)
 
    ```sh
    kubectl apply -f ./istio-manifests
    ```
 
-1. Deploy the application with `skaffold run --default-repo=gcr.io/[PROJECT_ID]`.
+5. Deploy the application with `skaffold run --default-repo=gcr.io/[PROJECT_ID]`.
 
-1. Run `kubectl get pods` to see pods are in a healthy and ready state.
+6. Run `kubectl get pods` to see pods are in a healthy and ready state.
 
-1. Find the IP address of your Istio gateway Ingress or Service, and visit the
+7. Find the IP address of your Istio gateway Ingress or Service, and visit the
    application.
 
    ```sh
