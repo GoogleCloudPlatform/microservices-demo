@@ -32,7 +32,6 @@ spec:
         command: ['/bin/sh', '-c']
         args:
           - until redis-cli -h redis-cart -p 6379 ping; do echo waiting for redis-cart; sleep 2; done
-          #- for i in {1..100}; do sleep 1; if redis-cli -h redis-cart -p 6379 ping; then exit 0; fi; done; exit 1
       containers:
       - name: server
         image: cartservice

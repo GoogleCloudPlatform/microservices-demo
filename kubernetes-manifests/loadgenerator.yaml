@@ -32,7 +32,9 @@ spec:
       initContainers:
       - name: init-frontend-ready
         image: busybox:1.28
-        command: ['sh', '-c', 'until  [[ "$(wget --spider -S http://frontend 2>&1 | grep HTTP/)" == "  HTTP/1.1 200 OK" ]]; do echo waiting for frontend; sleep 2; done;']
+        command: ['/bin/sh', '-c']
+        args:
+          - until  [[ "$(wget --spider -S http://frontend 2>&1 | grep HTTP/)" == "  HTTP/1.1 200 OK" ]]; do echo waiting for frontend; sleep 2; done
       containers:
       - name: main
         image: loadgenerator
