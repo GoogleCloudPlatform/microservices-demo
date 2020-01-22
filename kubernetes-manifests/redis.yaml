@@ -31,9 +31,11 @@ spec:
         ports:
         - containerPort: 6379
         readinessProbe:
-          periodSeconds: 5
-          tcpSocket:
-            port: 6379
+          exec:
+            command:
+            - sh
+            - -c
+            - "redis-cli -h $(hostname) ping"
         livenessProbe:
           periodSeconds: 5
           tcpSocket:
