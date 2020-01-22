@@ -31,6 +31,7 @@ spec:
         ports:
         - containerPort: 6379
         readinessProbe:
+          periodSeconds: 5
           exec:
             command: ['/bin/sh', '-c', 'redis-cli -h $(hostname) ping']
         livenessProbe:
