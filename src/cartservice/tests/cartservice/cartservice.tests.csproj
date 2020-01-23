@@ -18,7 +18,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\cartservice\cartservice.csproj" />
+    <ProjectReference Include="..\..\cartservice.csproj" />
   </ItemGroup>
 
   <ItemGroup>
