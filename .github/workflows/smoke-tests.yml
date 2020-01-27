@@ -19,6 +19,7 @@ jobs:
           kubectl get nodes
         else
           echo "test cluster not active. Attempting to create through kind..."
+          kind delete cluster 2>/dev/null
           kind create cluster
           kubectl get nodes
         fi
