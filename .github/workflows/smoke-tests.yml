@@ -23,6 +23,7 @@ jobs:
       run: |
         skaffold run
     - name: Wait For Pods
+      timeout-minutes: 20
       run: |
         set -x
         kubectl wait --for=condition=available --timeout=500s deployment/adservice
