@@ -1,4 +1,4 @@
-name: "System Smoke Tests"
+name: "Continuous Integration"
 on:
   push:
     # run on pushes to master or release/*
@@ -10,7 +10,7 @@ on:
     branches:
       - master
 jobs:
-  smoke-tests:
+  run-tests:
     runs-on: self-hosted
     steps:
     - uses: actions/checkout@v2
@@ -37,7 +37,7 @@ jobs:
         kubectl wait --for=condition=available --timeout=500s deployment/productcatalogservice
         kubectl wait --for=condition=available --timeout=500s deployment/recommendationservice
         kubectl wait --for=condition=available --timeout=500s deployment/shippingservice
-    - name: Test HTTP
+    - name: Smoke Test
       timeout-minutes: 5
       run: |
         RESULT=" "
