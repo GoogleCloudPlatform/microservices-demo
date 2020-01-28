@@ -8,7 +8,7 @@
   - to set up dependencies, run the following commands:
     ```
     # install kubectl
-    sudo apt-get install kind kubectl
+    sudo apt-get install kubectl
     # install kind
     curl -Lo ./kind "https://github.com/kubernetes-sigs/kind/releases/download/v0.7.0/kind-$(uname)-amd64"
     chmod +x ./kind
