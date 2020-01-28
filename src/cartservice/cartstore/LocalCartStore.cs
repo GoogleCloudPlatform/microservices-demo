@@ -65,7 +65,7 @@ namespace cartservice.cartstore
         public Task EmptyCartAsync(string userId)
         {
             Console.WriteLine($"EmptyCartAsync called with userId={userId}");
-            userCartItems[userId] = emptyCart;
+            userCartItems[userId] = new Hipstershop.Cart();
 
             return Task.CompletedTask;
         }

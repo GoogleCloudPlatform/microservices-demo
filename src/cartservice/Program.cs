@@ -56,7 +56,7 @@ namespace cartservice
                     Console.WriteLine($"Trying to start a grpc server at  {host}:{port}");
                     Server server = new Server
                     {
-                        Services = 
+                        Services =
                         {
                             // Cart Service Endpoint
                              Hipstershop.CartService.BindService(new CartServiceImpl(cartStore)),
@@ -99,7 +99,7 @@ namespace cartservice
             {
                 case "start":
                     Parser.Default.ParseArguments<ServerOptions>(args).MapResult(
-                        (ServerOptions options) => 
+                        (ServerOptions options) =>
                         {
                             Console.WriteLine($"Started as process with id {System.Diagnostics.Process.GetCurrentProcess().Id}");
 
@@ -127,7 +127,7 @@ namespace cartservice
                                     Console.WriteLine($"{CART_SERVICE_PORT} environment variable was not set. Setting the port to 8080");
                                     port = 8080;
                                 }
-                                else    
+                                else
                                 {
                                     port = int.Parse(portStr);
                                 }
