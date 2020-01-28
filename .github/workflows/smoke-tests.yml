@@ -40,17 +40,17 @@ jobs:
         sleep 60
         kubectl get pods
         echo waiting for ready state...
-        kubectl wait --for=condition=ready pod -l app=adservice --timeout=500s
-        kubectl wait --for=condition=ready pod -l app=cartservice --timeout=500s
-        kubectl wait --for=condition=ready pod -l app=checkoutservice --timeout=500s
-        kubectl wait --for=condition=ready pod -l app=currencyservice --timeout=500s
-        kubectl wait --for=condition=ready pod -l app=emailservice --timeout=500s
-        kubectl wait --for=condition=ready pod -l app=frontend --timeout=500s
-        kubectl wait --for=condition=ready pod -l app=loadgenerator --timeout=500s
-        kubectl wait --for=condition=ready pod -l app=paymentservice --timeout=500s
-        kubectl wait --for=condition=ready pod -l app=productcatalogservice --timeout=500s
-        kubectl wait --for=condition=ready pod -l app=recommendationservice --timeout=500s
-        kubectl wait --for=condition=ready pod -l app=shippingservice --timeout=500s
+        kubectl wait --for=condition=available --timeout=500s deployment/adservice
+        kubectl wait --for=condition=available --timeout=500s deployment/cartservice
+        kubectl wait --for=condition=available --timeout=500s deployment/checkoutservice
+        kubectl wait --for=condition=available --timeout=500s deployment/currencyservice
+        kubectl wait --for=condition=available --timeout=500s deployment/emailservice
+        kubectl wait --for=condition=available --timeout=500s deployment/frontend
+        kubectl wait --for=condition=available --timeout=500s deployment/loadgenerator
+        kubectl wait --for=condition=available --timeout=500s deployment/paymentservice
+        kubectl wait --for=condition=available --timeout=500s deployment/productcatalogservice
+        kubectl wait --for=condition=available --timeout=500s deployment/recommendationservice
+        kubectl wait --for=condition=available --timeout=500s deployment/shippingservice
     - name: Test HTTP
       timeout-minutes: 5
       run: |
