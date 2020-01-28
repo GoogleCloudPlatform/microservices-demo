@@ -5,6 +5,9 @@
 - project admins maintain a private Google Compute Engine VM for running tests
   - VM should be at least n1-standard-4 with 50GB persistent disk
   - instructions for setting up the VM can be found in repo settings under "Actions"
+  - ⚠️  WARNING: VM should be set up with no GCP service account
+    - external contributors could contribute malicious PRs to run code on our test VM. Ensure no service accounts or other secrets exist on the VM
+    - An empty GCP project should be used for extra security
   - to set up dependencies, run the following commands:
     ```
     # install kubectl
