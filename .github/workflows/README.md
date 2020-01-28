@@ -9,21 +9,25 @@
     ```
     # install kubectl
     sudo apt-get install kubectl
+
     # install kind
-    curl -Lo ./kind "https://github.com/kubernetes-sigs/kind/releases/download/v0.7.0/kind-$(uname)-amd64"
-    chmod +x ./kind
+    curl -Lo ./kind "https://github.com/kubernetes-sigs/kind/releases/download/v0.7.0/kind-$(uname)-amd64" && \
+    chmod +x ./kind && \
     sudo mv ./kind /usr/local/bin
+
     # install skaffold
-    curl -Lo skaffold https://storage.googleapis.com/skaffold/releases/latest/skaffold-linux-amd64
-    chmod +x skaffold
+    curl -Lo skaffold https://storage.googleapis.com/skaffold/releases/latest/skaffold-linux-amd64 && \
+    chmod +x skaffold && \
     sudo mv skaffold /usr/local/bin
+
     # install docker
-    sudo apt install apt-transport-https ca-certificates curl gnupg2 software-properties-common
-    curl -fsSL https://download.docker.com/linux/debian/gpg | sudo apt-key add -
-    sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/debian $(lsb_release -cs) stable"
-    sudo apt update
-    sudo apt install docker-ce
+    sudo apt install apt-transport-https ca-certificates curl gnupg2 software-properties-common && \
+    curl -fsSL https://download.docker.com/linux/debian/gpg | sudo apt-key add - && \
+    sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/debian $(lsb_release -cs) stable" && \
+    sudo apt update && \
+    sudo apt install docker-ce && \
     sudo usermod -aG docker ${USER}
+
     # logout and back on
     exit
     ```
