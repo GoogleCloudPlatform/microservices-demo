@@ -10,28 +10,15 @@ on:
     branches:
       - master
 jobs:
-  setup:
+  smoke-tests:
     runs-on: self-hosted
-    steps:
-    - name: Check Test Cluster
-      run: |
-        if kubectl get nodes; then
-          kubectl get nodes
-        else
-          echo "test cluster not active. Attempting to create through kind..."
-          kind delete cluster 2>/dev/null
-          kind create cluster
-          kubectl get nodes
-        fi
-  test-source:
-    runs-on: self-hosted
-    needs: setup
     steps:
     - uses: actions/checkout@v2
-    - name: Clean Cluster
+    - name: Setup Cluster
       run: |
-        kubectl delete all --all --wait=true --force --grace-period=0
-        sleep 5
+        kind delete cluster 2>/dev/null
+        kind create cluster
+        kubectl get nodes
     - name: Deploy From Source
       run: |
         skaffold run
