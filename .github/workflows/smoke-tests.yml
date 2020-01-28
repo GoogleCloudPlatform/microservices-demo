@@ -37,9 +37,7 @@ jobs:
         skaffold run
     - name: Wait For Pods
       run: |
-        sleep 60
-        kubectl get pods
-        echo waiting for ready state...
+        set -x
         kubectl wait --for=condition=available --timeout=500s deployment/adservice
         kubectl wait --for=condition=available --timeout=500s deployment/cartservice
         kubectl wait --for=condition=available --timeout=500s deployment/checkoutservice
