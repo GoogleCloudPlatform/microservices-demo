@@ -16,15 +16,35 @@
 
 import sys
 import grpc
+import os
 import demo_pb2
 import demo_pb2_grpc
 
 from opencensus.trace.tracer import Tracer
-from opencensus.trace.exporters import stackdriver_exporter
-from opencensus.trace.ext.grpc import client_interceptor
+from opencensus.ext.grpc import client_interceptor
+from opencensus.ext.zipkin.trace_exporter import ZipkinExporter
+from opencensus.trace.samplers import AlwaysOnSampler
 
 from logger import getJSONLogger
 logger = getJSONLogger('recommendationservice-server')
+
+# Setup Zipkin exporter
+try: 
+  zipkin_service_addr = os.environ.get("ZIPKIN_SERVICE_ADDR", '')
+  if zipkin_service_addr == "":
+    logger.info("Skipping Zipkin traces initialization. Set environment variable ZIPKIN_SERVICE_ADDR=<host>:<port> to enable.")
+    raise KeyError()
+  host, port = zipkin_service_addr.split(":")
+  ze = ZipkinExporter(service_name="recommendationservice-client",
+    host_name=host,
+    port=port,
+    endpoint='/api/v2/spans')
+  sampler = AlwaysOnSampler()
+  tracer = Tracer(exporter=ze, sampler=sampler)
+  tracer_interceptor = client_interceptor.OpenCensusClientInterceptor(sampler, ze)
+  logger.info("Zipkin traces enabled, sending to " + zipkin_service_addr)
+except KeyError:
+  tracer_interceptor = client_interceptor.OpenCensusClientInterceptor()
 
 if __name__ == "__main__":
     # get port
@@ -32,13 +52,6 @@ if __name__ == "__main__":
         port = sys.argv[1]
     else:
         port = "8080"
-
-    try:
-        exporter = stackdriver_exporter.StackdriverExporter()
-        tracer = Tracer(exporter=exporter)
-        tracer_interceptor = client_interceptor.OpenCensusClientInterceptor(tracer, host_port='localhost:'+port)
-    except:
-        tracer_interceptor = client_interceptor.OpenCensusClientInterceptor()
 
     # set up server stub
     channel = grpc.insecure_channel('localhost:'+port)

@@ -15,23 +15,36 @@
 # limitations under the License.
 
 import grpc
+import os
 
 import demo_pb2
 import demo_pb2_grpc
 
+from opencensus.trace.tracer import Tracer
+from opencensus.ext.grpc import client_interceptor
+from opencensus.ext.zipkin.trace_exporter import ZipkinExporter
+from opencensus.trace.samplers import AlwaysOnSampler
+
 from logger import getJSONLogger
 logger = getJSONLogger('emailservice-client')
 
-from opencensus.trace.tracer import Tracer
-from opencensus.trace.exporters import stackdriver_exporter
-from opencensus.trace.ext.grpc import client_interceptor
-
-try:
-    exporter = stackdriver_exporter.StackdriverExporter()
-    tracer = Tracer(exporter=exporter)
-    tracer_interceptor = client_interceptor.OpenCensusClientInterceptor(tracer, host_port='0.0.0.0:8080')
-except:
-    tracer_interceptor = client_interceptor.OpenCensusClientInterceptor()
+# Setup Zipkin exporter
+try: 
+  zipkin_service_addr = os.environ.get("ZIPKIN_SERVICE_ADDR", '')
+  if zipkin_service_addr == "":
+    logger.info("Skipping Zipkin traces initialization. Set environment variable ZIPKIN_SERVICE_ADDR=<host>:<port> to enable.")
+    raise KeyError()
+  host, port = zipkin_service_addr.split(":")
+  ze = ZipkinExporter(service_name="recommendationservice-client",
+    host_name=host,
+    port=port,
+    endpoint='/api/v2/spans')
+  sampler = AlwaysOnSampler()
+  tracer = Tracer(exporter=ze, sampler=sampler)
+  tracer_interceptor = client_interceptor.OpenCensusClientInterceptor(sampler, ze)
+  logger.info("Zipkin traces enabled, sending to " + zipkin_service_addr)
+except KeyError:
+  tracer_interceptor = client_interceptor.OpenCensusClientInterceptor()
 
 def send_confirmation_email(email, order):
   channel = grpc.insecure_channel('0.0.0.0:8080')
@@ -49,3 +62,4 @@ def send_confirmation_email(email, order):
 
 if __name__ == '__main__':
   logger.info('Client for email service.')
+
