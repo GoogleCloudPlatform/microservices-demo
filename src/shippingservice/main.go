@@ -172,7 +172,7 @@ func initZipkinTracing() {
 		return
 	}
 
-	reporter := zipkinhttp.NewReporter(svcAddr)
+	reporter := zipkinhttp.NewReporter(fmt.Sprintf("http://%s/api/v2/spans", svcAddr))
 	exporter := zipkin.NewExporter(reporter, nil)
 	trace.RegisterExporter(exporter)
 

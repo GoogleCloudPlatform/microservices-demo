@@ -41,7 +41,7 @@ function setupTracerAndExporters () {
   }
   
   const zipkinOptions = {
-    url: ZIPKIN_SERVICE_ADDR,
+    url: "http://" + ZIPKIN_SERVICE_ADDR + "/api/v2/spans",
     serviceName: 'paymentservice-server'
   };
 

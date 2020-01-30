@@ -271,7 +271,7 @@ public final class AdService {
   private static void initZipkin() {
     String zipkinAddr = System.getenv("ZIPKIN_SERVICE_ADDR");
     if (zipkinAddr != null && !zipkinAddr.isEmpty()) {
-      String zipkinUrl = String.format("%s", zipkinAddr);
+      String zipkinUrl = String.format("http://%s/api/v2/spans", zipkinAddr);
       // Register Zipkin Tracing.
       ZipkinTraceExporter.createAndRegister(zipkinUrl, "adservice");
       logger.info("Zipkin initialization complete.");
