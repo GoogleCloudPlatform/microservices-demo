@@ -4,9 +4,7 @@ The Shipping service provides price quote, tracking IDs, and the impression of o
 
 ## Local
 
-Run the following command to restore dependencies to `vendor/` directory:
-
-    dep ensure --vendor-only
+Now using Go 1.13 Modules. just use `go build`
 
 ## Build
 

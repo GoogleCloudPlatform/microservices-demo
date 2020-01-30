@@ -21,18 +21,21 @@ import (
 	"os"
 	"time"
 
-	"cloud.google.com/go/profiler"
-	"contrib.go.opencensus.io/exporter/stackdriver"
 	"github.com/gorilla/mux"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
-	"go.opencensus.io/exporter/jaeger"
+
 	"go.opencensus.io/plugin/ocgrpc"
 	"go.opencensus.io/plugin/ochttp"
 	"go.opencensus.io/plugin/ochttp/propagation/b3"
 	"go.opencensus.io/stats/view"
 	"go.opencensus.io/trace"
 	"google.golang.org/grpc"
+
+	"contrib.go.opencensus.io/exporter/jaeger"
+	"contrib.go.opencensus.io/exporter/prometheus"
+	"contrib.go.opencensus.io/exporter/zipkin"
+	zipkinhttp "github.com/openzipkin/zipkin-go/reporter/http"
 )
 
 const (
@@ -94,7 +97,6 @@ func main() {
 	}
 	log.Out = os.Stdout
 
-	go initProfiling(log, "frontend", "1.0.0")
 	go initTracing(log)
 
 	srvPort := port
@@ -132,6 +134,9 @@ func main() {
 	r.HandleFunc("/robots.txt", func(w http.ResponseWriter, _ *http.Request) { fmt.Fprint(w, "User-agent: *\nDisallow: /") })
 	r.HandleFunc("/_healthz", func(w http.ResponseWriter, _ *http.Request) { fmt.Fprint(w, "ok") })
 
+	// also init the prometheus handler
+	initPrometheusStats(log, r)
+
 	var handler http.Handler = r
 	handler = &logHandler{log: log, next: handler} // add logging
 	handler = ensureSessionID(handler)             // add session ID
@@ -166,7 +171,38 @@ func initJaegerTracing(log logrus.FieldLogger) {
 	log.Info("jaeger initialization completed.")
 }
 
-func initStats(log logrus.FieldLogger, exporter *stackdriver.Exporter) {
+func initZipkinTracing(log logrus.FieldLogger) {
+	// start zipkin exporter
+	// URL to zipkin is like http://zipkin.tcc:9411/api/v2/spans
+	svcAddr := os.Getenv("ZIPKIN_SERVICE_ADDR")
+	if svcAddr == "" {
+		log.Info("zipkin initialization disabled.")
+		return
+	}
+
+	reporter := zipkinhttp.NewReporter(svcAddr)
+	exporter := zipkin.NewExporter(reporter, nil)
+	trace.RegisterExporter(exporter)
+
+	log.Info("zipkin initialization completed.")
+}
+
+func initPrometheusStats(log logrus.FieldLogger, r *mux.Router) {
+	// init the prometheus /metrics endpoint
+	exporter, err := prometheus.NewExporter(prometheus.Options{})
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// register basic views
+	initStats(log, exporter)
+
+	// init the prometheus /metrics endpoint
+	r.Handle("/metrics", exporter).Methods(http.MethodGet, http.MethodHead)
+	log.Info("prometheus metrics initialization completed.")
+}
+
+func initStats(log logrus.FieldLogger, exporter *prometheus.Exporter) {
 	view.SetReportingPeriod(60 * time.Second)
 	view.RegisterExporter(exporter)
 	if err := view.Register(ochttp.DefaultServerViews...); err != nil {
@@ -181,32 +217,6 @@ func initStats(log logrus.FieldLogger, exporter *stackdriver.Exporter) {
 	}
 }
 
-func initStackdriverTracing(log logrus.FieldLogger) {
-	// TODO(ahmetb) this method is duplicated in other microservices using Go
-	// since they are not sharing packages.
-	for i := 1; i <= 3; i++ {
-		log = log.WithField("retry", i)
-		exporter, err := stackdriver.NewExporter(stackdriver.Options{})
-		if err != nil {
-			// log.Warnf is used since there are multiple backends (stackdriver & jaeger)
-			// to store the traces. In production setup most likely you would use only one backend.
-			// In that case you should use log.Fatalf.
-			log.Warnf("failed to initialize Stackdriver exporter: %+v", err)
-		} else {
-			trace.RegisterExporter(exporter)
-			log.Info("registered Stackdriver tracing")
-
-			// Register the views to collect server stats.
-			initStats(log, exporter)
-			return
-		}
-		d := time.Second * 20 * time.Duration(i)
-		log.Debugf("sleeping %v to retry initializing Stackdriver exporter", d)
-		time.Sleep(d)
-	}
-	log.Warn("could not initialize Stackdriver exporter after retrying, giving up")
-}
-
 func initTracing(log logrus.FieldLogger) {
 	// This is a demo app with low QPS. trace.AlwaysSample() is used here
 	// to make sure traces are available for observation and analysis.
@@ -215,31 +225,7 @@ func initTracing(log logrus.FieldLogger) {
 	trace.ApplyConfig(trace.Config{DefaultSampler: trace.AlwaysSample()})
 
 	initJaegerTracing(log)
-	initStackdriverTracing(log)
-
-}
-
-func initProfiling(log logrus.FieldLogger, service, version string) {
-	// TODO(ahmetb) this method is duplicated in other microservices using Go
-	// since they are not sharing packages.
-	for i := 1; i <= 3; i++ {
-		log = log.WithField("retry", i)
-		if err := profiler.Start(profiler.Config{
-			Service:        service,
-			ServiceVersion: version,
-			// ProjectID must be set if not running on GCP.
-			// ProjectID: "my-project",
-		}); err != nil {
-			log.Warnf("warn: failed to start profiler: %+v", err)
-		} else {
-			log.Info("started Stackdriver profiler")
-			return
-		}
-		d := time.Second * 10 * time.Duration(i)
-		log.Debugf("sleeping %v to retry initializing Stackdriver profiler", d)
-		time.Sleep(d)
-	}
-	log.Warn("warning: could not initialize Stackdriver profiler after retrying, giving up")
+	initZipkinTracing(log)
 }
 
 func mustMapEnv(target *string, envKey string) {

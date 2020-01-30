@@ -67,6 +67,7 @@ def checkout(l):
 class UserBehavior(TaskSet):
 
     def on_start(self):
+        self.client.verify = False
         index(self)
 
     tasks = {index: 1,

@@ -15,11 +15,11 @@
  * limitations under the License.
  *
  */
-require('@google-cloud/trace-agent').start();
+// require('@google-cloud/trace-agent').start();
 
 const path = require('path');
 const grpc = require('grpc');
-const leftPad = require('left-pad');
+const leftPad = require('pad-left');
 const pino = require('pino');
 
 const PROTO_PATH = path.join(__dirname, './proto/demo.proto');
@@ -61,6 +61,6 @@ client.convert(request, (err, response) => {
   if (err) {
     logger.error(`Error in convert: ${err}`);
   } else {
-    logger.log(`Convert: ${_moneyToString(request.from)} to ${_moneyToString(response)}`);
+    logger.info(`Convert: ${_moneyToString(request.from)} to ${_moneyToString(response)}`);
   }
 });

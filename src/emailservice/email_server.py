@@ -28,32 +28,40 @@ import demo_pb2_grpc
 from grpc_health.v1 import health_pb2
 from grpc_health.v1 import health_pb2_grpc
 
-from opencensus.trace.exporters import stackdriver_exporter
-from opencensus.trace.ext.grpc import server_interceptor
-from opencensus.trace.samplers import always_on
+
+from opencensus.ext.grpc import server_interceptor
+from opencensus.trace.tracer import Tracer
+from opencensus.ext.zipkin.trace_exporter import ZipkinExporter
+from opencensus.trace.samplers import AlwaysOnSampler
+from opencensus.trace import config_integration
 
 # import googleclouddebugger
 import googlecloudprofiler
 
-try:
-    sampler = always_on.AlwaysOnSampler()
-    exporter = stackdriver_exporter.StackdriverExporter(
-        project_id=os.environ.get('GCP_PROJECT_ID'),
-        transport=AsyncTransport)
-    tracer_interceptor = server_interceptor.OpenCensusServerInterceptor(sampler, exporter)
-except:
-    tracer_interceptor = server_interceptor.OpenCensusServerInterceptor()
+zipkin_service_addr = os.environ["ZIPKIN_SERVICE_ADDR"]
+host, port = zipkin_service_addr.split(":")
+ze = ZipkinExporter(service_name="emailservice-server",
+  host_name=host,
+  port=port,
+  endpoint='/api/v2/spans')
+sampler = AlwaysOnSampler()
+tracer = Tracer(exporter=ze, sampler=sampler)
 
-# try:
-#     googleclouddebugger.enable(
-#         module='emailserver',
-#         version='1.0.0'
-#     )
-# except:
-#     pass
+try:
+  tracer_interceptor = server_interceptor.OpenCensusServerInterceptor(sampler, ze)
+except:
+  tracer_interceptor = server_interceptor.OpenCensusServerInterceptor()
 
 from logger import getJSONLogger
 logger = getJSONLogger('emailservice-server')
+
+#  log the SPAN on the console
+config_integration.trace_integrations(['logging'])
+
+# uncomment to create a test span
+# with tracer.span(name='hello'):
+#     logger.warning('In the span')
+
 
 # Loads confirmation email template from file
 env = Environment(
@@ -171,16 +179,24 @@ def initStackdriverProfiling():
         logger.warning("Could not initialize Stackdriver Profiler after retrying, giving up")
   return
 
+def initZipkinTrace(zipkin_service_addr):
+  host, port = zipkin_service_addr.split(":")
+  ze = ZipkinExporter(service_name="emailservice-server",
+                                  host_name=host,
+                                  port=port,
+                                  endpoint='/api/v2/spans')
+  sampler = AlwaysOnSampler()
+  tracer = Tracer(exporter=ze, sampler=sampler)
+
+  try:
+    tracer_interceptor = server_interceptor.OpenCensusServerInterceptor(sampler, ze)
+  except:
+    tracer_interceptor = server_interceptor.OpenCensusServerInterceptor()
+
+
+
+  logger.info("Successfully started Zipkin Traces to " + zipkin_service_addr)
+
 if __name__ == '__main__':
   logger.info('starting the email service in dummy mode.')
-  try:
-    enable_profiler = os.environ["ENABLE_PROFILER"]
-    if enable_profiler != "1":
-      raise KeyError()
-    else:
-      initStackdriverProfiling()
-  except KeyError:
-      logger.info("Skipping Stackdriver Profiler Python agent initialization. Set environment variable ENABLE_PROFILER=1 to enable.")
-
-
   start(dummy_mode = True)

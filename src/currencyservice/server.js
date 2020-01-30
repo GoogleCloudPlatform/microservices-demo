@@ -14,20 +14,6 @@
  * limitations under the License.
  */
 
-require('@google-cloud/profiler').start({
-  serviceContext: {
-    service: 'currencyservice',
-    version: '1.0.0'
-  }
-});
-require('@google-cloud/trace-agent').start();
-require('@google-cloud/debug-agent').start({
-  serviceContext: {
-    service: 'currencyservice',
-    version: 'VERSION'
-  }
-});
-
 const path = require('path');
 const grpc = require('grpc');
 const pino = require('pino');
@@ -40,6 +26,12 @@ const PORT = process.env.PORT;
 
 const shopProto = _loadProto(MAIN_PROTO_PATH).hipstershop;
 const healthProto = _loadProto(HEALTH_PROTO_PATH).grpc.health.v1;
+
+// tracing stuff
+const tracing = require('@opencensus/nodejs');
+const { plugin } = require('@opencensus/instrumentation-grpc');
+const { ZipkinTraceExporter } = require('@opencensus/exporter-zipkin');
+const tracer = setupTracerAndExporters();
 
 const logger = pino({
   name: 'currencyservice-server',
@@ -144,12 +136,46 @@ function check (call, callback) {
  * CurrencyConverter service at the sample server port
  */
 function main () {
+
   logger.info(`Starting gRPC server on port ${PORT}...`);
   const server = new grpc.Server();
   server.addService(shopProto.CurrencyService.service, {getSupportedCurrencies, convert});
   server.addService(healthProto.Health.service, {check});
   server.bind(`0.0.0.0:${PORT}`, grpc.ServerCredentials.createInsecure());
   server.start();
+}
+
+function setupTracerAndExporters () {
+  // grab Zipkin address from env variables
+  const ZIPKIN_SERVICE_ADDR = process.env['ZIPKIN_SERVICE_ADDR'];
+  if (!ZIPKIN_SERVICE_ADDR) {
+    throw Error('Unable to start Zipking, please define ZIPKIN_SERVICE_ADDR');
+  }
+  
+  const zipkinOptions = {
+    url: ZIPKIN_SERVICE_ADDR,
+    serviceName: 'paymentservice-server'
+  };
+
+  // Creates Zipkin exporter
+  const exporter = new ZipkinTraceExporter(zipkinOptions);
+
+  // Starts Stackdriver exporter
+  tracing.registerExporter(exporter).start();
+
+  // Starts tracing and set sampling rate
+  const tracer = tracing.start({
+    samplingRate: 1 // For demo purposes, always sample
+  }).tracer;
+
+  // Defines basedir and version
+  const basedir = path.dirname(require.resolve('grpc'));
+  const version = require(path.join(basedir, 'package.json')).version;
+
+  // Enables GRPC plugin: Method that enables the instrumentation patch.
+  plugin.enable(grpc, tracer, version, /** plugin options */{}, basedir);
+
+  return tracer;
 }
 
 main();

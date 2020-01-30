@@ -21,6 +21,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net"
+	"net/http"
 	"os"
 	"os/signal"
 	"strings"
@@ -31,17 +32,19 @@ import (
 	pb "github.com/GoogleCloudPlatform/microservices-demo/src/productcatalogservice/genproto"
 	healthpb "google.golang.org/grpc/health/grpc_health_v1"
 
-	"cloud.google.com/go/profiler"
-	"contrib.go.opencensus.io/exporter/stackdriver"
 	"github.com/golang/protobuf/jsonpb"
 	"github.com/sirupsen/logrus"
-	"go.opencensus.io/exporter/jaeger"
 	"go.opencensus.io/plugin/ocgrpc"
 	"go.opencensus.io/stats/view"
 	"go.opencensus.io/trace"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+
+	"contrib.go.opencensus.io/exporter/jaeger"
+	"contrib.go.opencensus.io/exporter/prometheus"
+	"contrib.go.opencensus.io/exporter/zipkin"
+	zipkinhttp "github.com/openzipkin/zipkin-go/reporter/http"
 )
 
 var (
@@ -50,7 +53,8 @@ var (
 	log          *logrus.Logger
 	extraLatency time.Duration
 
-	port = "3550"
+	port        = "3550"
+	metricsPort = "3551"
 
 	reloadCatalog bool
 )
@@ -75,7 +79,6 @@ func init() {
 
 func main() {
 	go initTracing()
-	go initProfiling("productcatalogservice", "1.0.0")
 	flag.Parse()
 
 	// set injected latency
@@ -111,6 +114,12 @@ func main() {
 	}
 	log.Infof("starting grpc server at :%s", port)
 	run(port)
+
+	if os.Getenv("METRICSPORT") != "" {
+		metricsPort = os.Getenv("METRICSPORT")
+	}
+
+	initPrometheusStats()
 	select {}
 }
 
@@ -148,7 +157,39 @@ func initJaegerTracing() {
 	log.Info("jaeger initialization completed.")
 }
 
-func initStats(exporter *stackdriver.Exporter) {
+func initZipkinTracing() {
+	// start zipkin exporter
+	// URL to zipkin is like http://zipkin.tcc:9411/api/v2/spans
+	svcAddr := os.Getenv("ZIPKIN_SERVICE_ADDR")
+	if svcAddr == "" {
+		log.Info("zipkin initialization disabled. Set ZIPKIN_SERVICE_ADDR=<host>:<port> to enable")
+		return
+	}
+
+	reporter := zipkinhttp.NewReporter(fmt.Sprintf("http://%s/api/v2/spans", svcAddr))
+	exporter := zipkin.NewExporter(reporter, nil)
+	trace.RegisterExporter(exporter)
+
+	log.Info("zipkin initialization completed.")
+}
+
+func initPrometheusStats() {
+	// init the prometheus /metrics endpoint
+	exporter, err := prometheus.NewExporter(prometheus.Options{})
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// register basic views
+	initStats(exporter)
+
+	metricsURL := fmt.Sprintf(":%s", metricsPort)
+	http.Handle("/metrics", exporter)
+	log.Infof("starting HTTP server at %s", metricsURL)
+	log.Fatal(http.ListenAndServe(metricsURL, nil))
+}
+
+func initStats(exporter *prometheus.Exporter) {
 	view.SetReportingPeriod(60 * time.Second)
 	view.RegisterExporter(exporter)
 	if err := view.Register(ocgrpc.DefaultServerViews...); err != nil {
@@ -158,54 +199,11 @@ func initStats(exporter *stackdriver.Exporter) {
 	}
 }
 
-func initStackdriverTracing() {
-	// TODO(ahmetb) this method is duplicated in other microservices using Go
-	// since they are not sharing packages.
-	for i := 1; i <= 3; i++ {
-		exporter, err := stackdriver.NewExporter(stackdriver.Options{})
-		if err != nil {
-			log.Warnf("failed to initialize Stackdriver exporter: %+v", err)
-		} else {
-			trace.RegisterExporter(exporter)
-			trace.ApplyConfig(trace.Config{DefaultSampler: trace.AlwaysSample()})
-			log.Info("registered Stackdriver tracing")
-
-			// Register the views to collect server stats.
-			initStats(exporter)
-			return
-		}
-		d := time.Second * 10 * time.Duration(i)
-		log.Infof("sleeping %v to retry initializing Stackdriver exporter", d)
-		time.Sleep(d)
-	}
-	log.Warn("could not initialize Stackdriver exporter after retrying, giving up")
-}
-
 func initTracing() {
-	initJaegerTracing()
-	initStackdriverTracing()
-}
+	trace.ApplyConfig(trace.Config{DefaultSampler: trace.AlwaysSample()})
 
-func initProfiling(service, version string) {
-	// TODO(ahmetb) this method is duplicated in other microservices using Go
-	// since they are not sharing packages.
-	for i := 1; i <= 3; i++ {
-		if err := profiler.Start(profiler.Config{
-			Service:        service,
-			ServiceVersion: version,
-			// ProjectID must be set if not running on GCP.
-			// ProjectID: "my-project",
-		}); err != nil {
-			log.Warnf("failed to start profiler: %+v", err)
-		} else {
-			log.Info("started Stackdriver profiler")
-			return
-		}
-		d := time.Second * 10 * time.Duration(i)
-		log.Infof("sleeping %v to retry initializing Stackdriver profiler", d)
-		time.Sleep(d)
-	}
-	log.Warn("could not initialize Stackdriver profiler after retrying, giving up")
+	initJaegerTracing()
+	initZipkinTracing()
 }
 
 type productCatalog struct{}

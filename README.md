@@ -1,5 +1,33 @@
 # Hipster Shop: Cloud-Native Microservices Demo Application
 
+This repo is a fork of http://go/microservices-demo with modifications to suite the Tetrate Service Bus.
+
+Changes includes :
+- using `Zipkin` traces instead of `Jaeger`/`Stackdriver`
+- adding HTTP and GRPC metrics where needed
+
+## Changelog
+
+- 20200129
+  - All Go microservices are updated to use Zipkin and provide a `/metrics` endpoint for metrology
+  - Loadgenerator can connect to an HTTPS endpoint
+
+## building images
+You can build the images using the scripts located in the `hack` folder:
+
+```
+# build only one image
+TAG=v1.2.3 REPO_PREFIX=my.docker.hub ./hack/make-docker-images-nopush.sh emailservice
+
+# build all images
+TAG=v1.2.3 REPO_PREFIX=my.docker.hub ./hack/make-docker-images-nopush.sh
+
+# build all and push to Docker Registry
+TAG=v1.2.3 REPO_PREFIX=my.docker.hub ./hack/make-docker-images.sh
+```
+
+## Original Project Description
+
 This project contains a 10-tier microservices application. The application is a
 web-based e-commerce app called **“Hipster Shop”** where users can browse items,
 add them to the cart, and purchase them.

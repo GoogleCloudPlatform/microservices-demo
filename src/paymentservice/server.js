@@ -19,12 +19,52 @@ const protoLoader = require('@grpc/proto-loader');
 
 const charge = require('./charge');
 
+// tracing stuff
+const tracing = require('@opencensus/nodejs');
+const { plugin } = require('@opencensus/instrumentation-grpc');
+const { ZipkinTraceExporter } = require('@opencensus/exporter-zipkin');
+const tracer = setupTracerAndExporters();
+
 const logger = pino({
   name: 'paymentservice-server',
   messageKey: 'message',
   changeLevelName: 'severity',
   useLevelLabels: true
 });
+
+
+function setupTracerAndExporters () {
+  // grab Zipkin address from env variables
+  const ZIPKIN_SERVICE_ADDR = process.env['ZIPKIN_SERVICE_ADDR'];
+  if (!ZIPKIN_SERVICE_ADDR) {
+    throw Error('Unable to start Zipking, please define ZIPKIN_SERVICE_ADDR');
+  }
+  
+  const zipkinOptions = {
+    url: ZIPKIN_SERVICE_ADDR,
+    serviceName: 'paymentservice-server'
+  };
+
+  // Creates Zipkin exporter
+  const exporter = new ZipkinTraceExporter(zipkinOptions);
+
+  // Starts Stackdriver exporter
+  tracing.registerExporter(exporter).start();
+
+  // Starts tracing and set sampling rate
+  const tracer = tracing.start({
+    samplingRate: 1 // For demo purposes, always sample
+  }).tracer;
+
+  // Defines basedir and version
+  const basedir = path.dirname(require.resolve('grpc'));
+  const version = require(path.join(basedir, 'package.json')).version;
+
+  // Enables GRPC plugin: Method that enables the instrumentation patch.
+  plugin.enable(grpc, tracer, version, /** plugin options */{}, basedir);
+
+  return tracer;
+}
 
 class HipsterShopServer {
   constructor (protoRoot, port = HipsterShopServer.PORT) {
@@ -96,7 +136,7 @@ class HipsterShopServer {
         check: HipsterShopServer.CheckHandler.bind(this)
       }
     );
-  }
+  };
 }
 
 HipsterShopServer.PORT = process.env.PORT;

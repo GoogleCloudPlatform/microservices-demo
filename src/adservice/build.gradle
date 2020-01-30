@@ -49,6 +49,7 @@ dependencies {
                 "io.opencensus:opencensus-api:${opencensusVersion}",
                 "io.opencensus:opencensus-contrib-grpc-util:${opencensusVersion}",
                 "io.opencensus:opencensus-exporter-trace-jaeger:${opencensusVersion}",
+                "io.opencensus:opencensus-exporter-trace-zipkin:${opencensusVersion}",
                 "io.opencensus:opencensus-exporter-stats-stackdriver:${opencensusVersion}",
                 "io.opencensus:opencensus-exporter-trace-stackdriver:${opencensusVersion}",
                 "io.opencensus:opencensus-exporter-trace-logging:${opencensusVersion}",

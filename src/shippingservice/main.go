@@ -17,21 +17,24 @@ package main
 import (
 	"fmt"
 	"net"
+	"net/http"
 	"os"
 	"time"
 
-	"cloud.google.com/go/profiler"
-	"contrib.go.opencensus.io/exporter/stackdriver"
 	"github.com/sirupsen/logrus"
-	"go.opencensus.io/exporter/jaeger"
-	"go.opencensus.io/plugin/ocgrpc"
-	"go.opencensus.io/stats/view"
-	"go.opencensus.io/trace"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/reflection"
 	"google.golang.org/grpc/status"
+
+	"contrib.go.opencensus.io/exporter/jaeger"
+	"contrib.go.opencensus.io/exporter/prometheus"
+	"contrib.go.opencensus.io/exporter/zipkin"
+	zipkinhttp "github.com/openzipkin/zipkin-go/reporter/http"
+	"go.opencensus.io/plugin/ocgrpc"
+	"go.opencensus.io/stats/view"
+	"go.opencensus.io/trace"
 
 	pb "github.com/GoogleCloudPlatform/microservices-demo/src/shippingservice/genproto"
 	healthpb "google.golang.org/grpc/health/grpc_health_v1"
@@ -39,6 +42,7 @@ import (
 
 const (
 	defaultPort = "50051"
+	metricsPort = "50052"
 )
 
 var log *logrus.Logger
@@ -59,7 +63,6 @@ func init() {
 
 func main() {
 	go initTracing()
-	go initProfiling("shippingservice", "1.0.0")
 
 	port := defaultPort
 	if value, ok := os.LookupEnv("PORT"); ok {
@@ -76,6 +79,9 @@ func main() {
 	pb.RegisterShippingServiceServer(srv, svc)
 	healthpb.RegisterHealthServer(srv, svc)
 	log.Infof("Shipping Service listening on port %s", port)
+
+	// start metrics server
+	go initPrometheusStats()
 
 	// Register reflection service on gRPC server.
 	reflection.Register(srv)
@@ -157,7 +163,40 @@ func initJaegerTracing() {
 	log.Info("jaeger initialization completed.")
 }
 
-func initStats(exporter *stackdriver.Exporter) {
+func initZipkinTracing() {
+	// start zipkin exporter
+	// URL to zipkin is like http://zipkin.tcc:9411/api/v2/spans
+	svcAddr := os.Getenv("ZIPKIN_SERVICE_ADDR")
+	if svcAddr == "" {
+		log.Info("zipkin initialization disabled.")
+		return
+	}
+
+	reporter := zipkinhttp.NewReporter(svcAddr)
+	exporter := zipkin.NewExporter(reporter, nil)
+	trace.RegisterExporter(exporter)
+
+	log.Info("zipkin initialization completed.")
+}
+
+func initPrometheusStats() {
+	// init the prometheus /metrics endpoint
+	exporter, err := prometheus.NewExporter(prometheus.Options{})
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// register basic views
+	initStats(exporter)
+
+	metricsURL := fmt.Sprintf(":%s", metricsPort)
+	http.Handle("/metrics", exporter)
+
+	log.Infof("starting HTTP server at %s", metricsURL)
+	log.Fatal(http.ListenAndServe(metricsURL, nil))
+}
+
+func initStats(exporter *prometheus.Exporter) {
 	view.SetReportingPeriod(60 * time.Second)
 	view.RegisterExporter(exporter)
 	if err := view.Register(ocgrpc.DefaultServerViews...); err != nil {
@@ -167,52 +206,13 @@ func initStats(exporter *stackdriver.Exporter) {
 	}
 }
 
-func initStackdriverTracing() {
-	// TODO(ahmetb) this method is duplicated in other microservices using Go
-	// since they are not sharing packages.
-	for i := 1; i <= 3; i++ {
-		exporter, err := stackdriver.NewExporter(stackdriver.Options{})
-		if err != nil {
-			log.Warnf("failed to initialize Stackdriver exporter: %+v", err)
-		} else {
-			trace.RegisterExporter(exporter)
-			trace.ApplyConfig(trace.Config{DefaultSampler: trace.AlwaysSample()})
-			log.Info("registered Stackdriver tracing")
-
-			// Register the views to collect server stats.
-			initStats(exporter)
-			return
-		}
-		d := time.Second * 10 * time.Duration(i)
-		log.Infof("sleeping %v to retry initializing Stackdriver exporter", d)
-		time.Sleep(d)
-	}
-	log.Warn("could not initialize Stackdriver exporter after retrying, giving up")
-}
-
 func initTracing() {
-	initJaegerTracing()
-	initStackdriverTracing()
-}
+	// This is a demo app with low QPS. trace.AlwaysSample() is used here
+	// to make sure traces are available for observation and analysis.
+	// In a production environment or high QPS setup please use
+	// trace.ProbabilitySampler set at the desired probability.
+	trace.ApplyConfig(trace.Config{DefaultSampler: trace.AlwaysSample()})
 
-func initProfiling(service, version string) {
-	// TODO(ahmetb) this method is duplicated in other microservices using Go
-	// since they are not sharing packages.
-	for i := 1; i <= 3; i++ {
-		if err := profiler.Start(profiler.Config{
-			Service:        service,
-			ServiceVersion: version,
-			// ProjectID must be set if not running on GCP.
-			// ProjectID: "my-project",
-		}); err != nil {
-			log.Warnf("failed to start profiler: %+v", err)
-		} else {
-			log.Info("started Stackdriver profiler")
-			return
-		}
-		d := time.Second * 10 * time.Duration(i)
-		log.Infof("sleeping %v to retry initializing Stackdriver profiler", d)
-		time.Sleep(d)
-	}
-	log.Warn("could not initialize Stackdriver profiler after retrying, giving up")
+	initJaegerTracing()
+	initZipkinTracing()
 }
