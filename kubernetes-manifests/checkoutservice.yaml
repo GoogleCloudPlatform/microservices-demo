@@ -51,6 +51,12 @@ spec:
             value: "currencyservice:7000"
           - name: CART_SERVICE_ADDR
             value: "cartservice:7070"
+          - name: OC_STATS
+            value: "False"
+          - name: OC_TRACE
+            value: "False"
+          - name: OC_PROFILING
+            value: "False"
           # - name: JAEGER_SERVICE_ADDR
           #   value: "jaeger-collector:14268"
           resources:

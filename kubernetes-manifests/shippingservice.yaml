@@ -33,6 +33,12 @@ spec:
         env:
         - name: PORT
           value: "50051"
+        - name: OC_STATS
+          value: "False"
+        - name: OC_TRACE
+          value: "False"
+        - name: OC_PROFILING
+          value: "False"
         readinessProbe:
           periodSeconds: 5
           exec:

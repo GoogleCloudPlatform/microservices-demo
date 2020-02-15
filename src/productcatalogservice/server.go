@@ -79,27 +79,31 @@ func main() {
 	var err error
 	ocStats, err = getenvBool("OC_STATS")
 	if err != nil {
-		log.Error(err)
+		log.Errorf("Could not get OC_STATS var: %v, defaulting to True", err)
+		ocStats = true
 	}
-	ocStats = false
 
 	ocTrace, err := getenvBool("OC_TRACE")
 	if err != nil {
-		log.Error(err)
+		log.Errorf("Could not get OC_TRACE var: %v, defaulting to True", err)
+		ocTrace = true
 	}
-	ocTrace = false
 
 	ocProfiling, err := getenvBool("OC_PROFILING")
 	if err != nil {
-		log.Error(err)
+		log.Errorf("Could not get OC_PROFILING var: %v, defaulting to True", err)
+		ocProfiling = true
 	}
-	ocProfiling = false
 
 	if ocTrace == true {
 		go initTracing()
+	} else {
+		log.Info("Tracing disabled.")
 	}
 	if ocProfiling == true {
 		go initProfiling("productcatalogservice", "1.0.0")
+	} else {
+		log.Info("Profiling disabled.")
 	}
 
 	flag.Parse()
@@ -147,8 +151,10 @@ func run(port string) string {
 	}
 	var srv *grpc.Server
 	if ocStats == true {
+		log.Info("Stats enabled.")
 		srv = grpc.NewServer(grpc.StatsHandler(&ocgrpc.ServerHandler{}))
 	} else {
+		log.Info("Stats disabled.")
 		srv = grpc.NewServer()
 	}
 

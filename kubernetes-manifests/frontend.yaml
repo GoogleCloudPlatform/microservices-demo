@@ -65,6 +65,12 @@ spec:
             value: "checkoutservice:5050"
           - name: AD_SERVICE_ADDR
             value: "adservice:9555"
+          - name: OC_STATS
+            value: "False"
+          - name: OC_TRACE
+            value: "False"
+          - name: OC_PROFILING
+            value: "False"
           # - name: JAEGER_SERVICE_ADDR
           #   value: "jaeger-collector:14268"
           resources:
