@@ -23,6 +23,7 @@ import (
 	"net"
 	"os"
 	"os/signal"
+	"strconv"
 	"strings"
 	"sync"
 	"syscall"
@@ -53,6 +54,7 @@ var (
 	port = "3550"
 
 	reloadCatalog bool
+	ocStats       bool
 )
 
 func init() {
