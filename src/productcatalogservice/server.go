@@ -74,8 +74,32 @@ func init() {
 }
 
 func main() {
-	go initTracing()
-	go initProfiling("productcatalogservice", "1.0.0")
+	var err error
+	ocStats, err = getenvBool("OC_STATS")
+	if err != nil {
+		log.Error(err)
+	}
+	ocStats = false
+
+	ocTrace, err := getenvBool("OC_TRACE")
+	if err != nil {
+		log.Error(err)
+	}
+	ocTrace = false
+
+	ocProfiling, err := getenvBool("OC_PROFILING")
+	if err != nil {
+		log.Error(err)
+	}
+	ocProfiling = false
+
+	if ocTrace == true {
+		go initTracing()
+	}
+	if ocProfiling == true {
+		go initProfiling("productcatalogservice", "1.0.0")
+	}
+
 	flag.Parse()
 
 	// set injected latency
@@ -119,8 +143,15 @@ func run(port string) string {
 	if err != nil {
 		log.Fatal(err)
 	}
-	srv := grpc.NewServer(grpc.StatsHandler(&ocgrpc.ServerHandler{}))
+	var srv *grpc.Server
+	if ocStats == true {
+		srv = grpc.NewServer(grpc.StatsHandler(&ocgrpc.ServerHandler{}))
+	} else {
+		srv = grpc.NewServer()
+	}
+
 	svc := &productCatalog{}
+
 	pb.RegisterProductCatalogServiceServer(srv, svc)
 	healthpb.RegisterHealthServer(srv, svc)
 	go srv.Serve(l)
@@ -274,4 +305,24 @@ func (p *productCatalog) SearchProducts(ctx context.Context, req *pb.SearchProdu
 		}
 	}
 	return &pb.SearchProductsResponse{Results: ps}, nil
+}
+
+func getenvBool(key string) (bool, error) {
+	s, err := getenvStr(key)
+	if err != nil {
+		return false, err
+	}
+	v, err := strconv.ParseBool(s)
+	if err != nil {
+		return false, err
+	}
+	return v, nil
+}
+
+func getenvStr(key string) (string, error) {
+	v := os.Getenv(key)
+	if v == "" {
+		return v, fmt.Errorf("empty var")
+	}
+	return v, nil
 }

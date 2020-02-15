@@ -19,6 +19,7 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"strconv"
 	"time"
 
 	"cloud.google.com/go/profiler"
@@ -94,8 +95,24 @@ func main() {
 	}
 	log.Out = os.Stdout
 
-	go initProfiling(log, "frontend", "1.0.0")
-	go initTracing(log)
+	ocTrace, err := getenvBool("OC_TRACE")
+	if err != nil {
+		log.Error(err)
+	}
+	ocTrace = false
+
+	ocProfiling, err := getenvBool("OC_PROFILING")
+	if err != nil {
+		log.Error(err)
+	}
+	ocProfiling = false
+
+	if ocTrace == true {
+		go initTracing(log)
+	}
+	if ocProfiling == true {
+		go initProfiling(log, "frontend", "1.0.0")
+	}
 
 	srvPort := port
 	if os.Getenv("PORT") != "" {
@@ -259,4 +276,24 @@ func mustConnGRPC(ctx context.Context, conn **grpc.ClientConn, addr string) {
 	if err != nil {
 		panic(errors.Wrapf(err, "grpc: failed to connect %s", addr))
 	}
+}
+
+func getenvBool(key string) (bool, error) {
+	s, err := getenvStr(key)
+	if err != nil {
+		return false, err
+	}
+	v, err := strconv.ParseBool(s)
+	if err != nil {
+		return false, err
+	}
+	return v, nil
+}
+
+func getenvStr(key string) (string, error) {
+	v := os.Getenv(key)
+	if v == "" {
+		return v, fmt.Errorf("empty var")
+	}
+	return v, nil
 }

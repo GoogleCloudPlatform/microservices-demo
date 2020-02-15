@@ -19,6 +19,7 @@ import (
 	"fmt"
 	"net"
 	"os"
+	"strconv"
 	"time"
 
 	"cloud.google.com/go/profiler"
@@ -69,8 +70,30 @@ type checkoutService struct {
 }
 
 func main() {
-	go initTracing()
-	go initProfiling("checkoutservice", "1.0.0")
+	ocStats, err := getenvBool("OC_STATS")
+	if err != nil {
+		log.Error(err)
+	}
+	ocStats = false
+
+	ocTrace, err := getenvBool("OC_TRACE")
+	if err != nil {
+		log.Error(err)
+	}
+	ocTrace = false
+
+	ocProfiling, err := getenvBool("OC_PROFILING")
+	if err != nil {
+		log.Error(err)
+	}
+	ocProfiling = false
+
+	if ocTrace == true {
+		go initTracing()
+	}
+	if ocProfiling == true {
+		go initProfiling("checkoutservice", "1.0.0")
+	}
 
 	port := listenPort
 	if os.Getenv("PORT") != "" {
@@ -91,7 +114,13 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	srv := grpc.NewServer(grpc.StatsHandler(&ocgrpc.ServerHandler{}))
+
+	var srv *grpc.Server
+	if ocStats == true {
+		srv = grpc.NewServer(grpc.StatsHandler(&ocgrpc.ServerHandler{}))
+	} else {
+		srv = grpc.NewServer()
+	}
 	pb.RegisterCheckoutServiceServer(srv, svc)
 	healthpb.RegisterHealthServer(srv, svc)
 	log.Infof("starting to listen on tcp: %q", lis.Addr().String())
@@ -409,3 +438,23 @@ func (cs *checkoutService) shipOrder(ctx context.Context, address *pb.Address, i
 }
 
 // TODO: Dial and create client once, reuse.
+
+func getenvBool(key string) (bool, error) {
+	s, err := getenvStr(key)
+	if err != nil {
+		return false, err
+	}
+	v, err := strconv.ParseBool(s)
+	if err != nil {
+		return false, err
+	}
+	return v, nil
+}
+
+func getenvStr(key string) (string, error) {
+	v := os.Getenv(key)
+	if v == "" {
+		return v, fmt.Errorf("empty var")
+	}
+	return v, nil
+}
