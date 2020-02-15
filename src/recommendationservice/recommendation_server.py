@@ -88,33 +88,49 @@ class RecommendationService(demo_pb2_grpc.RecommendationServiceServicer):
 if __name__ == "__main__":
     logger.info("initializing recommendationservice")
 
+    # Profiler
     try:
-      enable_profiler = os.environ["ENABLE_PROFILER"]
-      if enable_profiler != "1":
+      sdProfiler = os.getenv('SD_PROFILER', True)
+      if sdProfiler != "True":
         raise KeyError()
       else:
+        logger.inf("Profiler enabled.")
         initStackdriverProfiling()
     except KeyError:
-      logger.info("Skipping Stackdriver Profiler Python agent initialization. Set environment variable ENABLE_PROFILER=1 to enable.")
+      logger.info("Profiler disabled.")
 
-    try:
-        sampler = always_on.AlwaysOnSampler()
-        exporter = stackdriver_exporter.StackdriverExporter(
-            project_id=os.environ.get('GCP_PROJECT_ID'),
-            transport=AsyncTransport)
-        tracer_interceptor = server_interceptor.OpenCensusServerInterceptor(sampler, exporter)
-    except:
-        tracer_interceptor = server_interceptor.OpenCensusServerInterceptor()
+    # Trace
+    sdTrace = os.getenv('SD_TRACE', True)
+    if sdTrace != True:
+      logger.info("Tracing disabled.")
+      tracer_interceptor = server_interceptor.OpenCensusServerInterceptor()
+    else:
+      logger.info("Tracing enabled.")
+      try:
+          sampler = always_on.AlwaysOnSampler()
+          exporter = stackdriver_exporter.StackdriverExporter(
+              project_id=os.environ.get('GCP_PROJECT_ID'),
+              transport=AsyncTransport)
+          tracer_interceptor = server_interceptor.OpenCensusServerInterceptor(sampler, exporter)
+      except:
+          tracer_interceptor = server_interceptor.OpenCensusServerInterceptor()
 
-    try:
-        googleclouddebugger.enable(
-            module='recommendationserver',
-            version='1.0.0'
-        )
-    except Exception, err:
-        logger.error("could not enable debugger")
-        logger.error(traceback.print_exc())
-        pass
+    # Debugger
+    sdDebugger = os.getenv('SD_DEBUGGER', True)
+    if sdDebugger != True:
+      logger.info("Debugger disabled.")
+      tracer_interceptor = server_interceptor.OpenCensusServerInterceptor()
+    else:
+      logger.info("Debugger enabled.")
+      try:
+          googleclouddebugger.enable(
+              module='recommendationserver',
+              version='1.0.0'
+          )
+      except Exception, err:
+          logger.error("could not enable debugger")
+          logger.error(traceback.print_exc())
+          pass
 
     port = os.environ.get('PORT', "8080")
     catalog_addr = os.environ.get('PRODUCT_CATALOG_SERVICE_ADDR', '')

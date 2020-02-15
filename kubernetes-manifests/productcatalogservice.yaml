@@ -34,11 +34,11 @@ spec:
         env:
         - name: PORT
           value: "3550"
-        - name: OC_STATS
+        - name: SD_STATS
           value: "False"
-        - name: OC_TRACE
+        - name: SD_TRACE
           value: "False"
-        - name: OC_PROFILING
+        - name: SD_PROFILER
           value: "False"
         readinessProbe:
           exec:

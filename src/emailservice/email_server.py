@@ -35,14 +35,28 @@ from opencensus.trace.samplers import always_on
 # import googleclouddebugger
 import googlecloudprofiler
 
-try:
-    sampler = always_on.AlwaysOnSampler()
-    exporter = stackdriver_exporter.StackdriverExporter(
-        project_id=os.environ.get('GCP_PROJECT_ID'),
-        transport=AsyncTransport)
-    tracer_interceptor = server_interceptor.OpenCensusServerInterceptor(sampler, exporter)
-except:
+from logger import getJSONLogger
+logger = getJSONLogger('emailservice-server')
+
+
+sdTrace = os.getenv('SD_TRACE', True)
+sdStats = os.getenv('SD_STATS', True)
+
+if sdTrace != False:
+  logger.info("Tracing enabled.")
+  try:
+      sampler = always_on.AlwaysOnSampler()
+      exporter = stackdriver_exporter.StackdriverExporter(
+          project_id=os.environ.get('GCP_PROJECT_ID'),
+          transport=AsyncTransport)
+      tracer_interceptor = server_interceptor.OpenCensusServerInterceptor(sampler, exporter)
+  except:
+      tracer_interceptor = server_interceptor.OpenCensusServerInterceptor()
+else:
+    logger.info("Tracing disabled.")
     tracer_interceptor = server_interceptor.OpenCensusServerInterceptor()
+
+
 
 # try:
 #     googleclouddebugger.enable(
@@ -51,9 +65,6 @@ except:
 #     )
 # except:
 #     pass
-
-from logger import getJSONLogger
-logger = getJSONLogger('emailservice-server')
 
 # Loads confirmation email template from file
 env = Environment(

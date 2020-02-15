@@ -65,11 +65,11 @@ spec:
             value: "checkoutservice:5050"
           - name: AD_SERVICE_ADDR
             value: "adservice:9555"
-          - name: OC_STATS
+          - name: SD_STATS
             value: "False"
-          - name: OC_TRACE
+          - name: SD_TRACE
             value: "False"
-          - name: OC_PROFILING
+          - name: SD_PROFILER
             value: "False"
           # - name: JAEGER_SERVICE_ADDR
           #   value: "jaeger-collector:14268"

@@ -51,11 +51,11 @@ spec:
             value: "currencyservice:7000"
           - name: CART_SERVICE_ADDR
             value: "cartservice:7070"
-          - name: OC_STATS
+          - name: SD_STATS
             value: "False"
-          - name: OC_TRACE
+          - name: SD_TRACE
             value: "False"
-          - name: OC_PROFILING
+          - name: SD_PROFILER
             value: "False"
           # - name: JAEGER_SERVICE_ADDR
           #   value: "jaeger-collector:14268"
