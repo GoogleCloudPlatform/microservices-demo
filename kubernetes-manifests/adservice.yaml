@@ -34,6 +34,10 @@ spec:
         env:
         - name: PORT
           value: "9555"
+        - name: OC_STATS
+          value: "True"
+        - name: OC_TRACE
+          value: "True"
         #- name: JAEGER_SERVICE_ADDR
         #  value: "jaeger-collector:14268"
         resources:
