@@ -26,6 +26,7 @@ import grpc
 from opencensus.trace.exporters import print_exporter
 from opencensus.trace.exporters import stackdriver_exporter
 from opencensus.trace.ext.grpc import server_interceptor
+from opencensus.common.transports.async_ import AsyncTransport
 from opencensus.trace.samplers import always_on
 
 import demo_pb2
@@ -74,7 +75,7 @@ class RecommendationService(demo_pb2_grpc.RecommendationServiceServicer):
         indices = random.sample(range(num_products), num_return)
         # fetch product ids from indices
         prod_list = [filtered_products[i] for i in indices]
-        logger.info("[Recv ListRecommendations] product_ids={}".format(prod_list))
+        # logger.info("[Recv ListRecommendations] product_ids={}".format(prod_list))
         # build and return response
         response = demo_pb2.ListRecommendationsResponse()
         response.product_ids.extend(prod_list)
@@ -90,8 +91,9 @@ if __name__ == "__main__":
 
     # Profiler
     try:
-      profiler = os.getenv('PROFILER', True)
-      if profiler != "True":
+      profiler = os.getenv('PROFILER', "true")
+      profiler = profiler.lower()
+      if profiler != "true":
         raise KeyError()
       else:
         logger.info("Profiler enabled.")
@@ -99,38 +101,42 @@ if __name__ == "__main__":
     except KeyError:
       logger.info("Profiler disabled.")
 
-    # Trace
-    trace = os.getenv('TRACE', True)
-    if trace != True:
+    # Tracing
+    try:
+      trace = os.getenv('TRACE', "true")
+      trace = trace.lower()
+      if trace != "true":
+        raise KeyError()
+      else:
+        logger.info("Tracing enabled.")
+        sampler = always_on.AlwaysOnSampler()
+        exporter = stackdriver_exporter.StackdriverExporter(
+          project_id=os.environ.get('GCP_PROJECT_ID'),
+          transport=AsyncTransport)
+        tracer_interceptor = server_interceptor.OpenCensusServerInterceptor(sampler, exporter)
+    except KeyError:
       logger.info("Tracing disabled.")
       tracer_interceptor = server_interceptor.OpenCensusServerInterceptor()
-    else:
-      logger.info("Tracing enabled.")
-      try:
-          sampler = always_on.AlwaysOnSampler()
-          exporter = stackdriver_exporter.StackdriverExporter(
-              project_id=os.environ.get('GCP_PROJECT_ID'),
-              transport=AsyncTransport)
-          tracer_interceptor = server_interceptor.OpenCensusServerInterceptor(sampler, exporter)
-      except:
-          tracer_interceptor = server_interceptor.OpenCensusServerInterceptor()
 
     # Debugger
-    debugger = os.getenv('DEBUGGER', True)
-    if debugger != True:
-      logger.info("Debugger disabled.")
-      tracer_interceptor = server_interceptor.OpenCensusServerInterceptor()
-    else:
-      logger.info("Debugger enabled.")
-      try:
+    try:
+      debugger = os.getenv('DEBUGGER', "true")
+      debugger = debugger.lower()
+      if debugger != "true":
+        raise KeyError()
+      else:
+        logger.info("Debugger enabled.")
+        try:
           googleclouddebugger.enable(
               module='recommendationserver',
               version='1.0.0'
           )
-      except Exception, err:
-          logger.error("could not enable debugger")
-          logger.error(traceback.print_exc())
-          pass
+        except Exception, err:
+            logger.error("Could not enable debugger")
+            logger.error(traceback.print_exc())
+            pass
+    except KeyError:
+      logger.info("Debugger disabled.")
 
     port = os.environ.get('PORT', "8080")
     catalog_addr = os.environ.get('PRODUCT_CATALOG_SERVICE_ADDR', '')

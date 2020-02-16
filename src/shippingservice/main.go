@@ -78,11 +78,13 @@ func main() {
 	}
 
 	if trace == true {
+		log.Info("Tracing enabled.")
 		go initTracing()
 	} else {
 		log.Info("Tracing disabled.")
 	}
 	if profiler == true {
+		log.Info("Profiling enabled.")
 		go initProfiling("shippingservice", "1.0.0")
 	} else {
 		log.Info("Profiling disabled.")

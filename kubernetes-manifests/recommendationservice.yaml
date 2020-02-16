@@ -44,16 +44,12 @@ spec:
           value: "8080"
         - name: PRODUCT_CATALOG_SERVICE_ADDR
           value: "productcatalogservice:3550"
-      # - name: STATS
-      #   value: "False"
-      # - name: TRACE
-      #   value: "False"
-      # - name: PROFILER
-      #   value: "False"
-      # - name: DEBUGGER
-      #   value: "False"
-      # - name: JAEGER_SERVICE_ADDR
-      #   value: "jaeger-collector:14268"
+        # - name: TRACE
+        #   value: "False"
+        # - name: PROFILER
+        #   value: "False"
+        # - name: DEBUGGER
+        #   value: "False"
         resources:
           requests:
             cpu: 100m

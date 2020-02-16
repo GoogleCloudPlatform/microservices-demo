@@ -108,11 +108,13 @@ func main() {
 	}
 
 	if trace == true {
+		log.Info("Tracing enabled.")
 		go initTracing(log)
 	} else {
 		log.Info("Tracing disabled.")
 	}
 	if profiler == true {
+		log.Info("Profiling enabled.")
 		go initProfiling(log, "frontend", "1.0.0")
 	} else {
 		log.Info("Profiling disabled")

@@ -34,14 +34,10 @@ spec:
         env:
         - name: PORT
           value: "8080"
-      # - name: STATS
-      #   value: "False"
-      # - name: TRACE
-      #   value: "False"
-      # - name: PROFILER
-      #   value: "False"
-      # - name: DEBUGGER
-      #   value: "False"
+        # - name: TRACE
+        #   value: "False"
+        # - name: PROFILER
+        #   value: "False"
         readinessProbe:
           periodSeconds: 5
           exec:

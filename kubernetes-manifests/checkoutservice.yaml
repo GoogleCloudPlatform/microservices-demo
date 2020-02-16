@@ -57,8 +57,6 @@ spec:
           #   value: "False"
           # - name: PROFILER
           #   value: "False"
-          # - name: DEBUGGER
-          #   value: "False"
           # - name: JAEGER_SERVICE_ADDR
           #   value: "jaeger-collector:14268"
           resources:

@@ -33,16 +33,14 @@ spec:
         env:
         - name: PORT
           value: "50051"
-      # - name: STATS
-      #   value: "False"
-      # - name: TRACE
-      #   value: "False"
-      # - name: PROFILER
-      #   value: "False"
-      # - name: DEBUGGER
-      #   value: "False"
-      # - name: JAEGER_SERVICE_ADDR
-      #   value: "jaeger-collector:14268"
+        # - name: STATS
+        #   value: "False"
+        # - name: TRACE
+        #   value: "False"
+        # - name: PROFILER
+        #   value: "False"
+        # - name: JAEGER_SERVICE_ADDR
+        #   value: "jaeger-collector:14268"
         readinessProbe:
           periodSeconds: 5
           exec:

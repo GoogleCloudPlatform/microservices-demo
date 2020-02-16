@@ -35,8 +35,6 @@ spec:
         env:
         - name: PORT
           value: "7000"
-        # - name: STATS
-        #   value: "False"
         # - name: TRACE
         #   value: "False"
         # - name: PROFILER

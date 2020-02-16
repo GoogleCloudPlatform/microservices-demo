@@ -214,7 +214,11 @@ public final class AdService {
   }
 
   private static void initStats() {
-    boolean stats = Boolean.parseBoolean(System.getenv("STATS"));
+    String statsEnv = System.getenv("STATS");
+    if (statsEnv == null) {
+      statsEnv = "true";
+    }
+    boolean stats = Boolean.parseBoolean(statsEnv);
     if (!stats) {
       logger.info("Stats disabled.");
       return;
@@ -252,7 +256,11 @@ public final class AdService {
   }
 
   private static void initTracing() {
-    boolean trace = Boolean.parseBoolean(System.getenv("TRACE"));
+    String traceEnv = System.getenv("TRACE");
+    if (traceEnv == null) {
+      traceEnv = "true";
+    }
+    boolean trace = Boolean.parseBoolean(traceEnv);
     if (!trace) {
       logger.info("Tracing disabled.");
       return;

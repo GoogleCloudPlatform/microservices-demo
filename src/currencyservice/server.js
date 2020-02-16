@@ -31,10 +31,10 @@ if (profiler == "true") {
 var trace = process.env.TRACE || "true";
 trace = trace.toLowerCase();
 if (trace == "true") {
-  console.log("Trace enabled.")
+  console.log("Tracing enabled.")
   require('@google-cloud/trace-agent').start();
 } else {
-  console.log("Trace disabled.")
+  console.log("Tracing disabled.")
 }
 
 var debug = process.env.DEBUGGER || "true";
