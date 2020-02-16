@@ -94,7 +94,7 @@ if __name__ == "__main__":
       if profiler != "True":
         raise KeyError()
       else:
-        logger.inf("Profiler enabled.")
+        logger.info("Profiler enabled.")
         initStackdriverProfiling()
     except KeyError:
       logger.info("Profiler disabled.")
