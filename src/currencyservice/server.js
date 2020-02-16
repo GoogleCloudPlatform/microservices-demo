@@ -14,19 +14,42 @@
  * limitations under the License.
  */
 
-require('@google-cloud/profiler').start({
-  serviceContext: {
-    service: 'currencyservice',
-    version: '1.0.0'
-  }
-});
-require('@google-cloud/trace-agent').start();
-require('@google-cloud/debug-agent').start({
-  serviceContext: {
-    service: 'currencyservice',
-    version: 'VERSION'
-  }
-});
+var profiler = process.env.PROFILER || "true";
+profiler = profiler.toLowerCase();
+if (profiler == "true") {
+  console.log("Profiler enabled.")
+  require('@google-cloud/profiler').start({
+    serviceContext: {
+      service: 'currencyservice',
+      version: '1.0.0'
+    }
+  });
+} else {
+  console.log("Profiler disabled.")
+}
+
+var trace = process.env.TRACE || "true";
+trace = trace.toLowerCase();
+if (trace == "true") {
+  console.log("Trace enabled.")
+  require('@google-cloud/trace-agent').start();
+} else {
+  console.log("Trace disabled.")
+}
+
+var debug = process.env.DEBUGGER || "true";
+debug = debug.toLowerCase();
+if (debug == "true") {
+  console.log("Debugger enabled.")
+  require('@google-cloud/debug-agent').start({
+    serviceContext: {
+      service: 'currencyservice',
+      version: 'VERSION'
+    }
+  });
+} else {
+  console.log("Debugger disabled.")
+}
 
 const path = require('path');
 const grpc = require('grpc');

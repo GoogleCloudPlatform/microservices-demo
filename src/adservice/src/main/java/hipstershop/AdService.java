@@ -214,8 +214,8 @@ public final class AdService {
   }
 
   private static void initStats() {
-    boolean sdStats = Boolean.parseBoolean(System.getenv("SD_STATS"));
-    if (!sdStats) {
+    boolean stats = Boolean.parseBoolean(System.getenv("STATS"));
+    if (!stats) {
       logger.info("Stats disabled.");
       return;
     }
@@ -252,8 +252,8 @@ public final class AdService {
   }
 
   private static void initTracing() {
-    boolean sdTrace = Boolean.parseBoolean(System.getenv("SD_TRACE"));
-    if (!sdTrace) {
+    boolean trace = Boolean.parseBoolean(System.getenv("TRACE"));
+    if (!trace) {
       logger.info("Tracing disabled.");
       return;
     }

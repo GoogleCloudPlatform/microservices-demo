@@ -35,6 +35,14 @@ spec:
         env:
         - name: PORT
           value: "7000"
+        # - name: STATS
+        #   value: "False"
+        # - name: TRACE
+        #   value: "False"
+        # - name: PROFILER
+        #   value: "False"
+        # - name: DEBUGGER
+        #   value: "False"
         readinessProbe:
           exec:
             command: ["/bin/grpc_health_probe", "-addr=:7000"]

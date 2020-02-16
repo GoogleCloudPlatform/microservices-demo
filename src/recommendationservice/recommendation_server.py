@@ -90,8 +90,8 @@ if __name__ == "__main__":
 
     # Profiler
     try:
-      sdProfiler = os.getenv('SD_PROFILER', True)
-      if sdProfiler != "True":
+      profiler = os.getenv('PROFILER', True)
+      if profiler != "True":
         raise KeyError()
       else:
         logger.inf("Profiler enabled.")
@@ -100,8 +100,8 @@ if __name__ == "__main__":
       logger.info("Profiler disabled.")
 
     # Trace
-    sdTrace = os.getenv('SD_TRACE', True)
-    if sdTrace != True:
+    trace = os.getenv('TRACE', True)
+    if trace != True:
       logger.info("Tracing disabled.")
       tracer_interceptor = server_interceptor.OpenCensusServerInterceptor()
     else:
@@ -116,8 +116,8 @@ if __name__ == "__main__":
           tracer_interceptor = server_interceptor.OpenCensusServerInterceptor()
 
     # Debugger
-    sdDebugger = os.getenv('SD_DEBUGGER', True)
-    if sdDebugger != True:
+    debugger = os.getenv('DEBUGGER', True)
+    if debugger != True:
       logger.info("Debugger disabled.")
       tracer_interceptor = server_interceptor.OpenCensusServerInterceptor()
     else:

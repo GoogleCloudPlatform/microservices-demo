@@ -54,7 +54,7 @@ var (
 	port = "3550"
 
 	reloadCatalog bool
-	sdStats       bool
+	stats       bool
 )
 
 func init() {
@@ -77,30 +77,30 @@ func init() {
 
 func main() {
 	var err error
-	sdStats, err = getenvBool("SD_STATS")
+	stats, err = getenvBool("STATS")
 	if err != nil {
-		log.Errorf("Could not get SD_STATS var: %v, defaulting to True", err)
-		sdStats = true
+		log.Errorf("Could not get STATS var: %v, defaulting to True", err)
+		stats = true
 	}
 
-	sdTrace, err := getenvBool("SD_TRACE")
+	trace, err := getenvBool("TRACE")
 	if err != nil {
-		log.Errorf("Could not get SD_TRACE var: %v, defaulting to True", err)
-		sdTrace = true
+		log.Errorf("Could not get TRACE var: %v, defaulting to True", err)
+		trace = true
 	}
 
-	sdProfiler, err := getenvBool("SD_PROFILER")
+	profiler, err := getenvBool("PROFILER")
 	if err != nil {
-		log.Errorf("Could not get SD_PROFILER var: %v, defaulting to True", err)
-		sdProfiler = true
+		log.Errorf("Could not get PROFILER var: %v, defaulting to True", err)
+		profiler = true
 	}
 
-	if sdTrace == true {
+	if trace == true {
 		go initTracing()
 	} else {
 		log.Info("Tracing disabled.")
 	}
-	if sdProfiler == true {
+	if profiler == true {
 		go initProfiling("productcatalogservice", "1.0.0")
 	} else {
 		log.Info("Profiling disabled.")
@@ -150,7 +150,7 @@ func run(port string) string {
 		log.Fatal(err)
 	}
 	var srv *grpc.Server
-	if sdStats == true {
+	if stats == true {
 		log.Info("Stats enabled.")
 		srv = grpc.NewServer(grpc.StatsHandler(&ocgrpc.ServerHandler{}))
 	} else {

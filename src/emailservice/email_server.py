@@ -39,10 +39,9 @@ from logger import getJSONLogger
 logger = getJSONLogger('emailservice-server')
 
 
-sdTrace = os.getenv('SD_TRACE', True)
-sdStats = os.getenv('SD_STATS', True)
+trace = os.getenv('TRACE', True)
 
-if sdTrace != False:
+if trace != False:
   logger.info("Tracing enabled.")
   try:
       sampler = always_on.AlwaysOnSampler()

@@ -33,12 +33,16 @@ spec:
         env:
         - name: PORT
           value: "50051"
-        - name: SD_STATS
-          value: "False"
-        - name: SD_TRACE
-          value: "False"
-        - name: SD_PROFILER
-          value: "False"
+      # - name: STATS
+      #   value: "False"
+      # - name: TRACE
+      #   value: "False"
+      # - name: PROFILER
+      #   value: "False"
+      # - name: DEBUGGER
+      #   value: "False"
+      # - name: JAEGER_SERVICE_ADDR
+      #   value: "jaeger-collector:14268"
         readinessProbe:
           periodSeconds: 5
           exec:
@@ -46,9 +50,6 @@ spec:
         livenessProbe:
           exec:
             command: ["/bin/grpc_health_probe", "-addr=:50051"]
-#        env:
-#          - name: JAEGER_SERVICE_ADDR
-#            value: "jaeger-collector:14268"
         resources:
           requests:
             cpu: 100m
