@@ -72,13 +72,13 @@ type checkoutService struct {
 func main() {
 	stats, err := getenvBool("STATS")
 	if err != nil {
-		log.Debugf("Could not get STATS var: %v, defaulting to True", err)
+		log.Infof("Could not get STATS var: %v, defaulting to True", err)
 		stats = true
 	}
 
 	trace, err := getenvBool("TRACE")
 	if err != nil {
-		log.Debugf("Could not get TRACE var: %v, defaulting to True", err)
+		log.Infof("Could not get TRACE var: %v, defaulting to True", err)
 		trace = true
 	}
 	if trace == true {
@@ -90,7 +90,7 @@ func main() {
 
 	profiler, err := getenvBool("PROFILER")
 	if err != nil {
-		log.Debugf("Could not get PROFILER var: %v, defaulting to True", err)
+		log.Infof("Could not get PROFILER var: %v, defaulting to True", err)
 		profiler = true
 	}
 	if profiler == true {
@@ -257,7 +257,7 @@ func (cs *checkoutService) PlaceOrder(ctx context.Context, req *pb.PlaceOrderReq
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "failed to charge card: %+v", err)
 	}
-	log.Debugf("payment went through (transaction_id: %s)", txID)
+	log.Infof("payment went through (transaction_id: %s)", txID)
 
 	shippingTrackingID, err := cs.shipOrder(ctx, req.Address, prep.cartItems)
 	if err != nil {
@@ -277,7 +277,7 @@ func (cs *checkoutService) PlaceOrder(ctx context.Context, req *pb.PlaceOrderReq
 	if err := cs.sendOrderConfirmation(ctx, req.Email, orderResult); err != nil {
 		log.Warnf("failed to send order confirmation to %q: %+v", req.Email, err)
 	} else {
-		// log.Infof("order confirmation email sent to %q", req.Email)
+		log.Infof("order confirmation email sent to %q", req.Email)
 	}
 	resp := &pb.PlaceOrderResponse{Order: orderResult}
 	return resp, nil

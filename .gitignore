@@ -10,3 +10,4 @@ pkg/
 .skaffold-*.yaml
 .kubernetes-manifests-*/
 .project
+.eclipse.buildship.core.prefs
