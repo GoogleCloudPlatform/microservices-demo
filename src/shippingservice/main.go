@@ -59,31 +59,18 @@ func init() {
 }
 
 func main() {
-	stats, err := getenvBool("STATS")
-	if err != nil {
-		log.Errorf("Could not get STATS var: %v, defaulting to True", err)
-		stats = true
-	}
+	statsEnabled := os.Getenv("DISABLE_STATS") == ""
+	traceEnabled := os.Getenv("DISABLE_TRACING") == ""
+	profilerEnabled := os.Getenv("DISABLE_PROFILER") == ""
 
-	trace, err := getenvBool("TRACE")
-	if err != nil {
-		log.Errorf("Could not get TRACE var: %v, defaulting to True", err)
-		trace = true
-	}
-
-	profiler, err := getenvBool("PROFILER")
-	if err != nil {
-		log.Errorf("Could not get PROFILER var: %v, defaulting to True", err)
-		profiler = true
-	}
-
-	if trace == true {
+	if traceEnabled {
 		log.Info("Tracing enabled.")
 		go initTracing()
 	} else {
 		log.Info("Tracing disabled.")
 	}
-	if profiler == true {
+
+	if profilerEnabled {
 		log.Info("Profiling enabled.")
 		go initProfiling("shippingservice", "1.0.0")
 	} else {
@@ -102,7 +89,7 @@ func main() {
 	}
 
 	var srv *grpc.Server
-	if stats == true {
+	if statsEnabled {
 		log.Info("Stats enabled.")
 		srv = grpc.NewServer(grpc.StatsHandler(&ocgrpc.ServerHandler{}))
 	} else {

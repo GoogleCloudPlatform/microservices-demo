@@ -89,23 +89,17 @@ class RecommendationService(demo_pb2_grpc.RecommendationServiceServicer):
 if __name__ == "__main__":
     logger.info("initializing recommendationservice")
 
-    # Profiler
     try:
-      profiler = os.getenv('PROFILER', "true")
-      profiler = profiler.lower()
-      if profiler != "true":
+      if "DISABLE_PROFILER" in os.environ:
         raise KeyError()
       else:
         logger.info("Profiler enabled.")
         initStackdriverProfiling()
     except KeyError:
-      logger.info("Profiler disabled.")
+        logger.info("Profiler disabled.")
 
-    # Tracing
     try:
-      trace = os.getenv('TRACE', "true")
-      trace = trace.lower()
-      if trace != "true":
+      if "DISABLE_TRACING" in os.environ:
         raise KeyError()
       else:
         logger.info("Tracing enabled.")
@@ -115,14 +109,12 @@ if __name__ == "__main__":
           transport=AsyncTransport)
         tracer_interceptor = server_interceptor.OpenCensusServerInterceptor(sampler, exporter)
     except KeyError:
-      logger.info("Tracing disabled.")
-      tracer_interceptor = server_interceptor.OpenCensusServerInterceptor()
+        logger.info("Tracing disabled.")
+        tracer_interceptor = server_interceptor.OpenCensusServerInterceptor()
 
-    # Debugger
+
     try:
-      debugger = os.getenv('DEBUGGER', "true")
-      debugger = debugger.lower()
-      if debugger != "true":
+      if "DISABLE_DEBUGGER" in os.environ:
         raise KeyError()
       else:
         logger.info("Debugger enabled.")
@@ -136,7 +128,7 @@ if __name__ == "__main__":
             logger.error(traceback.print_exc())
             pass
     except KeyError:
-      logger.info("Debugger disabled.")
+        logger.info("Debugger disabled.")
 
     port = os.environ.get('PORT', "8080")
     catalog_addr = os.environ.get('PRODUCT_CATALOG_SERVICE_ADDR', '')

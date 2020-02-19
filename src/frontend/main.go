@@ -95,29 +95,21 @@ func main() {
 	}
 	log.Out = os.Stdout
 
-	trace, err := getenvBool("TRACE")
-	if err != nil {
-		log.Errorf("Could not get TRACE var: %v, defaulting to True", err)
-		trace = true
-	}
+	traceEnabled := os.Getenv("DISABLE_TRACING") == ""
+	profilerEnabled := os.Getenv("DISABLE_PROFILER") == ""
 
-	profiler, err := getenvBool("PROFILER")
-	if err != nil {
-		log.Errorf("Could not get PROFILER var: %v, defaulting to True", err)
-		profiler = true
-	}
-
-	if trace == true {
+	if traceEnabled {
 		log.Info("Tracing enabled.")
 		go initTracing(log)
 	} else {
 		log.Info("Tracing disabled.")
 	}
-	if profiler == true {
+
+	if profilerEnabled {
 		log.Info("Profiling enabled.")
 		go initProfiling(log, "frontend", "1.0.0")
 	} else {
-		log.Info("Profiling disabled")
+		log.Info("Profiling disabled.")
 	}
 
 	srvPort := port

@@ -166,23 +166,21 @@ def initStackdriverProfiling():
 
 
 if __name__ == '__main__':
+  logger.info('starting the email service in dummy mode.')
+
   # Profiler
   try:
-    profiler = os.getenv('PROFILER', "true")
-    profiler = profiler.lower()
-    if profiler != "true":
+    if "DISABLE_PROFILER" in os.environ:
       raise KeyError()
     else:
       logger.info("Profiler enabled.")
       initStackdriverProfiling()
   except KeyError:
-    logger.info("Profiler disabled.")
+      logger.info("Profiler disabled.")
 
   # Tracing
   try:
-    trace = os.getenv('TRACE', "true")
-    trace = trace.lower()
-    if trace != "true":
+    if "DISABLE_TRACING" in os.environ:
       raise KeyError()
     else:
       logger.info("Tracing enabled.")
@@ -192,8 +190,7 @@ if __name__ == '__main__':
         transport=AsyncTransport)
       tracer_interceptor = server_interceptor.OpenCensusServerInterceptor(sampler, exporter)
   except KeyError:
-    logger.info("Tracing disabled.")
-    tracer_interceptor = server_interceptor.OpenCensusServerInterceptor()
-
+      logger.info("Tracing disabled.")
+      tracer_interceptor = server_interceptor.OpenCensusServerInterceptor()
 
   start(dummy_mode = True)

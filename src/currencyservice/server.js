@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-var profiler = process.env.PROFILER || "true";
-profiler = profiler.toLowerCase();
-if (profiler == "true") {
+if(process.env.DISABLE_PROFILER) {
+  console.log("Profiler disabled.")
+}
+else {
   console.log("Profiler enabled.")
   require('@google-cloud/profiler').start({
     serviceContext: {
@@ -24,22 +25,21 @@ if (profiler == "true") {
       version: '1.0.0'
     }
   });
-} else {
-  console.log("Profiler disabled.")
 }
 
-var trace = process.env.TRACE || "true";
-trace = trace.toLowerCase();
-if (trace == "true") {
-  console.log("Tracing enabled.")
-  require('@google-cloud/trace-agent').start();
-} else {
+
+if(process.env.DISABLE_TRACING) {
   console.log("Tracing disabled.")
 }
+else {
+  console.log("Tracing enabled.")
+  require('@google-cloud/trace-agent').start();
+}
 
-var debug = process.env.DEBUGGER || "true";
-debug = debug.toLowerCase();
-if (debug == "true") {
+if(process.env.DISABLE_DEBUGGER) {
+  console.log("Debugger disabled.")
+}
+else {
   console.log("Debugger enabled.")
   require('@google-cloud/debug-agent').start({
     serviceContext: {
@@ -47,8 +47,6 @@ if (debug == "true") {
       version: 'VERSION'
     }
   });
-} else {
-  console.log("Debugger disabled.")
 }
 
 const path = require('path');
