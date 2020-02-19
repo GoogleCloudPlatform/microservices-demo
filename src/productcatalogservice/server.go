@@ -53,7 +53,6 @@ var (
 	port = "3550"
 
 	reloadCatalog bool
-	statsEnabled  bool
 )
 
 func init() {
