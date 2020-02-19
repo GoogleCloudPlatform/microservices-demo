@@ -19,7 +19,6 @@ import (
 	"fmt"
 	"net/http"
 	"os"
-	"strconv"
 	"time"
 
 	"cloud.google.com/go/profiler"
@@ -95,17 +94,14 @@ func main() {
 	}
 	log.Out = os.Stdout
 
-	traceEnabled := os.Getenv("DISABLE_TRACING") == ""
-	profilerEnabled := os.Getenv("DISABLE_PROFILER") == ""
-
-	if traceEnabled {
+	if os.Getenv("DISABLE_TRACING") == "" {
 		log.Info("Tracing enabled.")
 		go initTracing(log)
 	} else {
 		log.Info("Tracing disabled.")
 	}
 
-	if profilerEnabled {
+	if os.Getenv("DISABLE_PROFILER") == "" {
 		log.Info("Profiling enabled.")
 		go initProfiling(log, "frontend", "1.0.0")
 	} else {
@@ -274,24 +270,4 @@ func mustConnGRPC(ctx context.Context, conn **grpc.ClientConn, addr string) {
 	if err != nil {
 		panic(errors.Wrapf(err, "grpc: failed to connect %s", addr))
 	}
-}
-
-func getenvBool(key string) (bool, error) {
-	s, err := getenvStr(key)
-	if err != nil {
-		return false, err
-	}
-	v, err := strconv.ParseBool(s)
-	if err != nil {
-		return false, err
-	}
-	return v, nil
-}
-
-func getenvStr(key string) (string, error) {
-	v := os.Getenv(key)
-	if v == "" {
-		return v, fmt.Errorf("empty var")
-	}
-	return v, nil
 }

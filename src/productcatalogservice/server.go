@@ -23,7 +23,6 @@ import (
 	"net"
 	"os"
 	"os/signal"
-	"strconv"
 	"strings"
 	"sync"
 	"syscall"
@@ -76,18 +75,14 @@ func init() {
 }
 
 func main() {
-	statsEnabled = os.Getenv("DISABLE_STATS") == ""
-	traceEnabled := os.Getenv("DISABLE_TRACING") == ""
-	profilerEnabled := os.Getenv("DISABLE_PROFILER") == ""
-
-	if traceEnabled {
+	if os.Getenv("DISABLE_TRACING") == "" {
 		log.Info("Tracing enabled.")
 		go initTracing()
 	} else {
 		log.Info("Tracing disabled.")
 	}
 
-	if profilerEnabled {
+	if os.Getenv("DISABLE_PROFILER") == "" {
 		log.Info("Profiling enabled.")
 		go initProfiling("productcatalogservice", "1.0.0")
 	} else {
@@ -138,7 +133,7 @@ func run(port string) string {
 		log.Fatal(err)
 	}
 	var srv *grpc.Server
-	if statsEnabled {
+	if os.Getenv("DISABLE_STATS") == "" {
 		log.Info("Stats enabled.")
 		srv = grpc.NewServer(grpc.StatsHandler(&ocgrpc.ServerHandler{}))
 	} else {
@@ -301,24 +296,4 @@ func (p *productCatalog) SearchProducts(ctx context.Context, req *pb.SearchProdu
 		}
 	}
 	return &pb.SearchProductsResponse{Results: ps}, nil
-}
-
-func getenvBool(key string) (bool, error) {
-	s, err := getenvStr(key)
-	if err != nil {
-		return false, err
-	}
-	v, err := strconv.ParseBool(s)
-	if err != nil {
-		return false, err
-	}
-	return v, nil
-}
-
-func getenvStr(key string) (string, error) {
-	v := os.Getenv(key)
-	if v == "" {
-		return v, fmt.Errorf("empty var")
-	}
-	return v, nil
 }

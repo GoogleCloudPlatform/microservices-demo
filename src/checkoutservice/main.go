@@ -19,7 +19,6 @@ import (
 	"fmt"
 	"net"
 	"os"
-	"strconv"
 	"time"
 
 	"cloud.google.com/go/profiler"
@@ -70,18 +69,14 @@ type checkoutService struct {
 }
 
 func main() {
-	statsEnabled := os.Getenv("DISABLE_STATS") == ""
-	traceEnabled := os.Getenv("DISABLE_TRACING") == ""
-	profilerEnabled := os.Getenv("DISABLE_PROFILER") == ""
-
-	if traceEnabled {
+	if os.Getenv("DISABLE_TRACING") == "" {
 		log.Info("Tracing enabled.")
 		go initTracing()
 	} else {
 		log.Info("Tracing disabled.")
 	}
 
-	if profilerEnabled {
+	if os.Getenv("DISABLE_PROFILER") == "" {
 		log.Info("Profiling enabled.")
 		go initProfiling("checkoutservice", "1.0.0")
 	} else {
@@ -109,7 +104,7 @@ func main() {
 	}
 
 	var srv *grpc.Server
-	if statsEnabled {
+	if os.Getenv("DISABLE_STATS") == "" {
 		log.Info("Stats enabled.")
 		srv = grpc.NewServer(grpc.StatsHandler(&ocgrpc.ServerHandler{}))
 	} else {
@@ -433,23 +428,3 @@ func (cs *checkoutService) shipOrder(ctx context.Context, address *pb.Address, i
 }
 
 // TODO: Dial and create client once, reuse.
-
-func getenvBool(key string) (bool, error) {
-	s, err := getenvStr(key)
-	if err != nil {
-		return false, err
-	}
-	v, err := strconv.ParseBool(s)
-	if err != nil {
-		return false, err
-	}
-	return v, nil
-}
-
-func getenvStr(key string) (string, error) {
-	v := os.Getenv(key)
-	if v == "" {
-		return v, fmt.Errorf("empty var")
-	}
-	return v, nil
-}
