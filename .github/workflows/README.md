@@ -44,7 +44,7 @@
 ---
 ## Workflows
 
-### Smoketests.yaml
+### ci.yaml
 
 #### Triggers
 - commits pushed to master
