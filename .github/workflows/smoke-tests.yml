@@ -1,4 +1,4 @@
-name: "Continuous Integration"
+name: "CI"
 on:
   push:
     # run on pushes to master or release/*
