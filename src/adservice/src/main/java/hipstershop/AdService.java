@@ -213,21 +213,18 @@ public final class AdService {
         .build();
   }
 
-  private static void initStackdriver() {
-    logger.info("Initialize Stackdriver");
+  private static void initStats() {
+    if (System.getenv("DISABLE_STATS") != null) {
+      logger.info("Stats disabled.");
+      return;
+    }
+    logger.info("Stats enabled");
 
     long sleepTime = 10; /* seconds */
     int maxAttempts = 5;
     boolean statsExporterRegistered = false;
-    boolean traceExporterRegistered = false;
-
     for (int i = 0; i < maxAttempts; i++) {
       try {
-        if (!traceExporterRegistered) {
-          StackdriverTraceExporter.createAndRegister(
-              StackdriverTraceConfiguration.builder().build());
-          traceExporterRegistered = true;
-        }
         if (!statsExporterRegistered) {
           StackdriverStatsExporter.createAndRegister(
               StackdriverStatsConfiguration.builder()
@@ -240,7 +237,7 @@ public final class AdService {
           logger.log(
               Level.WARN,
               "Failed to register Stackdriver Exporter."
-                  + " Tracing and Stats data will not reported to Stackdriver. Error message: "
+                  + " Stats data will not reported to Stackdriver. Error message: "
                   + e.toString());
         } else {
           logger.info("Attempt to register Stackdriver Exporter in " + sleepTime + " seconds ");
@@ -252,8 +249,49 @@ public final class AdService {
         }
       }
     }
-    logger.info("Stackdriver initialization complete.");
+    logger.info("Stats enabled - Stackdriver Exporter initialized.");
   }
+
+  private static void initTracing() {
+    if (System.getenv("DISABLE_TRACING") != null) {
+      logger.info("Tracing disabled.");
+      return;
+    }
+    logger.info("Tracing enabled");
+
+    long sleepTime = 10; /* seconds */
+    int maxAttempts = 5;
+    boolean traceExporterRegistered = false;
+
+    for (int i = 0; i < maxAttempts; i++) {
+      try {
+        if (!traceExporterRegistered) {
+          StackdriverTraceExporter.createAndRegister(
+              StackdriverTraceConfiguration.builder().build());
+          traceExporterRegistered = true;
+        }
+      } catch (Exception e) {
+        if (i == (maxAttempts - 1)) {
+          logger.log(
+              Level.WARN,
+              "Failed to register Stackdriver Exporter."
+                  + " Tracing data will not reported to Stackdriver. Error message: "
+                  + e.toString());
+        } else {
+          logger.info("Attempt to register Stackdriver Exporter in " + sleepTime + " seconds ");
+          try {
+            Thread.sleep(TimeUnit.SECONDS.toMillis(sleepTime));
+          } catch (Exception se) {
+            logger.log(Level.WARN, "Exception while sleeping" + se.toString());
+          }
+        }
+      }
+    }
+    logger.info("Tracing enabled - Stackdriver exporter initialized.");
+  }
+
+
+
 
   private static void initJaeger() {
     String jaegerAddr = System.getenv("JAEGER_SERVICE_ADDR");
@@ -282,7 +320,8 @@ public final class AdService {
     new Thread(
             new Runnable() {
               public void run() {
-                initStackdriver();
+                initStats();
+                initTracing();
               }
             })
         .start();

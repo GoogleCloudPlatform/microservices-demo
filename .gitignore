@@ -9,3 +9,5 @@ pkg/
 .idea
 .skaffold-*.yaml
 .kubernetes-manifests-*/
+.project
+.eclipse.buildship.core.prefs
