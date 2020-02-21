@@ -10,10 +10,10 @@ Run the following command to restore dependencies to `vendor/` directory:
 
 ## Build
 
-From repository root, run:
+From `src/shippingservice`, run:
 
 ```
-docker build --file src/shippingservice/Dockerfile .
+docker build ./
 ```
 
 ## Test
