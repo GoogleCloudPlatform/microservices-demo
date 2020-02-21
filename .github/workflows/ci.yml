@@ -1,0 +1,53 @@
+name: "Continuous Integration"
+on:
+  push:
+    # run on pushes to master or release/*
+    branches:    
+      - master
+      - release/*
+  pull_request:
+    # run on pull requests targeting master
+    branches:
+      - master
+jobs:
+  run-tests:
+    runs-on: self-hosted
+    steps:
+    - uses: actions/checkout@v2
+    - name: Setup Cluster
+      run: |
+        set -x
+        kind delete cluster || true
+        kind create cluster
+        kubectl get nodes
+    - name: Deploy From Source
+      run: |
+        skaffold run
+    - name: Wait For Pods
+      timeout-minutes: 20
+      run: |
+        set -x
+        kubectl wait --for=condition=available --timeout=500s deployment/adservice
+        kubectl wait --for=condition=available --timeout=500s deployment/cartservice
+        kubectl wait --for=condition=available --timeout=500s deployment/checkoutservice
+        kubectl wait --for=condition=available --timeout=500s deployment/currencyservice
+        kubectl wait --for=condition=available --timeout=500s deployment/emailservice
+        kubectl wait --for=condition=available --timeout=500s deployment/frontend
+        kubectl wait --for=condition=available --timeout=500s deployment/loadgenerator
+        kubectl wait --for=condition=available --timeout=500s deployment/paymentservice
+        kubectl wait --for=condition=available --timeout=500s deployment/productcatalogservice
+        kubectl wait --for=condition=available --timeout=500s deployment/recommendationservice
+        kubectl wait --for=condition=available --timeout=500s deployment/shippingservice
+    - name: Smoke Test
+      timeout-minutes: 5
+      run: |
+        set -x
+        RESULT=" "
+        while [[ "$RESULT" != "  HTTP/1.1 200 OK" ]]; do
+          sleep 1
+          RESULT=$(kubectl exec deployments/frontend -- sh -c "wget --spider -S "http://frontend" 2>&1 | grep 'HTTP/'")
+          echo "front end response: $RESULT"
+        done
+        if [[ "$RESULT" != "  HTTP/1.1 200 OK" ]]; then 
+          exit 1
+        fi
