@@ -53,6 +53,10 @@
   branch = "master"
   name = "golang.org/x/net"
 
+[[constraint]]
+  name = "github.com/newrelic/go-agent"
+  version = "3.3.0"
+
 [prune]
   go-tests = true
   unused-packages = true

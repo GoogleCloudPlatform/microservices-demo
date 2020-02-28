@@ -51,10 +51,18 @@ spec:
             value: "currencyservice:7000"
           - name: CART_SERVICE_ADDR
             value: "cartservice:7070"
+          - name: NEW_RELIC_APP_NAME
+            value: checkout-service
+          - name: NEW_RELIC_LICENSE_KEY
+            value: MY_LICENSE_KEY
+          - name: NEW_RELIC_DISTRIBUTED_TRACING_ENABLED
+            value: "true"
+          - name: NEW_RELIC_LABELS
+            value: clusterName:GKE
           # - name: DISABLE_STATS
           #   value: "1"
-          # - name: DISABLE_TRACING
-          #   value: "1"
+          - name: DISABLE_TRACING
+            value: "1"
           # - name: DISABLE_PROFILER
           #   value: "1"
           # - name: JAEGER_SERVICE_ADDR
