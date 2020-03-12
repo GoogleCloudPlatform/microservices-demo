@@ -24,9 +24,4 @@ if [ -z "${FRONTEND_ADDR}" ]; then
 fi
 
 set -x
-locust \
-  -f locustfile.py \
-  --host="http://${FRONTEND_ADDR}" \
-  --no-web \
-  -c "${USERS:-10}" \
-  -r 1
+python pinger.py "${FRONTEND_ADDR}"

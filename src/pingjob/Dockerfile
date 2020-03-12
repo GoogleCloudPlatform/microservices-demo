@@ -14,5 +14,5 @@ FROM base
 COPY --from=builder /install /usr/local
 
 COPY . .
-ENTRYPOINT ["./loadgen.sh"]
+ENTRYPOINT ["./pinger.sh"]
 

@@ -17,6 +17,8 @@ kind: Deployment
 metadata:
   name: adservice
 spec:
+  revisionHistoryLimit: 1
+  replicas: 5
   selector:
     matchLabels:
       app: adservice
