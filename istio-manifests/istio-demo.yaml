@@ -15138,7 +15138,7 @@ data:
     accessLogFormat: ""
 
     # Set accessLogEncoding to JSON or TEXT to configure sidecar access log
-    accessLogEncoding: 'TEXT'
+    accessLogEncoding: 'JSON'
 
     enableEnvoyAccessLogService: false
     mixerCheckServer: istio-policy.istio-system.svc.cluster.local:9091
@@ -18239,7 +18239,7 @@ spec:
           - name: PILOT_PUSH_THROTTLE
             value: "100"
           - name: PILOT_TRACE_SAMPLING
-            value: "100"
+            value: "10"
           - name: PILOT_ENABLE_PROTOCOL_SNIFFING_FOR_OUTBOUND
             value: "true"
           - name: PILOT_ENABLE_PROTOCOL_SNIFFING_FOR_INBOUND
