@@ -17,7 +17,7 @@ kind: Config
 build:
   artifacts:
   # image tags are relative; to specify an image repo (e.g. GCR), you
-  # must provide a "default repo" using one of the methods described 
+  # must provide a "default repo" using one of the methods described
   # here:
   # https://skaffold.dev/docs/concepts/#image-repository-handling
   - image: emailservice
@@ -48,6 +48,7 @@ deploy:
   kubectl:
     manifests:
     - ./kubernetes-manifests/**.yaml
+    # - ./istio-manifests/**.yaml
 profiles:
 # "gcb" profile allows building and pushing the images
 # on Google Container Builder without requiring docker
@@ -63,3 +64,26 @@ profiles:
       diskSizeGb: 300
       machineType: N1_HIGHCPU_32
       timeout: 4000s
+
+- name: gcb-tracing
+  build:
+    googleCloudBuild:
+      diskSizeGb: 300
+      machineType: N1_HIGHCPU_32
+      timeout: 4000s
+  deploy:
+    kubectl:
+      manifests:
+      - ./kubernetes-manifests-tracing/**.yaml
+
+- name: gcb-istio
+  build:
+    googleCloudBuild:
+      diskSizeGb: 300
+      machineType: N1_HIGHCPU_32
+      timeout: 4000s
+  deploy:
+    kubectl:
+      manifests:
+      - ./kubernetes-manifests/**.yaml
+      - ./istio-manifests/**.yaml

@@ -1,0 +1,36 @@
+apiVersion: install.istio.io/v1alpha2
+kind: IstioControlPlane
+spec:
+  policy:
+    enabled: false
+
+  telemetry:
+    enabled: false
+
+  security:
+    enabled: false
+
+  configManagement:
+    enabled: false
+
+  autoInjection:
+    enabled: false
+
+  gateways:
+    enabled: false
+
+  values:
+    global:
+      useMCP: false
+
+    pilot:
+      sidecar: false
+
+    proxy:
+      envoyStatsd:
+        enabled: false
+        host:
+        port:
+
+    prometheus:
+      enabled: false
