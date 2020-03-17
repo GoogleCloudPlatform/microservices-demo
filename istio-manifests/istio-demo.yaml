@@ -214,7 +214,7 @@ metadata:
     release: istio
     istio: galley
 data:
-  validatingwebhookconfiguration.yaml: |-    
+  validatingwebhookconfiguration.yaml: |-
     apiVersion: admissionregistration.k8s.io/v1beta1
     kind: ValidatingWebhookConfiguration
     metadata:
@@ -334,7 +334,7 @@ metadata:
     release: istio
     istio: grafana
 data:
-  custom-resources.yaml: |-    
+  custom-resources.yaml: |-
     apiVersion: authentication.istio.io/v1alpha1
     kind: Policy
     metadata:
@@ -350,18 +350,18 @@ data:
       - name: grafana
         ports:
         - number: 3000
-  run.sh: |-    
+  run.sh: |-
     #!/bin/sh
-    
+
     set -x
-    
+
     if [ "$#" -ne "1" ]; then
         echo "first argument should be path to custom resource yaml"
         exit 1
     fi
-    
+
     pathToResourceYAML=${1}
-    
+
     kubectl get validatingwebhookconfiguration istio-galley 2>/dev/null
     if [ "$?" -eq 0 ]; then
         echo "istio-galley validatingwebhookconfiguration found - waiting for istio-galley deployment to be ready"
@@ -381,7 +381,7 @@ data:
     fi
     sleep 5
     kubectl apply -f ${pathToResourceYAML}
-    
+
 
 ---
 # Source: istio/charts/grafana/templates/configmap-dashboards.yaml
@@ -14696,7 +14696,7 @@ data:
       orgId: 1
       type: prometheus
       url: http://prometheus:9090
-    
+
   dashboardproviders.yaml: |
     apiVersion: 1
     providers:
@@ -14707,7 +14707,7 @@ data:
         path: /var/lib/grafana/dashboards/istio
       orgId: 1
       type: file
-    
+
 ---
 # Source: istio/charts/kiali/templates/configmap.yaml
 apiVersion: v1
@@ -14732,10 +14732,10 @@ data:
       web_root: /kiali
     external_services:
       tracing:
-        url: 
+        url:
         in_cluster_url: http://tracing/jaeger
       grafana:
-        url: 
+        url:
         in_cluster_url: http://grafana:3000
       prometheus:
         url: http://prometheus:9090
@@ -15051,7 +15051,7 @@ metadata:
     release: istio
     istio: citadel
 data:
-  custom-resources.yaml: |-    
+  custom-resources.yaml: |-
     # Authentication policy to enable permissive mode for all services (that have sidecar) in the mesh.
     apiVersion: "authentication.istio.io/v1alpha1"
     kind: "MeshPolicy"
@@ -15066,18 +15066,18 @@ data:
       peers:
       - mtls:
           mode: PERMISSIVE
-  run.sh: |-    
+  run.sh: |-
     #!/bin/sh
-    
+
     set -x
-    
+
     if [ "$#" -ne "1" ]; then
         echo "first argument should be path to custom resource yaml"
         exit 1
     fi
-    
+
     pathToResourceYAML=${1}
-    
+
     kubectl get validatingwebhookconfiguration istio-galley 2>/dev/null
     if [ "$?" -eq 0 ]; then
         echo "istio-galley validatingwebhookconfiguration found - waiting for istio-galley deployment to be ready"
@@ -15097,7 +15097,7 @@ data:
     fi
     sleep 5
     kubectl apply -f ${pathToResourceYAML}
-    
+
 
 ---
 # Source: istio/templates/configmap.yaml
@@ -15858,7 +15858,7 @@ spec:
           configMap:
             name: istio-grafana-custom-resources
       restartPolicy: OnFailure
-      affinity:      
+      affinity:
         nodeAffinity:
           requiredDuringSchedulingIgnoredDuringExecution:
             nodeSelectorTerms:
@@ -15890,7 +15890,7 @@ spec:
               - key: beta.kubernetes.io/arch
                 operator: In
                 values:
-                - "s390x"      
+                - "s390x"
 
 ---
 # Source: istio/charts/kiali/templates/serviceaccount.yaml
@@ -16039,7 +16039,7 @@ spec:
           configMap:
             name: istio-security-custom-resources
       restartPolicy: OnFailure
-      affinity:      
+      affinity:
         nodeAffinity:
           requiredDuringSchedulingIgnoredDuringExecution:
             nodeSelectorTerms:
@@ -16071,7 +16071,7 @@ spec:
               - key: beta.kubernetes.io/arch
                 operator: In
                 values:
-                - "s390x"      
+                - "s390x"
 
 ---
 # Source: istio/charts/security/templates/serviceaccount.yaml
@@ -16803,7 +16803,7 @@ spec:
       name: http
   selector:
     app: grafana
-  
+
 
 ---
 # Source: istio/charts/kiali/templates/service.yaml
@@ -17065,7 +17065,7 @@ spec:
           resources:
             requests:
               cpu: 10m
-            
+
       volumes:
       - name: certs
         secret:
@@ -17077,7 +17077,7 @@ spec:
       - name: mesh-config
         configMap:
           name: istio
-      affinity:      
+      affinity:
         nodeAffinity:
           requiredDuringSchedulingIgnoredDuringExecution:
             nodeSelectorTerms:
@@ -17109,7 +17109,7 @@ spec:
               - key: beta.kubernetes.io/arch
                 operator: In
                 values:
-                - "s390x"      
+                - "s390x"
 ---
 # Source: istio/charts/gateways/templates/deployment.yaml
 
@@ -17124,7 +17124,7 @@ metadata:
     heritage: Tiller
     istio: egressgateway
     release: istio
-    
+
 spec:
   replicas: 1
   selector:
@@ -17143,7 +17143,7 @@ spec:
         heritage: Tiller
         istio: egressgateway
         release: istio
-        
+
       annotations:
         sidecar.istio.io/inject: "false"
     spec:
@@ -17200,7 +17200,7 @@ spec:
             requests:
               cpu: 10m
               memory: 40Mi
-            
+
           env:
           - name: NODE_NAME
             valueFrom:
@@ -17255,7 +17255,7 @@ spec:
             value: kubernetes://apis/apps/v1/namespaces/istio-system/deployments/istio-egressgateway
           - name: ISTIO_META_ROUTER_MODE
             value: standard
-          
+
           volumeMounts:
           - name: istio-certs
             mountPath: /etc/certs
@@ -17279,7 +17279,7 @@ spec:
         secret:
           secretName: "istio-egressgateway-ca-certs"
           optional: true
-      affinity:      
+      affinity:
         nodeAffinity:
           requiredDuringSchedulingIgnoredDuringExecution:
             nodeSelectorTerms:
@@ -17311,7 +17311,7 @@ spec:
               - key: beta.kubernetes.io/arch
                 operator: In
                 values:
-                - "s390x"      
+                - "s390x"
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -17324,7 +17324,7 @@ metadata:
     heritage: Tiller
     istio: ingressgateway
     release: istio
-    
+
 spec:
   replicas: 1
   selector:
@@ -17343,7 +17343,7 @@ spec:
         heritage: Tiller
         istio: ingressgateway
         release: istio
-        
+
       annotations:
         sidecar.istio.io/inject: "false"
     spec:
@@ -17406,7 +17406,7 @@ spec:
             requests:
               cpu: 10m
               memory: 40Mi
-            
+
           env:
           - name: NODE_NAME
             valueFrom:
@@ -17461,8 +17461,8 @@ spec:
             value: kubernetes://apis/apps/v1/namespaces/istio-system/deployments/istio-ingressgateway
           - name: ISTIO_META_ROUTER_MODE
             value: standard
-          
-          
+
+
           volumeMounts:
           - name: istio-certs
             mountPath: /etc/certs
@@ -17486,7 +17486,7 @@ spec:
         secret:
           secretName: "istio-ingressgateway-ca-certs"
           optional: true
-      affinity:      
+      affinity:
         nodeAffinity:
           requiredDuringSchedulingIgnoredDuringExecution:
             nodeSelectorTerms:
@@ -17518,7 +17518,7 @@ spec:
               - key: beta.kubernetes.io/arch
                 operator: In
                 values:
-                - "s390x"      
+                - "s390x"
 ---
 
 ---
@@ -17576,7 +17576,7 @@ spec:
           resources:
             requests:
               cpu: 10m
-            
+
           volumeMounts:
           - name: data
             mountPath: /data/grafana
@@ -17618,7 +17618,7 @@ spec:
           - name: config
             mountPath: "/etc/grafana/provisioning/dashboards/dashboardproviders.yaml"
             subPath: dashboardproviders.yaml
-      affinity:      
+      affinity:
         nodeAffinity:
           requiredDuringSchedulingIgnoredDuringExecution:
             nodeSelectorTerms:
@@ -17650,7 +17650,7 @@ spec:
               - key: beta.kubernetes.io/arch
                 operator: In
                 values:
-                - "s390x"      
+                - "s390x"
       volumes:
       - name: config
         configMap:
@@ -17729,14 +17729,14 @@ spec:
           httpGet:
             path: /kiali/healthz
             port: 20001
-            scheme:   'HTTP' 
+            scheme:   'HTTP'
           initialDelaySeconds: 5
           periodSeconds: 30
         livenessProbe:
           httpGet:
             path: /kiali/healthz
             port: 20001
-            scheme:   'HTTP' 
+            scheme:   'HTTP'
           initialDelaySeconds: 5
           periodSeconds: 30
         env:
@@ -17754,7 +17754,7 @@ spec:
         resources:
           requests:
             cpu: 10m
-          
+
       volumes:
       - name: kiali-configuration
         configMap:
@@ -17767,7 +17767,7 @@ spec:
         secret:
           secretName: kiali
           optional: true
-      affinity:      
+      affinity:
         nodeAffinity:
           requiredDuringSchedulingIgnoredDuringExecution:
             nodeSelectorTerms:
@@ -17799,7 +17799,7 @@ spec:
               - key: beta.kubernetes.io/arch
                 operator: In
                 values:
-                - "s390x"      
+                - "s390x"
 
 ---
 # Source: istio/charts/mixer/templates/deployment.yaml
@@ -17849,7 +17849,7 @@ spec:
         secret:
           secretName: policy-adapter-secret
           optional: true
-      affinity:      
+      affinity:
         nodeAffinity:
           requiredDuringSchedulingIgnoredDuringExecution:
             nodeSelectorTerms:
@@ -17881,7 +17881,7 @@ spec:
               - key: beta.kubernetes.io/arch
                 operator: In
                 values:
-                - "s390x"      
+                - "s390x"
       containers:
       - name: mixer
         image: "docker.io/istio/mixer:1.5.0"
@@ -17911,7 +17911,7 @@ spec:
           requests:
             cpu: 10m
             memory: 100Mi
-          
+
         volumeMounts:
         - name: istio-certs
           mountPath: /etc/certs
@@ -17969,7 +17969,7 @@ spec:
           requests:
             cpu: 10m
             memory: 40Mi
-          
+
         volumeMounts:
         - name: istio-certs
           mountPath: /etc/certs
@@ -18026,7 +18026,7 @@ spec:
         secret:
           secretName: telemetry-adapter-secret
           optional: true
-      affinity:      
+      affinity:
         nodeAffinity:
           requiredDuringSchedulingIgnoredDuringExecution:
             nodeSelectorTerms:
@@ -18058,7 +18058,7 @@ spec:
               - key: beta.kubernetes.io/arch
                 operator: In
                 values:
-                - "s390x"      
+                - "s390x"
       containers:
       - name: mixer
         image: "docker.io/istio/mixer:1.5.0"
@@ -18095,7 +18095,7 @@ spec:
           requests:
             cpu: 50m
             memory: 100Mi
-          
+
         volumeMounts:
         - name: istio-certs
           mountPath: /etc/certs
@@ -18156,7 +18156,7 @@ spec:
           requests:
             cpu: 10m
             memory: 40Mi
-          
+
         volumeMounts:
         - name: istio-certs
           mountPath: /etc/certs
@@ -18164,7 +18164,7 @@ spec:
         - name: uds-socket
           mountPath: /sock
 
---- 
+---
 
 ---
 # Source: istio/charts/pilot/templates/deployment.yaml
@@ -18248,7 +18248,7 @@ spec:
             requests:
               cpu: 10m
               memory: 100Mi
-            
+
           volumeMounts:
           - name: config-volume
             mountPath: /etc/istio/config
@@ -18299,7 +18299,7 @@ spec:
             requests:
               cpu: 10m
               memory: 40Mi
-            
+
           volumeMounts:
           - name: istio-certs
             mountPath: /etc/certs
@@ -18312,7 +18312,7 @@ spec:
         secret:
           secretName: istio.istio-pilot-service-account
           optional: true
-      affinity:      
+      affinity:
         nodeAffinity:
           requiredDuringSchedulingIgnoredDuringExecution:
             nodeSelectorTerms:
@@ -18344,7 +18344,7 @@ spec:
               - key: beta.kubernetes.io/arch
                 operator: In
                 values:
-                - "s390x"      
+                - "s390x"
 
 ---
 # Source: istio/charts/prometheus/templates/deployment.yaml
@@ -18376,12 +18376,27 @@ spec:
     spec:
       serviceAccountName: prometheus
       containers:
+        - name: sidecar
+          image: gcr.io/stackdriver-prometheus/stackdriver-prometheus-sidecar:0.7.3
+          args:
+          - "--stackdriver.project-id=tonyh-gke-o11y-anz-openbanking"
+          - "--prometheus.wal-directory=/data/wal"
+          - "--prometheus.api-address=http://127.0.0.1:9090"
+          - "--stackdriver.kubernetes.location=australia-southeast1"
+          - "--stackdriver.kubernetes.cluster-name=o11y-ob"
+          ports:
+          - name: sidecar
+            containerPort: 9091
+          volumeMounts:
+          - name: data-volume
+            mountPath: /data
         - name: prometheus
           image: "docker.io/prom/prometheus:v2.12.0"
           imagePullPolicy: IfNotPresent
           args:
             - '--storage.tsdb.retention=6h'
             - '--config.file=/etc/prometheus/prometheus.yml'
+            - '--storage.tsdb.path=/data'
           ports:
             - containerPort: 9090
               name: http
@@ -18396,13 +18411,17 @@ spec:
           resources:
             requests:
               cpu: 10m
-            
+
           volumeMounts:
+          - name: data-volume
+            mountPath: /data
           - name: config-volume
             mountPath: /etc/prometheus
           - mountPath: /etc/istio-certs
             name: istio-certs
       volumes:
+      - name: data-volume
+        emptyDir: {}
       - name: config-volume
         configMap:
           name: prometheus
@@ -18410,7 +18429,7 @@ spec:
         secret:
           defaultMode: 420
           secretName: istio.default
-      affinity:      
+      affinity:
         nodeAffinity:
           requiredDuringSchedulingIgnoredDuringExecution:
             nodeSelectorTerms:
@@ -18442,7 +18461,7 @@ spec:
               - key: beta.kubernetes.io/arch
                 operator: In
                 values:
-                - "s390x"      
+                - "s390x"
 
 ---
 # Source: istio/charts/security/templates/deployment.yaml
@@ -18497,8 +18516,8 @@ spec:
           resources:
             requests:
               cpu: 10m
-            
-      affinity:      
+
+      affinity:
         nodeAffinity:
           requiredDuringSchedulingIgnoredDuringExecution:
             nodeSelectorTerms:
@@ -18530,7 +18549,7 @@ spec:
               - key: beta.kubernetes.io/arch
                 operator: In
                 values:
-                - "s390x"      
+                - "s390x"
 
 ---
 # Source: istio/charts/sidecarInjectorWebhook/templates/deployment.yaml
@@ -18610,7 +18629,7 @@ spec:
           resources:
             requests:
               cpu: 10m
-            
+
       volumes:
       - name: config-volume
         configMap:
@@ -18626,7 +18645,7 @@ spec:
             path: config
           - key: values
             path: values
-      affinity:      
+      affinity:
         nodeAffinity:
           requiredDuringSchedulingIgnoredDuringExecution:
             nodeSelectorTerms:
@@ -18658,7 +18677,7 @@ spec:
               - key: beta.kubernetes.io/arch
                 operator: In
                 values:
-                - "s390x"      
+                - "s390x"
 
 ---
 # Source: istio/charts/tracing/templates/deployment-jaeger.yaml
@@ -18726,7 +18745,7 @@ spec:
           - name: MEMORY_MAX_TRACES
             value: "50000"
           - name: QUERY_BASE_PATH
-            value:  /jaeger 
+            value:  /jaeger
           livenessProbe:
             httpGet:
               path: /
@@ -18741,8 +18760,8 @@ spec:
           resources:
             requests:
               cpu: 10m
-            
-      affinity:      
+
+      affinity:
         nodeAffinity:
           requiredDuringSchedulingIgnoredDuringExecution:
             nodeSelectorTerms:
@@ -18774,7 +18793,7 @@ spec:
               - key: beta.kubernetes.io/arch
                 operator: In
                 values:
-                - "s390x"      
+                - "s390x"
       volumes:
       - name: data
         emptyDir: {}

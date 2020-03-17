@@ -85,5 +85,4 @@ profiles:
   deploy:
     kubectl:
       manifests:
-      - ./kubernetes-manifests/**.yaml
-      - ./istio-manifests/**.yaml
+      - ./kubernetes-manifests-tracing/**.yaml

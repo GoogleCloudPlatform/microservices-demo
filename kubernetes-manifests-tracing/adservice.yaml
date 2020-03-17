@@ -39,7 +39,7 @@ spec:
         # - name: DISABLE_TRACING
         #   value: "1"
         - name: JAEGER_SERVICE_ADDR
-          value: "jaeger-collector:14268"
+          value: "jaeger-collector.istio-sysem.svc:14268"
         resources:
           requests:
             cpu: 200m
