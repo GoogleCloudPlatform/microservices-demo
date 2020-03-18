@@ -13,6 +13,16 @@ ZONE=australia-southeast1-a
 ISTIO_VERSION=1.5.0
 
 a: help
+all: all.cluster all.istio default.app
+
+all.cluster: cluster.create get.creds
+
+all.istio: ns.create.istio-system istio.init crd.wait ns.istio.enabled istio.template istio.deploy
+
+default.app: crd.wait skaffold.run.gcp.istio hipster.istio.rules
+
+crd.wait:
+	@kubectl -n istio-system wait --for=condition=complete job --all
 
 ## Use Istio Version 1.5.0
 istio150:
@@ -25,7 +35,7 @@ istio135:
 ## Create GKE Cluster with istio enabled
 cluster.create.istio:
  	@gcloud container clusters create ${CLUSTER_NAME} --enable-autoupgrade \
-	--enable-autoscaling --min-nodes=1 --max-nodes=10 --num-nodes=4 --zone=${ZONE} \
+	--enable-autoscaling --min-nodes=1 --max-nodes=10 --num-nodes=6 --zone=${ZONE} \
 	--addons=Istio --istio-config=auth=MTLS_PERMISSIVE \
 	--machine-type=n1-standard-2
 
@@ -43,7 +53,7 @@ cluster.resize:
 ## Create GKE Cluster
 cluster.create:
 	@gcloud container clusters create ${CLUSTER_NAME} --enable-autoupgrade \
-	--enable-autoscaling --min-nodes=1 --max-nodes=10 --num-nodes=4 --zone=${ZONE} \
+	--enable-autoscaling --min-nodes=1 --max-nodes=10 --num-nodes=6 --zone=${ZONE} \
 	--machine-type=n1-standard-2
 
 ## Get Cluster Creds
@@ -67,9 +77,6 @@ ns.istio.disabled:
 istio.init:
 	@helm template istio-${ISTIO_VERSION}/install/kubernetes/helm/istio-init --name istio-init --namespace istio-system | kubectl apply -f -
 
-istio.init.delete:
-	@helm template istio-${ISTIO_VERSION}/install/kubernetes/helm/istio-init --name istio-init --namespace istio-system | kubectl delete -f -
-
 
 ## Generate Istio Template
 istio.template:
@@ -77,8 +84,12 @@ istio.template:
 	--values istio-${ISTIO_VERSION}/install/kubernetes/helm/istio/values-istio-demo.yaml > istio-manifests/istio-demo.yaml
 
 ## Deploy Istio Config
-istio.deploy: istio.template
+istio.deploy:
 	@kubectl apply -f istio-manifests/istio-demo.yaml
+
+## Check if prometheus-stackdriver-sidecar has been deployed
+prom.sidecar.exist:
+	@kubectl -n istio-system get deployment prometheus -o=go-template='{{$output := "stackdriver-prometheus-sidecar does not exists."}}{{range .spec.template.spec.containers}}{{if eq .name "sidecar"}}{{$output = (print "stackdriver-prometheus-sidecar exists. Image: " .image)}}{{end}}{{end}}{{printf $output}}{{"\n"}}'
 
 ## Delete Istio Config
 istio.delete:
@@ -121,6 +132,15 @@ skaffold.build.gcp:
 ## Delete the GKE Cluster
 cluster.delete:
 	@gcloud container clusters delete ${CLUSTER_NAME} --zone ${ZONE}
+
+## Application Istio Rules
+hipster.istio.rules:
+	@kubectl apply -f istio-manifests/frontend.yaml
+	@kubectl apply -f istio-manifests/frontend-gateway.yaml
+	@kubectl apply -f istio-manifests/whitelist-egress-googleapis.yaml
+
+istio.init.delete:
+	@helm template istio-${ISTIO_VERSION}/install/kubernetes/helm/istio-init --name istio-init --namespace istio-system | kubectl delete -f -
 
 help:
 	@echo ''

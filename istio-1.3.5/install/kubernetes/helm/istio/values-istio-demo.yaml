@@ -21,7 +21,7 @@ sidecarInjectorWebhook:
 
 pilot:
   autoscaleEnabled: false
-  traceSampling: 100.0
+  traceSampling: 10.0
   resources:
     requests:
       cpu: 10m
@@ -43,11 +43,11 @@ mixer:
       requests:
         cpu: 50m
         memory: 100Mi
- 
+
   adapters:
     stdio:
       enabled: true
- 
+
 grafana:
   enabled: true
 

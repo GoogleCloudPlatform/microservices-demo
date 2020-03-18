@@ -1,0 +1,117 @@
+
+---
+# Source: istio/charts/prometheus/templates/deployment.yaml
+# TODO: the original template has service account, roles, etc
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: prometheus
+  namespace: istio-system
+  labels:
+    app: prometheus
+    chart: prometheus
+    heritage: Tiller
+    release: istio
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: prometheus
+  template:
+    metadata:
+      labels:
+        app: prometheus
+        chart: prometheus
+        heritage: Tiller
+        release: istio
+      annotations:
+        sidecar.istio.io/inject: "false"
+    spec:
+      serviceAccountName: prometheus
+      containers:
+        - name: sidecar
+          image: gcr.io/stackdriver-prometheus/stackdriver-prometheus-sidecar:0.7.3
+          args:
+          - "--stackdriver.project-id=tonyh-gke-o11y-anz-openbanking"
+          - "--prometheus.wal-directory=/data/wal"
+          - "--prometheus.api-address=http://127.0.0.1:9090"
+          - "--stackdriver.kubernetes.location=australia-southeast1"
+          - "--stackdriver.kubernetes.cluster-name=o11y-ob"
+          ports:
+          - name: sidecar
+            containerPort: 9091
+          volumeMounts:
+          - name: data-volume
+            mountPath: /data
+        - name: prometheus
+          image: "docker.io/prom/prometheus:v2.12.0"
+          imagePullPolicy: IfNotPresent
+          args:
+            - '--storage.tsdb.retention=6h'
+            - '--config.file=/etc/prometheus/prometheus.yml'
+            - '--storage.tsdb.path=/data'
+          ports:
+            - containerPort: 9090
+              name: http
+          livenessProbe:
+            httpGet:
+              path: /-/healthy
+              port: 9090
+          readinessProbe:
+            httpGet:
+              path: /-/ready
+              port: 9090
+          resources:
+            requests:
+              cpu: 10m
+
+          volumeMounts:
+          - name: data-volume
+            mountPath: /data
+          - name: config-volume
+            mountPath: /etc/prometheus
+          - mountPath: /etc/istio-certs
+            name: istio-certs
+      volumes:
+      - name: data-volume
+        emptyDir: {}
+      - name: config-volume
+        configMap:
+          name: prometheus
+      - name: istio-certs
+        secret:
+          defaultMode: 420
+          secretName: istio.default
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: beta.kubernetes.io/arch
+                operator: In
+                values:
+                - "amd64"
+                - "ppc64le"
+                - "s390x"
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 2
+            preference:
+              matchExpressions:
+              - key: beta.kubernetes.io/arch
+                operator: In
+                values:
+                - "amd64"
+          - weight: 2
+            preference:
+              matchExpressions:
+              - key: beta.kubernetes.io/arch
+                operator: In
+                values:
+                - "ppc64le"
+          - weight: 2
+            preference:
+              matchExpressions:
+              - key: beta.kubernetes.io/arch
+                operator: In
+                values:
+                - "s390x"

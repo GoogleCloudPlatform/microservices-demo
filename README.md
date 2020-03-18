@@ -115,7 +115,7 @@ We offer the following installation methods:
     ```shell
     minikube start --cpus=4 --memory 4096
     ```
-    
+
     - Launch “Docker for Desktop” (tested with Mac/Windows). Go to Preferences:
         - choose “Enable Kubernetes”,
         - set CPUs to at least 3, and Memory to at least 6.0 GiB
@@ -289,3 +289,15 @@ resources.
 ---
 
 This is not an official Google project.
+
+============
+### Tony's notes
+
+## ref links
+
+[Cloud Monitoring metric export](https://cloud.google.com/solutions/stackdriver-monitoring-metric-export)
+
+
+[External metrics list](https://cloud.google.com/monitoring/api/metrics_other)
+
+[Metirc descriptors list](https://cloud.google.com/monitoring/api/ref_v3/rest/v3/projects.metricDescriptors/list)

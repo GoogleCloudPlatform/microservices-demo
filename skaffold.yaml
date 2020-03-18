@@ -86,3 +86,5 @@ profiles:
     kubectl:
       manifests:
       - ./kubernetes-manifests-tracing/**.yaml
+      - ./istio-manifests/frontend**.yaml
+      - ./istio-manifests/whitelist-egress-googleapis.yaml
