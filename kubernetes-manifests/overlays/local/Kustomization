@@ -1,0 +1,15 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+- ../../bases/redis/
+- ../../../src/adservice/kubernetes-manifests
+- ../../../src/cartservice/kubernetes-manifests
+- ../../../src/checkoutservice/kubernetes-manifests
+- ../../../src/currencyservice/kubernetes-manifests
+- ../../../src/emailservice/kubernetes-manifests
+- ../../../src/frontend/kubernetes-manifests
+- ../../../src/loadgenerator/kubernetes-manifests
+- ../../../src/paymentservice/kubernetes-manifests
+- ../../../src/productcatalogservice/kubernetes-manifests
+- ../../../src/recommendationservice/kubernetes-manifests
+- ../../../src/shippingservice/kubernetes-manifests
