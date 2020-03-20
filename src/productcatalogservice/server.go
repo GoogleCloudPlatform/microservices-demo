@@ -32,10 +32,12 @@ import (
 	healthpb "google.golang.org/grpc/health/grpc_health_v1"
 
 	"cloud.google.com/go/profiler"
-	"contrib.go.opencensus.io/exporter/stackdriver"
+    "contrib.go.opencensus.io/exporter/stackdriver"
+    "contrib.go.opencensus.io/exporter/stackdriver/monitoredresource"
+    "go.opencensus.io/examples/exporter"
 	"github.com/golang/protobuf/jsonpb"
 	"github.com/sirupsen/logrus"
-	"go.opencensus.io/exporter/jaeger"
+	// "go.opencensus.io/exporter/jaeger"
 	"go.opencensus.io/plugin/ocgrpc"
 	"go.opencensus.io/stats/view"
 	"go.opencensus.io/trace"
@@ -148,30 +150,31 @@ func run(port string) string {
 	return l.Addr().String()
 }
 
-func initJaegerTracing() {
-	svcAddr := os.Getenv("JAEGER_SERVICE_ADDR")
-	if svcAddr == "" {
-		log.Info("jaeger initialization disabled.")
-		return
-	}
-	// Register the Jaeger exporter to be able to retrieve
-	// the collected spans.
-	exporter, err := jaeger.NewExporter(jaeger.Options{
-		Endpoint: fmt.Sprintf("http://%s", svcAddr),
-		Process: jaeger.Process{
-			ServiceName: "productcatalogservice",
-		},
-	})
-	if err != nil {
-		log.Fatal(err)
-	}
-	trace.RegisterExporter(exporter)
-	log.Info("jaeger initialization completed.")
-}
+// func initJaegerTracing() {
+// 	svcAddr := os.Getenv("JAEGER_SERVICE_ADDR")
+// 	if svcAddr == "" {
+// 		log.Info("jaeger initialization disabled.")
+// 		return
+// 	}
+// 	// Register the Jaeger exporter to be able to retrieve
+// 	// the collected spans.
+// 	exporter, err := jaeger.NewExporter(jaeger.Options{
+// 		Endpoint: fmt.Sprintf("http://%s", svcAddr),
+// 		Process: jaeger.Process{
+// 			ServiceName: "productcatalogservice",
+// 		},
+// 	})
+// 	if err != nil {
+// 		log.Fatal(err)
+// 	}
+// 	trace.RegisterExporter(exporter)
+// 	log.Info("jaeger initialization completed.")
+// }
 
 func initStats(exporter *stackdriver.Exporter) {
-	view.SetReportingPeriod(60 * time.Second)
-	view.RegisterExporter(exporter)
+    view.SetReportingPeriod(60 * time.Second)
+    exporter.StartMetricsExporter()
+    // view.RegisterExporter(exporter) X
 	if err := view.Register(ocgrpc.DefaultServerViews...); err != nil {
 		log.Info("Error registering default server views")
 	} else {
@@ -183,11 +186,15 @@ func initStackdriverTracing() {
 	// TODO(ahmetb) this method is duplicated in other microservices using Go
 	// since they are not sharing packages.
 	for i := 1; i <= 3; i++ {
-		exporter, err := stackdriver.NewExporter(stackdriver.Options{})
+        view.RegisterExporter(&exporter.PrintExporter{})
+		exporter, err := stackdriver.NewExporter(stackdriver.Options{
+            ProjectID:         "test-exemplar-project", // Google Cloud Console project ID for stackdriver.
+            MonitoredResource: monitoredresource.Autodetect(),
+        })
 		if err != nil {
 			log.Warnf("failed to initialize Stackdriver exporter: %+v", err)
 		} else {
-			trace.RegisterExporter(exporter)
+			// trace.RegisterExporter(exporter)
 			trace.ApplyConfig(trace.Config{DefaultSampler: trace.AlwaysSample()})
 			log.Info("registered Stackdriver tracing")
 
@@ -203,7 +210,7 @@ func initStackdriverTracing() {
 }
 
 func initTracing() {
-	initJaegerTracing()
+	// initJaegerTracing()
 	initStackdriverTracing()
 }
 
