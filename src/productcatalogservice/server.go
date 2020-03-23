@@ -191,6 +191,7 @@ func initStackdriverTracing() {
             ProjectID:         "test-exemplar-project", // Google Cloud Console project ID for stackdriver.
             MonitoredResource: monitoredresource.Autodetect(),
         })
+        trace.RegisterExporter(exporter)
 		if err != nil {
 			log.Warnf("failed to initialize Stackdriver exporter: %+v", err)
 		} else {
