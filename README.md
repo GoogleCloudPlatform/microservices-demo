@@ -249,7 +249,21 @@ by deploying the [release manifest](./release) directly to an existing cluster.
    kubectl apply -f ./istio-manifests
    ```
 
-5. Deploy the application with `skaffold run --default-repo=gcr.io/[PROJECT_ID]`.
+5. In the root of this repository, run `skaffold run --default-repo=gcr.io/[PROJECT_ID]`,
+    where [PROJECT_ID] is your GCP project ID.
+
+    This command:
+
+    - builds the container images
+    - pushes them to GCR
+    - applies the `./kubernetes-manifests` deploying the application to
+      Kubernetes.
+
+    **Troubleshooting:** If you get "No space left on device" error on Google
+    Cloud Shell, you can build the images on Google Cloud Build: [Enable the
+    Cloud Build
+    API](https://console.cloud.google.com/flows/enableapi?apiid=cloudbuild.googleapis.com),
+    then run `skaffold run -p gcb --default-repo=gcr.io/[PROJECT_ID]` instead.
 
 6. Run `kubectl get pods` to see pods are in a healthy and ready state.
 
