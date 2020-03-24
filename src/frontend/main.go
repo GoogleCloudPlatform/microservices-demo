@@ -23,10 +23,10 @@ import (
 
 	"cloud.google.com/go/profiler"
 	"contrib.go.opencensus.io/exporter/stackdriver"
+    "go.opencensus.io/examples/exporter"
 	"github.com/gorilla/mux"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
-	"go.opencensus.io/exporter/jaeger"
 	"go.opencensus.io/plugin/ocgrpc"
 	"go.opencensus.io/plugin/ochttp"
 	"go.opencensus.io/plugin/ochttp/propagation/b3"
@@ -154,32 +154,10 @@ func main() {
 	log.Fatal(http.ListenAndServe(addr+":"+srvPort, handler))
 }
 
-func initJaegerTracing(log logrus.FieldLogger) {
-
-	svcAddr := os.Getenv("JAEGER_SERVICE_ADDR")
-	if svcAddr == "" {
-		log.Info("jaeger initialization disabled.")
-		return
-	}
-
-	// Register the Jaeger exporter to be able to retrieve
-	// the collected spans.
-	exporter, err := jaeger.NewExporter(jaeger.Options{
-		Endpoint: fmt.Sprintf("http://%s", svcAddr),
-		Process: jaeger.Process{
-			ServiceName: "frontend",
-		},
-	})
-	if err != nil {
-		log.Fatal(err)
-	}
-	trace.RegisterExporter(exporter)
-	log.Info("jaeger initialization completed.")
-}
 
 func initStats(log logrus.FieldLogger, exporter *stackdriver.Exporter) {
 	view.SetReportingPeriod(60 * time.Second)
-	view.RegisterExporter(exporter)
+    exporter.StartMetricsExporter()
 	if err := view.Register(ochttp.DefaultServerViews...); err != nil {
 		log.Warn("Error registering http default server views")
 	} else {
@@ -197,6 +175,7 @@ func initStackdriverTracing(log logrus.FieldLogger) {
 	// since they are not sharing packages.
 	for i := 1; i <= 3; i++ {
 		log = log.WithField("retry", i)
+        view.RegisterExporter(&exporter.PrintExporter{})
 		exporter, err := stackdriver.NewExporter(stackdriver.Options{})
 		if err != nil {
 			// log.Warnf is used since there are multiple backends (stackdriver & jaeger)
@@ -225,7 +204,6 @@ func initTracing(log logrus.FieldLogger) {
 	// trace.ProbabilitySampler set at the desired probability.
 	trace.ApplyConfig(trace.Config{DefaultSampler: trace.AlwaysSample()})
 
-	initJaegerTracing(log)
 	initStackdriverTracing(log)
 
 }
