@@ -20,9 +20,9 @@ If you need to upgrade the version of gradle then run
 
 ## Building docker image
 
-From the repository root, run:
+From `src/adservice/`, run:
 
 ```
-docker build --file src/adservice/Dockerfile .
+docker build ./
 ```
 
