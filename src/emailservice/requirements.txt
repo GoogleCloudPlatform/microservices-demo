@@ -7,28 +7,28 @@
 cachetools==3.0.0         # via google-auth
 certifi==2018.11.29       # via requests
 chardet==3.0.4            # via requests
-google-api-core[grpc]==1.6.0
+google-api-core[grpc]==1.6.0  # via -r requirements.in, google-cloud-core, google-cloud-trace, opencensus
 google-api-python-client==1.7.8  # via google-cloud-profiler
 google-auth-httplib2==0.0.3  # via google-api-python-client, google-cloud-profiler
 google-auth==1.6.2        # via google-api-core, google-api-python-client, google-auth-httplib2, google-cloud-profiler
 google-cloud-core==0.29.1  # via google-cloud-trace
-google-cloud-profiler==1.0.8
+google-cloud-profiler==1.0.8  # via -r requirements.in
 google-cloud-trace==0.20.2  # via opencensus
 googleapis-common-protos==1.5.5  # via google-api-core
-grpcio-health-checking==1.12.1
-grpcio==1.16.1
+grpcio-health-checking==1.12.1  # via -r requirements.in
+grpcio==1.16.1            # via -r requirements.in, google-api-core, grpcio-health-checking
 httplib2==0.12.1          # via google-api-python-client, google-auth-httplib2
 idna==2.8                 # via requests
-jinja2==2.10
+jinja2==2.10              # via -r requirements.in
 markupsafe==1.1.0         # via jinja2
-opencensus[stackdriver]==0.1.10
+opencensus[stackdriver]==0.1.10  # via -r requirements.in
 protobuf==3.6.1           # via google-api-core, google-cloud-profiler, googleapis-common-protos, grpcio-health-checking
 pyasn1-modules==0.2.3     # via google-auth
 pyasn1==0.4.5             # via pyasn1-modules, rsa
-python-json-logger==0.1.9
+python-json-logger==0.1.9  # via -r requirements.in
 pytz==2018.9              # via google-api-core
 requests==2.21.0          # via google-api-core, google-cloud-profiler
 rsa==4.0                  # via google-auth
 six==1.12.0               # via google-api-core, google-api-python-client, google-auth, grpcio, protobuf
 uritemplate==3.0.0        # via google-api-python-client
-urllib3==1.24.1           # via requests
+urllib3==1.24.2           # via requests
