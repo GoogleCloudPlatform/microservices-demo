@@ -22,6 +22,7 @@ import time
 import grpc
 from jinja2 import Environment, FileSystemLoader, select_autoescape, TemplateError
 from google.api_core.exceptions import GoogleAPICallError
+from google.auth.exceptions import DefaultCredentialsError
 
 import demo_pb2
 import demo_pb2_grpc
@@ -189,7 +190,7 @@ if __name__ == '__main__':
         project_id=os.environ.get('GCP_PROJECT_ID'),
         transport=AsyncTransport)
       tracer_interceptor = server_interceptor.OpenCensusServerInterceptor(sampler, exporter)
-  except KeyError:
+  except (KeyError, DefaultCredentialsError):
       logger.info("Tracing disabled.")
       tracer_interceptor = server_interceptor.OpenCensusServerInterceptor()
 
