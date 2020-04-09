@@ -28,7 +28,7 @@ pyasn1-modules==0.2.4     # via google-auth
 pyasn1==0.4.5             # via pyasn1-modules, rsa
 python-json-logger==0.1.9  # via -r requirements.in
 pytz==2018.9              # via google-api-core
-pyyaml==3.13              # via google-python-cloud-debugger
+pyyaml==5.1               # via google-python-cloud-debugger
 requests==2.21.0          # via google-api-core, google-cloud-profiler
 rsa==4.0                  # via google-auth
 six==1.12.0               # via google-api-core, google-api-python-client, google-auth, google-python-cloud-debugger, grpcio, protobuf
