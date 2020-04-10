@@ -22,7 +22,8 @@ jobs:
         kubectl get nodes
     - name: Deploy From Source
       run: |
-        skaffold run
+        skaffold config set --global local-cluster true
+        skaffold run --default-repo local
     - name: Wait For Pods
       timeout-minutes: 20
       run: |
@@ -42,12 +43,16 @@ jobs:
       timeout-minutes: 5
       run: |
         set -x
-        RESULT=" "
-        while [[ "$RESULT" != "  HTTP/1.1 200 OK" ]]; do
-          sleep 1
-          RESULT=$(kubectl exec deployments/frontend -- sh -c "wget --spider -S "http://frontend" 2>&1 | grep 'HTTP/'")
-          echo "front end response: $RESULT"
+        # start fresh loadgenerator pod
+        kubectl delete pod -l app=loadgenerator
+        # wait for requests to come in
+        REQUEST_COUNT="0"
+        while [[ "$REQUEST_COUNT"  -lt "50"  ]]; do
+            sleep 5
+            REQUEST_COUNT=$(kubectl logs -l app=loadgenerator | grep Aggregated | awk '{print $2}')
         done
-        if [[ "$RESULT" != "  HTTP/1.1 200 OK" ]]; then 
+        # ensure there are no errors hitting endpoints
+        ERROR_COUNT=$(kubectl logs -l app=loadgenerator | grep Aggregated | awk '{print $3}' | sed "s/[(][^)]*[)]//g")
+        if [[ "$ERROR_COUNT" -gt "0" ]]; then
           exit 1
         fi
