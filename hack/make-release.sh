@@ -40,12 +40,13 @@ fi
 # update yaml
 "${SCRIPTDIR}"/make-release-artifacts.sh
 
-# create git release / push to master
+# create git release / push to new branch
+git checkout -b "release/${TAG}"
 git add "${SCRIPTDIR}/../release/"
 git commit --allow-empty -m "Release $TAG"
-log "Pushing k8s manifests to master..."
+log "Pushing k8s manifests to release/${TAG}..."
 git tag "$TAG"
+git push --set-upstream origin "release/${TAG}"
 git push --tags
-git push origin master
 
 log "Successfully tagged release $TAG."
