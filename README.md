@@ -122,7 +122,7 @@ We offer the following installation methods:
         - set CPUs to at least 3, and Memory to at least 6.0 GiB
         - on the "Disk" tab, set at least 32 GB disk space
 
-    - To Launch a **Kind** cluster:
+    - To launch a **Kind** cluster:
 
       ```shell
       kind create cluster
