@@ -112,6 +112,7 @@ We offer the following installation methods:
        local Kubernetes cluster has at least:
         - 4 CPU's
         - 4.0 GiB memory
+
       ```shell
       minikube start --cpus=4 --memory 4096
       ```
@@ -121,10 +122,11 @@ We offer the following installation methods:
         - set CPUs to at least 3, and Memory to at least 6.0 GiB
         - on the "Disk" tab, set at least 32 GB disk space
 
-    - to Launch a **Kind** cluster:
-        ```shell
-        kind create cluster
-        ```
+    - To Launch a **Kind** cluster:
+
+      ```shell
+      kind create cluster
+      ```
 
 1. Run `kubectl get nodes` to verify you're connected to “Kubernetes on Docker”.
 
@@ -136,12 +138,16 @@ We offer the following installation methods:
 
 1. Access the web frontend through your browser
     - **Minikube** requires you to run a command to access the frontend service:
+
     ```shell
     minikube service frontend-external
     ```
+
     - **Docker For Desktop** should automatically provide the frontend at http://localhost:80
-    - **Kind** does not provision an IP address for the service. 
+
+    - **Kind** does not provision an IP address for the service.
       You must run a port-forwarding process to access the frontend at http://localhost:8080:
+
     ```shell
     kubectl port-forward deployment/frontend 8080:8080
     ```
