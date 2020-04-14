@@ -72,12 +72,13 @@ We offer the following installation methods:
 
 1. **Running locally** (~20 minutes) You will build
    and deploy microservices images to a single-node Kubernetes cluster running
-   on your development machine. There are two options to run a Kubernetes
+   on your development machine. There are three options to run a Kubernetes
    cluster locally for this demo:
-   - [Minikube](https://github.com/kubernetes/minikube). Recommended for the
+   - [Minikube](https://github.com/kubernetes/minikube). Recommended for
      Linux hosts (also supports Mac/Windows).
    - [Docker for Desktop](https://www.docker.com/products/docker-desktop).
      Recommended for Mac/Windows.
+   - [Kind](https://www.docker.com/products/docker-desktop) (supports Mac/Windows/Linux)
 
 1. **Running on Google Kubernetes Engine (GKE)”** (~30 minutes) You will build,
    upload and deploy the container images to a Kubernetes cluster on Google
@@ -98,9 +99,11 @@ We offer the following installation methods:
    - kubectl (can be installed via `gcloud components install kubectl`)
    - Local Kubernetes cluster deployment tool:
         - [Minikube (recommended for
-         Linux)](https://kubernetes.io/docs/setup/minikube/).
-        - Docker for Desktop (recommended for Mac/Windows): It provides Kubernetes support as [noted
-     here](https://docs.docker.com/docker-for-mac/kubernetes/).
+         Linux)](https://kubernetes.io/docs/setup/minikube/)
+        - [Docker for Desktop (recommended for Mac/Windows)](https://www.docker.com/products/docker-desktop)
+          - It provides Kubernetes support as [noted
+     here](https://docs.docker.com/docker-for-mac/kubernetes/)
+        - [Kind](https://github.com/kubernetes-sigs/kind)
    - [skaffold]( https://skaffold.dev/docs/install/) (ensure version ≥v0.20)
 
 1. Launch the local Kubernetes cluster with one of the following tools:
@@ -112,14 +115,19 @@ We offer the following installation methods:
 
         To run a Kubernetes cluster with Minikube using the described configuration, please run:
 
-    ```shell
-    minikube start --cpus=4 --memory 4096
-    ```
-    
+      ```shell
+      minikube start --cpus=4 --memory 4096
+      ```
+
     - Launch “Docker for Desktop” (tested with Mac/Windows). Go to Preferences:
         - choose “Enable Kubernetes”,
         - set CPUs to at least 3, and Memory to at least 6.0 GiB
         - on the "Disk" tab, set at least 32 GB disk space
+
+    - Launch a Kind cluster
+        ```shell
+        kind create cluster
+        ```
 
 1. Run `kubectl get nodes` to verify you're connected to “Kubernetes on Docker”.
 
