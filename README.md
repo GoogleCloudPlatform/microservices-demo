@@ -108,7 +108,7 @@ We offer the following installation methods:
 
 1. Launch the local Kubernetes cluster with one of the following tools:
 
-    - Launch Minikube (tested with Ubuntu Linux). Please, ensure that the
+    - To launch **Minikube** (tested with Ubuntu Linux). Please, ensure that the
        local Kubernetes cluster has at least:
         - 4 CPU's
         - 4.0 GiB memory
@@ -116,12 +116,12 @@ We offer the following installation methods:
       minikube start --cpus=4 --memory 4096
       ```
 
-    - Launch “Docker for Desktop” (tested with Mac/Windows). Go to Preferences:
+    - To launch **Docker for Desktop** (tested with Mac/Windows). Go to Preferences:
         - choose “Enable Kubernetes”,
         - set CPUs to at least 3, and Memory to at least 6.0 GiB
         - on the "Disk" tab, set at least 32 GB disk space
 
-    - Launch a Kind cluster:
+    - to Launch a **Kind** cluster:
         ```shell
         kind create cluster
         ```
@@ -132,9 +132,20 @@ We offer the following installation methods:
    This will build and deploy the application. If you need to rebuild the images
    automatically as you refactor the code, run `skaffold dev` command.
 
-1. Run `kubectl get pods` to verify the Pods are ready and running. The
-   application frontend should be available at http://localhost:80 on your
-   machine.
+1. Run `kubectl get pods` to verify the Pods are ready and running.
+
+1. Access the web frontend through your browser
+    - **Minikube** requires you to run a command to access the service:
+    ```shell
+    minikube service frontend-external
+    ```
+    - **Docker For Desktop** should automatically provide a port mapping for the LoadBalancer. =
+      You can access the frontend at http://localhost:80
+    - **Kind** does not provision an IP address for the service. You must first run a port-forwarding process:
+    ```shell
+    kubectl port-forward deployment/frontend 8080:8080
+    ```
+    You should now be able to access the frontend at http://localhost:8080
 
 ### Option 2: Running on Google Kubernetes Engine (GKE)
 
