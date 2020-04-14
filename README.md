@@ -135,17 +135,16 @@ We offer the following installation methods:
 1. Run `kubectl get pods` to verify the Pods are ready and running.
 
 1. Access the web frontend through your browser
-    - **Minikube** requires you to run a command to access the service:
+    - **Minikube** requires you to run a command to access the frontend service:
     ```shell
     minikube service frontend-external
     ```
-    - **Docker For Desktop** should automatically provide a port mapping for the LoadBalancer. =
-      You can access the frontend at http://localhost:80
-    - **Kind** does not provision an IP address for the service. You must first run a port-forwarding process:
+    - **Docker For Desktop** should automatically provide the frontend at http://localhost:80
+    - **Kind** does not provision an IP address for the service. 
+      You must run a port-forwarding process to access the frontend at http://localhost:8080:
     ```shell
     kubectl port-forward deployment/frontend 8080:8080
     ```
-    You should now be able to access the frontend at http://localhost:8080
 
 ### Option 2: Running on Google Kubernetes Engine (GKE)
 
