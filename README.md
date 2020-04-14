@@ -78,7 +78,7 @@ We offer the following installation methods:
      Linux hosts (also supports Mac/Windows).
    - [Docker for Desktop](https://www.docker.com/products/docker-desktop).
      Recommended for Mac/Windows.
-   - [Kind](https://www.docker.com/products/docker-desktop) (supports Mac/Windows/Linux)
+   - [Kind](https://www.docker.com/products/docker-desktop). Supports Mac/Windows/Linux.
 
 1. **Running on Google Kubernetes Engine (GKE)”** (~30 minutes) You will build,
    upload and deploy the container images to a Kubernetes cluster on Google
@@ -112,9 +112,6 @@ We offer the following installation methods:
        local Kubernetes cluster has at least:
         - 4 CPU's
         - 4.0 GiB memory
-
-        To run a Kubernetes cluster with Minikube using the described configuration, please run:
-
       ```shell
       minikube start --cpus=4 --memory 4096
       ```
@@ -124,7 +121,7 @@ We offer the following installation methods:
         - set CPUs to at least 3, and Memory to at least 6.0 GiB
         - on the "Disk" tab, set at least 32 GB disk space
 
-    - Launch a Kind cluster
+    - Launch a Kind cluster:
         ```shell
         kind create cluster
         ```
