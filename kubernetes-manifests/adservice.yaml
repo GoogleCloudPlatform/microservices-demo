@@ -27,7 +27,7 @@ spec:
     spec:
       terminationGracePeriodSeconds: 5
       containers:
-      - name: addserver
+      - name: server
         image: adservice
         ports:
         - containerPort: 9555

@@ -27,7 +27,7 @@ spec:
     spec:
       terminationGracePeriodSeconds: 5
       containers:
-      - name: paymentserver
+      - name: server
         image: paymentservice
         ports:
         - containerPort: 50051

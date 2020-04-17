@@ -27,7 +27,7 @@ spec:
     spec:
       terminationGracePeriodSeconds: 5
       containers:
-      - name: cartserver
+      - name: server
         image: cartservice
         ports:
         - containerPort: 7070
