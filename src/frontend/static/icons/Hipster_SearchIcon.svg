@@ -1,0 +1,11 @@
+<svg id="Layer_1" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 12">
+  <defs>
+    <style>
+      .cls-1 {
+        fill: #605f64;
+      }
+    </style>
+  </defs>
+  <title>Hipster</title>
+  <path class="cls-1" d="M8.58,7.55H8l-.19-.19a4.48,4.48,0,1,0-.48.48L7.55,8v.55L11,12l1-1Zm-4.12,0A3.09,3.09,0,1,1,7.55,4.46,3.09,3.09,0,0,1,4.46,7.55Z"/>
+</svg>

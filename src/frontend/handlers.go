@@ -22,6 +22,7 @@ import (
 	"net/http"
 	"os"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/gorilla/mux"
@@ -31,6 +32,11 @@ import (
 	pb "github.com/GoogleCloudPlatform/microservices-demo/src/frontend/genproto"
 	"github.com/GoogleCloudPlatform/microservices-demo/src/frontend/money"
 )
+
+type platformDetails struct {
+	css      string
+	provider string
+}
 
 var (
 	templates = template.Must(template.New("").
@@ -72,6 +78,11 @@ func (fe *frontendServer) homeHandler(w http.ResponseWriter, r *http.Request) {
 		ps[i] = productView{p, price}
 	}
 
+	//get env and render correct platform banner.
+	var env = os.Getenv("ENV_PLATFORM")
+	plat := platformDetails{}
+	plat.setPlatformDetails(strings.ToLower(env))
+
 	if err := templates.ExecuteTemplate(w, "home", map[string]interface{}{
 		"session_id":    sessionID(r),
 		"request_id":    r.Context().Value(ctxKeyRequestID{}),
@@ -81,8 +92,23 @@ func (fe *frontendServer) homeHandler(w http.ResponseWriter, r *http.Request) {
 		"cart_size":     len(cart),
 		"banner_color":  os.Getenv("BANNER_COLOR"), // illustrates canary deployments
 		"ad":            fe.chooseAd(r.Context(), []string{}, log),
+		"platform_css":  plat.css,
+		"platform_name": plat.provider,
 	}); err != nil {
 		log.Error(err)
+	}
+}
+
+func (plat *platformDetails) setPlatformDetails(env string) {
+	if env == "aws" {
+		plat.provider = "AWS"
+		plat.css = "aws-platform"
+	} else if env == "onprem" {
+		plat.provider = "On-Premises"
+		plat.css = "onprem-platform"
+	} else {
+		plat.provider = "Google Cloud"
+		plat.css = "gcp-platform"
 	}
 }
 

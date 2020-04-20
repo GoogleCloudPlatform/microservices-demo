@@ -1,21 +1,26 @@
 {{ define "recommendations" }}
-<h5 class="text-muted">Products you might like</h5>
-<div class="row my-2 py-3">
-    {{range . }}
-        <div class="col-sm-6 col-md-4 col-lg-3">
-            <div class="card mb-3 box-shadow">
-                <a href="/product/{{.Id}}">
-                    <img class="card-img-top border-bottom" alt =""
-                        style="width: 100%; height: auto;"
-                        src="{{.Picture}}">
-                </a>
-                <div class="card-body text-center py-2">
-                    <small class="card-title text-muted">
-                        {{ .Name }}
-                    </small>
-                </div>
+<section class="recommendations">
+    <div class="container">
+      <div class="image">
+        <img src="/static/icons/Hipster_OtherProducts.svg" alt="icon" />
+      </div>
+      <div class="row prods">
+          {{range . }}
+          <div class="col-md-3">
+            <div class="h-card card mb-3 box-shadow">
+              <a href="/product/{{.Id}}">
+                <img alt="" style="width: 100%; height: auto;" src="{{.Picture}}">
+                <div class="card-hover"></div>
+              </a>
+              <div class="card-body text-center py-2">
+                <h5 class="card-title h-card-title">
+                  {{ .Name }}
+                </h5>
+              </div>
             </div>
+          </div>
+          {{ end }}
         </div>
-    {{ end }}
-</div>
+    </div>
+</section>
 {{ end }}

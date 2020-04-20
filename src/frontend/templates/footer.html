@@ -1,25 +1,81 @@
 {{ define "footer" }}
-    <footer class="py-5 px-5">
-        <div class="container">
-            <p>
-                &copy; 2018 Google Inc
-                <span class="text-muted">
-                    <a href="https://github.com/GoogleCloudPlatform/microservices-demo/">(Source Code)</a>
-                </span>
-            </p>
-            <p>
-                <small class="text-muted">
-                    This website is hosted for demo purposes only. It is not an
-                    actual shop. This is not an official Google project.
-                </small>
-            </p>
-            <small class="text-muted">
-                {{ if $.session_id }}session-id: {{ $.session_id }}</br>{{end}}
-                {{ if $.request_id }}request-id: {{ $.request_id }}</br>{{end}}
-            </small>
+
+<footer class="py-5">
+    <div class="footer-top">
+        <div class="container footer-social">
+            <div class="social">
+                <h4>Connect <br>with us</h4>
+                <img src="/static/icons/Hipster_FacebookIcon.svg" alt="icon" />
+                <img src="/static/icons/Hipster_InstagramIcon.svg" alt="icon" />
+                <img src="/static/icons/Hipster_PinterestIcon.svg" alt="icon" />
+                <img src="/static/icons/Hipster_TwitterIcon.svg" alt="icon" />
+                <img src="/static/icons/Hipster_YoutubeIcon.svg" alt="icon" />
+            </div>
+            <div class="app">
+                <h4>DOWNLOAD THE <span>ONLINE <br>BOUTIQUE</span> APP</h4>
+                <img src="/static/icons/Hipster_GooglePlayIcon.svg" alt="icon" class="icon search-icon" />
+            </div>
         </div>
-    </footer>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js" integrity="sha384-smHYKdLADwkXOn1EmN1qk/HfnUcbVRZyYmZ4qpPea6sjB/pTJ0euyQp0Mk8ck+5T" crossorigin="anonymous"></script>
+        <div class="container footer-links">
+            <ul class="links-group">
+                <li class="group-header">CUSTOMER SERVICE</li>
+                <li>Contact Us</li>
+                <li>Shipping</li>
+                <li>Returns</li>
+                <li>Rebates</li>
+                <li>Recalls</li>
+                <li>Product Guides</li>
+                <li>Store Survey</li>
+                <li>O.B. Cash</li>
+            </ul>
+            <ul class="links-group">
+                <li class="group-header">SHOP</li>
+                <li>Get 15% off when you sign up for our emails</li>
+                <li>My Lists</li>
+                <li>Site Map</li>
+                <li>Store Locator</li>
+                <li>Gift Cards</li>
+                <li>Today’s Ad</li>
+                <li>O.B. Coupons</li>
+            </ul>
+            <ul class="links-group">
+                <li class="group-header">MY ACCOUNT</li>
+                <li>Sign in</li>
+                <li>My Account</li>
+                <li>Update Password</li>
+                <li>Order Status</li>
+                <li>Gift Card Balance</li>
+                <li>O.B. Cash Balance</li>
+            </ul>
+            <ul class="links-group">
+                <li class="group-header">O.B. CHARGE</li>
+                <li>Pay & Manage Card</li>
+                <li>Apply for a O.B. Charge</li>
+                <li>See if you prequalify</li>
+            </ul>
+            <ul class="links-group">
+                <li class="group-header">ABOUT O.B.</li>
+                <li>Our Websites</li>
+                <li>Community</li>
+                <li>Sustainability</li>
+                <li>Careers</li>
+                <li>Apply for Seasonal Jobs</li>
+                <li>Associate Services</li>
+                <li>Investor Relations</li>
+                <li>Affiliate Program</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="footer-bottom">
+        <p>© 2019 Google Inc</p>
+        <p>This website is hosted for demo purposes only. It is not an actual shop.</p>
+    </div>
+</footer>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js"
+    integrity="sha384-smHYKdLADwkXOn1EmN1qk/HfnUcbVRZyYmZ4qpPea6sjB/pTJ0euyQp0Mk8ck+5T" crossorigin="anonymous">
+</script>
 </body>
+
 </html>
 {{ end }}

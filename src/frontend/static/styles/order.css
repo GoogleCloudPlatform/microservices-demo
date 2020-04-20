@@ -1,0 +1,32 @@
+.order {
+    background: #f0f0f0;
+}
+
+.order .container {
+    border-top: 1px solid #b4b2bb;
+}
+
+.order-logo {
+    height: 100px;
+    margin-bottom: 35px;
+}
+
+.order h3 {
+    font-size: 36px;
+    margin-bottom: 40px;
+}
+
+.order p {
+    font-size: 24px;
+    margin-bottom: 0;
+    color: #707070;
+}
+
+.order .mg-bt {
+    color: #111111;
+    margin-bottom: 35px;
+}
+
+.order .btn {
+    margin: auto;
+}
