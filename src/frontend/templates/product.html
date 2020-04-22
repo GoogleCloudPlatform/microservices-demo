@@ -45,9 +45,8 @@
       {{ template "recommendations" $.recommendations }}
     {{ end }}
 
-    <div class="row ad-row ad-row-2">
-      <img src="/static/icons/Hipster_Advert2.svg" alt="icon" class="" />
-    </div>
+   {{ with $.ad }}{{ template "text_ad" . }}{{ end}}
+
   </div>
 </main>
 {{ template "footer" . }}

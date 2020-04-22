@@ -36,13 +36,17 @@
                         <span>Help</span>
                     </div>
                     <div class="h-control">
+                        {{ if $.currencies }}
                         <img src="/static/icons/Hipster_CurrencyIcon.svg" alt="icon" class="icon" />
-                        <select value="US Dollars">
-                            <option>US Dollars</option>
-                            <option>Euros</option>
-                            <option>CRC</option>
-                        </select>
-                        <img src="/static/icons/Hipster_DownArrow.svg" alt="icon" class="icon arrow" />
+                        <form method="POST" action="/setCurrency" id="currency_form">
+                            <select value="US Dollars"
+                            onchange="document.getElementById('currency_form').submit();" style="width:auto;">
+                            {{range $.currencies}}
+                                <option value="{{.}}" {{if eq . $.user_currency}}selected="selected"{{end}}>{{.}}</option>
+                            {{end}}
+                            </select>
+                        </form>
+                        {{ end }}
                     </div>
                 </div>
             </div>

@@ -91,6 +91,43 @@ header .h-control input {
   align-items: center;
 }
 
+header .h-form form {
+  font-size: 12px;
+  border: solid 1px #f2f2f2;
+  padding: 0 0px 0 0px;
+  width: 250px;
+  height: 24px;
+  flex-shrink: 0;
+  background-color: #f2f2f2;
+  display: flex;
+  align-items: center;
+}
+
+header .h-form select {
+  background: transparent;
+  border-radius: 0;
+  border: solid 1px #f2f2f2;
+  width: 100px;
+  height: 20px;
+  flex-shrink: 0;
+  padding: 0 7px;
+  display: flex;
+  align-items: center;
+}
+
+header .h-form option {
+  background: transparent;
+  border-radius: 0;
+  border: solid 1px #f2f2f2;
+  width: 100px;
+  height: 20px;
+  flex-shrink: 0;
+  padding: 0 7px;
+  display: flex;
+  align-items: center;
+}
+
+
 header .h-control input:focus {
   outline: 0;
   border: 0;
@@ -119,7 +156,7 @@ header .icon.search-icon {
 header .h-control select {
   background: transparent;
   border-radius: 0;
-  border: 1px solid #acacac;
+  border: none;
   width: 100px;
   height: 20px;
   flex-shrink: 0;
