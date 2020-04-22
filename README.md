@@ -1,5 +1,7 @@
+<p align="center">
+<img src="src/frontend/static/icons/Hipster_HeroLogoCyan.svg" width="300"/>
+</p>
 
-<a href="src/frontend/static/icons/Hipster_HeroLogoCyan.svg"><img src="src/frontend/static/icons/Hipster_HeroLogoCyan.svg" width="300"/></a>
 
 
 **Online Boutique** is a cloud-native microservices demo application.
@@ -18,8 +20,7 @@ If you’re using this demo, please **★Star** this repository to show your int
 > [go/microservices-demo](http://go/microservices-demo) if you are using this
 > application.
 
-
-*If you're looking for the old Hipster Shop frontend interface, use the manifests in release [v0.1.4](https://github.com/GoogleCloudPlatform/microservices-demo/releases/v0.1.4).*
+Looking for the old Hipster Shop frontend interface? Use the manifests in release [v0.1.4](https://github.com/GoogleCloudPlatform/microservices-demo/releases/v0.1.4).
 
 ## Screenshots
 
