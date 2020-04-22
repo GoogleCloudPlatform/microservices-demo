@@ -6,9 +6,7 @@ body {
   font-family: 'Roboto', sans-serif;
 }
 
-hr {
-  border-top: 1px solid #b4b2bb;
-}
+
 
 .text-muted {
   color: #707070;
@@ -232,7 +230,6 @@ footer .footer-top .app {
 
 footer .footer-top .footer-social {
   padding: 31px;
-  border-bottom: 1px solid #b4b2bb;
 }
 
 footer .footer-top .footer-social h4 {
@@ -243,9 +240,6 @@ footer .footer-top .footer-social div {
   width: 50%;
 }
 
-.footer-top .social {
-  border-right: 1px solid #b4b2bb;
-}
 
 .footer-top .social h4 {
   font-size: 24px;
@@ -264,6 +258,7 @@ footer .footer-top .footer-social div {
 
 .footer-top .app {
   justify-content: flex-end;
+  padding-left: 100px;
 }
 
 .footer-top .app h4 {
@@ -546,7 +541,6 @@ main.home {
 .aws-platform,
 .aws-platform .platform-flag {
   background-color: #ff9900;
-  color: #000000;
 }
 
 .onprem-platform,
@@ -561,7 +555,7 @@ main.home {
 
 .azure-platform,
 .azure-platform .platform-flag {
-  background-color:#F25022;
+  background-color: #f35426;
 }
 
 .platform-flag {

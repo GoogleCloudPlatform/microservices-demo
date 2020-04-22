@@ -1,6 +1,10 @@
 {{ define "cart" }}
     {{ template "header" . }}
-
+    <div {{ with $.platform_css }} class="{{.}}" {{ end }}>
+        <span class="platform-flag">
+          {{$.platform_name}}
+        </span>
+      </div>
     <main role="main" class="cart">
         <div class="cart-bg">
             <div class="container py-3 px-lg-5 py-lg-5">
@@ -21,11 +25,11 @@
                                 <button class="btn btn-secondary empty-btn" type="submit">Empty cart</button>
                                 <a class="btn btn-info" href="/" role="button">Keep browsing</a>
                             </form>
-                    
+
                         </div>
                     </div>
                     <hr>
-                    
+
                     {{ range $.items }}
                     <div class="product-item">
                         <div class="row pt-2 mb-2">
@@ -74,7 +78,7 @@
                                         <input type="text" class="form-control"
                                             name="zip_code" id="zip_code" value="94043" required pattern="\d{4,5}">
                                     </div>
-                                    
+
                                 </div>
                                 <div class="form-row">
                                     <div class="col-md-5 mb-3">
@@ -90,7 +94,7 @@
                                     <div class="col-md-5 mb-3">
                                         <label for="country">Country</label>
                                         <input type="text" class="form-control" id="country"
-                                            placeholder="Country Name" 
+                                            placeholder="Country Name"
                                             name="country" value="United States" required>
                                     </div>
                                 </div>
@@ -145,7 +149,7 @@
                         </div>
                     </div>
                 {{ end }} <!-- end if $.items -->
-                
+
             </div>
             {{ if $.recommendations}}
                 {{ template "recommendations" $.recommendations }}

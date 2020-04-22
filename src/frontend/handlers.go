@@ -40,9 +40,10 @@ type platformDetails struct {
 
 var (
 	templates = template.Must(template.New("").
-		Funcs(template.FuncMap{
+			Funcs(template.FuncMap{
 			"renderMoney": renderMoney,
 		}).ParseGlob("templates/*.html"))
+	plat platformDetails
 )
 
 func (fe *frontendServer) homeHandler(w http.ResponseWriter, r *http.Request) {
@@ -80,7 +81,7 @@ func (fe *frontendServer) homeHandler(w http.ResponseWriter, r *http.Request) {
 
 	//get env and render correct platform banner.
 	var env = os.Getenv("ENV_PLATFORM")
-	plat := platformDetails{}
+	plat = platformDetails{}
 	plat.setPlatformDetails(strings.ToLower(env))
 
 	if err := templates.ExecuteTemplate(w, "home", map[string]interface{}{
@@ -168,6 +169,8 @@ func (fe *frontendServer) productHandler(w http.ResponseWriter, r *http.Request)
 		"product":         product,
 		"recommendations": recommendations,
 		"cart_size":       cartSize(cart),
+		"platform_css":    plat.css,
+		"platform_name":   plat.provider,
 	}); err != nil {
 		log.Println(err)
 	}
@@ -275,6 +278,8 @@ func (fe *frontendServer) viewCartHandler(w http.ResponseWriter, r *http.Request
 		"total_cost":       totalPrice,
 		"items":            items,
 		"expiration_years": []int{year, year + 1, year + 2, year + 3, year + 4},
+		"platform_css":     plat.css,
+		"platform_name":    plat.provider,
 	}); err != nil {
 		log.Println(err)
 	}
@@ -335,6 +340,8 @@ func (fe *frontendServer) placeOrderHandler(w http.ResponseWriter, r *http.Reque
 		"order":           order.GetOrder(),
 		"total_paid":      &totalPaid,
 		"recommendations": recommendations,
+		"platform_css":    plat.css,
+		"platform_name":   plat.provider,
 	}); err != nil {
 		log.Println(err)
 	}
