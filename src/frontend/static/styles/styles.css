@@ -65,7 +65,7 @@ header .h-control {
   font-size: 14px;
   position: relative;
   margin-left: 40px;
-  color: #605f64;
+  color: #b4b2bb;
   outline:none !important;
 }
 
@@ -87,7 +87,7 @@ header .h-control input {
   width: 250px;
   height: 24px;
   flex-shrink: 0;
-  background-color: #f2f2f2;
+  background-color: #b4b2bb;
   display: flex;
   align-items: center;
   outline:none !important;
@@ -135,25 +135,25 @@ header .h-control select {
 header .h-control::-webkit-input-placeholder {
   /* Chrome/Opera/Safari */
   font-size: 14px;
-  color: #605f64;
+  color: #b4b2bb;
 }
 
 header .h-control::-moz-placeholder {
   /* Firefox 19+ */
   font-size: 14px;
-  color: #605f64;
+  color: #b4b2bb;
 }
 
 header .h-control :-ms-input-placeholder {
   /* IE 10+ */
   font-size: 14px;
-  color: #605f64;
+  color: #b4b2bb;
 }
 
 header .h-control :-moz-placeholder {
   /* Firefox 18- */
   font-size: 14px;
-  color: #605f64;
+  color: #b4b2bb;
 }
 
 
@@ -185,7 +185,8 @@ header .navbar.sub-navbar nav a {
 }
 
 header .navbar.sub-navbar .controls {
-  display: flex;
+  display: inline-block;
+  text-align: center;
   height: 60px;
 }
 
@@ -199,6 +200,30 @@ header .navbar.sub-navbar .controls a {
   justify-content: center;
 }
 
+header .navbar.sub-navbar .controls-div {
+  display: block;
+  width: 120px;
+  border-left: 1px solid #b4b2bb;
+  display: flex;
+  flex-flow: column;
+  align-items: center;
+  justify-content: center;
+}
+
+
+header .navbar.sub-navbar form .controls-form {
+  background-color: #111111;
+  display: block;
+  width: 120px;
+  border-left: 1px solid #b4b2bb;
+  display: inline-block;
+  flex-flow: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+
 header .navbar.sub-navbar .controls a img {
   width: 20px;
   height: 20px;
@@ -207,6 +232,49 @@ header .navbar.sub-navbar .controls a img {
 
 header .navbar.sub-navbar .controls a:last-child {
   border-right: 1px solid #b4b2bb;
+}
+
+form .currency {
+  height: auto;
+  background-color: #111111;
+  font-size: 15px;
+  color: #b4b2bb;
+  padding-top: 5px;
+  padding-bottom: 0;
+  padding-right: 30px;
+  align-items: center;
+  display: flex;
+  border: none;
+}
+
+span .currency-icon {
+  padding-bottom: 2px;
+  padding-top: 20px;
+  display: inline-block;
+
+}
+
+span.buffer {
+  padding-top: 3px;
+  display: inline-block;
+
+}
+
+select .currency {
+  padding-left: 10px;
+  padding-top: 2px;
+  align-items: center;
+  background-color: #111111;
+  padding-right: 30px;
+  border: none;
+}
+
+option .currency {
+  padding-left: 10px;
+  align-items: center;
+  background-color: #111111;
+  padding-right: 30px;
+  border: none;
 }
 
 /*footer*/
@@ -602,16 +670,4 @@ main.home {
 select {
   -webkit-appearance: none;
   -webkit-border-radius: 0px;
-}
-
-form #currency_form {
-  border: none;
-  padding: 0 31px 0 31px;
-  width: 250px;
-  height: 24px;
-  flex-shrink: 0;
-  background-color: #f2f2f2;
-  display: flex;
-  align-items: center;
-  outline:none !important;
 }
