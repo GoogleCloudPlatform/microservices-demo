@@ -1,148 +1,110 @@
 {
     "products": [
         {
-            "id": "1YMWWN1N4O",
-            "name": "HOME BARISTA KIT",
-            "description": "Always wanted to make barista quality coffee at home?",
-            "picture": "/static/images/products/CoffeeMachine.png",
+            "id": "OLJCESPC7Z",
+            "name": "Vintage Typewriter",
+            "description": "This typewriter looks good in your living room.",
+            "picture": "/static/img/products/typewriter.jpg",
             "priceUsd": {
                 "currencyCode": "USD",
-                "units": 139,
-                "nanos": 999000000
+                "units": 67,
+                "nanos": 990000000
+            },
+            "categories": ["vintage"]
+        },
+        {
+            "id": "66VCHSJNUP",
+            "name": "Vintage Camera Lens",
+            "description": "You won't have a camera to use it and it probably doesn't work anyway.",
+            "picture": "/static/img/products/camera-lens.jpg",
+            "priceUsd": {
+                "currencyCode": "USD",
+                "units": 12,
+                "nanos": 490000000
+            },
+            "categories": ["photography", "vintage"]
+        },
+        {
+            "id": "1YMWWN1N4O",
+            "name": "Home Barista Kit",
+            "description": "Always wanted to brew coffee with Chemex and Aeropress at home?",
+            "picture": "/static/img/products/barista-kit.jpg",
+            "priceUsd": {
+                "currencyCode": "USD",
+                "units": 124
             },
             "categories": ["cookware"]
         },
         {
-            "id": "OLJCESPC7Z",
-            "name": "COLORING PENCILS",
-            "description": "Create a masterpiece with our coloured pencil set.",
-            "picture": "/static/images/products/ColouredPencils.png",
-            "priceUsd": {
-                "currencyCode": "USD",
-                "units": 5,
-                "nanos": 990000000
-            },
-            "categories": ["art"]
-        },
-        {
-            "id": "66VCHSJNUP",
-            "name": "CACTUS",
-            "description": "Ferocactus echidne is a barrel cactus in the genus Ferocactus. It is found in nature in Mexico. The white pottery vase has been hand crafted by local artisans.",
-            "picture": "/static/images/products/Cactus.png",
-            "priceUsd": {
-                "currencyCode": "USD",
-                "units": 12,
-                "nanos": 999000000
-            },
-            "categories": ["plants", "art"]
-        },
-        {
             "id": "L9ECAV7KIM",
-            "name": "GLOBE",
-            "description": "Dream about your next travel adventure with this decorative globe.",
-            "picture": "/static/images/products/Globe.png",
+            "name": "Terrarium",
+            "description": "This terrarium will looks great in your white painted living room.",
+            "picture": "/static/img/products/terrarium.jpg",
             "priceUsd": {
                 "currencyCode": "USD",
-                "units": 19,
-                "nanos": 990000000
+                "units": 36,
+                "nanos": 450000000
             },
-            "categories": ["accessories"]
+            "categories": ["gardening"]
         },
         {
             "id": "2ZYFJ3GM2N",
-            "name": "NOTEBOOKS",
-            "description": "Jot down your thoughts. Anywhere! Anytime!",
-            "picture": "/static/images/products/Notebook.png",
+            "name": "Film Camera",
+            "description": "This camera looks like it's a film camera, but it's actually digital.",
+            "picture": "/static/img/products/film-camera.jpg",
             "priceUsd": {
                 "currencyCode": "USD",
-                "units": 8,
-                "nanos": 990000000
+                "units": 2245
             },
-            "categories": ["notebooks", "vintage"]
+            "categories": ["photography", "vintage"]
         },
         {
             "id": "0PUK6V6EV0",
-            "name": "UNICORN",
-            "description": "Brighten up your mantelpiece with this colorful ornament.",
-            "picture": "/static/images/products/Unicorn.png",
+            "name": "Vintage Record Player",
+            "description": "It still works.",
+            "picture": "/static/img/products/record-player.jpg",
             "priceUsd": {
                 "currencyCode": "USD",
-                "units": 19,
-                "nanos": 999000000
+                "units": 65,
+                "nanos": 500000000
             },
-            "categories": ["accessories", "alternative"]
+            "categories": ["music", "vintage"]
         },
         {
             "id": "LS4PSXUNUM",
-            "name": "FRAMED ROBOT",
-            "description": "Lighten up your wall with this kitsch piece.",
-            "picture": "/static/images/products/Robot1.png",
+            "name": "Metal Camping Mug",
+            "description": "You probably don't go camping that often but this is better than plastic cups.",
+            "picture": "/static/img/products/camp-mug.jpg",
             "priceUsd": {
                 "currencyCode": "USD",
-                "units": 49,
-                "nanos": 999000000
+                "units": 24,
+                "nanos": 330000000
             },
-            "categories": ["accessories"]
+            "categories": ["cookware"]
         },
         {
             "id": "9SIQT8TOJO",
-            "name": "SUNGLASSES",
-            "description": "Prepare for summer with these stylish sunglasses!",
-            "picture": "/static/images/products/Sunnies.png",
+            "name": "City Bike",
+            "description": "This single gear bike probably cannot climb the hills of San Francisco.",
+            "picture": "/static/img/products/city-bike.jpg",
             "priceUsd": {
                 "currencyCode": "USD",
-                "units": 19,
-                "nanos": 999000000
+                "units": 789,
+                "nanos": 500000000
             },
-            "categories": ["clothing"]
+            "categories": ["cycling"]
         },
         {
             "id": "6E92ZMYYFZ",
-            "name": "POTTERY BOWL",
-            "description": "Colorful bowl for your favourite fruit!",
-            "picture": "/static/images/products/Bowl.png",
+            "name": "Air Plant",
+            "description": "Have you ever wondered whether air plants need water? Buy one and figure out.",
+            "picture": "/static/img/products/air-plant.jpg",
             "priceUsd": {
                 "currencyCode": "USD",
-                "units": 16,
-                "nanos": 999000000
+                "units": 12,
+                "nanos": 300000000
             },
-            "categories": ["hobbies"]
-        },
-        {
-            "id": "5E9JZMYYFA",
-            "name": "MUG",
-            "description": "Never miss your morning coffee with your new favourite mug!",
-            "picture": "/static/images/products/Mugs.png",
-            "priceUsd": {
-                "currencyCode": "USD",
-                "units": 6,
-                "nanos": 999000000
-            },
-            "categories": ["crockery"]
-        },
-        {
-            "id": "E692ZMLLFW",
-            "name": "LAMP SHADE",
-            "description": "Brighten up your lounge with this stylish lamp shade!",
-            "picture": "/static/images/products/LightShade.png",
-            "priceUsd": {
-                "currencyCode": "USD",
-                "units": 27,
-                "nanos": 999000000
-            },
-            "categories": ["furniture"]
-        },
-        {
-            "id": "1A92SMYYDc",
-            "name": "MECHANICAL ROBOT",
-            "description": "Surprise your tech-savvy friend with this retro robot!",
-            "picture": "/static/images/products/Robot2.png",
-            "priceUsd": {
-                "currencyCode": "USD",
-                "units": 26,
-                "nanos": 999000000
-            },
-            "categories": ["accessories"]
+            "categories": ["gardening"]
         }
     ]
 }
