@@ -89,7 +89,7 @@ func (fe *frontendServer) homeHandler(w http.ResponseWriter, r *http.Request) {
 		"user_currency": currentCurrency(r),
 		"currencies":    currencies,
 		"products":      ps,
-		"cart_size":     len(cart),
+		"cart_size":     cartSize(cart),
 		"banner_color":  os.Getenv("BANNER_COLOR"), // illustrates canary deployments
 		"ad":            fe.chooseAd(r.Context(), []string{}, log),
 		"platform_css":  plat.css,
@@ -106,6 +106,9 @@ func (plat *platformDetails) setPlatformDetails(env string) {
 	} else if env == "onprem" {
 		plat.provider = "On-Premises"
 		plat.css = "onprem-platform"
+	} else if env == "azure" {
+		plat.provider = "Azure"
+		plat.css = "azure-platform"
 	} else {
 		plat.provider = "Google Cloud"
 		plat.css = "gcp-platform"
@@ -164,7 +167,7 @@ func (fe *frontendServer) productHandler(w http.ResponseWriter, r *http.Request)
 		"currencies":      currencies,
 		"product":         product,
 		"recommendations": recommendations,
-		"cart_size":       len(cart),
+		"cart_size":       cartSize(cart),
 	}); err != nil {
 		log.Println(err)
 	}
@@ -237,7 +240,7 @@ func (fe *frontendServer) viewCartHandler(w http.ResponseWriter, r *http.Request
 		Quantity int32
 		Price    *pb.Money
 	}
-	items := make([]cartItemView, len(cart))
+	items := make([]cartItemView, cartSize(cart))
 	totalPrice := pb.Money{CurrencyCode: currentCurrency(r)}
 	for i, item := range cart {
 		p, err := fe.getProduct(r.Context(), item.GetProductId())
@@ -267,7 +270,7 @@ func (fe *frontendServer) viewCartHandler(w http.ResponseWriter, r *http.Request
 		"user_currency":    currentCurrency(r),
 		"currencies":       currencies,
 		"recommendations":  recommendations,
-		"cart_size":        len(cart),
+		"cart_size":        cartSize(cart),
 		"shipping_cost":    shippingCost,
 		"total_cost":       totalPrice,
 		"items":            items,
@@ -416,6 +419,15 @@ func cartIDs(c []*pb.CartItem) []string {
 		out[i] = v.GetProductId()
 	}
 	return out
+}
+
+// get total # of items in cart
+func cartSize(c []*pb.CartItem) int {
+	cartSize := 0
+	for _, item := range c {
+		cartSize += int(item.GetQuantity())
+	}
+	return cartSize
 }
 
 func renderMoney(money pb.Money) string {

@@ -39,10 +39,10 @@
                         {{ if $.currencies }}
                         <img src="/static/icons/Hipster_CurrencyIcon.svg" alt="icon" class="icon" />
                         <form method="POST" action="/setCurrency" id="currency_form">
-                            <select value="US Dollars"
+                            <select name="currency_code" class="h-control"
                             onchange="document.getElementById('currency_form').submit();" style="width:auto;">
                             {{range $.currencies}}
-                                <option value="{{.}}" {{if eq . $.user_currency}}selected="selected"{{end}}>{{.}}</option>
+                                <option class="h-control" value="{{.}}" {{if eq . $.user_currency}}selected="selected"{{end}}>{{.}}</option>
                             {{end}}
                             </select>
                         </form>
@@ -57,19 +57,13 @@
                     <img src="/static/icons/Hipster_NavLogo.svg" alt="logo" class="logo" />
                 </a>
                 <nav>
-                    <a href="/">Women's</a>
-                    <a href="/">Men's</a>
-                    <a href="/">Home</a>
-                    <a href="/">Lifestyle</a>
-                    <a href="/">Beauty</a>
-                    <a href="/">Sale</a>
                 </nav>
                 <div class="controls">
                     <a href="/cart">
                         <img src="/static/icons/Hipster_CheckOutIcon.svg" alt="cart-icon" class="logo" />
                         <span>View Cart
                             {{ if $.cart_size }}
-                            <span class="badge badge-blue">{{$.cart_size}} x</span>
+                            <span class="badge badge-blue">{{$.cart_size}}</span>
                             {{ end }}
                         </span>
                     </a>

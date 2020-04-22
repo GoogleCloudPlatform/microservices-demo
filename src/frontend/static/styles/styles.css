@@ -22,7 +22,7 @@ hr {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 10px;
+  font-size: 11px;
   margin-left: 7px;
   border-radius: 50%;
 }
@@ -64,20 +64,23 @@ header .h-controls {
 header .h-control {
   display: flex;
   align-items: center;
-  font-size: 12px;
+  font-size: 14px;
   position: relative;
   margin-left: 40px;
   color: #605f64;
+  outline:none !important;
 }
 
 header .h-control:first-child {
   margin-left: 0;
+  outline:none !important;
 }
 
 header .h-control img {
   width: 20px;
   height: 20px;
   margin-right: 8px;
+  outline:none !important;
 }
 
 header .h-control input {
@@ -89,49 +92,13 @@ header .h-control input {
   background-color: #f2f2f2;
   display: flex;
   align-items: center;
+  outline:none !important;
 }
-
-header .h-form form {
-  font-size: 12px;
-  border: solid 1px #f2f2f2;
-  padding: 0 0px 0 0px;
-  width: 250px;
-  height: 24px;
-  flex-shrink: 0;
-  background-color: #f2f2f2;
-  display: flex;
-  align-items: center;
-}
-
-header .h-form select {
-  background: transparent;
-  border-radius: 0;
-  border: solid 1px #f2f2f2;
-  width: 100px;
-  height: 20px;
-  flex-shrink: 0;
-  padding: 0 7px;
-  display: flex;
-  align-items: center;
-}
-
-header .h-form option {
-  background: transparent;
-  border-radius: 0;
-  border: solid 1px #f2f2f2;
-  width: 100px;
-  height: 20px;
-  flex-shrink: 0;
-  padding: 0 7px;
-  display: flex;
-  align-items: center;
-}
-
 
 header .h-control input:focus {
-  outline: 0;
   border: 0;
   box-shadow: 0;
+  outline:none !important;
 }
 
 header .icon {
@@ -163,32 +130,35 @@ header .h-control select {
   padding: 0 7px;
   display: flex;
   align-items: center;
+  outline:none !important;
 }
 
 
 header .h-control::-webkit-input-placeholder {
   /* Chrome/Opera/Safari */
-  font-size: 12px;
+  font-size: 14px;
   color: #605f64;
 }
 
 header .h-control::-moz-placeholder {
   /* Firefox 19+ */
-  font-size: 12px;
+  font-size: 14px;
   color: #605f64;
 }
 
 header .h-control :-ms-input-placeholder {
   /* IE 10+ */
-  font-size: 12px;
+  font-size: 14px;
   color: #605f64;
 }
 
 header .h-control :-moz-placeholder {
   /* Firefox 18- */
-  font-size: 12px;
+  font-size: 14px;
   color: #605f64;
 }
+
+
 
 header .navbar.sub-navbar {
   height: 60px;
@@ -561,6 +531,7 @@ main.home {
 
 .aws-platform,
 .onprem-platform,
+.azure-platform,
 .gcp-platform {
   position: fixed;
   top: 0;
@@ -586,6 +557,11 @@ main.home {
 .gcp-platform,
 .gcp-platform .platform-flag {
   background-color: #4285f4;
+}
+
+.azure-platform,
+.azure-platform .platform-flag {
+  background-color:#F25022;
 }
 
 .platform-flag {
@@ -632,4 +608,16 @@ main.home {
 select {
   -webkit-appearance: none;
   -webkit-border-radius: 0px;
+}
+
+form #currency_form {
+  border: none;
+  padding: 0 31px 0 31px;
+  width: 250px;
+  height: 24px;
+  flex-shrink: 0;
+  background-color: #f2f2f2;
+  display: flex;
+  align-items: center;
+  outline:none !important;
 }
