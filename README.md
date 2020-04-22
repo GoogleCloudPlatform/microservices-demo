@@ -1,4 +1,5 @@
-![src/frontend/static/icons/Hipster_HeroLogoCyan.svg](src/frontend/static/icons/Hipster_HeroLogoCyan.svg)
+
+<a href="src/frontend/static/icons/Hipster_HeroLogoCyan.svg"><img src="src/frontend/static/icons/Hipster_HeroLogoCyan.svg" width="300"/></a>
 
 
 **Online Boutique** is a cloud-native microservices demo application.
