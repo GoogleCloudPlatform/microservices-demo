@@ -16,8 +16,8 @@
 
                     <div class="row mb-3 py-2">
                         <div class="col">
-                            <h3>{{ len $.items }} item
-                                {{- if gt (len $.items) 1}}s{{end}}
+                            <h3>{{ $.cart_size }} item
+                                {{- if gt ($.cart_size) 1}}s{{end}}
                                 in your cart</h3>
                         </div>
                         <div class="col text-right">
