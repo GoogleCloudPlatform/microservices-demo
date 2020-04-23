@@ -17,46 +17,34 @@
 </head>
 
 <body>
-
     <header>
+        <div class="navbar">
+            <div class="container d-flex justify-content-between">
+                <div class="h-free-shipping">Free shipping with $75 purchase! &nbsp;&nbsp;</div>
+                <div class="h-controls">
+                    <div class="h-control">
+                        <img src="/static/icons/Hipster_CurrencyIcon.svg" alt="icon" class="icon" />
+                        <form method="POST" class="controls-form" action="/setCurrency" id="currency_form" >
+                            <select name="currency_code" onchange="document.getElementById('currency_form').submit();">
+                                    {{range $.currencies}}
+                                <option value="{{.}}" {{if eq . $.user_currency}}selected="selected"{{end}}>{{.}}</option>
+                                {{end}}
+                            </select>
+                        </form>
+                        <img src="/static/icons/Hipster_DownArrow.svg" alt="icon" class="icon arrow" />
+                    </div>
+                </div>
+            </div>
+        </div>
         <div class="navbar sub-navbar">
             <div class="container d-flex justify-content-between">
                 <a href="/" class="navbar-brand d-flex align-items-center">
                     <img src="/static/icons/Hipster_NavLogo.svg" alt="logo" class="logo" />
                 </a>
-                <nav>
-                </nav>
-
-
-
                 <div class="controls">
-
-                    {{ if $.currencies }}
-
-                        <span>              <form method="POST" class="controls-form" action="/setCurrency" id="currency_form" >
-                        <span class="buffer"></span>
-                        <span class="currency-icon"><img src="/static/icons/Hipster_CurrencyIcon.svg" alt="currency-icon" class="icon" /></span>
-
-                        <select class="currency" name="currency_code"
-                        onchange="document.getElementById('currency_form').submit();">
-
-                        {{range $.currencies}}
-                            <option class="currency" value="{{.}}" {{if eq . $.user_currency}}selected="selected"{{end}}>{{.}}</option>
-                        {{end}}
-                        </select>
-
-                    </form>
-                        </span>
-
-
-
-
-                    {{ end }}
-
-
                     <a href="/cart">
-                        <img src="/static/icons/Hipster_CheckOutIcon.svg" alt="cart-icon" class="logo" />
-                        <span>View Cart
+                        <img src="/static/icons/Hipster_CartIcon.svg" alt="cart-icon" class="logo" />
+                        <span>Cart
                             {{ if $.cart_size }}
                             <span class="badge badge-blue">{{$.cart_size}}</span>
                             {{ end }}
@@ -66,6 +54,4 @@
             </div>
         </div>
     </header>
-
-
     {{end}}

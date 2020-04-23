@@ -19,9 +19,9 @@
                         <p>Shipping Tracking ID</p>
                         <p class="mg-bt"><strong>{{.order.ShippingTrackingId}}</strong></p>
                         <p>Shipping Cost</p>
-                        <p class="mg-bt"><strong>USD {{renderMoney .order.ShippingCost}}</strong></p>
+                        <p class="mg-bt"><strong>{{renderMoney .order.ShippingCost}}</strong></p>
                         <p>Total Paid</p>
-                        <p class="mg-bt"><strong>USD {{renderMoney .total_paid}}</strong></p>
+                        <p class="mg-bt"><strong>{{renderMoney .total_paid}}</strong></p>
                     </div>
                 </div>
 
@@ -38,4 +38,4 @@
     </main>
 
     {{ template "footer" . }}
-{{ end }}
+    {{ end }}

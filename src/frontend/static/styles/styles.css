@@ -1,12 +1,19 @@
 /* general */
 
+html, body {
+  height: 100%;
+}
 
 body {
   color: #111111;
   font-family: 'Roboto', sans-serif;
+  display: flex;
+  flex-direction: column;
 }
 
-
+hr {
+  border-top: 1px solid #b4b2bb;
+}
 
 .text-muted {
   color: #707070;
@@ -14,20 +21,20 @@ body {
 
 .badge {
   display: inline-block !important;
-  width: 15px;
-  height: 15px;
+  width: 18px;
+  height: 18px;
   color: #111111;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 11px;
-  margin-left: 7px;
+  font-size: 10px;
   border-radius: 50%;
+  padding-left: 3px;
 }
 
 .badge.badge-blue {
   background-color: #4bc7c7;
-  padding-bottom: 2px;
+  padding-top: 5px;
 }
 
 /*header*/
@@ -62,23 +69,20 @@ header .h-controls {
 header .h-control {
   display: flex;
   align-items: center;
-  font-size: 14px;
+  font-size: 12px;
   position: relative;
   margin-left: 40px;
-  color: #b4b2bb;
-  outline:none !important;
+  color: #605f64;
 }
 
 header .h-control:first-child {
   margin-left: 0;
-  outline:none !important;
 }
 
 header .h-control img {
   width: 20px;
   height: 20px;
   margin-right: 8px;
-  outline:none !important;
 }
 
 header .h-control input {
@@ -87,16 +91,15 @@ header .h-control input {
   width: 250px;
   height: 24px;
   flex-shrink: 0;
-  background-color: #b4b2bb;
+  background-color: #f2f2f2;
   display: flex;
   align-items: center;
-  outline:none !important;
 }
 
 header .h-control input:focus {
+  outline: 0;
   border: 0;
   box-shadow: 0;
-  outline:none !important;
 }
 
 header .icon {
@@ -121,42 +124,39 @@ header .icon.search-icon {
 header .h-control select {
   background: transparent;
   border-radius: 0;
-  border: none;
+  border: 1px solid #acacac;
   width: 100px;
   height: 20px;
   flex-shrink: 0;
   padding: 0 7px;
   display: flex;
   align-items: center;
-  outline:none !important;
 }
 
 
 header .h-control::-webkit-input-placeholder {
   /* Chrome/Opera/Safari */
-  font-size: 14px;
-  color: #b4b2bb;
+  font-size: 12px;
+  color: #605f64;
 }
 
 header .h-control::-moz-placeholder {
   /* Firefox 19+ */
-  font-size: 14px;
-  color: #b4b2bb;
+  font-size: 12px;
+  color: #605f64;
 }
 
 header .h-control :-ms-input-placeholder {
   /* IE 10+ */
-  font-size: 14px;
-  color: #b4b2bb;
+  font-size: 12px;
+  color: #605f64;
 }
 
 header .h-control :-moz-placeholder {
   /* Firefox 18- */
-  font-size: 14px;
-  color: #b4b2bb;
+  font-size: 12px;
+  color: #605f64;
 }
-
-
 
 header .navbar.sub-navbar {
   height: 60px;
@@ -185,8 +185,7 @@ header .navbar.sub-navbar nav a {
 }
 
 header .navbar.sub-navbar .controls {
-  display: inline-block;
-  text-align: center;
+  display: flex;
   height: 60px;
 }
 
@@ -200,30 +199,6 @@ header .navbar.sub-navbar .controls a {
   justify-content: center;
 }
 
-header .navbar.sub-navbar .controls-div {
-  display: block;
-  width: 120px;
-  border-left: 1px solid #b4b2bb;
-  display: flex;
-  flex-flow: column;
-  align-items: center;
-  justify-content: center;
-}
-
-
-header .navbar.sub-navbar form .controls-form {
-  background-color: #111111;
-  display: block;
-  width: 120px;
-  border-left: 1px solid #b4b2bb;
-  display: inline-block;
-  flex-flow: column;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-}
-
-
 header .navbar.sub-navbar .controls a img {
   width: 20px;
   height: 20px;
@@ -234,52 +209,10 @@ header .navbar.sub-navbar .controls a:last-child {
   border-right: 1px solid #b4b2bb;
 }
 
-form .currency {
-  height: auto;
-  background-color: #111111;
-  font-size: 15px;
-  color: #b4b2bb;
-  padding-top: 5px;
-  padding-bottom: 0;
-  padding-right: 30px;
-  align-items: center;
-  display: flex;
-  border: none;
-}
-
-span .currency-icon {
-  padding-bottom: 2px;
-  padding-top: 20px;
-  display: inline-block;
-
-}
-
-span.buffer {
-  padding-top: 3px;
-  display: inline-block;
-
-}
-
-select .currency {
-  padding-left: 10px;
-  padding-top: 2px;
-  align-items: center;
-  background-color: #111111;
-  padding-right: 30px;
-  border: none;
-}
-
-option .currency {
-  padding-left: 10px;
-  align-items: center;
-  background-color: #111111;
-  padding-right: 30px;
-  border: none;
-}
-
 /*footer*/
 
 footer.py-5 {
+  flex-shrink: 0;
   padding: 0 !important;
 }
 
@@ -308,6 +241,9 @@ footer .footer-top .footer-social div {
   width: 50%;
 }
 
+.footer-top .social {
+  border-right: 1px solid #b4b2bb;
+}
 
 .footer-top .social h4 {
   font-size: 24px;
@@ -326,7 +262,6 @@ footer .footer-top .footer-social div {
 
 .footer-top .app {
   justify-content: flex-end;
-  padding-left: 100px;
 }
 
 .footer-top .app h4 {
@@ -400,6 +335,10 @@ footer .footer-bottom p:first-child {
 }
 
 /*Home*/
+
+main {
+  flex: 1 0 auto;
+}
 
 main.home {
   background-color: white;
@@ -594,7 +533,6 @@ main.home {
 
 .aws-platform,
 .onprem-platform,
-.azure-platform,
 .gcp-platform {
   position: fixed;
   top: 0;
@@ -609,6 +547,7 @@ main.home {
 .aws-platform,
 .aws-platform .platform-flag {
   background-color: #ff9900;
+  color: #000000;
 }
 
 .onprem-platform,
@@ -619,11 +558,6 @@ main.home {
 .gcp-platform,
 .gcp-platform .platform-flag {
   background-color: #4285f4;
-}
-
-.azure-platform,
-.azure-platform .platform-flag {
-  background-color: #f35426;
 }
 
 .platform-flag {

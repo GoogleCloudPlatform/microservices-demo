@@ -18,7 +18,7 @@
                         <div class="col">
                             <h3>{{ len $.items }} item
                                 {{- if gt (len $.items) 1}}s{{end}}
-                                in your Shopping Cart</h3>
+                                in your cart</h3>
                         </div>
                         <div class="col text-right">
                             <form method="POST" action="/cart/empty">
@@ -43,7 +43,7 @@
                                 <div class="details">
                                     Quantity: {{.Quantity}}<br/>
                                     <strong>
-                                        USD {{ renderMoney .Price}}
+                                        {{ renderMoney .Price}}
                                     </strong>
                                 </div>
                             </div>
@@ -52,8 +52,8 @@
                     {{ end }} <!-- range $.items-->
                     <div class="row pt-2 my-3">
                         <div class="col text-center order-summary">
-                            <p class="text-muted my-0">Shipping Cost: <strong>USD {{ renderMoney .shipping_cost }}</strong></p>
-                            Total Cost: <strong>USD {{ renderMoney .total_cost }}</strong>
+                            <p class="text-muted my-0">Shipping Cost: <strong>{{ renderMoney .shipping_cost }}</strong></p>
+                            Total Cost: <strong>{{ renderMoney .total_cost }}</strong>
                         </div>
                     </div>
 
@@ -156,6 +156,5 @@
             {{ end }}
         </div>
     </main>
-
     {{ template "footer" . }}
-{{ end }}
+    {{ end }}
