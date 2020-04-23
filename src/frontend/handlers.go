@@ -243,7 +243,7 @@ func (fe *frontendServer) viewCartHandler(w http.ResponseWriter, r *http.Request
 		Quantity int32
 		Price    *pb.Money
 	}
-	items := make([]cartItemView, cartSize(cart))
+	items := make([]cartItemView, len(cart))
 	totalPrice := pb.Money{CurrencyCode: currentCurrency(r)}
 	for i, item := range cart {
 		p, err := fe.getProduct(r.Context(), item.GetProductId())
