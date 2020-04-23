@@ -1,63 +1,49 @@
 {{ define "home" }}
 
-    {{ template "header" . }}
-    <main role="main">
-        <section class="jumbotron text-center mb-0"
-		 {{ with $.banner_color }}
-		     style="background-color: {{.}};"
-		 {{ end }}
-		>
-            <div class="container">
-                <h1 class="jumbotron-heading">
-                    One-stop for Hipster Fashion &amp; Style Online
-                </h1>
-                <p class="lead text-muted">
-                    Tired of mainstream fashion ideas, popular trends and
-                    societal norms? This line of lifestyle products will help
-                    you catch up with the hipster trend and express your
-                    personal style. Start shopping hip and vintage items now!
-                </p>
-            </div>
-        </section>
+{{ template "header" . }}
+<div {{ with $.platform_css }} class="{{.}}" {{ end }}>
+  <span class="platform-flag">
+    {{$.platform_name}}
+  </span>
+</div>
+<main role="main" class="home">
+  <section class="jumbotron text-center mb-0 h-jumbotron">
+    <div class="container">
+      <img src="/static/icons/Hipster_HeroLogo.svg" alt="icon" class="icon search-icon" />
+    </div>
+  </section>
 
-        <div class="py-5 bg-light">
-            <div class="container">
-            <div class="row">
-                {{ range $.products }}
-                <div class="col-md-4">
-                    <div class="card mb-4 box-shadow">
-                        <a href="/product/{{.Item.Id}}">
-                            <img class="card-img-top" alt =""
-                                style="width: 100%; height: auto;"
-                                src="{{.Item.Picture}}">
-                        </a>
-                        <div class="card-body">
-                            <h5 class="card-title">
-                                {{ .Item.Name }}
-                            </h5>
-                            <div class="d-flex justify-content-between align-items-center">
-                                <div class="btn-group">
-                                    <a href="/product/{{.Item.Id}}">
-                                        <button type="button" class="btn btn-sm btn-outline-secondary">Buy</button>
-                                    </a>
-                                </div>
-                                <small class="text-muted">
-                                    {{ renderMoney .Price }} 
-                                </strong>
-                                </small>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                {{ end }}
+  <div class="h-grid py-5 bg-light">
+    <div class="container">
+      <div class="row h-row">
+        <img src="/static/icons/Hipster_HotProducts.svg" alt="icon" class="icon search-icon" />
+      </div>
+      <div class="row">
+        {{ range $.products }}
+        <div class="col-md-4">
+          <div class="h-card card mb-4 box-shadow">
+            <a href="/product/{{.Item.Id}}">
+              <img alt="" style="width: 100%; height: auto;" src="{{.Item.Picture}}">
+              <div class="card-hover"></div>
+            </a>
+            <div class="card-body h-card-body">
+              <h5 class="card-title h-card-title">
+                {{ .Item.Name }}
+              </h5>
+              <div class="d-flex justify-content-center align-items-center">
+                <small class="text-muted">
+                  {{ renderMoney .Price }}
+                </small>
+              </div>
             </div>
-            <div class="row">
-                {{ with $.ad }}{{ template "text_ad" . }}{{ end}}
-            </div>
-            </div>
+          </div>
         </div>
-    </main>
+        {{ end }}
+      </div>
+    </div>
+  </div>
+</main>
 
-    {{ template "footer" . }}
+{{ template "footer" . }}
 
 {{ end }}

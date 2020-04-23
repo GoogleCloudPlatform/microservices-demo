@@ -1,0 +1,99 @@
+.cart-bg {
+    background: #f0f0f0;
+}
+
+.cart .form-control {
+    border: none;
+    border-radius: 0;
+    -webkit-appearance: none;
+}
+
+.cart h3 {
+    font-size: 36px;
+}
+
+.cart form label {
+    color: #707070;
+}
+
+.empty-btn {
+    margin-right: 20px;
+}
+
+.btn {
+    border-radius: 0;
+    color: #111111;
+    background: #e9ecef;
+    border: 1px solid #d1d7dc;
+    font-size: 18px;
+    padding: 10px 15px;
+    text-transform: uppercase;
+    letter-spacing: 1.8px;
+}
+
+.btn-info {
+    border: none;
+    background: #4cc8c6;
+}
+
+.center-contents > * {
+    margin: auto;
+}
+
+.product-item {
+    max-width: 540px;
+    margin: auto;
+    margin-bottom: 30px;
+}
+
+.product-item .image {
+    max-width: 180px;
+    padding: 0;
+}
+
+.product-item .image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.product-item .text {
+    background: white;
+    padding: 25px 30px;
+}
+
+.product-item .text h4 {
+    font-size: 24px;
+    letter-spacing: 4.8px;
+    margin-bottom: 0;
+}
+
+.product-item .text p {
+    margin-bottom: 20px;
+}
+
+.product-item .text small {
+    font-size: 18px;
+}
+
+.product-item .text .details {
+    font-size: 18px;
+}
+
+.order-summary {
+    font-size: 24px;
+    color: #000000;
+    margin-bottom: 30px;
+}
+
+.order-summary p {
+    font-size: 18px;
+}
+
+.checkout h3 {
+    font-size: 36px;
+    margin-bottom: 30px;
+}
+.last-row {
+    margin-top: 30px;
+}

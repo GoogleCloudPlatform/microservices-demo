@@ -1,60 +1,64 @@
 {{ define "cart" }}
     {{ template "header" . }}
-
-    <main role="main">
-        <div class="py-5">
-            <div class="container bg-light py-3 px-lg-5 py-lg-5">
+    <div {{ with $.platform_css }} class="{{.}}" {{ end }}>
+        <span class="platform-flag">
+          {{$.platform_name}}
+        </span>
+      </div>
+    <main role="main" class="cart">
+        <div class="cart-bg">
+            <div class="container py-3 px-lg-5 py-lg-5">
                 {{ if eq (len $.items) 0 }}
                     <h3>Your shopping cart is empty!</h3>
                     <p>Items you add to your shopping cart will appear here.</p>
-                    <a class="btn btn-primary" href="/" role="button">Browse Products &rarr; </a>
+                    <a class="btn btn-info" href="/" role="button">Browse Products &rarr; </a>
                 {{ else }}
 
                     <div class="row mb-3 py-2">
                         <div class="col">
-                            <h3>{{ len $.items }} item
-                                {{- if gt (len $.items) 1}}s{{end}}
-                                in your Shopping Cart</h3>
+                            <h3>{{ $.cart_size }} item
+                                {{- if gt ($.cart_size) 1}}s{{end}}
+                                in your cart</h3>
                         </div>
                         <div class="col text-right">
                             <form method="POST" action="/cart/empty">
-                                <button class="btn btn-secondary" type="submit">Empty cart</button>
-                                <a class="btn btn-info" href="/" role="button">Browse more products &rarr; </a>
+                                <button class="btn btn-secondary empty-btn" type="submit">Empty cart</button>
+                                <a class="btn btn-info" href="/" role="button">Keep browsing</a>
                             </form>
-                    
+
                         </div>
                     </div>
-                    <hr>
-                    
+
                     {{ range $.items }}
-                    <div class="row pt-2 mb-2">
-                        <div class="col text-right">
-                                <a href="/product/{{.Item.Id}}"><img class="img-fluid" style="width: auto; max-height: 60px;"
-                                    src="{{.Item.Picture}}" /></a>
-                        </div>
-                        <div class="col align-middle">
-                            <strong>{{.Item.Name}}</strong><br/>
-                            <small class="text-muted">SKU: #{{.Item.Id}}</small>
-                        </div>
-                        <div class="col text-left">
-                            Qty: {{.Quantity}}<br/>
-                            <strong>
-                                {{ renderMoney .Price}}
-                            </strong>
+                    <div class="product-item">
+                        <div class="row pt-2 mb-2">
+                            <div class="col text-right image">
+                                    <a href="/product/{{.Item.Id}}"><img class="img-fluid"
+                                        src="{{.Item.Picture}}" /></a>
+                            </div>
+                            <div class="col text-left text">
+                                <h4>{{ .Item.Name }}</h4>
+                                <p><small class="text-muted">SKU: #{{ .Item.Id }}</small></p>
+                                <div class="details">
+                                    Quantity: {{ .Quantity }}<br/>
+                                    <strong>
+                                        {{ renderMoney .Price }}
+                                    </strong>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                    {{ end }} <!-- range $.items-->
+                    {{ end }}
                     <div class="row pt-2 my-3">
-                        <div class="col text-center">
+                        <div class="col text-center order-summary">
                             <p class="text-muted my-0">Shipping Cost: <strong>{{ renderMoney .shipping_cost }}</strong></p>
                             Total Cost: <strong>{{ renderMoney .total_cost }}</strong>
                         </div>
                     </div>
 
-                    <hr/>
-                    <div class="row py-3 my-2">
+                    <div class="row py-3 my-2 checkout">
                         <div class="col-12 col-lg-8 offset-lg-2">
-                            <h3>Checkout</h3>
+                            <h3 class="text-center">Checkout</h3>
                             <form action="/cart/checkout" method="POST">
                                 <div class="form-row">
                                     <div class="col-md-5 mb-3">
@@ -72,7 +76,7 @@
                                         <input type="text" class="form-control"
                                             name="zip_code" id="zip_code" value="94043" required pattern="\d{4,5}">
                                     </div>
-                                    
+
                                 </div>
                                 <div class="form-row">
                                     <div class="col-md-5 mb-3">
@@ -88,7 +92,7 @@
                                     <div class="col-md-5 mb-3">
                                         <label for="country">Country</label>
                                         <input type="text" class="form-control" id="country"
-                                            placeholder="Country Name" 
+                                            placeholder="Country Name"
                                             name="country" value="United States" required>
                                     </div>
                                 </div>
@@ -116,7 +120,7 @@
                                             <option value="9">September</option>
                                             <option value="10">October</option>
                                             <option value="11">November</option>
-                                            <option value="12">December</option>
+                                            <option value="12">January</option>
                                         </select>
                                     </div>
                                     <div class="col-md-2 mb-3">
@@ -133,26 +137,22 @@
                                     <div class="col-md-2 mb-3">
                                         <label for="credit_card_cvv">CVV</label>
                                         <input type="password" class="form-control" id="credit_card_cvv"
-                                            autocomplete="off"
                                             name="credit_card_cvv" value="672" required pattern="\d{3}">
                                     </div>
                                 </div>
-                                <div class="form-row">
-                                    <button class="btn btn-primary" type="submit">Place your order &rarr;</button>
+                                <div class="form-row center-contents last-row">
+                                    <button class="btn btn-info" type="submit">Place order</button>
                                 </div>
                             </form>
                         </div>
                     </div>
                 {{ end }} <!-- end if $.items -->
 
-                {{ if $.recommendations}}
-                    <hr/>
-                    {{ template "recommendations" $.recommendations }}
-                {{ end }}
-
             </div>
+            {{ if $.recommendations}}
+                {{ template "recommendations" $.recommendations }}
+            {{ end }}
         </div>
     </main>
-
     {{ template "footer" . }}
-{{ end }}
+    {{ end }}

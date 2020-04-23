@@ -1,37 +1,41 @@
 {{ define "order" }}
     {{ template "header" . }}
-
-    <main role="main">
+    <div {{ with $.platform_css }} class="{{.}}" {{ end }}>
+        <span class="platform-flag">
+          {{$.platform_name}}
+        </span>
+      </div>
+    <main role="main" class="order">
         <div class="py-5">
-            <div class="container bg-light py-3 px-lg-5">
+            <div class="container py-3 px-lg-5">
                 <div class="row mt-5 py-2">
-                    <div class="col">
-                    <h3>
-                        Your order is complete!
-                    </h3>
-                    <p>
-                        Order Confirmation ID: <strong>{{.order.OrderId}}</strong>
-                        <br>
-                        Shipping Tracking ID: <strong>{{.order.ShippingTrackingId}}</strong>
-                    </p>
-                    <p>
-                        Shipping Cost: <strong>{{renderMoney .order.ShippingCost}}</strong>
-                        <br>
-                        Total Paid: <strong>{{renderMoney .total_paid}}</strong>
-                    </p>
-                    <a class="btn btn-primary" href="/" role="button">Browse other products &rarr; </a>
+                    <div class="col text-center">
+                        <img class="order-logo" src="/static/icons/Hipster_HeroLogoCyan.svg" alt="icon" />
+                        <h3>
+                            Your order is complete!
+                        </h3>
+                        <p>Order Confirmation ID</p>
+                        <p class="mg-bt"><strong>{{.order.OrderId}}</strong></p>
+                        <p>Shipping Tracking ID</p>
+                        <p class="mg-bt"><strong>{{.order.ShippingTrackingId}}</strong></p>
+                        <p>Shipping Cost</p>
+                        <p class="mg-bt"><strong>{{renderMoney .order.ShippingCost}}</strong></p>
+                        <p>Total Paid</p>
+                        <p class="mg-bt"><strong>{{renderMoney .total_paid}}</strong></p>
                     </div>
                 </div>
-                <hr/>
 
-                {{ if $.recommendations }}
-                <div class="row mt-5 py-2">
-                    {{ template "recommendations" $.recommendations }}
-                </div>
-                {{ end }}
             </div>
+            <div class="container py-3 px-lg-5">
+                <div class="row py-2 text-center">
+                    <a class="btn btn-info" href="/" role="button" style="margin-top: 40px; margin-bottom: 40px;">Keep Browsing</a>
+                </div>
+            </div>
+            {{ if $.recommendations }}
+                {{ template "recommendations" $.recommendations }}
+            {{ end }}
         </div>
     </main>
 
     {{ template "footer" . }}
-{{ end }}
+    {{ end }}

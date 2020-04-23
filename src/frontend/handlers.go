@@ -22,6 +22,7 @@ import (
 	"net/http"
 	"os"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/gorilla/mux"
@@ -32,11 +33,17 @@ import (
 	"github.com/GoogleCloudPlatform/microservices-demo/src/frontend/money"
 )
 
+type platformDetails struct {
+	css      string
+	provider string
+}
+
 var (
 	templates = template.Must(template.New("").
-		Funcs(template.FuncMap{
+			Funcs(template.FuncMap{
 			"renderMoney": renderMoney,
 		}).ParseGlob("templates/*.html"))
+	plat platformDetails
 )
 
 func (fe *frontendServer) homeHandler(w http.ResponseWriter, r *http.Request) {
@@ -72,17 +79,40 @@ func (fe *frontendServer) homeHandler(w http.ResponseWriter, r *http.Request) {
 		ps[i] = productView{p, price}
 	}
 
+	//get env and render correct platform banner.
+	var env = os.Getenv("ENV_PLATFORM")
+	plat = platformDetails{}
+	plat.setPlatformDetails(strings.ToLower(env))
+
 	if err := templates.ExecuteTemplate(w, "home", map[string]interface{}{
 		"session_id":    sessionID(r),
 		"request_id":    r.Context().Value(ctxKeyRequestID{}),
 		"user_currency": currentCurrency(r),
 		"currencies":    currencies,
 		"products":      ps,
-		"cart_size":     len(cart),
+		"cart_size":     cartSize(cart),
 		"banner_color":  os.Getenv("BANNER_COLOR"), // illustrates canary deployments
 		"ad":            fe.chooseAd(r.Context(), []string{}, log),
+		"platform_css":  plat.css,
+		"platform_name": plat.provider,
 	}); err != nil {
 		log.Error(err)
+	}
+}
+
+func (plat *platformDetails) setPlatformDetails(env string) {
+	if env == "aws" {
+		plat.provider = "AWS"
+		plat.css = "aws-platform"
+	} else if env == "onprem" {
+		plat.provider = "On-Premises"
+		plat.css = "onprem-platform"
+	} else if env == "azure" {
+		plat.provider = "Azure"
+		plat.css = "azure-platform"
+	} else {
+		plat.provider = "Google Cloud"
+		plat.css = "gcp-platform"
 	}
 }
 
@@ -138,7 +168,9 @@ func (fe *frontendServer) productHandler(w http.ResponseWriter, r *http.Request)
 		"currencies":      currencies,
 		"product":         product,
 		"recommendations": recommendations,
-		"cart_size":       len(cart),
+		"cart_size":       cartSize(cart),
+		"platform_css":    plat.css,
+		"platform_name":   plat.provider,
 	}); err != nil {
 		log.Println(err)
 	}
@@ -234,6 +266,8 @@ func (fe *frontendServer) viewCartHandler(w http.ResponseWriter, r *http.Request
 	}
 	totalPrice = money.Must(money.Sum(totalPrice, *shippingCost))
 
+	log.Info("🌈 ITEMS: %v", items)
+
 	year := time.Now().Year()
 	if err := templates.ExecuteTemplate(w, "cart", map[string]interface{}{
 		"session_id":       sessionID(r),
@@ -241,11 +275,13 @@ func (fe *frontendServer) viewCartHandler(w http.ResponseWriter, r *http.Request
 		"user_currency":    currentCurrency(r),
 		"currencies":       currencies,
 		"recommendations":  recommendations,
-		"cart_size":        len(cart),
+		"cart_size":        cartSize(cart),
 		"shipping_cost":    shippingCost,
 		"total_cost":       totalPrice,
 		"items":            items,
 		"expiration_years": []int{year, year + 1, year + 2, year + 3, year + 4},
+		"platform_css":     plat.css,
+		"platform_name":    plat.provider,
 	}); err != nil {
 		log.Println(err)
 	}
@@ -299,13 +335,22 @@ func (fe *frontendServer) placeOrderHandler(w http.ResponseWriter, r *http.Reque
 		totalPaid = money.Must(money.Sum(totalPaid, *v.GetCost()))
 	}
 
+	currencies, err := fe.getCurrencies(r.Context())
+	if err != nil {
+		renderHTTPError(log, r, w, errors.Wrap(err, "could not retrieve currencies"), http.StatusInternalServerError)
+		return
+	}
+
 	if err := templates.ExecuteTemplate(w, "order", map[string]interface{}{
 		"session_id":      sessionID(r),
 		"request_id":      r.Context().Value(ctxKeyRequestID{}),
 		"user_currency":   currentCurrency(r),
+		"currencies":      currencies,
 		"order":           order.GetOrder(),
 		"total_paid":      &totalPaid,
 		"recommendations": recommendations,
+		"platform_css":    plat.css,
+		"platform_name":   plat.provider,
 	}); err != nil {
 		log.Println(err)
 	}
@@ -390,6 +435,15 @@ func cartIDs(c []*pb.CartItem) []string {
 		out[i] = v.GetProductId()
 	}
 	return out
+}
+
+// get total # of items in cart
+func cartSize(c []*pb.CartItem) int {
+	cartSize := 0
+	for _, item := range c {
+		cartSize += int(item.GetQuantity())
+	}
+	return cartSize
 }
 
 func renderMoney(money pb.Money) string {

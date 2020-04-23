@@ -1,7 +1,12 @@
-# Hipster Shop: Cloud-Native Microservices Demo Application
+<p align="center">
+<img src="src/frontend/static/icons/Hipster_HeroLogoCyan.svg" width="300"/>
+</p>
 
-This project contains a 10-tier microservices application. The application is a
-web-based e-commerce app called **“Hipster Shop”** where users can browse items,
+
+
+**Online Boutique** is a cloud-native microservices demo application.
+Online Boutique consists of a 10-tier microservices application. The application is a
+web-based e-commerce app where users can browse items,
 add them to the cart, and purchase them.
 
 **Google uses this application to demonstrate use of technologies like
@@ -15,15 +20,17 @@ If you’re using this demo, please **★Star** this repository to show your int
 > [go/microservices-demo](http://go/microservices-demo) if you are using this
 > application.
 
+Looking for the old Hipster Shop frontend interface? Use the [manifests](https://github.com/GoogleCloudPlatform/microservices-demo/tree/v0.1.4/kubernetes-manifests) in release [v0.1.4](https://github.com/GoogleCloudPlatform/microservices-demo/releases/v0.1.4).
+
 ## Screenshots
 
 | Home Page                                                                                                         | Checkout Screen                                                                                                    |
 | ----------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
-| [![Screenshot of store homepage](./docs/img/hipster-shop-frontend-1.png)](./docs/img/hipster-shop-frontend-1.png) | [![Screenshot of checkout screen](./docs/img/hipster-shop-frontend-2.png)](./docs/img/hipster-shop-frontend-2.png) |
+| [![Screenshot of store homepage](./docs/img/online-boutique-frontend-1.png)](./docs/img/online-boutique-frontend-1.png) | [![Screenshot of checkout screen](./docs/img/online-boutique-frontend-2.png)](./docs/img/online-boutique-frontend-2.png) |
 
 ## Service Architecture
 
-**Hipster Shop** is composed of many microservices written in different
+**Online Boutique** is composed of many microservices written in different
 languages that talk to each other over gRPC.
 
 [![Architecture of
@@ -310,7 +317,7 @@ If you've deployed the application with `kubectl apply -f [...]`, you can
 run `kubectl delete -f [...]` with the same argument to clean up the deployed
 resources.
 
-## Conferences featuring Hipster Shop
+## Conferences featuring Online Boutique
 
 - [Google Cloud Next'18 London – Keynote](https://youtu.be/nIq2pkNcfEI?t=3071)
   showing Stackdriver Incident Response Management
