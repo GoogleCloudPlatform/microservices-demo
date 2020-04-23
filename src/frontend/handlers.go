@@ -276,6 +276,8 @@ func (fe *frontendServer) viewCartHandler(w http.ResponseWriter, r *http.Request
 		"cart_size":        cartSize(cart),
 		"shipping_cost":    shippingCost,
 		"total_cost":       totalPrice,
+		"banner_color":     os.Getenv("BANNER_COLOR"), // illustrates canary deployments
+		"ad":               fe.chooseAd(r.Context(), []string{}, log),
 		"items":            items,
 		"expiration_years": []int{year, year + 1, year + 2, year + 3, year + 4},
 		"platform_css":     plat.css,
@@ -333,10 +335,17 @@ func (fe *frontendServer) placeOrderHandler(w http.ResponseWriter, r *http.Reque
 		totalPaid = money.Must(money.Sum(totalPaid, *v.GetCost()))
 	}
 
+	currencies, err := fe.getCurrencies(r.Context())
+	if err != nil {
+		renderHTTPError(log, r, w, errors.Wrap(err, "could not retrieve currencies"), http.StatusInternalServerError)
+		return
+	}
+
 	if err := templates.ExecuteTemplate(w, "order", map[string]interface{}{
 		"session_id":      sessionID(r),
 		"request_id":      r.Context().Value(ctxKeyRequestID{}),
 		"user_currency":   currentCurrency(r),
+		"currencies":      currencies,
 		"order":           order.GetOrder(),
 		"total_paid":      &totalPaid,
 		"recommendations": recommendations,
