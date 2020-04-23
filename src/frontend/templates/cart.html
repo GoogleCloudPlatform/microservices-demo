@@ -28,8 +28,8 @@
 
                         </div>
                     </div>
-                    <hr>
 
+                    <h3>Begin range items</h3>
                     {{ range $.items }}
                     <div class="product-item">
                         <div class="row pt-2 mb-2">
@@ -38,20 +38,21 @@
                                         src="{{.Item.Picture}}" /></a>
                             </div>
                             <div class="col text-left text">
-                                <h4>{{.Item.Name}}</h4>
-                                <p><small class="text-muted">SKU: #{{.Item.Id}}</small></p>
+                                <h4>{{ .Item.Name }}</h4>
+                                <p><small class="text-muted">SKU: #{{ .Item.Id }}</small></p>
                                 <div class="details">
-                                    Quantity: {{.Quantity}}<br/>
+                                    Quantity: {{ .Quantity }}<br/>
                                     <strong>
-                                        {{ renderMoney .Price}}
+                                        {{ renderMoney .Price }}
                                     </strong>
                                 </div>
                             </div>
                         </div>
                     </div>
-                    {{ end }} <!-- range $.items-->
+                    {{ end }}
+                    <h3>End range items</h3>
 
-
+                    <h3>Begin checkout</h3>
                     <div class="row pt-2 my-3">
                         <div class="col text-center order-summary">
                             <p class="text-muted my-0">Shipping Cost: <strong>{{ renderMoney .shipping_cost }}</strong></p>
@@ -59,7 +60,6 @@
                         </div>
                     </div>
 
-                    <hr/>
                     <div class="row py-3 my-2 checkout">
                         <div class="col-12 col-lg-8 offset-lg-2">
                             <h3 class="text-center">Checkout</h3>
@@ -140,7 +140,7 @@
                                         </div>
                                     <div class="col-md-2 mb-3">
                                         <label for="credit_card_cvv">CVV</label>
-                                        <input type="text" class="form-control" id="credit_card_cvv"
+                                        <input type="password" class="form-control" id="credit_card_cvv"
                                             name="credit_card_cvv" value="672" required pattern="\d{3}">
                                     </div>
                                 </div>
@@ -150,6 +150,7 @@
                             </form>
                         </div>
                     </div>
+                    <h3>End checkout, if items</h3>
                 {{ end }} <!-- end if $.items -->
 
             </div>

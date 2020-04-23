@@ -266,6 +266,8 @@ func (fe *frontendServer) viewCartHandler(w http.ResponseWriter, r *http.Request
 	}
 	totalPrice = money.Must(money.Sum(totalPrice, *shippingCost))
 
+	log.Info("🌈 ITEMS: %v", items)
+
 	year := time.Now().Year()
 	if err := templates.ExecuteTemplate(w, "cart", map[string]interface{}{
 		"session_id":       sessionID(r),
@@ -276,8 +278,6 @@ func (fe *frontendServer) viewCartHandler(w http.ResponseWriter, r *http.Request
 		"cart_size":        cartSize(cart),
 		"shipping_cost":    shippingCost,
 		"total_cost":       totalPrice,
-		"banner_color":     os.Getenv("BANNER_COLOR"), // illustrates canary deployments
-		"ad":               fe.chooseAd(r.Context(), []string{}, log),
 		"items":            items,
 		"expiration_years": []int{year, year + 1, year + 2, year + 3, year + 4},
 		"platform_css":     plat.css,
