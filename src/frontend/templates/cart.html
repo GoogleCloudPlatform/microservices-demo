@@ -29,7 +29,6 @@
                         </div>
                     </div>
 
-                    <h3>Begin range items</h3>
                     {{ range $.items }}
                     <div class="product-item">
                         <div class="row pt-2 mb-2">
@@ -50,9 +49,6 @@
                         </div>
                     </div>
                     {{ end }}
-                    <h3>End range items</h3>
-
-                    <h3>Begin checkout</h3>
                     <div class="row pt-2 my-3">
                         <div class="col text-center order-summary">
                             <p class="text-muted my-0">Shipping Cost: <strong>{{ renderMoney .shipping_cost }}</strong></p>
@@ -150,7 +146,6 @@
                             </form>
                         </div>
                     </div>
-                    <h3>End checkout, if items</h3>
                 {{ end }} <!-- end if $.items -->
 
             </div>
