@@ -533,6 +533,7 @@ main.home {
 
 .aws-platform,
 .onprem-platform,
+.azure-platform,
 .gcp-platform {
   position: fixed;
   top: 0;
@@ -547,7 +548,6 @@ main.home {
 .aws-platform,
 .aws-platform .platform-flag {
   background-color: #ff9900;
-  color: #000000;
 }
 
 .onprem-platform,
@@ -558,6 +558,12 @@ main.home {
 .gcp-platform,
 .gcp-platform .platform-flag {
   background-color: #4285f4;
+}
+
+
+.azure-platform,
+.azure-platform .platform-flag {
+  background-color: #f35426;
 }
 
 .platform-flag {
