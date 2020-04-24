@@ -20,7 +20,7 @@ If you’re using this demo, please **★Star** this repository to show your int
 > [go/microservices-demo](http://go/microservices-demo) if you are using this
 > application.
 
-Looking for the old Hipster Shop frontend interface? Use the [manifests](https://github.com/GoogleCloudPlatform/microservices-demo/tree/v0.1.4/kubernetes-manifests) in release [v0.1.4](https://github.com/GoogleCloudPlatform/microservices-demo/releases/v0.1.4).
+Looking for the old Hipster Shop frontend interface? Use the [manifests](https://github.com/GoogleCloudPlatform/microservices-demo/tree/v0.1.5/kubernetes-manifests) in release [v0.1.5](https://github.com/GoogleCloudPlatform/microservices-demo/releases/v0.1.5).
 
 ## Screenshots
 
