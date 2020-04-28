@@ -18,6 +18,7 @@ def opencensusVersion = "0.25.0"
 def grpcVersion = "1.26.0"
 def jacksonVersion = "2.10.2"
 def protocVersion = "3.11.4"
+def openTelemetryVersion = "0.3.0"
 
 tasks.withType(JavaCompile) {
     sourceCompatibility = JavaVersion.VERSION_1_8
@@ -34,17 +35,15 @@ dependencies {
         implementation fileTree(dir: offlineCompile, include: '*.jar')
     } else {
         implementation "com.google.api.grpc:proto-google-common-protos:1.17.0",
-                "io.opencensus:opencensus-api:${opencensusVersion}",
-                "io.opencensus:opencensus-contrib-grpc-util:${opencensusVersion}",
-                "io.opencensus:opencensus-exporter-trace-jaeger:${opencensusVersion}",
-                "io.opencensus:opencensus-exporter-stats-stackdriver:${opencensusVersion}",
-                "io.opencensus:opencensus-exporter-trace-stackdriver:${opencensusVersion}",
-                "io.opencensus:opencensus-exporter-trace-logging:${opencensusVersion}",
+                "io.opentelemetry:opentelemetry-api:${openTelemetryVersion}",
+                "io.opentelemetry:opentelemetry-sdk:${openTelemetryVersion}",
+                "com.newrelic.telemetry:opentelemetry-exporters-newrelic:0.3.0",
                 "io.grpc:grpc-protobuf:${grpcVersion}",
                 "io.grpc:grpc-stub:${grpcVersion}",
                 "io.grpc:grpc-netty:${grpcVersion}",
                 "io.grpc:grpc-services:${grpcVersion}",
-                "org.apache.logging.log4j:log4j-core:2.13.0"
+                "org.apache.logging.log4j:log4j-core:2.13.0",
+                "org.apache.logging.log4j:log4j-slf4j-impl:2.13.2"
 
         runtimeOnly "com.fasterxml.jackson.core:jackson-core:${jacksonVersion}",
                 "com.fasterxml.jackson.core:jackson-databind:${jacksonVersion}",

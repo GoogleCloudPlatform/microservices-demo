@@ -19,21 +19,16 @@ package hipstershop;
 import hipstershop.Demo.Ad;
 import hipstershop.Demo.AdRequest;
 import hipstershop.Demo.AdResponse;
+import hipstershop.OpenTelemetryUtils.HttpTextFormatClientInterceptor;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import io.grpc.StatusRuntimeException;
-import io.opencensus.common.Duration;
-import io.opencensus.common.Scope;
-import io.opencensus.contrib.grpc.metrics.RpcViews;
-import io.opencensus.contrib.grpc.util.StatusConverter;
-import io.opencensus.exporter.stats.stackdriver.StackdriverStatsConfiguration;
-import io.opencensus.exporter.stats.stackdriver.StackdriverStatsExporter;
-import io.opencensus.exporter.trace.stackdriver.StackdriverTraceConfiguration;
-import io.opencensus.exporter.trace.stackdriver.StackdriverTraceExporter;
-import io.opencensus.trace.Span;
-import io.opencensus.trace.Tracer;
-import io.opencensus.trace.Tracing;
-import io.opencensus.trace.samplers.Samplers;
+import io.opentelemetry.OpenTelemetry;
+import io.opentelemetry.context.Scope;
+import io.opentelemetry.sdk.OpenTelemetrySdk;
+import io.opentelemetry.trace.Span;
+import io.opentelemetry.trace.Status;
+import io.opentelemetry.trace.Tracer;
 import java.util.concurrent.TimeUnit;
 import javax.annotation.Nullable;
 import org.apache.logging.log4j.Level;
@@ -44,7 +39,7 @@ import org.apache.logging.log4j.Logger;
 public class AdServiceClient {
 
   private static final Logger logger = LogManager.getLogger(AdServiceClient.class);
-  private static final Tracer tracer = Tracing.getTracer();
+  private static final Tracer tracer = OpenTelemetry.getTracerProvider().get("AdServiceClient");
 
   private final ManagedChannel channel;
   private final hipstershop.AdServiceGrpc.AdServiceBlockingStub blockingStub;
@@ -56,6 +51,7 @@ public class AdServiceClient {
             // Channels are secure by default (via SSL/TLS). For the example we disable TLS to avoid
             // needing certificates.
             .usePlaintext()
+            .intercept(new HttpTextFormatClientInterceptor())
             .build());
   }
 
@@ -72,21 +68,21 @@ public class AdServiceClient {
   /** Get Ads from Server. */
   public void getAds(String contextKey) {
     logger.info("Get Ads with context " + contextKey + " ...");
-    AdRequest request = AdRequest.newBuilder().addContextKeys(contextKey).build();
-    AdResponse response;
+    AdRequest request = AdRequest.newBuilder().addContextKeys(contextKey)
+        .build();
 
-    Span span =
-        tracer
-            .spanBuilder("AdsClient")
-            .setRecordEvents(true)
-            .setSampler(Samplers.alwaysSample())
-            .startSpan();
+    //todo: check out grpc semantic conventions and apply them
+    Span span = tracer
+        .spanBuilder("AdsClient")
+        .startSpan();
+    AdResponse response;
     try (Scope ignored = tracer.withSpan(span)) {
-      tracer.getCurrentSpan().addAnnotation("Getting Ads");
+      tracer.getCurrentSpan().addEvent("Getting Ads");
+
       response = blockingStub.getAds(request);
-      tracer.getCurrentSpan().addAnnotation("Received response from Ads Service.");
+      tracer.getCurrentSpan().addEvent("Received response from Ads Service.");
     } catch (StatusRuntimeException e) {
-      tracer.getCurrentSpan().setStatus(StatusConverter.fromGrpcStatus(e.getStatus()));
+      tracer.getCurrentSpan().setStatus(convertStatus(e.getStatus()));
       logger.log(Level.WARN, "RPC failed: " + e.getStatus());
       return;
     } finally {
@@ -95,6 +91,14 @@ public class AdServiceClient {
     for (Ad ads : response.getAdsList()) {
       logger.info("Ads: " + ads.getText());
     }
+  }
+
+  private Status convertStatus(io.grpc.Status status) {
+    if (status.isOk()) {
+      return Status.OK;
+    }
+    //todo: check out grpc semantic conventions and apply them
+    return Status.UNKNOWN.withDescription(status.getDescription());
   }
 
   private static int getPortOrDefaultFromArgs(String[] args) {
@@ -128,48 +132,19 @@ public class AdServiceClient {
     final String host = getStringOrDefaultFromArgs(args, 1, "localhost");
     final int serverPort = getPortOrDefaultFromArgs(args);
 
-    // Registers all RPC views.
-    RpcViews.registerAllGrpcViews();
-
-    // Registers Stackdriver exporters.
-    long sleepTime = 10; /* seconds */
-    int maxAttempts = 3;
-
-    for (int i = 0; i < maxAttempts; i++) {
-      try {
-        StackdriverTraceExporter.createAndRegister(StackdriverTraceConfiguration.builder().build());
-        StackdriverStatsExporter.createAndRegister(
-            StackdriverStatsConfiguration.builder()
-                .setExportInterval(Duration.create(15, 0))
-                .build());
-      } catch (Exception e) {
-        if (i == (maxAttempts - 1)) {
-          logger.log(
-              Level.WARN,
-              "Failed to register Stackdriver Exporter."
-                  + " Tracing and Stats data will not reported to Stackdriver. Error message: "
-                  + e.toString());
-        } else {
-          logger.info("Attempt to register Stackdriver Exporter in " + sleepTime + " seconds");
-          try {
-            Thread.sleep(TimeUnit.SECONDS.toMillis(sleepTime));
-          } catch (Exception se) {
-            logger.log(Level.WARN, "Exception while sleeping" + e.toString());
-          }
-        }
-      }
-    }
-
-    // Register Prometheus exporters and export metrics to a Prometheus HTTPServer.
-    // PrometheusStatsCollector.createAndRegister();
+    OpenTelemetryUtils.initializeSdk("AdServiceClient");
 
     AdServiceClient client = new AdServiceClient(host, serverPort);
     try {
-      client.getAds(contextKeys);
+      for (int i = 0; i < 10; i++) {
+        client.getAds(contextKeys);
+      }
     } finally {
       client.shutdown();
+      OpenTelemetrySdk.getTracerProvider().shutdown();
     }
 
     logger.info("Exiting AdServiceClient...");
   }
+
 }
