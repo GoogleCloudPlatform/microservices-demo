@@ -33,6 +33,7 @@ import io.opentelemetry.OpenTelemetry;
 import io.opentelemetry.common.AttributeValue;
 import io.opentelemetry.context.Scope;
 import io.opentelemetry.trace.Span;
+import io.opentelemetry.trace.Span.Kind;
 import io.opentelemetry.trace.Tracer;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -103,6 +104,7 @@ public final class AdService {
       Span span = tracer.spanBuilder("Retrieve Ads")
           //todo: check out grpc semantic conventions and apply them
           .setAttribute("method", AttributeValue.stringAttributeValue("getAds"))
+          .setSpanKind(Kind.SERVER)
           .startSpan();
 
       try (Scope ignored = tracer.withSpan(span)) {
@@ -216,7 +218,7 @@ public final class AdService {
 
   /** Main launches the server from the command line. */
   public static void main(String[] args) throws IOException, InterruptedException {
-    OpenTelemetryUtils.initializeSdk("AdService");
+    OpenTelemetryUtils.initializeForNewRelic("AdService");
 
     // Start the RPC server. You shouldn't see any output from gRPC before this.
     logger.info("AdService starting.");

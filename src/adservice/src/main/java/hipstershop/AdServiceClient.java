@@ -27,6 +27,7 @@ import io.opentelemetry.OpenTelemetry;
 import io.opentelemetry.context.Scope;
 import io.opentelemetry.sdk.OpenTelemetrySdk;
 import io.opentelemetry.trace.Span;
+import io.opentelemetry.trace.Span.Kind;
 import io.opentelemetry.trace.Status;
 import io.opentelemetry.trace.Tracer;
 import java.util.concurrent.TimeUnit;
@@ -74,6 +75,7 @@ public class AdServiceClient {
     //todo: check out grpc semantic conventions and apply them
     Span span = tracer
         .spanBuilder("AdsClient")
+        .setSpanKind(Kind.CLIENT)
         .startSpan();
     AdResponse response;
     try (Scope ignored = tracer.withSpan(span)) {
@@ -132,7 +134,7 @@ public class AdServiceClient {
     final String host = getStringOrDefaultFromArgs(args, 1, "localhost");
     final int serverPort = getPortOrDefaultFromArgs(args);
 
-    OpenTelemetryUtils.initializeSdk("AdServiceClient");
+    OpenTelemetryUtils.initializeForNewRelic("AdServiceClient");
 
     AdServiceClient client = new AdServiceClient(host, serverPort);
     try {

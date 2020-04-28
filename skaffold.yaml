@@ -42,6 +42,11 @@ build:
     context: src/loadgenerator
   - image: adservice
     context: src/adservice
+    docker:
+      buildArgs:
+        NEW_RELIC_API_KEY: "{{.NEW_RELIC_API_KEY}}"
+        NEW_RELIC_TRACE_URL: "{{.NEW_RELIC_TRACE_URL}}"
+        NEW_RELIC_METRIC_URL: "{{.NEW_RELIC_METRIC_URL}}"
   tagPolicy:
     gitCommit: {}
 deploy:

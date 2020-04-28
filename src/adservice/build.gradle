@@ -37,6 +37,7 @@ dependencies {
         implementation "com.google.api.grpc:proto-google-common-protos:1.17.0",
                 "io.opentelemetry:opentelemetry-api:${openTelemetryVersion}",
                 "io.opentelemetry:opentelemetry-sdk:${openTelemetryVersion}",
+                "io.opentelemetry:opentelemetry-exporters-logging:${openTelemetryVersion}",
                 "com.newrelic.telemetry:opentelemetry-exporters-newrelic:0.3.0",
                 "io.grpc:grpc-protobuf:${grpcVersion}",
                 "io.grpc:grpc-stub:${grpcVersion}",
