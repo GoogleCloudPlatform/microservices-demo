@@ -34,6 +34,12 @@ spec:
         env:
         - name: PORT
           value: "9555"
+        - name: NEW_RELIC_API_KEY
+          value: $(NEW_RELIC_API_KEY)
+        - name: NEW_RELIC_TRACE_URL
+          value: $(NEW_RELIC_TRACE_URL)
+        - name: NEW_RELIC_METRIC_URL
+          value: $(NEW_RELIC_METRIC_URL)
         # - name: DISABLE_STATS
         #   value: "1"
         # - name: DISABLE_TRACING
