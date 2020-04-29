@@ -71,11 +71,14 @@ public class AdServiceClient {
     logger.info("Get Ads with context " + contextKey + " ...");
     AdRequest request = AdRequest.newBuilder().addContextKeys(contextKey)
         .build();
-
-    //todo: check out grpc semantic conventions and apply them
+    //note: we're not applying all the grpc semantic conventions in this demo service.
     Span span = tracer
-        .spanBuilder("AdsClient")
+        .spanBuilder("hipstershop.AdService/getAds")
         .setSpanKind(Kind.CLIENT)
+        .setAttribute("rpc.service", "AdService")
+        .setAttribute("net.peer.name", channel.authority())
+        //note: normally servic.name is set by the Resource configured into the SDK
+        .setAttribute("service.name", "AdServiceClient")
         .startSpan();
     AdResponse response;
     try (Scope ignored = tracer.withSpan(span)) {
@@ -96,10 +99,42 @@ public class AdServiceClient {
   }
 
   private Status convertStatus(io.grpc.Status status) {
-    if (status.isOk()) {
-      return Status.OK;
+        switch(status.getCode()) {
+      case OK:
+        return Status.OK;
+      case CANCELLED:
+        return Status.CANCELLED;
+      case UNKNOWN:
+        return Status.UNKNOWN.withDescription(status.getDescription());
+      case INVALID_ARGUMENT:
+        return Status.INVALID_ARGUMENT;
+      case DEADLINE_EXCEEDED:
+        return Status.DEADLINE_EXCEEDED;
+      case NOT_FOUND:
+        return Status.NOT_FOUND;
+      case ALREADY_EXISTS:
+        return Status.ALREADY_EXISTS;
+      case PERMISSION_DENIED:
+        return Status.PERMISSION_DENIED;
+      case RESOURCE_EXHAUSTED:
+        return Status.RESOURCE_EXHAUSTED;
+      case FAILED_PRECONDITION:
+        return Status.FAILED_PRECONDITION;
+      case ABORTED:
+        return Status.ABORTED;
+      case OUT_OF_RANGE:
+        return Status.OUT_OF_RANGE;
+      case UNIMPLEMENTED:
+        return Status.UNIMPLEMENTED;
+      case INTERNAL:
+        return Status.INTERNAL;
+      case UNAVAILABLE:
+        return Status.UNAVAILABLE;
+      case DATA_LOSS:
+        return Status.DATA_LOSS;
+      case UNAUTHENTICATED:
+        return Status.UNAUTHENTICATED;
     }
-    //todo: check out grpc semantic conventions and apply them
     return Status.UNKNOWN.withDescription(status.getDescription());
   }
 
@@ -134,7 +169,7 @@ public class AdServiceClient {
     final String host = getStringOrDefaultFromArgs(args, 1, "localhost");
     final int serverPort = getPortOrDefaultFromArgs(args);
 
-    OpenTelemetryUtils.initializeForNewRelic("AdServiceClient");
+    OpenTelemetryUtils.initializeForNewRelic();
 
     AdServiceClient client = new AdServiceClient(host, serverPort);
     try {

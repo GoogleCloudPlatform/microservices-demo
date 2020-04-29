@@ -29,7 +29,7 @@ public class OpenTelemetryUtils {
   //seems like docker/k8s/skaffold/something passes in this value when the env var is missing.
   public static final String NO_VALUE_ENV_VAR = "<no value>";
 
-  public static void initializeForNewRelic(String serviceName) {
+  public static void initializeForNewRelic() {
     TracerSdkProvider tracerSdkProvider = OpenTelemetrySdk.getTracerProvider();
     String newRelicApiKey = System.getenv("NEW_RELIC_API_KEY");
     String traceEndpoint = System.getenv("NEW_RELIC_TRACE_URL");
@@ -42,8 +42,7 @@ public class OpenTelemetryUtils {
     } else {
       Builder builder = NewRelicSpanExporter.newBuilder()
           .apiKey(newRelicApiKey)
-          .enableAuditLogging()
-          .commonAttributes(new Attributes().put("service.name", serviceName));
+          .enableAuditLogging();
       if (traceEndpoint != null && !NO_VALUE_ENV_VAR.equals(traceEndpoint)) {
         builder.uriOverride(URI.create(traceEndpoint));
       }
@@ -74,7 +73,6 @@ public class OpenTelemetryUtils {
     @Override
     public <ReqT, RespT> Listener<ReqT> interceptCall(ServerCall<ReqT, RespT> call,
         Metadata headers, ServerCallHandler<ReqT, RespT> next) {
-
       Context updatedContext = OpenTelemetry.getPropagators().getHttpTextFormat()
           .extract(Context.current(), headers,
               (carrier, key) -> carrier.get(Key.of(key, Metadata.ASCII_STRING_MARSHALLER)));

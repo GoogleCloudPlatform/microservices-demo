@@ -101,10 +101,10 @@ public final class AdService {
     public void getAds(AdRequest req, StreamObserver<AdResponse> responseObserver) {
       AdService service = AdService.getInstance();
 
-      Span span = tracer.spanBuilder("Retrieve Ads")
-          //todo: check out grpc semantic conventions and apply them
-          .setAttribute("method", AttributeValue.stringAttributeValue("getAds"))
+      Span span = tracer.spanBuilder("hipstershop.AdService/getAds")
+          //note: we're not applying all the grpc semantic conventions in this demo service.
           .setSpanKind(Kind.SERVER)
+          .setAttribute("rpc.service", "AdService")
           .startSpan();
 
       try (Scope ignored = tracer.withSpan(span)) {
@@ -218,7 +218,7 @@ public final class AdService {
 
   /** Main launches the server from the command line. */
   public static void main(String[] args) throws IOException, InterruptedException {
-    OpenTelemetryUtils.initializeForNewRelic("AdService");
+    OpenTelemetryUtils.initializeForNewRelic();
 
     // Start the RPC server. You shouldn't see any output from gRPC before this.
     logger.info("AdService starting.");
