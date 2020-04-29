@@ -16,6 +16,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: frontend
+  namespace: demo-env
 spec:
   selector:
     matchLabels:
@@ -27,6 +28,12 @@ spec:
       annotations:
         sidecar.istio.io/rewriteAppHTTPProbers: "true"
     spec:
+      tolerations:
+      - key: dedicated
+        operator: Equal
+        value: demo-env
+      nodeSelector:
+        dedicated: demo-env
       containers:
         - name: server
           image: frontend
@@ -85,6 +92,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: frontend
+  namespace: demo-env
 spec:
   type: ClusterIP
   selector:
@@ -98,6 +106,13 @@ apiVersion: v1
 kind: Service
 metadata:
   name: frontend-external
+  namespace: demo-env
+  annotations:
+    service.beta.kubernetes.io/aws-load-balancer-internal: 0.0.0.0/0
+    service.beta.kubernetes.io/aws-load-balancer-healthcheck-interval: "5"
+    service.beta.kubernetes.io/aws-load-balancer-healthcheck-timeout: "3"
+    service.beta.kubernetes.io/aws-load-balancer-healthcheck-unhealthy-threshold: "2"
+    external-dns.alpha.kubernetes.io/hostname: ${FRONTEND_URL}
 spec:
   type: LoadBalancer
   selector:
