@@ -15,6 +15,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: loadgenerator
+  namespace: demo-env
 spec:
   selector:
     matchLabels:
@@ -27,6 +28,12 @@ spec:
       annotations:
         sidecar.istio.io/rewriteAppHTTPProbers: "true"
     spec:
+      tolerations:
+      - key: dedicated
+        operator: Equal
+        value: demo-env
+      nodeSelector:
+        dedicated: demo-env
       terminationGracePeriodSeconds: 5
       restartPolicy: Always
       containers:

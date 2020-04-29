@@ -25,6 +25,7 @@ log() { echo "$1" >&2; }
 
 TAG="${TAG:?TAG env variable must be specified}"
 REPO_PREFIX="${REPO_PREFIX:?REPO_PREFIX env variable must be specified}"
+FRONTEND_URL="${FRONTEND_URL:?FRONTEND_URL env variable must be specified}"
 OUT_DIR="${OUT_DIR:-${SCRIPTDIR}/../release}"
 
 print_license_header() {
@@ -63,6 +64,9 @@ read_manifests() {
 mk_kubernetes_manifests() {
     out_manifest="$(read_manifests "${SCRIPTDIR}/../kubernetes-manifests")"
 
+    # replace env variables
+    out_manifest="$(echo "${out_manifest}" | envsubst)"
+    
     # replace "image" repo, tag for each service
     for dir in ./src/*/
     do

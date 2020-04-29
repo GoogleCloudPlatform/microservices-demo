@@ -11,3 +11,6 @@ pkg/
 .kubernetes-manifests-*/
 .project
 .eclipse.buildship.core.prefs
+
+# ignore auto-generated k8s manifests
+release/*.yaml
