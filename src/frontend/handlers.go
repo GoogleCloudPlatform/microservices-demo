@@ -474,12 +474,14 @@ func startSpan(name string, r **http.Request) (context.Context, trace.Span) {
 	req = req.WithContext(correlation.ContextWithMap(req.Context(), correlation.NewMap(correlation.MapUpdate{
 		MultiKV: entries,
 	})))
-	*r = req
-	return tr.Start(
+	ctx, span := tr.Start(
 		trace.ContextWithRemoteSpanContext(req.Context(), spanCtx),
 		"hipstershop.Frontend/"+name,
 		trace.WithAttributes(attrs...),
 	)
+	req = req.WithContext(ctx)
+	*r = req
+	return ctx, span
 }
 
 func renderMoney(money pb.Money) string {
