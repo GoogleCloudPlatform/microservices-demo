@@ -112,7 +112,7 @@ metadata:
     service.beta.kubernetes.io/aws-load-balancer-healthcheck-interval: "5"
     service.beta.kubernetes.io/aws-load-balancer-healthcheck-timeout: "3"
     service.beta.kubernetes.io/aws-load-balancer-healthcheck-unhealthy-threshold: "2"
-    external-dns.alpha.kubernetes.io/hostname: ${FRONTEND_URL}
+    external-dns.alpha.kubernetes.io/hostname: demo.${DOMAIN}
 spec:
   type: LoadBalancer
   selector:

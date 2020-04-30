@@ -38,6 +38,8 @@ spec:
       restartPolicy: Always
       containers:
       - name: main
+        ports:
+        - containerPort: 8089
         image: loadgenerator
         env:
         - name: FRONTEND_ADDR
@@ -51,3 +53,37 @@ spec:
           limits:
             cpu: 500m
             memory: 512Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: loadgenerator
+  namespace: demo-env
+spec:
+  type: ClusterIP
+  selector:
+    app: loadgenerator
+  ports:
+  - name: http
+    port: 80
+    targetPort: 8089
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: loadgenerator-external
+  namespace: demo-env
+  annotations:
+    service.beta.kubernetes.io/aws-load-balancer-internal: 0.0.0.0/0
+    service.beta.kubernetes.io/aws-load-balancer-healthcheck-interval: "5"
+    service.beta.kubernetes.io/aws-load-balancer-healthcheck-timeout: "3"
+    service.beta.kubernetes.io/aws-load-balancer-healthcheck-unhealthy-threshold: "2"
+    external-dns.alpha.kubernetes.io/hostname: demo-load.${DOMAIN}
+spec:
+  type: LoadBalancer
+  selector:
+    app: loadgenerator
+  ports:
+  - name: http
+    port: 80
+    targetPort: 8089

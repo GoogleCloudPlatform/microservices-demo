@@ -25,7 +25,7 @@ log() { echo "$1" >&2; }
 
 TAG="${TAG:?TAG env variable must be specified}"
 REPO_PREFIX="${REPO_PREFIX:?REPO_PREFIX env variable must be specified}"
-FRONTEND_URL="${FRONTEND_URL:?FRONTEND_URL env variable must be specified}"
+DOMAIN="${DOMAIN:?DOMAIN env variable must be specified}"
 OUT_DIR="${OUT_DIR:-${SCRIPTDIR}/../release}"
 
 print_license_header() {
@@ -71,7 +71,7 @@ mk_kubernetes_manifests() {
     for dir in ./src/*/
     do
         svcname="$(basename "${dir}")"
-        image="$REPO_PREFIX/$svcname:$TAG"
+        image="$REPO_PREFIX$svcname:$TAG"
 
         pattern="^(\s*)image:\s.*$svcname(.*)(\s*)"
         replace="\1image: $image\3"

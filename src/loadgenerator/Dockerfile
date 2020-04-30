@@ -1,21 +1,11 @@
-FROM python:3-slim as base
+FROM locustio/locust:0.14.6
 
-FROM base as builder
-
-RUN apt-get -qq update \
-    && apt-get install -y --no-install-recommends \
-        g++
-
-COPY requirements.txt .
-
-RUN pip install --install-option="--prefix=/install" -r requirements.txt
-
-FROM base
-COPY --from=builder /install /usr/local
-
+WORKDIR /app
 COPY . .
+
+USER root
 RUN chmod +x ./loadgen.sh
-RUN apt-get -qq update \
-    && apt-get install -y --no-install-recommends \
-        curl
+RUN apk add bash curl
+
+USER locust
 ENTRYPOINT ./loadgen.sh
