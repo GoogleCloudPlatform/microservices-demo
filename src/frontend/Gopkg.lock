@@ -90,7 +90,7 @@
   version = "v1.5.0"
 
 [[projects]]
-  digest = "1:b4bcc2be608cbc68a42166db7bcb65ed750c7dd6d8e0a02322aed8eb3b984de8"
+  digest = "1:174a32f1d6e6db457159e549d94917416181d558f48f666b98b83c8b1c72f3f1"
   name = "go.opentelemetry.io/otel"
   packages = [
     "api/core",
@@ -104,6 +104,7 @@
     "api/propagation",
     "api/trace",
     "api/unit",
+    "exporters/trace/stdout",
     "internal/trace/parent",
     "plugin/grpctrace",
     "plugin/httptrace",
@@ -138,11 +139,14 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:c1f8d9eb178c49f24c90e608f1d2c55d184a789f0b1abe98dfb6749fe9e43649"
+  digest = "1:3407292e1a6e9d6ccd6f90d306b502508f09c1717e7d32cd61af3fbbd8b16985"
   name = "golang.org/x/sys"
-  packages = ["unix"]
+  packages = [
+    "internal/unsafeheader",
+    "unix",
+  ]
   pruneopts = "UT"
-  revision = "1f5687305801d4db70d30c51ccc82bf644f9e4d6"
+  revision = "d923437fa56d3cfb6c41de721456043c4ec46e7a"
 
 [[projects]]
   digest = "1:8d8faad6b12a3a4c819a3f9618cb6ee1fa1cfc33253abeeea8b55336721e3405"
@@ -280,6 +284,7 @@
     "go.opentelemetry.io/otel/api/correlation",
     "go.opentelemetry.io/otel/api/global",
     "go.opentelemetry.io/otel/api/trace",
+    "go.opentelemetry.io/otel/exporters/trace/stdout",
     "go.opentelemetry.io/otel/plugin/grpctrace",
     "go.opentelemetry.io/otel/plugin/httptrace",
     "go.opentelemetry.io/otel/sdk/trace",

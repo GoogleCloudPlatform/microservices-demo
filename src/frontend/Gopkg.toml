@@ -42,12 +42,12 @@
   version = "1.7.4"
 
 [[constraint]]
-  name = "github.com/newrelic/opentelemetry-exporter-go"
-  branch = "master"
-
-[[constraint]]
   name = "github.com/newrelic/newrelic-telemetry-sdk-go"
   version = "0.2.0"
+
+[[constraint]]
+  name = "github.com/newrelic/opentelemetry-exporter-go"
+  branch = "master"
 
 [[constraint]]
   name = "github.com/pkg/errors"

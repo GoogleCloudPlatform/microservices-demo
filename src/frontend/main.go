@@ -30,6 +30,7 @@ import (
 	"github.com/newrelic/newrelic-telemetry-sdk-go/telemetry"
 	"github.com/newrelic/opentelemetry-exporter-go/newrelic"
 	"go.opentelemetry.io/otel/api/global"
+	"go.opentelemetry.io/otel/exporters/trace/stdout"
 	"go.opentelemetry.io/otel/plugin/grpctrace"
 	"go.opentelemetry.io/otel/sdk/trace"
 )
@@ -141,27 +142,59 @@ func main() {
 	log.Fatal(http.ListenAndServe(addr+":"+srvPort, handler))
 }
 
+func checkEnvVar(s string) bool {
+  return s != "" && s != "<no value>"
+}
+
 func initTracing(log logrus.FieldLogger) {
 	// Create stdout exporter to be able to retrieve
 	// the collected spans.
-	exporter, err := newrelic.NewExporter(
-		"Frontend",
-		os.Getenv("NEW_RELIC_API_KEY"),
-		func(cfg *telemetry.Config) {
-			cfg.MetricsURLOverride = os.Getenv("NEW_RELIC_METRIC_URL")
-			cfg.SpansURLOverride = os.Getenv("NEW_RELIC_TRACE_URL")
-		},
-	)
-	if err != nil {
-		log.Fatal(err)
-	}
+  api_key := os.Getenv("NEW_RELIC_API_KEY")
+  if checkEnvVar(api_key) {
+    log.Info("Using New Relic API KEY: " + api_key)
+    exporter, err := newrelic.NewExporter(
+      "Frontend",
+      api_key,
+      func(cfg *telemetry.Config) {
+        metricURL := os.Getenv("NEW_RELIC_METRIC_URL")
+        if checkEnvVar(metricURL) {
+          log.Info("Setting metric export endpoint to " + metricURL)
+          cfg.MetricsURLOverride = metricURL
+        }
+        traceURL := os.Getenv("NEW_RELIC_TRACE_URL")
+        if checkEnvVar(traceURL) {
+          log.Info("Setting trace export endpoint to " + traceURL)
+          cfg.SpansURLOverride = traceURL
+        }
+      },
+    )
+    if err != nil {
+      log.Fatal(err)
+    }
 
-	tp, err := trace.NewProvider(trace.WithSyncer(exporter))
-	if err != nil {
-		log.Fatal(err)
-	}
-	global.SetTraceProvider(tp)
+    tp, err := trace.NewProvider(trace.WithSyncer(exporter))
+    if err != nil {
+      log.Fatal(err)
+    }
+    global.SetTraceProvider(tp)
+  } else {
+    log.Info("No New Relic API key found, defaulting to stdout exporter")
+    // Create stdout exporter to be able to retrieve
+    // the collected spans.
+    exporter, err := stdout.NewExporter(stdout.Options{PrettyPrint: true})
+    if err != nil {
+      log.Fatal(err)
+    }
 
+    // For the demonstration, use sdktrace.AlwaysSample sampler to sample all traces.
+    // In a production application, use sdktrace.ProbabilitySampler with a desired probability.
+    tp, err := trace.NewProvider(trace.WithConfig(trace.Config{DefaultSampler: trace.AlwaysSample()}),
+      trace.WithSyncer(exporter))
+    if err != nil {
+      log.Fatal(err)
+    }
+    global.SetTraceProvider(tp)
+  }
 }
 
 func mustMapEnv(target *string, envKey string) {
