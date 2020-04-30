@@ -38,6 +38,11 @@ build:
     context: src/cartservice
   - image: frontend
     context: src/frontend
+    docker:
+      buildArgs:
+        NEW_RELIC_API_KEY: "{{.NEW_RELIC_API_KEY}}"
+        NEW_RELIC_TRACE_URL: "{{.NEW_RELIC_TRACE_URL}}"
+        NEW_RELIC_METRIC_URL: "{{.NEW_RELIC_METRIC_URL}}"
   - image: loadgenerator
     context: src/loadgenerator
   - image: adservice

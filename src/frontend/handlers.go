@@ -29,6 +29,11 @@ import (
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 
+	"go.opentelemetry.io/otel/api/correlation"
+	"go.opentelemetry.io/otel/api/global"
+	"go.opentelemetry.io/otel/api/trace"
+	"go.opentelemetry.io/otel/plugin/httptrace"
+
 	pb "github.com/GoogleCloudPlatform/microservices-demo/src/frontend/genproto"
 	"github.com/GoogleCloudPlatform/microservices-demo/src/frontend/money"
 )
@@ -47,6 +52,8 @@ var (
 )
 
 func (fe *frontendServer) homeHandler(w http.ResponseWriter, r *http.Request) {
+	_, span := startSpan("home", &r)
+	defer span.End()
 	log := r.Context().Value(ctxKeyLog{}).(logrus.FieldLogger)
 	log.WithField("currency", currentCurrency(r)).Info("home")
 	currencies, err := fe.getCurrencies(r.Context())
@@ -117,6 +124,8 @@ func (plat *platformDetails) setPlatformDetails(env string) {
 }
 
 func (fe *frontendServer) productHandler(w http.ResponseWriter, r *http.Request) {
+	_, span := startSpan("product", &r)
+	defer span.End()
 	log := r.Context().Value(ctxKeyLog{}).(logrus.FieldLogger)
 	id := mux.Vars(r)["id"]
 	if id == "" {
@@ -177,6 +186,8 @@ func (fe *frontendServer) productHandler(w http.ResponseWriter, r *http.Request)
 }
 
 func (fe *frontendServer) addToCartHandler(w http.ResponseWriter, r *http.Request) {
+	_, span := startSpan("addToCart", &r)
+	defer span.End()
 	log := r.Context().Value(ctxKeyLog{}).(logrus.FieldLogger)
 	quantity, _ := strconv.ParseUint(r.FormValue("quantity"), 10, 32)
 	productID := r.FormValue("product_id")
@@ -201,6 +212,8 @@ func (fe *frontendServer) addToCartHandler(w http.ResponseWriter, r *http.Reques
 }
 
 func (fe *frontendServer) emptyCartHandler(w http.ResponseWriter, r *http.Request) {
+	_, span := startSpan("emptyCart", &r)
+	defer span.End()
 	log := r.Context().Value(ctxKeyLog{}).(logrus.FieldLogger)
 	log.Debug("emptying cart")
 
@@ -213,6 +226,8 @@ func (fe *frontendServer) emptyCartHandler(w http.ResponseWriter, r *http.Reques
 }
 
 func (fe *frontendServer) viewCartHandler(w http.ResponseWriter, r *http.Request) {
+	_, span := startSpan("viewCart", &r)
+	defer span.End()
 	log := r.Context().Value(ctxKeyLog{}).(logrus.FieldLogger)
 	log.Debug("view user cart")
 	currencies, err := fe.getCurrencies(r.Context())
@@ -288,6 +303,8 @@ func (fe *frontendServer) viewCartHandler(w http.ResponseWriter, r *http.Request
 }
 
 func (fe *frontendServer) placeOrderHandler(w http.ResponseWriter, r *http.Request) {
+	_, span := startSpan("placeOrder", &r)
+	defer span.End()
 	log := r.Context().Value(ctxKeyLog{}).(logrus.FieldLogger)
 	log.Debug("placing order")
 
@@ -357,6 +374,8 @@ func (fe *frontendServer) placeOrderHandler(w http.ResponseWriter, r *http.Reque
 }
 
 func (fe *frontendServer) logoutHandler(w http.ResponseWriter, r *http.Request) {
+	_, span := startSpan("logout", &r)
+	defer span.End()
 	log := r.Context().Value(ctxKeyLog{}).(logrus.FieldLogger)
 	log.Debug("logging out")
 	for _, c := range r.Cookies() {
@@ -369,6 +388,8 @@ func (fe *frontendServer) logoutHandler(w http.ResponseWriter, r *http.Request) 
 }
 
 func (fe *frontendServer) setCurrencyHandler(w http.ResponseWriter, r *http.Request) {
+	_, span := startSpan("setCurrency", &r)
+	defer span.End()
 	log := r.Context().Value(ctxKeyLog{}).(logrus.FieldLogger)
 	cur := r.FormValue("currency_code")
 	log.WithField("curr.new", cur).WithField("curr.old", currentCurrency(r)).
@@ -444,6 +465,21 @@ func cartSize(c []*pb.CartItem) int {
 		cartSize += int(item.GetQuantity())
 	}
 	return cartSize
+}
+
+func startSpan(name string, r **http.Request) (context.Context, trace.Span) {
+	tr := global.Tracer("Frontend")
+	req := *r
+	attrs, entries, spanCtx := httptrace.Extract(req.Context(), req)
+	req = req.WithContext(correlation.ContextWithMap(req.Context(), correlation.NewMap(correlation.MapUpdate{
+		MultiKV: entries,
+	})))
+	*r = req
+	return tr.Start(
+		trace.ContextWithRemoteSpanContext(req.Context(), spanCtx),
+		"hipstershop.Frontend/"+name,
+		trace.WithAttributes(attrs...),
+	)
 }
 
 func renderMoney(money pb.Money) string {

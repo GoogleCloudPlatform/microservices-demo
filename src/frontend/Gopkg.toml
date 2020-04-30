@@ -26,45 +26,49 @@
 
 
 [[constraint]]
-  name = "cloud.google.com/go"
-  version = "0.40.0"
-
-[[constraint]]
-  name = "contrib.go.opencensus.io/exporter/stackdriver"
-  version = "0.5.0"
+  name = "github.com/GoogleCloudPlatform/microservices-demo"
+  version = "0.2.0"
 
 [[constraint]]
   name = "github.com/golang/protobuf"
-  version = "1.2.0"
+  version = "1.4.0"
 
 [[constraint]]
   name = "github.com/google/uuid"
-  version = "1.0.0"
+  version = "1.1.1"
 
 [[constraint]]
   name = "github.com/gorilla/mux"
-  version = "1.6.2"
+  version = "1.7.4"
+
+[[constraint]]
+  name = "github.com/newrelic/opentelemetry-exporter-go"
+  branch = "master"
+
+[[constraint]]
+  name = "github.com/newrelic/newrelic-telemetry-sdk-go"
+  version = "0.2.0"
 
 [[constraint]]
   name = "github.com/pkg/errors"
-  version = "0.8.0"
+  version = "0.9.1"
 
 [[constraint]]
   name = "github.com/sirupsen/logrus"
-  version = "1.0.6"
+  version = "1.5.0"
 
 [[constraint]]
-  name = "go.opencensus.io"
-  version = "0.16.0"
+  name = "go.opentelemetry.io/otel"
+  version = "0.4.3"
 
 [[constraint]]
   branch = "master"
   name = "golang.org/x/net"
 
+[[constraint]]
+  name = "google.golang.org/grpc"
+  version = "1.29.1"
+
 [prune]
   go-tests = true
   unused-packages = true
-
-[[constraint]]
-  name = "contrib.go.opencensus.io/exporter/jaeger"
-  version = "0.2.0"
