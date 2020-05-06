@@ -21,6 +21,9 @@
         <div class="navbar">
             <div class="container d-flex justify-content-between">
                 <div class="h-free-shipping">Free shipping with $75 purchase! &nbsp;&nbsp;</div>
+
+
+                {{ if $.show_currency }}
                 <div class="h-controls">
                     <div class="h-control">
                         <img src="/static/icons/Hipster_CurrencyIcon.svg" alt="icon" class="icon" />
@@ -34,6 +37,8 @@
                         <img src="/static/icons/Hipster_DownArrow.svg" alt="icon" class="icon arrow" />
                     </div>
                 </div>
+                {{ end }}
+
             </div>
         </div>
         <div class="navbar sub-navbar">
@@ -53,5 +58,6 @@
                 </div>
             </div>
         </div>
+
     </header>
     {{end}}
