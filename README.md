@@ -137,6 +137,8 @@ We offer the following installation methods:
 
 1. Run `kubectl get nodes` to verify you're connected to “Kubernetes on Docker”.
 
+1. Run `kubectl create ns demo-env` to create a namespace to run the app in.
+
 1. Run `skaffold run` (first time will be slow, it can take ~20 minutes).
    This will build and deploy the application. If you need to rebuild the images
    automatically as you refactor the code, run `skaffold dev` command.
@@ -157,6 +159,22 @@ We offer the following installation methods:
 
     ```shell
     kubectl port-forward deployment/frontend 8080:8080
+    ```
+
+1. Access the load generator UI through your browser
+    - **Minikube** requires you to run a command to access the frontend service:
+
+    ```shell
+    minikube service loadgenerator
+    ```
+
+    - **Docker For Desktop** should be automatically accessible by http://localhost:8089
+
+    - **Kind** does not provision an IP address for the service.
+      You must run a port-forwarding process to access the frontend at http://localhost:8089:
+
+    ```shell
+    kubectl port-forward deployment/loadgenerator 8089:8089
     ```
 
 ### Option 2: Running on Google Kubernetes Engine (GKE)

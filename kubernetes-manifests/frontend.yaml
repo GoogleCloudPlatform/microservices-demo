@@ -33,7 +33,6 @@ spec:
         operator: Equal
         value: demo-env
       nodeSelector:
-        dedicated: demo-env
       containers:
         - name: server
           image: frontend
