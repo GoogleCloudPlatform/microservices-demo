@@ -17,27 +17,20 @@
 package hipstershop;
 
 import com.google.common.collect.ImmutableListMultimap;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
 import hipstershop.Demo.Ad;
 import hipstershop.Demo.AdRequest;
 import hipstershop.Demo.AdResponse;
-import hipstershop.OpenTelemetryUtils.HttpTextFormatServerInterceptor;
 import io.grpc.Server;
 import io.grpc.ServerBuilder;
 import io.grpc.StatusRuntimeException;
 import io.grpc.health.v1.HealthCheckResponse.ServingStatus;
 import io.grpc.services.HealthStatusManager;
 import io.grpc.stub.StreamObserver;
-import io.opentelemetry.OpenTelemetry;
-import io.opentelemetry.common.AttributeValue;
-import io.opentelemetry.context.Scope;
 import io.opentelemetry.metrics.DoubleMeasure;
 import io.opentelemetry.metrics.LongCounter;
 import io.opentelemetry.metrics.Meter;
-import io.opentelemetry.trace.Span;
-import io.opentelemetry.trace.Span.Kind;
-import io.opentelemetry.trace.Tracer;
+import io.opentelemetry.metrics.MeterProvider;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -51,24 +44,15 @@ public final class AdService {
 
   private static final Logger logger = LogManager.getLogger(AdService.class);
 
-  private static final Tracer tracer = OpenTelemetry.getTracerProvider().get("AdService");
-  private static final Meter meter = OpenTelemetry.getMeterProvider().get("AdService");
-
   private static final int MAX_ADS_TO_SERVE = 2;
+  private final MeterProvider meterProvider;
 
   private Server server;
   private HealthStatusManager healthMgr;
 
-  //note: these two instruments should be updated to match semantic conventions, when they are defined.
-  private final LongCounter requestCount = meter.longCounterBuilder("rpc_request_count")
-      .setDescription("Number of gRPC requests to a service")
-      .setUnit("1")
-      .build();
-
-  private final DoubleMeasure requestLatency = meter.doubleMeasureBuilder("rpc_request_latency")
-      .setDescription("Timings of gRPC requests to a service")
-      .setUnit("ms")
-      .build();
+  public AdService(MeterProvider meterProvider) {
+    this.meterProvider = meterProvider;
+  }
 
   private void start() throws IOException {
     int port = Integer.parseInt(System.getenv().getOrDefault("PORT", "9555"));
@@ -76,9 +60,8 @@ public final class AdService {
 
     server =
         ServerBuilder.forPort(port)
-            .addService(new AdServiceImpl(this, requestCount, requestLatency))
+            .addService(new AdServiceImpl(this))
             .addService(healthMgr.getHealthService())
-            .intercept(new HttpTextFormatServerInterceptor())
             .build()
             .start();
     logger.info("Ad Service started, listening on " + port);
@@ -103,16 +86,27 @@ public final class AdService {
   }
 
   private static class AdServiceImpl extends hipstershop.AdServiceGrpc.AdServiceImplBase {
-
     private final AdService service;
+
+    // note: these two instruments should be updated to match semantic conventions, when they are
+    // defined.
     private final LongCounter requestCount;
     private final DoubleMeasure requestLatency;
 
-    public AdServiceImpl(AdService service, LongCounter requestCount,
-        DoubleMeasure requestLatency) {
+    public AdServiceImpl(AdService service) {
       this.service = service;
-      this.requestCount = requestCount;
-      this.requestLatency = requestLatency;
+      //    private final Tracer tracer = OpenTelemetry.getTracerProvider().get("AdService");
+      Meter meter = service.meterProvider.get("AdService");
+      requestCount = meter
+          .longCounterBuilder("rpc_request_count")
+          .setDescription("Number of gRPC requests to a service")
+          .setUnit("1")
+          .build();
+      requestLatency = meter
+          .doubleMeasureBuilder("rpc_request_latency")
+          .setDescription("Timings of gRPC requests to a service")
+          .setUnit("ms")
+          .build();
     }
 
     /**
@@ -128,46 +122,31 @@ public final class AdService {
       requestCount.add(1, "method.name", methodName);
       long startTime = System.currentTimeMillis();
 
-      Span span = tracer.spanBuilder(methodName)
-          //note: we're not applying all the grpc semantic conventions in this demo service.
-          .setSpanKind(Kind.SERVER)
-          .setAttribute("rpc.service", "AdService")
-          .startSpan();
-
-      try (Scope ignored = tracer.withSpan(span)) {
+      try {
         List<Ad> allAds = new ArrayList<>();
         logger.info("received ad request (context_words=" + req.getContextKeysCount() + ")");
         if (req.getContextKeysCount() > 0) {
-          span.addEvent(
-              "Constructing Ads using context",
-              ImmutableMap.of(
-                  "Context Keys",
-                  AttributeValue.stringAttributeValue(req.getContextKeysList().toString()),
-                  "Context Keys length",
-                  AttributeValue.longAttributeValue(req.getContextKeysCount())));
           for (int i = 0; i < req.getContextKeysCount(); i++) {
             Collection<Ad> ads = service.getAdsByCategory(req.getContextKeys(i));
             allAds.addAll(ads);
           }
         } else {
-          span.addEvent("No Context provided. Constructing random Ads.");
           allAds = service.getRandomAds();
         }
         if (allAds.isEmpty()) {
           // Serve random ads.
-          span.addEvent("No Ads found based on context. Constructing random Ads.");
           allAds = service.getRandomAds();
         }
         AdResponse reply = AdResponse.newBuilder().addAllAds(allAds).build();
         responseObserver.onNext(reply);
         responseObserver.onCompleted();
-        requestLatency.record((System.currentTimeMillis() - startTime), "method.name", methodName, "error", "false");
+        requestLatency.record(
+            (System.currentTimeMillis() - startTime), "method.name", methodName, "error", "false");
       } catch (StatusRuntimeException e) {
         logger.log(Level.WARN, "GetAds Failed with status {}", e.getStatus());
         responseObserver.onError(e);
-        requestLatency.record((System.currentTimeMillis() - startTime), "method.name", methodName, "error", "true");
-      } finally {
-        span.end();
+        requestLatency.record(
+            (System.currentTimeMillis() - startTime), "method.name", methodName, "error", "true");
       }
     }
   }
@@ -243,13 +222,12 @@ public final class AdService {
 
   /** Main launches the server from the command line. */
   public static void main(String[] args) throws IOException, InterruptedException {
-    OpenTelemetryUtils.initializeForNewRelic();
+    MeterProvider meterProvider = OpenTelemetryUtils.initializeForNewRelic();
 
     // Start the RPC server. You shouldn't see any output from gRPC before this.
     logger.info("AdService starting.");
-    AdService adService = new AdService();
+    AdService adService = new AdService(meterProvider);
     adService.start();
     adService.blockUntilShutdown();
   }
-
 }
