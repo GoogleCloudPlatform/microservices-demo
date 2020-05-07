@@ -1,7 +1,6 @@
-FROM golang:1.12-alpine as builder
-RUN apk add --no-cache ca-certificates git && \
-      wget -qO/go/bin/dep https://github.com/golang/dep/releases/download/v0.5.0/dep-linux-amd64 && \
-      chmod +x /go/bin/dep
+FROM golang:1.13-alpine as builder
+RUN apk add --no-cache ca-certificates git curl && \
+      curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
 
 ENV PROJECT github.com/GoogleCloudPlatform/microservices-demo/src/frontend
 WORKDIR /go/src/$PROJECT

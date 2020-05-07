@@ -19,12 +19,20 @@ import (
 	"net/http"
 	"time"
 
+	"go.opentelemetry.io/otel/api/metric"
+
 	"github.com/google/uuid"
 	"github.com/sirupsen/logrus"
 )
 
 type ctxKeyLog struct{}
 type ctxKeyRequestID struct{}
+
+type telemetryHandler struct {
+	requestCount   metric.Int64Counter
+	requestLatency metric.Int64Measure
+	next           http.Handler
+}
 
 type logHandler struct {
 	log  *logrus.Logger
@@ -35,6 +43,16 @@ type responseRecorder struct {
 	b      int
 	status int
 	w      http.ResponseWriter
+}
+
+func (o *telemetryHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	o.requestCount.Add(ctx, 1)
+	start := time.Now()
+	defer func() {
+		o.requestLatency.Record(ctx, (int64)(time.Since(start)/time.Millisecond))
+	}()
+	o.next.ServeHTTP(w, r)
 }
 
 func (r *responseRecorder) Header() http.Header { return r.w.Header() }

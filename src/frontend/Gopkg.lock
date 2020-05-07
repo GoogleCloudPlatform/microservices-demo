@@ -2,6 +2,14 @@
 
 
 [[projects]]
+  branch = "master"
+  digest = "1:34624033bc188a4e41a68c1ba6ca9b2650e8c5f2136c28045b18c9c503a749d1"
+  name = "github.com/DataDog/sketches-go"
+  packages = ["ddsketch"]
+  pruneopts = "UT"
+  revision = "43f19ad77ff73bc865c41f7e391ef4b23b82810a"
+
+[[projects]]
   digest = "1:c4f0a05580fb5d27e1cc8f5723a8d33fd97590a931e845f23b104e05c02ea80b"
   name = "github.com/GoogleCloudPlatform/microservices-demo"
   packages = [
@@ -13,7 +21,7 @@
   version = "v0.2.0"
 
 [[projects]]
-  digest = "1:7beb0b38399dd0f16d27476a1351d9d5a1288757c7c673fece30b65f95fb04e5"
+  digest = "1:61e61e2587bc70b60b1f391b3c360c69c467869d656a068d03c7d5f086cf7ef6"
   name = "github.com/golang/protobuf"
   packages = [
     "proto",
@@ -23,8 +31,8 @@
     "ptypes/timestamp",
   ]
   pruneopts = "UT"
-  revision = "1b794fe86dd6a0c7c52ae69b5c9cb0aeedc52afa"
-  version = "v1.4.0"
+  revision = "6c66de79d66478d166c7ea05f5d2ccaf016fbd6b"
+  version = "v1.4.1"
 
 [[projects]]
   digest = "1:582b704bebaa06b48c29b0cec224a6058a09c86883aaddabde889cd1a5f73e1b"
@@ -82,15 +90,15 @@
   version = "v0.9.1"
 
 [[projects]]
-  digest = "1:0599141a8403114d34f1e546604ad6c5361b70dfa80e80c635f438cdbf71b43a"
+  digest = "1:05eebdd5727fea23083fce0d98d307d70c86baed644178e81608aaa9f09ea469"
   name = "github.com/sirupsen/logrus"
   packages = ["."]
   pruneopts = "UT"
-  revision = "d417be0fe654de640a82370515129985b407c7e3"
-  version = "v1.5.0"
+  revision = "60c74ad9be0d874af0ab0daef6ab07c5c5911f0d"
+  version = "v1.6.0"
 
 [[projects]]
-  digest = "1:174a32f1d6e6db457159e549d94917416181d558f48f666b98b83c8b1c72f3f1"
+  digest = "1:46d1dca2c2437cec235cb9250509d72b3db9319b7019a6ee221d7b7d64d6c76c"
   name = "go.opentelemetry.io/otel"
   packages = [
     "api/core",
@@ -104,6 +112,7 @@
     "api/propagation",
     "api/trace",
     "api/unit",
+    "exporters/metric/stdout",
     "exporters/trace/stdout",
     "internal/trace/parent",
     "plugin/grpctrace",
@@ -113,6 +122,15 @@
     "sdk/export/metric/aggregator",
     "sdk/export/trace",
     "sdk/internal",
+    "sdk/metric",
+    "sdk/metric/aggregator/array",
+    "sdk/metric/aggregator/ddsketch",
+    "sdk/metric/aggregator/histogram",
+    "sdk/metric/aggregator/minmaxsumcount",
+    "sdk/metric/aggregator/sum",
+    "sdk/metric/batcher/ungrouped",
+    "sdk/metric/controller/push",
+    "sdk/metric/selector/simple",
     "sdk/resource",
     "sdk/trace",
     "sdk/trace/internal",
@@ -123,7 +141,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:047ab7748a588b6e99382ca5f0a9be6707033bcf12ad9a556a46a10b689ab940"
+  digest = "1:81282d5d15c0b6102193c63269cb16c9a65b7fbd24bc6586ed26e5c6f309312c"
   name = "golang.org/x/net"
   packages = [
     "context",
@@ -135,18 +153,18 @@
     "trace",
   ]
   pruneopts = "UT"
-  revision = "ff2c4b7c35a07b0c1e90ce72aa7bfe41bb66a3cb"
+  revision = "7e3656a0809f6f95abd88ac65313578f80b00df2"
 
 [[projects]]
   branch = "master"
-  digest = "1:3407292e1a6e9d6ccd6f90d306b502508f09c1717e7d32cd61af3fbbd8b16985"
+  digest = "1:8cab10971112233c82c83683a517378038eba1c20e71b29c592b73fa212437b3"
   name = "golang.org/x/sys"
   packages = [
     "internal/unsafeheader",
     "unix",
   ]
   pruneopts = "UT"
-  revision = "d923437fa56d3cfb6c41de721456043c4ec46e7a"
+  revision = "bc7a7d42d5c30f4d0fe808715c002826ce2c624e"
 
 [[projects]]
   digest = "1:8d8faad6b12a3a4c819a3f9618cb6ee1fa1cfc33253abeeea8b55336721e3405"
@@ -179,7 +197,7 @@
   name = "google.golang.org/genproto"
   packages = ["googleapis/rpc/status"]
   pruneopts = "UT"
-  revision = "b979b6f78d84775ef7a93ffc8034924947960f29"
+  revision = "43844f6eee31fd8ee95bfe5daf9a24a45c5f3df2"
 
 [[projects]]
   digest = "1:712fa3cb36bfb9e0d333e10f8dcb9b1e64aa2ec30cabed56c114b5e64d775823"
@@ -230,7 +248,7 @@
   version = "v1.29.1"
 
 [[projects]]
-  digest = "1:4016f95c99c4974f9aa4a54d08846306a2548797e841b349edb5e1d3a16b3d0c"
+  digest = "1:d9915d65d4e7bbc01bd5b98d4b11b308a0f5d55c3ab3b72e91ebb1e0f02667ca"
   name = "google.golang.org/protobuf"
   packages = [
     "encoding/prototext",
@@ -265,8 +283,8 @@
     "types/known/timestamppb",
   ]
   pruneopts = "UT"
-  revision = "3b9eee12916ce611400f93d6c2fed2fc2911b0ad"
-  version = "v1.21.0"
+  revision = "8b0d71ac935315b10385aaaf30175de0c74bbba6"
+  version = "v1.22.0"
 
 [solve-meta]
   analyzer-name = "dep"
@@ -283,10 +301,15 @@
     "github.com/sirupsen/logrus",
     "go.opentelemetry.io/otel/api/correlation",
     "go.opentelemetry.io/otel/api/global",
+    "go.opentelemetry.io/otel/api/metric",
     "go.opentelemetry.io/otel/api/trace",
+    "go.opentelemetry.io/otel/exporters/metric/stdout",
     "go.opentelemetry.io/otel/exporters/trace/stdout",
     "go.opentelemetry.io/otel/plugin/grpctrace",
     "go.opentelemetry.io/otel/plugin/httptrace",
+    "go.opentelemetry.io/otel/sdk/metric/batcher/ungrouped",
+    "go.opentelemetry.io/otel/sdk/metric/controller/push",
+    "go.opentelemetry.io/otel/sdk/metric/selector/simple",
     "go.opentelemetry.io/otel/sdk/trace",
     "golang.org/x/net/context",
     "google.golang.org/grpc",

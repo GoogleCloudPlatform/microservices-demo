@@ -31,7 +31,7 @@
 
 [[constraint]]
   name = "github.com/golang/protobuf"
-  version = "1.4.0"
+  version = "1.4.1"
 
 [[constraint]]
   name = "github.com/google/uuid"
@@ -55,7 +55,7 @@
 
 [[constraint]]
   name = "github.com/sirupsen/logrus"
-  version = "1.5.0"
+  version = "1.6.0"
 
 [[constraint]]
   name = "go.opentelemetry.io/otel"

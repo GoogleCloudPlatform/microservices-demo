@@ -32,6 +32,9 @@ import (
 	"go.opentelemetry.io/otel/api/global"
 	"go.opentelemetry.io/otel/exporters/trace/stdout"
 	"go.opentelemetry.io/otel/plugin/grpctrace"
+	"go.opentelemetry.io/otel/sdk/metric/batcher/ungrouped"
+	"go.opentelemetry.io/otel/sdk/metric/controller/push"
+	"go.opentelemetry.io/otel/sdk/metric/selector/simple"
 	"go.opentelemetry.io/otel/sdk/trace"
 )
 
@@ -135,7 +138,20 @@ func main() {
 	r.HandleFunc("/robots.txt", func(w http.ResponseWriter, _ *http.Request) { fmt.Fprint(w, "User-agent: *\nDisallow: /") })
 	r.HandleFunc("/_healthz", func(w http.ResponseWriter, _ *http.Request) { fmt.Fprint(w, "ok") })
 
+	meter := global.MeterProvider().Meter("Frontend")
+
 	var handler http.Handler = r
+	requestCount, err := meter.NewInt64Counter("http_request_count")
+	if err != nil {
+	}
+	requestLatency, err := meter.NewInt64Measure("http_request_latency")
+	if err != nil {
+	}
+	handler = &telemetryHandler{
+		requestCount:   requestCount,
+		requestLatency: requestLatency,
+		next:           handler,
+	}
 	handler = &logHandler{log: log, next: handler} // add logging
 	handler = ensureSessionID(handler)             // add session ID
 	log.Infof("starting server on " + addr + ":" + srvPort)
@@ -143,58 +159,68 @@ func main() {
 }
 
 func checkEnvVar(s string) bool {
-  return s != "" && s != "<no value>"
+	return s != "" && s != "<no value>"
 }
+
+var pusher *push.Controller
 
 func initTracing(log logrus.FieldLogger) {
 	// Create stdout exporter to be able to retrieve
 	// the collected spans.
-  api_key := os.Getenv("NEW_RELIC_API_KEY")
-  if checkEnvVar(api_key) {
-    log.Info("Using New Relic API KEY: " + api_key)
-    exporter, err := newrelic.NewExporter(
-      "Frontend",
-      api_key,
-      func(cfg *telemetry.Config) {
-        metricURL := os.Getenv("NEW_RELIC_METRIC_URL")
-        if checkEnvVar(metricURL) {
-          log.Info("Setting metric export endpoint to " + metricURL)
-          cfg.MetricsURLOverride = metricURL
-        }
-        traceURL := os.Getenv("NEW_RELIC_TRACE_URL")
-        if checkEnvVar(traceURL) {
-          log.Info("Setting trace export endpoint to " + traceURL)
-          cfg.SpansURLOverride = traceURL
-        }
-      },
-    )
-    if err != nil {
-      log.Fatal(err)
-    }
+	api_key := os.Getenv("NEW_RELIC_API_KEY")
+	if checkEnvVar(api_key) {
+		log.Info("Using New Relic API KEY: " + api_key)
+		exporter, err := newrelic.NewExporter(
+			"Frontend",
+			api_key,
+			func(cfg *telemetry.Config) {
+				metricURL := os.Getenv("NEW_RELIC_METRIC_URL")
+				if checkEnvVar(metricURL) {
+					log.Info("Setting metric export endpoint to " + metricURL)
+					cfg.MetricsURLOverride = metricURL
+				}
+				traceURL := os.Getenv("NEW_RELIC_TRACE_URL")
+				if checkEnvVar(traceURL) {
+					log.Info("Setting trace export endpoint to " + traceURL)
+					cfg.SpansURLOverride = traceURL
+				}
+			},
+		)
+		if err != nil {
+			log.Fatal(err)
+		}
 
-    tp, err := trace.NewProvider(trace.WithSyncer(exporter))
-    if err != nil {
-      log.Fatal(err)
-    }
-    global.SetTraceProvider(tp)
-  } else {
-    log.Info("No New Relic API key found, defaulting to stdout exporter")
-    // Create stdout exporter to be able to retrieve
-    // the collected spans.
-    exporter, err := stdout.NewExporter(stdout.Options{PrettyPrint: true})
-    if err != nil {
-      log.Fatal(err)
-    }
+		tp, err := trace.NewProvider(trace.WithSyncer(exporter))
+		if err != nil {
+			log.Fatal(err)
+		}
+		// TODO: enable these piecemeal based on available urls
+		global.SetTraceProvider(tp)
 
-    // For the demonstration, use sdktrace.AlwaysSample sampler to sample all traces.
-    // In a production application, use sdktrace.ProbabilitySampler with a desired probability.
-    tp, err := trace.NewProvider(trace.WithConfig(trace.Config{DefaultSampler: trace.AlwaysSample()}),
-      trace.WithSyncer(exporter))
-    if err != nil {
-      log.Fatal(err)
-    }
-    global.SetTraceProvider(tp)
-  }
+		selector := simple.NewWithExactMeasure()
+		batcher := ungrouped.New(selector, true)
+		pusher = push.New(batcher, exporter, time.Second)
+		pusher.Start()
+		global.SetMeterProvider(pusher)
+	} else {
+		log.Info("No New Relic API key found, defaulting to stdout exporter")
+		// Create stdout exporter to be able to retrieve
+		// the collected spans.
+		exporter, err := stdout.NewExporter(stdout.Options{PrettyPrint: true})
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		// For the demonstration, use sdktrace.AlwaysSample sampler to sample all traces.
+		// In a production application, use sdktrace.ProbabilitySampler with a desired probability.
+		tp, err := trace.NewProvider(trace.WithConfig(trace.Config{DefaultSampler: trace.AlwaysSample()}),
+			trace.WithSyncer(exporter))
+		if err != nil {
+			log.Fatal(err)
+		}
+		global.SetTraceProvider(tp)
+		// TODO: use stdout exporter
+	}
 }
 
 func mustMapEnv(target *string, envKey string) {
