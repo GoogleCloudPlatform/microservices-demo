@@ -8,6 +8,13 @@ plugins {
 repositories {
     mavenCentral()
     mavenLocal()
+    maven() {
+        url "https://oss.sonatype.org/content/repositories/snapshots/"
+
+        mavenContent {
+            snapshotsOnly()
+        }
+    }
 }
 
 description = 'Ad Service'
@@ -21,8 +28,8 @@ def protocVersion = "3.11.4"
 def openTelemetryVersion = "0.3.0"
 
 tasks.withType(JavaCompile) {
-    sourceCompatibility = JavaVersion.VERSION_1_8
-    targetCompatibility = JavaVersion.VERSION_1_8
+    sourceCompatibility = JavaVersion.VERSION_11
+    targetCompatibility = JavaVersion.VERSION_11
 }
 
 ext {
@@ -30,28 +37,42 @@ ext {
     offlineCompile = new File("$buildDir/output/lib")
 }
 
+configurations {
+    exporters
+}
+
 dependencies {
     if (speed) {
         implementation fileTree(dir: offlineCompile, include: '*.jar')
     } else {
+        exporters ("com.newrelic.telemetry:opentelemetry-exporters-newrelic-auto:0.3.1-SNAPSHOT") {
+            transitive = false
+        }
+
         implementation "com.google.api.grpc:proto-google-common-protos:1.17.0",
                 "io.opentelemetry:opentelemetry-api:${openTelemetryVersion}",
                 "io.opentelemetry:opentelemetry-sdk:${openTelemetryVersion}",
                 "io.opentelemetry:opentelemetry-exporters-logging:${openTelemetryVersion}",
-                "com.newrelic.telemetry:opentelemetry-exporters-newrelic:0.3.0",
+                "com.newrelic.telemetry:opentelemetry-exporters-newrelic:0.3.1-SNAPSHOT",
                 "io.grpc:grpc-protobuf:${grpcVersion}",
                 "io.grpc:grpc-stub:${grpcVersion}",
                 "io.grpc:grpc-netty:${grpcVersion}",
                 "io.grpc:grpc-services:${grpcVersion}",
                 "org.apache.logging.log4j:log4j-core:2.13.0",
-                "org.apache.logging.log4j:log4j-slf4j-impl:2.13.2"
-
+                "org.apache.logging.log4j:log4j-slf4j-impl:2.13.2",
+                "javax.annotation:javax.annotation-api:1.3.2"
         runtimeOnly "com.fasterxml.jackson.core:jackson-core:${jacksonVersion}",
                 "com.fasterxml.jackson.core:jackson-databind:${jacksonVersion}",
                 "io.opencensus:opencensus-contrib-log-correlation-log4j2:${opencensusVersion}",
                 "io.opencensus:opencensus-impl:${opencensusVersion}",
                 "io.netty:netty-tcnative-boringssl-static:2.0.26.Final"
+
     }
+}
+
+task copyExporters(type: Copy) {
+    from configurations.exporters
+    into "$buildDir/exporters"
 }
 
 protobuf {
@@ -102,9 +123,7 @@ task adService(type: CreateStartScripts) {
     applicationName = 'AdService'
     outputDir = new File(project.buildDir, 'tmp')
     classpath = startScripts.classpath
-    defaultJvmOpts =
-            ["-Dlog4j2.contextDataInjector=io.opencensus.contrib.logcorrelation.log4j2.OpenCensusTraceContextDataInjector",
-             "-agentpath:/opt/cprof/profiler_java_agent.so=-cprof_service=adservice,-cprof_service_version=1.0.0"]
+    defaultJvmOpts = ["-javaagent:auto-agent/opentelemetry-auto.jar"]
 }
 
 task adServiceClient(type: CreateStartScripts) {

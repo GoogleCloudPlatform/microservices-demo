@@ -19,17 +19,9 @@ package hipstershop;
 import hipstershop.Demo.Ad;
 import hipstershop.Demo.AdRequest;
 import hipstershop.Demo.AdResponse;
-import hipstershop.OpenTelemetryUtils.HttpTextFormatClientInterceptor;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import io.grpc.StatusRuntimeException;
-import io.opentelemetry.OpenTelemetry;
-import io.opentelemetry.context.Scope;
-import io.opentelemetry.sdk.OpenTelemetrySdk;
-import io.opentelemetry.trace.Span;
-import io.opentelemetry.trace.Span.Kind;
-import io.opentelemetry.trace.Status;
-import io.opentelemetry.trace.Tracer;
 import java.util.concurrent.TimeUnit;
 import javax.annotation.Nullable;
 import org.apache.logging.log4j.Level;
@@ -40,7 +32,6 @@ import org.apache.logging.log4j.Logger;
 public class AdServiceClient {
 
   private static final Logger logger = LogManager.getLogger(AdServiceClient.class);
-  private static final Tracer tracer = OpenTelemetry.getTracerProvider().get("AdServiceClient");
 
   private final ManagedChannel channel;
   private final hipstershop.AdServiceGrpc.AdServiceBlockingStub blockingStub;
@@ -52,7 +43,6 @@ public class AdServiceClient {
             // Channels are secure by default (via SSL/TLS). For the example we disable TLS to avoid
             // needing certificates.
             .usePlaintext()
-            .intercept(new HttpTextFormatClientInterceptor())
             .build());
   }
 
@@ -69,74 +59,19 @@ public class AdServiceClient {
   /** Get Ads from Server. */
   public void getAds(String contextKey) {
     logger.info("Get Ads with context " + contextKey + " ...");
-    AdRequest request = AdRequest.newBuilder().addContextKeys(contextKey)
-        .build();
-    //note: we're not applying all the grpc semantic conventions in this demo service.
-    Span span = tracer
-        .spanBuilder("hipstershop.AdService/getAds")
-        .setSpanKind(Kind.CLIENT)
-        .setAttribute("rpc.service", "AdService")
-        .setAttribute("net.peer.name", channel.authority())
-        //note: normally servic.name is set by the Resource configured into the SDK
-        .setAttribute("service.name", "AdServiceClient")
-        .startSpan();
+    AdRequest request = AdRequest.newBuilder().addContextKeys(contextKey).build();
     AdResponse response;
-    try (Scope ignored = tracer.withSpan(span)) {
-      tracer.getCurrentSpan().addEvent("Getting Ads");
-
+    try {
       response = blockingStub.getAds(request);
-      tracer.getCurrentSpan().addEvent("Received response from Ads Service.");
     } catch (StatusRuntimeException e) {
-      tracer.getCurrentSpan().setStatus(convertStatus(e.getStatus()));
       logger.log(Level.WARN, "RPC failed: " + e.getStatus());
       return;
-    } finally {
-      span.end();
     }
     for (Ad ads : response.getAdsList()) {
       logger.info("Ads: " + ads.getText());
     }
   }
 
-  private Status convertStatus(io.grpc.Status status) {
-        switch(status.getCode()) {
-      case OK:
-        return Status.OK;
-      case CANCELLED:
-        return Status.CANCELLED;
-      case UNKNOWN:
-        return Status.UNKNOWN.withDescription(status.getDescription());
-      case INVALID_ARGUMENT:
-        return Status.INVALID_ARGUMENT;
-      case DEADLINE_EXCEEDED:
-        return Status.DEADLINE_EXCEEDED;
-      case NOT_FOUND:
-        return Status.NOT_FOUND;
-      case ALREADY_EXISTS:
-        return Status.ALREADY_EXISTS;
-      case PERMISSION_DENIED:
-        return Status.PERMISSION_DENIED;
-      case RESOURCE_EXHAUSTED:
-        return Status.RESOURCE_EXHAUSTED;
-      case FAILED_PRECONDITION:
-        return Status.FAILED_PRECONDITION;
-      case ABORTED:
-        return Status.ABORTED;
-      case OUT_OF_RANGE:
-        return Status.OUT_OF_RANGE;
-      case UNIMPLEMENTED:
-        return Status.UNIMPLEMENTED;
-      case INTERNAL:
-        return Status.INTERNAL;
-      case UNAVAILABLE:
-        return Status.UNAVAILABLE;
-      case DATA_LOSS:
-        return Status.DATA_LOSS;
-      case UNAUTHENTICATED:
-        return Status.UNAUTHENTICATED;
-    }
-    return Status.UNKNOWN.withDescription(status.getDescription());
-  }
 
   private static int getPortOrDefaultFromArgs(String[] args) {
     int portNumber = 9555;
@@ -169,8 +104,6 @@ public class AdServiceClient {
     final String host = getStringOrDefaultFromArgs(args, 1, "localhost");
     final int serverPort = getPortOrDefaultFromArgs(args);
 
-    OpenTelemetryUtils.initializeForNewRelic();
-
     AdServiceClient client = new AdServiceClient(host, serverPort);
     try {
       for (int i = 0; i < 10; i++) {
@@ -183,5 +116,4 @@ public class AdServiceClient {
 
     logger.info("Exiting AdServiceClient...");
   }
-
 }
