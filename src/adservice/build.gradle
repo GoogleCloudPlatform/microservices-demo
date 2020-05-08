@@ -123,7 +123,10 @@ task adService(type: CreateStartScripts) {
     applicationName = 'AdService'
     outputDir = new File(project.buildDir, 'tmp')
     classpath = startScripts.classpath
-    defaultJvmOpts = ["-javaagent:auto-agent/opentelemetry-auto.jar"]
+    defaultJvmOpts = ["-javaagent:auto-agent/opentelemetry-auto.jar",
+                      "-Dlog4j2.contextDataInjector=io.opencensus.contrib.logcorrelation.log4j2.OpenCensusTraceContextDataInjector",
+                      "-agentpath:/opt/cprof/profiler_java_agent.so=-cprof_service=adservice,-cprof_service_version=1.0.0"]
+
 }
 
 task adServiceClient(type: CreateStartScripts) {

@@ -45,17 +45,17 @@ spec:
         resources:
           requests:
             cpu: 200m
-            memory: 180Mi
+            memory: 280Mi
           limits:
             cpu: 300m
-            memory: 300Mi
+            memory: 400Mi
         readinessProbe:
-          initialDelaySeconds: 20
+          initialDelaySeconds: 30
           periodSeconds: 15
           exec:
             command: ["/bin/grpc_health_probe", "-addr=:9555"]
         livenessProbe:
-          initialDelaySeconds: 20
+          initialDelaySeconds: 30
           periodSeconds: 15
           exec:
             command: ["/bin/grpc_health_probe", "-addr=:9555"]
