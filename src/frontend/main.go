@@ -43,6 +43,8 @@ const (
 	cookiePrefix    = "shop_"
 	cookieSessionID = cookiePrefix + "session-id"
 	cookieCurrency  = cookiePrefix + "currency"
+
+	k8sIPLabelName = "k8s.pod.ip"
 )
 
 var (
@@ -168,6 +170,9 @@ func initJaegerTracing(log logrus.FieldLogger) {
 		Endpoint: fmt.Sprintf("http://%s", svcAddr),
 		Process: jaeger.Process{
 			ServiceName: "frontend",
+			Tags: []jaeger.Tag{
+				jaeger.StringTag(k8sIPLabelName, os.Getenv("POD_IP")),
+			},
 		},
 	})
 	if err != nil {

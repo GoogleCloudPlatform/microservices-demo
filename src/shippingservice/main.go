@@ -38,7 +38,8 @@ import (
 )
 
 const (
-	defaultPort = "50051"
+	defaultPort    = "50051"
+	k8sIPLabelName = "k8s.pod.ip"
 )
 
 var log *logrus.Logger
@@ -167,6 +168,9 @@ func initJaegerTracing() {
 		Endpoint: fmt.Sprintf("http://%s", svcAddr),
 		Process: jaeger.Process{
 			ServiceName: "shippingservice",
+			Tags: []jaeger.Tag{
+				jaeger.StringTag(k8sIPLabelName, os.Getenv("POD_IP")),
+			},
 		},
 	})
 	if err != nil {

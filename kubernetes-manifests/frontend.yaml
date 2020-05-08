@@ -73,6 +73,11 @@ spec:
             value: "adservice:9555"
           - name: ENV_PLATFORM
             value: "gcp"
+          - name: POD_IP
+            valueFrom:
+              fieldRef:
+                apiVersion: v1
+                fieldPath: status.podIP
           - name: NODE_NAME
             valueFrom:
               fieldRef:

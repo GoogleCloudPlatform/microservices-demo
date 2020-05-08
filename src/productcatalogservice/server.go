@@ -54,6 +54,8 @@ var (
 	port = "3550"
 
 	reloadCatalog bool
+
+	k8sIPLabelName = "k8s.pod.ip"
 )
 
 func init() {
@@ -161,6 +163,9 @@ func initJaegerTracing() {
 		Endpoint: fmt.Sprintf("http://%s", svcAddr),
 		Process: jaeger.Process{
 			ServiceName: "productcatalogservice",
+			Tags: []jaeger.Tag{
+				jaeger.StringTag(k8sIPLabelName, os.Getenv("POD_IP")),
+			},
 		},
 	})
 	if err != nil {
