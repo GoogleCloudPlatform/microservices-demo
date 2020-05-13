@@ -15,6 +15,7 @@
 package main
 
 import (
+	"encoding/hex"
 	"fmt"
 	"net"
 	"os"
@@ -41,12 +42,12 @@ const (
 	defaultPort = "50051"
 )
 
-var log *logrus.Logger
+var logger *logrus.Logger
 
 func init() {
-	log = logrus.New()
-	log.Level = logrus.DebugLevel
-	log.Formatter = &logrus.JSONFormatter{
+	logger = logrus.New()
+	logger.Level = logrus.DebugLevel
+	logger.Formatter = &logrus.JSONFormatter{
 		FieldMap: logrus.FieldMap{
 			logrus.FieldKeyTime:  "timestamp",
 			logrus.FieldKeyLevel: "severity",
@@ -54,22 +55,22 @@ func init() {
 		},
 		TimestampFormat: time.RFC3339Nano,
 	}
-	log.Out = os.Stdout
+	logger.Out = os.Stdout
 }
 
 func main() {
 	if os.Getenv("DISABLE_TRACING") == "" {
-		log.Info("Tracing enabled.")
+		logger.Info("Tracing enabled.")
 		go initTracing()
 	} else {
-		log.Info("Tracing disabled.")
+		logger.Info("Tracing disabled.")
 	}
 
 	if os.Getenv("DISABLE_PROFILER") == "" {
-		log.Info("Profiling enabled.")
+		logger.Info("Profiling enabled.")
 		go initProfiling("shippingservice", "1.0.0")
 	} else {
-		log.Info("Profiling disabled.")
+		logger.Info("Profiling disabled.")
 	}
 
 	port := defaultPort
@@ -80,26 +81,26 @@ func main() {
 
 	lis, err := net.Listen("tcp", port)
 	if err != nil {
-		log.Fatalf("failed to listen: %v", err)
+		logger.Fatalf("failed to listen: %v", err)
 	}
 
 	var srv *grpc.Server
 	if os.Getenv("DISABLE_STATS") == "" {
-		log.Info("Stats enabled.")
+		logger.Info("Stats enabled.")
 		srv = grpc.NewServer(grpc.StatsHandler(&ocgrpc.ServerHandler{}))
 	} else {
-		log.Info("Stats disabled.")
+		logger.Info("Stats disabled.")
 		srv = grpc.NewServer()
 	}
 	svc := &server{}
 	pb.RegisterShippingServiceServer(srv, svc)
 	healthpb.RegisterHealthServer(srv, svc)
-	log.Infof("Shipping Service listening on port %s", port)
+	logger.Infof("Shipping Service listening on port %s", port)
 
 	// Register reflection service on gRPC server.
 	reflection.Register(srv)
 	if err := srv.Serve(lis); err != nil {
-		log.Fatalf("failed to serve: %v", err)
+		logger.Fatalf("failed to serve: %v", err)
 	}
 }
 
@@ -117,6 +118,7 @@ func (s *server) Watch(req *healthpb.HealthCheckRequest, ws healthpb.Health_Watc
 
 // GetQuote produces a shipping quote (cost) in USD.
 func (s *server) GetQuote(ctx context.Context, in *pb.GetQuoteRequest) (*pb.GetQuoteResponse, error) {
+	log := logger.WithFields(getTraceLogFields(ctx))
 	log.Info("[GetQuote] received request")
 	defer log.Info("[GetQuote] completed request")
 
@@ -142,6 +144,7 @@ func (s *server) GetQuote(ctx context.Context, in *pb.GetQuoteRequest) (*pb.GetQ
 // ShipOrder mocks that the requested items will be shipped.
 // It supplies a tracking ID for notional lookup of shipment delivery status.
 func (s *server) ShipOrder(ctx context.Context, in *pb.ShipOrderRequest) (*pb.ShipOrderResponse, error) {
+	log := logger.WithFields(getTraceLogFields(ctx))
 	log.Info("[ShipOrder] received request")
 	defer log.Info("[ShipOrder] completed request")
 	// 1. Create a Tracking ID
@@ -157,7 +160,7 @@ func (s *server) ShipOrder(ctx context.Context, in *pb.ShipOrderRequest) (*pb.Sh
 func initJaegerTracing() {
 	svcAddr := os.Getenv("JAEGER_SERVICE_ADDR")
 	if svcAddr == "" {
-		log.Info("jaeger initialization disabled.")
+		logger.Info("jaeger initialization disabled.")
 		return
 	}
 
@@ -170,19 +173,19 @@ func initJaegerTracing() {
 		},
 	})
 	if err != nil {
-		log.Fatal(err)
+		logger.Fatal(err)
 	}
 	trace.RegisterExporter(exporter)
-	log.Info("jaeger initialization completed.")
+	logger.Info("jaeger initialization completed.")
 }
 
 func initStats(exporter *stackdriver.Exporter) {
 	view.SetReportingPeriod(60 * time.Second)
 	view.RegisterExporter(exporter)
 	if err := view.Register(ocgrpc.DefaultServerViews...); err != nil {
-		log.Warn("Error registering default server views")
+		logger.Warn("Error registering default server views")
 	} else {
-		log.Info("Registered default server views")
+		logger.Info("Registered default server views")
 	}
 }
 
@@ -192,21 +195,21 @@ func initStackdriverTracing() {
 	for i := 1; i <= 3; i++ {
 		exporter, err := stackdriver.NewExporter(stackdriver.Options{})
 		if err != nil {
-			log.Warnf("failed to initialize Stackdriver exporter: %+v", err)
+			logger.Warnf("failed to initialize Stackdriver exporter: %+v", err)
 		} else {
 			trace.RegisterExporter(exporter)
 			trace.ApplyConfig(trace.Config{DefaultSampler: trace.AlwaysSample()})
-			log.Info("registered Stackdriver tracing")
+			logger.Info("registered Stackdriver tracing")
 
 			// Register the views to collect server stats.
 			initStats(exporter)
 			return
 		}
 		d := time.Second * 10 * time.Duration(i)
-		log.Infof("sleeping %v to retry initializing Stackdriver exporter", d)
+		logger.Infof("sleeping %v to retry initializing Stackdriver exporter", d)
 		time.Sleep(d)
 	}
-	log.Warn("could not initialize Stackdriver exporter after retrying, giving up")
+	logger.Warn("could not initialize Stackdriver exporter after retrying, giving up")
 }
 
 func initTracing() {
@@ -224,14 +227,27 @@ func initProfiling(service, version string) {
 			// ProjectID must be set if not running on GCP.
 			// ProjectID: "my-project",
 		}); err != nil {
-			log.Warnf("failed to start profiler: %+v", err)
+			logger.Warnf("failed to start profiler: %+v", err)
 		} else {
-			log.Info("started Stackdriver profiler")
+			logger.Info("started Stackdriver profiler")
 			return
 		}
 		d := time.Second * 10 * time.Duration(i)
-		log.Infof("sleeping %v to retry initializing Stackdriver profiler", d)
+		logger.Infof("sleeping %v to retry initializing Stackdriver profiler", d)
 		time.Sleep(d)
 	}
-	log.Warn("could not initialize Stackdriver profiler after retrying, giving up")
+	logger.Warn("could not initialize Stackdriver profiler after retrying, giving up")
+}
+
+func getTraceLogFields(ctx context.Context) logrus.Fields {
+	span := trace.FromContext(ctx)
+	if span == nil {
+		return logrus.Fields{}
+	}
+	traceID := span.SpanContext().TraceID
+	spanID := span.SpanContext().SpanID
+	return logrus.Fields{
+		"trace_id": hex.EncodeToString(traceID[:]),
+		"span_id":  hex.EncodeToString(spanID[:]),
+	}
 }

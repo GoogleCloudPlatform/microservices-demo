@@ -17,6 +17,7 @@ package main
 import (
 	"bytes"
 	"context"
+	"encoding/hex"
 	"flag"
 	"fmt"
 	"io/ioutil"
@@ -48,7 +49,7 @@ import (
 var (
 	cat          pb.ListProductsResponse
 	catalogMutex *sync.Mutex
-	log          *logrus.Logger
+	logger       *logrus.Logger
 	extraLatency time.Duration
 
 	port = "3550"
@@ -57,8 +58,8 @@ var (
 )
 
 func init() {
-	log = logrus.New()
-	log.Formatter = &logrus.JSONFormatter{
+	logger = logrus.New()
+	logger.Formatter = &logrus.JSONFormatter{
 		FieldMap: logrus.FieldMap{
 			logrus.FieldKeyTime:  "timestamp",
 			logrus.FieldKeyLevel: "severity",
@@ -66,27 +67,27 @@ func init() {
 		},
 		TimestampFormat: time.RFC3339Nano,
 	}
-	log.Out = os.Stdout
+	logger.Out = os.Stdout
 	catalogMutex = &sync.Mutex{}
-	err := readCatalogFile(&cat)
+	err := readCatalogFile(context.Background(), &cat)
 	if err != nil {
-		log.Warnf("could not parse product catalog")
+		logger.Warnf("could not parse product catalog")
 	}
 }
 
 func main() {
 	if os.Getenv("DISABLE_TRACING") == "" {
-		log.Info("Tracing enabled.")
+		logger.Info("Tracing enabled.")
 		go initTracing()
 	} else {
-		log.Info("Tracing disabled.")
+		logger.Info("Tracing disabled.")
 	}
 
 	if os.Getenv("DISABLE_PROFILER") == "" {
-		log.Info("Profiling enabled.")
+		logger.Info("Profiling enabled.")
 		go initProfiling("productcatalogservice", "1.0.0")
 	} else {
-		log.Info("Profiling disabled.")
+		logger.Info("Profiling disabled.")
 	}
 
 	flag.Parse()
@@ -95,10 +96,10 @@ func main() {
 	if s := os.Getenv("EXTRA_LATENCY"); s != "" {
 		v, err := time.ParseDuration(s)
 		if err != nil {
-			log.Fatalf("failed to parse EXTRA_LATENCY (%s) as time.Duration: %+v", v, err)
+			logger.Fatalf("failed to parse EXTRA_LATENCY (%s) as time.Duration: %+v", v, err)
 		}
 		extraLatency = v
-		log.Infof("extra latency enabled (duration: %v)", extraLatency)
+		logger.Infof("extra latency enabled (duration: %v)", extraLatency)
 	} else {
 		extraLatency = time.Duration(0)
 	}
@@ -108,13 +109,13 @@ func main() {
 	go func() {
 		for {
 			sig := <-sigs
-			log.Printf("Received signal: %s", sig)
+			logger.Printf("Received signal: %s", sig)
 			if sig == syscall.SIGUSR1 {
 				reloadCatalog = true
-				log.Infof("Enable catalog reloading")
+				logger.Infof("Enable catalog reloading")
 			} else {
 				reloadCatalog = false
-				log.Infof("Disable catalog reloading")
+				logger.Infof("Disable catalog reloading")
 			}
 		}
 	}()
@@ -122,7 +123,7 @@ func main() {
 	if os.Getenv("PORT") != "" {
 		port = os.Getenv("PORT")
 	}
-	log.Infof("starting grpc server at :%s", port)
+	logger.Infof("starting grpc server at :%s", port)
 	run(port)
 	select {}
 }
@@ -130,14 +131,14 @@ func main() {
 func run(port string) string {
 	l, err := net.Listen("tcp", fmt.Sprintf(":%s", port))
 	if err != nil {
-		log.Fatal(err)
+		logger.Fatal(err)
 	}
 	var srv *grpc.Server
 	if os.Getenv("DISABLE_STATS") == "" {
-		log.Info("Stats enabled.")
+		logger.Info("Stats enabled.")
 		srv = grpc.NewServer(grpc.StatsHandler(&ocgrpc.ServerHandler{}))
 	} else {
-		log.Info("Stats disabled.")
+		logger.Info("Stats disabled.")
 		srv = grpc.NewServer()
 	}
 
@@ -152,7 +153,7 @@ func run(port string) string {
 func initJaegerTracing() {
 	svcAddr := os.Getenv("JAEGER_SERVICE_ADDR")
 	if svcAddr == "" {
-		log.Info("jaeger initialization disabled.")
+		logger.Info("jaeger initialization disabled.")
 		return
 	}
 	// Register the Jaeger exporter to be able to retrieve
@@ -164,19 +165,19 @@ func initJaegerTracing() {
 		},
 	})
 	if err != nil {
-		log.Fatal(err)
+		logger.Fatal(err)
 	}
 	trace.RegisterExporter(exporter)
-	log.Info("jaeger initialization completed.")
+	logger.Info("jaeger initialization completed.")
 }
 
 func initStats(exporter *stackdriver.Exporter) {
 	view.SetReportingPeriod(60 * time.Second)
 	view.RegisterExporter(exporter)
 	if err := view.Register(ocgrpc.DefaultServerViews...); err != nil {
-		log.Info("Error registering default server views")
+		logger.Info("Error registering default server views")
 	} else {
-		log.Info("Registered default server views")
+		logger.Info("Registered default server views")
 	}
 }
 
@@ -186,21 +187,21 @@ func initStackdriverTracing() {
 	for i := 1; i <= 3; i++ {
 		exporter, err := stackdriver.NewExporter(stackdriver.Options{})
 		if err != nil {
-			log.Warnf("failed to initialize Stackdriver exporter: %+v", err)
+			logger.Warnf("failed to initialize Stackdriver exporter: %+v", err)
 		} else {
 			trace.RegisterExporter(exporter)
 			trace.ApplyConfig(trace.Config{DefaultSampler: trace.AlwaysSample()})
-			log.Info("registered Stackdriver tracing")
+			logger.Info("registered Stackdriver tracing")
 
 			// Register the views to collect server stats.
 			initStats(exporter)
 			return
 		}
 		d := time.Second * 10 * time.Duration(i)
-		log.Infof("sleeping %v to retry initializing Stackdriver exporter", d)
+		logger.Infof("sleeping %v to retry initializing Stackdriver exporter", d)
 		time.Sleep(d)
 	}
-	log.Warn("could not initialize Stackdriver exporter after retrying, giving up")
+	logger.Warn("could not initialize Stackdriver exporter after retrying, giving up")
 }
 
 func initTracing() {
@@ -218,21 +219,22 @@ func initProfiling(service, version string) {
 			// ProjectID must be set if not running on GCP.
 			// ProjectID: "my-project",
 		}); err != nil {
-			log.Warnf("failed to start profiler: %+v", err)
+			logger.Warnf("failed to start profiler: %+v", err)
 		} else {
-			log.Info("started Stackdriver profiler")
+			logger.Info("started Stackdriver profiler")
 			return
 		}
 		d := time.Second * 10 * time.Duration(i)
-		log.Infof("sleeping %v to retry initializing Stackdriver profiler", d)
+		logger.Infof("sleeping %v to retry initializing Stackdriver profiler", d)
 		time.Sleep(d)
 	}
-	log.Warn("could not initialize Stackdriver profiler after retrying, giving up")
+	logger.Warn("could not initialize Stackdriver profiler after retrying, giving up")
 }
 
 type productCatalog struct{}
 
-func readCatalogFile(catalog *pb.ListProductsResponse) error {
+func readCatalogFile(ctx context.Context, catalog *pb.ListProductsResponse) error {
+	log := logger.WithFields(getTraceLogFields(ctx))
 	catalogMutex.Lock()
 	defer catalogMutex.Unlock()
 	catalogJSON, err := ioutil.ReadFile("products.json")
@@ -248,9 +250,9 @@ func readCatalogFile(catalog *pb.ListProductsResponse) error {
 	return nil
 }
 
-func parseCatalog() []*pb.Product {
+func parseCatalog(ctx context.Context) []*pb.Product {
 	if reloadCatalog || len(cat.Products) == 0 {
-		err := readCatalogFile(&cat)
+		err := readCatalogFile(ctx, &cat)
 		if err != nil {
 			return []*pb.Product{}
 		}
@@ -266,17 +268,17 @@ func (p *productCatalog) Watch(req *healthpb.HealthCheckRequest, ws healthpb.Hea
 	return status.Errorf(codes.Unimplemented, "health check via Watch not implemented")
 }
 
-func (p *productCatalog) ListProducts(context.Context, *pb.Empty) (*pb.ListProductsResponse, error) {
+func (p *productCatalog) ListProducts(ctx context.Context, _ *pb.Empty) (*pb.ListProductsResponse, error) {
 	time.Sleep(extraLatency)
-	return &pb.ListProductsResponse{Products: parseCatalog()}, nil
+	return &pb.ListProductsResponse{Products: parseCatalog(ctx)}, nil
 }
 
 func (p *productCatalog) GetProduct(ctx context.Context, req *pb.GetProductRequest) (*pb.Product, error) {
 	time.Sleep(extraLatency)
 	var found *pb.Product
-	for i := 0; i < len(parseCatalog()); i++ {
-		if req.Id == parseCatalog()[i].Id {
-			found = parseCatalog()[i]
+	for i := 0; i < len(parseCatalog(ctx)); i++ {
+		if req.Id == parseCatalog(ctx)[i].Id {
+			found = parseCatalog(ctx)[i]
 		}
 	}
 	if found == nil {
@@ -289,11 +291,24 @@ func (p *productCatalog) SearchProducts(ctx context.Context, req *pb.SearchProdu
 	time.Sleep(extraLatency)
 	// Intepret query as a substring match in name or description.
 	var ps []*pb.Product
-	for _, p := range parseCatalog() {
+	for _, p := range parseCatalog(ctx) {
 		if strings.Contains(strings.ToLower(p.Name), strings.ToLower(req.Query)) ||
 			strings.Contains(strings.ToLower(p.Description), strings.ToLower(req.Query)) {
 			ps = append(ps, p)
 		}
 	}
 	return &pb.SearchProductsResponse{Results: ps}, nil
+}
+
+func getTraceLogFields(ctx context.Context) logrus.Fields {
+	span := trace.FromContext(ctx)
+	if span == nil {
+		return logrus.Fields{}
+	}
+	traceID := span.SpanContext().TraceID
+	spanID := span.SpanContext().SpanID
+	return logrus.Fields{
+		"trace_id": hex.EncodeToString(traceID[:]),
+		"span_id":  hex.EncodeToString(spanID[:]),
+	}
 }

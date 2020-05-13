@@ -16,11 +16,13 @@ package main
 
 import (
 	"context"
+	"encoding/hex"
 	"net/http"
 	"time"
 
 	"github.com/google/uuid"
 	"github.com/sirupsen/logrus"
+	"go.opencensus.io/trace"
 )
 
 type ctxKeyLog struct{}
@@ -68,6 +70,7 @@ func (lh *logHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if v, ok := r.Context().Value(ctxKeySessionID{}).(string); ok {
 		log = log.WithField("session", v)
 	}
+	log = withTraceContext(log, r)
 	log.Debug("request started")
 	defer func() {
 		log.WithFields(logrus.Fields{
@@ -79,6 +82,20 @@ func (lh *logHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	ctx = context.WithValue(ctx, ctxKeyLog{}, log)
 	r = r.WithContext(ctx)
 	lh.next.ServeHTTP(rr, r)
+}
+
+// withTraceContext add trace fields to log messages
+func withTraceContext(log *logrus.Entry, r *http.Request) *logrus.Entry {
+	span := trace.FromContext(r.Context())
+	if span == nil {
+		return log
+	}
+	traceID := span.SpanContext().TraceID
+	spanID := span.SpanContext().SpanID
+	return log.WithFields(logrus.Fields{
+		"trace_id": hex.EncodeToString(traceID[:]),
+		"span_id":  hex.EncodeToString(spanID[:]),
+	})
 }
 
 func ensureSessionID(next http.Handler) http.HandlerFunc {
