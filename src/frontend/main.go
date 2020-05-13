@@ -30,6 +30,8 @@ import (
 	"github.com/newrelic/newrelic-telemetry-sdk-go/telemetry"
 	"github.com/newrelic/opentelemetry-exporter-go/newrelic"
 	"go.opentelemetry.io/otel/api/global"
+	"go.opentelemetry.io/otel/api/metric"
+	"go.opentelemetry.io/otel/api/unit"
 	"go.opentelemetry.io/otel/exporters/trace/stdout"
 	"go.opentelemetry.io/otel/plugin/grpctrace"
 	"go.opentelemetry.io/otel/sdk/metric/batcher/ungrouped"
@@ -141,11 +143,21 @@ func main() {
 	meter := global.MeterProvider().Meter("Frontend")
 
 	var handler http.Handler = r
-	requestCount, err := meter.NewInt64Counter("http_request_count")
+	requestCount, err := meter.NewInt64Counter(
+		"http_request_count",
+		metric.WithUnit(unit.Milliseconds),
+		metric.WithDescription("Number of incoming requests"),
+	)
 	if err != nil {
+		// TODO: handle this properly
 	}
-	requestLatency, err := meter.NewInt64Measure("http_request_latency")
+	requestLatency, err := meter.NewInt64Measure(
+		"http_request_latency",
+		metric.WithUnit(unit.Milliseconds),
+		metric.WithDescription("Time spent responding to a request"),
+	)
 	if err != nil {
+		// TODO: handle this properly
 	}
 	handler = &telemetryHandler{
 		requestCount:   requestCount,

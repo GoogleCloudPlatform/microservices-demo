@@ -17,6 +17,7 @@
 package hipstershop;
 
 import com.google.common.collect.ImmutableListMultimap;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
 import hipstershop.Demo.Ad;
 import hipstershop.Demo.AdRequest;
@@ -33,6 +34,7 @@ import io.opentelemetry.metrics.Meter;
 import io.opentelemetry.metrics.MeterProvider;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.net.InetAddress;
 import java.util.Collection;
 import java.util.List;
 import java.util.Random;
@@ -52,6 +54,14 @@ public final class AdService {
 
   public AdService(MeterProvider meterProvider) {
     this.meterProvider = meterProvider;
+  }
+
+  private static String getHost() {
+    try {
+      return InetAddress.getLocalHost().getHostName();
+    } catch (java.net.UnknownHostException e) {
+      return "";
+    }
   }
 
   private void start() throws IOException {
@@ -92,7 +102,6 @@ public final class AdService {
     // defined.
     private final LongCounter requestCount;
     private final DoubleMeasure requestLatency;
-
     public AdServiceImpl(AdService service) {
       this.service = service;
       //    private final Tracer tracer = OpenTelemetry.getTracerProvider().get("AdService");
@@ -100,11 +109,23 @@ public final class AdService {
       requestCount = meter
           .longCounterBuilder("rpc_request_count")
           .setDescription("Number of gRPC requests to a service")
+          .setConstantLabels(
+              ImmutableMap.of(
+                "host",
+                AdService.getHost()
+              )
+          )
           .setUnit("1")
           .build();
       requestLatency = meter
           .doubleMeasureBuilder("rpc_request_latency")
           .setDescription("Timings of gRPC requests to a service")
+          .setConstantLabels(
+              ImmutableMap.of(
+                "host",
+                AdService.getHost()
+              )
+          )
           .setUnit("ms")
           .build();
     }
