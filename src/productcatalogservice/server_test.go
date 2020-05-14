@@ -18,9 +18,9 @@ import (
 	"context"
 	"testing"
 
-	pb "github.com/GoogleCloudPlatform/microservices-demo/src/productcatalogservice/genproto"
 	"github.com/golang/protobuf/proto"
 	"github.com/google/go-cmp/cmp"
+	pb "github.com/signalfx/microservices-demo/src/productcatalogservice/genproto"
 	"go.opencensus.io/plugin/ocgrpc"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
@@ -29,7 +29,7 @@ import (
 
 func TestServer(t *testing.T) {
 	ctx := context.Background()
-	addr := run(0)
+	addr := run("0")
 	conn, err := grpc.Dial(addr,
 		grpc.WithInsecure(),
 		grpc.WithStatsHandler(&ocgrpc.ClientHandler{}))
