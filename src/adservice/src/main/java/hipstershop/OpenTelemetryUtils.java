@@ -51,7 +51,9 @@ public class OpenTelemetryUtils {
   }
 
   public static void shutdownSdk() {
-    intervalMetricReader.shutdown();
+    if (intervalMetricReader != null) {
+      intervalMetricReader.shutdown();
+    }
   }
 
 }

@@ -102,31 +102,34 @@ public final class AdService {
     // defined.
     private final LongCounter requestCount;
     private final DoubleMeasure requestLatency;
+    private final LongCounter numberOfAdsRequested;
+
     public AdServiceImpl(AdService service) {
       this.service = service;
       //    private final Tracer tracer = OpenTelemetry.getTracerProvider().get("AdService");
       Meter meter = service.meterProvider.get("AdService");
+      ImmutableMap<String, String> hostLabels = ImmutableMap.of(
+          "host",
+          AdService.getHost()
+      );
       requestCount = meter
           .longCounterBuilder("rpc_request_count")
           .setDescription("Number of gRPC requests to a service")
-          .setConstantLabels(
-              ImmutableMap.of(
-                "host",
-                AdService.getHost()
-              )
-          )
+          .setConstantLabels(hostLabels)
           .setUnit("1")
           .build();
       requestLatency = meter
           .doubleMeasureBuilder("rpc_request_latency")
           .setDescription("Timings of gRPC requests to a service")
-          .setConstantLabels(
-              ImmutableMap.of(
-                "host",
-                AdService.getHost()
-              )
-          )
+          .setConstantLabels(hostLabels)
           .setUnit("ms")
+          .build();
+      numberOfAdsRequested = meter
+          .longCounterBuilder("ads_requested")
+          .setMonotonic(false)
+          .setConstantLabels(hostLabels)
+          .setUnit("one")
+          .setDescription("Number of Ads Requested per Request")
           .build();
     }
 
@@ -142,6 +145,7 @@ public final class AdService {
       String methodName = "hipstershop.AdService/getAds";
       requestCount.add(1, "method.name", methodName);
       long startTime = System.currentTimeMillis();
+      numberOfAdsRequested.add(req.getContextKeysCount());
 
       try {
         List<Ad> allAds = new ArrayList<>();
