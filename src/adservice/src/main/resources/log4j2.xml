@@ -3,17 +3,13 @@
   <Appenders>
     <Console name="STDOUT" target="SYSTEM_OUT">
 
-      <!-- This is a JSON format that can be read by the Stackdriver Logging agent. The trace ID,
-           span ID, sampling decision, and timestamp are interpreted by Stackdriver. It uses the
-           special JSON keys that the Stackdriver Logging agent converts to "trace", "spanId",
-           "traceSampled", and "timestamp" in the Stackdriver LogEntry
-           (https://cloud.google.com/logging/docs/agent/configuration#special-fields). -->
+      <!-- This is a JSON appender adds additional fields to logs for logs-traces correlation: 
+           trace ID, span ID, and flag showing sampling decision. -->
 
       <JsonLayout compact="true" eventEol="true">
-        <KeyValuePair key="logging.googleapis.com/trace" value="$${ctx:traceId}"/>
-        <KeyValuePair key="logging.googleapis.com/spanId" value="$${ctx:spanId}"/>
-        <KeyValuePair key="logging.googleapis.com/traceSampled" value="$${ctx:traceSampled}"/>
-        <KeyValuePair key="time" value="$${date:yyyy-MM-dd}T$${date:HH:mm:ss.SSS}Z"/>
+        <KeyValuePair key="trace_id" value="$${ctx:traceId}"/>
+        <KeyValuePair key="span_id" value="$${ctx:spanId}"/>
+        <KeyValuePair key="trace_sampled" value="$${ctx:traceSampled}"/>
      </JsonLayout>
 
     </Console>
