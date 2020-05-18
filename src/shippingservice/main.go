@@ -22,7 +22,7 @@ import (
 	"time"
 
 	"cloud.google.com/go/profiler"
-	"contrib.go.opencensus.io/exporter/jaeger"
+	"contrib.go.opencensus.io/exporter/ocagent"
 	"contrib.go.opencensus.io/exporter/stackdriver"
 	"github.com/sirupsen/logrus"
 	"go.opencensus.io/plugin/ocgrpc"
@@ -157,26 +157,24 @@ func (s *server) ShipOrder(ctx context.Context, in *pb.ShipOrderRequest) (*pb.Sh
 	}, nil
 }
 
-func initJaegerTracing() {
-	svcAddr := os.Getenv("JAEGER_SERVICE_ADDR")
+func initOCTracing() {
+	svcAddr := os.Getenv("OC_SERVICE_ADDR")
 	if svcAddr == "" {
-		logger.Info("jaeger initialization disabled.")
+		logger.Info("opencensus initialization disabled.")
 		return
 	}
 
-	// Register the Jaeger exporter to be able to retrieve
+	// Register the OpenCensus exporter to be able to retrieve
 	// the collected spans.
-	exporter, err := jaeger.NewExporter(jaeger.Options{
-		Endpoint: fmt.Sprintf("http://%s", svcAddr),
-		Process: jaeger.Process{
-			ServiceName: "shippingservice",
-		},
-	})
+	exporter, err := ocagent.NewExporter(
+		ocagent.WithInsecure(),
+		ocagent.WithAddress(svcAddr),
+		ocagent.WithServiceName("shippingservice"))
 	if err != nil {
 		logger.Fatal(err)
 	}
 	trace.RegisterExporter(exporter)
-	logger.Info("jaeger initialization completed.")
+	logger.Info("opencensus initialization completed.")
 }
 
 func initStats(exporter *stackdriver.Exporter) {
@@ -213,7 +211,7 @@ func initStackdriverTracing() {
 }
 
 func initTracing() {
-	initJaegerTracing()
+	initOCTracing()
 	initStackdriverTracing()
 }
 

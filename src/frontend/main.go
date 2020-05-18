@@ -22,7 +22,7 @@ import (
 	"time"
 
 	"cloud.google.com/go/profiler"
-	"contrib.go.opencensus.io/exporter/jaeger"
+	"contrib.go.opencensus.io/exporter/ocagent"
 	"contrib.go.opencensus.io/exporter/stackdriver"
 	"github.com/gorilla/mux"
 	"github.com/pkg/errors"
@@ -154,27 +154,25 @@ func main() {
 	log.Fatal(http.ListenAndServe(addr+":"+srvPort, handler))
 }
 
-func initJaegerTracing(log logrus.FieldLogger) {
+func initOCTracing(log logrus.FieldLogger) {
 
-	svcAddr := os.Getenv("JAEGER_SERVICE_ADDR")
+	svcAddr := os.Getenv("OC_SERVICE_ADDR")
 	if svcAddr == "" {
-		log.Info("jaeger initialization disabled.")
+		log.Info("opencensus initialization disabled.")
 		return
 	}
 
-	// Register the Jaeger exporter to be able to retrieve
+	// Register the OpenCensus exporter to be able to retrieve
 	// the collected spans.
-	exporter, err := jaeger.NewExporter(jaeger.Options{
-		Endpoint: fmt.Sprintf("http://%s", svcAddr),
-		Process: jaeger.Process{
-			ServiceName: "frontend",
-		},
-	})
+	exporter, err := ocagent.NewExporter(
+		ocagent.WithInsecure(),
+		ocagent.WithAddress(svcAddr),
+		ocagent.WithServiceName("frontend"))
 	if err != nil {
 		log.Fatal(err)
 	}
 	trace.RegisterExporter(exporter)
-	log.Info("jaeger initialization completed.")
+	log.Info("opencensus initialization completed.")
 }
 
 func initStats(log logrus.FieldLogger, exporter *stackdriver.Exporter) {
@@ -225,7 +223,7 @@ func initTracing(log logrus.FieldLogger) {
 	// trace.ProbabilitySampler set at the desired probability.
 	trace.ApplyConfig(trace.Config{DefaultSampler: trace.AlwaysSample()})
 
-	initJaegerTracing(log)
+	initOCTracing(log)
 	initStackdriverTracing(log)
 
 }

@@ -44,8 +44,8 @@ spec:
             fieldRef:
               apiVersion: v1
               fieldPath: spec.nodeName
-        - name: JAEGER_SERVICE_ADDR
-          value: "$(NODE_NAME):14268"
+        - name: OC_SERVICE_ADDR
+          value: "$(NODE_NAME):55678"
         readinessProbe:
           periodSeconds: 5
           exec:

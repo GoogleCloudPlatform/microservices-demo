@@ -33,6 +33,7 @@ import io.opencensus.exporter.trace.stackdriver.StackdriverTraceExporter;
 import io.opencensus.trace.Span;
 import io.opencensus.trace.Tracer;
 import io.opencensus.trace.Tracing;
+import io.opencensus.trace.Span.Kind;
 import io.opencensus.trace.samplers.Samplers;
 import java.util.concurrent.TimeUnit;
 import javax.annotation.Nullable;
@@ -80,6 +81,7 @@ public class AdServiceClient {
             .spanBuilder("AdsClient")
             .setRecordEvents(true)
             .setSampler(Samplers.alwaysSample())
+            .setSpanKind(Kind.SERVER)
             .startSpan();
     try (Scope ignored = tracer.withSpan(span)) {
       tracer.getCurrentSpan().addAnnotation("Getting Ads");

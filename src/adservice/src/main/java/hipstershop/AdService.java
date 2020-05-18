@@ -32,8 +32,8 @@ import io.opencensus.common.Duration;
 import io.opencensus.contrib.grpc.metrics.RpcViews;
 import io.opencensus.exporter.stats.stackdriver.StackdriverStatsConfiguration;
 import io.opencensus.exporter.stats.stackdriver.StackdriverStatsExporter;
-import io.opencensus.exporter.trace.jaeger.JaegerExporterConfiguration;
-import io.opencensus.exporter.trace.jaeger.JaegerTraceExporter;
+import io.opencensus.exporter.trace.ocagent.OcAgentTraceExporterConfiguration;
+import io.opencensus.exporter.trace.ocagent.OcAgentTraceExporter;
 import io.opencensus.exporter.trace.stackdriver.StackdriverTraceConfiguration;
 import io.opencensus.exporter.trace.stackdriver.StackdriverTraceExporter;
 import io.opencensus.trace.AttributeValue;
@@ -292,22 +292,18 @@ public final class AdService {
     logger.info("Tracing enabled - Stackdriver exporter initialized.");
   }
 
-
-
-
-  private static void initJaeger() {
-    String jaegerAddr = System.getenv("JAEGER_SERVICE_ADDR");
-    if (jaegerAddr != null && !jaegerAddr.isEmpty()) {
-      String jaegerUrl = String.format("http://%s/api/traces", jaegerAddr);
-      // Register Jaeger Tracing.
-      JaegerTraceExporter.createAndRegister(
-          JaegerExporterConfiguration.builder()
-              .setThriftEndpoint(jaegerUrl)
+  private static void initOC() {
+    String ocAddr = System.getenv("OC_SERVICE_ADDR");
+    if (ocAddr != null && !ocAddr.isEmpty()) {
+      OcAgentTraceExporter.createAndRegister(
+          OcAgentTraceExporterConfiguration.builder()
+              .setEndPoint(ocAddr)
               .setServiceName("adservice")
+              .setUseInsecure(true)
               .build());
-      logger.info("Jaeger initialization complete.");
+      logger.info("OpenCensus initialization complete.");
     } else {
-      logger.info("Jaeger initialization disabled.");
+      logger.info("OpenCensus initialization disabled.");
     }
   }
 
@@ -330,8 +326,7 @@ public final class AdService {
             })
         .start();
 
-    // Register Jaeger
-    initJaeger();
+    initOC();
 
     // Start the RPC server. You shouldn't see any output from gRPC before this.
     logger.info("AdService starting.");
