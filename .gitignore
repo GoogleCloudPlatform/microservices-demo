@@ -11,3 +11,6 @@ pkg/
 .kubernetes-manifests-*/
 .project
 .eclipse.buildship.core.prefs
+terraform.tfstate
+terraform.tfstate.backup
+terraform.tfvars

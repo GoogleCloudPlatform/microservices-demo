@@ -5,6 +5,7 @@ terraform {
 }
 provider "google" {
   # pin provider to 2.x
+  project = var.project
   version = "~> 2.5"
 }
 
@@ -13,21 +14,8 @@ provider "random" {
   version = "~> 2.0"
 }
 
-
-# Here we create the actual project.
-resource "google_project" "project" {
-
-#   lifecycle {
-#     ignore_changes = [
-#       name,
-#       project_id,
-#       billing_account
-#     ]
-#   }
-}
-
 resource "google_project_service" "iam" {
-  project = google_project.project.id
+  project = var.project
 
   service = "iam.googleapis.com"
 
@@ -35,7 +23,7 @@ resource "google_project_service" "iam" {
 }
 
 resource "google_project_service" "compute" {
-  project = google_project.project.id
+  project = var.project
 
   service = "compute.googleapis.com"
 
@@ -43,7 +31,7 @@ resource "google_project_service" "compute" {
 }
 
 resource "google_project_service" "clouddebugger" {
-  project = google_project.project.id
+  project = var.project
 
   service = "clouddebugger.googleapis.com"
 
@@ -52,7 +40,7 @@ resource "google_project_service" "clouddebugger" {
 
 
 resource "google_project_service" "cloudtrace" {
-  project = google_project.project.id
+  project = var.project
 
   service = "cloudtrace.googleapis.com"
 
@@ -60,7 +48,7 @@ resource "google_project_service" "cloudtrace" {
 }
 
 resource "google_project_service" "errorreporting" {
-  project = google_project.project.id
+  project = var.project
 
   service = "clouderrorreporting.googleapis.com"
 
@@ -87,7 +75,7 @@ resource "google_project_service" "gke" {
   # and then we don't have to specify this on every resource any more.
   #
   # Anyway, expect to see a lot more of these. I won't explain every time.
-  project = google_project.project.id
+  project = var.project
 
   # the service URI we want to enable
   service = "container.googleapis.com"
@@ -106,7 +94,7 @@ resource "random_shuffle" "zone" {
   # found that it only ever picked `us-central-1c` unless we seeded it. Here
   # we're using the ID of the project as a seed because it is unique to the
   # project but will not change, thereby guaranteeing stability of the results.
-  seed = "${google_project.project.id}"
+  seed = var.project
 }
 
 # First we create the cluster. If you're wondering where all the sizing details
@@ -123,7 +111,7 @@ resource "random_shuffle" "zone" {
 # replicates what the Hipster Shop README creates. If you want to see what else
 # is possible, check out the docs: https://www.terraform.io/docs/providers/google/r/container_cluster.html
 resource "google_container_cluster" "gke" {
-  project = "${google_project.project.id}"
+  project = var.project
 
   # Here's how you specify the name
   name = "demo-cluster"
@@ -131,7 +119,7 @@ resource "google_container_cluster" "gke" {
   # Set the zone by grabbing the result of the random_shuffle above. It
   # returns a list so we have to pull the first element off. If you're looking
   # at this and thinking "huh terraform syntax looks a clunky" you are NOT WRONG
-  zone = "${element(random_shuffle.zone.result, 0)}"
+  zone = element(random_shuffle.zone.result, 0)
 
   # Using an embedded resource to define the node pool. Another
   # option would be to create the node pool as a separate resource and link it
@@ -187,25 +175,25 @@ resource "google_container_cluster" "gke" {
   # be enabled) before the cluster can be created. This will not address the
   # eventual consistency problems we have with the API but it will make sure
   # that we're at least trying to do things in the right order.
-  depends_on = ["google_project_service.gke"]
+  depends_on = [google_project_service.gke]
 }
 
 # Set current project 
 resource "null_resource" "current_project" {
   provisioner "local-exec" {
-    command = "gcloud config set project ${google_project.project.id}"
+    command = "gcloud config set project ${var.project}"
   }
 }
 
 # Setting kubectl context to currently deployed GKE cluster
 resource "null_resource" "set_gke_context" {
   provisioner "local-exec" {
-    command = "gcloud container clusters get-credentials demo-cluster --zone ${element(random_shuffle.zone.result, 0)} --project ${google_project.project.id}"
+    command = "gcloud container clusters get-credentials demo-cluster --zone ${element(random_shuffle.zone.result, 0)} --project ${var.project}"
   }
 
   depends_on = [
-    "google_container_cluster.gke", 
-    "null_resource.current_project"
+    google_container_cluster.gke, 
+    null_resource.current_project
   ]
 }
 
@@ -215,7 +203,7 @@ resource "null_resource" "deploy_services" {
     command = "kubectl apply -f ..//release//kubernetes-manifests.yaml"
   }
 
-  depends_on = ["null_resource.set_gke_context"]
+  depends_on = [null_resource.set_gke_context]
 }
 
 # There is no reliable way to do deployment verification with kubernetes
