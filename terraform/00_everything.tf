@@ -1,8 +1,24 @@
+# Copyright 2020 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# save terraform state locally for now
 terraform {
   backend "local" {
     path = "terraform.tfstate"
   }
 }
+
 provider "google" {
   # pin provider to 2.x
   project = var.project
@@ -14,6 +30,7 @@ provider "random" {
   version = "~> 2.0"
 }
 
+# enable all the Google Cloud Platform APIs we need for this project
 resource "google_project_service" "iam" {
   project = var.project
 
@@ -207,7 +224,7 @@ resource "null_resource" "deploy_services" {
 }
 
 # There is no reliable way to do deployment verification with kubernetes
-# For the purposes of Sandbox, we can mitigate by waiting a few sec to ensure kubectl apply completes
+# we can mitigate by waiting a few sec to ensure kubectl apply completes
 resource "null_resource" "delay" {
   provisioner "local-exec" {
     command = "sleep 5"
@@ -217,3 +234,7 @@ resource "null_resource" "delay" {
   }
 }
 
+# TODO:
+# use gke_deploy instead of kubectl apply
+# add service monitoring
+# add a dashboard
