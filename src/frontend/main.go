@@ -30,6 +30,7 @@ import (
 	"github.com/newrelic/newrelic-telemetry-sdk-go/telemetry"
 	"github.com/newrelic/opentelemetry-exporter-go/newrelic"
 	"go.opentelemetry.io/otel/api/global"
+	"go.opentelemetry.io/otel/api/key"
 	"go.opentelemetry.io/otel/api/metric"
 	"go.opentelemetry.io/otel/api/unit"
 	"go.opentelemetry.io/otel/exporters/trace/stdout"
@@ -143,9 +144,14 @@ func main() {
 	meter := global.MeterProvider().Meter("Frontend")
 
 	var handler http.Handler = r
+	hostname, err := os.Hostname()
+	if err != nil {
+		// TODO: handle this properly
+	}
+	hostKey := key.New("host").String(hostname)
 	requestCount, err := meter.NewInt64Counter(
 		"http_request_count",
-		metric.WithUnit(unit.Milliseconds),
+		metric.WithUnit(unit.Dimensionless),
 		metric.WithDescription("Number of incoming requests"),
 	)
 	if err != nil {
@@ -159,9 +165,18 @@ func main() {
 	if err != nil {
 		// TODO: handle this properly
 	}
+	errorCount, err := meter.NewInt64Counter(
+		"http_error_count",
+		metric.WithUnit(unit.Dimensionless),
+		metric.WithDescription("Number of errored requests"),
+	)
+	if err != nil {
+		// TODO: handle this properly
+	}
 	handler = &telemetryHandler{
-		requestCount:   requestCount,
-		requestLatency: requestLatency,
+		requestCount:   requestCount.Bind(hostKey),
+		requestLatency: requestLatency.Bind(hostKey),
+		errorCount:     errorCount.Bind(hostKey),
 		next:           handler,
 	}
 	handler = &logHandler{log: log, next: handler} // add logging

@@ -21,7 +21,7 @@
   version = "v0.2.0"
 
 [[projects]]
-  digest = "1:61e61e2587bc70b60b1f391b3c360c69c467869d656a068d03c7d5f086cf7ef6"
+  digest = "1:4a32eb57407190eced21a21abee9ce4d4ab6f0bf113ca61cb1cb2d549a65c985"
   name = "github.com/golang/protobuf"
   packages = [
     "proto",
@@ -31,8 +31,8 @@
     "ptypes/timestamp",
   ]
   pruneopts = "UT"
-  revision = "6c66de79d66478d166c7ea05f5d2ccaf016fbd6b"
-  version = "v1.4.1"
+  revision = "d04d7b157bb510b1e0c10132224b616ac0e26b17"
+  version = "v1.4.2"
 
 [[projects]]
   digest = "1:582b704bebaa06b48c29b0cec224a6058a09c86883aaddabde889cd1a5f73e1b"
@@ -98,7 +98,7 @@
   version = "v1.6.0"
 
 [[projects]]
-  digest = "1:46d1dca2c2437cec235cb9250509d72b3db9319b7019a6ee221d7b7d64d6c76c"
+  digest = "1:9c0ec8d5d40bd1267cbf7cc4cac3b1f24a51aadbc523f852175c6a57222b9a4c"
   name = "go.opentelemetry.io/otel"
   packages = [
     "api/core",
@@ -112,7 +112,6 @@
     "api/propagation",
     "api/trace",
     "api/unit",
-    "exporters/metric/stdout",
     "exporters/trace/stdout",
     "internal/trace/parent",
     "plugin/grpctrace",
@@ -153,18 +152,18 @@
     "trace",
   ]
   pruneopts = "UT"
-  revision = "7e3656a0809f6f95abd88ac65313578f80b00df2"
+  revision = "a91f0712d120a21e49061d61eb6ba9b88cb0d376"
 
 [[projects]]
   branch = "master"
-  digest = "1:8cab10971112233c82c83683a517378038eba1c20e71b29c592b73fa212437b3"
+  digest = "1:020620a097c2bfd056c8db7d31a69ea2cfed874ce985763dcd9ae00f9fa5f74b"
   name = "golang.org/x/sys"
   packages = [
     "internal/unsafeheader",
     "unix",
   ]
   pruneopts = "UT"
-  revision = "bc7a7d42d5c30f4d0fe808715c002826ce2c624e"
+  revision = "417ce2331b5c91eea36730d3e1739adb75193be2"
 
 [[projects]]
   digest = "1:8d8faad6b12a3a4c819a3f9618cb6ee1fa1cfc33253abeeea8b55336721e3405"
@@ -193,11 +192,11 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:1c2a9b5021f7fe23a6f880468633f407f8b600a67e29b10f1892ae4425085820"
+  digest = "1:7ac26fa764d15fdbc6a9b6de1d29fc0b38bbd485d24a2aa80add05a064ec6a04"
   name = "google.golang.org/genproto"
   packages = ["googleapis/rpc/status"]
   pruneopts = "UT"
-  revision = "43844f6eee31fd8ee95bfe5daf9a24a45c5f3df2"
+  revision = "8feb7f20f2a2671fd688c5a98471562a85b208fd"
 
 [[projects]]
   digest = "1:712fa3cb36bfb9e0d333e10f8dcb9b1e64aa2ec30cabed56c114b5e64d775823"
@@ -248,7 +247,7 @@
   version = "v1.29.1"
 
 [[projects]]
-  digest = "1:d9915d65d4e7bbc01bd5b98d4b11b308a0f5d55c3ab3b72e91ebb1e0f02667ca"
+  digest = "1:0693f1182e1896fb3970135212ee3984814b56c571d865b2380ccb90ee9e05a8"
   name = "google.golang.org/protobuf"
   packages = [
     "encoding/prototext",
@@ -283,8 +282,8 @@
     "types/known/timestamppb",
   ]
   pruneopts = "UT"
-  revision = "8b0d71ac935315b10385aaaf30175de0c74bbba6"
-  version = "v1.22.0"
+  revision = "d165be301fb1e13390ad453281ded24385fd8ebc"
+  version = "v1.23.0"
 
 [solve-meta]
   analyzer-name = "dep"
@@ -301,9 +300,10 @@
     "github.com/sirupsen/logrus",
     "go.opentelemetry.io/otel/api/correlation",
     "go.opentelemetry.io/otel/api/global",
+    "go.opentelemetry.io/otel/api/key",
     "go.opentelemetry.io/otel/api/metric",
     "go.opentelemetry.io/otel/api/trace",
-    "go.opentelemetry.io/otel/exporters/metric/stdout",
+    "go.opentelemetry.io/otel/api/unit",
     "go.opentelemetry.io/otel/exporters/trace/stdout",
     "go.opentelemetry.io/otel/plugin/grpctrace",
     "go.opentelemetry.io/otel/plugin/httptrace",

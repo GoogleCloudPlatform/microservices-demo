@@ -29,8 +29,9 @@ type ctxKeyLog struct{}
 type ctxKeyRequestID struct{}
 
 type telemetryHandler struct {
-	requestCount   metric.Int64Counter
-	requestLatency metric.Int64Measure
+	requestCount   metric.BoundInt64Counter
+	errorCount     metric.BoundInt64Counter
+	requestLatency metric.BoundInt64Measure
 	next           http.Handler
 }
 
@@ -47,12 +48,18 @@ type responseRecorder struct {
 
 func (o *telemetryHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	o.requestCount.Add(ctx, 1)
 	start := time.Now()
+	rr := &responseRecorder{w: w}
+	defer func() {
+		if rr.status >= 400 {
+			o.errorCount.Add(ctx, 1)
+		}
+		o.requestCount.Add(ctx, 1)
+	}()
 	defer func() {
 		o.requestLatency.Record(ctx, (int64)(time.Since(start)/time.Millisecond))
 	}()
-	o.next.ServeHTTP(w, r)
+	o.next.ServeHTTP(rr, r)
 }
 
 func (r *responseRecorder) Header() http.Header { return r.w.Header() }
@@ -72,12 +79,12 @@ func (r *responseRecorder) WriteHeader(statusCode int) {
 }
 
 func (lh *logHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	rr := &responseRecorder{w: w}
 	ctx := r.Context()
 	requestID, _ := uuid.NewRandom()
 	ctx = context.WithValue(ctx, ctxKeyRequestID{}, requestID.String())
 
 	start := time.Now()
-	rr := &responseRecorder{w: w}
 	log := lh.log.WithFields(logrus.Fields{
 		"http.req.path":   r.URL.Path,
 		"http.req.method": r.Method,

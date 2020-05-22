@@ -31,6 +31,7 @@ import (
 
 	"go.opentelemetry.io/otel/api/correlation"
 	"go.opentelemetry.io/otel/api/global"
+	"go.opentelemetry.io/otel/api/key"
 	"go.opentelemetry.io/otel/api/trace"
 	"go.opentelemetry.io/otel/plugin/httptrace"
 
@@ -470,7 +471,15 @@ func cartSize(c []*pb.CartItem) int {
 func startSpan(name string, r **http.Request) (context.Context, trace.Span) {
 	tr := global.Tracer("Frontend")
 	req := *r
+
+	hostname, err := os.Hostname()
+	if err != nil {
+		// TODO: handle this properly
+	}
+
+	hostKey := key.New("host").String(hostname)
 	attrs, entries, spanCtx := httptrace.Extract(req.Context(), req)
+	attrs = append(attrs, hostKey)
 	req = req.WithContext(correlation.ContextWithMap(req.Context(), correlation.NewMap(correlation.MapUpdate{
 		MultiKV: entries,
 	})))

@@ -102,6 +102,7 @@ public final class AdService {
     // defined.
     private final LongCounter requestCount;
     private final DoubleMeasure requestLatency;
+    private final LongCounter errorCount;
     private final LongCounter numberOfAdsRequested;
 
     public AdServiceImpl(AdService service) {
@@ -123,6 +124,12 @@ public final class AdService {
           .setDescription("Timings of gRPC requests to a service")
           .setConstantLabels(hostLabels)
           .setUnit("ms")
+          .build();
+      errorCount = meter
+          .longCounterBuilder("rpc_error_count")
+          .setDescription("Number of gRPC requests to a service which resulted in an error")
+          .setConstantLabels(hostLabels)
+          .setUnit("1")
           .build();
       numberOfAdsRequested = meter
           .longCounterBuilder("ads_requested")
@@ -169,6 +176,7 @@ public final class AdService {
             (System.currentTimeMillis() - startTime), "method.name", methodName, "error", "false");
       } catch (StatusRuntimeException e) {
         logger.log(Level.WARN, "GetAds Failed with status {}", e.getStatus());
+        errorCount.add(1, "method.name", methodName);
         responseObserver.onError(e);
         requestLatency.record(
             (System.currentTimeMillis() - startTime), "method.name", methodName, "error", "true");
