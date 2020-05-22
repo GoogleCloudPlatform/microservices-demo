@@ -1,0 +1,50 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: product-allow-frontend
+  namespace: default
+spec:
+  podSelector:
+    matchLabels:
+      app: productcatalogservice
+  ingress:
+  - from:
+    - podSelector:
+        matchLabels:
+          app: frontend
+    ports:
+      - port: 3550
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: product-allow-recommend
+  namespace: default
+spec:
+  podSelector:
+    matchLabels:
+      app: productcatalogservice
+  ingress:
+  - from:
+    - podSelector:
+        matchLabels:
+          app: recommendationservice
+    ports:
+      - port: 3550
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: product-allow-checkout
+  namespace: default
+spec:
+  podSelector:
+    matchLabels:
+      app: productcatalogservice
+  ingress:
+  - from:
+    - podSelector:
+        matchLabels:
+          app: checkoutservice
+    ports:
+      - port: 3550

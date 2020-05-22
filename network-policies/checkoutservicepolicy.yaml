@@ -1,0 +1,16 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: checkout-allow-frontend
+  namespace: default
+spec:
+  podSelector:
+    matchLabels:
+      app: checkoutservice
+  ingress:
+  - from:
+    - podSelector:
+        matchLabels:
+          app: frontend
+    ports:
+      - port: 5050

@@ -1,0 +1,17 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: ad-allow-frontend
+  namespace: default
+spec:
+  podSelector:
+    matchLabels:
+      app: adservice
+  ingress:
+  - from:
+    - podSelector:
+        matchLabels:
+          app: frontend
+    ports:
+      - port: 9555
+

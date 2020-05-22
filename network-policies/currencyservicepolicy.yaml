@@ -1,0 +1,34 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: currencyservice-allow-frontend
+  namespace: default
+spec:
+  podSelector:
+    matchLabels:
+      app: currencyservice
+  ingress:
+  - from:
+    - podSelector:
+        matchLabels:
+          app: frontend
+    ports:
+      - port: 7000
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: currencyservice-allow-checkout
+  namespace: default
+spec:
+  podSelector:
+    matchLabels:
+      app: currencyservice
+  ingress:
+  - from:
+    - podSelector:
+        matchLabels:
+          app: checkoutservice
+    ports:
+      - port: 7000
+---

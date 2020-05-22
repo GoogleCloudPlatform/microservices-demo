@@ -1,0 +1,33 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: shipping-allow-frontend
+  namespace: default
+spec:
+  podSelector:
+    matchLabels:
+      app: shippingservice
+  ingress:
+  - from:
+    - podSelector:
+        matchLabels:
+          app: frontend
+    ports:
+      - port: 50051
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: shipping-allow-checkout
+  namespace: default
+spec:
+  podSelector:
+    matchLabels:
+      app: shippingservice
+  ingress:
+  - from:
+    - podSelector:
+        matchLabels:
+          app: checkoutservice
+    ports:
+      - port: 50051

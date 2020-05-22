@@ -1,0 +1,16 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: email-allow-checkout
+  namespace: default
+spec:
+  podSelector:
+    matchLabels:
+      app: emailservice
+  ingress:
+  - from:
+    - podSelector:
+        matchLabels:
+          app: checkoutservice
+    ports:
+      - port: 5050
