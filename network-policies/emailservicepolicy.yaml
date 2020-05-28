@@ -14,3 +14,4 @@ spec:
           app: checkoutservice
     ports:
       - port: 5050
+---

@@ -48,3 +48,4 @@ spec:
           app: checkoutservice
     ports:
       - port: 3550
+---
