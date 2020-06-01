@@ -111,7 +111,7 @@ We offer the following installation methods:
           - It provides Kubernetes support as [noted
      here](https://docs.docker.com/docker-for-mac/kubernetes/)
         - [Kind](https://github.com/kubernetes-sigs/kind)
-   - [skaffold]( https://skaffold.dev/docs/install/) (ensure version ≥v0.20)
+   - [skaffold]( https://skaffold.dev/docs/install/) ([ensure version ≥v1.10](https://github.com/GoogleContainerTools/skaffold/releases))
 
 1. Launch the local Kubernetes cluster with one of the following tools:
 
@@ -165,7 +165,19 @@ We offer the following installation methods:
 > 💡 Recommended if you're using Google Cloud Platform and want to try it on
 > a realistic cluster.
 
-1.  Install tools specified in the previous section (Docker, kubectl, skaffold)
+
+1. Install tools to run a Kubernetes cluster locally:
+
+   - kubectl (can be installed via `gcloud components install kubectl`)
+   - Local Kubernetes cluster deployment tool:
+        - [Minikube (recommended for
+         Linux)](https://kubernetes.io/docs/setup/minikube/)
+        - [Docker for Desktop (recommended for Mac/Windows)](https://www.docker.com/products/docker-desktop)
+          - It provides Kubernetes support as [noted
+     here](https://docs.docker.com/docker-for-mac/kubernetes/)
+        - [Kind](https://github.com/kubernetes-sigs/kind)
+   - [skaffold]( https://skaffold.dev/docs/install/) ([ensure version ≥v1.10](https://github.com/GoogleContainerTools/skaffold/releases))
+
 
 1.  Create a Google Kubernetes Engine cluster and make sure `kubectl` is pointing
     to the cluster.
