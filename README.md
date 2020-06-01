@@ -119,9 +119,10 @@ We offer the following installation methods:
        local Kubernetes cluster has at least:
         - 4 CPU's
         - 4.0 GiB memory
+        - 32 GB disk space
 
       ```shell
-      minikube start --cpus=4 --memory 4096
+      minikube start --cpus=4 --memory 4096 --disk-size 32g
       ```
 
     - To launch **Docker for Desktop** (tested with Mac/Windows). Go to Preferences:
