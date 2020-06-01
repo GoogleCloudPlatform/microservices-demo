@@ -309,6 +309,18 @@ by deploying the [release manifest](./release) directly to an existing cluster.
    curl -v "http://$INGRESS_HOST"
    ```
 
+### (Optional) Enable Cloud Operations / Stackdriver
+
+OnlineBoutique is instrumented for [Google Cloud Operations](https://cloud.google.com/products/operations) tools including: Monitoring, Tracing, and Debugger. To enable some or all of these APIs in your Google Cloud Project, run the following commands before deploying the app to GKE:
+
+```
+gcloud services enable monitoring.googleapis.com
+
+gcloud services enable cloudtrace.googleapis.com
+
+gcloud services enable clouddebugger.googleapis.com
+```
+
 ### Cleanup
 
 If you've deployed the application with `skaffold run` command, you can run
