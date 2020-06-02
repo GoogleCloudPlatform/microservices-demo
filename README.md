@@ -96,12 +96,7 @@ We offer the following installation methods:
    option, you will use pre-built container images that are available publicly,
    instead of building them yourself, which takes a long time).
 
-### Option 1: Running locally
-
-> 💡 Recommended if you're planning to develop the application or giving it a
-> try on your local cluster.
-
-1. Install tools to run a Kubernetes cluster locally:
+### Prerequisites
 
    - kubectl (can be installed via `gcloud components install kubectl`)
    - Local Kubernetes cluster deployment tool:
@@ -111,9 +106,20 @@ We offer the following installation methods:
           - It provides Kubernetes support as [noted
      here](https://docs.docker.com/docker-for-mac/kubernetes/)
         - [Kind](https://github.com/kubernetes-sigs/kind)
-   - [skaffold]( https://skaffold.dev/docs/install/) (ensure version ≥v0.20)
+   - [skaffold]( https://skaffold.dev/docs/install/) ([ensure version ≥v1.10](https://github.com/GoogleContainerTools/skaffold/releases))
+   - Enable GCP APIs for Cloud Monitoring, Tracing, Debugger:
+    ```
+    gcloud services enable monitoring.googleapis.com \
+      cloudtrace.googleapis.com \
+      clouddebugger.googleapis.com
+    ```
 
-1. Launch the local Kubernetes cluster with one of the following tools:
+### Option 1: Running locally
+
+> 💡 Recommended if you're planning to develop the application or giving it a
+> try on your local cluster.
+
+1. Launch a local Kubernetes cluster with one of the following tools:
 
     - To launch **Minikube** (tested with Ubuntu Linux). Please, ensure that the
        local Kubernetes cluster has at least:
@@ -136,15 +142,15 @@ We offer the following installation methods:
       kind create cluster
       ```
 
-1. Run `kubectl get nodes` to verify you're connected to “Kubernetes on Docker”.
+2. Run `kubectl get nodes` to verify you're connected to “Kubernetes on Docker”.
 
-1. Run `skaffold run` (first time will be slow, it can take ~20 minutes).
+3. Run `skaffold run` (first time will be slow, it can take ~20 minutes).
    This will build and deploy the application. If you need to rebuild the images
    automatically as you refactor the code, run `skaffold dev` command.
 
-1. Run `kubectl get pods` to verify the Pods are ready and running.
+4. Run `kubectl get pods` to verify the Pods are ready and running.
 
-1. Access the web frontend through your browser
+5. Access the web frontend through your browser
     - **Minikube** requires you to run a command to access the frontend service:
 
     ```shell
@@ -165,8 +171,6 @@ We offer the following installation methods:
 > 💡 Recommended if you're using Google Cloud Platform and want to try it on
 > a realistic cluster.
 
-1.  Install tools specified in the previous section (Docker, kubectl, skaffold)
-
 1.  Create a Google Kubernetes Engine cluster and make sure `kubectl` is pointing
     to the cluster.
 
@@ -183,7 +187,7 @@ We offer the following installation methods:
     kubectl get nodes
     ```
 
-1.  Enable Google Container Registry (GCR) on your GCP project and configure the
+2.  Enable Google Container Registry (GCR) on your GCP project and configure the
     `docker` CLI to authenticate to GCR:
 
     ```sh
@@ -194,7 +198,7 @@ We offer the following installation methods:
     gcloud auth configure-docker -q
     ```
 
-1.  In the root of this repository, run `skaffold run --default-repo=gcr.io/[PROJECT_ID]`,
+3.  In the root of this repository, run `skaffold run --default-repo=gcr.io/[PROJECT_ID]`,
     where [PROJECT_ID] is your GCP project ID.
 
     This command:
@@ -210,7 +214,7 @@ We offer the following installation methods:
     API](https://console.cloud.google.com/flows/enableapi?apiid=cloudbuild.googleapis.com),
     then run `skaffold run -p gcb --default-repo=gcr.io/[PROJECT_ID]` instead.
 
-1.  Find the IP address of your application, then visit the application on your
+4.  Find the IP address of your application, then visit the application on your
     browser to confirm installation.
 
         kubectl get service frontend-external
@@ -244,14 +248,13 @@ by deploying the [release manifest](./release) directly to an existing cluster.
    kubectl get service/frontend-external
    ```
 
-### (Optional) Deploying on a Istio-installed GKE cluster
+### Option 4: Deploying on a Istio-enabled GKE cluster
 
-> **Note:** you followed GKE deployment steps above, run `skaffold delete` first
-> to delete what's deployed.
+> **Note:** if you followed GKE deployment steps above, run `skaffold delete` first to delete what's deployed.
 
 1. Create a GKE cluster (described in "Option 2").
 
-1. Use [Istio on GKE add-on](https://cloud.google.com/istio/docs/istio-on-gke/installing)
+2. Use the [Istio on GKE add-on](https://cloud.google.com/istio/docs/istio-on-gke/installing)
    to install Istio to your existing GKE cluster.
 
    ```sh
@@ -261,24 +264,24 @@ by deploying the [release manifest](./release) directly to an existing cluster.
        --istio-config=auth=MTLS_PERMISSIVE
    ```
 
-2. (Optional) Enable Stackdriver Tracing/Logging with Istio Stackdriver Adapter
+3. (Optional) Enable Stackdriver Tracing/Logging with Istio Stackdriver Adapter
    by [following this guide](https://cloud.google.com/istio/docs/istio-on-gke/installing#enabling_tracing_and_logging).
 
-3. Install the automatic sidecar injection (annotate the `default` namespace
+4. Install the automatic sidecar injection (annotate the `default` namespace
    with the label):
 
    ```sh
    kubectl label namespace default istio-injection=enabled
    ```
 
-4. Apply the manifests in [`./istio-manifests`](./istio-manifests) directory.
+5. Apply the manifests in [`./istio-manifests`](./istio-manifests) directory.
    (This is required only once.)
 
    ```sh
    kubectl apply -f ./istio-manifests
    ```
 
-5. In the root of this repository, run `skaffold run --default-repo=gcr.io/[PROJECT_ID]`,
+6. In the root of this repository, run `skaffold run --default-repo=gcr.io/[PROJECT_ID]`,
     where [PROJECT_ID] is your GCP project ID.
 
     This command:
@@ -294,9 +297,9 @@ by deploying the [release manifest](./release) directly to an existing cluster.
     API](https://console.cloud.google.com/flows/enableapi?apiid=cloudbuild.googleapis.com),
     then run `skaffold run -p gcb --default-repo=gcr.io/[PROJECT_ID]` instead.
 
-6. Run `kubectl get pods` to see pods are in a healthy and ready state.
+7. Run `kubectl get pods` to see pods are in a healthy and ready state.
 
-7. Find the IP address of your Istio gateway Ingress or Service, and visit the
+8. Find the IP address of your Istio gateway Ingress or Service, and visit the
    application.
 
    ```sh
@@ -308,16 +311,6 @@ by deploying the [release manifest](./release) directly to an existing cluster.
    ```sh
    curl -v "http://$INGRESS_HOST"
    ```
-
-### (Optional) Enable Cloud Operations / Stackdriver
-
-Online Boutique is instrumented for [Google Cloud Operations](https://cloud.google.com/products/operations) tools including: Monitoring, Tracing, and Debugger. To enable some or all of these APIs in your Google Cloud Project, run the following commands before deploying the app to GKE:
-
-```
-gcloud services enable monitoring.googleapis.com \
-  cloudtrace.googleapis.com \
-  clouddebugger.googleapis.com
-```
 
 ### Cleanup
 
