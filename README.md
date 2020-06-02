@@ -107,6 +107,12 @@ We offer the following installation methods:
      here](https://docs.docker.com/docker-for-mac/kubernetes/)
         - [Kind](https://github.com/kubernetes-sigs/kind)
    - [skaffold]( https://skaffold.dev/docs/install/) ([ensure version ≥v1.10](https://github.com/GoogleContainerTools/skaffold/releases))
+   - Enable GCP APIs for Cloud Monitoring, Tracing, Debugger:
+    ```
+    gcloud services enable monitoring.googleapis.com \
+      cloudtrace.googleapis.com \
+      clouddebugger.googleapis.com
+    ```
 
 ### Option 1: Running locally
 
@@ -305,16 +311,6 @@ by deploying the [release manifest](./release) directly to an existing cluster.
    ```sh
    curl -v "http://$INGRESS_HOST"
    ```
-
-### (Optional) Enable Cloud Operations / Stackdriver
-
-Online Boutique is instrumented for [Google Cloud Operations](https://cloud.google.com/products/operations) tools including: Monitoring, Tracing, and Debugger. To enable some or all of these APIs in your Google Cloud Project, run the following commands before deploying the app to GKE:
-
-```
-gcloud services enable monitoring.googleapis.com \
-  cloudtrace.googleapis.com \
-  clouddebugger.googleapis.com
-```
 
 ### Cleanup
 
