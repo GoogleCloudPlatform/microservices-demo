@@ -316,7 +316,7 @@ Online Boutique is instrumented for [Google Cloud Operations](https://cloud.goog
 ```
 gcloud services enable monitoring.googleapis.com \
   cloudtrace.googleapis.com \
-  gcloud services enable clouddebugger.googleapis.com
+  clouddebugger.googleapis.com
 ```
 
 ### Cleanup
