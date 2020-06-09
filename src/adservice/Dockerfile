@@ -27,7 +27,7 @@ ENV OTA_EXPORTER_NEWRELIC_API_KEY=${NEW_RELIC_API_KEY}
 ENV OTA_EXPORTER_NEWRELIC_URI_OVERRIDE=${NEW_RELIC_TRACE_URL}
 ENV OTA_EXPORTER_NEWRELIC_TRACE_URI_OVERRIDE=${NEW_RELIC_TRACE_URL}
 ## TODO: make these env vars injectable somehow
-ENV OTA_EXPORTER_JAR=auto-agent/opentelemetry-exporters-newrelic-auto-0.3.1-SNAPSHOT.jar
+ENV OTA_EXPORTER_JAR=auto-agent/opentelemetry-exporters-newrelic-auto-0.5.0.jar
 
 # Download Stackdriver Profiler Java agent
 RUN apt-get -y update && apt-get install -qqy \

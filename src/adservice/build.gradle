@@ -45,7 +45,7 @@ dependencies {
     if (speed) {
         implementation fileTree(dir: offlineCompile, include: '*.jar')
     } else {
-        exporters ("com.newrelic.telemetry:opentelemetry-exporters-newrelic-auto:0.3.1-SNAPSHOT") {
+        exporters ("com.newrelic.telemetry:opentelemetry-exporters-newrelic-auto:0.5.0") {
             transitive = false
         }
 
@@ -53,7 +53,7 @@ dependencies {
                 "io.opentelemetry:opentelemetry-api:${openTelemetryVersion}",
                 "io.opentelemetry:opentelemetry-sdk:${openTelemetryVersion}",
                 "io.opentelemetry:opentelemetry-exporters-logging:${openTelemetryVersion}",
-                "com.newrelic.telemetry:opentelemetry-exporters-newrelic:0.3.1-SNAPSHOT",
+                "com.newrelic.telemetry:opentelemetry-exporters-newrelic:0.5.0",
                 "io.grpc:grpc-protobuf:${grpcVersion}",
                 "io.grpc:grpc-stub:${grpcVersion}",
                 "io.grpc:grpc-netty:${grpcVersion}",
@@ -74,6 +74,8 @@ task copyExporters(type: Copy) {
     from configurations.exporters
     into "$buildDir/exporters"
 }
+
+
 
 protobuf {
     protoc {
