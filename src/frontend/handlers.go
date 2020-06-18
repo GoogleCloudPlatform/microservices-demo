@@ -407,12 +407,15 @@ func renderHTTPError(log logrus.FieldLogger, r *http.Request, w http.ResponseWri
 	errMsg := fmt.Sprintf("%+v", err)
 
 	w.WriteHeader(code)
-	templates.ExecuteTemplate(w, "error", map[string]interface{}{
+	if templateErr := templates.ExecuteTemplate(w, "error", map[string]interface{}{
 		"session_id":  sessionID(r),
 		"request_id":  r.Context().Value(ctxKeyRequestID{}),
 		"error":       errMsg,
 		"status_code": code,
-		"status":      http.StatusText(code)})
+		"status":      http.StatusText(code),
+	}); templateErr != nil {
+		log.Println(templateErr)
+	}		
 }
 
 func currentCurrency(r *http.Request) string {
