@@ -28,8 +28,10 @@ import io.grpc.StatusRuntimeException;
 import io.grpc.health.v1.HealthCheckResponse.ServingStatus;
 import io.grpc.services.HealthStatusManager;
 import io.grpc.stub.StreamObserver;
-import io.opentelemetry.metrics.DoubleMeasure;
+import io.opentelemetry.OpenTelemetry;
+import io.opentelemetry.metrics.DoubleValueRecorder;
 import io.opentelemetry.metrics.LongCounter;
+import io.opentelemetry.metrics.LongUpDownCounter;
 import io.opentelemetry.metrics.Meter;
 import io.opentelemetry.metrics.MeterProvider;
 import java.io.IOException;
@@ -101,9 +103,9 @@ public final class AdService {
     // note: these two instruments should be updated to match semantic conventions, when they are
     // defined.
     private final LongCounter requestCount;
-    private final DoubleMeasure requestLatency;
+    private final DoubleValueRecorder requestLatency;
     private final LongCounter errorCount;
-    private final LongCounter numberOfAdsRequested;
+    private final LongUpDownCounter numberOfAdsRequested;
 
     public AdServiceImpl(AdService service) {
       this.service = service;
@@ -120,7 +122,7 @@ public final class AdService {
           .setUnit("1")
           .build();
       requestLatency = meter
-          .doubleMeasureBuilder("rpc_request_latency")
+          .doubleValueRecorderBuilder("rpc_request_latency")
           .setDescription("Timings of gRPC requests to a service")
           .setConstantLabels(hostLabels)
           .setUnit("ms")
@@ -132,8 +134,7 @@ public final class AdService {
           .setUnit("1")
           .build();
       numberOfAdsRequested = meter
-          .longCounterBuilder("ads_requested")
-          .setMonotonic(false)
+          .longUpDownCounterBuilder("ads_requested")
           .setConstantLabels(hostLabels)
           .setUnit("one")
           .setDescription("Number of Ads Requested per Request")
@@ -255,7 +256,7 @@ public final class AdService {
 
   /** Main launches the server from the command line. */
   public static void main(String[] args) throws IOException, InterruptedException {
-    MeterProvider meterProvider = OpenTelemetryUtils.initializeForNewRelic();
+    MeterProvider meterProvider = OpenTelemetry.getMeterProvider();
 
     // Start the RPC server. You shouldn't see any output from gRPC before this.
     logger.info("AdService starting.");

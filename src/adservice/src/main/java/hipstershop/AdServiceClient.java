@@ -111,7 +111,6 @@ public class AdServiceClient {
       }
     } finally {
       client.shutdown();
-      OpenTelemetryUtils.shutdownSdk();
     }
 
     logger.info("Exiting AdServiceClient...");

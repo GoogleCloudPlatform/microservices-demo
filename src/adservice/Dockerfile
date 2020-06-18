@@ -9,7 +9,7 @@ RUN ./gradlew downloadRepos
 
 COPY . .
 RUN chmod +x gradlew
-RUN ./gradlew installDist copyExporters && mkdir -p auto-agent && mv build/exporters/* ./auto-agent/
+RUN ./gradlew --refresh-dependencies installDist copyExporters && mkdir -p auto-agent && mv build/exporters/* ./auto-agent/
 
 FROM adoptopenjdk/openjdk11
 
@@ -26,8 +26,9 @@ ENV USE_ZIPKIN_EXPORTER=${USE_ZIPKIN_EXPORTER}
 ENV OTA_EXPORTER_NEWRELIC_API_KEY=${NEW_RELIC_API_KEY}
 ENV OTA_EXPORTER_NEWRELIC_URI_OVERRIDE=${NEW_RELIC_TRACE_URL}
 ENV OTA_EXPORTER_NEWRELIC_TRACE_URI_OVERRIDE=${NEW_RELIC_TRACE_URL}
+ENV OTA_EXPORTER_NEWRELIC_METRIC_URI_OVERRIDE=${NEW_RELIC_METRIC_URL}
 ## TODO: make these env vars injectable somehow
-ENV OTA_EXPORTER_JAR=auto-agent/opentelemetry-exporters-newrelic-auto-0.5.0.jar
+ENV OTA_EXPORTER_JAR=auto-agent/opentelemetry-exporters-newrelic-auto-0.5.1-SNAPSHOT.jar
 
 # Download Stackdriver Profiler Java agent
 RUN apt-get -y update && apt-get install -qqy \
@@ -44,7 +45,7 @@ RUN GRPC_HEALTH_PROBE_VERSION=v0.3.1 && \
 
 RUN mkdir -p /app/auto-agent && \
     wget -q -O /app/auto-agent/opentelemetry-auto.jar \
-    https://github.com/open-telemetry/opentelemetry-auto-instr-java/releases/download/v0.2.2/opentelemetry-auto-0.2.2.jar
+    https://jcenter.bintray.com/io/opentelemetry/auto/opentelemetry-auto/0.4.0/opentelemetry-auto-0.4.0.jar
 
 WORKDIR /app
 COPY --from=builder /app .
