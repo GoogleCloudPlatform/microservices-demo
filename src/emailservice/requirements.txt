@@ -17,7 +17,7 @@ google-cloud-trace==0.20.2  # via opencensus
 googleapis-common-protos==1.5.5  # via google-api-core
 grpcio-health-checking==1.12.1  # via -r requirements.in
 grpcio==1.16.1            # via -r requirements.in, google-api-core, grpcio-health-checking
-httplib2==0.12.1          # via google-api-python-client, google-auth-httplib2
+httplib2==0.18.0          # via google-api-python-client, google-auth-httplib2
 idna==2.8                 # via requests
 jinja2==2.10              # via -r requirements.in
 markupsafe==1.1.0         # via jinja2
