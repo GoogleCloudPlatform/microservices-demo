@@ -30,13 +30,12 @@ import io.grpc.services.HealthStatusManager;
 import io.grpc.stub.StreamObserver;
 import io.opentelemetry.OpenTelemetry;
 import io.opentelemetry.metrics.DoubleValueRecorder;
-import io.opentelemetry.metrics.LongCounter;
 import io.opentelemetry.metrics.LongUpDownCounter;
 import io.opentelemetry.metrics.Meter;
 import io.opentelemetry.metrics.MeterProvider;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.net.InetAddress;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Random;
@@ -102,40 +101,25 @@ public final class AdService {
 
     // note: these two instruments should be updated to match semantic conventions, when they are
     // defined.
-    private final LongCounter requestCount;
-    private final DoubleValueRecorder requestLatency;
-    private final LongCounter errorCount;
+    private final DoubleValueRecorder getAdsRequestLatency;
     private final LongUpDownCounter numberOfAdsRequested;
 
     public AdServiceImpl(AdService service) {
       this.service = service;
-      //    private final Tracer tracer = OpenTelemetry.getTracerProvider().get("AdService");
-      Meter meter = service.meterProvider.get("AdService");
-      ImmutableMap<String, String> hostLabels = ImmutableMap.of(
-          "host",
-          AdService.getHost()
-      );
-      requestCount = meter
-          .longCounterBuilder("rpc_request_count")
-          .setDescription("Number of gRPC requests to a service")
-          .setConstantLabels(hostLabels)
-          .setUnit("1")
-          .build();
-      requestLatency = meter
-          .doubleValueRecorderBuilder("rpc_request_latency")
+      Meter meter = service.meterProvider.get(AdService.class.getName());
+      //note: preliminary spec discussion has things leaning toward this for the instrument name.
+      //see https://github.com/open-telemetry/opentelemetry-specification/pull/657 for discussion
+      getAdsRequestLatency = meter
+          .doubleValueRecorderBuilder("grpc.server.duration")
           .setDescription("Timings of gRPC requests to a service")
-          .setConstantLabels(hostLabels)
+          .setConstantLabels(ImmutableMap.of("host", AdService.getHost()))
           .setUnit("ms")
           .build();
-      errorCount = meter
-          .longCounterBuilder("rpc_error_count")
-          .setDescription("Number of gRPC requests to a service which resulted in an error")
-          .setConstantLabels(hostLabels)
-          .setUnit("1")
-          .build();
+
+      //this is a custom "business" metric, outside the scope of semantic conventions
       numberOfAdsRequested = meter
           .longUpDownCounterBuilder("ads_requested")
-          .setConstantLabels(hostLabels)
+          .setConstantLabels(ImmutableMap.of("host", AdService.getHost()))
           .setUnit("one")
           .setDescription("Number of Ads Requested per Request")
           .build();
@@ -150,11 +134,14 @@ public final class AdService {
      */
     @Override
     public void getAds(AdRequest req, StreamObserver<AdResponse> responseObserver) {
+      //note: these could be pulled into constants to reduce allocations
       String methodName = "hipstershop.AdService/getAds";
-      requestCount.add(1, "method.name", methodName);
+      String[] nonErrorLabels = {"method.name", methodName, "error", "false"};
+      String[] errorLabels = {"method.name", methodName, "error", "true"};
+
       long startTime = System.currentTimeMillis();
       numberOfAdsRequested.add(req.getContextKeysCount());
-
+      String[] labels = nonErrorLabels;
       try {
         List<Ad> allAds = new ArrayList<>();
         logger.info("received ad request (context_words=" + req.getContextKeysCount() + ")");
@@ -173,15 +160,14 @@ public final class AdService {
         AdResponse reply = AdResponse.newBuilder().addAllAds(allAds).build();
         responseObserver.onNext(reply);
         responseObserver.onCompleted();
-        requestLatency.record(
-            (System.currentTimeMillis() - startTime), "method.name", methodName, "error", "false");
       } catch (StatusRuntimeException e) {
         logger.log(Level.WARN, "GetAds Failed with status {}", e.getStatus());
-        errorCount.add(1, "method.name", methodName);
+        labels = errorLabels;
         responseObserver.onError(e);
-        requestLatency.record(
-            (System.currentTimeMillis() - startTime), "method.name", methodName, "error", "true");
+      } finally {
+        getAdsRequestLatency.record((System.currentTimeMillis() - startTime), labels);
       }
+
     }
   }
 
