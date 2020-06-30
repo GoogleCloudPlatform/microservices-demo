@@ -17,7 +17,7 @@ kind: Config
 build:
   artifacts:
   # image tags are relative; to specify an image repo (e.g. GCR), you
-  # must provide a "default repo" using one of the methods described 
+  # must provide a "default repo" using one of the methods described
   # here:
   # https://skaffold.dev/docs/concepts/#image-repository-handling
   - image: emailservice
@@ -44,6 +44,8 @@ build:
     context: src/adservice
   tagPolicy:
     gitCommit: {}
+  local:
+    useBuildkit: true
 deploy:
   kubectl:
     manifests:
