@@ -27,6 +27,10 @@ TAG="${TAG:?TAG env variable must be specified}"
 REPO_PREFIX="${REPO_PREFIX:?REPO_PREFIX env variable must be specified}"
 DOMAIN="${DOMAIN:?DOMAIN env variable must be specified}"
 OUT_DIR="${OUT_DIR:-${SCRIPTDIR}/../release}"
+NODE_SELECTOR_KEY="${NODE_SELECTOR_KEY:--}"
+NODE_SELECTOR_VALUE="${NODE_SELECTOR_VALUE:--}"
+TOLERATION_KEY="${TOLERATION_KEY:--}"
+TOLERATION_VALUE="${TOLERATION_VALUE:--}"
 
 print_license_header() {
     cat "${SCRIPTDIR}/license_header.txt"
@@ -79,9 +83,20 @@ mk_kubernetes_manifests() {
     done
 
     # insert node selector
-    pattern="^(\s*)nodeSelector:"
-    replace="\1nodeSelector: \n\1  dedicated: demo-env"
-    out_manifest="$(gsed -r "s|$pattern|$replace|g" <(echo "${out_manifest}") )"
+    if [ ${NODE_SELECTOR_KEY} != "-" ] && [ ${NODE_SELECTOR_VALUE} != "-" ]
+    then
+        pattern="^(\s*)nodeSelector:"
+        replace="\1nodeSelector: \n\1  ${NODE_SELECTOR_KEY}: ${NODE_SELECTOR_VALUE}"
+        out_manifest="$(gsed -r "s|$pattern|$replace|g" <(echo "${out_manifest}") )"
+    fi
+
+    # insert toleration
+    if [ ${TOLERATION_KEY} != "-" ] && [ ${TOLERATION_VALUE} != "-" ]
+    then
+        pattern="^(\s*)tolerations:"
+        replace="\1tolerations: \n\1- key: ${TOLERATION_KEY}\n\1  operator: Equal\n\1  value: ${TOLERATION_VALUE}"
+        out_manifest="$(gsed -r "s|$pattern|$replace|g" <(echo "${out_manifest}") )"
+    fi
 
     # substitude loadgenerator port: 8089 -> 80
     pattern="^(\s*)port:\s+8089(\s*)"

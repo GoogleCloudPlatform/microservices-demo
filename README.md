@@ -137,8 +137,6 @@ We offer the following installation methods:
 
 1. Run `kubectl get nodes` to verify you're connected to “Kubernetes on Docker”.
 
-1. Run `kubectl create ns demo-env` to create a namespace to run the app in.
-
 1. Run `skaffold run` (first time will be slow, it can take ~20 minutes).
    This will build and deploy the application. If you need to rebuild the images
    automatically as you refactor the code, run `skaffold dev` command.

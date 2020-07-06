@@ -16,7 +16,6 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: currencyservice
-  namespace: demo-env
 spec:
   selector:
     matchLabels:
@@ -27,9 +26,6 @@ spec:
         app: currencyservice
     spec:
       tolerations:
-      - key: dedicated
-        operator: Equal
-        value: demo-env
       nodeSelector:
       terminationGracePeriodSeconds: 5
       containers:
@@ -65,7 +61,6 @@ apiVersion: v1
 kind: Service
 metadata:
   name: currencyservice
-  namespace: demo-env
 spec:
   type: ClusterIP
   selector:
