@@ -13,6 +13,19 @@
     # install kubectl
     sudo apt-get install kubectl
 
+    # install go
+    curl -O https://storage.googleapis.com/golang/go1.12.9.linux-amd64.tar.gz
+    tar -xvf go1.12.9.linux-amd64.tar.gz
+    sudo chown -R root:root ./go
+    sudo mv go /usr/local
+    echo 'export GOPATH=$HOME/go' >> ~/.profile
+    echo 'export PATH=$PATH:/usr/local/go/bin:$GOPATH/bin' >> ~/.profile
+    source ~/.profile
+
+    # install addlicense
+    go get -u github.com/google/addlicense
+    sudo ln -s $HOME/go/bin/addlicense /bin
+
     # install kind
     curl -Lo ./kind "https://github.com/kubernetes-sigs/kind/releases/download/v0.7.0/kind-$(uname)-amd64" && \
     chmod +x ./kind && \
