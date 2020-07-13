@@ -33,6 +33,7 @@ jobs:
         set -x
         git init
         git add --all
+        git -c user.name="CI Bot" -c user.email="<>" commit -m "initial state"
         addlicense ./
         test -z "$(git status -s | tee /dev/stderr)"
     - name: Setup Cluster
