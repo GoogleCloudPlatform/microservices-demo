@@ -38,7 +38,6 @@ jobs:
         if [[ -n $(git status -s) ]]; then
           exit 1
         fi
-    - uses: actions/checkout@v2
     - name: Setup Cluster
       run: |
         set -x
