@@ -35,7 +35,9 @@ jobs:
         git add --all
         git -c user.name="CI Bot" -c user.email="<>" commit -m "initial state"
         addlicense ./
-        test -z "$(git status -s | tee /dev/stderr)"
+        if [[ -n $(git diff) ]]; then
+          exit 1
+        fi
     - name: Setup Cluster
       run: |
         set -x
