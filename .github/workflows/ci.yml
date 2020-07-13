@@ -34,9 +34,7 @@ jobs:
         git init
         git add --all
         addlicense ./
-        if [[ -n $(git status -s) ]]; then
-          exit 1
-        fi
+        test -z "$(git status -s | tee /dev/stderr)"
     - name: Setup Cluster
       run: |
         set -x
