@@ -22,11 +22,13 @@ import (
 	"io/ioutil"
 	"net"
 	"os"
-	"os/signal"
+	// "os/signal"
 	"strings"
 	"sync"
-	"syscall"
-	"time"
+	// "syscall"
+    "time"
+    "math/rand"
+    "strconv"
 
 	pb "github.com/GoogleCloudPlatform/microservices-demo/src/productcatalogservice/genproto"
 	healthpb "google.golang.org/grpc/health/grpc_health_v1"
@@ -86,7 +88,15 @@ func main() {
 		go initProfiling("productcatalogservice", "1.0.0")
 	} else {
 		log.Info("Profiling disabled.")
-	}
+    }
+    
+    if os.Getenv("ENABLE_RELOAD") != "" {
+		reloadCatalog = true
+		log.Infof("Enable catalog reloading")
+	} else {
+		reloadCatalog = false
+		log.Infof("Disable catalog reloading")
+    }    
 
 	flag.Parse()
 
@@ -101,22 +111,6 @@ func main() {
 	} else {
 		extraLatency = time.Duration(0)
 	}
-
-	sigs := make(chan os.Signal, 1)
-	signal.Notify(sigs, syscall.SIGUSR1, syscall.SIGUSR2)
-	go func() {
-		for {
-			sig := <-sigs
-			log.Printf("Received signal: %s", sig)
-			if sig == syscall.SIGUSR1 {
-				reloadCatalog = true
-				log.Infof("Enable catalog reloading")
-			} else {
-				reloadCatalog = false
-				log.Infof("Disable catalog reloading")
-			}
-		}
-	}()
 
 	if os.Getenv("PORT") != "" {
 		port = os.Getenv("PORT")
@@ -246,12 +240,26 @@ func (p *productCatalog) Watch(req *healthpb.HealthCheckRequest, ws healthpb.Hea
 }
 
 func (p *productCatalog) ListProducts(context.Context, *pb.Empty) (*pb.ListProductsResponse, error) {
-	time.Sleep(extraLatency)
+    time.Sleep(extraLatency)
+    rand.Seed(time.Now().UnixNano())
+    n := 3 * (1 + rand.Intn(20)) // n will be between 0 and v
+    time.Sleep(time.Duration(n)*time.Second)           
 	return &pb.ListProductsResponse{Products: parseCatalog()}, nil
 }
 
 func (p *productCatalog) GetProduct(ctx context.Context, req *pb.GetProductRequest) (*pb.Product, error) {
-	time.Sleep(extraLatency)
+	if s := os.Getenv("LATENCY_SPIKE"); s != "" {
+		v, err := strconv.Atoi(s)
+		if err != nil {
+			log.Fatalf("faigit chaled to parse EXTRA_LATENCY (%s) as int: %+v", v, err)
+		}
+        rand.Seed(time.Now().UnixNano())
+        n := 3 * (1 + rand.Intn(v)) // n will be between 0 and v
+        time.Sleep(time.Duration(n)*time.Second)           
+		log.Infof("extra latency enabled (duration: %v)", extraLatency)
+	} else {
+		time.Sleep(extraLatency)
+	}    
 	var found *pb.Product
 	for i := 0; i < len(parseCatalog()); i++ {
 		if req.Id == parseCatalog()[i].Id {
