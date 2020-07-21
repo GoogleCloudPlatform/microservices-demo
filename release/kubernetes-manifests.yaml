@@ -375,7 +375,7 @@ spec:
         - name: ENABLE_RELOAD
           value: "1"
         # - name: LATENCY_SPIKE
-        #   value: "100"          
+        #   value: "1"          
         # - name: JAEGER_SERVICE_ADDR
         #   value: "jaeger-collector:14268"
         readinessProbe:
