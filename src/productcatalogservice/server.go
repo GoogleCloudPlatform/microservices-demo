@@ -241,25 +241,29 @@ func (p *productCatalog) Watch(req *healthpb.HealthCheckRequest, ws healthpb.Hea
 
 func (p *productCatalog) ListProducts(context.Context, *pb.Empty) (*pb.ListProductsResponse, error) {
     time.Sleep(extraLatency)
-    rand.Seed(time.Now().UnixNano())
-    n := 3 * (1 + rand.Intn(20)) // n will be between 0 and v
-    time.Sleep(time.Duration(n)*time.Second)           
-	return &pb.ListProductsResponse{Products: parseCatalog()}, nil
-}
-
-func (p *productCatalog) GetProduct(ctx context.Context, req *pb.GetProductRequest) (*pb.Product, error) {
 	if s := os.Getenv("LATENCY_SPIKE"); s != "" {
 		// v, err := strconv.Atoi(s)
 		// if err != nil {
 		// 	log.Fatalf("faigit chaled to parse EXTRA_LATENCY (%s) as int: %+v", v, err)
 		// }
         // rand.Seed(time.Now().UnixNano())
-        n := 3 * (1 + rand.Intn(10)) // n will be between 0 and v
+        n := 3 + rand.Intn(25) // n will be between 0 and v
         time.Sleep(time.Duration(n)*time.Second)           
 		log.Infof("extra latency enabled (duration: %v)", extraLatency)
 	} else {
 		time.Sleep(extraLatency)
-	}    
+	}       
+	return &pb.ListProductsResponse{Products: parseCatalog()}, nil
+}
+
+func (p *productCatalog) GetProduct(ctx context.Context, req *pb.GetProductRequest) (*pb.Product, error) {
+	if s := os.Getenv("LATENCY_SPIKE"); s != "" {
+        n := 3 + rand.Intn(25) // n will be between 0 and v
+        time.Sleep(time.Duration(n)*time.Second)
+		log.Infof("extra latency enabled (duration: %v)", extraLatency)
+	} else {
+		time.Sleep(extraLatency)
+	}
 	var found *pb.Product
 	for i := 0; i < len(parseCatalog()); i++ {
 		if req.Id == parseCatalog()[i].Id {

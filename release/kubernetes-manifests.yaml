@@ -360,7 +360,6 @@ spec:
       - name: server
         # image: gcr.io/qwiklab-gke-debugging/productcatalogservice:v0.1.0
         image: gcr.io/cloud-ops-demo-app/productservice:latest
-        # imagePullPolicy: Always
         ports:
         - containerPort: 3550
         env:
@@ -374,8 +373,8 @@ spec:
           value: "1"
         - name: ENABLE_RELOAD
           value: "1"
-        # - name: LATENCY_SPIKE
-        #   value: "1"          
+        - name: LATENCY_SPIKE
+          value: "1"
         # - name: JAEGER_SERVICE_ADDR
         #   value: "jaeger-collector:14268"
         readinessProbe:
