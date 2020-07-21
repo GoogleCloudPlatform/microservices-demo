@@ -72,7 +72,6 @@ public class AdServiceClient {
     }
   }
 
-
   private static int getPortOrDefaultFromArgs(String[] args) {
     int portNumber = 9555;
     if (2 < args.length) {

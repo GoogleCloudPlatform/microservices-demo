@@ -25,7 +25,7 @@ ENV OTA_EXPORTER_NEWRELIC_API_KEY=${NEW_RELIC_API_KEY}
 ENV OTA_EXPORTER_NEWRELIC_TRACE_URI_OVERRIDE=${NEW_RELIC_TRACE_URL}
 ENV OTA_EXPORTER_NEWRELIC_METRIC_URI_OVERRIDE=${NEW_RELIC_METRIC_URL}
 ## TODO: make these env vars injectable somehow
-ENV OTA_EXPORTER_JAR=auto-agent/opentelemetry-exporters-newrelic-auto-0.5.1.jar
+ENV OTA_EXPORTER_JAR=auto-agent/opentelemetry-exporters-newrelic-auto-0.6.1.jar
 
 # Download Stackdriver Profiler Java agent
 RUN apt-get -y update && apt-get install -qqy \
@@ -41,8 +41,8 @@ RUN GRPC_HEALTH_PROBE_VERSION=v0.3.1 && \
     chmod +x /bin/grpc_health_probe
 
 RUN mkdir -p /app/auto-agent && \
-    wget -q -O /app/auto-agent/opentelemetry-auto.jar \
-    https://jcenter.bintray.com/io/opentelemetry/auto/opentelemetry-auto/0.4.0/opentelemetry-auto-0.4.0.jar
+    wget -q -O /app/auto-agent/opentelemetry-agent.jar \
+    https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/download/v0.6.0/opentelemetry-javaagent-all.jar
 
 WORKDIR /app
 COPY --from=builder /app .

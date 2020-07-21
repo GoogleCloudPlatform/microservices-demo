@@ -17,7 +17,6 @@
 package hipstershop;
 
 import com.google.common.collect.ImmutableListMultimap;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
 import hipstershop.Demo.Ad;
 import hipstershop.Demo.AdRequest;
@@ -30,6 +29,7 @@ import io.grpc.health.v1.HealthCheckResponse.ServingStatus;
 import io.grpc.services.HealthStatusManager;
 import io.grpc.stub.StreamObserver;
 import io.opentelemetry.OpenTelemetry;
+import io.opentelemetry.common.Labels;
 import io.opentelemetry.metrics.DoubleValueRecorder;
 import io.opentelemetry.metrics.LongUpDownCounter;
 import io.opentelemetry.metrics.Meter;
@@ -109,22 +109,24 @@ public final class AdService {
     public AdServiceImpl(AdService service) {
       this.service = service;
       Meter meter = service.meterProvider.get(AdService.class.getName());
-      //note: preliminary spec discussion has things leaning toward this for the instrument name.
-      //see https://github.com/open-telemetry/opentelemetry-specification/pull/657 for discussion
-      getAdsRequestLatency = meter
-          .doubleValueRecorderBuilder("grpc.server.duration")
-          .setDescription("Timings of gRPC requests to a service")
-          .setConstantLabels(ImmutableMap.of("host", AdService.getHost()))
-          .setUnit("ms")
-          .build();
+      // note: preliminary spec discussion has things leaning toward this for the instrument name.
+      // see https://github.com/open-telemetry/opentelemetry-specification/pull/657 for discussion
+      getAdsRequestLatency =
+          meter
+              .doubleValueRecorderBuilder("grpc.server.duration")
+              .setDescription("Timings of gRPC requests to a service")
+              .setConstantLabels(Labels.of("host", AdService.getHost()))
+              .setUnit("ms")
+              .build();
 
-      //this is a custom "business" metric, outside the scope of semantic conventions
-      numberOfAdsRequested = meter
-          .longUpDownCounterBuilder("ads_requested")
-          .setConstantLabels(ImmutableMap.of("host", AdService.getHost()))
-          .setUnit("one")
-          .setDescription("Number of Ads Requested per Request")
-          .build();
+      // this is a custom "business" metric, outside the scope of semantic conventions
+      numberOfAdsRequested =
+          meter
+              .longUpDownCounterBuilder("ads_requested")
+              .setConstantLabels(Labels.of("host", AdService.getHost()))
+              .setUnit("one")
+              .setDescription("Number of Ads Requested per Request")
+              .build();
     }
 
     /**
@@ -132,18 +134,18 @@ public final class AdService {
      *
      * @param req the request containing context.
      * @param responseObserver the stream observer which gets notified with the value of {@code
-     * AdResponse}
+     *     AdResponse}
      */
     @Override
     public void getAds(AdRequest req, StreamObserver<AdResponse> responseObserver) {
-      //note: these could be pulled into constants to reduce allocations
+      // note: these could be pulled into constants to reduce allocations
       String methodName = "hipstershop.AdService/getAds";
-      String[] nonErrorLabels = {"method.name", methodName, "error", "false"};
-      String[] errorLabels = {"method.name", methodName, "error", "true"};
+      Labels nonErrorLabels = Labels.of("method.name", methodName, "error", "false");
+      Labels errorLabels = Labels.of("method.name", methodName, "error", "true");
 
       long startTime = System.currentTimeMillis();
-      numberOfAdsRequested.add(req.getContextKeysCount());
-      String[] labels = nonErrorLabels;
+      numberOfAdsRequested.add(req.getContextKeysCount(), Labels.empty());
+      Labels labels = nonErrorLabels;
       try {
         List<Ad> allAds = new ArrayList<>();
         logger.info("received ad request (context_words=" + req.getContextKeysCount() + ")");
@@ -173,7 +175,6 @@ public final class AdService {
       } finally {
         getAdsRequestLatency.record((System.currentTimeMillis() - startTime), labels);
       }
-
     }
   }
 

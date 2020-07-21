@@ -25,7 +25,7 @@ def opencensusVersion = "0.25.0"
 def grpcVersion = "1.26.0"
 def jacksonVersion = "2.10.2"
 def protocVersion = "3.11.4"
-def openTelemetryVersion = "0.5.0"
+def openTelemetryVersion = "0.6.0"
 
 tasks.withType(JavaCompile) {
     sourceCompatibility = JavaVersion.VERSION_11
@@ -45,7 +45,7 @@ dependencies {
     if (speed) {
         implementation fileTree(dir: offlineCompile, include: '*.jar')
     } else {
-        exporters ("com.newrelic.telemetry:opentelemetry-exporters-newrelic-auto:0.5.1") {
+        exporters ("com.newrelic.telemetry:opentelemetry-exporters-newrelic-auto:0.6.1") {
             transitive = false
         }
 
@@ -71,8 +71,6 @@ task copyExporters(type: Copy) {
     from configurations.exporters
     into "$buildDir/exporters"
 }
-
-
 
 protobuf {
     protoc {
@@ -122,7 +120,7 @@ task adService(type: CreateStartScripts) {
     applicationName = 'AdService'
     outputDir = new File(project.buildDir, 'tmp')
     classpath = startScripts.classpath
-    defaultJvmOpts = ["-javaagent:auto-agent/opentelemetry-auto.jar",
+    defaultJvmOpts = ["-javaagent:auto-agent/opentelemetry-agent.jar",
                       "-Dio.opentelemetry.auto.slf4j.simpleLogger.log.com.newrelic.telemetry=debug",
                       "-Dlog4j2.contextDataInjector=io.opencensus.contrib.logcorrelation.log4j2.OpenCensusTraceContextDataInjector",
                       "-agentpath:/opt/cprof/profiler_java_agent.so=-cprof_service=adservice,-cprof_service_version=1.0.0"]
