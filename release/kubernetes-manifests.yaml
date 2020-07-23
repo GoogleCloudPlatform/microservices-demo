@@ -360,6 +360,8 @@ spec:
       - name: server
         # image: gcr.io/qwiklab-gke-debugging/productcatalogservice:v0.1.0
         image: gcr.io/cloud-ops-demo-app/productservice:latest
+        # image: gcr.io/cloud-trace-demo/productservicecatalog:latest
+        # image: gcr.io/cloud-ops-demo-app/productservice@sha256:aa755c26b3a7b2e1da1c1cd3741d97af1c877ec7d572fa46187044b3334b9f45
         # imagePullPolicy: Always
         ports:
         - containerPort: 3550
