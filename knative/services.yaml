@@ -8,7 +8,7 @@ spec:
   template:
     spec:
       containers:
-      - image: gcr.io/google-samples/microservices-demo/emailservice:v0.1.0
+      - image: gcr.io/google-samples/microservices-demo/emailservice:v0.2.0
         ports:
           - containerPort: 8080
             name: h2c
@@ -42,7 +42,7 @@ spec:
   template:
     spec:
       containers:
-      - image: gcr.io/google-samples/microservices-demo/checkoutservice:v0.1.0
+      - image: gcr.io/google-samples/microservices-demo/checkoutservice:v0.2.0
         ports:
           - containerPort: 8080
             name: h2c
@@ -89,7 +89,7 @@ spec:
   template:
     spec:
       containers:
-      - image: gcr.io/google-samples/microservices-demo/recommendationservice:v0.1.0
+      - image: gcr.io/google-samples/microservices-demo/recommendationservice:v0.2.0
         ports:
           - containerPort: 8080
             name: h2c
@@ -124,7 +124,7 @@ spec:
   template:
     spec:
       containers:
-      - image: gcr.io/google-samples/microservices-demo/frontend:v0.1.0
+      - image: gcr.io/google-samples/microservices-demo/frontend:v0.2.0
         readinessProbe:
           failureThreshold: 1
           periodSeconds: 5
@@ -178,7 +178,7 @@ spec:
   template:
     spec:
       containers:
-      - image: gcr.io/google-samples/microservices-demo/paymentservice:v0.1.0
+      - image: gcr.io/google-samples/microservices-demo/paymentservice:v0.2.0
         ports:
           - containerPort: 8080
             name: h2c
@@ -212,7 +212,7 @@ spec:
   template:
     spec:
       containers:
-      - image: gcr.io/google-samples/microservices-demo/productcatalogservice:v0.1.0
+      - image: gcr.io/google-samples/microservices-demo/productcatalogservice:v0.2.0
         ports:
           - containerPort: 3550
             name: h2c
@@ -246,7 +246,7 @@ spec:
   template:
     spec:
       containers:
-      - image: gcr.io/google-samples/microservices-demo/cartservice:v0.1.0
+      - image: gcr.io/google-samples/microservices-demo/cartservice:v0.2.0
         args: ["-p", "$(PORT)"]
         ports:
           - containerPort: 8080
@@ -289,7 +289,7 @@ spec:
   template:
     spec:
       containers:
-      - image: gcr.io/google-samples/microservices-demo/currencyservice:v0.1.0
+      - image: gcr.io/google-samples/microservices-demo/currencyservice:v0.2.0
         ports:
           - containerPort: 7000
             name: h2c
@@ -323,7 +323,7 @@ spec:
   template:
     spec:
       containers:
-      - image: gcr.io/google-samples/microservices-demo/shippingservice:v0.1.0
+      - image: gcr.io/google-samples/microservices-demo/shippingservice:v0.2.0
         ports:
           - containerPort: 50051
             name: h2c
@@ -357,7 +357,7 @@ spec:
   template:
     spec:
       containers:
-      - image: gcr.io/google-samples/microservices-demo/adservice:v0.1.0
+      - image: gcr.io/google-samples/microservices-demo/adservice:v0.2.0
         ports:
           - containerPort: 8080
             name: h2c
