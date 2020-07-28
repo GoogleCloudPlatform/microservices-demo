@@ -1,36 +1,104 @@
+# Copyright 2020 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+---
 apiVersion: serving.knative.dev/v1
 kind: Service
 metadata:
-  name: emailservice
+  name: adservice
   labels:
     serving.knative.dev/visibility: cluster-local
 spec:
   template:
+    metadata:
+      annotations:
+        autoscaling.knative.dev/minScale: "1"
+        autoscaling.knative.dev/maxScale: "5"
+        autoscaling.knative.dev/target: "2"
     spec:
       containers:
-      - image: gcr.io/google-samples/microservices-demo/emailservice:v0.2.0
+      - image: gcr.io/google-samples/microservices-demo/adservice:v0.2.0
         ports:
           - containerPort: 8080
             name: h2c
+        resources:
+          requests:
+            cpu: 200m
+            memory: 180Mi
+          limits:
+            cpu: 300m
+            memory: 300Mi
         readinessProbe:
-          failureThreshold: 1
+          failureThreshold: 3
           periodSeconds: 5
-          timeoutSeconds: 1
+          timeoutSeconds: 2
+          initialDelaySeconds: 10
           exec:
             command: ["/bin/grpc_health_probe", "-addr=:$(PORT)"]
         livenessProbe:
-          failureThreshold: 1
+          failureThreshold: 3
           periodSeconds: 5
-          timeoutSeconds: 1
+          timeoutSeconds: 2
+          initialDelaySeconds: 10
           exec:
             command: ["/bin/grpc_health_probe", "-addr=:$(PORT)"]
+---
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: cartservice
+  labels:
+    serving.knative.dev/visibility: cluster-local
+spec:
+  template:
+    metadata:
+      annotations:
+        autoscaling.knative.dev/minScale: "1"
+        autoscaling.knative.dev/maxScale: "5"
+        autoscaling.knative.dev/target: "2"
+    spec:
+      containers:
+      - image: gcr.io/google-samples/microservices-demo/cartservice:v0.2.0
+        args: ["-p", "$(PORT)"]
+        ports:
+          - containerPort: 8080
+            name: h2c
+        env:
+          - name: REDIS_ADDR
+            value: "redis-cart:6379"
+          - name: LISTEN_ADDR
+            value: "0.0.0.0"
         resources:
           requests:
-            cpu: 100m
+            cpu: 200m
             memory: 64Mi
           limits:
-            cpu: 200m
+            cpu: 300m
             memory: 128Mi
+        readinessProbe:
+          failureThreshold: 3
+          periodSeconds: 10
+          timeoutSeconds: 2
+          initialDelaySeconds: 15
+          exec:
+            command: ["/bin/grpc_health_probe", "-addr=:$(PORT)"]
+        livenessProbe:
+          failureThreshold: 3
+          periodSeconds: 10
+          timeoutSeconds: 2
+          initialDelaySeconds: 15
+          exec:
+            command: ["/bin/grpc_health_probe", "-addr=:$(PORT)"]
 ---
 apiVersion: serving.knative.dev/v1
 kind: Service
@@ -40,24 +108,17 @@ metadata:
     serving.knative.dev/visibility: cluster-local
 spec:
   template:
+    metadata:
+      annotations:
+        autoscaling.knative.dev/minScale: "1"
+        autoscaling.knative.dev/maxScale: "5"
+        autoscaling.knative.dev/target: "2"
     spec:
       containers:
       - image: gcr.io/google-samples/microservices-demo/checkoutservice:v0.2.0
         ports:
           - containerPort: 8080
             name: h2c
-        readinessProbe:
-          failureThreshold: 1
-          periodSeconds: 5
-          timeoutSeconds: 1
-          exec:
-            command: ["/bin/grpc_health_probe", "-addr=:$(PORT)"]
-        livenessProbe:
-          failureThreshold: 1
-          periodSeconds: 5
-          timeoutSeconds: 1
-          exec:
-            command: ["/bin/grpc_health_probe", "-addr=:$(PORT)"]
         env:
           - name: PRODUCT_CATALOG_SERVICE_ADDR
             value: "productcatalogservice.default:80"
@@ -82,84 +143,36 @@ spec:
 apiVersion: serving.knative.dev/v1
 kind: Service
 metadata:
-  name: recommendationservice
+  name: currencyservice
   labels:
     serving.knative.dev/visibility: cluster-local
 spec:
   template:
+    metadata:
+      annotations:
+        autoscaling.knative.dev/minScale: "1"
+        autoscaling.knative.dev/maxScale: "5"
+        autoscaling.knative.dev/target: "2"
     spec:
       containers:
-      - image: gcr.io/google-samples/microservices-demo/recommendationservice:v0.2.0
+      - image: gcr.io/google-samples/microservices-demo/currencyservice:v0.2.0
         ports:
-          - containerPort: 8080
+          - containerPort: 7000
             name: h2c
         readinessProbe:
-          failureThreshold: 1
+          failureThreshold: 3
           periodSeconds: 5
-          timeoutSeconds: 1
+          timeoutSeconds: 2
+          initialDelaySeconds: 10
           exec:
             command: ["/bin/grpc_health_probe", "-addr=:$(PORT)"]
         livenessProbe:
-          failureThreshold: 1
+          failureThreshold: 3
           periodSeconds: 5
-          timeoutSeconds: 1
+          timeoutSeconds: 2
+          initialDelaySeconds: 10
           exec:
             command: ["/bin/grpc_health_probe", "-addr=:$(PORT)"]
-        env:
-          - name: PRODUCT_CATALOG_SERVICE_ADDR
-            value: "productcatalogservice.default:80"
-        resources:
-          requests:
-            cpu: 100m
-            memory: 220Mi
-          limits:
-            cpu: 200m
-            memory: 450Mi
----
-apiVersion: serving.knative.dev/v1
-kind: Service
-metadata:
-  name: frontend
-spec:
-  template:
-    spec:
-      containers:
-      - image: gcr.io/google-samples/microservices-demo/frontend:v0.2.0
-        readinessProbe:
-          failureThreshold: 1
-          periodSeconds: 5
-          timeoutSeconds: 1
-          initialDelaySeconds: 10
-          httpGet:
-            path: "/_healthz"
-            httpHeaders:
-              - name: "Cookie"
-                value: "shop_session-id=x-readiness-probe"
-        livenessProbe:
-          failureThreshold: 1
-          periodSeconds: 5
-          timeoutSeconds: 1
-          initialDelaySeconds: 10
-          httpGet:
-            path: "/_healthz"
-            httpHeaders:
-              - name: "Cookie"
-                value: "shop_session-id=x-liveness-probe"
-        env:
-          - name: PRODUCT_CATALOG_SERVICE_ADDR
-            value: "productcatalogservice.default:80"
-          - name: CURRENCY_SERVICE_ADDR
-            value: "currencyservice.default:80"
-          - name: CART_SERVICE_ADDR
-            value: "cartservice.default:80"
-          - name: RECOMMENDATION_SERVICE_ADDR
-            value: "recommendationservice.default:80"
-          - name: SHIPPING_SERVICE_ADDR
-            value: "shippingservice.default:80"
-          - name: CHECKOUT_SERVICE_ADDR
-            value: "checkoutservice.default:80"
-          - name: AD_SERVICE_ADDR
-            value: "adservice.default:80"
         resources:
           requests:
             cpu: 100m
@@ -171,11 +184,114 @@ spec:
 apiVersion: serving.knative.dev/v1
 kind: Service
 metadata:
+  name: emailservice
+  labels:
+    serving.knative.dev/visibility: cluster-local
+spec:
+  template:
+    metadata:
+      annotations:
+        autoscaling.knative.dev/minScale: "1"
+        autoscaling.knative.dev/maxScale: "5"
+        autoscaling.knative.dev/target: "2"
+    spec:
+      containers:
+      - image: gcr.io/google-samples/microservices-demo/emailservice:v0.2.0
+        ports:
+          - containerPort: 8080
+            name: h2c
+        readinessProbe:
+          failureThreshold: 3
+          periodSeconds: 5
+          timeoutSeconds: 2
+          initialDelaySeconds: 10
+          exec:
+            command: ["/bin/grpc_health_probe", "-addr=:$(PORT)"]
+        livenessProbe:
+          failureThreshold: 3
+          periodSeconds: 5
+          timeoutSeconds: 2
+          initialDelaySeconds: 10
+          exec:
+            command: ["/bin/grpc_health_probe", "-addr=:$(PORT)"]
+        resources:
+          requests:
+            cpu: 100m
+            memory: 64Mi
+          limits:
+            cpu: 200m
+            memory: 128Mi
+---
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: frontend
+spec:
+  template:
+    metadata:
+      annotations:
+        autoscaling.knative.dev/minScale: "1"
+        autoscaling.knative.dev/maxScale: "5"
+        autoscaling.knative.dev/target: "2"
+    spec:
+      containers:
+        - image: gcr.io/google-samples/microservices-demo/frontend:v0.2.0
+          readinessProbe:
+            failureThreshold: 3
+            periodSeconds: 5
+            timeoutSeconds: 2
+            initialDelaySeconds: 10
+            httpGet:
+              path: "/_healthz"
+              httpHeaders:
+                - name: "Cookie"
+                  value: "shop_session-id=x-readiness-probe"
+          livenessProbe:
+            failureThreshold: 3
+            periodSeconds: 5
+            timeoutSeconds: 2
+            initialDelaySeconds: 10
+            httpGet:
+              path: "/_healthz"
+              httpHeaders:
+                - name: "Cookie"
+                  value: "shop_session-id=x-liveness-probe"
+          env:
+            - name: PRODUCT_CATALOG_SERVICE_ADDR
+              value: "productcatalogservice.default:80"
+            - name: CURRENCY_SERVICE_ADDR
+              value: "currencyservice.default:80"
+            - name: CART_SERVICE_ADDR
+              value: "cartservice.default:80"
+            - name: RECOMMENDATION_SERVICE_ADDR
+              value: "recommendationservice.default:80"
+            - name: SHIPPING_SERVICE_ADDR
+              value: "shippingservice.default:80"
+            - name: CHECKOUT_SERVICE_ADDR
+              value: "checkoutservice.default:80"
+            - name: AD_SERVICE_ADDR
+              value: "adservice.default:80"
+          resources:
+            requests:
+              cpu: 100m
+              memory: 64Mi
+            limits:
+              cpu: 200m
+              memory: 128Mi
+---
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
   name: paymentservice
   labels:
     serving.knative.dev/visibility: cluster-local
 spec:
   template:
+    metadata:
+      annotations:
+        autoscaling.knative.dev/minScale: "1"
+        autoscaling.knative.dev/maxScale: "5"
+        autoscaling.knative.dev/target: "2"
     spec:
       containers:
       - image: gcr.io/google-samples/microservices-demo/paymentservice:v0.2.0
@@ -183,15 +299,17 @@ spec:
           - containerPort: 8080
             name: h2c
         readinessProbe:
-          failureThreshold: 1
+          failureThreshold: 3
           periodSeconds: 5
-          timeoutSeconds: 1
+          timeoutSeconds: 2
+          initialDelaySeconds: 10
           exec:
             command: ["/bin/grpc_health_probe", "-addr=:$(PORT)"]
         livenessProbe:
-          failureThreshold: 1
+          failureThreshold: 3
           periodSeconds: 5
-          timeoutSeconds: 1
+          timeoutSeconds: 2
+          initialDelaySeconds: 10
           exec:
             command: ["/bin/grpc_health_probe", "-addr=:$(PORT)"]
         resources:
@@ -210,108 +328,82 @@ metadata:
     serving.knative.dev/visibility: cluster-local
 spec:
   template:
+    metadata:
+      annotations:
+        autoscaling.knative.dev/minScale: "1"
+        autoscaling.knative.dev/maxScale: "5"
+        autoscaling.knative.dev/target: "2"
     spec:
       containers:
-      - image: gcr.io/google-samples/microservices-demo/productcatalogservice:v0.2.0
-        ports:
-          - containerPort: 3550
-            name: h2c
-        readinessProbe:
-          failureThreshold: 1
-          periodSeconds: 5
-          timeoutSeconds: 1
-          exec:
-            command: ["/bin/grpc_health_probe", "-addr=:$(PORT)"]
-        livenessProbe:
-          failureThreshold: 1
-          periodSeconds: 5
-          timeoutSeconds: 1
-          exec:
-            command: ["/bin/grpc_health_probe", "-addr=:$(PORT)"]
-        resources:
-          requests:
-            cpu: 100m
-            memory: 64Mi
-          limits:
-            cpu: 200m
-            memory: 128Mi
+        - image: gcr.io/google-samples/microservices-demo/productcatalogservice:v0.2.0
+          ports:
+            - containerPort: 3550
+              name: h2c
+          readinessProbe:
+            failureThreshold: 3
+            periodSeconds: 5
+            timeoutSeconds: 2
+            initialDelaySeconds: 10
+            exec:
+              command: ["/bin/grpc_health_probe", "-addr=:$(PORT)"]
+          livenessProbe:
+            failureThreshold: 3
+            periodSeconds: 5
+            timeoutSeconds: 2
+            initialDelaySeconds: 10
+            exec:
+              command: ["/bin/grpc_health_probe", "-addr=:$(PORT)"]
+          resources:
+            requests:
+              cpu: 100m
+              memory: 64Mi
+            limits:
+              cpu: 200m
+              memory: 128Mi
 ---
 apiVersion: serving.knative.dev/v1
 kind: Service
 metadata:
-  name: cartservice
+  name: recommendationservice
   labels:
     serving.knative.dev/visibility: cluster-local
 spec:
   template:
+    metadata:
+      annotations:
+        autoscaling.knative.dev/minScale: "1"
+        autoscaling.knative.dev/maxScale: "5"
+        autoscaling.knative.dev/target: "2"
     spec:
       containers:
-      - image: gcr.io/google-samples/microservices-demo/cartservice:v0.2.0
-        args: ["-p", "$(PORT)"]
+      - image: gcr.io/google-samples/microservices-demo/recommendationservice:v0.2.0
         ports:
           - containerPort: 8080
             name: h2c
+        readinessProbe:
+          failureThreshold: 3
+          periodSeconds: 5
+          timeoutSeconds: 2
+          initialDelaySeconds: 10
+          exec:
+            command: ["/bin/grpc_health_probe", "-addr=:$(PORT)"]
+        livenessProbe:
+          failureThreshold: 3
+          periodSeconds: 5
+          timeoutSeconds: 2
+          initialDelaySeconds: 10
+          exec:
+            command: ["/bin/grpc_health_probe", "-addr=:$(PORT)"]
         env:
-          - name: REDIS_ADDR
-            value: "redis-cart:6379"
-          - name: LISTEN_ADDR
-            value: "0.0.0.0"
-        resources:
-          requests:
-            cpu: 200m
-            memory: 64Mi
-          limits:
-            cpu: 300m
-            memory: 128Mi
-        readinessProbe:
-          failureThreshold: 1
-          periodSeconds: 5
-          timeoutSeconds: 1
-          initialDelaySeconds: 15
-          exec:
-            command: ["/bin/grpc_health_probe", "-addr=:$(PORT)"]
-        livenessProbe:
-          failureThreshold: 1
-          periodSeconds: 5
-          timeoutSeconds: 1
-          initialDelaySeconds: 15
-          periodSeconds: 10
-          exec:
-            command: ["/bin/grpc_health_probe", "-addr=:$(PORT)"]
----
-apiVersion: serving.knative.dev/v1
-kind: Service
-metadata:
-  name: currencyservice
-  labels:
-    serving.knative.dev/visibility: cluster-local
-spec:
-  template:
-    spec:
-      containers:
-      - image: gcr.io/google-samples/microservices-demo/currencyservice:v0.2.0
-        ports:
-          - containerPort: 7000
-            name: h2c
-        readinessProbe:
-          failureThreshold: 1
-          periodSeconds: 5
-          timeoutSeconds: 1
-          exec:
-            command: ["/bin/grpc_health_probe", "-addr=:$(PORT)"]
-        livenessProbe:
-          failureThreshold: 1
-          periodSeconds: 5
-          timeoutSeconds: 1
-          exec:
-            command: ["/bin/grpc_health_probe", "-addr=:$(PORT)"]
+          - name: PRODUCT_CATALOG_SERVICE_ADDR
+            value: "productcatalogservice.default:80"
         resources:
           requests:
             cpu: 100m
-            memory: 64Mi
+            memory: 220Mi
           limits:
             cpu: 200m
-            memory: 128Mi
+            memory: 450Mi
 ---
 apiVersion: serving.knative.dev/v1
 kind: Service
@@ -321,6 +413,11 @@ metadata:
     serving.knative.dev/visibility: cluster-local
 spec:
   template:
+    metadata:
+      annotations:
+        autoscaling.knative.dev/minScale: "1"
+        autoscaling.knative.dev/maxScale: "5"
+        autoscaling.knative.dev/target: "2"
     spec:
       containers:
       - image: gcr.io/google-samples/microservices-demo/shippingservice:v0.2.0
@@ -328,15 +425,17 @@ spec:
           - containerPort: 50051
             name: h2c
         readinessProbe:
-          failureThreshold: 1
+          failureThreshold: 3
           periodSeconds: 5
-          timeoutSeconds: 1
+          timeoutSeconds: 2
+          initialDelaySeconds: 10
           exec:
             command: ["/bin/grpc_health_probe", "-addr=:$(PORT)"]
         livenessProbe:
-          failureThreshold: 1
+          failureThreshold: 3
           periodSeconds: 5
-          timeoutSeconds: 1
+          timeoutSeconds: 2
+          initialDelaySeconds: 10
           exec:
             command: ["/bin/grpc_health_probe", "-addr=:$(PORT)"]
         resources:
@@ -346,41 +445,3 @@ spec:
           limits:
             cpu: 200m
             memory: 128Mi
----
-apiVersion: serving.knative.dev/v1
-kind: Service
-metadata:
-  name: adservice
-  labels:
-    serving.knative.dev/visibility: cluster-local
-spec:
-  template:
-    spec:
-      containers:
-      - image: gcr.io/google-samples/microservices-demo/adservice:v0.2.0
-        ports:
-          - containerPort: 8080
-            name: h2c
-        resources:
-          requests:
-            cpu: 200m
-            memory: 180Mi
-          limits:
-            cpu: 300m
-            memory: 300Mi
-        readinessProbe:
-          failureThreshold: 1
-          periodSeconds: 5
-          timeoutSeconds: 1
-          initialDelaySeconds: 20
-          periodSeconds: 15
-          exec:
-            command: ["/bin/grpc_health_probe", "-addr=:$(PORT)"]
-        livenessProbe:
-          failureThreshold: 1
-          periodSeconds: 5
-          timeoutSeconds: 1
-          initialDelaySeconds: 20
-          periodSeconds: 15
-          exec:
-            command: ["/bin/grpc_health_probe", "-addr=:$(PORT)"]
