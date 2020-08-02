@@ -18,7 +18,7 @@ FROM base as builder
 
 RUN apt-get -qq update \
     && apt-get install -y --no-install-recommends \
-    g++
+        g++
 
 COPY requirements.txt .
 
@@ -31,5 +31,5 @@ COPY . .
 RUN chmod +x ./loadgen.sh
 RUN apt-get -qq update \
     && apt-get install -y --no-install-recommends \
-    curl
+        curl
 ENTRYPOINT ./loadgen.sh
