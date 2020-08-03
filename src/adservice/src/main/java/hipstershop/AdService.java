@@ -30,10 +30,13 @@ import io.grpc.services.HealthStatusManager;
 import io.grpc.stub.StreamObserver;
 import io.opentelemetry.OpenTelemetry;
 import io.opentelemetry.common.Labels;
+import io.opentelemetry.context.Scope;
 import io.opentelemetry.metrics.DoubleValueRecorder;
 import io.opentelemetry.metrics.LongUpDownCounter;
 import io.opentelemetry.metrics.Meter;
 import io.opentelemetry.metrics.MeterProvider;
+import io.opentelemetry.trace.Span;
+import io.opentelemetry.trace.Tracer;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.util.ArrayList;
@@ -105,6 +108,8 @@ public final class AdService {
     // defined.
     private final DoubleValueRecorder getAdsRequestLatency;
     private final LongUpDownCounter numberOfAdsRequested;
+    // used for doing some manual span instrumentation.
+    private final Tracer tracer = OpenTelemetry.getTracer("hipstershop.adservice");
 
     public AdServiceImpl(AdService service) {
       this.service = service;
@@ -134,19 +139,38 @@ public final class AdService {
      *
      * @param req the request containing context.
      * @param responseObserver the stream observer which gets notified with the value of {@code
-     *     AdResponse}
+     * AdResponse}
      */
     @Override
     public void getAds(AdRequest req, StreamObserver<AdResponse> responseObserver) {
       // note: these could be pulled into constants to reduce allocations
       String methodName = "hipstershop.AdService/getAds";
-      Labels nonErrorLabels = Labels.of("method.name", methodName, "error", "false");
-      Labels errorLabels = Labels.of("method.name", methodName, "error", "true");
+      Labels nonErrorLabels = Labels
+          .of("method.name", methodName, "span.name", methodName, "error", "false");
+      Labels errorLabels = Labels
+          .of("method.name", methodName, "span.name", methodName, "error", "true");
 
       long startTime = System.currentTimeMillis();
       numberOfAdsRequested.add(req.getContextKeysCount(), Labels.empty());
       Labels labels = nonErrorLabels;
       try {
+        List<Ad> allAds = chooseAds(req);
+
+        AdResponse reply = AdResponse.newBuilder().addAllAds(allAds).build();
+        responseObserver.onNext(reply);
+        responseObserver.onCompleted();
+      } catch (StatusRuntimeException e) {
+        logger.log(Level.WARN, "GetAds Failed with status {}", e.getStatus());
+        labels = errorLabels;
+        responseObserver.onError(e);
+      } finally {
+        getAdsRequestLatency.record((System.currentTimeMillis() - startTime), labels);
+      }
+    }
+
+    private List<Ad> chooseAds(AdRequest req) {
+      Span getSomeAds = tracer.spanBuilder("chooseAds").startSpan();
+      try (Scope scope = tracer.withSpan(getSomeAds)) {
         List<Ad> allAds = new ArrayList<>();
         logger.info("received ad request (context_words=" + req.getContextKeysCount() + ")");
         if (req.getContextKeysCount() > 0) {
@@ -164,16 +188,9 @@ public final class AdService {
         if (random.nextInt(100) == 1) {
           throw new StatusRuntimeException(Status.RESOURCE_EXHAUSTED);
         }
-
-        AdResponse reply = AdResponse.newBuilder().addAllAds(allAds).build();
-        responseObserver.onNext(reply);
-        responseObserver.onCompleted();
-      } catch (StatusRuntimeException e) {
-        logger.log(Level.WARN, "GetAds Failed with status {}", e.getStatus());
-        labels = errorLabels;
-        responseObserver.onError(e);
+        return allAds;
       } finally {
-        getAdsRequestLatency.record((System.currentTimeMillis() - startTime), labels);
+        getSomeAds.end();
       }
     }
   }
