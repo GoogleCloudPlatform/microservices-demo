@@ -478,8 +478,9 @@ func startSpan(name string, r **http.Request) (context.Context, trace.Span) {
 	}
 
 	hostKey := key.New("host").String(hostname)
+	kindKey := key.New("kind").String("SERVER")
 	attrs, entries, spanCtx := httptrace.Extract(req.Context(), req)
-	attrs = append(attrs, hostKey)
+	attrs = append(attrs, hostKey, kindKey)
 	req = req.WithContext(correlation.ContextWithMap(req.Context(), correlation.NewMap(correlation.MapUpdate{
 		MultiKV: entries,
 	})))
