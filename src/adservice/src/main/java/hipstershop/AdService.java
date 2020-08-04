@@ -144,7 +144,7 @@ public final class AdService {
     @Override
     public void getAds(AdRequest req, StreamObserver<AdResponse> responseObserver) {
       // note: these could be pulled into constants to reduce allocations
-      String methodName = "hipstershop.AdService/getAds";
+      String methodName = "hipstershop.AdService/GetAds";
       Labels nonErrorLabels = Labels
           .of("method.name", methodName, "span.name", methodName, "error", "false");
       Labels errorLabels = Labels
