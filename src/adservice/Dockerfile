@@ -21,11 +21,11 @@ ARG USE_ZIPKIN_EXPORTER=false
 ENV USE_ZIPKIN_EXPORTER=${USE_ZIPKIN_EXPORTER}
 
 ## These 4 are used by the auto-instrumentation configuration:
-ENV OTA_EXPORTER_NEWRELIC_API_KEY=${NEW_RELIC_API_KEY}
-ENV OTA_EXPORTER_NEWRELIC_TRACE_URI_OVERRIDE=${NEW_RELIC_TRACE_URL}
-ENV OTA_EXPORTER_NEWRELIC_METRIC_URI_OVERRIDE=${NEW_RELIC_METRIC_URL}
+ENV OTEL_EXPORTER_NEWRELIC_API_KEY=${NEW_RELIC_API_KEY}
+ENV OTEL_EXPORTER_NEWRELIC_TRACE_URI_OVERRIDE=${NEW_RELIC_TRACE_URL}
+ENV OTEL_EXPORTER_NEWRELIC_METRIC_URI_OVERRIDE=${NEW_RELIC_METRIC_URL}
 ## TODO: make these env vars injectable somehow
-ENV OTA_EXPORTER_JAR=auto-agent/opentelemetry-exporters-newrelic-auto-0.6.1.jar
+ENV OTEL_EXPORTER_JAR=auto-agent/opentelemetry-exporters-newrelic-auto-0.7.0.jar
 
 # Download Stackdriver Profiler Java agent
 RUN apt-get -y update && apt-get install -qqy \
@@ -42,7 +42,7 @@ RUN GRPC_HEALTH_PROBE_VERSION=v0.3.1 && \
 
 RUN mkdir -p /app/auto-agent && \
     wget -q -O /app/auto-agent/opentelemetry-agent.jar \
-    https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/download/v0.6.0/opentelemetry-javaagent-all.jar
+    https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/download/v0.7.0/opentelemetry-javaagent-all.jar
 
 WORKDIR /app
 COPY --from=builder /app .

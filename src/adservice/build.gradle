@@ -45,7 +45,7 @@ dependencies {
     if (speed) {
         implementation fileTree(dir: offlineCompile, include: '*.jar')
     } else {
-        exporters ("com.newrelic.telemetry:opentelemetry-exporters-newrelic-auto:0.6.1") {
+        exporters ("com.newrelic.telemetry:opentelemetry-exporters-newrelic-auto:0.7.0") {
             transitive = false
         }
 
