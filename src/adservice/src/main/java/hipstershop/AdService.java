@@ -43,6 +43,10 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.Executor;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -101,12 +105,15 @@ public final class AdService {
   }
 
   private static class AdServiceImpl extends hipstershop.AdServiceGrpc.AdServiceImplBase {
+    private final Executor backgroundJobber = new ThreadPoolExecutor(1, 5, 100, TimeUnit.SECONDS,
+        new LinkedBlockingQueue<>(), new ThreadPoolExecutor.CallerRunsPolicy());
     private final Random random = new Random();
     private final AdService service;
 
     // note: these two instruments should be updated to match semantic conventions, when they are
     // defined.
     private final DoubleValueRecorder getAdsRequestLatency;
+    private final DoubleValueRecorder backgroundLatency;
     private final LongUpDownCounter numberOfAdsRequested;
     // used for doing some manual span instrumentation.
     private final Tracer tracer = OpenTelemetry.getTracer("hipstershop.adservice");
@@ -132,6 +139,14 @@ public final class AdService {
               .setUnit("one")
               .setDescription("Number of Ads Requested per Request")
               .build();
+
+      //custom timer for the background job.
+      backgroundLatency = meter
+          .doubleValueRecorderBuilder("background.job.duration")
+          .setDescription("Background job timings")
+          .setConstantLabels(Labels.of("host", AdService.getHost()))
+          .setUnit("ms")
+          .build();
     }
 
     /**
@@ -155,7 +170,7 @@ public final class AdService {
       Labels labels = nonErrorLabels;
       try {
         List<Ad> allAds = chooseAds(req);
-
+        reportAdsToBackgroundService(allAds);
         AdResponse reply = AdResponse.newBuilder().addAllAds(allAds).build();
         responseObserver.onNext(reply);
         responseObserver.onCompleted();
@@ -168,9 +183,39 @@ public final class AdService {
       }
     }
 
+    private void reportAdsToBackgroundService(List<Ad> allAds) {
+      backgroundJobber.execute(() -> {
+        long startTime = System.currentTimeMillis();
+        String spanName = "ReportRequestedAds";
+        Span span = tracer.spanBuilder(spanName)
+            .setNoParent()
+            .setAttribute("numberOfAds", allAds.size())
+            .startSpan();
+        try (Scope ignored = tracer.withSpan(span)) {
+          anotherSpan();
+        } catch (InterruptedException e) {
+          throw new RuntimeException(e);
+        } finally {
+          backgroundLatency.record((System.currentTimeMillis() - startTime),
+              Labels.of("span.name", spanName, "error", "false"));
+          span.end();
+        }
+      });
+    }
+
+    private void anotherSpan() throws InterruptedException {
+      Span innerSpan = tracer.spanBuilder("InnerBackgroundThing")
+          .startSpan();
+      try (Scope ignored = tracer.withSpan(innerSpan)) {
+        Thread.sleep(random.nextInt(200));
+      } finally {
+        innerSpan.end();
+      }
+    }
+
     private List<Ad> chooseAds(AdRequest req) {
       Span getSomeAds = tracer.spanBuilder("chooseAds").startSpan();
-      try (Scope scope = tracer.withSpan(getSomeAds)) {
+      try (Scope ignored = tracer.withSpan(getSomeAds)) {
         List<Ad> allAds = new ArrayList<>();
         logger.info("received ad request (context_words=" + req.getContextKeysCount() + ")");
         if (req.getContextKeysCount() > 0) {
