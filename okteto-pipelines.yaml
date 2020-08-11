@@ -1,4 +1,6 @@
 icon: https://raw.githubusercontent.com/rberrelleza/microservices-demo/master/src/frontend/static/icons/Hipster_HeroLogoCyan.svg
 deploy:
   - kubectl apply -f release/kubernetes-manifests.yaml
-  - kubectl annotate service frontend dev.okteto.com/auto-ingress=true
+  - kubectl annotate service frontend dev.okteto.com/auto-ingress=true --overwrite
+devs:
+  - src/frontend/okteto.yml
