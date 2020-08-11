@@ -1,0 +1,3 @@
+icon: https://raw.githubusercontent.com/rberrelleza/microservices-demo/master/src/frontend/static/icons/Hipster_HeroLogoCyan.svg
+deploy:
+  - kubectl apply -f release/kubernetes-manifests.yaml
