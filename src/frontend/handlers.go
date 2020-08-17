@@ -96,6 +96,7 @@ func (fe *frontendServer) homeHandler(w http.ResponseWriter, r *http.Request) {
 		"session_id":    sessionID(r),
 		"request_id":    r.Context().Value(ctxKeyRequestID{}),
 		"user_currency": currentCurrency(r),
+		"show_currency": true,
 		"currencies":    currencies,
 		"products":      ps,
 		"cart_size":     cartSize(cart),
@@ -175,6 +176,7 @@ func (fe *frontendServer) productHandler(w http.ResponseWriter, r *http.Request)
 		"request_id":      r.Context().Value(ctxKeyRequestID{}),
 		"ad":              fe.chooseAd(r.Context(), p.Categories, log),
 		"user_currency":   currentCurrency(r),
+		"show_currency":   true,
 		"currencies":      currencies,
 		"product":         product,
 		"recommendations": recommendations,
@@ -282,8 +284,6 @@ func (fe *frontendServer) viewCartHandler(w http.ResponseWriter, r *http.Request
 	}
 	totalPrice = money.Must(money.Sum(totalPrice, *shippingCost))
 
-	log.Info("🌈 ITEMS: %v", items)
-
 	year := time.Now().Year()
 	if err := templates.ExecuteTemplate(w, "cart", map[string]interface{}{
 		"session_id":       sessionID(r),
@@ -293,6 +293,7 @@ func (fe *frontendServer) viewCartHandler(w http.ResponseWriter, r *http.Request
 		"recommendations":  recommendations,
 		"cart_size":        cartSize(cart),
 		"shipping_cost":    shippingCost,
+		"show_currency":    true,
 		"total_cost":       totalPrice,
 		"items":            items,
 		"expiration_years": []int{year, year + 1, year + 2, year + 3, year + 4},
@@ -363,6 +364,7 @@ func (fe *frontendServer) placeOrderHandler(w http.ResponseWriter, r *http.Reque
 		"session_id":      sessionID(r),
 		"request_id":      r.Context().Value(ctxKeyRequestID{}),
 		"user_currency":   currentCurrency(r),
+		"show_currency":   false,
 		"currencies":      currencies,
 		"order":           order.GetOrder(),
 		"total_paid":      &totalPaid,
@@ -427,12 +429,15 @@ func renderHTTPError(log logrus.FieldLogger, r *http.Request, w http.ResponseWri
 	errMsg := fmt.Sprintf("%+v", err)
 
 	w.WriteHeader(code)
-	templates.ExecuteTemplate(w, "error", map[string]interface{}{
+	if templateErr := templates.ExecuteTemplate(w, "error", map[string]interface{}{
 		"session_id":  sessionID(r),
 		"request_id":  r.Context().Value(ctxKeyRequestID{}),
 		"error":       errMsg,
 		"status_code": code,
-		"status":      http.StatusText(code)})
+		"status":      http.StatusText(code),
+	}); templateErr != nil {
+		log.Println(templateErr)
+	}		
 }
 
 func currentCurrency(r *http.Request) string {

@@ -1,3 +1,19 @@
+<!--
+ Copyright 2020 Google LLC
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+-->
+
 {{ define "header" }}
 <!DOCTYPE html>
 <html lang="en">
@@ -21,6 +37,9 @@
         <div class="navbar">
             <div class="container d-flex justify-content-between">
                 <div class="h-free-shipping">Free shipping with $75 purchase! &nbsp;&nbsp;</div>
+
+
+                {{ if $.show_currency }}
                 <div class="h-controls">
                     <div class="h-control">
                         <img src="/static/icons/Hipster_CurrencyIcon.svg" alt="icon" class="icon" />
@@ -34,6 +53,8 @@
                         <img src="/static/icons/Hipster_DownArrow.svg" alt="icon" class="icon arrow" />
                     </div>
                 </div>
+                {{ end }}
+
             </div>
         </div>
         <div class="navbar sub-navbar">
@@ -53,5 +74,6 @@
                 </div>
             </div>
         </div>
+
     </header>
     {{end}}
