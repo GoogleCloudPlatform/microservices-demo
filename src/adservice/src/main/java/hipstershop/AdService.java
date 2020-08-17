@@ -161,9 +161,15 @@ public final class AdService {
       // note: these could be pulled into constants to reduce allocations
       String methodName = "hipstershop.AdService/GetAds";
       Labels nonErrorLabels = Labels
-          .of("method.name", methodName, "span.name", methodName, "error", "false");
+          .of("method.name", methodName,
+              "span.name", methodName,
+              "error", "false",
+              "span.kind", Span.Kind.SERVER.name());
       Labels errorLabels = Labels
-          .of("method.name", methodName, "span.name", methodName, "error", "true");
+          .of("method.name", methodName,
+              "span.name", methodName,
+              "error", "true",
+              "span.kind", Span.Kind.SERVER.name());
 
       long startTime = System.currentTimeMillis();
       numberOfAdsRequested.add(req.getContextKeysCount(), Labels.empty());
@@ -197,7 +203,10 @@ public final class AdService {
           throw new RuntimeException(e);
         } finally {
           backgroundLatency.record((System.currentTimeMillis() - startTime),
-              Labels.of("span.name", spanName, "error", "false"));
+              Labels.of("span.name", spanName,
+                  "error", "false",
+                  "span.kind", Span.Kind.INTERNAL.name()
+              ));
           span.end();
         }
       });

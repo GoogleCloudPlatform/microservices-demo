@@ -25,7 +25,7 @@ def opencensusVersion = "0.25.0"
 def grpcVersion = "1.26.0"
 def jacksonVersion = "2.10.2"
 def protocVersion = "3.11.4"
-def openTelemetryVersion = "0.6.0"
+def openTelemetryVersion = "0.7.0"
 
 tasks.withType(JavaCompile) {
     sourceCompatibility = JavaVersion.VERSION_11
@@ -51,6 +51,8 @@ dependencies {
 
         implementation "com.google.api.grpc:proto-google-common-protos:1.17.0",
                 "io.opentelemetry:opentelemetry-api:${openTelemetryVersion}",
+                "io.opentelemetry:opentelemetry-extension-auto-annotations:${openTelemetryVersion}",
+                "com.newrelic.agent.java:newrelic-api:5.14.0",
                 "io.grpc:grpc-protobuf:${grpcVersion}",
                 "io.grpc:grpc-stub:${grpcVersion}",
                 "io.grpc:grpc-netty:${grpcVersion}",
