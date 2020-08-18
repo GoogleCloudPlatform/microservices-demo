@@ -29,14 +29,14 @@ import (
 	//"go.opentelemetry.io/otel/api/correlation"
 	"github.com/newrelic/newrelic-telemetry-sdk-go/telemetry"
 	"github.com/newrelic/opentelemetry-exporter-go/newrelic"
+	muxtrace "go.opentelemetry.io/contrib/instrumentation/github.com/gorilla/mux"
 	"go.opentelemetry.io/otel/api/global"
-	"go.opentelemetry.io/otel/api/key"
-	"go.opentelemetry.io/otel/api/metric"
-	"go.opentelemetry.io/otel/api/unit"
-	"go.opentelemetry.io/otel/exporters/trace/stdout"
-	"go.opentelemetry.io/otel/plugin/grpctrace"
-	"go.opentelemetry.io/otel/sdk/metric/batcher/ungrouped"
+	stdoutmetric "go.opentelemetry.io/otel/exporters/metric/stdout"
+	stdouttrace "go.opentelemetry.io/otel/exporters/trace/stdout"
+	exportmetric "go.opentelemetry.io/otel/sdk/export/metric"
+	exporttrace "go.opentelemetry.io/otel/sdk/export/trace"
 	"go.opentelemetry.io/otel/sdk/metric/controller/push"
+	"go.opentelemetry.io/otel/sdk/metric/processor/basic"
 	"go.opentelemetry.io/otel/sdk/metric/selector/simple"
 	"go.opentelemetry.io/otel/sdk/trace"
 )
@@ -49,6 +49,8 @@ const (
 	cookiePrefix    = "shop_"
 	cookieSessionID = cookiePrefix + "session-id"
 	cookieCurrency  = cookiePrefix + "currency"
+
+	serviceName = "Frontend"
 )
 
 var (
@@ -99,9 +101,48 @@ func main() {
 		TimestampFormat: time.RFC3339Nano,
 	}
 	log.Out = os.Stdout
+
+	var traceExporter exporttrace.SpanSyncer
+	var metricExporter exportmetric.Exporter
+	if apiKey, ok := os.LookupEnv("NEW_RELIC_API_KEY"); ok {
+		log.Info("Using New Relic exporter")
+		exporter, err := newrelic.NewExporter(
+			serviceName,
+			apiKey,
+			func(cfg *telemetry.Config) {
+				if u, ok := os.LookupEnv("NEW_RELIC_METRIC_URL"); ok {
+					log.Info("setting metric export endpoint to " + u)
+					cfg.MetricsURLOverride = u
+				}
+				if u, ok := os.LookupEnv("NEW_RELIC_TRACE_URL"); ok {
+					log.Info("setting trace export endpoint to " + u)
+					cfg.SpansURLOverride = u
+				}
+			},
+		)
+		if err != nil {
+			log.Fatal(err)
+		}
+		traceExporter = exporter
+		metricExporter = exporter
+	} else {
+		log.Info("Defaulting to stdout exporter")
+		te, err := stdouttrace.NewExporter(stdouttrace.Options{PrettyPrint: true})
+		if err != nil {
+			log.Fatal(err)
+		}
+		traceExporter = te
+		me, err := stdoutmetric.NewRawExporter(stdoutmetric.Config{PrettyPrint: true})
+		if err != nil {
+			log.Fatal(err)
+		}
+		metricExporter = me
+	}
+
+	defer initMetric(log, metricExporter).Stop()
 	if os.Getenv("DISABLE_TRACING") == "" {
 		log.Info("Tracing enabled.")
-		initTracing(log)
+		initTracing(log, traceExporter)
 	} else {
 		log.Info("Tracing disabled.")
 	}
@@ -129,6 +170,7 @@ func main() {
 	mustConnGRPC(ctx, &svc.adSvcConn, svc.adSvcAddr)
 
 	r := mux.NewRouter()
+	r.Use(MuxMiddleware(), muxtrace.Middleware(serviceName))
 	r.HandleFunc("/", svc.homeHandler).Methods(http.MethodGet, http.MethodHead)
 	r.HandleFunc("/product/{id}", svc.productHandler).Methods(http.MethodGet, http.MethodHead)
 	r.HandleFunc("/cart", svc.viewCartHandler).Methods(http.MethodGet, http.MethodHead)
@@ -141,113 +183,39 @@ func main() {
 	r.HandleFunc("/robots.txt", func(w http.ResponseWriter, _ *http.Request) { fmt.Fprint(w, "User-agent: *\nDisallow: /") })
 	r.HandleFunc("/_healthz", func(w http.ResponseWriter, _ *http.Request) { fmt.Fprint(w, "ok") })
 
-	meter := global.MeterProvider().Meter("Frontend")
-
 	var handler http.Handler = r
-	hostname, err := os.Hostname()
-	if err != nil {
-		// TODO: handle this properly
-	}
-	hostKey := key.New("host").String(hostname)
-	requestCount, err := meter.NewInt64Counter(
-		"http_request_count",
-		metric.WithUnit(unit.Dimensionless),
-		metric.WithDescription("Number of incoming requests"),
-	)
-	if err != nil {
-		// TODO: handle this properly
-	}
-	requestLatency, err := meter.NewInt64Measure(
-		"http_request_latency",
-		metric.WithUnit(unit.Milliseconds),
-		metric.WithDescription("Time spent responding to a request"),
-	)
-	if err != nil {
-		// TODO: handle this properly
-	}
-	errorCount, err := meter.NewInt64Counter(
-		"http_error_count",
-		metric.WithUnit(unit.Dimensionless),
-		metric.WithDescription("Number of errored requests"),
-	)
-	if err != nil {
-		// TODO: handle this properly
-	}
-	handler = &telemetryHandler{
-		requestCount:   requestCount.Bind(hostKey),
-		requestLatency: requestLatency.Bind(hostKey),
-		errorCount:     errorCount.Bind(hostKey),
-		next:           handler,
-	}
 	handler = &logHandler{log: log, next: handler} // add logging
 	handler = ensureSessionID(handler)             // add session ID
 	log.Infof("starting server on " + addr + ":" + srvPort)
 	log.Fatal(http.ListenAndServe(addr+":"+srvPort, handler))
 }
 
-func checkEnvVar(s string) bool {
-	return s != "" && s != "<no value>"
+func initTracing(log logrus.FieldLogger, syncer exporttrace.SpanSyncer) {
+	tp, err := trace.NewProvider(
+		trace.WithConfig(
+			trace.Config{
+				DefaultSampler: trace.AlwaysSample(),
+				Resource:       res,
+			},
+		),
+		trace.WithSyncer(syncer),
+	)
+	if err != nil {
+		log.Fatal(err)
+	}
+	global.SetTraceProvider(tp)
 }
 
-var pusher *push.Controller
-
-func initTracing(log logrus.FieldLogger) {
-	// Create stdout exporter to be able to retrieve
-	// the collected spans.
-	api_key := os.Getenv("NEW_RELIC_API_KEY")
-	if checkEnvVar(api_key) {
-		log.Info("Using New Relic API KEY: " + api_key)
-		exporter, err := newrelic.NewExporter(
-			"Frontend",
-			api_key,
-			func(cfg *telemetry.Config) {
-				metricURL := os.Getenv("NEW_RELIC_METRIC_URL")
-				if checkEnvVar(metricURL) {
-					log.Info("Setting metric export endpoint to " + metricURL)
-					cfg.MetricsURLOverride = metricURL
-				}
-				traceURL := os.Getenv("NEW_RELIC_TRACE_URL")
-				if checkEnvVar(traceURL) {
-					log.Info("Setting trace export endpoint to " + traceURL)
-					cfg.SpansURLOverride = traceURL
-				}
-			},
-		)
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		tp, err := trace.NewProvider(trace.WithSyncer(exporter))
-		if err != nil {
-			log.Fatal(err)
-		}
-		// TODO: enable these piecemeal based on available urls
-		global.SetTraceProvider(tp)
-
-		selector := simple.NewWithExactMeasure()
-		batcher := ungrouped.New(selector, true)
-		pusher = push.New(batcher, exporter, time.Second)
-		pusher.Start()
-		global.SetMeterProvider(pusher)
-	} else {
-		log.Info("No New Relic API key found, defaulting to stdout exporter")
-		// Create stdout exporter to be able to retrieve
-		// the collected spans.
-		exporter, err := stdout.NewExporter(stdout.Options{PrettyPrint: true})
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		// For the demonstration, use sdktrace.AlwaysSample sampler to sample all traces.
-		// In a production application, use sdktrace.ProbabilitySampler with a desired probability.
-		tp, err := trace.NewProvider(trace.WithConfig(trace.Config{DefaultSampler: trace.AlwaysSample()}),
-			trace.WithSyncer(exporter))
-		if err != nil {
-			log.Fatal(err)
-		}
-		global.SetTraceProvider(tp)
-		// TODO: use stdout exporter
-	}
+func initMetric(log logrus.FieldLogger, exporter exportmetric.Exporter) *push.Controller {
+	pusher := push.New(
+		basic.New(simple.NewWithExactDistribution(), exporter),
+		exporter,
+		push.WithPeriod(time.Second),
+		push.WithResource(res),
+	)
+	pusher.Start()
+	global.SetMeterProvider(pusher.Provider())
+	return pusher
 }
 
 func mustMapEnv(target *string, envKey string) {
@@ -263,8 +231,8 @@ func mustConnGRPC(ctx context.Context, conn **grpc.ClientConn, addr string) {
 	*conn, err = grpc.DialContext(ctx, addr,
 		grpc.WithInsecure(),
 		grpc.WithTimeout(time.Second*3),
-		grpc.WithUnaryInterceptor(grpctrace.UnaryClientInterceptor(global.Tracer("Frontend"))),
-		grpc.WithStreamInterceptor(grpctrace.StreamClientInterceptor(global.Tracer("Frontend"))),
+		grpc.WithUnaryInterceptor(UnaryClientInterceptor()),
+		grpc.WithStreamInterceptor(StreamClientInterceptor()),
 	)
 	if err != nil {
 		panic(errors.Wrapf(err, "grpc: failed to connect %s", addr))

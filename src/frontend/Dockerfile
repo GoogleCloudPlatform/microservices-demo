@@ -1,13 +1,9 @@
-FROM golang:1.13-alpine as builder
-RUN apk add --no-cache ca-certificates git curl && \
-      curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
+FROM golang:1.15-alpine as builder
 
 ENV PROJECT github.com/GoogleCloudPlatform/microservices-demo/src/frontend
 WORKDIR /go/src/$PROJECT
 
 # restore dependencies
-COPY Gopkg.* ./
-RUN dep ensure --vendor-only -v
 COPY . .
 RUN go install .
 

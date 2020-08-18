@@ -16,24 +16,122 @@ package main
 
 import (
 	"context"
+	"fmt"
+	"net"
 	"net/http"
+	"os"
+	"strings"
 	"time"
 
-	"go.opentelemetry.io/otel/api/metric"
-
+	"cloud.google.com/go/compute/metadata"
 	"github.com/google/uuid"
+	"github.com/gorilla/mux"
 	"github.com/sirupsen/logrus"
+	"go.opentelemetry.io/otel/api/global"
+	"go.opentelemetry.io/otel/api/kv"
+	"go.opentelemetry.io/otel/api/metric"
+	"go.opentelemetry.io/otel/api/propagation"
+	"go.opentelemetry.io/otel/api/standard"
+	"go.opentelemetry.io/otel/api/trace"
+	"go.opentelemetry.io/otel/api/unit"
+	"go.opentelemetry.io/otel/instrumentation/grpctrace"
+	"go.opentelemetry.io/otel/sdk/resource"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/peer"
 )
+
+const (
+	instName = "github.com/GoogleCloudPlatform/microservices-demo/src/frontend"
+	instVer  = "semver:0.0.1"
+)
+
+var (
+	tracer trace.Tracer
+	meter  metric.Meter
+
+	httpLatency metric.Float64ValueRecorder
+
+	grpcLatency metric.Float64ValueRecorder
+
+	res *resource.Resource
+)
+
+func init() {
+	tracer = global.TraceProvider().Tracer(instName, trace.WithInstrumentationVersion(instVer))
+	meter = global.MeterProvider().Meter(instName, metric.WithInstrumentationVersion(instVer))
+
+	httpLatency = metric.Must(meter).NewFloat64ValueRecorder(
+		"http.server.duration",
+		metric.WithDescription("duration of the inbound HTTP request"),
+		metric.WithUnit(unit.Milliseconds),
+	)
+
+	grpcLatency = metric.Must(meter).NewFloat64ValueRecorder(
+		"grpc.client.duration",
+		metric.WithDescription("duration of the inbound gRPC request"),
+		metric.WithUnit(unit.Milliseconds),
+	)
+
+	labels := []kv.KeyValue{standard.ServiceNameKey.String(serviceName)}
+	if metadata.OnGCE() {
+		labels = append(labels, standard.CloudProviderGCP)
+
+		// Ignore all errors as we cannot do anything about them.
+
+		if projectID, err := metadata.ProjectID(); err == nil && projectID != "" {
+			labels = append(labels, standard.CloudAccountIDKey.String(projectID))
+		}
+
+		if zone, err := metadata.Zone(); err == nil && zone != "" {
+			labels = append(labels, standard.CloudZoneKey.String(zone))
+
+			splitArr := strings.SplitN(zone, "-", 3)
+			if len(splitArr) == 3 {
+				standard.CloudRegionKey.String(strings.Join(splitArr[0:2], "-"))
+			}
+		}
+
+		if instanceID, err := metadata.InstanceID(); err == nil && instanceID != "" {
+			labels = append(labels, standard.HostIDKey.String(instanceID))
+		}
+
+		if name, err := metadata.InstanceName(); err == nil && name != "" {
+			labels = append(labels, standard.HostNameKey.String(name))
+		}
+
+		if hostname, err := os.Hostname(); err == nil && hostname != "" {
+			labels = append(labels, standard.HostHostNameKey.String(hostname))
+		}
+
+		if hostType, err := metadata.Get("instance/machine-type"); err == nil && hostType != "" {
+			labels = append(labels, standard.HostTypeKey.String(hostType))
+		}
+	}
+
+	if os.Getenv("KUBERNETES_SERVICE_HOST") != "" {
+		if ns, ok := os.LookupEnv("NAMESPACE"); ok && ns != "" {
+			labels = append(labels, standard.K8SNamespaceNameKey.String(ns))
+		}
+
+		if host, ok := os.LookupEnv("HOSTNAME"); ok && host != "" {
+			labels = append(labels, standard.K8SPodNameKey.String(host))
+		}
+
+		if containerName := os.Getenv("CONTAINER_NAME"); containerName != "" {
+			labels = append(labels, standard.ContainerNameKey.String(containerName))
+		}
+
+		if clusterName, err := metadata.InstanceAttributeValue("cluster-name"); err == nil && clusterName != "" {
+			labels = append(labels, standard.K8SClusterNameKey.String(clusterName))
+		}
+
+	}
+
+	res = resource.New(labels...)
+}
 
 type ctxKeyLog struct{}
 type ctxKeyRequestID struct{}
-
-type telemetryHandler struct {
-	requestCount   metric.BoundInt64Counter
-	errorCount     metric.BoundInt64Counter
-	requestLatency metric.BoundInt64Measure
-	next           http.Handler
-}
 
 type logHandler struct {
 	log  *logrus.Logger
@@ -44,22 +142,6 @@ type responseRecorder struct {
 	b      int
 	status int
 	w      http.ResponseWriter
-}
-
-func (o *telemetryHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	ctx := r.Context()
-	start := time.Now()
-	rr := &responseRecorder{w: w}
-	defer func() {
-		if rr.status >= 400 {
-			o.errorCount.Add(ctx, 1)
-		}
-		o.requestCount.Add(ctx, 1)
-	}()
-	defer func() {
-		o.requestLatency.Record(ctx, (int64)(time.Since(start)/time.Millisecond))
-	}()
-	o.next.ServeHTTP(rr, r)
 }
 
 func (r *responseRecorder) Header() http.Header { return r.w.Header() }
@@ -128,3 +210,159 @@ func ensureSessionID(next http.Handler) http.HandlerFunc {
 		next.ServeHTTP(w, r)
 	}
 }
+
+type traceware struct {
+	handler http.Handler
+}
+
+// ServeHTTP implements the http.Handler interface. It does the actual
+// tracing of the request.
+func (tw traceware) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	ctx := propagation.ExtractHTTP(r.Context(), global.Propagators(), r.Header)
+	spanName := ""
+	route := mux.CurrentRoute(r)
+	if route != nil {
+		var err error
+		spanName, err = route.GetPathTemplate()
+		if err != nil {
+			spanName, err = route.GetPathRegexp()
+			if err != nil {
+				spanName = ""
+			}
+		}
+	}
+	if spanName == "" {
+		spanName = fmt.Sprintf("HTTP %s route not found", r.Method)
+	}
+	labels := []kv.KeyValue{
+		kv.String("span.name", spanName),
+		kv.String("span.kind", trace.SpanKindServer.String()),
+	}
+	labels = append(labels, standard.HTTPServerMetricAttributesFromHTTPRequest(serviceName, r)...)
+
+	start := time.Now()
+	defer func() {
+		httpLatency.Record(ctx, float64(time.Now().Sub(start)), labels...)
+	}()
+	tw.handler.ServeHTTP(w, r)
+}
+
+func MuxMiddleware() mux.MiddlewareFunc {
+	return func(handler http.Handler) http.Handler {
+		return traceware{handler: handler}
+	}
+}
+
+// UnaryClientInterceptor returns a grpc.UnaryClientInterceptor suitable
+// for use in a grpc.Dial call.
+func UnaryClientInterceptor() grpc.UnaryClientInterceptor {
+	upstream := grpctrace.UnaryClientInterceptor(tracer)
+	return func(
+		ctx context.Context,
+		method string,
+		req, reply interface{},
+		cc *grpc.ClientConn,
+		invoker grpc.UnaryInvoker,
+		opts ...grpc.CallOption,
+	) error {
+		start := time.Now()
+		defer func() {
+			grpcLatency.Record(
+				ctx,
+				float64(time.Now().Sub(start)),
+				labels(method, cc.Target())...,
+			)
+		}()
+
+		return upstream(ctx, method, req, reply, cc, invoker, opts...)
+	}
+}
+
+// StreamClientInterceptor returns a grpc.StreamClientInterceptor suitable
+// for use in a grpc.Dial call.
+func StreamClientInterceptor() grpc.StreamClientInterceptor {
+	upstream := grpctrace.StreamClientInterceptor(tracer)
+	return func(
+		ctx context.Context,
+		desc *grpc.StreamDesc,
+		cc *grpc.ClientConn,
+		method string,
+		streamer grpc.Streamer,
+		opts ...grpc.CallOption,
+	) (grpc.ClientStream, error) {
+		start := time.Now()
+		defer func() {
+			grpcLatency.Record(
+				ctx,
+				float64(time.Now().Sub(start)),
+				labels(method, cc.Target())...,
+			)
+		}()
+
+		return upstream(ctx, desc, cc, method, streamer, opts...)
+	}
+}
+
+/*************************************************************************
+* Copied from
+* go.opentelemetry.io/otel/instrumentation/grpctrace/interceptor.go@v0.8.0
+ */
+
+func labels(fullMethod, peerAddress string) []kv.KeyValue {
+	attrs := []kv.KeyValue{standard.RPCSystemGRPC}
+	name, mAttrs := parseFullMethod(fullMethod)
+	attrs = append(attrs, mAttrs...)
+	attrs = append(attrs, peerAttr(peerAddress)...)
+	attrs = append(attrs, kv.String("span.name", name))
+	attrs = append(attrs, kv.String("span.kind", trace.SpanKindServer.String()))
+	return attrs
+}
+
+// peerAttr returns attributes about the peer address.
+func peerAttr(addr string) []kv.KeyValue {
+	host, port, err := net.SplitHostPort(addr)
+	if err != nil {
+		return []kv.KeyValue(nil)
+	}
+
+	if host == "" {
+		host = "127.0.0.1"
+	}
+
+	return []kv.KeyValue{
+		standard.NetPeerIPKey.String(host),
+		standard.NetPeerPortKey.String(port),
+	}
+}
+
+// peerFromCtx returns a peer address from a context, if one exists.
+func peerFromCtx(ctx context.Context) string {
+	p, ok := peer.FromContext(ctx)
+	if !ok {
+		return ""
+	}
+	return p.Addr.String()
+}
+
+// parseFullMethod returns a span name following the OpenTelemetry semantic
+// conventions as well as all applicable span kv.KeyValue attributes based
+// on a gRPC's FullMethod.
+func parseFullMethod(fullMethod string) (string, []kv.KeyValue) {
+	name := strings.TrimLeft(fullMethod, "/")
+	parts := strings.SplitN(name, "/", 2)
+	if len(parts) != 2 {
+		// Invalid format, does not follow `/package.service/method`.
+		return name, []kv.KeyValue(nil)
+	}
+
+	var attrs []kv.KeyValue
+	if service := parts[0]; service != "" {
+		attrs = append(attrs, standard.RPCServiceKey.String(service))
+	}
+	if method := parts[1]; method != "" {
+		attrs = append(attrs, standard.RPCMethodKey.String(method))
+	}
+	return name, attrs
+}
+
+/*************************************************************************/

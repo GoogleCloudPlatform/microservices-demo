@@ -31,9 +31,9 @@ import (
 
 	"go.opentelemetry.io/otel/api/correlation"
 	"go.opentelemetry.io/otel/api/global"
-	"go.opentelemetry.io/otel/api/key"
+	"go.opentelemetry.io/otel/api/kv"
 	"go.opentelemetry.io/otel/api/trace"
-	"go.opentelemetry.io/otel/plugin/httptrace"
+	"go.opentelemetry.io/otel/instrumentation/httptrace"
 
 	pb "github.com/GoogleCloudPlatform/microservices-demo/src/frontend/genproto"
 	"github.com/GoogleCloudPlatform/microservices-demo/src/frontend/money"
@@ -437,7 +437,7 @@ func renderHTTPError(log logrus.FieldLogger, r *http.Request, w http.ResponseWri
 		"status":      http.StatusText(code),
 	}); templateErr != nil {
 		log.Println(templateErr)
-	}		
+	}
 }
 
 func currentCurrency(r *http.Request) string {
@@ -482,8 +482,8 @@ func startSpan(name string, r **http.Request) (context.Context, trace.Span) {
 		// TODO: handle this properly
 	}
 
-	hostKey := key.New("host").String(hostname)
-	kindKey := key.New("kind").String("SERVER")
+	hostKey := kv.String("host", hostname)
+	kindKey := kv.String("kind", "SERVER")
 	attrs, entries, spanCtx := httptrace.Extract(req.Context(), req)
 	attrs = append(attrs, hostKey, kindKey)
 	req = req.WithContext(correlation.ContextWithMap(req.Context(), correlation.NewMap(correlation.MapUpdate{
