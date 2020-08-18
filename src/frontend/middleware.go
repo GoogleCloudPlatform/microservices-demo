@@ -242,7 +242,7 @@ func (tw traceware) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	start := time.Now()
 	defer func() {
-		httpLatency.Record(ctx, float64(time.Now().Sub(start)), labels...)
+		httpLatency.Record(ctx, float64(time.Now().Sub(start).Milliseconds()), labels...)
 	}()
 	tw.handler.ServeHTTP(w, r)
 }
@@ -269,7 +269,7 @@ func UnaryClientInterceptor() grpc.UnaryClientInterceptor {
 		defer func() {
 			grpcLatency.Record(
 				ctx,
-				float64(time.Now().Sub(start)),
+				float64(time.Now().Sub(start).Milliseconds()),
 				labels(method, cc.Target())...,
 			)
 		}()
@@ -294,7 +294,7 @@ func StreamClientInterceptor() grpc.StreamClientInterceptor {
 		defer func() {
 			grpcLatency.Record(
 				ctx,
-				float64(time.Now().Sub(start)),
+				float64(time.Now().Sub(start).Milliseconds()),
 				labels(method, cc.Target())...,
 			)
 		}()
