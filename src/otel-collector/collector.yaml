@@ -1,0 +1,29 @@
+---
+extensions:
+  health_check:
+  zpages:
+receivers:
+  zipkin:
+  jaeger:
+    protocols:
+      grpc:
+      thrift_http:
+processors:
+  batch:
+  queued_retry:
+  memory_limiter:
+    ballast_size_mib: 683
+    check_interval: 2s
+    limit_mib: 1800
+    spike_limit_mib: 500
+exporters:
+  newrelic:
+    apikey: NEW_RELIC_API_KEY
+    spans_url_override: NEW_RELIC_TRACE_URL
+    metrics_url_override: NEW_RELIC_METRIC_URL
+service:
+  pipelines:
+    traces:
+      receivers: [zipkin, jaeger]
+      processors: [memory_limiter, batch, queued_retry]
+      exporters: [newrelic]
