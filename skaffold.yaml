@@ -22,6 +22,11 @@ build:
   # https://skaffold.dev/docs/concepts/#image-repository-handling
   - image: emailservice
     context: src/emailservice
+    docker:
+      buildArgs:
+        NEW_RELIC_API_KEY: "{{.NEW_RELIC_API_KEY}}"
+        NEW_RELIC_TRACE_URL: "{{.NEW_RELIC_TRACE_URL}}"
+        NEW_RELIC_METRIC_URL: "{{.NEW_RELIC_METRIC_URL}}"
   - image: productcatalogservice
     context: src/productcatalogservice
     docker:
@@ -29,6 +34,11 @@ build:
         JAEGER_SERVICE_ADDR: otel-collector:14268
   - image: recommendationservice
     context: src/recommendationservice
+    docker:
+      buildArgs:
+        NEW_RELIC_API_KEY: "{{.NEW_RELIC_API_KEY}}"
+        NEW_RELIC_TRACE_URL: "{{.NEW_RELIC_TRACE_URL}}"
+        NEW_RELIC_METRIC_URL: "{{.NEW_RELIC_METRIC_URL}}"
   - image: shippingservice
     context: src/shippingservice
     docker:
