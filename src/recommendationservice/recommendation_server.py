@@ -18,17 +18,16 @@ import os
 import random
 import time
 import traceback
+from urlparse import urlparse
 from concurrent import futures
 
 import googleclouddebugger
 import googlecloudprofiler
 from google.auth.exceptions import DefaultCredentialsError
 import grpc
-from opencensus.trace.exporters import print_exporter
-from opencensus.trace.exporters import stackdriver_exporter
-from opencensus.trace.ext.grpc import server_interceptor
-from opencensus.common.transports.async_ import AsyncTransport
-from opencensus.trace.samplers import always_on
+from opencensus_ext_newrelic import NewRelicTraceExporter
+from opencensus.ext.grpc import server_interceptor
+from opencensus.trace import samplers
 
 import demo_pb2
 import demo_pb2_grpc
@@ -104,10 +103,12 @@ if __name__ == "__main__":
         raise KeyError()
       else:
         logger.info("Tracing enabled.")
-        sampler = always_on.AlwaysOnSampler()
-        exporter = stackdriver_exporter.StackdriverExporter(
-          project_id=os.environ.get('GCP_PROJECT_ID'),
-          transport=AsyncTransport)
+        sampler = samplers.AlwaysOnSampler()
+        exporter = NewRelicTraceExporter(
+            insert_key=os.environ["NEW_RELIC_API_KEY"],
+            host=urlparse(os.environ["NEW_RELIC_TRACE_URL"]).hostname,
+            service_name="recommendationservice"
+        )
         tracer_interceptor = server_interceptor.OpenCensusServerInterceptor(sampler, exporter)
     except (KeyError, DefaultCredentialsError):
         logger.info("Tracing disabled.")
@@ -124,7 +125,7 @@ if __name__ == "__main__":
               module='recommendationserver',
               version='1.0.0'
           )
-        except Exception, err:
+        except Exception:
             logger.error("Could not enable debugger")
             logger.error(traceback.print_exc())
             pass
