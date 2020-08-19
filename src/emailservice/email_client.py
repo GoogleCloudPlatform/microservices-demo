@@ -33,7 +33,7 @@ try:
     exporter = NewRelicTraceExporter(
         insert_key=os.environ["NEW_RELIC_API_KEY"],
         host=urlparse(os.environ["NEW_RELIC_TRACE_URL"]).hostname,
-        service_name="recommendationservice"
+        service_name="emailservice"
     )
     tracer = Tracer(exporter=exporter)
     tracer_interceptor = client_interceptor.OpenCensusClientInterceptor(tracer, host_port='0.0.0.0:8080')

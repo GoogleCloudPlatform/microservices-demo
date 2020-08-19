@@ -188,7 +188,7 @@ if __name__ == '__main__':
       exporter = NewRelicTraceExporter(
           insert_key=os.environ["NEW_RELIC_API_KEY"],
           host=urlparse(os.environ["NEW_RELIC_TRACE_URL"]).hostname,
-          service_name="recommendationservice"
+          service_name="emailservice"
       )
       tracer_interceptor = server_interceptor.OpenCensusServerInterceptor(sampler, exporter)
   except (KeyError, DefaultCredentialsError):
