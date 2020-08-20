@@ -110,11 +110,15 @@ func init() {
 
 	if os.Getenv("KUBERNETES_SERVICE_HOST") != "" {
 		if ns, ok := os.LookupEnv("NAMESPACE"); ok && ns != "" {
+			labels = append(labels, standard.ServiceNamespaceKey.String(ns))
 			labels = append(labels, standard.K8SNamespaceNameKey.String(ns))
 		}
 
 		if host, ok := os.LookupEnv("HOSTNAME"); ok && host != "" {
+			labels = append(labels, standard.ServiceInstanceIDKey.String(host))
 			labels = append(labels, standard.K8SPodNameKey.String(host))
+		} else {
+			labels = append(labels, standard.ServiceInstanceIDKey.String(uuid.New().String()))
 		}
 
 		if containerName := os.Getenv("CONTAINER_NAME"); containerName != "" {
@@ -125,6 +129,8 @@ func init() {
 			labels = append(labels, standard.K8SClusterNameKey.String(clusterName))
 		}
 
+	} else {
+		labels = append(labels, standard.ServiceInstanceIDKey.String(uuid.New().String()))
 	}
 
 	res = resource.New(labels...)
