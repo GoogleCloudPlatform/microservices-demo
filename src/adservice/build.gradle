@@ -45,7 +45,7 @@ dependencies {
     if (speed) {
         implementation fileTree(dir: offlineCompile, include: '*.jar')
     } else {
-        exporters ("com.newrelic.telemetry:opentelemetry-exporters-newrelic-auto:0.7.0") {
+        exporters ("com.newrelic.telemetry:opentelemetry-exporters-newrelic-auto:0.8.0-SNAPSHOT") {
             transitive = false
         }
 
@@ -124,6 +124,7 @@ task adService(type: CreateStartScripts) {
     classpath = startScripts.classpath
     defaultJvmOpts = ["-javaagent:auto-agent/opentelemetry-agent.jar",
                       "-Dio.opentelemetry.auto.slf4j.simpleLogger.log.com.newrelic.telemetry=debug",
+                      "-Dotel.imr.export.interval=10000",
                       "-Dlog4j2.contextDataInjector=io.opencensus.contrib.logcorrelation.log4j2.OpenCensusTraceContextDataInjector",
                       "-agentpath:/opt/cprof/profiler_java_agent.so=-cprof_service=adservice,-cprof_service_version=1.0.0"]
 

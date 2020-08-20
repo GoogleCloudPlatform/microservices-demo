@@ -191,25 +191,29 @@ public final class AdService {
 
     private void reportAdsToBackgroundService(List<Ad> allAds) {
       backgroundJobber.execute(() -> {
-        long startTime = System.currentTimeMillis();
-        String spanName = "ReportRequestedAds";
-        Span span = tracer.spanBuilder(spanName)
-            .setNoParent()
-            .setAttribute("numberOfAds", allAds.size())
-            .startSpan();
-        try (Scope ignored = tracer.withSpan(span)) {
-          anotherSpan();
-        } catch (InterruptedException e) {
-          throw new RuntimeException(e);
-        } finally {
-          backgroundLatency.record((System.currentTimeMillis() - startTime),
-              Labels.of("span.name", spanName,
-                  "error", "false",
-                  "span.kind", Span.Kind.INTERNAL.name()
-              ));
-          span.end();
-        }
+        reportAdsRequest(allAds);
       });
+    }
+
+    private void reportAdsRequest(List<Ad> allAds) {
+      long startTime = System.currentTimeMillis();
+      String spanName = "ReportRequestedAds";
+      Span span = tracer.spanBuilder(spanName)
+          .setNoParent()
+          .setAttribute("numberOfAds", allAds.size())
+          .startSpan();
+      try (Scope ignored = tracer.withSpan(span)) {
+        anotherSpan();
+      } catch (InterruptedException e) {
+        throw new RuntimeException(e);
+      } finally {
+        backgroundLatency.record((System.currentTimeMillis() - startTime),
+            Labels.of("span.name", spanName,
+                "error", "false",
+                "span.kind", Span.Kind.INTERNAL.name()
+            ));
+        span.end();
+      }
     }
 
     private void anotherSpan() throws InterruptedException {
