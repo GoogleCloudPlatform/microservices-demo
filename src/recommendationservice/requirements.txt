@@ -34,3 +34,4 @@ rsa==4.0                  # via google-auth
 six==1.12.0               # via google-api-core, google-api-python-client, google-auth, google-python-cloud-debugger, grpcio, protobuf
 uritemplate==3.0.0        # via google-api-python-client
 urllib3==1.24.2           # via requests
+ddtrace

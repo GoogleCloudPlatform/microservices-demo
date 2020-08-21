@@ -32,6 +32,10 @@ spec:
         ports:
         - containerPort: 8080
         env:
+        - name: DD_AGENT_HOST
+          valueFrom:
+            fieldRef:
+              fieldPath: status.hostIP
         - name: PORT
           value: "8080"
         # - name: DISABLE_TRACING
