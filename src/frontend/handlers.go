@@ -95,7 +95,7 @@ func (fe *frontendServer) homeHandler(w http.ResponseWriter, r *http.Request) {
 		"ad":            fe.chooseAd(r.Context(), []string{}, log),
 		"platform_css":  plat.css,
 		"platform_name": plat.provider,
-		"extra_headers": template.HTML(os.Getenv("EXTRA_HEADERS")),
+		"extra_headers": template.HTML(os.Getenv("FRONTEND_EXTRA_HEADERS")),
 	}); err != nil {
 		log.Error(err)
 	}
@@ -172,7 +172,7 @@ func (fe *frontendServer) productHandler(w http.ResponseWriter, r *http.Request)
 		"cart_size":       cartSize(cart),
 		"platform_css":    plat.css,
 		"platform_name":   plat.provider,
-		"extra_headers": template.HTML(os.Getenv("EXTRA_HEADERS")),
+		"extra_headers":   template.HTML(os.Getenv("FRONTEND_EXTRA_HEADERS")),
 	}); err != nil {
 		log.Println(err)
 	}
@@ -284,7 +284,7 @@ func (fe *frontendServer) viewCartHandler(w http.ResponseWriter, r *http.Request
 		"expiration_years": []int{year, year + 1, year + 2, year + 3, year + 4},
 		"platform_css":     plat.css,
 		"platform_name":    plat.provider,
-		"extra_headers": template.HTML(os.Getenv("EXTRA_HEADERS")),
+		"extra_headers":    template.HTML(os.Getenv("FRONTEND_EXTRA_HEADERS")),
 	}); err != nil {
 		log.Println(err)
 	}
@@ -354,7 +354,7 @@ func (fe *frontendServer) placeOrderHandler(w http.ResponseWriter, r *http.Reque
 		"recommendations": recommendations,
 		"platform_css":    plat.css,
 		"platform_name":   plat.provider,
-		"extra_headers": template.HTML(os.Getenv("EXTRA_HEADERS")),
+		"extra_headers":   template.HTML(os.Getenv("FRONTEND_EXTRA_HEADERS")),
 	}); err != nil {
 		log.Println(err)
 	}
@@ -410,12 +410,12 @@ func renderHTTPError(log logrus.FieldLogger, r *http.Request, w http.ResponseWri
 
 	w.WriteHeader(code)
 	templates.ExecuteTemplate(w, "error", map[string]interface{}{
-		"session_id":  sessionID(r),
-		"request_id":  r.Context().Value(ctxKeyRequestID{}),
-		"error":       errMsg,
-		"status_code": code,
-		"extra_headers": template.HTML(os.Getenv("EXTRA_HEADERS")),
-		"status":      http.StatusText(code)})
+		"session_id":    sessionID(r),
+		"request_id":    r.Context().Value(ctxKeyRequestID{}),
+		"error":         errMsg,
+		"status_code":   code,
+		"extra_headers": template.HTML(os.Getenv("FRONTEND_EXTRA_HEADERS")),
+		"status":        http.StatusText(code)})
 }
 
 func currentCurrency(r *http.Request) string {

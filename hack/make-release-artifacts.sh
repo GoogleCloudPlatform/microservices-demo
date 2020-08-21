@@ -31,6 +31,7 @@ NODE_SELECTOR_KEY="${NODE_SELECTOR_KEY:--}"
 NODE_SELECTOR_VALUE="${NODE_SELECTOR_VALUE:--}"
 TOLERATION_KEY="${TOLERATION_KEY:--}"
 TOLERATION_VALUE="${TOLERATION_VALUE:--}"
+FRONTEND_EXTRA_HEADERS="${FRONTEND_EXTRA_HEADERS:-}"
 
 print_license_header() {
     cat "${SCRIPTDIR}/license_header.txt"
@@ -97,6 +98,11 @@ mk_kubernetes_manifests() {
         replace="\1tolerations: \n\1- key: ${TOLERATION_KEY}\n\1  operator: Equal\n\1  value: ${TOLERATION_VALUE}"
         out_manifest="$(gsed -r "s|$pattern|$replace|g" <(echo "${out_manifest}") )"
     fi
+
+    # insert FRONTEND_EXTRA_HEADERS
+    pattern="^(\s*)- name: FRONTEND_EXTRA_HEADERS"
+    replace="\1- name: FRONTEND_EXTRA_HEADERS\n\1  value: \"${FRONTEND_EXTRA_HEADERS}\""
+    out_manifest="$(gsed -r "s|$pattern|$replace|g" <(echo "${out_manifest}") )"
 
     # substitude loadgenerator port: 8089 -> 80
     pattern="^(\s*)port:\s+8089(\s*)"
