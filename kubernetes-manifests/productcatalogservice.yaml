@@ -42,10 +42,14 @@ spec:
           value: "true"
         - name: DD_ENV
           value: "prod"
+        - name: DD_LOGS_INJECTION
+          value: "true"
+        - name: DD_VERSION
+          value: "latest"
         - name: DD_SERVICE
           value: "productcatalogservice"
         - name: DD_LOG_LEVEL
-          value: "debug"
+          value: "info"
         - name: DISABLE_STATS
           value: "1"
         - name: DISABLE_TRACING

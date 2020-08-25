@@ -58,10 +58,14 @@ spec:
           # Enable datadog tracing
           - name: DATADOG_APM_ENABLED
             value: "true"
+          - name: DD_LOGS_INJECTION
+            value: "true"
           - name: DD_ENV
             value: "prod"
           - name: DD_SERVICE
             value: "checkoutservice"
+          - name: DD_VERSION
+            value: "latest"
           - name: DD_LOG_LEVEL
             value: "debug"
           # Disable default opentracing ?

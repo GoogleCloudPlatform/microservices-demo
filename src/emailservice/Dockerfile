@@ -49,8 +49,5 @@ COPY --from=builder /usr/local/lib/python3.7/ /usr/local/lib/python3.7/
 
 # Add the application
 COPY . .
-ENV DD_LOGS_INJECTION=true
-ENV DD_ENV=prod
-ENV DD_SERVICE=emailservice
 EXPOSE 8080
 ENTRYPOINT [ "ddtrace-run", "python", "email_server.py" ]

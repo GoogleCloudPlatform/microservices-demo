@@ -44,6 +44,14 @@ spec:
           valueFrom:
             fieldRef:
               fieldPath: status.hostIP
+        - name: DD_ENV
+          value: "prod"
+        - name: DD_LOGS_INJECTION
+          value: "true"
+        - name: DD_SERVICE
+          value: "recommendationservice"
+        - name: DD_VERSION
+          value: "latest"
         - name: PORT
           value: "8080"
         - name: PRODUCT_CATALOG_SERVICE_ADDR

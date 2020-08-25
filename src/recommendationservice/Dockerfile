@@ -18,9 +18,6 @@ RUN apt-get update -qqy && \
 	rm -rf /var/lib/apt/lists/*
 # show python logs as they occur
 ENV PYTHONUNBUFFERED=0
-ENV DD_LOGS_INJECTION=true
-ENV DD_ENV=prod
-ENV DD_SERVICE=recommendationservice
 
 # download the grpc health probe
 RUN GRPC_HEALTH_PROBE_VERSION=v0.2.0 && \

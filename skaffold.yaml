@@ -43,7 +43,7 @@ build:
   - image: adservice
     context: src/adservice
   tagPolicy:
-    gitCommit: {}
+    sha256: {}  # the sha256 always tags the images as `latest` (which points to sha256 of the image built)
 deploy:
   kubectl:
     manifests:
