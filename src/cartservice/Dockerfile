@@ -35,6 +35,7 @@ RUN apk add --no-cache \
     libuuid \
     libgcc \
     libstdc++ \
+    libssl1.0 \
     libintl \
     icu
 WORKDIR /app
