@@ -23,7 +23,8 @@ const logger = pino({
   name: 'paymentservice-server',
   messageKey: 'message',
   changeLevelName: 'severity',
-  useLevelLabels: true
+  useLevelLabels: true,
+  timestamp: pino.stdTimeFunctions.unixTime
 });
 
 class HipsterShopServer {

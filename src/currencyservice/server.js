@@ -52,6 +52,7 @@ else {
 const path = require('path');
 const grpc = require('grpc');
 const pino = require('pino');
+
 const protoLoader = require('@grpc/proto-loader');
 
 const MAIN_PROTO_PATH = path.join(__dirname, './proto/demo.proto');
@@ -66,7 +67,8 @@ const logger = pino({
   name: 'currencyservice-server',
   messageKey: 'message',
   changeLevelName: 'severity',
-  useLevelLabels: true
+  useLevelLabels: true,
+  timestamp: pino.stdTimeFunctions.unixTime
 });
 
 /**

@@ -20,7 +20,8 @@ const logger = pino({
   name: 'paymentservice-charge',
   messageKey: 'message',
   changeLevelName: 'severity',
-  useLevelLabels: true
+  useLevelLabels: true,
+  timestamp: pino.stdTimeFunctions.unixTime
 });
 
 

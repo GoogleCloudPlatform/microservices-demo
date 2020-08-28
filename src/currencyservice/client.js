@@ -33,7 +33,8 @@ const logger = pino({
   name: 'currencyservice-client',
   messageKey: 'message',
   changeLevelName: 'severity',
-  useLevelLabels: true
+  useLevelLabels: true,
+  timestamp: pino.stdTimeFunctions.unixTime
 });
 
 const request = {
