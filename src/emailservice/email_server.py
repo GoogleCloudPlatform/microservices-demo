@@ -38,6 +38,10 @@ from opencensus.trace.samplers import always_on
 # import googleclouddebugger
 import googlecloudprofiler
 
+from ddtrace import patch_all
+patch_all()
+from ddtrace import tracer
+
 from logger import getJSONLogger
 logger = getJSONLogger('emailservice-server')
 
@@ -118,6 +122,7 @@ class HealthCheck():
     return health_pb2.HealthCheckResponse(
       status=health_pb2.HealthCheckResponse.SERVING)
 
+@tracer.wrap('start', service='emailservice')
 def start(dummy_mode):
   server = grpc.server(futures.ThreadPoolExecutor(max_workers=10),
                        interceptors=(tracer_interceptor,))

@@ -50,4 +50,4 @@ COPY --from=builder /usr/local/lib/python3.7/ /usr/local/lib/python3.7/
 # Add the application
 COPY . .
 EXPOSE 8080
-ENTRYPOINT [ "ddtrace-run", "python", "email_server.py" ]
+ENTRYPOINT [ "python", "email_server.py" ]
