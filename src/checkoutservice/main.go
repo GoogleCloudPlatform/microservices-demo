@@ -29,9 +29,11 @@ import (
 	"go.opencensus.io/plugin/ocgrpc"
 	"go.opencensus.io/stats/view"
 	"go.opencensus.io/trace"
-	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+	"gopkg.in/DataDog/dd-trace-go.v1/ddtrace/tracer"
+	gt "gopkg.in/DataDog/dd-trace-go.v1/contrib/google.golang.org/grpc"
+	"google.golang.org/grpc"
 
 	pb "github.com/GoogleCloudPlatform/microservices-demo/src/checkoutservice/genproto"
 	money "github.com/GoogleCloudPlatform/microservices-demo/src/checkoutservice/money"
@@ -69,6 +71,12 @@ type checkoutService struct {
 }
 
 func main() {
+	tracer.Start(
+		tracer.WithEnv("prod"),
+		tracer.WithService("checkoutservice"),
+		tracer.WithDebugMode(true),
+	)
+	defer tracer.Stop()
 	if os.Getenv("DISABLE_TRACING") == "" {
 		log.Info("Tracing enabled.")
 		go initTracing()
@@ -104,13 +112,24 @@ func main() {
 	}
 
 	var srv *grpc.Server
+	
 	if os.Getenv("DISABLE_STATS") == "" {
 		log.Info("Stats enabled.")
 		srv = grpc.NewServer(grpc.StatsHandler(&ocgrpc.ServerHandler{}))
+	} else if os.Getenv("DATADOG_APM_ENABLED") == "true" { //datadog traces enabled
+		log.Info("Datadog enabled.")
+		// Create the server interceptor using the grpc trace package.
+		grpc_option := gt.WithServiceName(os.Getenv("DD_SERVICE"))
+		unary_server_trace := gt.UnaryServerInterceptor(grpc_option)
+		stream_server_trace := gt.StreamServerInterceptor(grpc_option)
+		unary_trace := grpc.UnaryInterceptor(unary_server_trace)
+		stream_trace := grpc.StreamInterceptor(stream_server_trace)
+		srv = grpc.NewServer(unary_trace, stream_trace)	
 	} else {
 		log.Info("Stats disabled.")
-		srv = grpc.NewServer()
+		srv = grpc.NewServer()	
 	}
+
 	pb.RegisterCheckoutServiceServer(srv, svc)
 	healthpb.RegisterHealthServer(srv, svc)
 	log.Infof("starting to listen on tcp: %q", lis.Addr().String())

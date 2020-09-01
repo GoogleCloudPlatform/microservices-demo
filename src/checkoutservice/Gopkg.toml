@@ -23,8 +23,6 @@
 #   non-go = false
 #   go-tests = true
 #   unused-packages = true
-
-
 [[constraint]]
   name = "cloud.google.com/go"
   version = "0.40.0"
@@ -60,3 +58,4 @@
 [[constraint]]
   name = "contrib.go.opencensus.io/exporter/jaeger"
   version = "0.2.0"
+

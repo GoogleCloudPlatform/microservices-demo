@@ -25,6 +25,9 @@ logger = getJSONLogger('emailservice-client')
 from opencensus.trace.tracer import Tracer
 from opencensus.trace.exporters import stackdriver_exporter
 from opencensus.trace.ext.grpc import client_interceptor
+from ddtrace import patch_all
+patch_all()
+from ddtrace import tracer
 
 try:
     exporter = stackdriver_exporter.StackdriverExporter()
@@ -33,6 +36,7 @@ try:
 except:
     tracer_interceptor = client_interceptor.OpenCensusClientInterceptor()
 
+@tracer.wrap('send_confirmation_email', service='emailservice')
 def send_confirmation_email(email, order):
   channel = grpc.insecure_channel('0.0.0.0:8080')
   channel = grpc.intercept_channel(channel, tracer_interceptor)

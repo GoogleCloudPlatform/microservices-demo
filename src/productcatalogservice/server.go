@@ -28,6 +28,8 @@ import (
 	"syscall"
 	"time"
 
+	"gopkg.in/DataDog/dd-trace-go.v1/ddtrace/tracer"
+	gt "gopkg.in/DataDog/dd-trace-go.v1/contrib/google.golang.org/grpc"
 	pb "github.com/GoogleCloudPlatform/microservices-demo/src/productcatalogservice/genproto"
 	healthpb "google.golang.org/grpc/health/grpc_health_v1"
 
@@ -75,6 +77,11 @@ func init() {
 }
 
 func main() {
+	tracer.Start(
+		tracer.WithEnv("prod"),
+		tracer.WithService("productcatalogservice"),
+	)
+	defer tracer.Stop()
 	if os.Getenv("DISABLE_TRACING") == "" {
 		log.Info("Tracing enabled.")
 		go initTracing()
@@ -136,9 +143,18 @@ func run(port string) string {
 	if os.Getenv("DISABLE_STATS") == "" {
 		log.Info("Stats enabled.")
 		srv = grpc.NewServer(grpc.StatsHandler(&ocgrpc.ServerHandler{}))
+	} else if os.Getenv("DATADOG_APM_ENABLED") == "true" {
+		log.Info("Datadog trace enabled.")
+		// Create the server interceptor using the grpc trace package.
+		grpc_option := gt.WithServiceName(os.Getenv("DD_SERVICE"))
+		unary_server_trace := gt.UnaryServerInterceptor(grpc_option)
+		stream_server_trace := gt.StreamServerInterceptor(grpc_option)
+		unary_trace := grpc.UnaryInterceptor(unary_server_trace)
+		stream_trace := grpc.StreamInterceptor(stream_server_trace)
+		srv = grpc.NewServer(unary_trace, stream_trace)	
 	} else {
 		log.Info("Stats disabled.")
-		srv = grpc.NewServer()
+		srv = grpc.NewServer()	
 	}
 
 	svc := &productCatalog{}

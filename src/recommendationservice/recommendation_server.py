@@ -38,6 +38,9 @@ from grpc_health.v1 import health_pb2_grpc
 from logger import getJSONLogger
 logger = getJSONLogger('recommendationservice-server')
 
+from ddtrace import patch_all
+patch_all()
+
 def initStackdriverProfiling():
   project_id = None
   try:

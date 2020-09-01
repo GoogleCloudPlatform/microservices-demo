@@ -16,6 +16,8 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: redis-cart
+  annotations:
+    ad.datadoghq.com/redis.logs: '[{"source": "redis", "service": "redis-cart"}]'
 spec:
   selector:
     matchLabels:
@@ -28,6 +30,15 @@ spec:
       containers:
       - name: redis
         image: redis:alpine
+        env:
+        - name: DD_AGENT_HOST
+          valueFrom:
+            fieldRef:
+              fieldPath: status.hostIP
+        - name: DD_ENV
+          value: prod 
+        - name: DD_SERVICE
+          value: redis-cart
         ports:
         - containerPort: 6379
         readinessProbe:

@@ -33,6 +33,8 @@ import (
 	"go.opencensus.io/stats/view"
 	"go.opencensus.io/trace"
 	"google.golang.org/grpc"
+	"gopkg.in/DataDog/dd-trace-go.v1/ddtrace/tracer"
+	gt "gopkg.in/DataDog/dd-trace-go.v1/contrib/google.golang.org/grpc"
 )
 
 const (
@@ -93,7 +95,11 @@ func main() {
 		TimestampFormat: time.RFC3339Nano,
 	}
 	log.Out = os.Stdout
-
+	tracer.Start(
+		tracer.WithEnv("prod"),
+		tracer.WithService("frontend"),
+	)
+	defer tracer.Stop()
 	if os.Getenv("DISABLE_TRACING") == "" {
 		log.Info("Tracing enabled.")
 		go initTracing(log)
@@ -263,11 +269,27 @@ func mustMapEnv(target *string, envKey string) {
 
 func mustConnGRPC(ctx context.Context, conn **grpc.ClientConn, addr string) {
 	var err error
-	*conn, err = grpc.DialContext(ctx, addr,
-		grpc.WithInsecure(),
-		grpc.WithTimeout(time.Second*3),
-		grpc.WithStatsHandler(&ocgrpc.ClientHandler{}))
-	if err != nil {
-		panic(errors.Wrapf(err, "grpc: failed to connect %s", addr))
+
+	if os.Getenv("DATADOG_APM_ENABLED") == "true" { //datadog traces enabled
+		// Create the client interceptor using the grpc trace package.
+		si := gt.StreamClientInterceptor(gt.WithServiceName(os.Getenv("DD_SERVICE")))
+		ui := gt.UnaryClientInterceptor(gt.WithServiceName(os.Getenv("DD_SERVICE")))
+		*conn, err = grpc.DialContext(ctx, addr,
+			grpc.WithInsecure(),
+			grpc.WithTimeout(time.Second*3),
+			grpc.WithStatsHandler(&ocgrpc.ClientHandler{}),
+			grpc.WithStreamInterceptor(si), grpc.WithUnaryInterceptor(ui))
+		if err != nil {
+			panic(errors.Wrapf(err, "grpc: failed to connect %s", addr))
+		}
+	} else  {
+		*conn, err = grpc.DialContext(ctx, addr,
+			grpc.WithInsecure(),
+			grpc.WithTimeout(time.Second*3),
+			grpc.WithStatsHandler(&ocgrpc.ClientHandler{}),
+		)
+		if err != nil {
+			panic(errors.Wrapf(err, "grpc: failed to connect %s", addr))
+		}
 	}
 }

@@ -5,3 +5,4 @@ jinja2==2.10
 opencensus[stackdriver]==0.1.10
 python-json-logger==0.1.9
 google-cloud-profiler==1.0.8
+ddtrace
