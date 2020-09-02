@@ -70,13 +70,12 @@ spec:
           - name: FRONTEND_EXTRA_HEADERS
           - name: ENV_PLATFORM
             value: "gcp"
-          - name: NODE_NAME
+          - name: NODE_IP
             valueFrom:
               fieldRef:
-                apiVersion: v1
-                fieldPath: spec.nodeName
+                fieldPath: status.hostIP
           - name: OC_SERVICE_ADDR
-            value: "$(NODE_NAME):55678"
+            value: "$(NODE_IP):55678"
           resources:
             requests:
               cpu: 100m

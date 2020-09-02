@@ -35,13 +35,12 @@ spec:
         env:
         - name: PORT
           value: "50051"
-        - name: NODE_NAME
+        - name: NODE_IP
           valueFrom:
             fieldRef:
-              apiVersion: v1
-              fieldPath: spec.nodeName
+              fieldPath: status.hostIP
         - name: OC_SERVICE_ADDR
-          value: "$(NODE_NAME):55678"
+          value: "$(NODE_IP):55678"
         readinessProbe:
           periodSeconds: 5
           exec:
