@@ -78,4 +78,4 @@ class UserBehavior(TaskSet):
 
 class WebsiteUser(HttpLocust):
     task_set = UserBehavior
-    wait_time = between(1, 10)
+    wait_time = between(10, 30)

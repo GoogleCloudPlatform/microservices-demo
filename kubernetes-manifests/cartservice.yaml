@@ -36,8 +36,32 @@ spec:
           value: "redis-cart:6379"
         - name: PORT
           value: "7070"
+        - name: DD_AGENT_HOST
+          valueFrom:
+            fieldRef:
+              fieldPath: status.hostIP
+        - name: DD_ENV
+          value: "prod"
+        - name: DD_LOGS_INJECTION
+          value: "true"
+        - name: DD_TRACE_ENABLED
+          value: "true"
+        - name: DD_SERVICE
+          value: "cartservice"
+        - name: DD_VERSION
+          value: "latest"
         - name: LISTEN_ADDR
           value: "0.0.0.0"
+        - name: CORECLR_ENABLE_PROFILING
+          value: "1"
+        - name: CORECLR_PROFILER
+          value: "{846F5F1C-F9AE-4B07-969E-05C26BC060D8}"
+        - name: CORECLR_PROFILER_PATH
+          value: /opt/datadog/Datadog.Trace.ClrProfiler.Native.so
+        - name: DD_INTEGRATIONS
+          value: /opt/datadog/integrations.json
+        - name: DD_DOTNET_TRACER_HOME
+          value: /opt/datadog
         resources:
           requests:
             cpu: 200m
