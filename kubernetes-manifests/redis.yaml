@@ -39,6 +39,10 @@ spec:
           value: prod 
         - name: DD_SERVICE
           value: redis-cart
+        - name: DD_VERSION
+          value: latest
+        - name: DD_LOGS_INJECTION
+          value: "true"
         ports:
         - containerPort: 6379
         readinessProbe:

@@ -22,6 +22,38 @@ If you’re using this demo, please **★Star** this repository to show your int
 
 Looking for the old Hipster Shop frontend interface? Use the [manifests](https://github.com/GoogleCloudPlatform/microservices-demo/tree/v0.1.5/kubernetes-manifests) in release [v0.1.5](https://github.com/GoogleCloudPlatform/microservices-demo/releases/v0.1.5).
 
+## Quick Start (For Relyance developer)
+Run the following commands, if you want to get the online boutique app quickly up and running
+
+1. Enable kubernetes using "Docker For Desktop" (Docker -> Preference -> Kuberentes -> Enable Kuberentes -> Apply & Restart).
+
+2. Login to your google cloud account (if not already done )
+```
+gcloud auth login
+gcloud auth configure-docker
+```
+
+3. Create the secret for docker registry (which is used to pull the images from relyance-internal project)
+```
+kubectl --namespace=default create secret docker-registry gcr --docker-server=https://gcr.io --docker-username=oauth2accesstoken --docker-password="$(gcloud auth print-access-token)" --docker-email=engineer@relyance.ai
+```
+
+4. Patch the service account with newly created secret 
+```
+kubectl patch serviceaccount default -p '{"imagePullSecrets": [{"name": "gcr"}]}'
+```
+5. Configure Datadog agent permissions ( skip if you dont care about APM tools)
+```
+kubectl apply -f "https://raw.githubusercontent.com/DataDog/datadog-agent/master/Dockerfiles/manifests/rbac/clusterrole.yaml"
+kubectl apply -f "https://raw.githubusercontent.com/DataDog/datadog-agent/master/Dockerfiles/manifests/rbac/serviceaccount.yaml"
+kubectl apply -f "https://raw.githubusercontent.com/DataDog/datadog-agent/master/Dockerfiles/manifests/rbac/clusterrolebinding.yaml"
+```
+
+6. Run the Online Boutique App 
+```
+kubectl apply -f release/kubernetes-manifests.yaml
+```
+
 ## Screenshots
 
 | Home Page                                                                                                         | Checkout Screen                                                                                                    |

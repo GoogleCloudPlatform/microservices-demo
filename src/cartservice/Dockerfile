@@ -37,6 +37,11 @@ RUN apk add --no-cache \
     libstdc++ \
     libintl \
     icu
+
+RUN apk --no-cache add curl
+RUN mkdir -p /opt/datadog
+RUN curl -L https://github.com/DataDog/dd-trace-dotnet/releases/download/v1.19.2/datadog-dotnet-apm-1.19.2-musl.tar.gz | tar xzf - -C /opt/datadog
+RUN sh /opt/datadog/createLogPath.sh 
 WORKDIR /app
 COPY --from=builder /cartservice .
 ENTRYPOINT ["./cartservice", "start"]
