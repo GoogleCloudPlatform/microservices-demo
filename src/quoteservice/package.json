@@ -1,0 +1,26 @@
+{
+  "name": "quoteservice",
+  "version": "0.0.1",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "lint": "semistandard *.js"
+  },
+  "license": "ISC",
+  "dependencies": {
+    "@opentelemetry/api": "~0.11.0",
+    "@opentelemetry/core": "~0.11.0",
+    "@opentelemetry/exporter-prometheus": "~0.11.0",
+    "@opentelemetry/exporter-zipkin": "~0.11.0",
+    "@opentelemetry/metrics": "~0.11.0",
+    "@opentelemetry/node": "~0.11.0",
+    "@opentelemetry/plugin-express": "~0.9.0",
+    "@opentelemetry/plugin-http": "~0.11.0",
+    "@opentelemetry/sdk-node": "~0.11.0",
+    "@opentelemetry/tracing": "~0.11.0",
+    "express": "~4.17.1"
+  },
+  "devDependencies": {
+    "semistandard": "^12.0.1"
+  }
+}
