@@ -35,6 +35,12 @@ import demo_pb2_grpc
 from grpc_health.v1 import health_pb2
 from grpc_health.v1 import health_pb2_grpc
 
+from recombee_api_client.api_client import RecombeeClient
+from recombee_api_client.exceptions import APIException
+from recombee_api_client.api_requests import AddPurchase, RecommendItemsToUser, Batch
+import random
+
+
 from logger import getJSONLogger
 logger = getJSONLogger('recommendationservice-server')
 
@@ -66,24 +72,62 @@ def initStackdriverProfiling():
         logger.warning("Could not initialize Stackdriver Profiler after retrying, giving up")
   return
 
+# class RecommendationService(demo_pb2_grpc.RecommendationServiceServicer):
+#     def ListRecommendations(self, request, context):
+#         max_responses = 5
+#         # fetch list of products from product catalog stub
+#         cat_response = product_catalog_stub.ListProducts(demo_pb2.Empty())
+#         product_ids = [x.id for x in cat_response.products]
+#         filtered_products = list(set(product_ids)-set(request.product_ids))
+#         num_products = len(filtered_products)
+#         num_return = min(max_responses, num_products)
+#         # sample list of indicies to return
+#         indices = random.sample(range(num_products), num_return)
+#         # fetch product ids from indices
+#         prod_list = [filtered_products[i] for i in indices]
+#         logger.info("[Recv ListRecommendations] product_ids={}".format(prod_list))
+#         # build and return response
+#         response = demo_pb2.ListRecommendationsResponse()
+#         response.product_ids.extend(prod_list)
+#         return response
+
+#     def Check(self, request, context):
+#         return health_pb2.HealthCheckResponse(
+#             status=health_pb2.HealthCheckResponse.SERVING)
+
+
 class RecommendationService(demo_pb2_grpc.RecommendationServiceServicer):
-    def ListRecommendations(self, request, context):
+    def __init__(self):
+        db_id = os.environ('RECOMBEE_DB_ID')
+        db_private_token = os.environ('RECOMBEE_PRIVATE_TOKEN')
+        self.client = RecombeeClient(db_id, db_private_token)
+        self.purchase_requests = generate_purchases()
+
+    def generate_purchases(self):
+        #Generate some random purchases of items by users
+        PROBABILITY_PURCHASED = 0.1
+        NUM = 100
+        purchase_requests = []
+        
+        for user_id in ["user-%s" % i for i in range(NUM) ]:
+          for item_id in ["item-%s" % i for i in range(NUM) ]:
+            if random.random() < PROBABILITY_PURCHASED:        
+              request = AddPurchase(user_id, item_id, cascade_create=True)
+              purchase_requests.append(request)
+        return purchase_requests
+
+    def ListRecommendations(self, user_id):
         max_responses = 5
-        # fetch list of products from product catalog stub
-        cat_response = product_catalog_stub.ListProducts(demo_pb2.Empty())
-        product_ids = [x.id for x in cat_response.products]
-        filtered_products = list(set(product_ids)-set(request.product_ids))
-        num_products = len(filtered_products)
-        num_return = min(max_responses, num_products)
-        # sample list of indicies to return
-        indices = random.sample(range(num_products), num_return)
-        # fetch product ids from indices
-        prod_list = [filtered_products[i] for i in indices]
-        logger.info("[Recv ListRecommendations] product_ids={}".format(prod_list))
-        # build and return response
-        response = demo_pb2.ListRecommendationsResponse()
-        response.product_ids.extend(prod_list)
-        return response
+        try:
+            # Send the data to Recombee, use Batch for faster processing of larger data
+            client.send(Batch(self.purchase_requests))        
+            # Get recommendations for user
+            recommended = client.send(RecommendItemsToUser(user_id, max_responses))
+        except:
+            raise APIException
+
+        logger.info("[Recv ListRecommendations] product_ids={}".format(recommended))
+        return recommended
 
     def Check(self, request, context):
         return health_pb2.HealthCheckResponse(

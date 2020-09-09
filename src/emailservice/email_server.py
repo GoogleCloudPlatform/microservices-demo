@@ -29,6 +29,9 @@ import demo_pb2_grpc
 from grpc_health.v1 import health_pb2
 from grpc_health.v1 import health_pb2_grpc
 
+from sendgrid import SendGridAPIClient
+from sendgrid.helpers.mail import Mail
+
 from opencensus.trace.exporters import stackdriver_exporter
 from opencensus.trace.exporters import print_exporter
 from opencensus.trace.ext.grpc import server_interceptor
@@ -72,23 +75,50 @@ class EmailService(BaseEmailService):
 
   @staticmethod
   def send_email(client, email_address, content):
-    response = client.send_message(
-      sender = client.sender_path(project_id, region, sender_id),
-      envelope_from_authority = '',
-      header_from_authority = '',
-      envelope_from_address = from_address,
-      simple_message = {
-        "from": {
-          "address_spec": from_address,
-        },
-        "to": [{
-          "address_spec": email_address
-        }],
-        "subject": "Your Confirmation Email",
-        "html_body": content
-      }
-    )
-    logger.info("Message sent: {}".format(response.rfc822_message_id))
+
+      from_address='from_email@microservices-demo.com'
+
+      message = Mail(
+          from_email=from_address,
+          to_emails=email_address,
+          subject='Your Confirmation Email',
+          html_content=content)
+      try:
+          sg = SendGridAPIClient(os.environ.get('SENDGRID_API_KEY'))
+          response = sg.send(message)
+          print(response.status_code)
+          print(response.body)
+          print(response.headers)
+      except Exception as e:
+          print(e.message)
+
+    logger.info("Message sent: {}".format(response.status_code))
+
+
+# class EmailService(BaseEmailService):
+#   def __init__(self):
+#     raise Exception('cloud mail client not implemented')
+#     super().__init__()
+
+#   @staticmethod
+#   def send_email(client, email_address, content):
+#     response = client.send_message(
+#       sender = client.sender_path(project_id, region, sender_id),
+#       envelope_from_authority = '',
+#       header_from_authority = '',
+#       envelope_from_address = from_address,
+#       simple_message = {
+#         "from": {
+#           "address_spec": from_address,
+#         },
+#         "to": [{
+#           "address_spec": email_address
+#         }],
+#         "subject": "Your Confirmation Email",
+#         "html_body": content
+#       }
+#     )
+#     logger.info("Message sent: {}".format(response.rfc822_message_id))
 
   def SendOrderConfirmation(self, request, context):
     email = request.email
