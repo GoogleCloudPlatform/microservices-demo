@@ -2,6 +2,11 @@
 <img src="src/frontend/static/icons/Hipster_HeroLogoCyan.svg" width="300"/>
 </p>
 
+<p align="center">
+<a href="https://okteto.sf.okteto.net/deploy">
+  <img src="https://okteto.com/develop-okteto.svg" alt="Develop on Okteto">
+</a>
+</p>
 
 
 **Online Boutique** is a cloud-native microservices demo application.

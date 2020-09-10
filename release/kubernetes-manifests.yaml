@@ -215,7 +215,7 @@ spec:
     spec:
       containers:
         - name: server
-          image: gcr.io/google-samples/microservices-demo/frontend:v0.2.0
+          image: frontend
           ports:
           - containerPort: 8080
           readinessProbe:
@@ -273,19 +273,6 @@ metadata:
   name: frontend
 spec:
   type: ClusterIP
-  selector:
-    app: frontend
-  ports:
-  - name: http
-    port: 80
-    targetPort: 8080
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: frontend-external
-spec:
-  type: LoadBalancer
   selector:
     app: frontend
   ports:

@@ -1,0 +1,21 @@
+name: frontend
+image: ramiro/frontend:okteto
+command:
+- sh
+workdir: /go/src/github.com/GoogleCloudPlatform/microservices-demo/src/frontend
+forward:
+- 2345:2345
+- 8080:8080
+volumes:
+- /go/pkg/
+- /root/.cache/go-build/
+persistentVolume:
+  enabled: true
+resources:
+  limits:
+    cpu: "1"
+    memory: 2Gi
+securityContext:
+  capabilities:
+    add:
+    - SYS_PTRACE
