@@ -22,16 +22,11 @@ import (
 	"time"
 
 	"cloud.google.com/go/profiler"
-	"contrib.go.opencensus.io/exporter/ocagent"
-	"contrib.go.opencensus.io/exporter/stackdriver"
-	"github.com/gorilla/mux"
 	"github.com/pkg/errors"
+	grpctrace "github.com/signalfx/signalfx-go-tracing/contrib/google.golang.org/grpc"
+	muxtrace "github.com/signalfx/signalfx-go-tracing/contrib/gorilla/mux"
+	"github.com/signalfx/signalfx-go-tracing/tracing"
 	"github.com/sirupsen/logrus"
-	"go.opencensus.io/plugin/ocgrpc"
-	"go.opencensus.io/plugin/ochttp"
-	"go.opencensus.io/plugin/ochttp/propagation/b3"
-	"go.opencensus.io/stats/view"
-	"go.opencensus.io/trace"
 	"google.golang.org/grpc"
 )
 
@@ -96,7 +91,8 @@ func main() {
 
 	if os.Getenv("DISABLE_TRACING") == "" {
 		log.Info("Tracing enabled.")
-		go initTracing(log)
+		stopTracing := initTracing(log)
+		defer stopTracing()
 	} else {
 		log.Info("Tracing disabled.")
 	}
@@ -130,7 +126,7 @@ func main() {
 	mustConnGRPC(ctx, &svc.checkoutSvcConn, svc.checkoutSvcAddr)
 	mustConnGRPC(ctx, &svc.adSvcConn, svc.adSvcAddr)
 
-	r := mux.NewRouter()
+	r := muxtrace.NewRouter()
 	r.HandleFunc("/", svc.homeHandler).Methods(http.MethodGet, http.MethodHead)
 	r.HandleFunc("/product/{id}", svc.productHandler).Methods(http.MethodGet, http.MethodHead)
 	r.HandleFunc("/cart", svc.viewCartHandler).Methods(http.MethodGet, http.MethodHead)
@@ -146,86 +142,18 @@ func main() {
 	var handler http.Handler = r
 	handler = &logHandler{log: log, next: handler} // add logging
 	handler = ensureSessionID(handler)             // add session ID
-	handler = &ochttp.Handler{                     // add opencensus instrumentation
-		Handler:     handler,
-		Propagation: &b3.HTTPFormat{}}
 
 	log.Infof("starting server on " + addr + ":" + srvPort)
 	log.Fatal(http.ListenAndServe(addr+":"+srvPort, handler))
 }
 
-func initOCTracing(log logrus.FieldLogger) {
-
-	svcAddr := os.Getenv("OC_SERVICE_ADDR")
-	if svcAddr == "" {
-		log.Info("opencensus initialization disabled.")
-		return
+func initTracing(log logrus.FieldLogger) func() {
+	opts := []tracing.StartOption{
+		tracing.WithServiceName("frontend"),
 	}
-
-	// Register the OpenCensus exporter to be able to retrieve
-	// the collected spans.
-	exporter, err := ocagent.NewExporter(
-		ocagent.WithInsecure(),
-		ocagent.WithAddress(svcAddr),
-		ocagent.WithServiceName("frontend"))
-	if err != nil {
-		log.Fatal(err)
-	}
-	trace.RegisterExporter(exporter)
-	log.Info("opencensus initialization completed.")
-}
-
-func initStats(log logrus.FieldLogger, exporter *stackdriver.Exporter) {
-	view.SetReportingPeriod(60 * time.Second)
-	view.RegisterExporter(exporter)
-	if err := view.Register(ochttp.DefaultServerViews...); err != nil {
-		log.Warn("Error registering http default server views")
-	} else {
-		log.Info("Registered http default server views")
-	}
-	if err := view.Register(ocgrpc.DefaultClientViews...); err != nil {
-		log.Warn("Error registering grpc default client views")
-	} else {
-		log.Info("Registered grpc default client views")
-	}
-}
-
-func initStackdriverTracing(log logrus.FieldLogger) {
-	// TODO(ahmetb) this method is duplicated in other microservices using Go
-	// since they are not sharing packages.
-	for i := 1; i <= 3; i++ {
-		log = log.WithField("retry", i)
-		exporter, err := stackdriver.NewExporter(stackdriver.Options{})
-		if err != nil {
-			// log.Warnf is used since there are multiple backends (stackdriver & jaeger)
-			// to store the traces. In production setup most likely you would use only one backend.
-			// In that case you should use log.Fatalf.
-			log.Warnf("failed to initialize Stackdriver exporter: %+v", err)
-		} else {
-			trace.RegisterExporter(exporter)
-			log.Info("registered Stackdriver tracing")
-
-			// Register the views to collect server stats.
-			initStats(log, exporter)
-			return
-		}
-		d := time.Second * 20 * time.Duration(i)
-		log.Debugf("sleeping %v to retry initializing Stackdriver exporter", d)
-		time.Sleep(d)
-	}
-	log.Warn("could not initialize Stackdriver exporter after retrying, giving up")
-}
-
-func initTracing(log logrus.FieldLogger) {
-	// This is a demo app with low QPS. trace.AlwaysSample() is used here
-	// to make sure traces are available for observation and analysis.
-	// In a production environment or high QPS setup please use
-	// trace.ProbabilitySampler set at the desired probability.
-	trace.ApplyConfig(trace.Config{DefaultSampler: trace.AlwaysSample()})
-
-	initOCTracing(log)
-	initStackdriverTracing(log)
-
+	tracing.Start(opts...)
+	log.Info("signalfx initialization completed.")
+	return tracing.Stop
 }
 
 func initProfiling(log logrus.FieldLogger, service, version string) {
@@ -260,11 +188,15 @@ func mustMapEnv(target *string, envKey string) {
 }
 
 func mustConnGRPC(ctx context.Context, conn **grpc.ClientConn, addr string) {
+	si := grpctrace.StreamClientInterceptor(grpctrace.WithServiceName("frontend"))
+	ui := grpctrace.UnaryClientInterceptor(grpctrace.WithServiceName("frontend"))
+
 	var err error
 	*conn, err = grpc.DialContext(ctx, addr,
 		grpc.WithInsecure(),
 		grpc.WithTimeout(time.Second*3),
-		grpc.WithStatsHandler(&ocgrpc.ClientHandler{}))
+		grpc.WithStreamInterceptor(si),
+		grpc.WithUnaryInterceptor(ui))
 	if err != nil {
 		panic(errors.Wrapf(err, "grpc: failed to connect %s", addr))
 	}
