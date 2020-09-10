@@ -1,5 +1,8 @@
 icon: https://raw.githubusercontent.com/rberrelleza/microservices-demo/master/src/frontend/static/icons/Hipster_HeroLogoCyan.svg
 deploy:
+  - okteto build -t okteto.dev/frontend:${OKTETO_COMMIT} src/frontend
+  - kustomize edit set image frontend=okteto.dev/frontend:${OKTETO_COMMIT}
+  - kustomize build .
   - kubectl apply -f release/kubernetes-manifests.yaml
   - kubectl annotate service frontend dev.okteto.com/auto-ingress=true --overwrite
 devs:
