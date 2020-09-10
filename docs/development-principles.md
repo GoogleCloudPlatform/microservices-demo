@@ -1,7 +1,7 @@
 # Development Principles
 
 > **Note:** This document outlines guidances behind some development decisions
-> behind the Hipster Shop demo application.
+> behind the Online Boutique demo application.
 
 ### Minimal configuration
 
