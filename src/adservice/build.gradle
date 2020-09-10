@@ -25,7 +25,7 @@ def opencensusVersion = "0.25.0"
 def grpcVersion = "1.26.0"
 def jacksonVersion = "2.10.2"
 def protocVersion = "3.11.4"
-def openTelemetryVersion = "0.7.0"
+def openTelemetryVersion = "0.8.0"
 
 tasks.withType(JavaCompile) {
     sourceCompatibility = JavaVersion.VERSION_11
@@ -45,7 +45,7 @@ dependencies {
     if (speed) {
         implementation fileTree(dir: offlineCompile, include: '*.jar')
     } else {
-        exporters ("com.newrelic.telemetry:opentelemetry-exporters-newrelic-auto:0.8.0-SNAPSHOT") {
+        exporters ("com.newrelic.telemetry:opentelemetry-exporters-newrelic-auto:0.8.1") {
             transitive = false
         }
 
