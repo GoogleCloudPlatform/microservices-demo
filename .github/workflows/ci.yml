@@ -15,6 +15,7 @@ jobs:
       uses: okteto/login@master
       with:
         token: ${{ secrets.OKTETO_TOKEN }}
+        url: ${{ secrets.OKTETO_URL }}
 
     - name: Create namespace
       uses: okteto/create-namespace@master
