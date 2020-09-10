@@ -1,0 +1,4 @@
+#! /bin/sh 
+
+source /opt/signalfx-dotnet-tracing/defaults.env
+./cartservice start

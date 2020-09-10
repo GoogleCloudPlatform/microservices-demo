@@ -40,6 +40,12 @@ spec:
           value: "7070"
         - name: LISTEN_ADDR
           value: "0.0.0.0"
+        - name: SIGNALFX_ENDPOINT_URL
+          value: "$(NODE_IP):9411/api/v2/span"
+        - name: SIGNALFX_SERVICE_NAME
+          value: "cartservice"
+        - name: SIGNALFX_SERVER_TIMING_CONTEXT
+          value: "true"
         resources:
           requests:
             cpu: 200m
