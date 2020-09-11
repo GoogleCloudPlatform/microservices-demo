@@ -188,15 +188,11 @@ func mustMapEnv(target *string, envKey string) {
 }
 
 func mustConnGRPC(ctx context.Context, conn **grpc.ClientConn, addr string) {
-	si := grpctrace.StreamClientInterceptor(grpctrace.WithServiceName("frontend"))
-	ui := grpctrace.UnaryClientInterceptor(grpctrace.WithServiceName("frontend"))
-
 	var err error
 	*conn, err = grpc.DialContext(ctx, addr,
 		grpc.WithInsecure(),
 		grpc.WithTimeout(time.Second*3),
-		grpc.WithStreamInterceptor(si),
-		grpc.WithUnaryInterceptor(ui))
+		grpc.WithStatsHandler(grpctrace.NewClientStatsHandler(grpctrace.WithServiceName("frontend"))))
 	if err != nil {
 		panic(errors.Wrapf(err, "grpc: failed to connect %s", addr))
 	}
