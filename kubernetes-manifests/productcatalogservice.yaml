@@ -42,6 +42,8 @@ spec:
               fieldPath: status.hostIP
         - name: OC_SERVICE_ADDR
           value: "$(NODE_IP):55678"
+        - name: SIGNALFX_ENDPOINT_URL 
+          value: "$(NODE_IP):9411/api/v2/spans"
         readinessProbe:
           exec:
             command: ["/bin/grpc_health_probe", "-addr=:3550"]

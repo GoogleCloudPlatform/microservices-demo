@@ -29,17 +29,14 @@ import (
 	"syscall"
 	"time"
 
+	"cloud.google.com/go/profiler"
+	"github.com/golang/protobuf/jsonpb"
 	pb "github.com/signalfx/microservices-demo/src/productcatalogservice/genproto"
+	grpctrace "github.com/signalfx/signalfx-go-tracing/contrib/google.golang.org/grpc"
+	"github.com/signalfx/signalfx-go-tracing/tracing"
+	"github.com/sirupsen/logrus"
 	healthpb "google.golang.org/grpc/health/grpc_health_v1"
 
-	"cloud.google.com/go/profiler"
-	"contrib.go.opencensus.io/exporter/ocagent"
-	"contrib.go.opencensus.io/exporter/stackdriver"
-	"github.com/golang/protobuf/jsonpb"
-	"github.com/sirupsen/logrus"
-
-	"go.opencensus.io/plugin/ocgrpc"
-	"go.opencensus.io/stats/view"
 	"go.opencensus.io/trace"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
@@ -78,7 +75,8 @@ func init() {
 func main() {
 	if os.Getenv("DISABLE_TRACING") == "" {
 		logger.Info("Tracing enabled.")
-		go initTracing()
+		stopTracing := initTracing()
+		defer stopTracing()
 	} else {
 		logger.Info("Tracing disabled.")
 	}
@@ -133,10 +131,12 @@ func run(port string) string {
 	if err != nil {
 		logger.Fatal(err)
 	}
+
 	var srv *grpc.Server
 	if os.Getenv("DISABLE_STATS") == "" {
 		logger.Info("Stats enabled.")
-		srv = grpc.NewServer(grpc.StatsHandler(&ocgrpc.ServerHandler{}))
+		statsHandler := grpctrace.NewClientStatsHandler(grpctrace.WithServiceName("productcatalogservice"))
+		srv = grpc.NewServer(grpc.StatsHandler(statsHandler))
 	} else {
 		logger.Info("Stats disabled.")
 		srv = grpc.NewServer()
@@ -150,62 +150,14 @@ func run(port string) string {
 	return l.Addr().String()
 }
 
-func initOCTracing() {
-	svcAddr := os.Getenv("OC_SERVICE_ADDR")
-	if svcAddr == "" {
-		logger.Info("opencensus initialization disabled.")
-		return
+func initTracing() func() {
+	opts := []tracing.StartOption{
+		tracing.WithServiceName("productcatalogservice"),
 	}
 
-	// Register the OpenCensus exporter to be able to retrieve
-	// the collected spans.
-	exporter, err := ocagent.NewExporter(
-		ocagent.WithInsecure(),
-		ocagent.WithAddress(svcAddr),
-		ocagent.WithServiceName("productcatalogservice"))
-	if err != nil {
-		logger.Fatal(err)
-	}
-	trace.RegisterExporter(exporter)
-	logger.Info("opencensus initialization completed.")
-}
-
-func initStats(exporter *stackdriver.Exporter) {
-	view.SetReportingPeriod(60 * time.Second)
-	view.RegisterExporter(exporter)
-	if err := view.Register(ocgrpc.DefaultServerViews...); err != nil {
-		logger.Info("Error registering default server views")
-	} else {
-		logger.Info("Registered default server views")
-	}
-}
-
-func initStackdriverTracing() {
-	// TODO(ahmetb) this method is duplicated in other microservices using Go
-	// since they are not sharing packages.
-	for i := 1; i <= 3; i++ {
-		exporter, err := stackdriver.NewExporter(stackdriver.Options{})
-		if err != nil {
-			logger.Warnf("failed to initialize Stackdriver exporter: %+v", err)
-		} else {
-			trace.RegisterExporter(exporter)
-			trace.ApplyConfig(trace.Config{DefaultSampler: trace.AlwaysSample()})
-			logger.Info("registered Stackdriver tracing")
-
-			// Register the views to collect server stats.
-			initStats(exporter)
-			return
-		}
-		d := time.Second * 10 * time.Duration(i)
-		logger.Infof("sleeping %v to retry initializing Stackdriver exporter", d)
-		time.Sleep(d)
-	}
-	logger.Warn("could not initialize Stackdriver exporter after retrying, giving up")
-}
-
-func initTracing() {
-	initOCTracing()
-	initStackdriverTracing()
+	tracing.Start(opts...)
+	logger.Info("signalfx initialization completed.")
+	return tracing.Stop
 }
 
 func initProfiling(service, version string) {
