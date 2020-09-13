@@ -15,19 +15,15 @@
 package main
 
 import (
-	"encoding/hex"
 	"fmt"
 	"net"
 	"os"
 	"time"
 
 	"cloud.google.com/go/profiler"
-	"contrib.go.opencensus.io/exporter/ocagent"
-	"contrib.go.opencensus.io/exporter/stackdriver"
+	grpctrace "github.com/signalfx/signalfx-go-tracing/contrib/google.golang.org/grpc"
+	"github.com/signalfx/signalfx-go-tracing/tracing"
 	"github.com/sirupsen/logrus"
-	"go.opencensus.io/plugin/ocgrpc"
-	"go.opencensus.io/stats/view"
-	"go.opencensus.io/trace"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
@@ -61,7 +57,8 @@ func init() {
 func main() {
 	if os.Getenv("DISABLE_TRACING") == "" {
 		logger.Info("Tracing enabled.")
-		go initTracing()
+		stopTracing := initTracing()
+		defer stopTracing()
 	} else {
 		logger.Info("Tracing disabled.")
 	}
@@ -87,7 +84,8 @@ func main() {
 	var srv *grpc.Server
 	if os.Getenv("DISABLE_STATS") == "" {
 		logger.Info("Stats enabled.")
-		srv = grpc.NewServer(grpc.StatsHandler(&ocgrpc.ServerHandler{}))
+		statsHandler := grpctrace.NewServerStatsHandler(grpctrace.WithServiceName("shippingservice"))
+		srv = grpc.NewServer(grpc.StatsHandler(statsHandler))
 	} else {
 		logger.Info("Stats disabled.")
 		srv = grpc.NewServer()
@@ -157,62 +155,14 @@ func (s *server) ShipOrder(ctx context.Context, in *pb.ShipOrderRequest) (*pb.Sh
 	}, nil
 }
 
-func initOCTracing() {
-	svcAddr := os.Getenv("OC_SERVICE_ADDR")
-	if svcAddr == "" {
-		logger.Info("opencensus initialization disabled.")
-		return
+func initTracing() func() {
+	opts := []tracing.StartOption{
+		tracing.WithServiceName("shippingservice"),
 	}
 
-	// Register the OpenCensus exporter to be able to retrieve
-	// the collected spans.
-	exporter, err := ocagent.NewExporter(
-		ocagent.WithInsecure(),
-		ocagent.WithAddress(svcAddr),
-		ocagent.WithServiceName("shippingservice"))
-	if err != nil {
-		logger.Fatal(err)
-	}
-	trace.RegisterExporter(exporter)
-	logger.Info("opencensus initialization completed.")
-}
-
-func initStats(exporter *stackdriver.Exporter) {
-	view.SetReportingPeriod(60 * time.Second)
-	view.RegisterExporter(exporter)
-	if err := view.Register(ocgrpc.DefaultServerViews...); err != nil {
-		logger.Warn("Error registering default server views")
-	} else {
-		logger.Info("Registered default server views")
-	}
-}
-
-func initStackdriverTracing() {
-	// TODO(ahmetb) this method is duplicated in other microservices using Go
-	// since they are not sharing packages.
-	for i := 1; i <= 3; i++ {
-		exporter, err := stackdriver.NewExporter(stackdriver.Options{})
-		if err != nil {
-			logger.Warnf("failed to initialize Stackdriver exporter: %+v", err)
-		} else {
-			trace.RegisterExporter(exporter)
-			trace.ApplyConfig(trace.Config{DefaultSampler: trace.AlwaysSample()})
-			logger.Info("registered Stackdriver tracing")
-
-			// Register the views to collect server stats.
-			initStats(exporter)
-			return
-		}
-		d := time.Second * 10 * time.Duration(i)
-		logger.Infof("sleeping %v to retry initializing Stackdriver exporter", d)
-		time.Sleep(d)
-	}
-	logger.Warn("could not initialize Stackdriver exporter after retrying, giving up")
-}
-
-func initTracing() {
-	initOCTracing()
-	initStackdriverTracing()
+	tracing.Start(opts...)
+	logger.Info("signalfx initialization completed.")
+	return tracing.Stop
 }
 
 func initProfiling(service, version string) {
@@ -238,14 +188,9 @@ func initProfiling(service, version string) {
 }
 
 func getTraceLogFields(ctx context.Context) logrus.Fields {
-	span := trace.FromContext(ctx)
-	if span == nil {
-		return logrus.Fields{}
-	}
-	traceID := span.SpanContext().TraceID
-	spanID := span.SpanContext().SpanID
+	// TODO: add sfx trace context to logs
 	return logrus.Fields{
-		"trace_id": hex.EncodeToString(traceID[:]),
-		"span_id":  hex.EncodeToString(spanID[:]),
+		// "trace_id": hex.EncodeToString(traceID[:]),
+		// "span_id":  hex.EncodeToString(spanID[:]),
 	}
 }

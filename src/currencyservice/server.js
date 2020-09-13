@@ -14,40 +14,26 @@
  * limitations under the License.
  */
 
-if(process.env.DISABLE_PROFILER) {
-  console.log("Profiler disabled.")
-}
-else {
-  console.log("Profiler enabled.")
-  require('@google-cloud/profiler').start({
-    serviceContext: {
-      service: 'currencyservice',
-      version: '1.0.0'
-    }
-  });
-}
+const api = require("@opentelemetry/api");
+const { NodeTracerProvider } = require('@opentelemetry/node');
+const { B3Propagator } = require("@opentelemetry/core");
+const { ZipkinExporter } = require('@opentelemetry/exporter-zipkin');
+const { BatchSpanProcessor } = require('@opentelemetry/tracing');
 
+api.propagation.setGlobalPropagator(new B3Propagator());
 
-if(process.env.DISABLE_TRACING) {
-  console.log("Tracing disabled.")
-}
-else {
-  console.log("Tracing enabled.")
-  require('@google-cloud/trace-agent').start();
-}
+const provider = new NodeTracerProvider();
+provider.register({
+  propagator: new B3Propagator(),
+});
 
-if(process.env.DISABLE_DEBUGGER) {
-  console.log("Debugger disabled.")
-}
-else {
-  console.log("Debugger enabled.")
-  require('@google-cloud/debug-agent').start({
-    serviceContext: {
-      service: 'currencyservice',
-      version: 'VERSION'
-    }
-  });
-}
+const exporter = new ZipkinExporter({
+  serviceName: 'currencyservice',
+  url: process.env.SIGNALFX_ENDPOINT_URL,
+});
+
+const tracer = provider.getTracer('currencyservice')
+provider.addSpanProcessor(new BatchSpanProcessor(exporter));
 
 const path = require('path');
 const grpc = require('grpc');

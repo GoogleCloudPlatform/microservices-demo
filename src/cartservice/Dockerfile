@@ -1,8 +1,7 @@
-FROM microsoft/dotnet:2.1-sdk-alpine as builder
+#FROM microsoft/dotnet:2.2-sdk-alpine as builder
+FROM mcr.microsoft.com/dotnet/core/sdk:3.1-alpine as builder
 
 RUN apk --update add curl tar
-RUN curl -L https://github.com/signalfx/signalfx-dotnet-tracing/releases/download/v0.1.2/signalfx-dotnet-tracing-0.1.2-musl.tar.gz -o  signalfx-dotnet-tracing-musl.tar.gz
-RUN tar -xf signalfx-dotnet-tracing-musl.tar.gz -C /
 
 WORKDIR /app
 COPY . .
@@ -32,5 +31,5 @@ RUN apk add --no-cache \
 WORKDIR /app
 COPY --from=builder /cartservice .
 COPY --from=builder /app/start .
-COPY --from=builder /opt/signalfx-dotnet-tracing/* /opt/signalfx-dotnet-tracing/
-ENTRYPOINT ["./start"]
+
+ENTRYPOINT ["./cartservice", "start"]

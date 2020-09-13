@@ -18,17 +18,20 @@ import os
 import random
 import time
 import traceback
+import urllib.parse
 from concurrent import futures
 
-import googleclouddebugger
-import googlecloudprofiler
-from google.auth.exceptions import DefaultCredentialsError
 import grpc
-from opencensus.trace.exporters import print_exporter
-from opencensus.trace.exporters import stackdriver_exporter
-from opencensus.trace.ext.grpc import server_interceptor
-from opencensus.common.transports.async_ import AsyncTransport
-from opencensus.trace.samplers import always_on
+
+from opentelemetry import trace
+from opentelemetry import propagators
+from opentelemetry.sdk.trace import TracerProvider
+from opentelemetry.exporter import zipkin
+from opentelemetry.sdk.trace.export import BatchExportSpanProcessor
+from opentelemetry.sdk.trace.propagation.b3_format import B3Format
+from opentelemetry.instrumentation.grpc import GrpcInstrumentorServer
+from opentelemetry.instrumentation.grpc import GrpcInstrumentorClient
+from opentelemetry.instrumentation.grpc.grpcext import intercept_server
 
 import demo_pb2
 import demo_pb2_grpc
@@ -38,30 +41,26 @@ from grpc_health.v1 import health_pb2_grpc
 from logger import getJSONLogger
 logger = getJSONLogger('recommendationservice-server')
 
-def initStackdriverProfiling():
-  project_id = None
-  try:
-    project_id = os.environ["GCP_PROJECT_ID"]
-  except KeyError:
-    # Environment variable not set
-    pass
+export_url = urllib.parse.urlparse(os.environ['SIGNALFX_ENDPOINT_URL'])
+zipkin_exporter = zipkin.ZipkinSpanExporter(
+    service_name="recommendationservice",
+    host_name=export_url.hostname,
+    port=export_url.port,
+    endpoint=export_url.path,
+    protocol=export_url.scheme
+)
+span_processor = BatchExportSpanProcessor(zipkin_exporter)
 
-  for retry in xrange(1,4):
-    try:
-      if project_id:
-        googlecloudprofiler.start(service='recommendation_server', service_version='1.0.0', verbose=0, project_id=project_id)
-      else:
-        googlecloudprofiler.start(service='recommendation_server', service_version='1.0.0', verbose=0)
-      logger.info("Successfully started Stackdriver Profiler.")
-      return
-    except (BaseException) as exc:
-      logger.info("Unable to start Stackdriver Profiler Python agent. " + str(exc))
-      if (retry < 4):
-        logger.info("Sleeping %d seconds to retry Stackdriver Profiler agent initialization"%(retry*10))
-        time.sleep (1)
-      else:
-        logger.warning("Could not initialize Stackdriver Profiler after retrying, giving up")
-  return
+propagators.set_global_httptextformat(B3Format())
+trace.set_tracer_provider(TracerProvider())
+trace.get_tracer_provider().add_span_processor(span_processor)
+tracer = trace.get_tracer(__name__)
+
+instrumentor = GrpcInstrumentorClient()
+instrumentor.instrument()
+grpc_server_instrumentor = GrpcInstrumentorServer()
+grpc_server_instrumentor.instrument()
+
 
 class RecommendationService(demo_pb2_grpc.RecommendationServiceServicer):
     def ListRecommendations(self, request, context):
@@ -86,50 +85,14 @@ class RecommendationService(demo_pb2_grpc.RecommendationServiceServicer):
         return health_pb2.HealthCheckResponse(
             status=health_pb2.HealthCheckResponse.SERVING)
 
+    def Watch(self, request, context, send_response_callback=None):
+        context.write(health_pb2.HealthCheckResponse(status=health_pb2.HealthCheckResponse.SERVING))
+
 
 if __name__ == "__main__":
     logger.info("initializing recommendationservice")
 
-    try:
-      if "DISABLE_PROFILER" in os.environ:
-        raise KeyError()
-      else:
-        logger.info("Profiler enabled.")
-        initStackdriverProfiling()
-    except KeyError:
-        logger.info("Profiler disabled.")
-
-    try:
-      if "DISABLE_TRACING" in os.environ:
-        raise KeyError()
-      else:
-        logger.info("Tracing enabled.")
-        sampler = always_on.AlwaysOnSampler()
-        exporter = stackdriver_exporter.StackdriverExporter(
-          project_id=os.environ.get('GCP_PROJECT_ID'),
-          transport=AsyncTransport)
-        tracer_interceptor = server_interceptor.OpenCensusServerInterceptor(sampler, exporter)
-    except (KeyError, DefaultCredentialsError):
-        logger.info("Tracing disabled.")
-        tracer_interceptor = server_interceptor.OpenCensusServerInterceptor()
-
-
-    try:
-      if "DISABLE_DEBUGGER" in os.environ:
-        raise KeyError()
-      else:
-        logger.info("Debugger enabled.")
-        try:
-          googleclouddebugger.enable(
-              module='recommendationserver',
-              version='1.0.0'
-          )
-        except Exception, err:
-            logger.error("Could not enable debugger")
-            logger.error(traceback.print_exc())
-            pass
-    except KeyError:
-        logger.info("Debugger disabled.")
+    logger.info("Tracing enabled.")
 
     port = os.environ.get('PORT', "8080")
     catalog_addr = os.environ.get('PRODUCT_CATALOG_SERVICE_ADDR', '')
@@ -141,7 +104,7 @@ if __name__ == "__main__":
 
     # create gRPC server
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10),
-                      interceptors=(tracer_interceptor,))
+                      interceptors=tuple())
 
     # add class to gRPC server
     service = RecommendationService()

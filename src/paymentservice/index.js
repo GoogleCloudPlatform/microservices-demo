@@ -16,19 +16,27 @@
 
 'use strict';
 
-require('@google-cloud/profiler').start({
-  serviceContext: {
-    service: 'paymentservice',
-    version: '1.0.0'
-  }
+const api = require("@opentelemetry/api");
+const { NodeTracerProvider } = require('@opentelemetry/node');
+const { B3Propagator } = require("@opentelemetry/core");
+const { ZipkinExporter } = require('@opentelemetry/exporter-zipkin');
+const { BatchSpanProcessor } = require('@opentelemetry/tracing');
+
+api.propagation.setGlobalPropagator(new B3Propagator());
+
+const provider = new NodeTracerProvider();
+provider.register({
+  propagator: new B3Propagator(),
 });
-require('@google-cloud/trace-agent').start();
-require('@google-cloud/debug-agent').start({
-  serviceContext: {
-    service: 'paymentservice',
-    version: 'VERSION'
-  }
+
+const exporter = new ZipkinExporter({
+  serviceName: 'paymentservice',
+  url: process.env.SIGNALFX_ENDPOINT_URL,
 });
+
+const tracer = provider.getTracer('paymentservice')
+provider.addSpanProcessor(new BatchSpanProcessor(exporter));
+
 
 const path = require('path');
 const HipsterShopServer = require('./server');

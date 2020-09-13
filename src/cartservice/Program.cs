@@ -14,6 +14,7 @@
 
 ﻿using System;
 using System.IO;
+using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 using cartservice.cartstore;
@@ -21,6 +22,8 @@ using cartservice.interfaces;
 using CommandLine;
 using Grpc.Core;
 using Microsoft.Extensions.Configuration;
+using OpenTelemetry;
+using OpenTelemetry.Trace;
 
 namespace cartservice
 {
@@ -42,6 +45,7 @@ namespace cartservice
             [Option('r', "redis", HelpText = "The ip of redis cache")]
             public string Redis { get; set; }
         }
+
 
         static object StartServer(string host, int port, ICartStore cartStore)
         {
@@ -94,6 +98,17 @@ namespace cartservice
                 Console.WriteLine("Invalid number of arguments supplied");
                 Environment.Exit(-1);
             }
+
+            using var tracerProvider = Sdk.CreateTracerProviderBuilder()
+                .AddSource("opentelemetry.dotnet")
+                // .AddGrpc()
+                // .AddRedisInstrumentation(connection)
+                .AddZipkinExporter(o =>
+                {
+                    o.ServiceName = "cartservice";
+                    o.Endpoint = new Uri(Environment.GetEnvironmentVariable("SIGNALFX_ENDPOINT_URL"));
+                })
+                .Build();
 
             switch (args[0])
             {

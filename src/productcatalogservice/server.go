@@ -17,7 +17,6 @@ package main
 import (
 	"bytes"
 	"context"
-	"encoding/hex"
 	"flag"
 	"fmt"
 	"io/ioutil"
@@ -37,7 +36,6 @@ import (
 	"github.com/sirupsen/logrus"
 	healthpb "google.golang.org/grpc/health/grpc_health_v1"
 
-	"go.opencensus.io/trace"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -133,14 +131,8 @@ func run(port string) string {
 	}
 
 	var srv *grpc.Server
-	if os.Getenv("DISABLE_STATS") == "" {
-		logger.Info("Stats enabled.")
-		statsHandler := grpctrace.NewClientStatsHandler(grpctrace.WithServiceName("productcatalogservice"))
-		srv = grpc.NewServer(grpc.StatsHandler(statsHandler))
-	} else {
-		logger.Info("Stats disabled.")
-		srv = grpc.NewServer()
-	}
+	statsHandler := grpctrace.NewServerStatsHandler(grpctrace.WithServiceName("catalogservice"))
+	srv = grpc.NewServer(grpc.StatsHandler(statsHandler))
 
 	svc := &productCatalog{}
 
@@ -152,7 +144,7 @@ func run(port string) string {
 
 func initTracing() func() {
 	opts := []tracing.StartOption{
-		tracing.WithServiceName("productcatalogservice"),
+		tracing.WithServiceName("catalogservice"),
 	}
 
 	tracing.Start(opts...)
@@ -252,14 +244,9 @@ func (p *productCatalog) SearchProducts(ctx context.Context, req *pb.SearchProdu
 }
 
 func getTraceLogFields(ctx context.Context) logrus.Fields {
-	span := trace.FromContext(ctx)
-	if span == nil {
-		return logrus.Fields{}
-	}
-	traceID := span.SpanContext().TraceID
-	spanID := span.SpanContext().SpanID
+	// TODO: add sfx trace context to logs
 	return logrus.Fields{
-		"trace_id": hex.EncodeToString(traceID[:]),
-		"span_id":  hex.EncodeToString(spanID[:]),
+		// "trace_id": hex.EncodeToString(traceID[:]),
+		// "span_id":  hex.EncodeToString(spanID[:]),
 	}
 }
