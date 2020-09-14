@@ -20,7 +20,7 @@ require (
 	github.com/philhofer/fwd v1.0.0 // indirect
 	github.com/pkg/errors v0.8.1
 	github.com/signalfx/golib v2.5.1+incompatible // indirect
-	github.com/signalfx/signalfx-go-tracing v1.4.1
+	github.com/signalfx/signalfx-go-tracing v1.4.2
 	github.com/sirupsen/logrus v1.4.2
 	github.com/tinylib/msgp v1.1.2 // indirect
 	golang.org/x/net v0.0.0-20200202094626-16171245cfb2
