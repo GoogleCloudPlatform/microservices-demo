@@ -110,8 +110,8 @@ namespace cartservice
                             var redis = NewRedisConnection(options.Redis);
                             using var tracerProvider = Sdk.CreateTracerProviderBuilder()
                                 .AddSource("opentelemetry.dotnet")
-                                // .AddGrpc()
                                 .AddRedisInstrumentation(redis)
+                                .AddProcessor(new AttrMappingProcessor())
                                 .AddZipkinExporter(o =>
                                 {
                                     o.ServiceName = "cartservice";
