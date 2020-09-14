@@ -16,8 +16,8 @@
 
 package hipstershop;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableListMultimap;
-import com.google.common.collect.Iterables;
 import hipstershop.Demo.Ad;
 import hipstershop.Demo.AdRequest;
 import hipstershop.Demo.AdResponse;
@@ -50,6 +50,8 @@ import java.util.concurrent.TimeUnit;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.datasource.SingleConnectionDataSource;
 
 public final class AdService {
 
@@ -57,12 +59,14 @@ public final class AdService {
 
   private static final int MAX_ADS_TO_SERVE = 2;
   private final MeterProvider meterProvider;
+  private final JdbcTemplate jdbcTemplate;
 
   private Server server;
   private HealthStatusManager healthMgr;
 
-  public AdService(MeterProvider meterProvider) {
+  public AdService(MeterProvider meterProvider, JdbcTemplate jdbcTemplate) {
     this.meterProvider = meterProvider;
+    this.jdbcTemplate = jdbcTemplate;
   }
 
   private static String getHost() {
@@ -190,9 +194,7 @@ public final class AdService {
     }
 
     private void reportAdsToBackgroundService(List<Ad> allAds) {
-      backgroundJobber.execute(() -> {
-        reportAdsRequest(allAds);
-      });
+      backgroundJobber.execute(() -> reportAdsRequest(allAds));
     }
 
     private void reportAdsRequest(List<Ad> allAds) {
@@ -253,21 +255,23 @@ public final class AdService {
     }
   }
 
-  private static final ImmutableListMultimap<String, Ad> adsMap = createAdsMap();
-
   private Collection<Ad> getAdsByCategory(String category) {
-    return adsMap.get(category);
+    return jdbcTemplate.query("select redirectUrl, text from ads where category = ?",
+        (rs, rowNum) -> Ad.newBuilder()
+            .setRedirectUrl(rs.getString("redirectUrl"))
+            .setText(rs.getString("text"))
+            .build(),
+        category);
   }
 
-  private static final Random random = new Random();
-
   private List<Ad> getRandomAds() {
-    List<Ad> ads = new ArrayList<>(MAX_ADS_TO_SERVE);
-    Collection<Ad> allAds = adsMap.values();
-    for (int i = 0; i < MAX_ADS_TO_SERVE; i++) {
-      ads.add(Iterables.get(allAds, random.nextInt(allAds.size())));
-    }
-    return ads;
+    return jdbcTemplate
+        .query("select redirectUrl, text from ads order by rand() limit " + MAX_ADS_TO_SERVE,
+            (rs, rowNum) -> Ad.newBuilder()
+                .setRedirectUrl(rs.getString("redirectUrl"))
+                .setText(rs.getString("text"))
+                .build()
+            );
   }
 
   /** Await termination on the main thread since the grpc library uses daemon threads. */
@@ -323,13 +327,37 @@ public final class AdService {
   }
 
   /** Main launches the server from the command line. */
-  public static void main(String[] args) throws IOException, InterruptedException {
+  public static void main(String[] args)
+      throws IOException, InterruptedException, ClassNotFoundException {
+    JdbcTemplate jdbcTemplate = setUpDatabase();
+
     MeterProvider meterProvider = OpenTelemetry.getMeterProvider();
 
     // Start the RPC server. You shouldn't see any output from gRPC before this.
     logger.info("AdService starting.");
-    AdService adService = new AdService(meterProvider);
+    AdService adService = new AdService(meterProvider, jdbcTemplate);
     adService.start();
     adService.blockUntilShutdown();
+  }
+
+  private static JdbcTemplate setUpDatabase() throws ClassNotFoundException {
+    Class.forName("org.h2.Driver");
+    SingleConnectionDataSource dataSource = new SingleConnectionDataSource(
+        "jdbc:h2:mem:myDb;DB_CLOSE_DELAY=-1", "sa", "sa", true);
+
+    JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
+    jdbcTemplate.update(
+        "create table ads( id identity, category varchar(30), redirectUrl varchar(255), text varchar(255))");
+    ImmutableListMultimap<String, Ad> adsMap = createAdsMap();
+    for (String category : adsMap.keys()) {
+      ImmutableList<Ad> ads = adsMap.get(category);
+      for (Ad ad : ads) {
+        jdbcTemplate.update("insert into ads(category, redirectUrl, text) values (?,?,?)", category,
+            ad.getRedirectUrl(), ad.getText());
+      }
+    }
+    Integer count = jdbcTemplate.queryForObject("select count(*) from ads", Integer.class);
+    System.out.println("Created the Ads Database with " + count + " records.");
+    return jdbcTemplate;
   }
 }

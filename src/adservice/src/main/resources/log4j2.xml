@@ -42,6 +42,7 @@
     <Logger name="io.netty" level="INFO"/>
     <Logger name="sun.net" level="INFO"/>
     <Logger name="com.newrelic.telemetry" level="DEBUG"/>
+    <Logger name="org.springframework.jdbc" level="WARN"/>
 
     <Root level="TRACE">
       <AppenderRef ref="Console"/>
