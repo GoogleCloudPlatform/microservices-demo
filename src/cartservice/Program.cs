@@ -24,6 +24,7 @@ using Grpc.Core;
 using Microsoft.Extensions.Configuration;
 using OpenTelemetry;
 using OpenTelemetry.Trace;
+using StackExchange.Redis;
 
 namespace cartservice
 {
@@ -32,6 +33,7 @@ namespace cartservice
         const string CART_SERVICE_ADDRESS = "LISTEN_ADDR";
         const string REDIS_ADDRESS = "REDIS_ADDR";
         const string CART_SERVICE_PORT = "PORT";
+        private const int REDIS_RETRY_NUM = 5;
 
         [Verb("start", HelpText = "Starts the server listening on provided port")]
         class ServerOptions
@@ -99,23 +101,23 @@ namespace cartservice
                 Environment.Exit(-1);
             }
 
-            using var tracerProvider = Sdk.CreateTracerProviderBuilder()
-                .AddSource("opentelemetry.dotnet")
-                // .AddGrpc()
-                // .AddRedisInstrumentation(connection)
-                .AddZipkinExporter(o =>
-                {
-                    o.ServiceName = "cartservice";
-                    o.Endpoint = new Uri(Environment.GetEnvironmentVariable("SIGNALFX_ENDPOINT_URL"));
-                })
-                .Build();
-
             switch (args[0])
             {
                 case "start":
                     Parser.Default.ParseArguments<ServerOptions>(args).MapResult(
                         (ServerOptions options) =>
                         {
+                            var redis = NewRedisConnection(options.Redis);
+                            using var tracerProvider = Sdk.CreateTracerProviderBuilder()
+                                .AddSource("opentelemetry.dotnet")
+                                // .AddGrpc()
+                                .AddRedisInstrumentation(redis)
+                                .AddZipkinExporter(o =>
+                                {
+                                    o.ServiceName = "cartservice";
+                                    o.Endpoint = new Uri(Environment.GetEnvironmentVariable("SIGNALFX_ENDPOINT_URL"));
+                                })
+                                .Build();
                             Console.WriteLine($"Started as process with id {System.Diagnostics.Process.GetCurrentProcess().Id}");
 
                             // Set hostname/ip address
@@ -150,23 +152,11 @@ namespace cartservice
 
                             // Set redis cache host (hostname+port)
                             ICartStore cartStore;
-                            string redis = ReadRedisAddress(options.Redis);
 
                             // Redis was specified via command line or environment variable
-                            if (!string.IsNullOrEmpty(redis))
-                            {
-                                // If you want to start cart store using local cache in process, you can replace the following line with this:
-                                // cartStore = new LocalCartStore();
-                                cartStore = new RedisCartStore(redis);
-
-                                return StartServer(hostname, port, cartStore);
-                            }
-                            else
-                            {
-                                Console.WriteLine("Redis cache host(hostname+port) was not specified. Starting a cart service using local store");
-                                Console.WriteLine("If you wanted to use Redis Cache as a backup store, you should provide its address via command line or REDIS_ADDRESS environment variable.");
-                                cartStore = new LocalCartStore();
-                            }
+                            // If you want to start cart store using local cache in process, you can replace the following line with this:
+                            // cartStore = new LocalCartStore();
+                            cartStore = new RedisCartStore(redis);
 
                             return StartServer(hostname, port, cartStore);
                         },
@@ -176,6 +166,35 @@ namespace cartservice
                     Console.WriteLine("Invalid command");
                     break;
             }
+        }
+
+        private static ConnectionMultiplexer NewRedisConnection(string address)
+        {
+            address = ReadRedisAddress(address); 
+            var connectionString = $"{address},ssl=false,allowAdmin=true,connectRetry=5";
+            var redisConnectionOptions = ConfigurationOptions.Parse(connectionString);
+
+            // Try to reconnect if first retry failed (up to 5 times with exponential backoff)
+            redisConnectionOptions.ConnectRetry = REDIS_RETRY_NUM;
+            redisConnectionOptions.ReconnectRetryPolicy = new ExponentialRetry(100);
+
+            redisConnectionOptions.KeepAlive = 180;
+
+            Console.WriteLine("Connecting to Redis: " + connectionString);
+            var redis = ConnectionMultiplexer.Connect(redisConnectionOptions);
+
+            // redis.InternalError += (o, e) => { Console.WriteLine(e.Exception); };
+
+            if (redis == null)
+            {
+                Console.WriteLine("Wasn't able to connect to redis");
+
+                // We weren't able to connect to redis despite 5 retries with exponential backoff
+                throw new ApplicationException("Wasn't able to connect to redis");
+            }
+
+            Console.WriteLine("Successfully connected to Redis");
+            return redis;
         }
 
         private static string ReadRedisAddress(string address)

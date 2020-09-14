@@ -19,7 +19,8 @@
     <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="2.1.1" />
     <PackageReference Include="OpenTelemetry.Exporter.Console" Version="0.5.0-beta.2" />
     <PackageReference Include="OpenTelemetry.Exporter.Zipkin" Version="0.5.0-beta.2" />
-    <PackageReference Include="StackExchange.Redis" Version="2.0.601" />
+    <PackageReference Include="OpenTelemetry.Instrumentation.StackExchangeRedis" Version="0.5.0-beta.2" />
+    <PackageReference Include="StackExchange.Redis" Version="2.1.58" />
   </ItemGroup>
 
   <ItemGroup>

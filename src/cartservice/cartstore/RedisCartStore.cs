@@ -28,87 +28,22 @@ namespace cartservice.cartstore
     public class RedisCartStore : ICartStore
     {
         private const string CART_FIELD_NAME = "cart";
-        private const int REDIS_RETRY_NUM = 5;
 
         private volatile ConnectionMultiplexer redis;
-        private volatile bool isRedisConnectionOpened = false;
-
         private readonly object locker = new object();
         private readonly byte[] emptyCartBytes;
-        private readonly string connectionString;
 
-        private readonly ConfigurationOptions redisConnectionOptions;
-
-        public RedisCartStore(string redisAddress)
+        public RedisCartStore(ConnectionMultiplexer connection)
         {
+            redis = connection;
             // Serialize empty cart into byte array.
             var cart = new Hipstershop.Cart();
             emptyCartBytes = cart.ToByteArray();
-            connectionString = $"{redisAddress},ssl=false,allowAdmin=true,connectRetry=5";
-
-            redisConnectionOptions = ConfigurationOptions.Parse(connectionString);
-
-            // Try to reconnect if first retry failed (up to 5 times with exponential backoff)
-            redisConnectionOptions.ConnectRetry = REDIS_RETRY_NUM;
-            redisConnectionOptions.ReconnectRetryPolicy = new ExponentialRetry(100);
-
-            redisConnectionOptions.KeepAlive = 180;
         }
 
         public Task InitializeAsync()
         {
-            EnsureRedisConnected();
             return Task.CompletedTask;
-        }
-
-        private void EnsureRedisConnected()
-        {
-            if (isRedisConnectionOpened)
-            {
-                return;
-            }
-
-            // Connection is closed or failed - open a new one but only at the first thread
-            lock (locker)
-            {
-                if (isRedisConnectionOpened)
-                {
-                    return;
-                }
-
-                Console.WriteLine("Connecting to Redis: " + connectionString);
-                redis = ConnectionMultiplexer.Connect(redisConnectionOptions);
-
-                if (redis == null || !redis.IsConnected)
-                {
-                    Console.WriteLine("Wasn't able to connect to redis");
-
-                    // We weren't able to connect to redis despite 5 retries with exponential backoff
-                    throw new ApplicationException("Wasn't able to connect to redis");
-                }
-
-                Console.WriteLine("Successfully connected to Redis");
-                var cache = redis.GetDatabase();
-
-                Console.WriteLine("Performing small test");
-                cache.StringSet("cart", "OK" );
-                object res = cache.StringGet("cart");
-                Console.WriteLine($"Small test result: {res}");
-
-                redis.InternalError += (o, e) => { Console.WriteLine(e.Exception); };
-                redis.ConnectionRestored += (o, e) =>
-                {
-                    isRedisConnectionOpened = true;
-                    Console.WriteLine("Connection to redis was retored successfully");
-                };
-                redis.ConnectionFailed += (o, e) =>
-                {
-                    Console.WriteLine("Connection failed. Disposing the object");
-                    isRedisConnectionOpened = false;
-                };
-
-                isRedisConnectionOpened = true;
-            }
         }
 
         public async Task AddItemAsync(string userId, string productId, int quantity)
@@ -117,8 +52,6 @@ namespace cartservice.cartstore
 
             try
             {
-                EnsureRedisConnected();
-
                 var db = redis.GetDatabase();
 
                 // Access the cart from the cache
@@ -159,7 +92,6 @@ namespace cartservice.cartstore
 
             try
             {
-                EnsureRedisConnected();
                 var db = redis.GetDatabase();
 
                 // Update the cache with empty cart for given user
@@ -177,8 +109,6 @@ namespace cartservice.cartstore
 
             try
             {
-                EnsureRedisConnected();
-
                 var db = redis.GetDatabase();
 
                 // Access the cart from the cache
