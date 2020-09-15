@@ -131,7 +131,7 @@ func run(port string) string {
 	}
 
 	var srv *grpc.Server
-	statsHandler := grpctrace.NewServerStatsHandler(grpctrace.WithServiceName("catalogservice"))
+	statsHandler := grpctrace.NewServerStatsHandler(grpctrace.WithServiceName("productcatalogservice"))
 	srv = grpc.NewServer(grpc.StatsHandler(statsHandler))
 
 	svc := &productCatalog{}
@@ -144,7 +144,7 @@ func run(port string) string {
 
 func initTracing() func() {
 	opts := []tracing.StartOption{
-		tracing.WithServiceName("catalogservice"),
+		tracing.WithServiceName("productcatalogservice"),
 	}
 
 	tracing.Start(opts...)
