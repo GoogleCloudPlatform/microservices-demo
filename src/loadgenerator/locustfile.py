@@ -58,7 +58,7 @@ def checkout(l):
         'city': 'Mountain View',
         'state': 'CA',
         'country': 'United States',
-        'credit_card_number': '4432-8015-6152-0454',
+        'credit_card_number': '4242-4242-4242-4242',
         'credit_card_expiration_month': '1',
         'credit_card_expiration_year': '2039',
         'credit_card_cvv': '672',
