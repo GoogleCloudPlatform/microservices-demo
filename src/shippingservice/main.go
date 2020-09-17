@@ -21,7 +21,9 @@ import (
 	"time"
 
 	"cloud.google.com/go/profiler"
+	"github.com/opentracing/opentracing-go"
 	grpctrace "github.com/signalfx/signalfx-go-tracing/contrib/google.golang.org/grpc"
+	"github.com/signalfx/signalfx-go-tracing/ddtrace/tracer"
 	"github.com/signalfx/signalfx-go-tracing/tracing"
 	"github.com/sirupsen/logrus"
 	"golang.org/x/net/context"
@@ -188,9 +190,12 @@ func initProfiling(service, version string) {
 }
 
 func getTraceLogFields(ctx context.Context) logrus.Fields {
-	// TODO: add sfx trace context to logs
-	return logrus.Fields{
-		// "trace_id": hex.EncodeToString(traceID[:]),
-		// "span_id":  hex.EncodeToString(spanID[:]),
+	fields := logrus.Fields{}
+	if span := opentracing.SpanFromContext(ctx); span != nil {
+		spanCtx := span.Context()
+		fields["trace_id"] = tracer.TraceIDHex(spanCtx)
+		fields["span_id"] = tracer.SpanIDHex(spanCtx)
 	}
+
+	return fields
 }
