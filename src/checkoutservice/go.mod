@@ -15,10 +15,10 @@ require (
 	github.com/juju/testing v0.0.0-20200706033705-4c23f9c453cd // indirect
 	github.com/konsorten/go-windows-terminal-sequences v1.0.2 // indirect
 	github.com/mailru/easyjson v0.7.6 // indirect
-	github.com/opentracing/opentracing-go v1.2.0 // indirect
+	github.com/opentracing/opentracing-go v1.2.0
 	github.com/philhofer/fwd v1.0.0 // indirect
 	github.com/signalfx/golib v2.5.1+incompatible // indirect
-	github.com/signalfx/signalfx-go-tracing v1.4.2
+	github.com/signalfx/signalfx-go-tracing v1.5.0
 	github.com/sirupsen/logrus v1.4.2
 	github.com/tinylib/msgp v1.1.2 // indirect
 	golang.org/x/net v0.0.0-20200202094626-16171245cfb2

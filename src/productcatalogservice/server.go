@@ -30,8 +30,10 @@ import (
 
 	"cloud.google.com/go/profiler"
 	"github.com/golang/protobuf/jsonpb"
+	"github.com/opentracing/opentracing-go"
 	pb "github.com/signalfx/microservices-demo/src/productcatalogservice/genproto"
 	grpctrace "github.com/signalfx/signalfx-go-tracing/contrib/google.golang.org/grpc"
+	"github.com/signalfx/signalfx-go-tracing/ddtrace/tracer"
 	"github.com/signalfx/signalfx-go-tracing/tracing"
 	"github.com/sirupsen/logrus"
 	healthpb "google.golang.org/grpc/health/grpc_health_v1"
@@ -244,9 +246,11 @@ func (p *productCatalog) SearchProducts(ctx context.Context, req *pb.SearchProdu
 }
 
 func getTraceLogFields(ctx context.Context) logrus.Fields {
-	// TODO: add sfx trace context to logs
-	return logrus.Fields{
-		// "trace_id": hex.EncodeToString(traceID[:]),
-		// "span_id":  hex.EncodeToString(spanID[:]),
+	fields := logrus.Fields{}
+	if span := opentracing.SpanFromContext(ctx); span != nil {
+		spanCtx := span.Context()
+		fields["trace_id"] = tracer.TraceIDHex(spanCtx)
+		fields["span_id"] = tracer.SpanIDHex(spanCtx)
 	}
+	return fields
 }
