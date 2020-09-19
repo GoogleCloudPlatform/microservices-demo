@@ -27,15 +27,15 @@ import (
 	"github.com/google/uuid"
 	"github.com/gorilla/mux"
 	"github.com/sirupsen/logrus"
+	otelgrpc "go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc"
 	"go.opentelemetry.io/otel/api/global"
-	"go.opentelemetry.io/otel/api/kv"
 	"go.opentelemetry.io/otel/api/metric"
 	"go.opentelemetry.io/otel/api/propagation"
-	"go.opentelemetry.io/otel/api/standard"
 	"go.opentelemetry.io/otel/api/trace"
 	"go.opentelemetry.io/otel/api/unit"
-	"go.opentelemetry.io/otel/instrumentation/grpctrace"
+	"go.opentelemetry.io/otel/label"
 	"go.opentelemetry.io/otel/sdk/resource"
+	"go.opentelemetry.io/otel/semconv"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/peer"
 )
@@ -72,65 +72,65 @@ func init() {
 		metric.WithUnit(unit.Milliseconds),
 	)
 
-	labels := []kv.KeyValue{standard.ServiceNameKey.String(serviceName)}
+	labels := []label.KeyValue{semconv.ServiceNameKey.String(serviceName)}
 	if metadata.OnGCE() {
-		labels = append(labels, standard.CloudProviderGCP)
+		labels = append(labels, semconv.CloudProviderGCP)
 
 		// Ignore all errors as we cannot do anything about them.
 
 		if projectID, err := metadata.ProjectID(); err == nil && projectID != "" {
-			labels = append(labels, standard.CloudAccountIDKey.String(projectID))
+			labels = append(labels, semconv.CloudAccountIDKey.String(projectID))
 		}
 
 		if zone, err := metadata.Zone(); err == nil && zone != "" {
-			labels = append(labels, standard.CloudZoneKey.String(zone))
+			labels = append(labels, semconv.CloudZoneKey.String(zone))
 
 			splitArr := strings.SplitN(zone, "-", 3)
 			if len(splitArr) == 3 {
-				standard.CloudRegionKey.String(strings.Join(splitArr[0:2], "-"))
+				semconv.CloudRegionKey.String(strings.Join(splitArr[0:2], "-"))
 			}
 		}
 
 		if instanceID, err := metadata.InstanceID(); err == nil && instanceID != "" {
-			labels = append(labels, standard.HostIDKey.String(instanceID))
+			labels = append(labels, semconv.HostIDKey.String(instanceID))
 		}
 
 		if name, err := metadata.InstanceName(); err == nil && name != "" {
-			labels = append(labels, standard.HostNameKey.String(name))
+			labels = append(labels, semconv.HostNameKey.String(name))
 		}
 
 		if hostname, err := os.Hostname(); err == nil && hostname != "" {
-			labels = append(labels, standard.HostHostNameKey.String(hostname))
+			labels = append(labels, semconv.HostHostNameKey.String(hostname))
 		}
 
 		if hostType, err := metadata.Get("instance/machine-type"); err == nil && hostType != "" {
-			labels = append(labels, standard.HostTypeKey.String(hostType))
+			labels = append(labels, semconv.HostTypeKey.String(hostType))
 		}
 	}
 
 	if os.Getenv("KUBERNETES_SERVICE_HOST") != "" {
 		if ns, ok := os.LookupEnv("NAMESPACE"); ok && ns != "" {
-			labels = append(labels, standard.ServiceNamespaceKey.String(ns))
-			labels = append(labels, standard.K8SNamespaceNameKey.String(ns))
+			labels = append(labels, semconv.ServiceNamespaceKey.String(ns))
+			labels = append(labels, semconv.K8SNamespaceNameKey.String(ns))
 		}
 
 		if host, ok := os.LookupEnv("HOSTNAME"); ok && host != "" {
-			labels = append(labels, standard.ServiceInstanceIDKey.String(host))
-			labels = append(labels, standard.K8SPodNameKey.String(host))
+			labels = append(labels, semconv.ServiceInstanceIDKey.String(host))
+			labels = append(labels, semconv.K8SPodNameKey.String(host))
 		} else {
-			labels = append(labels, standard.ServiceInstanceIDKey.String(uuid.New().String()))
+			labels = append(labels, semconv.ServiceInstanceIDKey.String(uuid.New().String()))
 		}
 
 		if containerName := os.Getenv("CONTAINER_NAME"); containerName != "" {
-			labels = append(labels, standard.ContainerNameKey.String(containerName))
+			labels = append(labels, semconv.ContainerNameKey.String(containerName))
 		}
 
 		if clusterName, err := metadata.InstanceAttributeValue("cluster-name"); err == nil && clusterName != "" {
-			labels = append(labels, standard.K8SClusterNameKey.String(clusterName))
+			labels = append(labels, semconv.K8SClusterNameKey.String(clusterName))
 		}
 
 	} else {
-		labels = append(labels, standard.ServiceInstanceIDKey.String(uuid.New().String()))
+		labels = append(labels, semconv.ServiceInstanceIDKey.String(uuid.New().String()))
 	}
 
 	res = resource.New(labels...)
@@ -240,11 +240,11 @@ func (tw traceware) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if spanName == "" {
 		spanName = fmt.Sprintf("HTTP %s route not found", r.Method)
 	}
-	labels := []kv.KeyValue{
-		kv.String("span.name", spanName),
-		kv.String("span.kind", trace.SpanKindServer.String()),
+	labels := []label.KeyValue{
+		label.String("span.name", spanName),
+		label.String("span.kind", trace.SpanKindServer.String()),
 	}
-	labels = append(labels, standard.HTTPServerMetricAttributesFromHTTPRequest(serviceName, r)...)
+	labels = append(labels, semconv.HTTPServerMetricAttributesFromHTTPRequest(serviceName, r)...)
 
 	start := time.Now()
 	defer func() {
@@ -262,7 +262,7 @@ func MuxMiddleware() mux.MiddlewareFunc {
 // UnaryClientInterceptor returns a grpc.UnaryClientInterceptor suitable
 // for use in a grpc.Dial call.
 func UnaryClientInterceptor() grpc.UnaryClientInterceptor {
-	upstream := grpctrace.UnaryClientInterceptor(tracer)
+	upstream := otelgrpc.UnaryClientInterceptor(tracer)
 	return func(
 		ctx context.Context,
 		method string,
@@ -287,7 +287,7 @@ func UnaryClientInterceptor() grpc.UnaryClientInterceptor {
 // StreamClientInterceptor returns a grpc.StreamClientInterceptor suitable
 // for use in a grpc.Dial call.
 func StreamClientInterceptor() grpc.StreamClientInterceptor {
-	upstream := grpctrace.StreamClientInterceptor(tracer)
+	upstream := otelgrpc.StreamClientInterceptor(tracer)
 	return func(
 		ctx context.Context,
 		desc *grpc.StreamDesc,
@@ -314,30 +314,30 @@ func StreamClientInterceptor() grpc.StreamClientInterceptor {
 * go.opentelemetry.io/otel/instrumentation/grpctrace/interceptor.go@v0.8.0
  */
 
-func labels(fullMethod, peerAddress string) []kv.KeyValue {
-	attrs := []kv.KeyValue{standard.RPCSystemGRPC}
+func labels(fullMethod, peerAddress string) []label.KeyValue {
+	attrs := []label.KeyValue{semconv.RPCSystemGRPC}
 	name, mAttrs := parseFullMethod(fullMethod)
 	attrs = append(attrs, mAttrs...)
 	attrs = append(attrs, peerAttr(peerAddress)...)
-	attrs = append(attrs, kv.String("span.name", name))
-	attrs = append(attrs, kv.String("span.kind", trace.SpanKindServer.String()))
+	attrs = append(attrs, label.String("span.name", name))
+	attrs = append(attrs, label.String("span.kind", trace.SpanKindServer.String()))
 	return attrs
 }
 
 // peerAttr returns attributes about the peer address.
-func peerAttr(addr string) []kv.KeyValue {
+func peerAttr(addr string) []label.KeyValue {
 	host, port, err := net.SplitHostPort(addr)
 	if err != nil {
-		return []kv.KeyValue(nil)
+		return []label.KeyValue(nil)
 	}
 
 	if host == "" {
 		host = "127.0.0.1"
 	}
 
-	return []kv.KeyValue{
-		standard.NetPeerIPKey.String(host),
-		standard.NetPeerPortKey.String(port),
+	return []label.KeyValue{
+		semconv.NetPeerIPKey.String(host),
+		semconv.NetPeerPortKey.String(port),
 	}
 }
 
@@ -351,22 +351,22 @@ func peerFromCtx(ctx context.Context) string {
 }
 
 // parseFullMethod returns a span name following the OpenTelemetry semantic
-// conventions as well as all applicable span kv.KeyValue attributes based
+// conventions as well as all applicable span label.KeyValue attributes based
 // on a gRPC's FullMethod.
-func parseFullMethod(fullMethod string) (string, []kv.KeyValue) {
+func parseFullMethod(fullMethod string) (string, []label.KeyValue) {
 	name := strings.TrimLeft(fullMethod, "/")
 	parts := strings.SplitN(name, "/", 2)
 	if len(parts) != 2 {
 		// Invalid format, does not follow `/package.service/method`.
-		return name, []kv.KeyValue(nil)
+		return name, []label.KeyValue(nil)
 	}
 
-	var attrs []kv.KeyValue
+	var attrs []label.KeyValue
 	if service := parts[0]; service != "" {
-		attrs = append(attrs, standard.RPCServiceKey.String(service))
+		attrs = append(attrs, semconv.RPCServiceKey.String(service))
 	}
 	if method := parts[1]; method != "" {
-		attrs = append(attrs, standard.RPCMethodKey.String(method))
+		attrs = append(attrs, semconv.RPCMethodKey.String(method))
 	}
 	return name, attrs
 }

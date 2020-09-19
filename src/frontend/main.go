@@ -31,8 +31,7 @@ import (
 	"github.com/newrelic/opentelemetry-exporter-go/newrelic"
 	muxtrace "go.opentelemetry.io/contrib/instrumentation/github.com/gorilla/mux"
 	"go.opentelemetry.io/otel/api/global"
-	stdoutmetric "go.opentelemetry.io/otel/exporters/metric/stdout"
-	stdouttrace "go.opentelemetry.io/otel/exporters/trace/stdout"
+	"go.opentelemetry.io/otel/exporters/stdout"
 	exportmetric "go.opentelemetry.io/otel/sdk/export/metric"
 	exporttrace "go.opentelemetry.io/otel/sdk/export/trace"
 	"go.opentelemetry.io/otel/sdk/metric/controller/push"
@@ -127,16 +126,12 @@ func main() {
 		metricExporter = exporter
 	} else {
 		log.Info("Defaulting to stdout exporter")
-		te, err := stdouttrace.NewExporter(stdouttrace.Options{PrettyPrint: true})
+		exporter, err := stdout.NewExporter(stdout.WithPrettyPrint())
 		if err != nil {
 			log.Fatal(err)
 		}
-		traceExporter = te
-		me, err := stdoutmetric.NewRawExporter(stdoutmetric.Config{PrettyPrint: true})
-		if err != nil {
-			log.Fatal(err)
-		}
-		metricExporter = me
+		traceExporter = exporter
+		metricExporter = exporter
 	}
 
 	defer initMetric(log, metricExporter).Stop()
