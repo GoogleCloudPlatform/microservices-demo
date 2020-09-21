@@ -55,6 +55,12 @@ spec:
           value: "true"
         - name: SIGNALFX_ENV
           value: "demo"
+        - name: REDIS_SPAN_ERROR_RATE
+          value: "0.33"
+        - name: EXTERNAL_DB_NAME
+          value: "Galactus.Postgres"
+        - name: EXTERNAL_DB_CHANGE_RATE
+          value: "0.50"
         resources:
           requests:
             cpu: 200m
