@@ -20,9 +20,12 @@
   docReady(() => {
     const formElem = document.getElementsByTagName("form")[2];
     formElem.onsubmit = (e) => {
+        e.preventDefault();
       fetch("/cart/checkout", {
         method: "POST",
         body: new FormData(formElem),
+      }).then(() => {
+          setTimeout(() => formElem.submit(), 2000);
       });
     };
   });
