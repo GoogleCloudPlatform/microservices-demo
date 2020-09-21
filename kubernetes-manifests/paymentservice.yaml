@@ -44,11 +44,11 @@ spec:
           # value: "http://zipkin.default:9411/api/v2/spans"
           value: "http://$(NODE_IP):9411/api/v2/spans"
         - name: API_TOKEN_FAILURE_RATE
-          value: 0.0
+          value: "0.66"
         - name: SUCCESS_PAYMENT_SERVICE_DURATION_MILLIS
-          value: 200
+          value: "200"
         - name: ERROR_PAYMENT_SERVICE_DURATION_MILLIS
-          value: 1000
+          value: "1000"
         readinessProbe:
           exec:
             command: ["/bin/grpc_health_probe", "-addr=:50051"]

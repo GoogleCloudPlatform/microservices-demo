@@ -61,9 +61,9 @@ spec:
             # value: "http://zipkin.default:9411/api/v2/spans"
             value: "http://$(NODE_IP):9411/api/v2/spans"
           - name: MAX_RETRY_ATTEMPTS
-            value: 10
+            value: "10"
           - name: RETRY_INITIAL_SLEEP_MILLIS
-            value: 50
+            value: "50"
           resources:
             requests:
               cpu: 100m
