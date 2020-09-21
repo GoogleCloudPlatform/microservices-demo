@@ -173,6 +173,7 @@ func (fe *frontendServer) productHandler(w http.ResponseWriter, r *http.Request)
 		"platform_css":    plat.css,
 		"platform_name":   plat.provider,
 		"extra_headers":   template.HTML(os.Getenv("FRONTEND_EXTRA_HEADERS")),
+		"introduce_errors":   template.HTML(os.Getenv("INTRODUCE_ERRORS")),
 	}); err != nil {
 		log.Println(err)
 	}

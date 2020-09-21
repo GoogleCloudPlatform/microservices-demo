@@ -5,7 +5,36 @@
     {{$.platform_name}}
   </span>
 </div>
+{{ if $.introduce_errors }}
+<script>
+  Prcie;
+</script>
+<script>
+  function docReady(fn) {
+    // see if DOM is already available
+    if (
+      document.readyState === "complete" ||
+      document.readyState === "interactive"
+    ) {
+      // call on next available tick
+      setTimeout(fn, 1);
+    } else {
+      document.addEventListener("DOMContentLoaded", fn);
+    }
+  }
 
+  docReady(() => {
+    const formElem = document.getElementsByTagName("form")[1];
+    formElem.onsubmit = (e) => {
+      e.preventDefault();
+      fetch("/cart", {
+        method: "POST",
+        body: new FormData(formElem),
+      }).then(() => (window.location.href = "/cart"));
+    };
+  });
+</script>
+{{ end }}
 <main role="main">
   <div class="h-product">
     <div class="row">
