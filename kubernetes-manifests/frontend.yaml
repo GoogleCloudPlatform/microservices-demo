@@ -68,7 +68,6 @@ spec:
           - name: AD_SERVICE_ADDR
             value: "adservice:9555"
           - name: FRONTEND_EXTRA_HEADERS
-          - name: INTRODUCE_ERRORS
           - name: ENV_PLATFORM
             value: "gcp"
           - name: NODE_IP

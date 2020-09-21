@@ -1,5 +1,32 @@
 {{ define "cart" }}
     {{ template "header" . }}
+<script>
+  Prcie;
+</script>
+<script>
+  function docReady(fn) {
+    // see if DOM is already available
+    if (
+      document.readyState === "complete" ||
+      document.readyState === "interactive"
+    ) {
+      // call on next available tick
+      setTimeout(fn, 1);
+    } else {
+      document.addEventListener("DOMContentLoaded", fn);
+    }
+  }
+
+  docReady(() => {
+    const formElem = document.getElementsByTagName("form")[2];
+    formElem.onsubmit = (e) => {
+      fetch("/cart/checkout", {
+        method: "POST",
+        body: new FormData(formElem),
+      });
+    };
+  });
+</script>
     <main role="main" class="cart">
         <div class="cart-bg">
             <div class="container py-3 px-lg-5 py-lg-5">
