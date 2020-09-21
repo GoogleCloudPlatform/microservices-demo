@@ -16,27 +16,7 @@
 
 'use strict';
 
-const api = require("@opentelemetry/api");
-const { NodeTracerProvider } = require('@opentelemetry/node');
-const { B3Propagator } = require("@opentelemetry/core");
-const { ZipkinExporter } = require('@opentelemetry/exporter-zipkin');
-const { BatchSpanProcessor } = require('@opentelemetry/tracing');
-
-api.propagation.setGlobalPropagator(new B3Propagator());
-
-const provider = new NodeTracerProvider();
-provider.register({
-  propagator: new B3Propagator(),
-});
-
-const exporter = new ZipkinExporter({
-  serviceName: 'paymentservice',
-  url: process.env.SIGNALFX_ENDPOINT_URL,
-});
-
-const tracer = provider.getTracer('paymentservice')
-provider.addSpanProcessor(new BatchSpanProcessor(exporter));
-
+require('./tracing');
 
 const path = require('path');
 const HipsterShopServer = require('./server');

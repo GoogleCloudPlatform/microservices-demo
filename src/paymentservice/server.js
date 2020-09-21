@@ -24,16 +24,18 @@ const logger = pino({
   messageKey: 'message',
   changeLevelName: 'severity',
   useLevelLabels: true,
-  timestamp: pino.stdTimeFunctions.unixTime
+  timestamp: pino.stdTimeFunctions.unixTime,
 });
 
 class HipsterShopServer {
-  constructor (protoRoot, port = HipsterShopServer.PORT) {
+  constructor(protoRoot, port = HipsterShopServer.PORT) {
     this.port = port;
 
     this.packages = {
       hipsterShop: this.loadProto(path.join(protoRoot, 'demo.proto')),
-      health: this.loadProto(path.join(protoRoot, 'grpc/health/v1/health.proto'))
+      health: this.loadProto(
+        path.join(protoRoot, 'grpc/health/v1/health.proto')
+      ),
     };
 
     this.server = new grpc.Server();
@@ -45,58 +47,61 @@ class HipsterShopServer {
    * @param {*} call  { ChargeRequest }
    * @param {*} callback  fn(err, ChargeResponse)
    */
-  static ChargeServiceHandler (call, callback) {
+  static ChargeServiceHandler(call, callback) {
     try {
-      logger.info(`PaymentService#Charge invoked with request ${JSON.stringify(call.request)}`);
-      const response = charge(call.request);
-      callback(null, response);
+      logger.info(
+        `PaymentService#Charge invoked with request ${JSON.stringify(
+          call.request
+        )}`
+      );
+      charge(call.request)
+        .then((response) => {
+          callback(null, response);
+        })
+        .catch((err) => {
+          callback(err);
+        });
     } catch (err) {
       console.warn(err);
       callback(err);
     }
   }
 
-  static CheckHandler (call, callback) {
+  static CheckHandler(call, callback) {
     callback(null, { status: 'SERVING' });
   }
 
-  listen () {
-    this.server.bind(`0.0.0.0:${this.port}`, grpc.ServerCredentials.createInsecure());
+  listen() {
+    this.server.bind(
+      `0.0.0.0:${this.port}`,
+      grpc.ServerCredentials.createInsecure()
+    );
     logger.info(`PaymentService grpc server listening on ${this.port}`);
     this.server.start();
   }
 
-  loadProto (path) {
-    const packageDefinition = protoLoader.loadSync(
-      path,
-      {
-        keepCase: true,
-        longs: String,
-        enums: String,
-        defaults: true,
-        oneofs: true
-      }
-    );
+  loadProto(path) {
+    const packageDefinition = protoLoader.loadSync(path, {
+      keepCase: true,
+      longs: String,
+      enums: String,
+      defaults: true,
+      oneofs: true,
+    });
     return grpc.loadPackageDefinition(packageDefinition);
   }
 
-  loadAllProtos (protoRoot) {
+  loadAllProtos(protoRoot) {
     const hipsterShopPackage = this.packages.hipsterShop.hipstershop;
     const healthPackage = this.packages.health.grpc.health.v1;
 
-    this.server.addService(
-      hipsterShopPackage.PaymentService.service,
-      {
-        charge: HipsterShopServer.ChargeServiceHandler.bind(this)
-      }
-    );
+    this.server.addService(hipsterShopPackage.PaymentService.service, {
+      charge: HipsterShopServer.ChargeServiceHandler.bind(this),
+    });
 
-    this.server.addService(
-      healthPackage.Health.service,
-      {
-        check: HipsterShopServer.CheckHandler.bind(this)
-      }
-    );
+    this.server.addService(healthPackage.Health.service, {
+      check: HipsterShopServer.CheckHandler.bind(this),
+    });
   }
 }
 

@@ -19,6 +19,7 @@ import (
 	"fmt"
 	"net"
 	"os"
+	"strconv"
 	"time"
 
 	"cloud.google.com/go/profiler"
@@ -191,6 +192,7 @@ func (cs *checkoutService) PlaceOrder(ctx context.Context, req *pb.PlaceOrderReq
 
 	txID, err := cs.chargeCard(ctx, &total, req.CreditCard)
 	if err != nil {
+		logger.Errorf("failed to charge card: %+v", err)
 		return nil, status.Errorf(codes.Internal, "failed to charge card: %+v", err)
 	}
 	log.Infof("payment went through (transaction_id: %s)", txID)
@@ -337,6 +339,24 @@ func (cs *checkoutService) convertCurrency(ctx context.Context, from *pb.Money, 
 	return result, err
 }
 
+// Retry function for chargeCard
+func chargeCardRetry(attempts int, sleep time.Duration, f func() (string, error)) (string, error) {
+	res, err := f()
+	if err != nil {
+		if attempts--; attempts > 0 {
+			logger.WithFields(logrus.Fields{
+				"RetriesRemaining": attempts,
+				"Sleep":            sleep,
+			}).Warnf("Retrying chargeCard")
+			time.Sleep(sleep)
+			return chargeCardRetry(attempts, 2*sleep, f)
+		}
+		return "", err
+	}
+
+	return res, nil
+}
+
 func (cs *checkoutService) chargeCard(ctx context.Context, amount *pb.Money, paymentInfo *pb.CreditCardInfo) (string, error) {
 	conn, err := grpc.DialContext(ctx, cs.paymentSvcAddr, grpc.WithInsecure(), grpc.WithStatsHandler(clientStatsHandler()))
 	if err != nil {
@@ -344,13 +364,20 @@ func (cs *checkoutService) chargeCard(ctx context.Context, amount *pb.Money, pay
 	}
 	defer conn.Close()
 
-	paymentResp, err := pb.NewPaymentServiceClient(conn).Charge(ctx, &pb.ChargeRequest{
-		Amount:     amount,
-		CreditCard: paymentInfo})
-	if err != nil {
-		return "", fmt.Errorf("could not charge the card: %+v", err)
+	chargeRequest := func() (string, error) {
+		paymentResp, err := pb.NewPaymentServiceClient(conn).Charge(ctx, &pb.ChargeRequest{
+			Amount:     amount,
+			CreditCard: paymentInfo})
+		if err != nil {
+			return "", fmt.Errorf("could not charge the card: %+v", err)
+		}
+		return paymentResp.GetTransactionId(), nil
 	}
-	return paymentResp.GetTransactionId(), nil
+
+	attempts, _ := strconv.Atoi(os.Getenv("MAX_RETRY_ATTEMPTS"))
+	initialSleepMillis, _ := strconv.Atoi(os.Getenv("RETRY_INITIAL_SLEEP_MILLIS"))
+	initialSleep := time.Duration(initialSleepMillis * 1000 * 1000) // millis to nanos
+	return chargeCardRetry(attempts, initialSleep, chargeRequest)
 }
 
 func (cs *checkoutService) sendOrderConfirmation(ctx context.Context, email string, order *pb.OrderResult) error {
