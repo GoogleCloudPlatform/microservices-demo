@@ -87,7 +87,7 @@ We offer the following installation methods:
      Recommended for Mac/Windows.
    - [Kind](https://kind.sigs.k8s.io). Supports Mac/Windows/Linux.
 
-1. **Running on Google Kubernetes Engine (GKE)”** (~30 minutes) You will build,
+1. **Running on Google Kubernetes Engine (GKE)** (~30 minutes) You will build,
    upload and deploy the container images to a Kubernetes cluster on Google
    Cloud.
 
