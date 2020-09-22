@@ -18,7 +18,6 @@ import os
 import random
 import time
 import traceback
-import urllib.parse
 from concurrent import futures
 
 import grpc
@@ -41,17 +40,13 @@ from grpc_health.v1 import health_pb2_grpc
 from logger import getJSONLogger
 logger = getJSONLogger('recommendationservice-server')
 
-export_url = urllib.parse.urlparse(os.environ['SIGNALFX_ENDPOINT_URL'])
 zipkin_exporter = zipkin.ZipkinSpanExporter(
     service_name="recommendationservice",
-    host_name=export_url.hostname,
-    port=export_url.port,
-    endpoint=export_url.path,
-    protocol=export_url.scheme
+    url=os.environ['SIGNALFX_ENDPOINT_URL']
 )
 span_processor = BatchExportSpanProcessor(zipkin_exporter)
 
-propagators.set_global_httptextformat(B3Format())
+propagators.set_global_textmap(B3Format())
 trace.set_tracer_provider(TracerProvider())
 trace.get_tracer_provider().add_span_processor(span_processor)
 tracer = trace.get_tracer(__name__)
