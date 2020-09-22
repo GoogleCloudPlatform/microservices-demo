@@ -97,7 +97,7 @@ namespace cartservice.cartstore
         // Attempt to access "external database" some percentage of the time
         if (_random.NextDouble() < EXTERNAL_DB_ACCESS_RATE)
         {
-          using (var span = _tracer.StartActiveSpan("Cart.DbQuery", SpanKind.Client))
+          using (var span = _tracer.StartActiveSpan("Cart.DbQuery.UpdateCart", SpanKind.Client))
           {
             span
                 .SetAttribute("db.system", "postgres")
@@ -153,6 +153,27 @@ namespace cartservice.cartstore
         {
           return Hipstershop.Cart.Parser.ParseFrom(value);
         }
+
+        // Attempt to access "external database" some percentage of the time
+        if (_random.NextDouble() < EXTERNAL_DB_ACCESS_RATE)
+        {
+          using (var span = _tracer.StartActiveSpan("Cart.DbQuery.GetCart", SpanKind.Client))
+          {
+            span
+                .SetAttribute("db.system", "postgres")
+                .SetAttribute("db.type", "postgres")
+                .SetAttribute("peer.service", EXTERNAL_DB_NAME + ":98321");
+
+            if (_random.NextDouble() < EXTERNAL_DB_ERROR_RATE)
+            {
+              span.SetAttribute("error", "true");
+            }
+
+            Thread.Sleep(TimeSpan.FromMilliseconds(_random.Next(0, EXTERNAL_DB_MAX_DURATION_MILLIS)));
+            span.End();
+          }
+        }
+
 
         // We decided to return empty cart in cases when user wasn't in the cache before
         return new Hipstershop.Cart();
