@@ -22,124 +22,151 @@ using Google.Protobuf;
 using Grpc.Core;
 using Hipstershop;
 using StackExchange.Redis;
+using OpenTelemetry.Trace;
 
 namespace cartservice.cartstore
 {
-    public class RedisCartStore : ICartStore
+  public class RedisCartStore : ICartStore
+  {
+
+    private const string CART_FIELD_NAME = "cart";
+
+    private volatile ConnectionMultiplexer redis;
+    private readonly object locker = new object();
+    private readonly byte[] emptyCartBytes;
+
+    private static double EXTERNAL_DB_ACCESS_RATE = Convert.ToDouble(Environment.GetEnvironmentVariable("EXTERNAL_DB_ACCESS_RATE"));
+    private static Int16 EXTERNAL_DB_MAX_DURATION_MILLIS = Convert.ToInt16(Environment.GetEnvironmentVariable("EXTERNAL_DB_MAX_DURATION_MILLIS"));
+    public static string EXTERNAL_DB_NAME = Environment.GetEnvironmentVariable("EXTERNAL_DB_NAME") ?? "global.datastore";
+
+    private readonly Tracer _tracer;
+    private readonly Random _random;
+
+    public RedisCartStore(ConnectionMultiplexer connection)
     {
-        private const string CART_FIELD_NAME = "cart";
+      redis = connection;
+      // Serialize empty cart into byte array.
+      var cart = new Hipstershop.Cart();
+      emptyCartBytes = cart.ToByteArray();
 
-        private volatile ConnectionMultiplexer redis;
-        private readonly object locker = new object();
-        private readonly byte[] emptyCartBytes;
-
-        public RedisCartStore(ConnectionMultiplexer connection)
-        {
-            redis = connection;
-            // Serialize empty cart into byte array.
-            var cart = new Hipstershop.Cart();
-            emptyCartBytes = cart.ToByteArray();
-        }
-
-        public Task InitializeAsync()
-        {
-            return Task.CompletedTask;
-        }
-
-        public async Task AddItemAsync(string userId, string productId, int quantity)
-        {
-            Console.WriteLine($"AddItemAsync called with userId={userId}, productId={productId}, quantity={quantity}");
-
-            try
-            {
-                var db = redis.GetDatabase();
-
-                // Access the cart from the cache
-                var value = await db.HashGetAsync(userId, CART_FIELD_NAME);
-
-                Hipstershop.Cart cart;
-                if (value.IsNull)
-                {
-                    cart = new Hipstershop.Cart();
-                    cart.UserId = userId;
-                    cart.Items.Add(new Hipstershop.CartItem { ProductId = productId, Quantity = quantity });
-                }
-                else
-                {
-                    cart = Hipstershop.Cart.Parser.ParseFrom(value);
-                    var existingItem = cart.Items.SingleOrDefault(i => i.ProductId == productId);
-                    if (existingItem == null)
-                    {
-                        cart.Items.Add(new Hipstershop.CartItem { ProductId = productId, Quantity = quantity });
-                    }
-                    else
-                    {
-                        existingItem.Quantity += quantity;
-                    }
-                }
-
-                await db.HashSetAsync(userId, new[]{ new HashEntry(CART_FIELD_NAME, cart.ToByteArray()) });
-            }
-            catch (Exception ex)
-            {
-                throw new RpcException(new Status(StatusCode.FailedPrecondition, $"Can't access cart storage. {ex}"));
-            }
-        }
-
-        public async Task EmptyCartAsync(string userId)
-        {
-            Console.WriteLine($"EmptyCartAsync called with userId={userId}");
-
-            try
-            {
-                var db = redis.GetDatabase();
-
-                // Update the cache with empty cart for given user
-                await db.HashSetAsync(userId, new[] { new HashEntry(CART_FIELD_NAME, emptyCartBytes) });
-            }
-            catch (Exception ex)
-            {
-                throw new RpcException(new Status(StatusCode.FailedPrecondition, $"Can't access cart storage. {ex}"));
-            }
-        }
-
-        public async Task<Hipstershop.Cart> GetCartAsync(string userId)
-        {
-            Console.WriteLine($"GetCartAsync called with userId={userId}");
-
-            try
-            {
-                var db = redis.GetDatabase();
-
-                // Access the cart from the cache
-                var value = await db.HashGetAsync(userId, CART_FIELD_NAME);
-
-                if (!value.IsNull)
-                {
-                    return Hipstershop.Cart.Parser.ParseFrom(value);
-                }
-
-                // We decided to return empty cart in cases when user wasn't in the cache before
-                return new Hipstershop.Cart();
-            }
-            catch (Exception ex)
-            {
-                throw new RpcException(new Status(StatusCode.FailedPrecondition, $"Can't access cart storage. {ex}"));
-            }
-        }
-
-        public bool Ping()
-        {
-            try
-            {
-                var cache = redis.GetDatabase();
-                var res = cache.Ping();
-                return res != TimeSpan.Zero;
-            }
-            catch (Exception)
-            {
-                return false;
-            }
-        }
+      _tracer = Program.tracerProvider.GetTracer("cartservice");
+      _random = new Random();
     }
+
+    public Task InitializeAsync()
+    {
+      return Task.CompletedTask;
+    }
+
+    public async Task AddItemAsync(string userId, string productId, int quantity)
+    {
+      Console.WriteLine($"AddItemAsync called with userId={userId}, productId={productId}, quantity={quantity}");
+
+      try
+      {
+        var db = redis.GetDatabase();
+
+        // Access the cart from the cache
+        var value = await db.HashGetAsync(userId, CART_FIELD_NAME);
+
+        Hipstershop.Cart cart;
+        if (value.IsNull)
+        {
+          cart = new Hipstershop.Cart();
+          cart.UserId = userId;
+          cart.Items.Add(new Hipstershop.CartItem { ProductId = productId, Quantity = quantity });
+        }
+        else
+        {
+          cart = Hipstershop.Cart.Parser.ParseFrom(value);
+          var existingItem = cart.Items.SingleOrDefault(i => i.ProductId == productId);
+          if (existingItem == null)
+          {
+            cart.Items.Add(new Hipstershop.CartItem { ProductId = productId, Quantity = quantity });
+          }
+          else
+          {
+            existingItem.Quantity += quantity;
+          }
+        }
+
+        await db.HashSetAsync(userId, new[] { new HashEntry(CART_FIELD_NAME, cart.ToByteArray()) });
+
+        // Attempt to access "external database" some percentage of the time
+        if (_random.NextDouble() < EXTERNAL_DB_ACCESS_RATE)
+        {
+          using (var span = _tracer.StartActiveSpan("Cart.DbQuery", SpanKind.Client))
+          {
+            span
+                .SetAttribute("db.system", "postgres")
+                .SetAttribute("db.type", "postgres")
+                .SetAttribute("peer.service", EXTERNAL_DB_NAME + ":98321");
+            Thread.Sleep(TimeSpan.FromMilliseconds(_random.Next(0, EXTERNAL_DB_MAX_DURATION_MILLIS)));
+            span.End();
+          }
+        }
+
+      }
+      catch (Exception ex)
+      {
+        throw new RpcException(new Grpc.Core.Status(StatusCode.FailedPrecondition, $"Can't access cart storage. {ex}"));
+      }
+    }
+
+    public async Task EmptyCartAsync(string userId)
+    {
+      Console.WriteLine($"EmptyCartAsync called with userId={userId}");
+
+      try
+      {
+        var db = redis.GetDatabase();
+
+        // Update the cache with empty cart for given user
+        await db.HashSetAsync(userId, new[] { new HashEntry(CART_FIELD_NAME, emptyCartBytes) });
+      }
+      catch (Exception ex)
+      {
+        throw new RpcException(new Grpc.Core.Status(StatusCode.FailedPrecondition, $"Can't access cart storage. {ex}"));
+      }
+    }
+
+    public async Task<Hipstershop.Cart> GetCartAsync(string userId)
+    {
+      Console.WriteLine($"GetCartAsync called with userId={userId}");
+
+      try
+      {
+        var db = redis.GetDatabase();
+
+        // Access the cart from the cache
+        var value = await db.HashGetAsync(userId, CART_FIELD_NAME);
+
+        if (!value.IsNull)
+        {
+          return Hipstershop.Cart.Parser.ParseFrom(value);
+        }
+
+        // We decided to return empty cart in cases when user wasn't in the cache before
+        return new Hipstershop.Cart();
+      }
+      catch (Exception ex)
+      {
+        throw new RpcException(new Grpc.Core.Status(StatusCode.FailedPrecondition, $"Can't access cart storage. {ex}"));
+      }
+    }
+
+    public bool Ping()
+    {
+      try
+      {
+        var cache = redis.GetDatabase();
+        var res = cache.Ping();
+        return res != TimeSpan.Zero;
+      }
+      catch (Exception)
+      {
+        return false;
+      }
+    }
+  }
 }
