@@ -25,6 +25,17 @@ const logger = pino({
   changeLevelName: 'severity',
   useLevelLabels: true,
   timestamp: pino.stdTimeFunctions.unixTime,
+  mixin() {
+    const span = tracer.getCurrentSpan()
+    if (!span) {
+      return {};
+    }
+    const { traceId, spanId } = span.context();
+    return {
+      trace_id: traceId.slice(-16), // convert to 64-bit format
+      span_id: spanId,
+    };
+  },
 });
 
 // Demo Data
