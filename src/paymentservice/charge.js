@@ -49,7 +49,7 @@ const API_TOKEN_FAILURE_RATE = Number.parseFloat(
 const API_TOKEN_SUCCESS_TOKEN = 'prod-a8cf28f9-1a1a-4994-bafa-cd4b143c3291';
 const API_TOKEN_SUCCESS_VERSION = 'v350.9';
 const API_TOKEN_SUCCESS_ENVIRONMENT = ['prod', 'staging', 'dev']; // note, some "prod" traffic will succeed, which is part of demo script
-const API_TOKEN_SUCCESS_TENANT_LEVEL = ['gold', 'silver', 'broze'];
+const API_TOKEN_SUCCESS_TENANT_LEVEL = ['gold', 'silver', 'bronze'];
 const API_TOKEN_SUCCESS_K8S_POD_UID = ['payment-service-449bc'];
 
 // Failure attributes
@@ -77,6 +77,11 @@ function random(arr) {
   return arr[index];
 }
 
+/** Returns random integer between `from` and `to` */
+function randomInt(from, to) {
+  return Math.floor(((to - from) * Math.random() + from));
+}
+
 /**
  * Verifies the credit card number and (pretend) charges the card.
  *
@@ -90,7 +95,7 @@ module.exports = function charge(request) {
   grpcActiveSpan.setAttributes({
     version: API_TOKEN_SUCCESS_VERSION,
     'tenant.level': random(API_TOKEN_SUCCESS_TENANT_LEVEL),
-    sf_environment: random(API_TOKEN_SUCCESS_ENVIRONMENT),
+    environment: random(API_TOKEN_SUCCESS_ENVIRONMENT),
     kubernetes_pod_uid: random(API_TOKEN_SUCCESS_K8S_POD_UID),
   });
 
@@ -147,13 +152,8 @@ module.exports = function charge(request) {
         // Mark error conditions on the root span; we force these for the demo
         grpcActiveSpan.setAttributes({
           version: API_TOKEN_FAILURE_VERSION,
-          sf_environment: API_TOKEN_FAILURE_ENVIRONMENT,
+          environment: API_TOKEN_FAILURE_ENVIRONMENT,
           kubernetes_pod_uid: random(API_TOKEN_FAILURE_K8S_POD_UID),
-          error: true,
-        });
-
-        // Mark failure from peer service
-        externalPaymentProcessorClientSpan.setAttributes({
           error: true,
         });
 
@@ -185,9 +185,10 @@ function buttercupPaymentsApiCharge(request, token) {
   return new Promise((resolve, reject) => {
     // Check for invalid token
     if (token === API_TOKEN_FAILURE_TOKEN) {
+      const timeoutMillis = randomInt(0, ERROR_PAYMENT_SERVICE_DURATION_MILLIS);
       setTimeout(() => {
         reject(new InvalidAPITokenError());
-      }, ERROR_PAYMENT_SERVICE_DURATION_MILLIS);
+      }, timeoutMillis);
       return;
     }
 
@@ -218,9 +219,10 @@ function buttercupPaymentsApiCharge(request, token) {
       throw new ExpiredCreditCard(cardNumber.replace('-', ''), month, year);
     }
 
+    const timeoutMillis = randomInt(0, SUCCESS_PAYMENT_SERVICE_DURATION_MILLIS);
     setTimeout(() => {
       resolve({ transaction_id: uuid(), cardType, cardNumber, amount });
-    }, SUCCESS_PAYMENT_SERVICE_DURATION_MILLIS);
+    }, timeoutMillis);
   });
 }
 

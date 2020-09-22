@@ -13,14 +13,11 @@
 // limitations under the License.
 
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using OpenTelemetry.Trace;
 
 internal class AttrMappingProcessor : ActivityProcessor
 {
-
-  private static double REDIS_SPAN_ERROR_RATE = Convert.ToDouble(Environment.GetEnvironmentVariable("REDIS_SPAN_ERROR_RATE"));
 
   public Random _random;
 
@@ -38,13 +35,6 @@ internal class AttrMappingProcessor : ActivityProcessor
       {
         // Duplicate tag for reporting
         activity.AddTag("db.type", tag.Value);
-
-        // Associate a random error some some redis calls
-        if (_random.NextDouble() < REDIS_SPAN_ERROR_RATE)
-        {
-          activity.AddTag("error", "true");
-        }
-
         break;
       }
     }

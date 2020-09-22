@@ -37,6 +37,8 @@ namespace cartservice.cartstore
 
     private static double EXTERNAL_DB_ACCESS_RATE = Convert.ToDouble(Environment.GetEnvironmentVariable("EXTERNAL_DB_ACCESS_RATE"));
     private static Int16 EXTERNAL_DB_MAX_DURATION_MILLIS = Convert.ToInt16(Environment.GetEnvironmentVariable("EXTERNAL_DB_MAX_DURATION_MILLIS"));
+    private static double EXTERNAL_DB_ERROR_RATE = Convert.ToDouble(Environment.GetEnvironmentVariable("EXTERNAL_DB_ERROR_RATE"));
+
     public static string EXTERNAL_DB_NAME = Environment.GetEnvironmentVariable("EXTERNAL_DB_NAME") ?? "global.datastore";
 
     private readonly Tracer _tracer;
@@ -101,6 +103,12 @@ namespace cartservice.cartstore
                 .SetAttribute("db.system", "postgres")
                 .SetAttribute("db.type", "postgres")
                 .SetAttribute("peer.service", EXTERNAL_DB_NAME + ":98321");
+
+            if (_random.NextDouble() < EXTERNAL_DB_ERROR_RATE)
+            {
+              span.SetAttribute("error", "true");
+            }
+
             Thread.Sleep(TimeSpan.FromMilliseconds(_random.Next(0, EXTERNAL_DB_MAX_DURATION_MILLIS)));
             span.End();
           }
