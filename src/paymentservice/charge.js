@@ -133,6 +133,7 @@ module.exports = function charge(request) {
       logger.info(
         {
           cardType,
+          version: API_TOKEN_SUCCESS_VERSION,
           cardNumberEnding: cardNumber.substr(-4),
           'amount.currency_code': amount.currency_code,
           'amount.units': amount.units,
@@ -161,6 +162,7 @@ module.exports = function charge(request) {
         logger.error(
           {
             token: API_TOKEN_FAILURE_TOKEN,
+            version: API_TOKEN_FAILURE_VERSION
           },
           `Failed payment processing through ButtercupPayments: Invalid API Token (${API_TOKEN_FAILURE_TOKEN})`
         );
