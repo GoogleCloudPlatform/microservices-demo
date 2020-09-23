@@ -26,7 +26,7 @@ const logger = pino({
   useLevelLabels: true,
   timestamp: pino.stdTimeFunctions.unixTime,
   mixin() {
-    const span = tracer.getCurrentSpan()
+    const span = tracer.getCurrentSpan();
     if (!span) {
       return {};
     }
@@ -48,7 +48,7 @@ const API_TOKEN_FAILURE_RATE = Number.parseFloat(
 // Success attributes
 const API_TOKEN_SUCCESS_TOKEN = 'prod-a8cf28f9-1a1a-4994-bafa-cd4b143c3291';
 const API_TOKEN_SUCCESS_VERSION = 'v350.9';
-const API_TOKEN_SUCCESS_ENVIRONMENT = ['prod', 'staging', 'dev']; // note, some "prod" traffic will succeed, which is part of demo script
+const API_TOKEN_SUCCESS_ENVIRONMENT = ['production', 'staging', 'development']; // note, some "production" traffic will succeed, which is part of demo script
 const API_TOKEN_SUCCESS_TENANT_LEVEL = ['gold', 'silver', 'bronze'];
 const API_TOKEN_SUCCESS_K8S_POD_UID = ['payment-service-449bc'];
 
@@ -79,7 +79,7 @@ function random(arr) {
 
 /** Returns random integer between `from` and `to` */
 function randomInt(from, to) {
-  return Math.floor(((to - from) * Math.random() + from));
+  return Math.floor((to - from) * Math.random() + from);
 }
 
 /**
@@ -162,7 +162,7 @@ module.exports = function charge(request) {
         logger.error(
           {
             token: API_TOKEN_FAILURE_TOKEN,
-            version: API_TOKEN_FAILURE_VERSION
+            version: API_TOKEN_FAILURE_VERSION,
           },
           `Failed payment processing through ButtercupPayments: Invalid API Token (${API_TOKEN_FAILURE_TOKEN})`
         );
