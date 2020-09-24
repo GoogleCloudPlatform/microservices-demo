@@ -45,23 +45,28 @@ const API_TOKEN_FAILURE_RATE = Number.parseFloat(
   process.env['API_TOKEN_FAILURE_RATE'] || 0
 );
 
+// Percentage of requests to fail for deserialization: [0, 1]
+const SERIALIZATION_FAILURE_RATE = Number.parseFloat(
+  process.env['SERIALIZATION_FAILURE_RATE'] || 0
+);
+
 // Success attributes
+const SUCCESS_VERSION = 'v350.9';
+const SUCCESS_ENVIRONMENT = ['production', 'staging', 'development']; // note, some "production" traffic will succeed, which is part of demo script
+const SUCCESS_TENANT_LEVEL = ['gold', 'silver', 'bronze'];
+const SUCCESS_K8S_POD_UID = ['payment-service-449bc'];
 const API_TOKEN_SUCCESS_TOKEN = 'prod-a8cf28f9-1a1a-4994-bafa-cd4b143c3291';
-const API_TOKEN_SUCCESS_VERSION = 'v350.9';
-const API_TOKEN_SUCCESS_ENVIRONMENT = ['production', 'staging', 'development']; // note, some "production" traffic will succeed, which is part of demo script
-const API_TOKEN_SUCCESS_TENANT_LEVEL = ['gold', 'silver', 'bronze'];
-const API_TOKEN_SUCCESS_K8S_POD_UID = ['payment-service-449bc'];
 
 // Failure attributes
-const API_TOKEN_FAILURE_TOKEN = 'test-20e26e90-356b-432e-a2c6-956fc03f5609';
-const API_TOKEN_FAILURE_VERSION = 'v350.10';
-const API_TOKEN_FAILURE_ENVIRONMENT = 'production';
-const API_TOKEN_FAILURE_K8S_POD_UID = [
+const FAILURE_VERSION = 'v350.10';
+const FAILURE_ENVIRONMENT = 'production';
+const FAILURE_K8S_POD_UID = [
   'payment-service-3483d',
   'payment-service-ab82e',
   'payment-service-9aaf3',
   'payment-service-6bbaf',
 ];
+const API_TOKEN_FAILURE_TOKEN = 'test-20e26e90-356b-432e-a2c6-956fc03f5609';
 
 // Artificial delay
 const SUCCESS_PAYMENT_SERVICE_DURATION_MILLIS = Number.parseInt(
@@ -88,16 +93,48 @@ function randomInt(from, to) {
  * @param {*} request
  * @return transaction_id - a random uuid v4.
  */
-module.exports = function charge(request) {
+module.exports = async function charge(request) {
   // Get handle to the active span and some random attributes for every request. In a failure
   // case some of these might be overwritten to constrain the domain of the error.
   const grpcActiveSpan = tracer.getCurrentSpan();
   grpcActiveSpan.setAttributes({
-    version: API_TOKEN_SUCCESS_VERSION,
-    'tenant.level': random(API_TOKEN_SUCCESS_TENANT_LEVEL),
-    environment: random(API_TOKEN_SUCCESS_ENVIRONMENT),
-    kubernetes_pod_uid: random(API_TOKEN_SUCCESS_K8S_POD_UID),
+    version: SUCCESS_VERSION,
+    'tenant.level': random(SUCCESS_TENANT_LEVEL),
+    environment: random(SUCCESS_ENVIRONMENT),
+    kubernetes_pod_uid: random(SUCCESS_K8S_POD_UID),
   });
+
+  // Pick successful or failing token base on configured api token failure rate
+  const token =
+    Math.random() < API_TOKEN_FAILURE_RATE
+      ? API_TOKEN_FAILURE_TOKEN
+      : API_TOKEN_SUCCESS_TOKEN;
+
+  logger.info({ token }, 'Charging through ButtercupPayments');
+
+  // Fail due to serialization error based on configured serialization failure rate
+  if (Math.random() < SERIALIZATION_FAILURE_RATE) {
+    await serializeRequestDataToProto().catch((err) => {
+      const kubernetes_pod_uid = random(FAILURE_K8S_POD_UID);
+
+      grpcActiveSpan.setAttributes({
+        version: FAILURE_VERSION,
+        environment: FAILURE_ENVIRONMENT,
+        kubernetes_pod_uid,
+        error: true,
+      });
+
+      logger
+        .child({
+          version: FAILURE_VERSION,
+          environment: FAILURE_ENVIRONMENT,
+          kubernetes_pod_uid,
+        })
+        .error(err);
+
+      throw new InternalError('Error');
+    });
+  }
 
   // Represents an "external service call" to a payment processor. This is the "call" that will
   // either succeed or fail due to an API token issue.
@@ -115,14 +152,6 @@ module.exports = function charge(request) {
     }
   );
 
-  // Pick successful or failing token base on configured failure rate
-  const token =
-    Math.random() < API_TOKEN_FAILURE_RATE
-      ? API_TOKEN_FAILURE_TOKEN
-      : API_TOKEN_SUCCESS_TOKEN;
-
-  logger.info({ token }, 'Charging through ButtercupPayments');
-
   // Call into our "external service" for charge processing
   return buttercupPaymentsApiCharge(request, token)
     .then(({ transaction_id, cardType, cardNumber, amount }) => {
@@ -133,7 +162,7 @@ module.exports = function charge(request) {
       logger.info(
         {
           cardType,
-          version: API_TOKEN_SUCCESS_VERSION,
+          version: SUCCESS_VERSION,
           cardNumberEnding: cardNumber.substr(-4),
           'amount.currency_code': amount.currency_code,
           'amount.units': amount.units,
@@ -152,9 +181,9 @@ module.exports = function charge(request) {
       if (err.code === 401) {
         // Mark error conditions on the root span; we force these for the demo
         grpcActiveSpan.setAttributes({
-          version: API_TOKEN_FAILURE_VERSION,
-          environment: API_TOKEN_FAILURE_ENVIRONMENT,
-          kubernetes_pod_uid: random(API_TOKEN_FAILURE_K8S_POD_UID),
+          version: FAILURE_VERSION,
+          environment: FAILURE_ENVIRONMENT,
+          kubernetes_pod_uid: random(FAILURE_K8S_POD_UID),
           error: true,
         });
 
@@ -162,7 +191,7 @@ module.exports = function charge(request) {
         logger.error(
           {
             token: API_TOKEN_FAILURE_TOKEN,
-            version: API_TOKEN_FAILURE_VERSION,
+            version: FAILURE_VERSION,
           },
           `Failed payment processing through ButtercupPayments: Invalid API Token (${API_TOKEN_FAILURE_TOKEN})`
         );
@@ -177,6 +206,13 @@ module.exports = function charge(request) {
 };
 
 /**
+ * Attempt serialization, but it fails!
+ */
+async function serializeRequestDataToProto() {
+  return Promise.reject(new Error('Serialization failure'));
+}
+
+/**
  * Process the charge request with the given API token. Acts as an external payment processer,
  * so the call is asynchronous and has added artificial network delay.
  *
@@ -189,7 +225,7 @@ function buttercupPaymentsApiCharge(request, token) {
     if (token === API_TOKEN_FAILURE_TOKEN) {
       const timeoutMillis = randomInt(0, ERROR_PAYMENT_SERVICE_DURATION_MILLIS);
       setTimeout(() => {
-        reject(new InvalidAPITokenError());
+        reject(new InvalidRequestError());
       }, timeoutMillis);
       return;
     }
@@ -230,9 +266,16 @@ function buttercupPaymentsApiCharge(request, token) {
 
 // Error Types
 
-class InvalidAPITokenError extends Error {
+class InternalError extends Error {
+  constructor(message) {
+    super(message);
+    this.code = 500;
+  }
+}
+
+class InvalidRequestError extends Error {
   constructor(token) {
-    super('Invalid API token');
+    super('Invalid request');
     this.code = 401; // Authorization error
   }
 }

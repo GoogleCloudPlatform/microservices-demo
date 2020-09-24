@@ -45,6 +45,8 @@ spec:
           value: "http://$(NODE_IP):9411/api/v2/spans"
         - name: API_TOKEN_FAILURE_RATE
           value: "0.75"
+        - name: SERIALIZATION_FAILURE_RATE
+          value: "0.0"
         - name: SUCCESS_PAYMENT_SERVICE_DURATION_MILLIS
           value: "200"
         - name: ERROR_PAYMENT_SERVICE_DURATION_MILLIS
