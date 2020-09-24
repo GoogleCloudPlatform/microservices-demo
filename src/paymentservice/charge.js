@@ -20,7 +20,7 @@ const { SpanKind } = require('@opentelemetry/api');
 const { tracer } = require('./tracing');
 
 const logger = pino({
-  name: 'paymentservice-charge',
+  name: 'paymentservice',
   messageKey: 'message',
   changeLevelName: 'severity',
   useLevelLabels: true,
