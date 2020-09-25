@@ -2,7 +2,19 @@
     {{ template "header" . }}
 <script>
   // Fake javascript error
-  console.error("Uncaught ReferenceError: Payment.Prcie is not defined");
+  console.error("Uncaught TypeError: Cannot read property 'Prcie' of undefined");
+
+  function getProductPrice() {
+    const Payment = undefined;
+    return Payment.Prcie;
+  }
+
+  function renderFinalPrice() {
+    getProductPrice();
+  }
+
+  renderFinalPrice();
+
 </script>
 <script>
   function docReady(fn) {
