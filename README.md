@@ -332,6 +332,11 @@ resources.
   - [Introduction to Service Management with Istio](https://www.youtube.com/watch?v=wCJrdKdD6UM&feature=youtu.be&t=586)
 - [KubeCon EU 2019 - Reinventing Networking: A Deep Dive into Istio's Multicluster Gateways - Steve Dake, Independent](https://youtu.be/-t2BfT59zJA?t=982)
 
+## Implementations (forks) featuring Online Boutique
+
+- [Microservices on cloud-based Kubernetes](https://github.com/didier-durand/microservices-on-cloud-kubernetes)
+  is an automated Github CI/CD workflow that can be forked to get a ready-to-use version of Online BBoutique on GCP / GKE. It also implements Istio, Kiali, Grafana, Jaeger, Prometheus, etc. to provide a thorougly instrumented version of the application delivering very realistic demos.
+
 ---
 
 This is not an official Google project.
