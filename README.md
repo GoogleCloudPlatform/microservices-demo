@@ -219,12 +219,6 @@ We offer the following installation methods:
 
         kubectl get service frontend-external
 
-    **Troubleshooting:** A Kubernetes bug (will be fixed in 1.12) combined with
-    a Skaffold [bug](https://github.com/GoogleContainerTools/skaffold/issues/887)
-    causes load balancer to not to work even after getting an IP address. If you
-    are seeing this, run `kubectl get service frontend-external -o=yaml | kubectl apply -f-`
-    to trigger load balancer reconfiguration.
-
 ### Option 3: Using Pre-Built Container Images
 
 > 💡 Recommended if you want to deploy the app faster in fewer steps to an
