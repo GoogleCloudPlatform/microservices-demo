@@ -15,7 +15,7 @@
 # limitations under the License.
 
 import random
-from locust import HttpLocust, TaskSet, between
+from locust import HttpUser, TaskSet, between
 
 products = [
     '0PUK6V6EV0',
@@ -76,6 +76,6 @@ class UserBehavior(TaskSet):
         viewCart: 3,
         checkout: 1}
 
-class WebsiteUser(HttpLocust):
-    task_set = UserBehavior
+class WebsiteUser(HttpUser):
+    tasks = [UserBehavior]
     wait_time = between(1, 10)
