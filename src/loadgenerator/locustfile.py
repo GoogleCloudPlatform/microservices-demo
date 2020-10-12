@@ -16,6 +16,19 @@
 
 import random
 from locust import HttpLocust, TaskSet, between
+import credentials
+
+import rollbar
+rollbar.init(credentials.POST_SERVER_ITEM_ACCESS_TOKEN, 'production')  # access_token, environment
+
+try:
+    main_app_loop()
+except IOError:
+    rollbar.report_message('Got an IOError in the main loop', 'warning')
+except:
+    # catch-all
+    rollbar.report_exc_info()
+    # equivalent to rollbar.report_exc_info(sys.exc_info())
 
 products = [
     '0PUK6V6EV0',
