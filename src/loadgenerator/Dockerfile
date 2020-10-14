@@ -22,6 +22,9 @@ RUN apt-get -qq update \
 
 COPY requirements.txt .
 
+# Pin Pip version:  unable to build wheel for gevent with PEP 517
+RUN python -m pip install --force-reinstall pip==20.1.1
+
 RUN pip install --prefix="/install" -r requirements.txt
 
 FROM base
