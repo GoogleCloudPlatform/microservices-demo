@@ -15,8 +15,10 @@
     "@google-cloud/profiler": "^2.0.2",
     "@google-cloud/trace-agent": "4.0.1",
     "@grpc/proto-loader": "^0.1.0",
+    "dotenv": "^8.2.0",
     "grpc": "^1.22.2",
     "pino": "^5.6.2",
+    "rollbar": "^2.19.4",
     "simple-card-validator": "^1.1.0",
     "uuid": "^3.2.1"
   },
