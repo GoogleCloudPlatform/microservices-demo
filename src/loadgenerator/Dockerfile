@@ -12,18 +12,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-FROM python:3-slim as base
+FROM python:3.7-slim as base
 
 FROM base as builder
 
 RUN apt-get -qq update \
     && apt-get install -y --no-install-recommends \
-        g++ libzmq3-dev
+        g++
 
 COPY requirements.txt .
-
-# Pin Pip version:  unable to build wheel for gevent with PEP 517
-RUN python -m pip install --force-reinstall pip==20.1.1
 
 RUN pip install --prefix="/install" -r requirements.txt
 
