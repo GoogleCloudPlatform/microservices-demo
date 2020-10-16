@@ -26,6 +26,7 @@ import (
 	"contrib.go.opencensus.io/exporter/stackdriver"
 	"github.com/gorilla/mux"
 	"github.com/pkg/errors"
+	"github.com/rollbar/rollbar-go"
 	"github.com/sirupsen/logrus"
 	"go.opencensus.io/plugin/ocgrpc"
 	"go.opencensus.io/plugin/ochttp"
@@ -81,6 +82,15 @@ type frontendServer struct {
 }
 
 func main() {
+	rollbar.SetToken(os.Getenv("GOROLLBARTOKEN"))
+  	rollbar.SetEnvironment("production")                 // defaults to "development"
+  	rollbar.SetCodeVersion("v2")                         // optional Git hash/branch/tag (required for GitHub integration)
+  	rollbar.SetServerHost("web.1")                       // optional override; defaults to hostname
+  	rollbar.SetServerRoot("github.com/heroku/myproject") // path of project (required for GitHub integration and non-project stacktrace collapsing)
+
+  	rollbar.Info("I am erroring critical")
+  	rollbar.WrapAndWait(doSomething)
+
 	ctx := context.Background()
 	log := logrus.New()
 	log.Level = logrus.DebugLevel
@@ -152,6 +162,11 @@ func main() {
 
 	log.Infof("starting server on " + addr + ":" + srvPort)
 	log.Fatal(http.ListenAndServe(addr+":"+srvPort, handler))
+}
+
+func doSomething() {
+  var timer *time.Timer = nil
+  timer.Reset(10) // this will panic
 }
 
 func initJaegerTracing(log logrus.FieldLogger) {

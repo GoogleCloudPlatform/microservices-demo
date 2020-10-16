@@ -415,7 +415,7 @@ func renderHTTPError(log logrus.FieldLogger, r *http.Request, w http.ResponseWri
 		"status":      http.StatusText(code),
 	}); templateErr != nil {
 		log.Println(templateErr)
-	}		
+	}
 }
 
 func currentCurrency(r *http.Request) string {
