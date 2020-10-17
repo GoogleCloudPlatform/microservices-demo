@@ -14,6 +14,12 @@
 
 syntax = "proto3";
 
+import "google/protobuf/descriptor.proto";
+
+extend google.protobuf.MessageOptions {
+    string protected_attributes = 51234;
+}
+
 package hipstershop;
 
 // -----------------Cart service-----------------
@@ -224,6 +230,7 @@ service CheckoutService {
 }
 
 message PlaceOrderRequest {
+    option (protected_attributes) = 'email;credit_card';
     string user_id = 1;
     string user_currency = 2;
 

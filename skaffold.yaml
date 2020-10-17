@@ -38,8 +38,6 @@ build:
     context: src/cartservice
   - image: frontend
     context: src/frontend
-  - image: loadgenerator
-    context: src/loadgenerator
   - image: adservice
     context: src/adservice
   tagPolicy:
