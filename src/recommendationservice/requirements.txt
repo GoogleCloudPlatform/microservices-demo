@@ -30,6 +30,7 @@ python-json-logger==0.1.9  # via -r requirements.in
 pytz==2018.9              # via google-api-core
 pyyaml==5.1               # via google-python-cloud-debugger
 requests==2.21.0          # via google-api-core, google-cloud-profiler
+rollbar
 rsa==4.0                  # via google-auth
 six==1.12.0               # via google-api-core, google-api-python-client, google-auth, google-python-cloud-debugger, grpcio, protobuf
 uritemplate==3.0.0        # via google-api-python-client

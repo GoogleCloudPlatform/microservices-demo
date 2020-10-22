@@ -12,6 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+var Rollbar = require('rollbar');
+var rollbarToken = process.env.ROLLBARTOKEN
+var rollbar = new Rollbar({
+  accessToken: rollbarToken,
+  captureUncaught: true,
+  captureUnhandledRejections: true
+});
+
+
 const cardValidator = require('simple-card-validator');
 const uuid = require('uuid/v4');
 const pino = require('pino');
@@ -74,7 +83,13 @@ module.exports = function charge (request) {
   const currentMonth = new Date().getMonth() + 1;
   const currentYear = new Date().getFullYear();
   const { credit_card_expiration_year: year, credit_card_expiration_month: month } = creditCard;
-  if ((currentYear * 12 + currentMonth) > (year * 12 + month)) { throw new ExpiredCreditCard(cardNumber.replace('-', ''), month, year); }
+  try {
+    if ((currentYear * 12 + currentMonth) > (year * 12 + month)) { throw new ExpiredCreditCard(cardNumber.replace('-', ''), month, year); }
+  } catch (e) {
+    rollbar.error(e)
+    throw e;
+  }
+
 
   logger.info(`Transaction processed: ${cardType} ending ${cardNumber.substr(-4)} \
     Amount: ${amount.currency_code}${amount.units}.${amount.nanos}`);

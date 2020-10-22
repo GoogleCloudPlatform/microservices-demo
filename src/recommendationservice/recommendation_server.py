@@ -38,6 +38,18 @@ from grpc_health.v1 import health_pb2_grpc
 from logger import getJSONLogger
 logger = getJSONLogger('recommendationservice-server')
 
+import rollbar
+rollbar.init(os.environ.get('PYTHON_ACCESS_TOKEN'), 'production')  # access_token, environment
+
+try:
+    main_app_loop()
+except IOError:
+    rollbar.report_message('Got an IOError in the main loop', 'warning')
+except:
+    # catch-all
+    rollbar.report_exc_info()
+    # equivalent to rollbar.report_exc_info(sys.exc_info())
+
 def initStackdriverProfiling():
   project_id = None
   try:

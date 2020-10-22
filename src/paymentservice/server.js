@@ -26,17 +26,6 @@ const logger = pino({
   useLevelLabels: true
 });
 
-var Rollbar = require('rollbar');
-var rollbarToken = process.env.ROLLBARTOKEN
-var rollbar = new Rollbar({
-  accessToken: rollbarToken,
-  captureUncaught: true,
-  captureUnhandledRejections: true
-});
-
-// log a generic message and send to rollbar
-rollbar.log('Hello world hello again!');
-
 class HipsterShopServer {
   constructor (protoRoot, port = HipsterShopServer.PORT) {
     this.port = port;

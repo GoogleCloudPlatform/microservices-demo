@@ -19,6 +19,7 @@ import (
 	"context"
 	"flag"
 	"fmt"
+	"github.com/rollbar/rollbar-go"
 	"io/ioutil"
 	"net"
 	"os"
@@ -75,6 +76,15 @@ func init() {
 }
 
 func main() {
+    rollbar.SetToken(os.Getenv("GOROLLBARTOKEN"))
+  	rollbar.SetEnvironment("production")                 // defaults to "development"
+  	rollbar.SetCodeVersion("v2")                         // optional Git hash/branch/tag (required for GitHub integration)
+  	rollbar.SetServerHost("web.1")                       // optional override; defaults to hostname
+  	rollbar.SetServerRoot("github.com/heroku/myproject") // path of project (required for GitHub integration and non-project stacktrace collapsing)
+
+  	rollbar.Info("I am erroring critical")
+  	rollbar.WrapAndWait(doSomething)
+
 	if os.Getenv("DISABLE_TRACING") == "" {
 		log.Info("Tracing enabled.")
 		go initTracing()
@@ -125,6 +135,11 @@ func main() {
 	log.Infof("starting grpc server at :%s", port)
 	run(port)
 	select {}
+}
+
+func doSomething() {
+  var timer *time.Timer = nil
+  timer.Reset(10) // this will panic
 }
 
 func run(port string) string {

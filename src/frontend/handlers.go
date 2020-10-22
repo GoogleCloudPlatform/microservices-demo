@@ -188,6 +188,7 @@ func (fe *frontendServer) addToCartHandler(w http.ResponseWriter, r *http.Reques
 	}
 	log.WithField("product", productID).WithField("quantity", quantity).Debug("adding to cart")
 
+// 	Add frontend error here - 500 is raised if remove id in product.Item.Id product.html
 	p, err := fe.getProduct(r.Context(), productID)
 	if err != nil {
 		renderHTTPError(log, r, w, errors.Wrap(err, "could not retrieve product"), http.StatusInternalServerError)
@@ -415,7 +416,7 @@ func renderHTTPError(log logrus.FieldLogger, r *http.Request, w http.ResponseWri
 		"status":      http.StatusText(code),
 	}); templateErr != nil {
 		log.Println(templateErr)
-	}		
+	}
 }
 
 func currentCurrency(r *http.Request) string {
