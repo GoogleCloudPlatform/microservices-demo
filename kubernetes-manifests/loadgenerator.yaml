@@ -16,31 +16,21 @@ kind: Deployment
 metadata:
   name: loadgenerator
 spec:
+  replicas: 1
   selector:
     matchLabels:
       app: loadgenerator
-  replicas: 1
   template:
     metadata:
       labels:
         app: loadgenerator
-      annotations:
-        sidecar.istio.io/rewriteAppHTTPProbers: "true"
     spec:
-      terminationGracePeriodSeconds: 5
-      restartPolicy: Always
       containers:
-      - name: main
-        image: loadgenerator
-        env:
-        - name: FRONTEND_ADDR
-          value: "frontend:80"
-        - name: USERS
-          value: "10"
-        resources:
-          requests:
-            cpu: 300m
-            memory: 256Mi
-          limits:
-            cpu: 500m
-            memory: 512Mi
+        - name: locust-main
+          image: loadgenerator
+          imagePullPolicy: Always
+          env:
+            - name: TARGET_HOST
+              value: "frontend:80"
+            - name: USERS
+              value: "10"

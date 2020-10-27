@@ -1,6 +1,6 @@
 #!/bin/bash
-#
-# Copyright 2018 Google LLC
+
+# Copyright 2020 Google Inc. All rights reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,22 +14,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-set -e
-trap "exit" TERM
+# ensure the working dir is the script's folder
+SCRIPT_DIR=$(realpath $(dirname "$0"))
+cd $SCRIPT_DIR
 
-if [[ -z "${FRONTEND_ADDR}" ]]; then
-    echo >&2 "FRONTEND_ADDR not specified"
-    exit 1
-fi
+LOCUS_OPTS="-f ./locustfile.py --host=http://${TARGET_HOST} --headless -u ${USERS}"
 
-set -x
+echo "locust $LOCUS_OPTS"
 
-# if one request to the frontend fails, then exit
-STATUSCODE=$(curl --silent --output /dev/stderr --write-out "%{http_code}" http://${FRONTEND_ADDR})
-if test $STATUSCODE -ne 200; then
-    echo "Error: Could not reach frontend - Status code: ${STATUSCODE}"
-    exit 1
-fi
-
-# else, run loadgen
-locust --host="http://${FRONTEND_ADDR}" --headless -u "${USERS:-10}" 2>&1
+locust $LOCUS_OPTS

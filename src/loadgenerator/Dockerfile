@@ -1,10 +1,10 @@
-# Copyright 2020 Google LLC
+# Copyright 2020 Google Inc. All rights reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
-#      http://www.apache.org/licenses/LICENSE-2.0
+#     http://www.apache.org/licenses/LICENSE-2.0
 #
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
@@ -12,24 +12,22 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-FROM python:3.8-slim as base
 
-FROM base as builder
+# Start with a base Python 3.8 image
+FROM python:3.8
 
-RUN apt-get -qq update \
-    && apt-get install -y --no-install-recommends \
-        g++
+WORKDIR /home
 
+# Install the required dependencies via pip
 COPY requirements.txt .
+RUN pip install -r requirements.txt
 
-RUN pip install --prefix="/install" -r requirements.txt
+# Copy tasks and runner script
+COPY run.sh .
+COPY locustfile.py ./locustfile.py
 
-FROM base
-COPY --from=builder /install /usr/local
+# Expose the required Locust ports
+EXPOSE 5557 5558 8089
 
-COPY . .
-RUN chmod +x ./loadgen.sh
-RUN apt-get -qq update \
-    && apt-get install -y --no-install-recommends \
-        curl
-ENTRYPOINT ./loadgen.sh
+# Start Locust using LOCUS_OPTS environment variable
+ENTRYPOINT ["./run.sh"]
