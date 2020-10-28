@@ -21,7 +21,7 @@ FROM base as builder
 RUN apk add --update --no-cache \
     python \
     make \
-    g++ 
+    g++
 
 WORKDIR /usr/src/app
 
@@ -38,6 +38,10 @@ RUN GRPC_HEALTH_PROBE_VERSION=v0.2.0 && \
 WORKDIR /usr/src/app
 
 COPY --from=builder /usr/src/app/node_modules ./node_modules
+
+ARG GIT_SHA_ARG="UNKNOWN"
+ENV GIT_SHA=${GIT_SHA_ARG}
+RUN echo "hello ${GIT_SHA}!!!"
 
 COPY . .
 

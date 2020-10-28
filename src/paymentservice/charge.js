@@ -11,7 +11,9 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-
+// GIT_COMMIT_HASH = sh (script: "git log -n 1 --pretty=format:'%H'", returnStdout: true)
+// GIT_COMMIT_HASH=$(git rev-parse HEAD | cut -c1-5) && echo $x
+var gitSha = process.env.GIT_SHA
 var Rollbar = require('rollbar');
 var rollbarToken = process.env.ROLLBARTOKEN
 var rollbar = new Rollbar({
@@ -20,6 +22,21 @@ var rollbar = new Rollbar({
   captureUnhandledRejections: true
 });
 
+rollbar.configure({
+  payload: {
+      environment: "production",
+      client: {
+        javascript: {
+          source_map_enabled: true,
+          code_version: gitSha,
+          guess_uncaught_frames: true
+        }
+      },
+      server: {
+        root: "/usr/src/app/"
+      }
+  }
+});
 
 const cardValidator = require('simple-card-validator');
 const uuid = require('uuid/v4');
