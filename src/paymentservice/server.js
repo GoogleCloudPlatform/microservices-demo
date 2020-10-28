@@ -35,6 +35,7 @@ const logger = pino({
     return {
       trace_id: traceId.slice(-16), // convert to 64-bit format
       span_id: spanId,
+      'service.name': 'paymentservice'
     };
   },
 });

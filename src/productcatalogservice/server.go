@@ -251,6 +251,7 @@ func getTraceLogFields(ctx context.Context) logrus.Fields {
 		spanCtx := span.Context()
 		fields["trace_id"] = tracer.TraceIDHex(spanCtx)
 		fields["span_id"] = tracer.SpanIDHex(spanCtx)
+		fields["service.name"] = "productcatalogservice"
 	}
 	return fields
 }

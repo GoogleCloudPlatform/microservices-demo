@@ -464,6 +464,7 @@ func getLoggerWithTraceFields(ctx context.Context) *logrus.Entry {
 		spanCtx := span.Context()
 		fields["trace_id"] = tracer.TraceIDHex(spanCtx)
 		fields["span_id"] = tracer.SpanIDHex(spanCtx)
+		fields["service.name"] = "frontend"
 	}
 	return log.WithFields(fields)
 }
