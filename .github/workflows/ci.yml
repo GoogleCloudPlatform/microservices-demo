@@ -16,7 +16,7 @@ name: "Continuous Integration"
 on:
   push:
     # run on pushes to master or release/*
-    branches:    
+    branches:
       - master
       - release/*
   pull_request:
@@ -78,3 +78,5 @@ jobs:
         if [[ "$ERROR_COUNT" -gt "0" ]]; then
           exit 1
         fi
+    - name: Rollbar deploy
+      uses: rollbar/github-deploy-action@2.0.0
