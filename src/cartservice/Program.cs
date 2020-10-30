@@ -21,6 +21,8 @@ using cartservice.interfaces;
 using CommandLine;
 using Grpc.Core;
 using Microsoft.Extensions.Configuration;
+using OpenTelemetry.Resources;
+using OpenTelemetry.Trace;
 
 namespace cartservice
 {
@@ -43,6 +45,8 @@ namespace cartservice
             public string Redis { get; set; }
         }
 
+        private static TracerProvider tracerProvider;
+
         static object StartServer(string host, int port, ICartStore cartStore)
         {
             // Run the server in a separate thread and make the main thread busy waiting.
@@ -51,7 +55,26 @@ namespace cartservice
             {
                 try
                 {
+
                     await cartStore.InitializeAsync();
+
+                    var redisCartStore = cartStore as RedisCartStore;
+
+                    if (redisCartStore != null)
+                    {
+                            tracerProvider = OpenTelemetry.Sdk.CreateTracerProviderBuilder()
+                           .AddRedisInstrumentation(redisCartStore.ConnectionMultiplexer)
+                           .AddSource(CartActivity.ActivitySourceName)
+                           .SetResource(Resources.CreateServiceResource(CartActivity.ActivitySourceName))
+                           .AddNewRelicExporter(options =>
+                           {
+
+                               options.ApiKey = Environment.GetEnvironmentVariable("NEW_RELIC_API_KEY");
+                               options.EndpointUrl = new Uri(Environment.GetEnvironmentVariable("NEW_RELIC_TRACE_URL"));
+                           })
+                           .Build();
+                    }
+
 
                     Console.WriteLine($"Trying to start a grpc server at  {host}:{port}");
                     Server server = new Server

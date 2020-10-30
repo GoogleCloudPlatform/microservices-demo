@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-FROM microsoft/dotnet:2.1-sdk-alpine as builder
+FROM mcr.microsoft.com/dotnet/core/sdk:3.1-alpine3.12 as builder
 WORKDIR /app
 COPY . .
 RUN dotnet restore && \
@@ -40,4 +40,12 @@ RUN apk add --no-cache \
     icu
 WORKDIR /app
 COPY --from=builder /cartservice .
+
+ARG NEW_RELIC_API_KEY
+ARG NEW_RELIC_TRACE_URL
+ARG NEW_RELIC_METRIC_URL
+ENV NEW_RELIC_API_KEY=${NEW_RELIC_API_KEY}
+ENV NEW_RELIC_TRACE_URL=${NEW_RELIC_TRACE_URL}
+ENV NEW_RELIC_METRIC_URL=${NEW_RELIC_METRIC_URL}
+
 ENTRYPOINT ["./cartservice", "start"]
