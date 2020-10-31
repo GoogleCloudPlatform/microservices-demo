@@ -45,6 +45,8 @@ WORKDIR /email_server
 # Grab packages from builder
 COPY --from=builder /usr/local/lib/python3.7/ /usr/local/lib/python3.7/
 
+ARG GIT_SHA_ARG="UNKNOWN"
+ENV GIT_SHA=${GIT_SHA_ARG}
 # Add the application
 COPY . .
 

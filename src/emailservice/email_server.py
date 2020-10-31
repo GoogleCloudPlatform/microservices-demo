@@ -41,6 +41,10 @@ import googlecloudprofiler
 from logger import getJSONLogger
 logger = getJSONLogger('emailservice-server')
 
+import rollbar
+rollbar.init(os.environ.get('PYTHON_ACCESS_TOKEN'), 'production', code_version=os.environ.get('GIT_SHA'),
+             server={'root': '/usr/src/app/'})
+
 # try:
 #     googleclouddebugger.enable(
 #         module='emailserver',
@@ -106,10 +110,14 @@ class EmailService(BaseEmailService):
       context.set_code(grpc.StatusCode.INTERNAL)
       return demo_pb2.Empty()
 
+    rollbar.report_message('Inside send order confirmation', 'info')
     return demo_pb2.Empty()
 
 class DummyEmailService(BaseEmailService):
   def SendOrderConfirmation(self, request, context):
+    # this will send a message to Rollbar every time you place an order using the email below
+    if request.email == 'myerror@gmail.com':
+      rollbar.report_message('You got an error!!!', 'info')
     logger.info('A request to send order confirmation email to {} has been received.'.format(request.email))
     return demo_pb2.Empty()
 

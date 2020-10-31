@@ -28,6 +28,7 @@ pyasn1==0.4.5             # via pyasn1-modules, rsa
 python-json-logger==0.1.9  # via -r requirements.in
 pytz==2018.9              # via google-api-core
 requests==2.21.0          # via google-api-core, google-cloud-profiler
+rollbar
 rsa==4.0                  # via google-auth
 six==1.12.0               # via google-api-core, google-api-python-client, google-auth, grpcio, protobuf
 uritemplate==3.0.0        # via google-api-python-client
