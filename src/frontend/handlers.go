@@ -28,6 +28,7 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
+	"github.com/rollbar/rollbar-go"
 
 	pb "github.com/GoogleCloudPlatform/microservices-demo/src/frontend/genproto"
 	"github.com/GoogleCloudPlatform/microservices-demo/src/frontend/money"
@@ -47,6 +48,12 @@ var (
 )
 
 func (fe *frontendServer) homeHandler(w http.ResponseWriter, r *http.Request) {
+    rollbar.SetToken(os.Getenv("GOROLLBARTOKEN"))        // frontend app token
+  	rollbar.SetEnvironment("production")                 // defaults to "development"
+  	rollbar.SetCodeVersion("v2")                         // optional Git hash/branch/tag (required for GitHub integration)
+  	rollbar.SetServerHost("web.1")                       // optional override; defaults to hostname
+  	rollbar.SetServerRoot("github.com/heroku/myproject") // path of project (required for GitHub integration and non-project stacktrace collapsing)
+
 	log := r.Context().Value(ctxKeyLog{}).(logrus.FieldLogger)
 	log.WithField("currency", currentCurrency(r)).Info("home")
 	currencies, err := fe.getCurrencies(r.Context())
@@ -102,6 +109,7 @@ func (fe *frontendServer) homeHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func (plat *platformDetails) setPlatformDetails(env string) {
+
 	if env == "aws" {
 		plat.provider = "AWS"
 		plat.css = "aws-platform"
@@ -129,7 +137,8 @@ func (fe *frontendServer) productHandler(w http.ResponseWriter, r *http.Request)
 
 	p, err := fe.getProduct(r.Context(), id)
 	if err != nil {
-		renderHTTPError(log, r, w, errors.Wrap(err, "could not retrieve product"), http.StatusInternalServerError)
+	    rollbar.Info("could not retrieve producttt")
+		renderHTTPError(log, r, w, errors.Wrap(err, "could not retrieve producttt"), http.StatusInternalServerError)
 		return
 	}
 	currencies, err := fe.getCurrencies(r.Context())
@@ -151,10 +160,12 @@ func (fe *frontendServer) productHandler(w http.ResponseWriter, r *http.Request)
 	}
 
 	recommendations, err := fe.getRecommendations(r.Context(), sessionID(r), []string{id})
-	if err != nil {
-		renderHTTPError(log, r, w, errors.Wrap(err, "failed to get product recommendations"), http.StatusInternalServerError)
-		return
-	}
+
+    if err != nil {
+//         rollbar.Info("failed to get product recommendations")
+        renderHTTPError(log, r, w, errors.Wrap(err, "failed to get product recommendations"), http.StatusInternalServerError)
+        return
+    }
 
 	product := struct {
 		Item  *pb.Product
@@ -290,6 +301,7 @@ func (fe *frontendServer) viewCartHandler(w http.ResponseWriter, r *http.Request
 }
 
 func (fe *frontendServer) placeOrderHandler(w http.ResponseWriter, r *http.Request) {
+//     this is called multiple times
 	log := r.Context().Value(ctxKeyLog{}).(logrus.FieldLogger)
 	log.Debug("placing order")
 
@@ -328,7 +340,6 @@ func (fe *frontendServer) placeOrderHandler(w http.ResponseWriter, r *http.Reque
 		return
 	}
 	log.WithField("order", order.GetOrder().GetOrderId()).Info("order placed")
-
 	order.GetOrder().GetItems()
 	recommendations, _ := fe.getRecommendations(r.Context(), sessionID(r), nil)
 

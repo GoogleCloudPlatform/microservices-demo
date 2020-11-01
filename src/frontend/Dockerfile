@@ -26,6 +26,9 @@ RUN dep ensure --vendor-only -v
 COPY . .
 RUN go install .
 
+ARG GIT_SHA_ARG="UNKNOWN"
+ENV GIT_SHA=${GIT_SHA_ARG}
+
 FROM alpine as release
 RUN apk add --no-cache ca-certificates \
     busybox-extras net-tools bind-tools
