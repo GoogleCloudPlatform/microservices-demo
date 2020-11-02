@@ -28,12 +28,7 @@ gcloud projects add-iam-policy-binding ${PROJECT_ID} \
 ```bash
 
 KSA_NAME=<your-ksa>
-
-mkdir -p wi-kubernetes-manifests
-FILES="`pwd`/release/kubernetes-manifests/*"
-for f in $FILES; do
-    echo "Processing $f..."
-    sed "s/serviceAccountName: default/serviceAccountName: ${KSA_NAME}/g" $f > wi-kubernetes-manifests/`basename $f`
+sed "s/serviceAccountName: default/serviceAccountName: ${KSA_NAME}/g" release/kubernetes-manifests.yaml > release/wi-kubernetes-manifests.yaml
 done
 ```
 
@@ -41,5 +36,5 @@ done
 
 ```bash
 NAMESPACE=<your-ksa-namespace>
-kubectl apply -n ${NAMESPACE} -f ./wi-kubernetes-manifests 
+kubectl apply -n ${NAMESPACE} -f release/wi-kubernetes-manifests.yaml
 ```

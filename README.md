@@ -169,7 +169,8 @@ We offer the following installation methods:
 ### Option 2: Running on Google Kubernetes Engine (GKE)
 
 > 💡 Recommended if you're using Google Cloud Platform and want to try it on
-> a realistic cluster.
+> a realistic cluster. **Note**: If your cluster has Workload Identity enabled, 
+> [see these instructions](/docs/workload-identity.md)
 
 1.  Create a Google Kubernetes Engine cluster and make sure `kubectl` is pointing
     to the cluster.
@@ -305,6 +306,10 @@ by deploying the [release manifest](./release) directly to an existing cluster.
    ```sh
    curl -v "http://$INGRESS_HOST"
    ```
+
+### Option 5: Deploying on a Workload Identity-enabled GKE cluster 
+
+See [this doc](/docs/workload-identity.md). 
 
 ### Cleanup
 
