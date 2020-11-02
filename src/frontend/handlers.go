@@ -137,8 +137,8 @@ func (fe *frontendServer) productHandler(w http.ResponseWriter, r *http.Request)
 
 	p, err := fe.getProduct(r.Context(), id)
 	if err != nil {
-	    rollbar.Info("could not retrieve producttt")
-		renderHTTPError(log, r, w, errors.Wrap(err, "could not retrieve producttt"), http.StatusInternalServerError)
+// 	    rollbar.Info("could not retrieve product")
+		renderHTTPError(log, r, w, errors.Wrap(err, "could not retrieve product"), http.StatusInternalServerError)
 		return
 	}
 	currencies, err := fe.getCurrencies(r.Context())
@@ -202,6 +202,7 @@ func (fe *frontendServer) addToCartHandler(w http.ResponseWriter, r *http.Reques
 // 	Add frontend error here - 500 is raised if remove id in product.Item.Id product.html
 	p, err := fe.getProduct(r.Context(), productID)
 	if err != nil {
+	    rollbar.Info("cannot retrieve product")
 		renderHTTPError(log, r, w, errors.Wrap(err, "could not retrieve product"), http.StatusInternalServerError)
 		return
 	}
