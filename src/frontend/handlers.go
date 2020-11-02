@@ -202,7 +202,7 @@ func (fe *frontendServer) addToCartHandler(w http.ResponseWriter, r *http.Reques
 // 	Add frontend error here - 500 is raised if remove id in product.Item.Id product.html
 	p, err := fe.getProduct(r.Context(), productID)
 	if err != nil {
-	    rollbar.Info("need product id")
+	    rollbar.Info("cannot find product id")
 		renderHTTPError(log, r, w, errors.Wrap(err, "could not retrieve product"), http.StatusInternalServerError)
 		return
 	}
