@@ -42,10 +42,10 @@ jobs:
           go test
           popd
         done
-    - name: C# Unit Tests 
-      timeout-minutes: 10
-      run: |
-        dotnet test src/cartservice/tests/cartservice.tests.csproj
+    # - name: TODO - run C# Unit Tests 
+    #   timeout-minutes: 10
+    #   run: |
+    #     dotnet test src/cartservice/tests/cartservice.tests.csproj
   deployment-tests:
     runs-on: self-hosted
     needs: code-tests
