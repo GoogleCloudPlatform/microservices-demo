@@ -19,23 +19,21 @@ import (
 	"fmt"
 	"net"
 	"net/http"
-	"os"
 	"strings"
 	"time"
 
-	"cloud.google.com/go/compute/metadata"
 	"github.com/google/uuid"
 	"github.com/gorilla/mux"
 	"github.com/sirupsen/logrus"
-	otelgrpc "go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc"
+	"go.opentelemetry.io/contrib/detectors/gcp"
+	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
 	"go.opentelemetry.io/otel/api/global"
 	"go.opentelemetry.io/otel/api/metric"
-	"go.opentelemetry.io/otel/api/propagation"
 	"go.opentelemetry.io/otel/api/trace"
-	"go.opentelemetry.io/otel/api/unit"
 	"go.opentelemetry.io/otel/label"
 	"go.opentelemetry.io/otel/sdk/resource"
 	"go.opentelemetry.io/otel/semconv"
+	"go.opentelemetry.io/otel/unit"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/peer"
 )
@@ -46,94 +44,30 @@ const (
 )
 
 var (
-	tracer trace.Tracer
-	meter  metric.Meter
-
 	httpLatency metric.Float64ValueRecorder
-
 	grpcLatency metric.Float64ValueRecorder
 
 	res *resource.Resource
 )
 
 func init() {
-	tracer = global.TraceProvider().Tracer(instName, trace.WithInstrumentationVersion(instVer))
-	meter = global.MeterProvider().Meter(instName, metric.WithInstrumentationVersion(instVer))
-
+	meter := global.MeterProvider().Meter(instName, metric.WithInstrumentationVersion(instVer))
 	httpLatency = metric.Must(meter).NewFloat64ValueRecorder(
 		"http.server.duration",
 		metric.WithDescription("duration of the inbound HTTP request"),
 		metric.WithUnit(unit.Milliseconds),
 	)
-
 	grpcLatency = metric.Must(meter).NewFloat64ValueRecorder(
 		"grpc.client.duration",
 		metric.WithDescription("duration of the inbound gRPC request"),
 		metric.WithUnit(unit.Milliseconds),
 	)
 
-	labels := []label.KeyValue{semconv.ServiceNameKey.String(serviceName)}
-	if metadata.OnGCE() {
-		labels = append(labels, semconv.CloudProviderGCP)
-
-		// Ignore all errors as we cannot do anything about them.
-
-		if projectID, err := metadata.ProjectID(); err == nil && projectID != "" {
-			labels = append(labels, semconv.CloudAccountIDKey.String(projectID))
-		}
-
-		if zone, err := metadata.Zone(); err == nil && zone != "" {
-			labels = append(labels, semconv.CloudZoneKey.String(zone))
-
-			splitArr := strings.SplitN(zone, "-", 3)
-			if len(splitArr) == 3 {
-				semconv.CloudRegionKey.String(strings.Join(splitArr[0:2], "-"))
-			}
-		}
-
-		if instanceID, err := metadata.InstanceID(); err == nil && instanceID != "" {
-			labels = append(labels, semconv.HostIDKey.String(instanceID))
-		}
-
-		if name, err := metadata.InstanceName(); err == nil && name != "" {
-			labels = append(labels, semconv.HostNameKey.String(name))
-		}
-
-		if hostname, err := os.Hostname(); err == nil && hostname != "" {
-			labels = append(labels, semconv.HostHostNameKey.String(hostname))
-		}
-
-		if hostType, err := metadata.Get("instance/machine-type"); err == nil && hostType != "" {
-			labels = append(labels, semconv.HostTypeKey.String(hostType))
-		}
+	var err error
+	res, err = new(gcp.GKE).Detect(context.Background())
+	if err != nil {
+		logrus.WithError(err).Fatal("could not detect GKE environment")
 	}
-
-	if os.Getenv("KUBERNETES_SERVICE_HOST") != "" {
-		if ns, ok := os.LookupEnv("NAMESPACE"); ok && ns != "" {
-			labels = append(labels, semconv.ServiceNamespaceKey.String(ns))
-			labels = append(labels, semconv.K8SNamespaceNameKey.String(ns))
-		}
-
-		if host, ok := os.LookupEnv("HOSTNAME"); ok && host != "" {
-			labels = append(labels, semconv.ServiceInstanceIDKey.String(host))
-			labels = append(labels, semconv.K8SPodNameKey.String(host))
-		} else {
-			labels = append(labels, semconv.ServiceInstanceIDKey.String(uuid.New().String()))
-		}
-
-		if containerName := os.Getenv("CONTAINER_NAME"); containerName != "" {
-			labels = append(labels, semconv.ContainerNameKey.String(containerName))
-		}
-
-		if clusterName, err := metadata.InstanceAttributeValue("cluster-name"); err == nil && clusterName != "" {
-			labels = append(labels, semconv.K8SClusterNameKey.String(clusterName))
-		}
-
-	} else {
-		labels = append(labels, semconv.ServiceInstanceIDKey.String(uuid.New().String()))
-	}
-
-	res = resource.New(labels...)
 }
 
 type ctxKeyLog struct{}
@@ -224,7 +158,7 @@ type traceware struct {
 // ServeHTTP implements the http.Handler interface. It does the actual
 // tracing of the request.
 func (tw traceware) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	ctx := propagation.ExtractHTTP(r.Context(), global.Propagators(), r.Header)
+	ctx := global.TextMapPropagator().Extract(r.Context(), r.Header)
 	spanName := ""
 	route := mux.CurrentRoute(r)
 	if route != nil {
@@ -262,7 +196,7 @@ func MuxMiddleware() mux.MiddlewareFunc {
 // UnaryClientInterceptor returns a grpc.UnaryClientInterceptor suitable
 // for use in a grpc.Dial call.
 func UnaryClientInterceptor() grpc.UnaryClientInterceptor {
-	upstream := otelgrpc.UnaryClientInterceptor(tracer)
+	upstream := otelgrpc.UnaryClientInterceptor()
 	return func(
 		ctx context.Context,
 		method string,
@@ -287,7 +221,7 @@ func UnaryClientInterceptor() grpc.UnaryClientInterceptor {
 // StreamClientInterceptor returns a grpc.StreamClientInterceptor suitable
 // for use in a grpc.Dial call.
 func StreamClientInterceptor() grpc.StreamClientInterceptor {
-	upstream := otelgrpc.StreamClientInterceptor(tracer)
+	upstream := otelgrpc.StreamClientInterceptor()
 	return func(
 		ctx context.Context,
 		desc *grpc.StreamDesc,

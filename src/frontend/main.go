@@ -29,7 +29,7 @@ import (
 	//"go.opentelemetry.io/otel/api/correlation"
 	"github.com/newrelic/newrelic-telemetry-sdk-go/telemetry"
 	"github.com/newrelic/opentelemetry-exporter-go/newrelic"
-	muxtrace "go.opentelemetry.io/contrib/instrumentation/github.com/gorilla/mux"
+	"go.opentelemetry.io/contrib/instrumentation/github.com/gorilla/mux/otelmux"
 	"go.opentelemetry.io/otel/api/global"
 	"go.opentelemetry.io/otel/exporters/stdout"
 	exportmetric "go.opentelemetry.io/otel/sdk/export/metric"
@@ -101,7 +101,7 @@ func main() {
 	}
 	log.Out = os.Stdout
 
-	var traceExporter exporttrace.SpanSyncer
+	var traceExporter exporttrace.SpanExporter
 	var metricExporter exportmetric.Exporter
 	if apiKey, ok := os.LookupEnv("NEW_RELIC_API_KEY"); ok {
 		log.Info("Using New Relic exporter")
@@ -165,7 +165,7 @@ func main() {
 	mustConnGRPC(ctx, &svc.adSvcConn, svc.adSvcAddr)
 
 	r := mux.NewRouter()
-	r.Use(MuxMiddleware(), muxtrace.Middleware(serviceName))
+	r.Use(MuxMiddleware(), otelmux.Middleware(serviceName))
 	r.HandleFunc("/", svc.homeHandler).Methods(http.MethodGet, http.MethodHead)
 	r.HandleFunc("/product/{id}", svc.productHandler).Methods(http.MethodGet, http.MethodHead)
 	r.HandleFunc("/cart", svc.viewCartHandler).Methods(http.MethodGet, http.MethodHead)
@@ -185,8 +185,8 @@ func main() {
 	log.Fatal(http.ListenAndServe(addr+":"+srvPort, handler))
 }
 
-func initTracing(log logrus.FieldLogger, syncer exporttrace.SpanSyncer) {
-	tp, err := trace.NewProvider(
+func initTracing(log logrus.FieldLogger, syncer exporttrace.SpanExporter) {
+	tp := trace.NewTracerProvider(
 		trace.WithConfig(
 			trace.Config{
 				DefaultSampler: trace.AlwaysSample(),
@@ -195,10 +195,7 @@ func initTracing(log logrus.FieldLogger, syncer exporttrace.SpanSyncer) {
 		),
 		trace.WithSyncer(syncer),
 	)
-	if err != nil {
-		log.Fatal(err)
-	}
-	global.SetTraceProvider(tp)
+	global.SetTracerProvider(tp)
 }
 
 func initMetric(log logrus.FieldLogger, exporter exportmetric.Exporter) *push.Controller {
@@ -209,7 +206,7 @@ func initMetric(log logrus.FieldLogger, exporter exportmetric.Exporter) *push.Co
 		push.WithResource(res),
 	)
 	pusher.Start()
-	global.SetMeterProvider(pusher.Provider())
+	global.SetMeterProvider(pusher.MeterProvider())
 	return pusher
 }
 

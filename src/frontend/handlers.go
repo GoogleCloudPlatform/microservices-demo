@@ -29,8 +29,8 @@ import (
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 
-	otelhttptrace "go.opentelemetry.io/contrib/instrumentation/net/http/httptrace"
-	"go.opentelemetry.io/otel/api/correlation"
+	"go.opentelemetry.io/contrib/instrumentation/net/http/httptrace/otelhttptrace"
+	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/api/global"
 	"go.opentelemetry.io/otel/api/trace"
 	"go.opentelemetry.io/otel/label"
@@ -486,9 +486,7 @@ func startSpan(name string, r **http.Request) (context.Context, trace.Span) {
 	kindKey := label.String("kind", "SERVER")
 	attrs, entries, spanCtx := otelhttptrace.Extract(req.Context(), req)
 	attrs = append(attrs, hostKey, kindKey)
-	req = req.WithContext(correlation.ContextWithMap(req.Context(), correlation.NewMap(correlation.MapUpdate{
-		MultiKV: entries,
-	})))
+	req = req.WithContext(otel.ContextWithBaggageValues(req.Context(), entries...))
 	ctx, span := tr.Start(
 		trace.ContextWithRemoteSpanContext(req.Context(), spanCtx),
 		"hipstershop.Frontend/"+name,
