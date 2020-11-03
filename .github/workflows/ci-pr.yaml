@@ -23,16 +23,6 @@ jobs:
     runs-on: self-hosted
     steps:
     - uses: actions/checkout@v2
-    - name: License Check
-      run: |
-        set -x
-        git init
-        git add --all
-        git -c user.name="CI Bot" -c user.email="<>" commit -m "initial state"
-        addlicense ./
-        if [[ -n $(git status -s) ]]; then
-          exit 1
-        fi
     - name: Go Unit Tests 
       timeout-minutes: 10
       run: |
