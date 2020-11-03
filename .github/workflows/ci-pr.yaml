@@ -72,17 +72,18 @@ jobs:
       run: |
         set -x
         kubectl config set-context --current --namespace=$NAMESPACE
-        kubectl wait --for=condition=available --timeout=500s deployment/adservice
-        kubectl wait --for=condition=available --timeout=500s deployment/cartservice
-        kubectl wait --for=condition=available --timeout=500s deployment/checkoutservice
-        kubectl wait --for=condition=available --timeout=500s deployment/currencyservice
-        kubectl wait --for=condition=available --timeout=500s deployment/emailservice
-        kubectl wait --for=condition=available --timeout=500s deployment/frontend
-        kubectl wait --for=condition=available --timeout=500s deployment/loadgenerator
-        kubectl wait --for=condition=available --timeout=500s deployment/paymentservice
-        kubectl wait --for=condition=available --timeout=500s deployment/productcatalogservice
-        kubectl wait --for=condition=available --timeout=500s deployment/recommendationservice
-        kubectl wait --for=condition=available --timeout=500s deployment/shippingservice
+        kubectl wait --for=condition=available --timeout=1000s deployment/redis-cart
+        kubectl wait --for=condition=available --timeout=1000s deployment/adservice
+        kubectl wait --for=condition=available --timeout=1000s deployment/cartservice
+        kubectl wait --for=condition=available --timeout=1000s deployment/checkoutservice
+        kubectl wait --for=condition=available --timeout=1000s deployment/currencyservice
+        kubectl wait --for=condition=available --timeout=1000s deployment/emailservice
+        kubectl wait --for=condition=available --timeout=1000s deployment/frontend
+        kubectl wait --for=condition=available --timeout=1000s deployment/loadgenerator
+        kubectl wait --for=condition=available --timeout=1000s deployment/paymentservice
+        kubectl wait --for=condition=available --timeout=1000s deployment/productcatalogservice
+        kubectl wait --for=condition=available --timeout=1000s deployment/recommendationservice
+        kubectl wait --for=condition=available --timeout=1000s deployment/shippingservice
     - name: Query EXTERNAL_IP for staging
       timeout-minutes: 5
       run: |
