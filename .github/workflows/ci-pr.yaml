@@ -112,3 +112,20 @@ jobs:
             -H "Authorization: token $GITHUB_TOKEN" \
             --data '{ "body": "🚲 PR staged at '"http://${EXTERNAL_IP}"'"}'
           sleep 60
+    - name: Smoke Test
+      timeout-minutes: 5	
+      run: |	
+        set -x	
+        # start fresh loadgenerator pod	
+        kubectl delete pod -l app=loadgenerator	
+        # wait for requests to come in	
+        REQUEST_COUNT="0"	
+        while [[ "$REQUEST_COUNT"  -lt "50"  ]]; do	
+            sleep 5	
+            REQUEST_COUNT=$(kubectl logs -l app=loadgenerator | grep Aggregated | awk '{print $2}')	
+        done	
+        # ensure there are no errors hitting endpoints	
+        ERROR_COUNT=$(kubectl logs -l app=loadgenerator | grep Aggregated | awk '{print $3}' | sed "s/[(][^)]*[)]//g")	
+        if [[ "$ERROR_COUNT" -gt "0" ]]; then	
+          exit 1	
+        fi
