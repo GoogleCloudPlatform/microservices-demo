@@ -286,6 +286,7 @@ metadata:
   name: frontend-external
 spec:
   type: LoadBalancer
+  loadBalancerIP: "35.238.231.235"
   selector:
     app: frontend
   ports:
