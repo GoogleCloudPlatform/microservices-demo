@@ -19,6 +19,7 @@ import (
 	"fmt"
 	"net"
 	"net/http"
+	"os"
 	"strings"
 	"time"
 
@@ -63,11 +64,18 @@ func init() {
 		metric.WithUnit(unit.Milliseconds),
 	)
 
-	var err error
-	res, err = new(gcp.GKE).Detect(context.Background())
+	detectedR, err := new(gcp.GKE).Detect(context.Background())
 	if err != nil {
 		logrus.WithError(err).Fatal("could not detect GKE environment")
 	}
+
+	var instID label.KeyValue
+	if host, ok := os.LookupEnv("HOSTNAME"); ok && host != "" {
+		instID = semconv.ServiceInstanceIDKey.String(host)
+	} else {
+		instID = semconv.ServiceInstanceIDKey.String(uuid.New().String())
+	}
+	res = resource.Merge(detectedR, resource.New(instID))
 }
 
 type ctxKeyLog struct{}
