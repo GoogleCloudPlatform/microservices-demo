@@ -49,6 +49,11 @@ spec:
               - name: "Cookie"
                 value: "shop_session-id=x-liveness-probe"
           env:
+          - name: GOROLLBARTOKEN
+            valueFrom:
+              secretKeyRef:
+                name: secret-frontend
+                key: ROLLBAR_FRONTEND_SERVICE_ACCESS_TOKEN
           - name: PORT
             value: "8080"
           - name: PRODUCT_CATALOG_SERVICE_ADDR
