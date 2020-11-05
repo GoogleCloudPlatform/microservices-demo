@@ -117,7 +117,7 @@ class DummyEmailService(BaseEmailService):
   def SendOrderConfirmation(self, request, context):
     # this will send a message to Rollbar every time you place an order using the email below
     if request.email == 'anothererror@gmail.com':
-      rollbar.report_message('You got an error!!!', 'info')
+      rollbar.report_message('nao tenho medo porra', 'info')
     logger.info('A request to send order confirmation email to {} has been received.'.format(request.email))
     return demo_pb2.Empty()
 
