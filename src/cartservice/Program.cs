@@ -13,6 +13,7 @@
 // limitations under the License.
 
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
@@ -21,6 +22,8 @@ using cartservice.interfaces;
 using CommandLine;
 using Grpc.Core;
 using Microsoft.Extensions.Configuration;
+using OpenCensus.Exporter.Stackdriver;
+using OpenCensus.Trace;
 
 namespace cartservice
 {
@@ -29,6 +32,8 @@ namespace cartservice
         const string CART_SERVICE_ADDRESS = "LISTEN_ADDR";
         const string REDIS_ADDRESS = "REDIS_ADDR";
         const string CART_SERVICE_PORT = "PORT";
+
+        const string PROJECT_ID = "PROJECT_ID";
 
         [Verb("start", HelpText = "Starts the server listening on provided port")]
         class ServerOptions
@@ -41,6 +46,9 @@ namespace cartservice
 
             [Option('r', "redis", HelpText = "The ip of redis cache")]
             public string Redis { get; set; }
+
+            [Option("projectId", HelpText = "The ProjectId to which telemetry will flow")]
+            public string ProjectId { get; set; }
         }
 
         static object StartServer(string host, int port, ICartStore cartStore)
@@ -56,7 +64,7 @@ namespace cartservice
                     Console.WriteLine($"Trying to start a grpc server at  {host}:{port}");
                     Server server = new Server
                     {
-                        Services =
+                        Services = 
                         {
                             // Cart Service Endpoint
                              Hipstershop.CartService.BindService(new CartServiceImpl(cartStore)),
@@ -99,60 +107,32 @@ namespace cartservice
             {
                 case "start":
                     Parser.Default.ParseArguments<ServerOptions>(args).MapResult(
-                        (ServerOptions options) =>
+                        (ServerOptions options) => 
                         {
                             Console.WriteLine($"Started as process with id {System.Diagnostics.Process.GetCurrentProcess().Id}");
 
                             // Set hostname/ip address
-                            string hostname = options.Host;
-                            if (string.IsNullOrEmpty(hostname))
-                            {
-                                Console.WriteLine($"Reading host address from {CART_SERVICE_ADDRESS} environment variable");
-                                hostname = Environment.GetEnvironmentVariable(CART_SERVICE_ADDRESS);
-                                if (string.IsNullOrEmpty(hostname))
-                                {
-                                    Console.WriteLine($"Environment variable {CART_SERVICE_ADDRESS} was not set. Setting the host to 0.0.0.0");
-                                    hostname = "0.0.0.0";
-                                }
-                            }
+                            string hostname = ReadParameter("host address", options.Host, CART_SERVICE_ADDRESS, p => p, "0.0.0.0");
 
                             // Set the port
-                            int port = options.Port;
-                            if (options.Port <= 0)
+                            int port = ReadParameter("cart service port", options.Port, CART_SERVICE_PORT, int.Parse, 8080);
+
+                            string projectId = ReadParameter("cloud service project id", options.ProjectId, PROJECT_ID, p => p, null);
+
+                            // Initialize Stackdriver Exporter - currently for tracing only
+                            if (!string.IsNullOrEmpty(projectId))
                             {
-                                Console.WriteLine($"Reading cart service port from {CART_SERVICE_PORT} environment variable");
-                                string portStr = Environment.GetEnvironmentVariable(CART_SERVICE_PORT);
-                                if (string.IsNullOrEmpty(portStr))
-                                {
-                                    Console.WriteLine($"{CART_SERVICE_PORT} environment variable was not set. Setting the port to 8080");
-                                    port = 8080;
-                                }
-                                else
-                                {
-                                    port = int.Parse(portStr);
-                                }
+                                var exporter = new StackdriverExporter(
+                                    projectId, 
+                                    Tracing.ExportComponent,
+                                    viewManager: null);
+                                exporter.Start();
                             }
 
                             // Set redis cache host (hostname+port)
-                            ICartStore cartStore;
-                            string redis = ReadRedisAddress(options.Redis);
+                            string redis = ReadParameter("redis cache address", options.Redis, REDIS_ADDRESS, p => p, null);
 
-                            // Redis was specified via command line or environment variable
-                            if (!string.IsNullOrEmpty(redis))
-                            {
-                                // If you want to start cart store using local cache in process, you can replace the following line with this:
-                                // cartStore = new LocalCartStore();
-                                cartStore = new RedisCartStore(redis);
-
-                                return StartServer(hostname, port, cartStore);
-                            }
-                            else
-                            {
-                                Console.WriteLine("Redis cache host(hostname+port) was not specified. Starting a cart service using local store");
-                                Console.WriteLine("If you wanted to use Redis Cache as a backup store, you should provide its address via command line or REDIS_ADDRESS environment variable.");
-                                cartStore = new LocalCartStore();
-                            }
-
+                            ICartStore cartStore = InstrumentedCartStore.Create(redis);
                             return StartServer(hostname, port, cartStore);
                         },
                         errs => 1);
@@ -163,21 +143,48 @@ namespace cartservice
             }
         }
 
-        private static string ReadRedisAddress(string address)
+        /// <summary>
+        /// Reads parameter in the right order
+        /// </summary>
+        /// <param name="description">Parameter description</param>
+        /// <param name="commandLineValue">Value provided from the command line</param>
+        /// <param name="environmentVariableName">The name of environment variable where it could have been set</param>
+        /// <param name="environmentParser">The method that parses environment variable and returns typed parameter value</param>
+        /// <param name="defaultValue">Parameter's default value - in case other method failed to assign a value</param>
+        /// <typeparam name="T">The type of the parameter</typeparam>
+        /// <returns>Parameter value read from all the sources in the right order(priorities)</returns>
+        private static T ReadParameter<T>(
+            string description,
+            T commandLineValue, 
+            string environmentVariableName, 
+            Func<string, T> environmentParser, 
+            T defaultValue)
         {
-            if (!string.IsNullOrEmpty(address))
+            // Command line argument
+            if(!EqualityComparer<T>.Default.Equals(commandLineValue, default(T))) 
             {
-                return address;
+                return commandLineValue;
             }
 
-            Console.WriteLine($"Reading redis cache address from environment variable {REDIS_ADDRESS}");
-            string redis = Environment.GetEnvironmentVariable(REDIS_ADDRESS);
-            if (!string.IsNullOrEmpty(redis))
+            // Environment variable
+            Console.Write($"Reading {description} from environment variable {environmentVariableName}. ");
+            string envValue = Environment.GetEnvironmentVariable(environmentVariableName);
+            if (!string.IsNullOrEmpty(envValue))
             {
-                return redis;
+                try
+                {
+                    var envTyped = environmentParser(envValue);
+                    Console.WriteLine("Done!");
+                    return envTyped;
+                }
+                catch (Exception)
+                {
+                    // We assign the default value later on
+                }
             }
 
-            return null;
+            Console.WriteLine($"Environment variable {environmentVariableName} was not set. Setting {description} to {defaultValue}");
+            return defaultValue;
         }
     }
 }
