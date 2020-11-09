@@ -625,7 +625,7 @@ spec:
     spec:
       containers:
       - name: redis
-        image: gcr.io/google-samples/microservices-demo/redis-cart:v0.2.1
+        image: redis:alpine
         ports:
         - containerPort: 6379
         readinessProbe:
