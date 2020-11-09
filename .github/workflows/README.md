@@ -1,75 +1,61 @@
 # GitHub Actions Workflows
 
-## Setup
-- workloads run using [GitHub self-hosted runners](https://help.github.com/en/actions/automating-your-workflow-with-github-actions/about-self-hosted-runners)
-- project admins maintain a private Google Compute Engine VM for running tests
-  - VM should be at least n1-standard-4 with 50GB persistent disk
-  - instructions for setting up the VM can be found in repo settings under "Actions"
-  - ⚠️  WARNING: VM should be set up with no GCP service account
-    - external contributors could contribute malicious PRs to run code on our test VM. Ensure no service accounts or other secrets exist on the VM
-    - An empty GCP project should be used for extra security
-  - to set up dependencies, run the following commands:
-    ```
-    # install kubectl
-    sudo apt-get install -yqq kubectl git
+This page describes the CI/CD workflows for the Online Boutique app, which run in [Github Actions](https://github.com/GoogleCloudPlatform/microservices-demo/actions). 
 
-    # install go
-    curl -O https://storage.googleapis.com/golang/go1.12.9.linux-amd64.tar.gz
-    tar -xvf go1.12.9.linux-amd64.tar.gz
-    sudo chown -R root:root ./go
-    sudo mv go /usr/local
-    echo 'export GOPATH=$HOME/go' >> ~/.profile
-    echo 'export PATH=$PATH:/usr/local/go/bin:$GOPATH/bin' >> ~/.profile
-    source ~/.profile
+## Infrastructure 
 
-    # install addlicense
-    go get -u github.com/google/addlicense
-    sudo ln -s $HOME/go/bin/addlicense /bin
+The CI/CD pipelines for Online Boutique run in Github Actions, using a pool of two [self-hosted runners]((https://help.github.com/en/actions/automating-your-workflow-with-github-actions/about-self-hosted-runners)). These runners are GCE instances (virtual machines) that, for every open Pull Request in the repo, run the code test pipeline, deploy test pipeline, and (on master) deploy the latest version of the app to [onlineboutique.dev](https://onlineboutique.dev)
 
-    # install kind
-    curl -Lo ./kind "https://github.com/kubernetes-sigs/kind/releases/download/v0.7.0/kind-$(uname)-amd64" && \
-    chmod +x ./kind && \
-    sudo mv ./kind /usr/local/bin
+We also host a test GKE cluster, which is where the deploy tests run. Every PR has its own namespace in the cluster. 
 
-    # install skaffold
-    curl -Lo skaffold https://storage.googleapis.com/skaffold/releases/latest/skaffold-linux-amd64 && \
-    chmod +x skaffold && \
-    sudo mv skaffold /usr/local/bin
+## Workflows 
 
-    # install docker
-    sudo apt install -yqq apt-transport-https ca-certificates curl gnupg2 software-properties-common && \
-    curl -fsSL https://download.docker.com/linux/debian/gpg | sudo apt-key add - && \
-    sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/debian $(lsb_release -cs) stable" && \
-    sudo apt-get update && \
-    sudo apt-get install -yqq docker-ce && \
-    sudo usermod -aG docker ${USER}
+**Note**: In order for the current CI/CD setup to work on your pull request, you must branch directly off the repo (no forks). This is because the Github secrets necessary for these tests aren't copied over when you fork.   
 
-    # logout and back on
-    exit
-    ```
-  - ensure GitHub Actions runs as background service:
-    ```
-    sudo ∼/actions-runner/svc.sh install
-    sudo ∼/actions-runner/svc.sh start
-    ```
+### Code Tests - [ci-pr.yaml](ci-pr.yaml)
+
+These tests run on every commit for every open PR, as well as any commit to master / any release branch. Currently, this workflow runs only Go unit tests. 
 
 
----
-## Workflows
+### Deploy Tests- [ci-pr.yaml](ci-pr.yaml)
 
-### ci.yaml
+These tests run on every commit for every open PR, as well as any commit to master / any release branch. This workflow: 
 
-#### Triggers
-- commits pushed to master
-- PRs to master
-- PRs to release/ branches
+1. Creates a dedicated GKE namespace for that PR, if it doesn't already exist, in the PR GKE cluster. 
+2. Uses `skaffold run` to build and push the images specific to that PR commit. Then skaffold deploys those images, via `kubernetes-manifests`, to the PR namespace in the test cluster. 
+3. Tests to make sure all the pods start up and become ready.
+4. Gets the LoadBalancer IP for the frontend service.
+5. Comments that IP in the pull request, for staging.
 
-#### Actions
-- ensures kind cluster is running
-- builds all containers in src/
-- deploys local containers to kind
-  - ensures all pods reach ready state
-  - ensures HTTP request to frontend returns HTTP status 200
-- deploys manifests from /releases
-  - ensures all pods reach ready state
-  - ensures HTTP request to frontend returns HTTP status 200
+### Push and Deploy Latest - [push-deploy](push-deploy.yml)
+
+This is the Continuous Deployment workflow, and it runs on every commit to the master branch. This workflow:
+
+1. Builds the contaner images for every service, tagging as `latest`. 
+2. Pushes those images to Google Container Registry.   
+
+Note that this workflow does not update the image tags used in `release/kubernetes-manifests.yaml` - these release manifests are tied to a stable `v0.x.x` release.
+
+### Cleanup - [cleanup.yaml](cleanup.yaml)
+
+This workflow runs when a PR closes, regardless of whether it was merged into master. This workflow deletes the PR-specific GKE namespace in the test cluster. 
+
+## Appendix - Creating a new Actions runner 
+
+Should one of the two self-hosted Github Actions runners (GCE instances) fail, or you want to add more runner capacity, this is how to provision a new runner. Note that you need IAM access to the admin Online Boutique GCP project in order to do this.  
+
+1. Create a GCE instance.
+    - VM should be at least n1-standard-4 with 50GB persistent disk
+    - VM should use custom service account with permissions to: access a GKE cluster, create GCS storage buckets, and push to GCR. 
+2. SSH into new VM through the Google Cloud Console.
+3. Follow the instructions to add a new runner on the [Actions Settings page](https://github.com/GoogleCloudPlatform/bank-of-anthos/settings/actions) to authenticate the new runner
+4. Start GitHub Actions as a background service:
+```
+sudo ~/actions-runner/svc.sh install ; sudo ~/actions-runner/svc.sh start
+```
+5. Install project-specific dependencies, including go, docker, skaffold, and kubectl: 
+
+```
+wget -O - https://raw.githubusercontent.com/GoogleCloudPlatform/microservices-demo/master/.github/workflows/install-dependencies.sh | bash
+```
+
