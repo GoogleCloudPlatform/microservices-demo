@@ -29,6 +29,7 @@ spec:
       labels:
         app: emailservice
     spec:
+      serviceAccountName: default
       terminationGracePeriodSeconds: 5
       containers:
       - name: server
@@ -152,6 +153,7 @@ spec:
       labels:
         app: recommendationservice
     spec:
+      serviceAccountName: default
       terminationGracePeriodSeconds: 5
       containers:
       - name: server
@@ -306,6 +308,7 @@ spec:
       labels:
         app: paymentservice
     spec:
+      serviceAccountName: default
       terminationGracePeriodSeconds: 5
       containers:
       - name: server
@@ -355,6 +358,7 @@ spec:
       labels:
         app: productcatalogservice
     spec:
+      serviceAccountName: default
       terminationGracePeriodSeconds: 5
       containers:
       - name: server
@@ -412,6 +416,7 @@ spec:
       labels:
         app: cartservice
     spec:
+      serviceAccountName: default
       terminationGracePeriodSeconds: 5
       containers:
       - name: server
@@ -471,6 +476,7 @@ spec:
       annotations:
         sidecar.istio.io/rewriteAppHTTPProbers: "true"
     spec:
+      serviceAccountName: default
       terminationGracePeriodSeconds: 5
       restartPolicy: Always
       containers:
@@ -502,6 +508,7 @@ spec:
       labels:
         app: currencyservice
     spec:
+      serviceAccountName: default
       terminationGracePeriodSeconds: 5
       containers:
       - name: server
@@ -668,6 +675,7 @@ spec:
       labels:
         app: adservice
     spec:
+      serviceAccountName: default
       terminationGracePeriodSeconds: 5
       containers:
       - name: server
