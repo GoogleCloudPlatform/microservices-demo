@@ -1,6 +1,6 @@
 #!/usr/bin/python
 #
-# Copyright 2018 Google LLC
+# Copyright 2020 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -46,7 +46,7 @@ def initStackdriverProfiling():
     # Environment variable not set
     pass
 
-  for retry in xrange(1,4):
+  for retry in range(1,4):
     try:
       if project_id:
         googlecloudprofiler.start(service='recommendation_server', service_version='1.0.0', verbose=0, project_id=project_id)
@@ -124,8 +124,9 @@ if __name__ == "__main__":
               module='recommendationserver',
               version='1.0.0'
           )
-        except Exception, err:
+        except (Exception, err):
             logger.error("Could not enable debugger")
+            logger.error(e)
             logger.error(traceback.print_exc())
             pass
     except KeyError:

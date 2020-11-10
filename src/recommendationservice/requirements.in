@@ -1,5 +1,5 @@
 google-api-core==1.6.0
-google-python-cloud-debugger==2.9
+google-python-cloud-debugger==2.15
 grpcio-health-checking==1.13.0
 grpcio==1.16.1
 opencensus[stackdriver]==0.1.10
