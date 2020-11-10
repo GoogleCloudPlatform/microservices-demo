@@ -45,7 +45,7 @@ build:
   tagPolicy:
     gitCommit: {}
   local:
-    useBuildkit: true
+    useBuildkit: false
 deploy:
   kubectl:
     manifests:
