@@ -126,7 +126,6 @@ if __name__ == "__main__":
           )
         except (Exception, err):
             logger.error("Could not enable debugger")
-            logger.error(e)
             logger.error(traceback.print_exc())
             pass
     except KeyError:
