@@ -149,6 +149,7 @@ if __name__ == "__main__":
     health_pb2_grpc.add_HealthServicer_to_server(service, server)
 
     # start server
+    logger.info("🌴 This is the python3 version")
     logger.info("listening on port: " + port)
     server.add_insecure_port('[::]:'+port)
     server.start()
