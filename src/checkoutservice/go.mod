@@ -19,4 +19,8 @@ require (
 	google.golang.org/appengine v1.6.1 // indirect
 	google.golang.org/genproto v0.0.0-20190708153700-3bdd9d9f5532 // indirect
 	google.golang.org/grpc v1.22.0
+	github.com/CSCI-2390-Project/privacy-go v2.0.0
 )
+replace google.golang.org/grpc => github.com/CSCI-2390-Project/grpc-go v2.0.0
+
+replace google.golang.org/protobuf => github.com/CSCI-2390-Project/protobuf-go v2.0.0
