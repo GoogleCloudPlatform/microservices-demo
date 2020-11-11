@@ -224,7 +224,6 @@ service CheckoutService {
 }
 
 message PlaceOrderRequest {
-    option protected_attributes = 'email;credit_card';
     string user_id = 1;
     string user_currency = 2;
 
