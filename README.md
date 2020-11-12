@@ -44,7 +44,7 @@ gcloud services enable container --project ${PROJECT_ID}
 
 ```
 git clone https://github.com/GoogleCloudPlatform/microservices-demo.git
-cd bank-of-anthos
+cd microservices-demo
 ```
 
 3. **Create a GKE cluster.** 
