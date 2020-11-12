@@ -104,7 +104,7 @@ EXTERNAL-IP
 8. [Optional] **Clean up**: 
 
 ```
-gcloud container clusteres delete onlineboutique \ 
+gcloud container clusters delete onlineboutique \ 
     --project=${PROJECT_ID} --zone=${ZONE}
 ```
 
