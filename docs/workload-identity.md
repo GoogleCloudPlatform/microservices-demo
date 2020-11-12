@@ -21,6 +21,14 @@ gcloud projects add-iam-policy-binding ${PROJECT_ID} \
 gcloud projects add-iam-policy-binding ${PROJECT_ID} \
   --member "serviceAccount:${GSA_NAME}@${PROJECT_ID}.iam.gserviceaccount.com" \
   --role roles/monitoring.metricWriter
+  
+gcloud projects add-iam-policy-binding ${PROJECT_ID} \
+  --member "serviceAccount:${GSA_NAME}@${PROJECT_ID}.iam.gserviceaccount.com" \
+  --role roles/cloudprofiler.agent
+  
+gcloud projects add-iam-policy-binding ${PROJECT_ID} \
+  --member "serviceAccount:${GSA_NAME}@${PROJECT_ID}.iam.gserviceaccount.com" \
+  --role roles/clouddebugger.agent
 ```
 
 3. **Generate OnlineBoutique manifests** using your KSA as the Pod service account. In `kubernetes-manifests/`, replace `serviceAccountName: default` with the name of your KSA. (**Note** - sample below is Bash.)

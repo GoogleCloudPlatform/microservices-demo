@@ -177,6 +177,7 @@ We offer the following installation methods:
 
     ```sh
     gcloud services enable container.googleapis.com
+    gcloud services enable cloudprofiler.googleapis.com
     ```
 
     ```sh

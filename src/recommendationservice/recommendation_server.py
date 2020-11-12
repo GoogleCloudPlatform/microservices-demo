@@ -46,7 +46,7 @@ def initStackdriverProfiling():
     # Environment variable not set
     pass
 
-  for retry in xrange(1,4):
+  for retry in range(1,4):
     try:
       if project_id:
         googlecloudprofiler.start(service='recommendation_server', service_version='1.0.0', verbose=0, project_id=project_id)
@@ -86,6 +86,10 @@ class RecommendationService(demo_pb2_grpc.RecommendationServiceServicer):
         return health_pb2.HealthCheckResponse(
             status=health_pb2.HealthCheckResponse.SERVING)
 
+    def Watch(self, request, context):
+        return health_pb2.HealthCheckResponse(
+            status=health_pb2.HealthCheckResponse.UNIMPLEMENTED)
+
 
 if __name__ == "__main__":
     logger.info("initializing recommendationservice")
@@ -124,7 +128,7 @@ if __name__ == "__main__":
               module='recommendationserver',
               version='1.0.0'
           )
-        except Exception, err:
+        except (Exception, err):
             logger.error("Could not enable debugger")
             logger.error(traceback.print_exc())
             pass
