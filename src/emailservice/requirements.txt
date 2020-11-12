@@ -19,7 +19,7 @@ grpcio-health-checking==1.12.1  # via -r requirements.in
 grpcio==1.16.1            # via -r requirements.in, google-api-core, grpcio-health-checking
 httplib2==0.18.0          # via google-api-python-client, google-auth-httplib2
 idna==2.8                 # via requests
-jinja2==2.10              # via -r requirements.in
+jinja2==2.10.1            # via -r requirements.in
 markupsafe==1.1.0         # via jinja2
 opencensus[stackdriver]==0.1.10  # via -r requirements.in
 protobuf==3.6.1           # via google-api-core, google-cloud-profiler, googleapis-common-protos, grpcio-health-checking
