@@ -36,6 +36,7 @@ import (
 	"contrib.go.opencensus.io/exporter/stackdriver"
 	"github.com/golang/protobuf/jsonpb"
 	"github.com/sirupsen/logrus"
+
 	//  "go.opencensus.io/exporter/jaeger"
 	"go.opencensus.io/plugin/ocgrpc"
 	"go.opencensus.io/stats/view"
@@ -275,12 +276,12 @@ func (p *productCatalog) GetProduct(ctx context.Context, req *pb.GetProductReque
 	time.Sleep(extraLatency)
 	var found *pb.Product
 	for i := 0; i < len(parseCatalog()); i++ {
-		if req.Id == parseCatalog()[i].Id {
+		if req.GetId() == parseCatalog()[i].Id {
 			found = parseCatalog()[i]
 		}
 	}
 	if found == nil {
-		return nil, status.Errorf(codes.NotFound, "no product with ID %s", req.Id)
+		return nil, status.Errorf(codes.NotFound, "no product with ID %s", req.GetId())
 	}
 	return found, nil
 }
@@ -290,8 +291,8 @@ func (p *productCatalog) SearchProducts(ctx context.Context, req *pb.SearchProdu
 	// Intepret query as a substring match in name or description.
 	var ps []*pb.Product
 	for _, p := range parseCatalog() {
-		if strings.Contains(strings.ToLower(p.Name), strings.ToLower(req.Query)) ||
-			strings.Contains(strings.ToLower(p.Description), strings.ToLower(req.Query)) {
+		if strings.Contains(strings.ToLower(p.GetName()), strings.ToLower(req.GetQuery())) ||
+			strings.Contains(strings.ToLower(p.GetDescription()), strings.ToLower(req.GetQuery())) {
 			ps = append(ps, p)
 		}
 	}

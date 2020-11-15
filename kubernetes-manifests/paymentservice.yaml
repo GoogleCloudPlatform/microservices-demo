@@ -34,12 +34,12 @@ spec:
         env:
         - name: PORT
           value: "50051"
-        readinessProbe:
-          exec:
-            command: ["/bin/grpc_health_probe", "-addr=:50051"]
-        livenessProbe:
-          exec:
-            command: ["/bin/grpc_health_probe", "-addr=:50051"]
+        #readinessProbe:
+          #exec:
+            #command: ["/bin/grpc_health_probe", "-addr=:50051"]
+        #livenessProbe:
+          #exec:
+            #command: ["/bin/grpc_health_probe", "-addr=:50051"]
         resources:
           requests:
             cpu: 100m

@@ -30,14 +30,14 @@ spec:
         image: redis:alpine
         ports:
         - containerPort: 6379
-        readinessProbe:
-          periodSeconds: 5
-          tcpSocket:
-            port: 6379
-        livenessProbe:
-          periodSeconds: 5
-          tcpSocket:
-            port: 6379
+        #readinessProbe:
+          #periodSeconds: 5
+          #tcpSocket:
+            #port: 6379
+        #livenessProbe:
+          #periodSeconds: 5
+          #tcpSocket:
+            #port: 6379
         volumeMounts:
         - mountPath: /data
           name: redis-data
