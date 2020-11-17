@@ -48,10 +48,11 @@ var (
 )
 
 func (fe *frontendServer) homeHandler(w http.ResponseWriter, r *http.Request) {
-    rollbar.SetToken(os.Getenv("GOROLLBARTOKEN"))        // frontend app token
-  	rollbar.SetEnvironment("production")                 // defaults to "development"
-  	rollbar.SetCodeVersion("v2")                         // optional Git hash/branch/tag (required for GitHub integration)
-  	rollbar.SetServerHost("web.1")                       // optional override; defaults to hostname
+    environment := os.Getenv("ROLLBAR_ENVIRONMENT");
+    codeVersion := os.Getenv("ROLLBAR_CODE_VERSION");
+    rollbar.SetToken(os.Getenv("ROLLBAR_ACCESS_TOKEN"))  // frontend app token
+  	rollbar.SetEnvironment(environment)                 // defaults to "development"
+  	rollbar.SetCodeVersion(codeVersion)                 // optional Git hash/branch/tag (required for GitHub integration)
   	rollbar.SetServerRoot("github.com/heroku/myproject") // path of project (required for GitHub integration and non-project stacktrace collapsing)
 
 	log := r.Context().Value(ctxKeyLog{}).(logrus.FieldLogger)

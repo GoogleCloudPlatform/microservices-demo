@@ -32,15 +32,15 @@ build:
     context: src/checkoutservice
   - image: paymentservice
     context: src/paymentservice
-    docker:
-      buildArgs:
-        GIT_SHA_ARG: "{{.GIT_SHA}}"
   - image: currencyservice
     context: src/currencyservice
   - image: cartservice
     context: src/cartservice
   - image: frontend
     context: src/frontend
+    docker:
+      buildArgs:
+        GIT_SHA_ARG: "{{.GIT_SHA}}"
   - image: loadgenerator
     context: src/loadgenerator
   - image: adservice

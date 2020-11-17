@@ -49,7 +49,7 @@ spec:
               - name: "Cookie"
                 value: "shop_session-id=x-liveness-probe"
           env:
-          - name: GOROLLBARTOKEN
+          - name: ROLLBAR_ACCESS_TOKEN
             valueFrom:
               secretKeyRef:
                 name: secret-frontend
