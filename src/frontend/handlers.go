@@ -29,6 +29,7 @@ import (
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 
+	privacy_go "github.com/CSCI-2390-Project/privacy-go"
 	pb "github.com/GoogleCloudPlatform/microservices-demo/src/frontend/genproto"
 	"github.com/GoogleCloudPlatform/microservices-demo/src/frontend/money"
 )
@@ -76,6 +77,7 @@ func (fe *frontendServer) homeHandler(w http.ResponseWriter, r *http.Request) {
 			renderHTTPError(log, r, w, errors.Wrapf(err, "failed to do currency conversion for product %s", p.GetId()), http.StatusInternalServerError)
 			return
 		}
+		privacy_go.PermissionedRecursiveDecrypt(p)
 		ps[i] = productView{p, price}
 	}
 
@@ -155,7 +157,7 @@ func (fe *frontendServer) productHandler(w http.ResponseWriter, r *http.Request)
 		renderHTTPError(log, r, w, errors.Wrap(err, "failed to get product recommendations"), http.StatusInternalServerError)
 		return
 	}
-
+	privacy_go.PermissionedRecursiveDecrypt(p)
 	product := struct {
 		Item  *pb.Product
 		Price *pb.Money
@@ -164,7 +166,7 @@ func (fe *frontendServer) productHandler(w http.ResponseWriter, r *http.Request)
 	if err := templates.ExecuteTemplate(w, "product", map[string]interface{}{
 		"session_id":      sessionID(r),
 		"request_id":      r.Context().Value(ctxKeyRequestID{}),
-		"ad":              fe.chooseAd(r.Context(), p.Categories, log),
+		"ad":              fe.chooseAd(r.Context(), p.GetCategories(), log),
 		"user_currency":   currentCurrency(r),
 		"show_currency":   true,
 		"currencies":      currencies,
