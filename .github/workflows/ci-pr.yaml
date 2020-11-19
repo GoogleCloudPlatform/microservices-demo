@@ -100,6 +100,8 @@ jobs:
         done
         EXTERNAL_IP=$(get_externalIP)
         echo "::set-env name=EXTERNAL_IP::$EXTERNAL_IP"
+      env:
+        ACTIONS_ALLOW_UNSECURE_COMMANDS: true
     - name: Smoke Test
       timeout-minutes: 5	
       run: |	
