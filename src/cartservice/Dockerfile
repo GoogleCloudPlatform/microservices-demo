@@ -12,12 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-FROM mcr.microsoft.com/dotnet/core/sdk:3.1 as builder
+FROM mcr.microsoft.com/dotnet/sdk:5.0 as builder
 WORKDIR /app
 COPY . .
-RUN dotnet restore && \
-    dotnet build && \
-    dotnet publish -c release -r linux-musl-x64 -o /cartservice
+RUN dotnet publish -r linux-musl-x64 --self-contained true -c release -o /cartservice
 
 # cartservice
 FROM alpine:3.8
