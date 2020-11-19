@@ -15,7 +15,7 @@
 FROM mcr.microsoft.com/dotnet/sdk:5.0 as builder
 WORKDIR /app
 COPY . .
-RUN dotnet publish -r linux-musl-x64 --self-contained true -p:PublishSingleFile=true -p:PublishTrimmed=True -p:TrimMode=Link -c release -o /cartservice
+RUN dotnet publish -r linux-musl-x64 --self-contained true -c release -o /cartservice
 
 # cartservice
 FROM alpine:3.8
