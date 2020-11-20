@@ -64,6 +64,7 @@ jobs:
         skaffold config set --global local-cluster false
         skaffold run --default-repo=gcr.io/$PROJECT_ID/$GITHUB_REF --tag=$GITHUB_SHA --namespace=$NAMESPACE
       env:
+        ACTIONS_ALLOW_UNSECURE_COMMANDS: true
         PROJECT_ID: ${{ secrets.PROJECT_ID }}
         PR_CLUSTER: ${{ secrets.PR_CLUSTER }}
         ZONE: ${{ secrets.PR_CLUSTER_ZONE }}
@@ -99,6 +100,8 @@ jobs:
         done
         EXTERNAL_IP=$(get_externalIP)
         echo "::set-env name=EXTERNAL_IP::$EXTERNAL_IP"
+      env:
+        ACTIONS_ALLOW_UNSECURE_COMMANDS: true
     - name: Smoke Test
       timeout-minutes: 5	
       run: |	
