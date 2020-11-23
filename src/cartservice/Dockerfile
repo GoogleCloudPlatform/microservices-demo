@@ -12,17 +12,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-FROM mcr.microsoft.com/dotnet/core/sdk:3.1 as builder
+FROM mcr.microsoft.com/dotnet/sdk:5.0 as builder
 WORKDIR /app
 COPY . .
-RUN dotnet restore && \
-    dotnet build && \
-    dotnet publish -c release -r linux-musl-x64 -o /cartservice
+RUN dotnet publish -r linux-musl-x64 --self-contained true -c release -o /cartservice
 
 # cartservice
-FROM alpine:3.8
+FROM alpine:3.12
 
-RUN GRPC_HEALTH_PROBE_VERSION=v0.3.2 && \
+RUN GRPC_HEALTH_PROBE_VERSION=v0.3.4 && \
     wget -qO/bin/grpc_health_probe https://github.com/grpc-ecosystem/grpc-health-probe/releases/download/${GRPC_HEALTH_PROBE_VERSION}/grpc_health_probe-linux-amd64 && \
     chmod +x /bin/grpc_health_probe
 
@@ -35,9 +33,10 @@ RUN apk add --no-cache \
     libuuid \
     libgcc \
     libstdc++ \
-    libssl1.0 \
+    libssl1.1 \
     libintl \
-    icu
+    icu \
+    gcompat
 WORKDIR /app
 COPY --from=builder /cartservice .
 ENTRYPOINT ["./cartservice", "start"]
