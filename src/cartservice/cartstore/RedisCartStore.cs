@@ -13,7 +13,6 @@
 // limitations under the License.
 
 using System;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -117,8 +116,6 @@ namespace cartservice.cartstore
         {
             Console.WriteLine($"AddItemAsync called with userId={userId}, productId={productId}, quantity={quantity}");
 
-            using var parent = CartActivity.ActivitySource.StartActivity("AddItem", ActivityKind.Server);
-
             try
             {
                 EnsureRedisConnected();
@@ -161,8 +158,6 @@ namespace cartservice.cartstore
         {
             Console.WriteLine($"EmptyCartAsync called with userId={userId}");
 
-            using var parent = CartActivity.ActivitySource.StartActivity("EmptyCart", ActivityKind.Server);
-
             try
             {
                 EnsureRedisConnected();
@@ -181,8 +176,6 @@ namespace cartservice.cartstore
         {
             Console.WriteLine($"GetCartAsync called with userId={userId}");
 
-            using var parent = CartActivity.ActivitySource.StartActivity("GetCart", ActivityKind.Server);
-            
             try
             {
                 EnsureRedisConnected();

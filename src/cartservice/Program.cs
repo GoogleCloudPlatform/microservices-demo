@@ -62,13 +62,12 @@ namespace cartservice
 
                     if (redisCartStore != null)
                     {
-                            tracerProvider = OpenTelemetry.Sdk.CreateTracerProviderBuilder()
+                        tracerProvider = OpenTelemetry.Sdk.CreateTracerProviderBuilder()
                            .AddRedisInstrumentation(redisCartStore.ConnectionMultiplexer)
-                           .AddSource(CartActivity.ActivitySourceName)
-                           .SetResource(Resources.CreateServiceResource(CartActivity.ActivitySourceName))
+                           .AddSource(CartServiceImpl.ActivitySourceName)
+                           .SetResource(Resources.CreateServiceResource("CartService"))
                            .AddNewRelicExporter(options =>
                            {
-
                                options.ApiKey = Environment.GetEnvironmentVariable("NEW_RELIC_API_KEY");
                                options.EndpointUrl = new Uri(Environment.GetEnvironmentVariable("NEW_RELIC_TRACE_URL"));
                            })
