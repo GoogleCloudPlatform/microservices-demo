@@ -79,7 +79,7 @@ gcloud services enable monitoring.googleapis.com \
 
     - To launch **Minikube** (tested with Ubuntu Linux). Please, ensure that the
        local Kubernetes cluster has at least:
-        - 4 CPU's
+        - 4 CPUs
         - 4.0 GiB memory
         - 32 GB disk space
 
