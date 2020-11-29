@@ -2,7 +2,7 @@
 
 This repository provides an [`istio-manifests`](/istio-manifests) directory containing ingress resources (an Istio `Gateway` and `VirtualService`) needed to expose the app frontend running inside a Kubernetes cluster.
 
-You can apply these resources to your cluster in addition to the `kuberentes-manifests`, then use the Istio IngressGateway's external IP to view the app frontend. See the following instructions for Istio steps.   
+You can apply these resources to your cluster in addition to the `kubernetes-manifests`, then use the Istio IngressGateway's external IP to view the app frontend. See the following instructions for Istio steps.   
 
 ## Steps
  
