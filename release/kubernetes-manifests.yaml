@@ -203,6 +203,7 @@ kind: Deployment
 metadata:
   name: frontend
 spec:
+  # (palexster) This can be removed when the LiqoVK will implement kubectl port-forwarding
   selector:
     matchLabels:
       app: frontend
@@ -213,6 +214,15 @@ spec:
       annotations:
         sidecar.istio.io/rewriteAppHTTPProbers: "true"
     spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: type
+                operator: NotIn
+                values:
+                - virtual-node
       containers:
         - name: server
           image: gcr.io/google-samples/microservices-demo/frontend:v0.2.0
