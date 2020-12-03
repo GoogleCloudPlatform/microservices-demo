@@ -18,25 +18,7 @@ COPY . .
 RUN dotnet publish -r linux-musl-x64 --self-contained true -c release -o /cartservice
 
 # cartservice
-FROM alpine:3.12
-
-RUN GRPC_HEALTH_PROBE_VERSION=v0.3.4 && \
-    wget -qO/bin/grpc_health_probe https://github.com/grpc-ecosystem/grpc-health-probe/releases/download/${GRPC_HEALTH_PROBE_VERSION}/grpc_health_probe-linux-amd64 && \
-    chmod +x /bin/grpc_health_probe
-
-# Dependencies for runtime
-# busybox-extras => telnet
-RUN apk add --no-cache \
-    busybox-extras \
-    libc6-compat \
-    libunwind \
-    libuuid \
-    libgcc \
-    libstdc++ \
-    libssl1.1 \
-    libintl \
-    icu \
-    gcompat
+FROM mcr.microsoft.com/dotnet/runtime-deps:5.0-alpine-amd64
 WORKDIR /app
 COPY --from=builder /cartservice .
-ENTRYPOINT ["./cartservice", "start"]
+ENTRYPOINT ["/app/cartservice"]
