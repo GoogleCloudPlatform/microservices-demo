@@ -16,7 +16,7 @@ using System;
 using System.Threading.Tasks;
 using Grpc.Core;
 using Microsoft.Extensions.Logging;
-using cartservice.interfaces;
+using cartservice.cartstore;
 using Hipstershop;
 
 namespace cartservice.services

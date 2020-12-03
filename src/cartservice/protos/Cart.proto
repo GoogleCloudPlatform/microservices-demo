@@ -14,8 +14,6 @@
 
 syntax = "proto3";
 
-//option csharp_namespace = "cartservice.services";
-
 package hipstershop;
 
 // -----------------Cart service-----------------

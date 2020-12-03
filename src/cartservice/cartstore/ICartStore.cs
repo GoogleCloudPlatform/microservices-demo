@@ -14,7 +14,7 @@
 
 using System.Threading.Tasks;
 
-namespace cartservice.interfaces
+namespace cartservice.cartstore
 {
     public interface ICartStore
     {

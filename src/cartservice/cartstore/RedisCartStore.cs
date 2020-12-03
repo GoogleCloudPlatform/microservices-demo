@@ -18,7 +18,6 @@ using System.Threading.Tasks;
 using Grpc.Core;
 using StackExchange.Redis;
 using Google.Protobuf;
-using cartservice.interfaces;
 
 namespace cartservice.cartstore
 {

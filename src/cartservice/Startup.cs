@@ -2,10 +2,11 @@ using System;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using cartservice.interfaces;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 using cartservice.cartstore;
 using cartservice.services;
 
@@ -44,6 +45,9 @@ namespace cartservice
             services.AddSingleton<ICartStore>(cartStore);
 
             services.AddGrpc();
+
+            services.AddHealthChecks()
+                .AddCheck("self", () => HealthCheckResult.Healthy());
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -59,11 +63,20 @@ namespace cartservice
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapGrpcService<CartService>();
-                //endpoints.MapGrpcService<HealthImpl>();
+                endpoints.MapGrpcService<cartservice.services.HealthCheckService>();
 
                 endpoints.MapGet("/", async context =>
                 {
                     await context.Response.WriteAsync("Communication with gRPC endpoints must be made through a gRPC client. To learn how to create a client, visit: https://go.microsoft.com/fwlink/?linkid=2086909");
+                });
+
+                endpoints.MapHealthChecks("/self", new HealthCheckOptions()
+                {
+                    Predicate = r => r.Name.Contains("self")
+                });
+                endpoints.MapHealthChecks("/ready", new HealthCheckOptions
+                {
+                    Predicate = r => r.Tags.Contains("services")
                 });
             });
         }

@@ -16,7 +16,6 @@ using System;
 using System.Collections.Concurrent;
 using System.Threading.Tasks;
 using System.Linq;
-using cartservice.interfaces;
 
 namespace cartservice.cartstore
 {

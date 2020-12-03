@@ -17,15 +17,15 @@ using System.Threading.Tasks;
 using Grpc.Core;
 using Grpc.Health.V1;
 using static Grpc.Health.V1.Health;
-using cartservice.interfaces;
+using cartservice.cartstore;
 
-namespace cartservice 
+namespace cartservice.services
 {
-    internal class HealthImpl : HealthBase 
+    internal class HealthCheckService : HealthBase
     {
         private ICartStore _dependency { get; }
 
-        public HealthImpl (ICartStore dependency) 
+        public HealthCheckService (ICartStore dependency) 
         {
             _dependency = dependency;
         }
