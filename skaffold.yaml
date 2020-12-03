@@ -51,6 +51,11 @@ build:
         JAEGER_SERVICE_ADDR: otel-collector:14268
   - image: paymentservice
     context: src/paymentservice
+    docker:
+          buildArgs:
+            NEW_RELIC_API_KEY: "{{.NEW_RELIC_API_KEY}}"
+            NEW_RELIC_TRACE_URL: "{{.NEW_RELIC_TRACE_URL}}"
+            NEW_RELIC_METRIC_URL: "{{.NEW_RELIC_METRIC_URL}}"
   - image: currencyservice
     context: src/currencyservice
   - image: cartservice

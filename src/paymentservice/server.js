@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+require('./tracing');
 const path = require('path');
 const grpc = require('grpc');
 const pino = require('pino');
