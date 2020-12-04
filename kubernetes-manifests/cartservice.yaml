@@ -45,19 +45,14 @@ spec:
             cpu: 300m
             memory: 128Mi
         readinessProbe:
-          httpGet:
-            port: 7070
-            path: /ready
           initialDelaySeconds: 15
-          periodSeconds: 10
-          timeoutSeconds: 5
+          exec:
+            command: ["/bin/grpc_health_probe", "-addr=localhost:7070", "-rpc-timeout=5s"]
         livenessProbe:
-          httpGet: 
-            port: 7070
-            path: /self
           initialDelaySeconds: 15
           periodSeconds: 10
-          timeoutSeconds: 5
+          exec:
+            command: ["/bin/grpc_health_probe", "-addr=localhost:7070", "-rpc-timeout=5s"]
 ---
 apiVersion: v1
 kind: Service

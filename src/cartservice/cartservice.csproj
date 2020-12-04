@@ -6,8 +6,8 @@
 
   <ItemGroup>
     <PackageReference Include="Grpc.AspNetCore" Version="2.33.1" />
+    <PackageReference Include="Grpc.HealthCheck" Version="2.33.1" />
     <PackageReference Include="StackExchange.Redis" Version="2.2.4" />
-    <PackageReference Include="AspNetCore.HealthChecks.Redis" Version="3.1.2" />
   </ItemGroup>
 
   <ItemGroup>
