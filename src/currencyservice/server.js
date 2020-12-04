@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+require('./tracing');
+
 if(process.env.DISABLE_PROFILER) {
   console.log("Profiler disabled.")
 }

@@ -58,6 +58,11 @@ build:
             NEW_RELIC_METRIC_URL: "{{.NEW_RELIC_METRIC_URL}}"
   - image: currencyservice
     context: src/currencyservice
+    docker:
+          buildArgs:
+            NEW_RELIC_API_KEY: "{{.NEW_RELIC_API_KEY}}"
+            NEW_RELIC_TRACE_URL: "{{.NEW_RELIC_TRACE_URL}}"
+            NEW_RELIC_METRIC_URL: "{{.NEW_RELIC_METRIC_URL}}"
   - image: cartservice
     context: src/cartservice
     docker:
