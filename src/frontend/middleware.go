@@ -28,12 +28,12 @@ import (
 	"github.com/sirupsen/logrus"
 	"go.opentelemetry.io/contrib/detectors/gcp"
 	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
-	"go.opentelemetry.io/otel/api/global"
-	"go.opentelemetry.io/otel/api/metric"
-	"go.opentelemetry.io/otel/api/trace"
+	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/label"
+	"go.opentelemetry.io/otel/metric"
 	"go.opentelemetry.io/otel/sdk/resource"
 	"go.opentelemetry.io/otel/semconv"
+	"go.opentelemetry.io/otel/trace"
 	"go.opentelemetry.io/otel/unit"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/peer"
@@ -52,7 +52,7 @@ var (
 )
 
 func init() {
-	meter := global.MeterProvider().Meter(instName, metric.WithInstrumentationVersion(instVer))
+	meter := otel.GetMeterProvider().Meter(instName, metric.WithInstrumentationVersion(instVer))
 	httpLatency = metric.Must(meter).NewFloat64ValueRecorder(
 		"http.server.duration",
 		metric.WithDescription("duration of the inbound HTTP request"),
@@ -75,7 +75,7 @@ func init() {
 	} else {
 		instID = semconv.ServiceInstanceIDKey.String(uuid.New().String())
 	}
-	res = resource.Merge(detectedR, resource.New(instID))
+	res = resource.Merge(detectedR, resource.NewWithAttributes(instID))
 }
 
 type ctxKeyLog struct{}
@@ -166,7 +166,7 @@ type traceware struct {
 // ServeHTTP implements the http.Handler interface. It does the actual
 // tracing of the request.
 func (tw traceware) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	ctx := global.TextMapPropagator().Extract(r.Context(), r.Header)
+	ctx := otel.GetTextMapPropagator().Extract(r.Context(), r.Header)
 	spanName := ""
 	route := mux.CurrentRoute(r)
 	if route != nil {

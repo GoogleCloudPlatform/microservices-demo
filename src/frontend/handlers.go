@@ -31,9 +31,9 @@ import (
 
 	"go.opentelemetry.io/contrib/instrumentation/net/http/httptrace/otelhttptrace"
 	"go.opentelemetry.io/otel"
-	"go.opentelemetry.io/otel/api/global"
-	"go.opentelemetry.io/otel/api/trace"
+	"go.opentelemetry.io/otel/baggage"
 	"go.opentelemetry.io/otel/label"
+	"go.opentelemetry.io/otel/trace"
 
 	pb "github.com/GoogleCloudPlatform/microservices-demo/src/frontend/genproto"
 	"github.com/GoogleCloudPlatform/microservices-demo/src/frontend/money"
@@ -474,7 +474,7 @@ func cartSize(c []*pb.CartItem) int {
 }
 
 func startSpan(name string, r **http.Request) (context.Context, trace.Span) {
-	tr := global.Tracer("Frontend")
+	tr := otel.Tracer("Frontend")
 	req := *r
 
 	hostname, err := os.Hostname()
@@ -486,7 +486,7 @@ func startSpan(name string, r **http.Request) (context.Context, trace.Span) {
 	kindKey := label.String("kind", "SERVER")
 	attrs, entries, spanCtx := otelhttptrace.Extract(req.Context(), req)
 	attrs = append(attrs, hostKey, kindKey)
-	req = req.WithContext(otel.ContextWithBaggageValues(req.Context(), entries...))
+	req = req.WithContext(baggage.ContextWithValues(req.Context(), entries...))
 	ctx, span := tr.Start(
 		trace.ContextWithRemoteSpanContext(req.Context(), spanCtx),
 		"hipstershop.Frontend/"+name,

@@ -30,7 +30,7 @@ import (
 	"github.com/newrelic/newrelic-telemetry-sdk-go/telemetry"
 	"github.com/newrelic/opentelemetry-exporter-go/newrelic"
 	"go.opentelemetry.io/contrib/instrumentation/github.com/gorilla/mux/otelmux"
-	"go.opentelemetry.io/otel/api/global"
+	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/exporters/stdout"
 	exportmetric "go.opentelemetry.io/otel/sdk/export/metric"
 	exporttrace "go.opentelemetry.io/otel/sdk/export/trace"
@@ -195,7 +195,7 @@ func initTracing(log logrus.FieldLogger, syncer exporttrace.SpanExporter) {
 		),
 		trace.WithSyncer(syncer),
 	)
-	global.SetTracerProvider(tp)
+	otel.SetTracerProvider(tp)
 }
 
 func initMetric(log logrus.FieldLogger, exporter exportmetric.Exporter) *push.Controller {
@@ -206,7 +206,7 @@ func initMetric(log logrus.FieldLogger, exporter exportmetric.Exporter) *push.Co
 		push.WithResource(res),
 	)
 	pusher.Start()
-	global.SetMeterProvider(pusher.MeterProvider())
+	otel.SetMeterProvider(pusher.MeterProvider())
 	return pusher
 }
 
