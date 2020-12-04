@@ -64,18 +64,22 @@ func init() {
 		metric.WithUnit(unit.Milliseconds),
 	)
 
-	detectedR, err := new(gcp.GKE).Detect(context.Background())
-	if err != nil {
-		logrus.WithError(err).Fatal("could not detect GKE environment")
-	}
-
 	var instID label.KeyValue
 	if host, ok := os.LookupEnv("HOSTNAME"); ok && host != "" {
 		instID = semconv.ServiceInstanceIDKey.String(host)
 	} else {
 		instID = semconv.ServiceInstanceIDKey.String(uuid.New().String())
 	}
-	res = resource.Merge(detectedR, resource.NewWithAttributes(instID))
+
+	var err error
+	res, err = resource.New(
+		context.Background(),
+		resource.WithAttributes(instID),
+		resource.WithDetectors(new(gcp.GCE)),
+	)
+	if err != nil {
+		logrus.WithError(err).Fatal("failed to detect environment resource")
+	}
 }
 
 type ctxKeyLog struct{}
