@@ -1,8 +1,9 @@
 module github.com/GoogleCloudPlatform/microservices-demo/src/frontend
 
-go 1.14
+go 1.15
 
 require (
+	cloud.google.com/go v0.72.0
 	github.com/golang/protobuf v1.4.3
 	github.com/google/uuid v1.1.2
 	github.com/gorilla/mux v1.8.0
