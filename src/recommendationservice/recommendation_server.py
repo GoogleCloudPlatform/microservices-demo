@@ -18,7 +18,7 @@ import os
 import random
 import time
 import traceback
-from urlparse import urlparse
+from urllib.parse import urlparse
 from concurrent import futures
 
 import googleclouddebugger
