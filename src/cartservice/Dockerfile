@@ -17,7 +17,6 @@ WORKDIR /app
 COPY . .
 RUN dotnet publish -p:PublishSingleFile=true -r linux-musl-x64 --self-contained true -p:PublishTrimmed=True -p:TrimMode=Link -c release -o /cartservice
 
-# cartservice
 FROM mcr.microsoft.com/dotnet/runtime-deps:5.0.0-alpine3.12-amd64
 RUN GRPC_HEALTH_PROBE_VERSION=v0.3.5 && \
     wget -qO/bin/grpc_health_probe https://github.com/grpc-ecosystem/grpc-health-probe/releases/download/${GRPC_HEALTH_PROBE_VERSION}/grpc_health_probe-linux-amd64 && \
