@@ -241,7 +241,7 @@ footer .footer-top .footer-app,
 footer .footer-links,
 footer .footer-top .social,
 footer .footer-top .app {
-  display: flex;
+  display: block;
   align-items: center;
 }
 
