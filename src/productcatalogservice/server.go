@@ -162,8 +162,17 @@ func initTracing() {
 	)
 }
 
+type errorHandler struct {
+	log *logrus.Logger
+}
+
+func (eh errorHandler) Handle(err error) {
+	eh.log.Error(err)
+}
+
 func main() {
 	initTracing()
+	otel.SetErrorHandler(errorHandler{log: log})
 	flag.Parse()
 
 	// set injected latency
