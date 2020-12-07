@@ -1,7 +1,7 @@
 ---
 extensions:
-  health_check:
-  zpages:
+  health_check: {}
+  zpages: {}
 receivers:
   otlp:
     protocols:
@@ -26,6 +26,7 @@ exporters:
     spans_url_override: NEW_RELIC_TRACE_URL
     metrics_url_override: NEW_RELIC_METRIC_URL
 service:
+  extensions: [health_check, zpages]
   pipelines:
     traces:
       receivers: [otlp, zipkin, jaeger]
