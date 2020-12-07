@@ -13,7 +13,7 @@ RUN sed -i "s/NEW_RELIC_API_KEY/${NEW_RELIC_API_KEY}/g" /etc/otel/config.yaml
 RUN sed -i "s#NEW_RELIC_TRACE_URL#${NEW_RELIC_TRACE_URL}#g" /etc/otel/config.yaml
 RUN sed -i "s#NEW_RELIC_METRIC_URL#${NEW_RELIC_METRIC_URL}#g" /etc/otel/config.yaml
 
-FROM otel/opentelemetry-collector-contrib:0.8.0
+FROM otel/opentelemetry-collector-contrib:0.16.0
 
 COPY --from=build /etc/otel/config.yaml /etc/otel/config.yaml
 
