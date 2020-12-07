@@ -29,21 +29,28 @@ import (
 	"time"
 
 	pb "github.com/GoogleCloudPlatform/microservices-demo/src/productcatalogservice/genproto"
+	"github.com/google/uuid"
+	"go.opentelemetry.io/contrib/detectors/gcp"
+	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/exporters/otlp"
+	"go.opentelemetry.io/otel/exporters/stdout"
+	"go.opentelemetry.io/otel/exporters/trace/jaeger"
+	"go.opentelemetry.io/otel/label"
+	exporttrace "go.opentelemetry.io/otel/sdk/export/trace"
+	"go.opentelemetry.io/otel/sdk/resource"
+	"go.opentelemetry.io/otel/sdk/trace"
+	"go.opentelemetry.io/otel/semconv"
 	healthpb "google.golang.org/grpc/health/grpc_health_v1"
 
-	"cloud.google.com/go/profiler"
-	"contrib.go.opencensus.io/exporter/jaeger"
-	"contrib.go.opencensus.io/exporter/stackdriver"
 	"github.com/golang/protobuf/jsonpb"
 	"github.com/sirupsen/logrus"
-	//  "go.opencensus.io/exporter/jaeger"
-	"go.opencensus.io/plugin/ocgrpc"
-	"go.opencensus.io/stats/view"
-	"go.opencensus.io/trace"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
+
+const serviceName = "productcatalogservice"
 
 var (
 	cat          pb.ListProductsResponse
@@ -74,21 +81,83 @@ func init() {
 	}
 }
 
+func detectResource() (*resource.Resource, error) {
+	var instID label.KeyValue
+	if host, ok := os.LookupEnv("HOSTNAME"); ok && host != "" {
+		instID = semconv.ServiceInstanceIDKey.String(host)
+	} else {
+		instID = semconv.ServiceInstanceIDKey.String(uuid.New().String())
+	}
+
+	return resource.New(
+		context.Background(),
+		resource.WithAttributes(
+			instID,
+			semconv.ServiceNameKey.String(serviceName),
+		),
+		resource.WithDetectors(new(gcp.GCE)),
+	)
+}
+
+func spanExporter() (exporttrace.SpanExporter, error) {
+	var otlpEndpoint string
+	if ep := os.Getenv("OTEL_EXPORTER_OTLP_SPAN_ENDPOINT"); ep != "" {
+		otlpEndpoint = ep
+	} else if ep = os.Getenv("OTEL_EXPORTER_OTLP_ENDPOINT"); ep != "" {
+		otlpEndpoint = ep
+	}
+	if otlpEndpoint != "" {
+		return otlp.NewExporter(otlp.WithAddress(otlpEndpoint))
+	}
+
+	if addr := os.Getenv("JAEGER_SERVICE_ADDR"); addr != "" {
+		return jaeger.NewRawExporter(
+			jaeger.WithCollectorEndpoint(addr),
+			jaeger.WithProcess(jaeger.Process{
+				ServiceName: serviceName,
+			}),
+		)
+
+	}
+
+	return stdout.NewExporter(stdout.WithPrettyPrint())
+}
+
+func initTracing() {
+	if os.Getenv("DISABLE_TRACING") != "" {
+		logrus.Info("tracing disabled")
+		return
+	}
+
+	res, err := detectResource()
+	if err != nil {
+		logrus.WithError(err).Fatal("failed to detect environment resource")
+	}
+
+	exp, err := spanExporter()
+	if err != nil {
+		logrus.WithError(err).Fatal("failed to initialize Span exporter")
+		return
+	}
+
+	logrus.Info("tracing enabled")
+	otel.SetTracerProvider(
+		trace.NewTracerProvider(
+			trace.WithConfig(
+				trace.Config{
+					DefaultSampler: trace.AlwaysSample(),
+					Resource:       res,
+				},
+			),
+			trace.WithSpanProcessor(
+				trace.NewBatchSpanProcessor(exp),
+			),
+		),
+	)
+}
+
 func main() {
-	if os.Getenv("DISABLE_TRACING") == "" {
-		log.Info("Tracing enabled.")
-		go initTracing()
-	} else {
-		log.Info("Tracing disabled.")
-	}
-
-	if os.Getenv("DISABLE_PROFILER") == "" {
-		log.Info("Profiling enabled.")
-		go initProfiling("productcatalogservice", "1.0.0")
-	} else {
-		log.Info("Profiling disabled.")
-	}
-
+	initTracing()
 	flag.Parse()
 
 	// set injected latency
@@ -134,10 +203,11 @@ func run(port string) string {
 	}
 	var srv *grpc.Server
 	if os.Getenv("DISABLE_STATS") == "" {
-		log.Info("Stats enabled.")
-		srv = grpc.NewServer(grpc.StatsHandler(&ocgrpc.ServerHandler{}))
+		srv = grpc.NewServer(
+			grpc.UnaryInterceptor(otelgrpc.UnaryServerInterceptor()),
+			grpc.StreamInterceptor(otelgrpc.StreamServerInterceptor()),
+		)
 	} else {
-		log.Info("Stats disabled.")
 		srv = grpc.NewServer()
 	}
 
@@ -147,87 +217,6 @@ func run(port string) string {
 	healthpb.RegisterHealthServer(srv, svc)
 	go srv.Serve(l)
 	return l.Addr().String()
-}
-
-func initJaegerTracing() {
-	svcAddr := os.Getenv("JAEGER_SERVICE_ADDR")
-	if svcAddr == "" {
-		log.Info("jaeger initialization disabled.")
-		return
-	}
-	// Register the Jaeger exporter to be able to retrieve
-	// the collected spans.
-	exporter, err := jaeger.NewExporter(jaeger.Options{
-		Endpoint: fmt.Sprintf("http://%s", svcAddr),
-		Process: jaeger.Process{
-			ServiceName: "productcatalogservice",
-		},
-	})
-	if err != nil {
-		log.Fatal(err)
-	}
-	trace.RegisterExporter(exporter)
-	log.Info("jaeger initialization completed.")
-}
-
-func initStats(exporter *stackdriver.Exporter) {
-	view.SetReportingPeriod(60 * time.Second)
-	view.RegisterExporter(exporter)
-	if err := view.Register(ocgrpc.DefaultServerViews...); err != nil {
-		log.Info("Error registering default server views")
-	} else {
-		log.Info("Registered default server views")
-	}
-}
-
-func initStackdriverTracing() {
-	// TODO(ahmetb) this method is duplicated in other microservices using Go
-	// since they are not sharing packages.
-	for i := 1; i <= 3; i++ {
-		exporter, err := stackdriver.NewExporter(stackdriver.Options{})
-		if err != nil {
-			log.Warnf("failed to initialize Stackdriver exporter: %+v", err)
-		} else {
-			trace.RegisterExporter(exporter)
-			trace.ApplyConfig(trace.Config{DefaultSampler: trace.AlwaysSample()})
-			log.Info("registered Stackdriver tracing")
-
-			// Register the views to collect server stats.
-			initStats(exporter)
-			return
-		}
-		d := time.Second * 10 * time.Duration(i)
-		log.Infof("sleeping %v to retry initializing Stackdriver exporter", d)
-		time.Sleep(d)
-	}
-	log.Warn("could not initialize Stackdriver exporter after retrying, giving up")
-}
-
-func initTracing() {
-	initJaegerTracing()
-	initStackdriverTracing()
-}
-
-func initProfiling(service, version string) {
-	// TODO(ahmetb) this method is duplicated in other microservices using Go
-	// since they are not sharing packages.
-	for i := 1; i <= 3; i++ {
-		if err := profiler.Start(profiler.Config{
-			Service:        service,
-			ServiceVersion: version,
-			// ProjectID must be set if not running on GCP.
-			// ProjectID: "my-project",
-		}); err != nil {
-			log.Warnf("failed to start profiler: %+v", err)
-		} else {
-			log.Info("started Stackdriver profiler")
-			return
-		}
-		d := time.Second * 10 * time.Duration(i)
-		log.Infof("sleeping %v to retry initializing Stackdriver profiler", d)
-		time.Sleep(d)
-	}
-	log.Warn("could not initialize Stackdriver profiler after retrying, giving up")
 }
 
 type productCatalog struct{}
