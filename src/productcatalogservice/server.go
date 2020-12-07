@@ -107,10 +107,12 @@ func spanExporter() (exporttrace.SpanExporter, error) {
 		otlpEndpoint = ep
 	}
 	if otlpEndpoint != "" {
+		log.Info("exporting to OTLP collector")
 		return otlp.NewExporter(otlp.WithAddress(otlpEndpoint))
 	}
 
 	if addr := os.Getenv("JAEGER_SERVICE_ADDR"); addr != "" {
+		log.Info("exporting to Jaeger endpoint")
 		return jaeger.NewRawExporter(
 			jaeger.WithCollectorEndpoint(addr),
 			jaeger.WithProcess(jaeger.Process{
@@ -120,27 +122,31 @@ func spanExporter() (exporttrace.SpanExporter, error) {
 
 	}
 
-	return stdout.NewExporter(stdout.WithPrettyPrint())
+	log.Info("exporting with STDOUT logger")
+	return stdout.NewExporter(
+		stdout.WithPrettyPrint(),
+		stdout.WithWriter(log.Writer()),
+	)
 }
 
 func initTracing() {
 	if os.Getenv("DISABLE_TRACING") != "" {
-		logrus.Info("tracing disabled")
+		log.Info("tracing disabled")
 		return
 	}
 
 	res, err := detectResource()
 	if err != nil {
-		logrus.WithError(err).Fatal("failed to detect environment resource")
+		log.WithError(err).Fatal("failed to detect environment resource")
 	}
 
 	exp, err := spanExporter()
 	if err != nil {
-		logrus.WithError(err).Fatal("failed to initialize Span exporter")
+		log.WithError(err).Fatal("failed to initialize Span exporter")
 		return
 	}
 
-	logrus.Info("tracing enabled")
+	log.Info("tracing enabled")
 	otel.SetTracerProvider(
 		trace.NewTracerProvider(
 			trace.WithConfig(
