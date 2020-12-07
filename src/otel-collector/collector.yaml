@@ -3,6 +3,10 @@ extensions:
   health_check:
   zpages:
 receivers:
+  otlp:
+    protocols:
+      grpc:
+      http:
   zipkin:
   jaeger:
     protocols:
@@ -24,6 +28,6 @@ exporters:
 service:
   pipelines:
     traces:
-      receivers: [zipkin, jaeger]
+      receivers: [otlp, zipkin, jaeger]
       processors: [memory_limiter, batch, queued_retry]
       exporters: [newrelic]
