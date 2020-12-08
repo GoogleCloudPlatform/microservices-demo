@@ -37,6 +37,7 @@ import (
 	"go.opentelemetry.io/otel/exporters/stdout"
 	"go.opentelemetry.io/otel/exporters/trace/jaeger"
 	"go.opentelemetry.io/otel/label"
+	"go.opentelemetry.io/otel/propagation"
 	exporttrace "go.opentelemetry.io/otel/sdk/export/trace"
 	"go.opentelemetry.io/otel/sdk/resource"
 	"go.opentelemetry.io/otel/sdk/trace"
@@ -163,6 +164,7 @@ func initTracing() {
 			),
 		),
 	)
+	otel.SetTextMapPropagator(propagation.NewCompositeTextMapPropagator(propagation.TraceContext{}, propagation.Baggage{}))
 }
 
 type errorHandler struct {

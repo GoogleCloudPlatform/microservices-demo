@@ -32,6 +32,7 @@ import (
 	"go.opentelemetry.io/contrib/instrumentation/github.com/gorilla/mux/otelmux"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/exporters/stdout"
+	"go.opentelemetry.io/otel/propagation"
 	exportmetric "go.opentelemetry.io/otel/sdk/export/metric"
 	exporttrace "go.opentelemetry.io/otel/sdk/export/trace"
 	"go.opentelemetry.io/otel/sdk/metric/controller/push"
@@ -196,6 +197,7 @@ func initTracing(log logrus.FieldLogger, syncer exporttrace.SpanExporter) {
 		trace.WithSyncer(syncer),
 	)
 	otel.SetTracerProvider(tp)
+	otel.SetTextMapPropagator(propagation.NewCompositeTextMapPropagator(propagation.TraceContext{}, propagation.Baggage{}))
 }
 
 func initMetric(log logrus.FieldLogger, exporter exportmetric.Exporter) *push.Controller {
