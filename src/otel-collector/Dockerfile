@@ -19,4 +19,4 @@ COPY --from=build /etc/otel/config.yaml /etc/otel/config.yaml
 
 ENTRYPOINT ["/otelcontribcol"]
 CMD ["--config", "/etc/otel/config.yaml"]
-EXPOSE 55680 55679 9411 14250 14268 13133
+EXPOSE 55680 55679 9411 14250 14268 13133 4317

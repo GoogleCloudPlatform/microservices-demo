@@ -31,7 +31,7 @@ build:
     context: src/productcatalogservice
     docker:
       buildArgs:
-        OTEL_EXPORTER_OTLP_SPAN_ENDPOINT: "otel-collector:55680"
+        OTEL_EXPORTER_OTLP_SPAN_ENDPOINT: "otel-collector:4317"
   - image: recommendationservice
     context: src/recommendationservice
     docker:

@@ -7,6 +7,8 @@ metadata:
     component: otel-collector
 spec:
   ports:
+  - name: otlp-grpc # Default OpenTelemetry RPC receiver port.
+    port: 4317
   - name: zipkin # Default endpoint for Zipkin trace receiver.
     port: 9411
   - name: jaeger-grpc # Default endpoint for Jaeger gRPC trace receiver.
@@ -15,7 +17,7 @@ spec:
     port: 14268
   - name: zpages # ZPages endpoint.
     port: 55679
-  - name: otlp # Default OpenTelemetry receiver port.
+  - name: otlp-http # Default OpenTelemetry HTTP receiver port.
     port: 55680
   selector:
     component: otel-collector
@@ -56,11 +58,12 @@ spec:
             cpu: 200m
             memory: 400Mi
         ports:
+        - containerPort: 4317 # Default OpenTelemetry RPC receiver port.
         - containerPort: 9411 # Default endpoint for Zipkin trace receiver.
         - containerPort: 14250 # Default endpoint for Jaeger gRPC trace receiver.
         - containerPort: 14268 # Default endpoint for Jaeger thrift HTTP trace receiver.
         - containerPort: 55679 # Default endpoint for ZPages.
-        - containerPort: 55680 # Default OpenTelemetry receiver port.
+        - containerPort: 55680 # Default OpenTelemetry HTTP receiver port.
         livenessProbe:
           httpGet:
             path: /

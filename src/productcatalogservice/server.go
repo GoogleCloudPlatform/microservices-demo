@@ -107,12 +107,15 @@ func spanExporter() (exporttrace.SpanExporter, error) {
 		otlpEndpoint = ep
 	}
 	if otlpEndpoint != "" {
-		log.Info("exporting to OTLP collector")
-		return otlp.NewExporter(otlp.WithAddress(otlpEndpoint))
+		log.Infof("exporting to OTLP collector at %s", otlpEndpoint)
+		return otlp.NewExporter(
+			otlp.WithInsecure(),
+			otlp.WithAddress(otlpEndpoint),
+		)
 	}
 
 	if addr := os.Getenv("JAEGER_SERVICE_ADDR"); addr != "" {
-		log.Info("exporting to Jaeger endpoint")
+		log.Infof("exporting to Jaeger endpoint at %s", addr)
 		return jaeger.NewRawExporter(
 			jaeger.WithCollectorEndpoint(addr),
 			jaeger.WithProcess(jaeger.Process{
