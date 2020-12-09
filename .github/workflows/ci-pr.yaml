@@ -28,10 +28,20 @@ jobs:
   #         go test
   #         popd
   #       done
-    # - name: TODO - run C# Unit Tests
-    #   timeout-minutes: 10
-    #   run: |
-    #     dotnet test src/cartservice/tests/cartservice.tests.csproj
+jobs:
+  code-tests:
+    runs-on: self-hosted
+    steps:
+    - uses: actions/checkout@v2
+    - name: Go Unit Tests
+      timeout-minutes: 10
+      run: |
+        for SERVICE in "shippingservice"; do
+          echo "testing $SERVICE..."
+          pushd src/$SERVICE
+          go test
+          popd
+        done
   deployment-tests:
     runs-on: self-hosted
     # needs: code-tests
