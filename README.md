@@ -41,7 +41,8 @@ gcloud services enable container --project ${PROJECT_ID}
 gcloud services enable monitoring.googleapis.com \
     cloudtrace.googleapis.com \
     clouddebugger.googleapis.com \
-    cloudprofiler.googleapis.com
+    cloudprofiler.googleapis.com \
+    --project ${PROJECT_ID}
 ```
 
 2. **Clone this repository.**
