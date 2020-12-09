@@ -13,7 +13,7 @@
 # limitations under the License.
 
 name: "Continuous Integration - Pull Request"
-on: [ pull_request_target ]
+on: [ pull_request ]
 jobs:
   # code-tests:
   #   runs-on: self-hosted
