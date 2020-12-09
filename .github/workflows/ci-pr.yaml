@@ -22,6 +22,7 @@ on:
     # run on fork pull requests targeting base upstream master
     # branches:
     #   - master
+    types: [opened]
 jobs:
   # code-tests:
   #   runs-on: self-hosted
