@@ -37,7 +37,7 @@ Looking for the old Hipster Shop frontend interface? Use the [manifests](https:/
 
 ```
 PROJECT_ID="<your-project-id>"
-gcloud services enable container --project ${PROJECT_ID}
+gcloud services enable container.googleapis.com --project ${PROJECT_ID}
 gcloud services enable monitoring.googleapis.com \
     cloudtrace.googleapis.com \
     clouddebugger.googleapis.com \
