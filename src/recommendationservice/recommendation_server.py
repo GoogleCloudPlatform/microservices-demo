@@ -128,7 +128,7 @@ if __name__ == "__main__":
               module='recommendationserver',
               version='1.0.0'
           )
-        except (Exception, err):
+        except (Exception, DefaultCredentialsError):
             logger.error("Could not enable debugger")
             logger.error(traceback.print_exc())
             pass
