@@ -20,8 +20,8 @@ on:
   #     - master
   pull_request_target:
     # run on fork pull requests targeting base upstream master
-    branches:
-      - master
+    # branches:
+    #   - master
 jobs:
   # code-tests:
   #   runs-on: self-hosted
