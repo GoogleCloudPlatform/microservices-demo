@@ -13,24 +13,36 @@
 # limitations under the License.
 
 name: "Continuous Integration - Pull Request"
-on: [ pull_request_target ]
+on:
+  pull_request_target:
+    # run on pull requests targeting master
+    branches:
+      - master
+  pull_request:
+    # run on pull requests targeting master
+    branches:
+      - master
 jobs:
-  # code-tests:
-  #   runs-on: self-hosted
-  #   steps:
-  #   - uses: actions/checkout@v2
-  #   - name: Go Unit Tests
-  #     timeout-minutes: 10
-  #     run: |
-  #       for SERVICE in "shippingservice"; do
-  #         echo "testing $SERVICE..."
-  #         pushd src/$SERVICE
-  #         go test
-  #         popd
-  #       done
+  code-tests:
+    runs-on: self-hosted
+    steps:
+    - uses: actions/checkout@v2
+    - name: Go Unit Tests
+      timeout-minutes: 10
+      run: |
+        for SERVICE in "shippingservice"; do
+          echo "testing $SERVICE..."
+          pushd src/$SERVICE
+          go test
+          popd
+        done
+    # - name: TODO - run C# Unit Tests
+    #   timeout-minutes: 10
+    #   run: |
+    #     dotnet test src/cartservice/tests/cartservice.tests.csproj
   deployment-tests:
     runs-on: self-hosted
-    # needs: code-tests
+    needs: code-tests
     strategy:
       matrix:
         profile: ["local-code"]
@@ -44,7 +56,6 @@ jobs:
         NAMESPACE="pr${PR_NUMBER}"
         echo "::set-env name=NAMESPACE::$NAMESPACE"
         echo "::set-env name=PR_NUMBER::$PR_NUMBER"
-        echo "Project ID secret is: $PROJECT_ID"
 
         gcloud container clusters get-credentials $PR_CLUSTER --zone $ZONE --project $PROJECT_ID
         cat <<EOF | kubectl apply -f -
