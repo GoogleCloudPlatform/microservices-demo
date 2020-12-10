@@ -66,10 +66,12 @@ build:
   - image: cartservice
     context: src/cartservice
     docker:
-          buildArgs:
-            NEW_RELIC_API_KEY: "{{.NEW_RELIC_API_KEY}}"
-            NEW_RELIC_TRACE_URL: "{{.NEW_RELIC_TRACE_URL}}"
-            NEW_RELIC_METRIC_URL: "{{.NEW_RELIC_METRIC_URL}}"
+      buildArgs:
+        NEW_RELIC_DEMO_EXPORT_TYPE: "{{.NEW_RELIC_DEMO_EXPORT_TYPE}}"
+        NEW_RELIC_API_KEY: "{{.NEW_RELIC_API_KEY}}"
+        NEW_RELIC_TRACE_URL: "{{.NEW_RELIC_TRACE_URL}}"
+        NEW_RELIC_METRIC_URL: "{{.NEW_RELIC_METRIC_URL}}"
+        OTEL_EXPORTER_OTLP_SPAN_ENDPOINT: "otel-collector:4317"
   - image: frontend
     context: src/frontend
     docker:

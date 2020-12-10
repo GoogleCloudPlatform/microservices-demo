@@ -7,6 +7,9 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Hosting;
+using OpenTelemetry;
+using OpenTelemetry.Resources;
+using OpenTelemetry.Trace;
 using cartservice.cartstore;
 using cartservice.services;
 
@@ -45,6 +48,8 @@ namespace cartservice
             services.AddSingleton<ICartStore>(cartStore);
 
             services.AddGrpc();
+
+            services.AddOpenTelemetryTracing(builder => ConfigureOpenTelemetry(builder, cartStore));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -67,6 +72,45 @@ namespace cartservice
                     await context.Response.WriteAsync("Communication with gRPC endpoints must be made through a gRPC client. To learn how to create a client, visit: https://go.microsoft.com/fwlink/?linkid=2086909");
                 });
             });
+        }
+
+        private static void ConfigureOpenTelemetry(TracerProviderBuilder builder, ICartStore cartStore)
+        {
+            builder.SetResourceBuilder(ResourceBuilder.CreateDefault().AddService("CartService"));
+
+            builder.AddAspNetCoreInstrumentation();
+
+            if (cartStore is RedisCartStore redisCartStore)
+            {
+                builder.AddRedisInstrumentation(redisCartStore.ConnectionMultiplexer);
+            }
+
+            var exportType = Environment.GetEnvironmentVariable("NEW_RELIC_DEMO_EXPORT_TYPE");
+            var newRelicApiKey = Environment.GetEnvironmentVariable("NEW_RELIC_API_KEY");
+            var newRelicTraceUrl = Environment.GetEnvironmentVariable("NEW_RELIC_TRACE_URL");
+            switch (exportType)
+            {
+                case "otlp":
+                    var otlpEndpoint = Environment.GetEnvironmentVariable("OTEL_EXPORTER_OTLP_SPAN_ENDPOINT")
+                        ?? Environment.GetEnvironmentVariable("OTEL_EXPORTER_OTLP_ENDPOINT");
+                    builder
+                        .AddOtlpExporter(options => options.Endpoint = otlpEndpoint);
+                    break;
+                case "zipkin":
+                    var zipkinEndpoint = $"{newRelicTraceUrl}?Api-Key={newRelicApiKey}";
+                    builder
+                        .AddZipkinExporter(options => options.Endpoint = new Uri(zipkinEndpoint));
+                    break;
+                case "newrelic":
+                default:
+                    builder
+                        .AddNewRelicExporter(options =>
+                        {
+                            options.ApiKey = newRelicApiKey;
+                            options.Endpoint = new Uri(newRelicTraceUrl);
+                        });
+                    break;
+            }
         }
     }
 }

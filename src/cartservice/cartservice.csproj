@@ -8,8 +8,12 @@
     <PackageReference Include="Grpc.AspNetCore" Version="2.33.1" />
     <PackageReference Include="Grpc.HealthCheck" Version="2.33.1" />
     <PackageReference Include="StackExchange.Redis" Version="2.2.4" />
-    <PackageReference Include="NewRelic.OpenTelemetry" Version="1.0.0-beta.209" />
-    <PackageReference Include="OpenTelemetry.Instrumentation.StackExchangeRedis" Version="0.7.0-beta.1" />
+    <PackageReference Include="NewRelic.OpenTelemetry" Version="1.0.0-rc1.9" />
+    <PackageReference Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.0.0-rc1.1" />
+    <PackageReference Include="OpenTelemetry.Exporter.Zipkin" Version="1.0.0-rc1.1" />
+    <PackageReference Include="OpenTelemetry.Extensions.Hosting" Version="1.0.0-rc1.1" />
+    <PackageReference Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.0.0-rc1.1" />
+    <PackageReference Include="OpenTelemetry.Instrumentation.StackExchangeRedis" Version="1.0.0-rc1.1" />
   </ItemGroup>
 
   <ItemGroup>
