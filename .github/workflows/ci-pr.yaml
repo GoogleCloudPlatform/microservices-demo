@@ -12,10 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-name: "Continuous Integration - Pull Request - From Fork"
+name: "Continuous Integration - Pull Request"
 on:
+# pull request target should allow secret access to fork PRs (deploy tests)
   pull_request_target:
-    # run on fork pull requests targeting base upstream master
     branches:
       - master
 jobs:
