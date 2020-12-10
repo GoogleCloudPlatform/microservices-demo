@@ -12,10 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-name: "Continuous Integration - Pull Request"
+name: "Continuous Integration - Pull Request - From Fork"
 on:
-  pull_request:
-    # run on pull requests targeting master
+  pull_request_target:
+    # run on fork pull requests targeting base upstream master
     branches:
       - master
 jobs:
@@ -23,7 +23,7 @@ jobs:
     runs-on: self-hosted
     steps:
     - uses: actions/checkout@v2
-    - name: Go Unit Tests 
+    - name: Go Unit Tests
       timeout-minutes: 10
       run: |
         for SERVICE in "shippingservice"; do
@@ -32,7 +32,7 @@ jobs:
           go test
           popd
         done
-    # - name: TODO - run C# Unit Tests 
+    # - name: TODO - run C# Unit Tests
     #   timeout-minutes: 10
     #   run: |
     #     dotnet test src/cartservice/tests/cartservice.tests.csproj
@@ -103,21 +103,21 @@ jobs:
       env:
         ACTIONS_ALLOW_UNSECURE_COMMANDS: true
     - name: Smoke Test
-      timeout-minutes: 5	
-      run: |	
-        set -x	
-        # start fresh loadgenerator pod	
-        kubectl delete pod -l app=loadgenerator	
-        # wait for requests to come in	
-        REQUEST_COUNT="0"	
-        while [[ "$REQUEST_COUNT"  -lt "50"  ]]; do	
-            sleep 5	
-            REQUEST_COUNT=$(kubectl logs -l app=loadgenerator | grep Aggregated | awk '{print $2}')	
-        done	
-        # ensure there are no errors hitting endpoints	
-        ERROR_COUNT=$(kubectl logs -l app=loadgenerator | grep Aggregated | awk '{print $3}' | sed "s/[(][^)]*[)]//g")	
-        if [[ "$ERROR_COUNT" -gt "0" ]]; then	
-          exit 1	
+      timeout-minutes: 5
+      run: |
+        set -x
+        # start fresh loadgenerator pod
+        kubectl delete pod -l app=loadgenerator
+        # wait for requests to come in
+        REQUEST_COUNT="0"
+        while [[ "$REQUEST_COUNT"  -lt "50"  ]]; do
+            sleep 5
+            REQUEST_COUNT=$(kubectl logs -l app=loadgenerator | grep Aggregated | awk '{print $2}')
+        done
+        # ensure there are no errors hitting endpoints
+        ERROR_COUNT=$(kubectl logs -l app=loadgenerator | grep Aggregated | awk '{print $3}' | sed "s/[(][^)]*[)]//g")
+        if [[ "$ERROR_COUNT" -gt "0" ]]; then
+          exit 1
         fi
     - name: Comment EXTERNAL_IP
       timeout-minutes: 5
