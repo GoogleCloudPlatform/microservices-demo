@@ -97,7 +97,7 @@ namespace cartservice
                         .AddOtlpExporter(options => options.Endpoint = otlpEndpoint);
                     break;
                 case "zipkin":
-                    var zipkinEndpoint = $"{newRelicTraceUrl}?Api-Key={newRelicApiKey}";
+                    var zipkinEndpoint = $"{newRelicTraceUrl}?Api-Key={newRelicApiKey}&Data-Format=zipkin&Data-Format-Version=2";
                     builder
                         .AddZipkinExporter(options => options.Endpoint = new Uri(zipkinEndpoint));
                     break;
