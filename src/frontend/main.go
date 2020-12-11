@@ -150,7 +150,7 @@ func main() {
 		Handler:     handler,
 		Propagation: &b3.HTTPFormat{}}
 
-	log.Infof("starting server on " + addr + ":" + srvPort)
+	log.Infof("🎾 This is an onlineboutique fork - starting server on " + addr + ":" + srvPort)
 	log.Fatal(http.ListenAndServe(addr+":"+srvPort, handler))
 }
 
