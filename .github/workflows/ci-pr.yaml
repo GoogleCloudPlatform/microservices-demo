@@ -23,6 +23,9 @@ jobs:
     runs-on: self-hosted
     steps:
     - uses: actions/checkout@v2
+      with:
+        ref: ${{github.event.pull_request.head.ref}}
+        repository: ${{github.event.pull_request.head.repo.full_name}}
     - name: Go Unit Tests
       timeout-minutes: 10
       run: |
@@ -45,6 +48,9 @@ jobs:
       fail-fast: true
     steps:
     - uses: actions/checkout@v2
+      with:
+        ref: ${{github.event.pull_request.head.ref}}
+        repository: ${{github.event.pull_request.head.repo.full_name}}
     - name: Build + Deploy PR images to GKE
       timeout-minutes: 20
       run: |
