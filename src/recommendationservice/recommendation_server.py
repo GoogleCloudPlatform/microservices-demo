@@ -132,7 +132,7 @@ if __name__ == "__main__":
             logger.error("Could not enable debugger")
             logger.error(traceback.print_exc())
             pass
-    except KeyError:
+    except (Exception, DefaultCredentialsError):
         logger.info("Debugger disabled.")
 
     port = os.environ.get('PORT', "8080")
