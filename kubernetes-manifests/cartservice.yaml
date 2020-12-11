@@ -35,10 +35,8 @@ spec:
         env:
         - name: REDIS_ADDR
           value: "redis-cart:6379"
-        - name: PORT
-          value: "7070"
-        - name: LISTEN_ADDR
-          value: "0.0.0.0"
+        - name: ASPNETCORE_URLS
+          value: "http://0.0.0.0:7070"
         resources:
           requests:
             cpu: 200m

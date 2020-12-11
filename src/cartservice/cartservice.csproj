@@ -5,20 +5,12 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="CommandLineParser" Version="2.8.0" />
-    <PackageReference Include="Google.Protobuf" Version="3.14.0" />
-    <PackageReference Include="Google.Protobuf.Tools" Version="3.14.0" />
-    <PackageReference Include="Grpc" Version="2.33.1" />
+    <PackageReference Include="Grpc.AspNetCore" Version="2.33.1" />
     <PackageReference Include="Grpc.HealthCheck" Version="2.33.1" />
-    <PackageReference Include="grpc.tools" Version="2.33.1" />
-    <PackageReference Include="Microsoft.Extensions.Configuration" Version="5.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="5.0.0" />
     <PackageReference Include="StackExchange.Redis" Version="2.2.4" />
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="Dockerfile">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
+    <Protobuf Include="protos\Cart.proto" GrpcServices="Server" />
   </ItemGroup>
 </Project>
