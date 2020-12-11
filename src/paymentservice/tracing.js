@@ -2,6 +2,7 @@
 const { NodeTracerProvider } = require('@opentelemetry/node')
 const { BatchSpanProcessor } = require('@opentelemetry/tracing')
 const { ZipkinExporter } = require('@opentelemetry/exporter-zipkin')
+const { CollectorTraceExporter } =  require('@opentelemetry/exporter-collector-grpc')
 const { Resource, SERVICE_RESOURCE } = require('@opentelemetry/resources')
 const os = require('os')
 
@@ -19,18 +20,30 @@ const NR_ZIPKIN_HEADERS = {
   'Data-Format-Version': '2',
 }
 
+function getExporter(exporterType) {
+  switch (exporterType) {
+    case 'otlp':
+      return new CollectorTraceExporter({
+        url: process.env.OTEL_EXPORTER_OTLP_SPAN_ENDPOINT
+      })
+    case 'zipkin':
+    default:
+      return new ZipkinExporter({
+        url: process.env.NEW_RELIC_TRACE_URL,
+        headers: NR_ZIPKIN_HEADERS,
+        statusCodeTagName: 'otel.status_code',
+        statusDescriptionTagName: 'otel.status_description'
+      })
+  }
+}
+
 const traceProvider = new NodeTracerProvider({
   resource: mergedResource
 })
 
 traceProvider.addSpanProcessor(
   new BatchSpanProcessor(
-    new ZipkinExporter({
-      url: process.env.NEW_RELIC_TRACE_URL,
-      headers: NR_ZIPKIN_HEADERS,
-      statusCodeTagName: 'otel.status_code',
-      statusDescriptionTagName: 'otel.status_description'
-    })
+    getExporter(process.env.NEW_RELIC_DEMO_EXPORT_TYPE)
   )
 )
 traceProvider.register()
