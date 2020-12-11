@@ -23,6 +23,9 @@ jobs:
     runs-on: self-hosted
     steps:
     - uses: actions/checkout@v2
+      with:
+        ref: ${{github.event.pull_request.head.ref}}
+        repository: ${{github.event.pull_request.head.repo.full_name}}
     - name: Go Unit Tests
       timeout-minutes: 10
       run: |
@@ -45,13 +48,14 @@ jobs:
       fail-fast: true
     steps:
     - uses: actions/checkout@v2
+      with:
+        ref: ${{github.event.pull_request.head.ref}}
+        repository: ${{github.event.pull_request.head.repo.full_name}}
     - name: Build + Deploy PR images to GKE
       timeout-minutes: 20
       run: |
-        PR_NUMBER=$(echo $GITHUB_REF | awk 'BEGIN { FS = "/" } ; { print $3 }')
         NAMESPACE="pr${PR_NUMBER}"
         echo "::set-env name=NAMESPACE::$NAMESPACE"
-        echo "::set-env name=PR_NUMBER::$PR_NUMBER"
 
         gcloud container clusters get-credentials $PR_CLUSTER --zone $ZONE --project $PROJECT_ID
         cat <<EOF | kubectl apply -f -
@@ -62,9 +66,10 @@ jobs:
         EOF
         echo Deploying application
         skaffold config set --global local-cluster false
-        skaffold run --default-repo=gcr.io/$PROJECT_ID/$GITHUB_REF --tag=$GITHUB_SHA --namespace=$NAMESPACE
+        skaffold run --default-repo=gcr.io/$PROJECT_ID/refs/pull/$PR_NUMBER --tag=$PR_NUMBER --namespace=$NAMESPACE
       env:
         ACTIONS_ALLOW_UNSECURE_COMMANDS: true
+        PR_NUMBER: ${{ github.event.pull_request.number }}
         PROJECT_ID: ${{ secrets.PROJECT_ID }}
         PR_CLUSTER: ${{ secrets.PR_CLUSTER }}
         ZONE: ${{ secrets.PR_CLUSTER_ZONE }}
@@ -89,7 +94,6 @@ jobs:
       timeout-minutes: 5
       run: |
         set -x
-        PR_NUMBER=$(echo $GITHUB_REF | awk 'BEGIN { FS = "/" } ; { print $3 }')
         NAMESPACE="pr${PR_NUMBER}"
         get_externalIP() {
           kubectl get service frontend-external --namespace $NAMESPACE -o jsonpath='{.status.loadBalancer.ingress[0].ip}'
@@ -102,6 +106,7 @@ jobs:
         echo "::set-env name=EXTERNAL_IP::$EXTERNAL_IP"
       env:
         ACTIONS_ALLOW_UNSECURE_COMMANDS: true
+        PR_NUMBER: ${{ github.event.pull_request.number }}
     - name: Smoke Test
       timeout-minutes: 5
       run: |
