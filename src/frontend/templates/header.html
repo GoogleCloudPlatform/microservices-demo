@@ -42,7 +42,7 @@
                 {{ if $.show_currency }}
                 <div class="h-controls">
                     <div class="h-control">
-                        <img src="/static/icons/Hipster_CurrencyIcon.svg" alt="icon" class="icon" />
+                        <img src="/static/icons/Hipster_CurrencyIcon.svg" alt="" class="icon" />
                         <form method="POST" class="controls-form" action="/setCurrency" id="currency_form" >
                             <select name="currency_code" onchange="document.getElementById('currency_form').submit();">
                                     {{range $.currencies}}
@@ -50,7 +50,7 @@
                                 {{end}}
                             </select>
                         </form>
-                        <img src="/static/icons/Hipster_DownArrow.svg" alt="icon" class="icon arrow" />
+                        <img src="/static/icons/Hipster_DownArrow.svg" alt="" class="icon arrow" />
                     </div>
                 </div>
                 {{ end }}
@@ -60,11 +60,11 @@
         <div class="navbar sub-navbar">
             <div class="container d-flex justify-content-between">
                 <a href="/" class="navbar-brand d-flex align-items-center">
-                    <img src="/static/icons/Hipster_NavLogo.svg" alt="logo" class="logo" />
+                    <img src="/static/icons/Hipster_NavLogo.svg" alt="" class="logo" />
                 </a>
                 <div class="controls">
                     <a href="/cart">
-                        <img src="/static/icons/Hipster_CartIcon.svg" alt="cart-icon" class="logo" />
+                        <img src="/static/icons/Hipster_CartIcon.svg" alt="" class="logo" />
                         <span>Cart
                             {{ if $.cart_size }}
                             <span class="badge badge-blue">{{$.cart_size}}</span>

@@ -49,8 +49,9 @@
                     <div class="product-item">
                         <div class="row pt-2 mb-2">
                             <div class="col text-right image">
-                                    <a href="/product/{{.Item.Id}}"><img class="img-fluid"
-                                        src="{{.Item.Picture}}" /></a>
+                                <a href="/product/{{.Item.Id}}">
+                                    <img class="img-fluid" alt="" src="{{.Item.Picture}}" />
+                                </a>
                             </div>
                             <div class="col text-left text">
                                 <h4>{{ .Item.Name }}</h4>
