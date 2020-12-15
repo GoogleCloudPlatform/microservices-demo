@@ -76,8 +76,6 @@ namespace cartservice
 
         private static void ConfigureOpenTelemetry(TracerProviderBuilder builder, ICartStore cartStore)
         {
-            builder.SetResourceBuilder(ResourceBuilder.CreateDefault().AddService("CartService"));
-
             builder.AddAspNetCoreInstrumentation();
 
             if (cartStore is RedisCartStore redisCartStore)
@@ -85,9 +83,13 @@ namespace cartservice
                 builder.AddRedisInstrumentation(redisCartStore.ConnectionMultiplexer);
             }
 
-            var exportType = Environment.GetEnvironmentVariable("NEW_RELIC_DEMO_EXPORT_TYPE");
+            var exportType = Environment.GetEnvironmentVariable("NEW_RELIC_DEMO_EXPORT_TYPE") ?? "newrelic";
             var newRelicApiKey = Environment.GetEnvironmentVariable("NEW_RELIC_API_KEY");
             var newRelicTraceUrl = Environment.GetEnvironmentVariable("NEW_RELIC_TRACE_URL");
+            var serviceName = "CartService" + (exportType == "newrelic" ? string.Empty : $"-{exportType}");
+
+            builder.SetResourceBuilder(ResourceBuilder.CreateDefault().AddService(serviceName, null, null, false, $"{exportType}-{Guid.NewGuid().ToString()}"));
+
             switch (exportType)
             {
                 case "otlp":
