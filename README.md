@@ -33,11 +33,16 @@ Looking for the old Hipster Shop frontend interface? Use the [manifests](https:/
 
 ## Quickstart (GKE)
 
-1. **[Create a Google Cloud Platform project](https://cloud.google.com/resource-manager/docs/creating-managing-projects#creating_a_project)** or use an existing project. Set the `PROJECT_ID` environment variable and ensure the Google Kubernetes Engine API is enabled.
+1. **[Create a Google Cloud Platform project](https://cloud.google.com/resource-manager/docs/creating-managing-projects#creating_a_project)** or use an existing project. Set the `PROJECT_ID` environment variable and ensure the Google Kubernetes Engine and Cloud Operations APIs are enabled.
 
 ```
 PROJECT_ID="<your-project-id>"
-gcloud services enable container --project ${PROJECT_ID}
+gcloud services enable container.googleapis.com --project ${PROJECT_ID}
+gcloud services enable monitoring.googleapis.com \
+    cloudtrace.googleapis.com \
+    clouddebugger.googleapis.com \
+    cloudprofiler.googleapis.com \
+    --project ${PROJECT_ID}
 ```
 
 2. **Clone this repository.**
