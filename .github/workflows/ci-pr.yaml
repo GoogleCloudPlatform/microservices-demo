@@ -14,8 +14,7 @@
 
 name: "Continuous Integration - Pull Request"
 on:
-# pull request target should allow secret access to fork PRs (deploy tests)
-  pull_request_target:
+  pull_request:
     branches:
       - master
 jobs:
@@ -70,9 +69,9 @@ jobs:
       env:
         ACTIONS_ALLOW_UNSECURE_COMMANDS: true
         PR_NUMBER: ${{ github.event.pull_request.number }}
-        PROJECT_ID: ${{ secrets.PROJECT_ID }}
-        PR_CLUSTER: ${{ secrets.PR_CLUSTER }}
-        ZONE: ${{ secrets.PR_CLUSTER_ZONE }}
+        PROJECT_ID: "onlineboutique-ci"
+        PR_CLUSTER: "online-boutique-pr"
+        ZONE: "us-east1-b"
     - name: Wait For Pods
       timeout-minutes: 20
       run: |
