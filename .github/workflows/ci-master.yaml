@@ -67,7 +67,7 @@ jobs:
       env:
         ACTIONS_ALLOW_UNSECURE_COMMANDS: true
         PROJECT_ID: "onlineboutique-ci"
-        PR_CLUSTER: "onlineboutique-pr"
+        PR_CLUSTER: "online-boutique-pr"
         ZONE: "us-east1-b"
     - name: Wait For Pods
       timeout-minutes: 20

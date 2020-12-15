@@ -70,7 +70,7 @@ jobs:
         ACTIONS_ALLOW_UNSECURE_COMMANDS: true
         PR_NUMBER: ${{ github.event.pull_request.number }}
         PROJECT_ID: "onlineboutique-ci"
-        PR_CLUSTER: "onlineboutique-pr"
+        PR_CLUSTER: "online-boutique-pr"
         ZONE: "us-east1-b"
     - name: Wait For Pods
       timeout-minutes: 20
