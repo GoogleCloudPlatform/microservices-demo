@@ -24,7 +24,7 @@ jobs:
     runs-on: self-hosted
     steps:
     - uses: actions/checkout@v2
-    - name: Go Unit Tests 
+    - name: Go Unit Tests
       timeout-minutes: 10
       run: |
         for SERVICE in "shippingservice"; do
@@ -33,7 +33,7 @@ jobs:
           go test
           popd
         done
-    # - name: TODO - run C# Unit Tests 
+    # - name: TODO - run C# Unit Tests
     #   timeout-minutes: 10
     #   run: |
     #     dotnet test src/cartservice/tests/cartservice.tests.csproj
@@ -66,9 +66,9 @@ jobs:
         skaffold run --default-repo=gcr.io/$PROJECT_ID/$GITHUB_REF --tag=$GITHUB_SHA --namespace=$NAMESPACE
       env:
         ACTIONS_ALLOW_UNSECURE_COMMANDS: true
-        PROJECT_ID: ${{ secrets.PROJECT_ID }}
-        PR_CLUSTER: ${{ secrets.PR_CLUSTER }}
-        ZONE: ${{ secrets.PR_CLUSTER_ZONE }}
+        PROJECT_ID: "onlineboutique-ci"
+        PR_CLUSTER: "online-boutique-pr"
+        ZONE: "us-east1-b"
     - name: Wait For Pods
       timeout-minutes: 20
       run: |
@@ -87,19 +87,19 @@ jobs:
         kubectl wait --for=condition=available --timeout=1000s deployment/recommendationservice
         kubectl wait --for=condition=available --timeout=1000s deployment/shippingservice
     - name: Smoke Test
-      timeout-minutes: 5	
-      run: |	
-        set -x	
-        # start fresh loadgenerator pod	
-        kubectl delete pod -l app=loadgenerator	
-        # wait for requests to come in	
-        REQUEST_COUNT="0"	
-        while [[ "$REQUEST_COUNT"  -lt "50"  ]]; do	
-            sleep 5	
-            REQUEST_COUNT=$(kubectl logs -l app=loadgenerator | grep Aggregated | awk '{print $2}')	
-        done	
-        # ensure there are no errors hitting endpoints	
-        ERROR_COUNT=$(kubectl logs -l app=loadgenerator | grep Aggregated | awk '{print $3}' | sed "s/[(][^)]*[)]//g")	
-        if [[ "$ERROR_COUNT" -gt "0" ]]; then	
-          exit 1	
+      timeout-minutes: 5
+      run: |
+        set -x
+        # start fresh loadgenerator pod
+        kubectl delete pod -l app=loadgenerator
+        # wait for requests to come in
+        REQUEST_COUNT="0"
+        while [[ "$REQUEST_COUNT"  -lt "50"  ]]; do
+            sleep 5
+            REQUEST_COUNT=$(kubectl logs -l app=loadgenerator | grep Aggregated | awk '{print $2}')
+        done
+        # ensure there are no errors hitting endpoints
+        ERROR_COUNT=$(kubectl logs -l app=loadgenerator | grep Aggregated | awk '{print $3}' | sed "s/[(][^)]*[)]//g")
+        if [[ "$ERROR_COUNT" -gt "0" ]]; then
+          exit 1
         fi

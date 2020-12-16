@@ -14,9 +14,9 @@
 
 using System.Threading.Tasks;
 
-namespace cartservice.interfaces
+namespace cartservice.cartstore
 {
-    internal interface ICartStore
+    public interface ICartStore
     {
         Task InitializeAsync();
         

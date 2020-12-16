@@ -15,7 +15,6 @@
 name: "Continuous Integration - Pull Request"
 on:
   pull_request:
-    # run on pull requests targeting master
     branches:
       - master
 jobs:
@@ -23,7 +22,10 @@ jobs:
     runs-on: self-hosted
     steps:
     - uses: actions/checkout@v2
-    - name: Go Unit Tests 
+      with:
+        ref: ${{github.event.pull_request.head.ref}}
+        repository: ${{github.event.pull_request.head.repo.full_name}}
+    - name: Go Unit Tests
       timeout-minutes: 10
       run: |
         for SERVICE in "shippingservice"; do
@@ -32,7 +34,7 @@ jobs:
           go test
           popd
         done
-    # - name: TODO - run C# Unit Tests 
+    # - name: TODO - run C# Unit Tests
     #   timeout-minutes: 10
     #   run: |
     #     dotnet test src/cartservice/tests/cartservice.tests.csproj
@@ -45,13 +47,14 @@ jobs:
       fail-fast: true
     steps:
     - uses: actions/checkout@v2
+      with:
+        ref: ${{github.event.pull_request.head.ref}}
+        repository: ${{github.event.pull_request.head.repo.full_name}}
     - name: Build + Deploy PR images to GKE
       timeout-minutes: 20
       run: |
-        PR_NUMBER=$(echo $GITHUB_REF | awk 'BEGIN { FS = "/" } ; { print $3 }')
         NAMESPACE="pr${PR_NUMBER}"
         echo "::set-env name=NAMESPACE::$NAMESPACE"
-        echo "::set-env name=PR_NUMBER::$PR_NUMBER"
 
         gcloud container clusters get-credentials $PR_CLUSTER --zone $ZONE --project $PROJECT_ID
         cat <<EOF | kubectl apply -f -
@@ -62,12 +65,13 @@ jobs:
         EOF
         echo Deploying application
         skaffold config set --global local-cluster false
-        skaffold run --default-repo=gcr.io/$PROJECT_ID/$GITHUB_REF --tag=$GITHUB_SHA --namespace=$NAMESPACE
+        skaffold run --default-repo=gcr.io/$PROJECT_ID/refs/pull/$PR_NUMBER --tag=$PR_NUMBER --namespace=$NAMESPACE
       env:
         ACTIONS_ALLOW_UNSECURE_COMMANDS: true
-        PROJECT_ID: ${{ secrets.PROJECT_ID }}
-        PR_CLUSTER: ${{ secrets.PR_CLUSTER }}
-        ZONE: ${{ secrets.PR_CLUSTER_ZONE }}
+        PR_NUMBER: ${{ github.event.pull_request.number }}
+        PROJECT_ID: "onlineboutique-ci"
+        PR_CLUSTER: "online-boutique-pr"
+        ZONE: "us-east1-b"
     - name: Wait For Pods
       timeout-minutes: 20
       run: |
@@ -89,7 +93,6 @@ jobs:
       timeout-minutes: 5
       run: |
         set -x
-        PR_NUMBER=$(echo $GITHUB_REF | awk 'BEGIN { FS = "/" } ; { print $3 }')
         NAMESPACE="pr${PR_NUMBER}"
         get_externalIP() {
           kubectl get service frontend-external --namespace $NAMESPACE -o jsonpath='{.status.loadBalancer.ingress[0].ip}'
@@ -102,22 +105,23 @@ jobs:
         echo "::set-env name=EXTERNAL_IP::$EXTERNAL_IP"
       env:
         ACTIONS_ALLOW_UNSECURE_COMMANDS: true
+        PR_NUMBER: ${{ github.event.pull_request.number }}
     - name: Smoke Test
-      timeout-minutes: 5	
-      run: |	
-        set -x	
-        # start fresh loadgenerator pod	
-        kubectl delete pod -l app=loadgenerator	
-        # wait for requests to come in	
-        REQUEST_COUNT="0"	
-        while [[ "$REQUEST_COUNT"  -lt "50"  ]]; do	
-            sleep 5	
-            REQUEST_COUNT=$(kubectl logs -l app=loadgenerator | grep Aggregated | awk '{print $2}')	
-        done	
-        # ensure there are no errors hitting endpoints	
-        ERROR_COUNT=$(kubectl logs -l app=loadgenerator | grep Aggregated | awk '{print $3}' | sed "s/[(][^)]*[)]//g")	
-        if [[ "$ERROR_COUNT" -gt "0" ]]; then	
-          exit 1	
+      timeout-minutes: 5
+      run: |
+        set -x
+        # start fresh loadgenerator pod
+        kubectl delete pod -l app=loadgenerator
+        # wait for requests to come in
+        REQUEST_COUNT="0"
+        while [[ "$REQUEST_COUNT"  -lt "50"  ]]; do
+            sleep 5
+            REQUEST_COUNT=$(kubectl logs -l app=loadgenerator | grep Aggregated | awk '{print $2}')
+        done
+        # ensure there are no errors hitting endpoints
+        ERROR_COUNT=$(kubectl logs -l app=loadgenerator | grep Aggregated | awk '{print $3}' | sed "s/[(][^)]*[)]//g")
+        if [[ "$ERROR_COUNT" -gt "0" ]]; then
+          exit 1
         fi
     - name: Comment EXTERNAL_IP
       timeout-minutes: 5

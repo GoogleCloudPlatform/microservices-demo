@@ -13,15 +13,11 @@
 // limitations under the License.
 
 using System;
-using System.IO;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
-using cartservice.interfaces;
-using Google.Protobuf;
 using Grpc.Core;
-using Hipstershop;
 using StackExchange.Redis;
+using Google.Protobuf;
 
 namespace cartservice.cartstore
 {
