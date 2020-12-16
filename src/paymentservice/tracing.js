@@ -7,9 +7,10 @@ const { Resource, SERVICE_RESOURCE } = require('@opentelemetry/resources')
 const os = require('os')
 
 const identifier = process.env.HOSTNAME || os.hostname()
+const exportType = process.env.NEW_RELIC_DEMO_EXPORT_TYPE
 const instanceResource = new Resource({
  [SERVICE_RESOURCE.INSTANCE_ID]: identifier,
- [SERVICE_RESOURCE.NAME]: 'PaymentService'
+ [SERVICE_RESOURCE.NAME]: 'PaymentService-' + exportType
 })
 
 const mergedResource = Resource.createTelemetrySDKResource().merge(instanceResource)
@@ -27,23 +28,28 @@ function getExporter(exporterType) {
         url: process.env.OTEL_EXPORTER_OTLP_SPAN_ENDPOINT
       })
     case 'zipkin':
-    default:
       return new ZipkinExporter({
         url: process.env.NEW_RELIC_TRACE_URL,
         headers: NR_ZIPKIN_HEADERS,
         statusCodeTagName: 'otel.status_code',
         statusDescriptionTagName: 'otel.status_description'
       })
+    default:
+      return null
   }
 }
 
-const traceProvider = new NodeTracerProvider({
-  resource: mergedResource
-})
+const exporter = getExporter(exportType)
 
-traceProvider.addSpanProcessor(
-  new BatchSpanProcessor(
-    getExporter(process.env.NEW_RELIC_DEMO_EXPORT_TYPE)
+if (exporter != null)
+{
+  const traceProvider = new NodeTracerProvider({
+    resource: mergedResource
+  })
+
+  traceProvider.addSpanProcessor(
+    new BatchSpanProcessor(exporter)
   )
-)
-traceProvider.register()
+
+  traceProvider.register()
+}
