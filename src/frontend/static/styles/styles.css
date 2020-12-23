@@ -16,13 +16,14 @@
 
 /* general */
 
-html, body {
+html,
+body {
   height: 100%;
 }
 
 body {
   color: #111111;
-  font-family: 'Roboto', sans-serif;
+  font-family: "Roboto", sans-serif;
   display: flex;
   flex-direction: column;
 }
@@ -148,7 +149,6 @@ header .h-control select {
   display: flex;
   align-items: center;
 }
-
 
 header .h-control::-webkit-input-placeholder {
   /* Chrome/Opera/Safari */
@@ -550,6 +550,7 @@ main.home {
 .aws-platform,
 .onprem-platform,
 .azure-platform,
+.do-platform,
 .gcp-platform {
   position: fixed;
   top: 0;
@@ -568,7 +569,7 @@ main.home {
 
 .onprem-platform,
 .onprem-platform .platform-flag {
-  background-color: #34A853;
+  background-color: #34a853;
 }
 
 .gcp-platform,
@@ -576,10 +577,14 @@ main.home {
   background-color: #4285f4;
 }
 
-
 .azure-platform,
 .azure-platform .platform-flag {
   background-color: #f35426;
+}
+
+.do-platform,
+.do-platform .platform-flag {
+  background-color: #0069ff;
 }
 
 .platform-flag {
@@ -594,7 +599,6 @@ main.home {
 }
 
 @media (min-width: 1679px) {
-
   header .navbar,
   header .navbar.sub-navbar,
   footer .footer-top {
@@ -610,7 +614,7 @@ main.home {
   text-align: center;
 }
 
-.recommendations .container .image>img {
+.recommendations .container .image > img {
   height: 80px;
   margin: 50px 0;
 }

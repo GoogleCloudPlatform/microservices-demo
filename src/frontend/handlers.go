@@ -80,7 +80,7 @@ func (fe *frontendServer) homeHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	//get env and render correct platform banner.
-	var env = os.Getenv("ENV_PLATFORM")
+	env := envFromNode()
 	plat = platformDetails{}
 	plat.setPlatformDetails(strings.ToLower(env))
 
@@ -101,6 +101,24 @@ func (fe *frontendServer) homeHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func envFromNode() string {
+	host := os.Getenv("NODE_NAME")
+	if host == "" {
+		return ""
+	}
+	env := "aws"
+	if strings.Contains(host, "-gcp-") {
+		return "gcp"
+	}
+	if strings.Contains(host, "-azure-") {
+		return "azure"
+	}
+	if strings.Contains(host, "-do-") {
+		return "do"
+	}
+	return env
+}
+
 func (plat *platformDetails) setPlatformDetails(env string) {
 	if env == "aws" {
 		plat.provider = "AWS"
@@ -111,6 +129,9 @@ func (plat *platformDetails) setPlatformDetails(env string) {
 	} else if env == "azure" {
 		plat.provider = "Azure"
 		plat.css = "azure-platform"
+	} else if env == "do" {
+		plat.provider = "Digital Ocean"
+		plat.css = "do-platform"
 	} else {
 		plat.provider = "Google Cloud"
 		plat.css = "gcp-platform"
