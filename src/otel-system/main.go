@@ -31,24 +31,50 @@ const (
 	nrEndpointEnv   = "NEW_RELIC_METRIC_URL"
 	otlpEndpointEnv = "OTLP_EXPORTER_ENDPOINT"
 
-	serviceName = "system-metrics"
+	serviceName = "otel-system"
 )
 
-func nrExporter(ctx context.Context, key string) (metric.Exporter, error) {
-	logrus.Info("using New Relic exporter")
+var log *logrus.Logger
 
+func init() {
+	log = logrus.New()
+	log.Level = logrus.DebugLevel
+	log.Formatter = &logrus.JSONFormatter{
+		FieldMap: logrus.FieldMap{
+			logrus.FieldKeyTime:  "timestamp",
+			logrus.FieldKeyLevel: "severity",
+			logrus.FieldKeyMsg:   "message",
+		},
+		TimestampFormat: time.RFC3339Nano,
+	}
+	log.Out = os.Stdout
+}
+
+func nrExporter(ctx context.Context, key string) (metric.Exporter, error) {
 	var opts []func(*telemetry.Config)
 	if u, ok := os.LookupEnv(nrEndpointEnv); ok {
 		opts = append(opts, func(cfg *telemetry.Config) {
 			cfg.MetricsURLOverride = u
 		})
+		logrus.Infof("exporting to New Relic: %s", u)
+	} else {
+		logrus.Info("exporting to New Relic")
 	}
+
+	opts = append(opts, func(cfg *telemetry.Config) {
+		cfg.DebugLogger = func(m map[string]interface{}) {
+			log.Info(m)
+		}
+		cfg.ErrorLogger = func(m map[string]interface{}) {
+			log.Error(m)
+		}
+	})
 
 	return newrelic.NewExporter(serviceName, key, opts...)
 }
 
 func otlpExporter(ctx context.Context, endpoint string) (metric.Exporter, error) {
-	logrus.Info("using OTLP exporter")
+	logrus.Infof("exporting with OTLP exporter: %s", endpoint)
 	return otlp.NewExporter(
 		ctx,
 		otlp.WithInsecure(),
@@ -57,7 +83,7 @@ func otlpExporter(ctx context.Context, endpoint string) (metric.Exporter, error)
 }
 
 func exporter(ctx context.Context) (metric.Exporter, error) {
-	if key, ok := os.LookupEnv(nrEndpointEnv); ok {
+	if key, ok := os.LookupEnv(nrAPIKeyEnv); ok {
 		return nrExporter(ctx, key)
 	}
 
