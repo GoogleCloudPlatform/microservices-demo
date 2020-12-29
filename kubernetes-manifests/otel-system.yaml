@@ -1,0 +1,28 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: otel-system
+  labels:
+    app: opentelemetry
+    component: otel-system-metrics
+spec:
+  selector:
+    matchLabels:
+      app: opentelemetry
+      component: otel-system-metrics
+  template:
+    metadata:
+      labels:
+        app: opentelemetry
+        component: otel-system-metrics
+    spec:
+      containers:
+      - name: otel-system
+        image: otel-system
+        resources:
+          requests:
+            cpu: 100m
+            memory: 64Mi
+          limits:
+            cpu: 200m
+            memory: 128Mi
