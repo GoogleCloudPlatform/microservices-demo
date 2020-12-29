@@ -30,6 +30,7 @@ import (
 	"github.com/newrelic/newrelic-telemetry-sdk-go/telemetry"
 	"github.com/newrelic/opentelemetry-exporter-go/newrelic"
 	"go.opentelemetry.io/contrib/instrumentation/github.com/gorilla/mux/otelmux"
+	"go.opentelemetry.io/contrib/instrumentation/runtime"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/exporters/stdout"
 	"go.opentelemetry.io/otel/propagation"
@@ -136,6 +137,12 @@ func main() {
 	}
 
 	defer initMetric(log, metricExporter).Stop()
+
+	// Include runtime metric instrumentation.
+	if err := runtime.Start(runtime.WithMinimumReadMemStatsInterval(time.Second)); err != nil {
+		log.WithError(err).Fatal("failed to setup runtime instrumentation")
+	}
+
 	if os.Getenv("DISABLE_TRACING") == "" {
 		log.Info("Tracing enabled.")
 		initTracing(log, traceExporter)
