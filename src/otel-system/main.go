@@ -1,0 +1,125 @@
+package main
+
+import (
+	"context"
+	"os"
+	"os/signal"
+	"syscall"
+	"time"
+
+	"github.com/google/uuid"
+	"github.com/newrelic/newrelic-telemetry-sdk-go/telemetry"
+	"github.com/newrelic/opentelemetry-exporter-go/newrelic"
+	"github.com/sirupsen/logrus"
+	"go.opentelemetry.io/contrib/detectors/gcp"
+	"go.opentelemetry.io/contrib/instrumentation/host"
+	"go.opentelemetry.io/contrib/instrumentation/runtime"
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/exporters/otlp"
+	"go.opentelemetry.io/otel/exporters/stdout"
+	"go.opentelemetry.io/otel/label"
+	"go.opentelemetry.io/otel/sdk/export/metric"
+	"go.opentelemetry.io/otel/sdk/metric/controller/push"
+	"go.opentelemetry.io/otel/sdk/metric/processor/basic"
+	"go.opentelemetry.io/otel/sdk/metric/selector/simple"
+	"go.opentelemetry.io/otel/sdk/resource"
+	"go.opentelemetry.io/otel/semconv"
+)
+
+const (
+	nrAPIKeyEnv     = "NEW_RELIC_API_KEY"
+	nrEndpointEnv   = "NEW_RELIC_METRIC_URL"
+	otlpEndpointEnv = "OTLP_EXPORTER_ENDPOINT"
+
+	serviceName = "system-metrics"
+)
+
+func nrExporter(ctx context.Context, key string) (metric.Exporter, error) {
+	logrus.Info("using New Relic exporter")
+
+	var opts []func(*telemetry.Config)
+	if u, ok := os.LookupEnv(nrEndpointEnv); ok {
+		opts = append(opts, func(cfg *telemetry.Config) {
+			cfg.MetricsURLOverride = u
+		})
+	}
+
+	return newrelic.NewExporter(serviceName, key, opts...)
+}
+
+func otlpExporter(ctx context.Context, endpoint string) (metric.Exporter, error) {
+	logrus.Info("using OTLP exporter")
+	return otlp.NewExporter(
+		ctx,
+		otlp.WithInsecure(),
+		otlp.WithAddress(endpoint),
+	)
+}
+
+func exporter(ctx context.Context) (metric.Exporter, error) {
+	if key, ok := os.LookupEnv(nrEndpointEnv); ok {
+		return nrExporter(ctx, key)
+	}
+
+	if ep, ok := os.LookupEnv(otlpEndpointEnv); ok {
+		return otlpExporter(ctx, ep)
+	}
+
+	logrus.Info("defaulting to stdout exporter")
+	return stdout.NewExporter(stdout.WithPrettyPrint())
+}
+
+func detectedResource(ctx context.Context) (*resource.Resource, error) {
+	srv := semconv.ServiceNameKey.String(serviceName)
+
+	var instID label.KeyValue
+	if host, ok := os.LookupEnv("HOSTNAME"); ok && host != "" {
+		instID = semconv.ServiceInstanceIDKey.String(host)
+	} else {
+		instID = semconv.ServiceInstanceIDKey.String(uuid.New().String())
+	}
+
+	return resource.New(
+		ctx,
+		resource.WithAttributes(srv, instID),
+		resource.WithDetectors(new(gcp.GCE)),
+	)
+}
+
+func main() {
+	ctx := context.Background()
+
+	exp, err := exporter(ctx)
+	if err != nil {
+		logrus.WithError(err).Fatal("failed to setup exporter")
+	}
+
+	res, err := detectedResource(ctx)
+	if err != nil {
+		logrus.WithError(err).Fatal("failed to detect resource")
+	}
+
+	pusher := push.New(
+		basic.New(simple.NewWithInexpensiveDistribution(), exp),
+		exp,
+		push.WithPeriod(time.Second),
+		push.WithResource(res),
+	)
+	pusher.Start()
+	otel.SetMeterProvider(pusher.MeterProvider())
+	defer pusher.Stop()
+
+	// Include runtime metric instrumentation.
+	if err := runtime.Start(runtime.WithMinimumReadMemStatsInterval(time.Second)); err != nil {
+		logrus.WithError(err).Fatal("failed to setup runtime instrumentation")
+	}
+
+	// Include host system metric instrumentation.
+	if err := host.Start(); err != nil {
+		logrus.WithError(err).Fatal("failed to setup host system instrumentation")
+	}
+
+	stopChan := make(chan os.Signal, 1)
+	signal.Notify(stopChan, syscall.SIGTERM, syscall.SIGINT)
+	<-stopChan
+}
