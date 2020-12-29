@@ -99,6 +99,12 @@ build:
         NEW_RELIC_API_KEY: "{{.NEW_RELIC_API_KEY}}"
         NEW_RELIC_TRACE_URL: "{{.NEW_RELIC_TRACE_URL}}"
         NEW_RELIC_METRIC_URL: "{{.NEW_RELIC_METRIC_URL}}"
+  - image: otel-system
+    context: src/otel-system
+    docker:
+      buildArgs:
+        NEW_RELIC_API_KEY: "{{.NEW_RELIC_API_KEY}}"
+        NEW_RELIC_METRIC_URL: "{{.NEW_RELIC_METRIC_URL}}"
   tagPolicy:
     gitCommit: {}
   local:
