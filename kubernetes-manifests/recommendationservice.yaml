@@ -53,11 +53,11 @@ spec:
         #   value: "1"
         resources:
           requests:
-            cpu: 100m
-            memory: 220Mi
+            cpu: 20m
+            memory: 142Mi
           limits:
-            cpu: 200m
-            memory: 450Mi
+            cpu: 40m
+            memory: 284Mi
 ---
 apiVersion: v1
 kind: Service

@@ -62,11 +62,11 @@ spec:
           #   value: "jaeger-collector:14268"
           resources:
             requests:
-              cpu: 100m
-              memory: 64Mi
+              cpu: 25m
+              memory: 136Mi
             limits:
-              cpu: 200m
-              memory: 128Mi
+              cpu: 50m
+              memory: 272Mi
 ---
 apiVersion: v1
 kind: Service

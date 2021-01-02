@@ -39,11 +39,11 @@ spec:
           value: "http://0.0.0.0:7070"
         resources:
           requests:
-            cpu: 200m
-            memory: 64Mi
+            cpu: 35m
+            memory: 39Mi
           limits:
-            cpu: 300m
-            memory: 128Mi
+            cpu: 70m
+            memory: 78Mi
         readinessProbe:
           initialDelaySeconds: 15
           exec:
