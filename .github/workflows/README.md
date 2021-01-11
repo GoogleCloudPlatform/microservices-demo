@@ -51,8 +51,6 @@ Should one of the two self-hosted Github Actions runners (GCE instances) fail, o
 3. Install project-specific dependencies, including go, docker, skaffold, and kubectl:
 
 ```
-sudo apt install -y wget
-
 wget -O - https://raw.githubusercontent.com/GoogleCloudPlatform/microservices-demo/master/.github/workflows/install-dependencies.sh | bash
 ```
 
