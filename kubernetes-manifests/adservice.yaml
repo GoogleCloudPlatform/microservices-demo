@@ -44,10 +44,10 @@ spec:
         resources:
           requests:
             cpu: 20m
-            memory: 251Mi
+            memory: 321Mi
           limits:
             cpu: 25m
-            memory: 286Mi
+            memory: 346Mi
         readinessProbe:
           initialDelaySeconds: 20
           periodSeconds: 15

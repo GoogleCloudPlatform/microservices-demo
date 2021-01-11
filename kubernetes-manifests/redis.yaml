@@ -44,11 +44,10 @@ spec:
         resources:
           requests:
             cpu: 3m
-            memory: 3Mi
+            memory: 6Mi
           limits:
             cpu: 6m
-            memory: 4Mi
-
+            memory: 7Mi
       volumes:
       - name: redis-data
         emptyDir: {}
