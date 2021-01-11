@@ -34,7 +34,7 @@ namespace cartservice
             else
             {
                 Console.WriteLine("Redis cache host(hostname+port) was not specified. Starting a cart service using local store");
-                Console.WriteLine("If you wanted to use Redis Cache as a backup store, you should provide its address via command line or REDIS_ADDRESS environment variable.");
+                Console.WriteLine("If you wanted to use Redis Cache as a backup store, you should provide its address via command line or REDIS_ADDR environment variable.");
                 cartStore = new LocalCartStore();
             }
 
