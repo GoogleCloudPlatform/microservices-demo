@@ -1,0 +1,3 @@
+[submodule "src/couponservice"]
+	path = src/couponservice
+	url = https://github.com/bobbsley/couponservice
