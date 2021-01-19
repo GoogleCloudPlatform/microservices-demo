@@ -49,7 +49,7 @@ spec:
             command: ["/bin/grpc_health_probe", "-addr=:8080"]
         resources:
           requests:
-            cpu: 5m
+            cpu: 8m
             memory: 61Mi
           limits:
             cpu: 15m
