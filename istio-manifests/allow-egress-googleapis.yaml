@@ -15,7 +15,7 @@
 apiVersion: networking.istio.io/v1alpha3
 kind: ServiceEntry
 metadata:
-  name: whitelist-egress-googleapis
+  name: allow-egress-googleapis
 spec:
   hosts:
   - "accounts.google.com" # Used to get token
@@ -31,7 +31,7 @@ spec:
 apiVersion: networking.istio.io/v1alpha3
 kind: ServiceEntry
 metadata:
-  name: whitelist-egress-google-metadata
+  name: allow-egress-google-metadata
 spec:
   hosts:
   - metadata.google.internal
