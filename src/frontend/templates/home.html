@@ -47,11 +47,17 @@
                 {{ .Item.Name }}
               </h5>
               <div class="d-flex justify-content-center align-items-center">
-                <small class="text-muted">
-                  {{ renderMoney .Price }}
-                </small>
                 {{if .Item.Discount >0}}
+
+                <strike class="text-muted">
+                  {{ renderMoney .Price }}
+                </strike>
                 <p>{{.Item.Discount}}</p>
+
+                {{else}}
+                <p class="text-muted">
+                  {{ renderMoney .Price }}
+                </p>
                 {{end}}
               </div>
             </div>

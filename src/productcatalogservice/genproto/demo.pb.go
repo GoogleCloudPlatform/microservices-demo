@@ -459,6 +459,7 @@ func (m *Product) GetCategories() []string {
 	}
 	return nil
 }
+//discount for the catalogues service
 func (m *Product) GetDiscount() int{
 	if m != nil{
 		return m.Discount
