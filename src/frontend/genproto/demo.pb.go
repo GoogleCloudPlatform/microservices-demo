@@ -374,13 +374,15 @@ func (m *ListRecommendationsResponse) GetProductIds() []string {
 	}
 	return nil
 }
-
+//the structure of the project
+//this struct is used
 type Product struct {
 	Id          string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
 	Name        string `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
 	Description string `protobuf:"bytes,3,opt,name=description,proto3" json:"description,omitempty"`
 	Picture     string `protobuf:"bytes,4,opt,name=picture,proto3" json:"picture,omitempty"`
 	PriceUsd    *Money `protobuf:"bytes,5,opt,name=price_usd,json=priceUsd,proto3" json:"price_usd,omitempty"`
+	Discount 	int    `protobuf:"bytes,6,opt,name=discount,json=discount,proto3" json:"discount,omitempty"`
 	// Categories such as "vintage" or "gardening" that can be used to look up
 	// other related products.
 	Categories           []string `protobuf:"bytes,6,rep,name=categories,proto3" json:"categories,omitempty"`
@@ -447,6 +449,12 @@ func (m *Product) GetPriceUsd() *Money {
 		return m.PriceUsd
 	}
 	return nil
+}
+func (m *Product)GetDiscount() int{
+	if m!=nil{
+		return m.Discount
+	}
+	return 0
 }
 
 func (m *Product) GetCategories() []string {

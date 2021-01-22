@@ -381,6 +381,7 @@ type Product struct {
 	Description string `protobuf:"bytes,3,opt,name=description,proto3" json:"description,omitempty"`
 	Picture     string `protobuf:"bytes,4,opt,name=picture,proto3" json:"picture,omitempty"`
 	PriceUsd    *Money `protobuf:"bytes,5,opt,name=price_usd,json=priceUsd,proto3" json:"price_usd,omitempty"`
+	Discount 	int
 	// Categories such as "vintage" or "gardening" that can be used to look up
 	// other related products.
 	Categories           []string `protobuf:"bytes,6,rep,name=categories,proto3" json:"categories,omitempty"`
@@ -413,6 +414,9 @@ func (m *Product) XXX_DiscardUnknown() {
 }
 
 var xxx_messageInfo_Product proto.InternalMessageInfo
+
+
+//getter methods for the product properties
 
 func (m *Product) GetId() string {
 	if m != nil {
@@ -455,6 +459,13 @@ func (m *Product) GetCategories() []string {
 	}
 	return nil
 }
+func (m *Product) GetDiscount() int{
+	if m != nil{
+		return m.Discount
+	}
+	return 0
+}
+
 
 type ListProductsResponse struct {
 	Products             []*Product `protobuf:"bytes,1,rep,name=products,proto3" json:"products,omitempty"`

@@ -29,7 +29,7 @@ import (
 
 func TestServer(t *testing.T) {
 	ctx := context.Background()
-	addr := run(0)
+	addr := run("8080")
 	conn, err := grpc.Dial(addr,
 		grpc.WithInsecure(),
 		grpc.WithStatsHandler(&ocgrpc.ClientHandler{}))

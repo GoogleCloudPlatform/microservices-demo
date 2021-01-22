@@ -50,6 +50,9 @@
                 <small class="text-muted">
                   {{ renderMoney .Price }}
                 </small>
+                {{if .Item.Discount >0}}
+                <p>{{.Item.Discount}}</p>
+                {{end}}
               </div>
             </div>
           </div>

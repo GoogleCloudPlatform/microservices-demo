@@ -10,6 +10,7 @@
                 "units": 67,
                 "nanos": 990000000
             },
+            "discount": 0,
             "categories": ["vintage"]
         },
         {
@@ -22,6 +23,7 @@
                 "units": 12,
                 "nanos": 490000000
             },
+            "discount": 0,
             "categories": ["photography", "vintage"]
         },
         {
@@ -32,7 +34,9 @@
             "priceUsd": {
                 "currencyCode": "USD",
                 "units": 124
+
             },
+            "discount": 0,
             "categories": ["cookware"]
         },
         {
@@ -44,7 +48,9 @@
                 "currencyCode": "USD",
                 "units": 36,
                 "nanos": 450000000
+
             },
+            "discount": 0,
             "categories": ["gardening"]
         },
         {
@@ -55,7 +61,9 @@
             "priceUsd": {
                 "currencyCode": "USD",
                 "units": 2245
+
             },
+            "discount": 0,
             "categories": ["photography", "vintage"]
         },
         {
@@ -67,7 +75,9 @@
                 "currencyCode": "USD",
                 "units": 65,
                 "nanos": 500000000
+
             },
+            "discount": 0,
             "categories": ["music", "vintage"]
         },
         {
@@ -79,7 +89,10 @@
                 "currencyCode": "USD",
                 "units": 24,
                 "nanos": 330000000
+
+
             },
+            "discount": 0,
             "categories": ["cookware"]
         },
         {
@@ -91,6 +104,7 @@
                 "currencyCode": "USD",
                 "units": 789,
                 "nanos": 500000000
+
             },
             "categories": ["cycling"]
         },
@@ -103,7 +117,9 @@
                 "currencyCode": "USD",
                 "units": 12,
                 "nanos": 300000000
+
             },
+            "discount": 0,
             "categories": ["gardening"]
         }
     ]

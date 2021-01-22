@@ -20,12 +20,11 @@ import (
 	"flag"
 	"fmt"
 	"io/ioutil"
+	"math/rand"
 	"net"
 	"os"
-	"os/signal"
 	"strings"
 	"sync"
-	"syscall"
 	"time"
 
 	pb "github.com/GoogleCloudPlatform/microservices-demo/src/productcatalogservice/genproto"
@@ -102,8 +101,7 @@ func main() {
 	} else {
 		extraLatency = time.Duration(0)
 	}
-
-	sigs := make(chan os.Signal, 1)
+	/*sigs := make(chan os.Signal, 1)
 	signal.Notify(sigs, syscall.SIGUSR1, syscall.SIGUSR2)
 	go func() {
 		for {
@@ -119,6 +117,8 @@ func main() {
 		}
 	}()
 
+
+	 */
 	if os.Getenv("PORT") != "" {
 		port = os.Getenv("PORT")
 	}
@@ -282,6 +282,9 @@ func (p *productCatalog) GetProduct(ctx context.Context, req *pb.GetProductReque
 	if found == nil {
 		return nil, status.Errorf(codes.NotFound, "no product with ID %s", req.Id)
 	}
+	// TODO call DiscountService
+	fmt.Println(found.Id);
+	found.Discount=rand.Intn(25-0)+25;
 	return found, nil
 }
 
