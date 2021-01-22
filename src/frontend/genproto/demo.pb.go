@@ -450,7 +450,7 @@ func (m *Product) GetPriceUsd() *Money {
 	}
 	return nil
 }
-//discount shown on the normal home page
+//discount on the normal home page
 func (m *Product)GetDiscount() int{
 	if m!=nil{
 		return m.Discount

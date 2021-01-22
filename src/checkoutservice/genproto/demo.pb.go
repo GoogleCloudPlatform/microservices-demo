@@ -449,7 +449,7 @@ func (m *Product) GetPriceUsd() *Money {
 	}
 	return nil
 }
-//Discount shown on the checkout page
+// for checkout page
 func (m *Product) GetDiscount() int{
 	if m!=nil{
 		return m.Discount

@@ -284,7 +284,7 @@ func (p *productCatalog) GetProduct(ctx context.Context, req *pb.GetProductReque
 	}
 	// TODO call DiscountService
 	fmt.Println(found.Id);
-	found.Discount=rand.Intn(20-0)+20;
+	found.Discount=rand.Intn(21-0)+21;
 	return found, nil
 }
 
