@@ -30,7 +30,7 @@
       </div>
       <div class="product-info col">
         <div class="product-wrapper">
-          <h2>{{$.product.Item.Name}} neazebiazorbaio</h2>
+          <h2>{{$.product.Item.Name}}</h2>
 
           <p class="text-muted">
             {{ renderMoney $.product.Price}}
@@ -60,7 +60,15 @@
         </div>
       </div>
     </div>
+    <div class="row">
+      <div class="product-info col">
+        <div class="product-wrapper">
+          {{ template "comment" . }}
+        </div>
+      </div>
+    </div>
   </div>
+
   <div class="container py-3 px-lg-5 py-lg-5">
     {{ if $.recommendations}}
       {{ template "recommendations" $.recommendations }}

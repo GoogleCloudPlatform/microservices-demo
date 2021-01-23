@@ -1,0 +1,51 @@
+
+
+{{ define "comment" }}
+<section class="recommendations">
+  <h2>Comments</h2>
+  <div class="row">
+    <div class="col-md-6">
+      <h3> {{ .author }} - {{ .date }} </h3>
+      <p>{{ .comment }}</p>
+    </div>
+    <div class="col-md-6">
+      <h3> One Author - Date </h3>
+      <p>A short comment</p>
+    </div>
+    <div class="col-md-6">
+      <h3> One Author - Date </h3>
+      <p>A short comment</p>
+    </div>
+  </div>
+  <hr>
+  <div class="row checkout">
+    <div class="col-12 col-lg-8 offset-lg-2">
+      <h3 class="text-center">Leave a comment</h3>
+      <form action="/comment/send" method="POST">
+        <div class="form-row">
+          <div class="col-md-8 mb-3">
+            <label for="login">Login</label>
+            <input type="text" class="form-control" id="login" name="login" required>
+          </div>
+          <div class="col-md-4 mb-3">
+            <label for="stars">Stars</label>
+            <select name="stars" id="stars" class="form-control">
+              <option value="1">&#9733;</option>
+              <option value="2">&#9733; &#9733;</option>
+              <option value="3">&#9733; &#9733; &#9733;</option>
+              <option value="4">&#9733; &#9733; &#9733; &#9733;</option>
+              <option value="5" selected="selected">&#9733; &#9733; &#9733; &#9733; &#9733;</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <textarea id="comment" name="coment" rows="4" cols="60">Here is my comment</textarea>
+        </div>
+        <div class="form-row center-contents last-row">
+          <button class="btn btn-info" type="submit">Send</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</section>
+{{ end }}
