@@ -1,0 +1,26 @@
+# This is the configuration file for Iac Scan APIv2.
+
+# Specify the template types.The valid values are TF, CFT, K8S
+template_type: K8S
+
+# For Terraform, it is recommended to provide one of the following values: 0.11, 0.12 or 0.13.
+# For CFT and K8s, this can be omitted.
+#template_version: 0.11
+
+# For your template_type, fill in the details where applicable.
+# variables: Specify any environment variables(TF) or parameters(CFT) as key:value pairs under this attribute.
+# variable_files: Specify all the custom variable_files under here. It is an array of strings.
+# variable_files: If it is standard extension(.tfvars for terraform), then this can be omitted.
+# variable_files: For a custom extension, specify the variable file path from the root of the repo.
+#template_parameters:
+#variables:
+#key1 : value1
+#key2 : value2
+#variable_files:
+#- ./filepath/filename1
+#- ./filepath/filename2
+
+# Define tags to identify your particular scan. You can use these tags to search the scan details on the Prisma Cloud.
+tags:
+org: Marketing
+team: PMM
