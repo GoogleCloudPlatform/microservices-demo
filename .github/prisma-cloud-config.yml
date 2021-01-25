@@ -1,0 +1,30 @@
+# Please update with the respective environment values and commit
+# to master branch under the .github folder before performing scans
+
+# Define the failure criteria for creating checks. If the criteria 
+# matches a check will be created. The template for the checks can 
+# becustomized in the "/.github/prisma-template-for-scan-results" 
+# file.
+failure_criteria_for_creating_checks:
+  high: 10
+  medium: 0
+  low: 0
+  operator: or
+
+# Define the failure criteria for creating issues. If the criteria 
+# matches an issue will be created. The template for issues can be 
+# customized in the "/.github/prisma-template-for-scan-results" 
+# file.
+failure_criteria_for_creating_issues:
+  high: 10
+  medium: 0
+  low: 0
+  operator: or
+
+# Define github asset name
+github_asset_name: "Example ecommerce shop"
+
+# Define tags
+tags:
+- phase:testing
+- env:Dev
