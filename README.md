@@ -33,6 +33,8 @@ Looking for the old Hipster Shop frontend interface? Use the [manifests](https:/
 
 ## Quickstart (GKE)
 
+[![Open in Cloud Shell](https://gstatic.com/cloudssh/images/open-btn.svg)](https://ssh.cloud.google.com/cloudshell/editor?cloudshell_git_repo=https://github.com/GoogleCloudPlatform/microservices-demo&cloudshell_tutorial=README.md)
+
 1. **[Create a Google Cloud Platform project](https://cloud.google.com/resource-manager/docs/creating-managing-projects#creating_a_project)** or use an existing project. Set the `PROJECT_ID` environment variable and ensure the Google Kubernetes Engine and Cloud Operations APIs are enabled.
 
 ```
@@ -52,7 +54,7 @@ git clone https://github.com/GoogleCloudPlatform/microservices-demo.git
 cd microservices-demo
 ```
 
-3. **Create a GKE cluster.** 
+3. **Create a GKE cluster.**
 
 ```
 ZONE=us-central1-b
@@ -61,13 +63,13 @@ gcloud container clusters create onlineboutique \
     --machine-type=e2-standard-2 --num-nodes=4
 ```
 
-4. **Deploy the sample app to the cluster.** 
+4. **Deploy the sample app to the cluster.**
 
 ```
 kubectl apply -f ./release/kubernetes-manifests.yaml
 ```
 
-5. **Wait for the Pods to be ready.** 
+5. **Wait for the Pods to be ready.**
 
 ```
 kubectl get pods
@@ -91,7 +93,7 @@ redis-cart-5f59546cdd-5jnqf              1/1     Running   0          2m58s
 shippingservice-6ccc89f8fd-v686r         1/1     Running   0          2m58s
 ```
 
-7. **Access the web frontend in a browser** using the frontend's `EXTERNAL_IP`. 
+7. **Access the web frontend in a browser** using the frontend's `EXTERNAL_IP`.
 
 ```
 kubectl get service frontend-external | awk '{print $4}'
@@ -104,19 +106,19 @@ EXTERNAL-IP
 <your-ip>
 ```
 
-**Note**- you may see `<pending>` while GCP provisions the load balancer. If this happens, wait a few minutes and re-run the command. 
+**Note**- you may see `<pending>` while GCP provisions the load balancer. If this happens, wait a few minutes and re-run the command.
 
-8. [Optional] **Clean up**: 
+8. [Optional] **Clean up**:
 
 ```
-gcloud container clusters delete onlineboutique \ 
+gcloud container clusters delete onlineboutique \
     --project=${PROJECT_ID} --zone=${ZONE}
 ```
 
-## Other Deployment Options 
+## Other Deployment Options
 
 - **Workload Identity**: [See these instructions.](docs/workload-identity.md)
-- **Istio**: [See these instructions.](docs/service-mesh.md) 
+- **Istio**: [See these instructions.](docs/service-mesh.md)
 - **Anthos Service Mesh**: ASM requires Workload Identity to be enabled in your GKE cluster. [See the workload identity instructions](docs/workload-identity.md) to configure and deploy the app. Then, use the [service mesh guide](/docs/service-mesh.md).
 - **non-GKE clusters (Minikube, Kind)**: see the [Development Guide](/docs/development-guide.md)
 
@@ -166,9 +168,9 @@ Find **Protocol Buffers Descriptions** at the [`./pb` directory](./pb).
   job that creates realistic usage patterns on the website using
   [Locust](https://locust.io/) load generator.
 
-## Local Development 
+## Local Development
 
-If you would like to contribute features or fixes to this app, see the [Development Guide](/docs/development-guide.md) on how to build this demo locally. 
+If you would like to contribute features or fixes to this app, see the [Development Guide](/docs/development-guide.md) on how to build this demo locally.
 
 ## Demos featuring Online Boutique
 

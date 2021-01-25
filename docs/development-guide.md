@@ -98,7 +98,7 @@ gcloud services enable monitoring.googleapis.com \
       kind create cluster
       ```
 
-2. Run `kubectl get nodes` to verify you're connected to “Kubernetes on Docker”.
+2. Run `kubectl get nodes` to verify you're connected to the respective control plane.
 
 3. Run `skaffold run` (first time will be slow, it can take ~20 minutes).
    This will build and deploy the application. If you need to rebuild the images
