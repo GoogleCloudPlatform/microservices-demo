@@ -210,6 +210,7 @@ message PlaceOrderRequest {
   Address address = 3;
   string email = 5;
   CreditCardInfo credit_card = 6;
+  string coupon_code = 7;
 }
 
 message PlaceOrderResponse { OrderResult order = 1; }
