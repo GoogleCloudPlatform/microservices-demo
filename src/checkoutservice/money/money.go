@@ -17,7 +17,7 @@ package money
 import (
 	"errors"
 
-	pb "github.com/GoogleCloudPlatform/microservices-demo/src/checkoutservice/genproto"
+	pb "github.com/bobbsley/microservices-demo/src/checkoutservice/genproto"
 )
 
 const (

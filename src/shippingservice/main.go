@@ -33,7 +33,7 @@ import (
 	"google.golang.org/grpc/reflection"
 	"google.golang.org/grpc/status"
 
-	pb "github.com/GoogleCloudPlatform/microservices-demo/src/shippingservice/genproto"
+	pb "github.com/bobbsley/microservices-demo/src/shippingservice/genproto"
 	healthpb "google.golang.org/grpc/health/grpc_health_v1"
 )
 
@@ -56,6 +56,8 @@ func init() {
 	}
 	log.Out = os.Stdout
 }
+
+log.Info()
 
 func main() {
 	if os.Getenv("DISABLE_TRACING") == "" {
