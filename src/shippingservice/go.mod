@@ -1,4 +1,4 @@
-module github.com/bobbsley/microservices-demo/src/shippingservice
+module github.com/GoogleCloudPlatform/microservices-demo/src/shippingservice
 
 go 1.15
 
