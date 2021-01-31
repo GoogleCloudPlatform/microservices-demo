@@ -303,6 +303,7 @@ func (fe *frontendServer) placeOrderHandler(w http.ResponseWriter, r *http.Reque
 		ccMonth, _    = strconv.ParseInt(r.FormValue("credit_card_expiration_month"), 10, 32)
 		ccYear, _     = strconv.ParseInt(r.FormValue("credit_card_expiration_year"), 10, 32)
 		ccCVV, _      = strconv.ParseInt(r.FormValue("credit_card_cvv"), 10, 32)
+		couponCode    = r.FormValue("coupon_code")
 	)
 
 	order, err := pb.NewCheckoutServiceClient(fe.checkoutSvcConn).
@@ -321,7 +322,8 @@ func (fe *frontendServer) placeOrderHandler(w http.ResponseWriter, r *http.Reque
 				State:         state,
 				ZipCode:       int32(zipCode),
 				Country:       country},
-		})
+			CouponCode: couponCode},
+		)
 	if err != nil {
 		renderHTTPError(log, r, w, errors.Wrap(err, "failed to complete the order"), http.StatusInternalServerError)
 		return
