@@ -9,7 +9,8 @@
       <JsonLayout compact="true" eventEol="true">
         <KeyValuePair key="trace_id" value="$${ctx:traceId}"/>
         <KeyValuePair key="span_id" value="$${ctx:spanId}"/>
-        <KeyValuePair key="trace_sampled" value="$${ctx:traceSampled}"/>
+        <KeyValuePair key="service.name" value="$${env:OTEL_EXPORTER_ZIPKIN_SERVICE_NAME}"/>
+        <KeyValuePair key="trace_sampled" value="$${ctx:sampled}"/>
      </JsonLayout>
 
     </Console>

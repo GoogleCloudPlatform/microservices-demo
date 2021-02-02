@@ -29,35 +29,36 @@ spec:
       tolerations:
       nodeSelector:
       initContainers:
-        - name: sfx-instrumentation 
+        - name: sfx-instrumentation
           image: quay.io/signalfuse/sfx-zero-config-agent:latest
           # image: sfx-zero-config-agent
           # imagePullPolicy: Never
           volumeMounts:
-          - mountPath: /opt/sfx/
-            name: sfx-instrumentation 
+            - mountPath: /opt/sfx/
+              name: sfx-instrumentation
       containers:
         - name: server
           image: adservice
           ports:
-          - containerPort: 9555
+            - containerPort: 9555
           env:
-          - name: PORT
-            value: "9555"
-          - name: NODE_IP
-            valueFrom:
-              fieldRef:
-                fieldPath: status.hostIP
-          - name: JAVA_TOOL_OPTIONS 
-            value: -javaagent:/opt/sfx/signalfx-tracing.jar 
-          - name: SIGNALFX_ENDPOINT_URL
-            # value: "http://zipkin.default:9411/api/v2/spans"
-            value: "http://$(NODE_IP):9411/api/v2/spans"
-          - name: SIGNALFX_SERVICE_NAME
-            value: adservice
+            - name: PORT
+              value: '9555'
+            - name: OTEL_EXPORTER_ZIPKIN_SERVICE_NAME
+              value: adservice
+            - name: NODE_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.hostIP
+            - name: OTEL_EXPORTER
+              value: zipkin
+            - name: JAVA_TOOL_OPTIONS
+              value: -javaagent:/opt/sfx/splunk-otel-javaagent-all.jar
+            - name: OTEL_EXPORTER_ZIPKIN_ENDPOINT
+              value: 'http://$(NODE_IP):9411/v1/trace'
           volumeMounts:
             - mountPath: /opt/sfx
-              name: sfx-instrumentation 
+              name: sfx-instrumentation
           resources:
             requests:
               cpu: 200m
@@ -69,15 +70,15 @@ spec:
             initialDelaySeconds: 60
             periodSeconds: 25
             exec:
-              command: ["/bin/grpc_health_probe", "-addr=:9555"]
+              command: ['/bin/grpc_health_probe', '-addr=:9555']
           livenessProbe:
             initialDelaySeconds: 60
             periodSeconds: 30
             exec:
-              command: ["/bin/grpc_health_probe", "-addr=:9555"]
+              command: ['/bin/grpc_health_probe', '-addr=:9555']
       volumes:
         - emptyDir: {}
-          name: sfx-instrumentation 
+          name: sfx-instrumentation
 ---
 apiVersion: v1
 kind: Service
@@ -88,6 +89,6 @@ spec:
   selector:
     app: adservice
   ports:
-  - name: grpc
-    port: 9555
-    targetPort: 9555
+    - name: grpc
+      port: 9555
+      targetPort: 9555
