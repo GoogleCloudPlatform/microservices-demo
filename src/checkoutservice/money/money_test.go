@@ -243,3 +243,33 @@ func TestSum(t *testing.T) {
 		})
 	}
 }
+
+func TestDiscount(t *testing.T) {
+	type args struct {
+		l pb.Money
+		p int32
+	}
+	tests := []struct {
+		name    string
+		args    args
+		want    pb.Money
+		wantErr error
+	}{
+		{"35% $73,57", args{mm(73, 570000000), 35}, mm(47, 830000000), nil},
+		{"100% $6364,39", args{mm(6364, 390000000), 100}, mm(0, 0), nil},
+		{"85% $0,02", args{mm(0, 20000000), 85}, mm(0, 10000000), nil},
+		{"0% $0,01", args{mm(0, 10000000), 0}, mm(0, 10000000), nil},
+		{"120% $0,01", args{mm(0, 10000000), 120}, mm(0, 0), ErrInvalidPercentage},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := Discount(tt.args.l, tt.args.p)
+			if err != tt.wantErr {
+				t.Errorf("Sum([%v],[%v]): expected err=\"%v\" got=\"%v\"", tt.args.l, tt.args.p, tt.wantErr, err)
+			}
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("Sum([%v],[%v]) = %v, want %v", tt.args.l, tt.args.p, got, tt.want)
+			}
+		})
+	}
+}

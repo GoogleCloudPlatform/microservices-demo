@@ -29,6 +29,7 @@ const (
 var (
 	ErrInvalidValue        = errors.New("one of the specified money values is invalid")
 	ErrMismatchingCurrency = errors.New("mismatching currency codes")
+	ErrInvalidPercentage   = errors.New("discount percentage is invalid")
 )
 
 // IsValid checks if specified value has a valid units/nanos signs and ranges.
@@ -129,4 +130,28 @@ func MultiplySlow(m pb.Money, n uint32) pb.Money {
 		n--
 	}
 	return out
+}
+
+// Discount takes the amount of money and a discount percentage and returns the discounted value rounded up to the nearest cent.
+// Discount percentage must can't be negative and must be at most 100.
+func Discount(m pb.Money, p int32) (pb.Money, error) {
+	out := m
+	if !IsValid(m) {
+		return pb.Money{}, ErrInvalidValue
+	}
+
+	if p < 0 || p > 100 {
+		return pb.Money{}, ErrInvalidPercentage
+	}
+	// Represent $1.75 as 175 similar to Fowler's Money Pattern (https://martinfowler.com/eaaCatalog/money.html)
+	mAsInt := 100*int32(m.GetUnits()) + m.GetNanos()/10000000
+	// toSubtract will be rounded down to the nearest cent
+	toSubtract := mAsInt * p / 100
+	// Convert from int to Units/Nanos
+	discountedAsInt := mAsInt - toSubtract
+	discountedUnits := discountedAsInt / 100
+	discountedNanos := (discountedAsInt % 100) * 10000000
+	out.Units = int64(discountedUnits)
+	out.Nanos = discountedNanos
+	return out, nil
 }
