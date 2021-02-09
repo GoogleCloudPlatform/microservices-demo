@@ -42,6 +42,8 @@ build:
     context: src/loadgenerator
   - image: adservice
     context: src/adservice
+#  -image: commentservice
+#    context: src/commentservice
   tagPolicy:
     gitCommit: {}
   local:
