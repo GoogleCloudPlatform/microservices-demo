@@ -1,27 +1,53 @@
 
 
 {{ define "comment" }}
-<section class="recommendations">
-  <h2>Comments</h2>
+<style>
+  repeat {
+      display:block;
+  }
+  repeat[n="1"]:before {
+     content: "★";
+  }
+  repeat[n="2"]:before {
+     content: "★★";
+  }
+  repeat[n="3"]:before {
+     content: "★★★";
+  }
+  repeat[n="4"]:before {
+     content: "★★★★";
+  }
+  repeat[n="5"]:before {
+     content: "★★★★★";
+  }
+</style>
+
+<div>
   <div class="row">
-    <div class="col-md-6">
-      <h3> {{ .author }} - {{ .date }} </h3>
-      <p>{{ .comment }}</p>
+    <div class="row">
+      <h2 class="text-center">Comments</h2>
     </div>
-    <div class="col-md-6">
-      <h3> One Author - Date </h3>
-      <p>A short comment</p>
-    </div>
-    <div class="col-md-6">
-      <h3> One Author - Date </h3>
-      <p>A short comment</p>
+    <div class="row">
+      {{range .comments }}
+        <div class="col-md-6">
+          <p>
+            <b>Author :</b> {{ .UserName }} - {{ .Date }}
+          </p>
+          <p>
+            <repeat n="{{ .Stars}}"> - {{ .CommentText }}</repeat>
+          </p>
+        </div>
+      {{ end }}
     </div>
   </div>
+
   <hr>
+
   <div class="row checkout">
     <div class="col-12 col-lg-8 offset-lg-2">
       <h3 class="text-center">Leave a comment</h3>
-      <form action="/comment/send" method="POST">
+      <form action="/comment" method="POST">
+        <input type="hidden"  id="product_id" name="product_id" value="{{ .product.Item.Id }}">
         <div class="form-row">
           <div class="col-md-8 mb-3">
             <label for="login">Login</label>
@@ -39,7 +65,7 @@
           </div>
         </div>
         <div class="form-row">
-          <textarea id="comment" name="coment" rows="4" cols="60">Here is my comment</textarea>
+          <textarea id="content" name="content" rows="4" cols="60">Here is my comment</textarea>
         </div>
         <div class="form-row center-contents last-row">
           <button class="btn btn-info" type="submit">Send</button>
@@ -47,5 +73,5 @@
       </form>
     </div>
   </div>
-</section>
+</div>
 {{ end }}

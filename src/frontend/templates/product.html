@@ -61,11 +61,7 @@
       </div>
     </div>
     <div class="row">
-      <div class="product-info col">
-        <div class="product-wrapper">
-          {{ template "comment" . }}
-        </div>
-      </div>
+          {{ with $ }} {{ template "comment" . }} {{ end }}
     </div>
   </div>
 
