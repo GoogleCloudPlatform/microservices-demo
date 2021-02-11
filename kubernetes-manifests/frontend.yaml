@@ -68,6 +68,8 @@ spec:
             value: "adservice:9555"
           - name: ENV_PLATFORM
             value: "gcp"
+          - name: COMMENT_SERVICE_ADDR
+            value : "commentservice:9090"
           # - name: DISABLE_TRACING
           #   value: "1"
           # - name: DISABLE_PROFILER
