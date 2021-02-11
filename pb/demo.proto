@@ -16,6 +16,33 @@ syntax = "proto3";
 
 package hipstershop;
 
+// -----------------Comment service--------------
+
+service  CommentService {
+    rpc GetComment(GetCommentRequest) returns (Comments) {}
+    rpc AddComment(AddCommentRequest) returns (Empty) {}
+}
+
+message AddCommentRequest {
+    Comment comment = 1;
+}
+
+message  GetCommentRequest {
+    string product_id = 1;
+}
+
+message Comments {
+    repeated Comment comment = 1;
+}
+
+message Comment {
+    string user_name = 1;
+    string date = 2;
+    string comment_text = 3;
+    string product_id = 4;
+    int32 stars = 5;
+}
+
 // -----------------Cart service-----------------
 
 service CartService {
