@@ -156,6 +156,14 @@ func (fe *frontendServer) productHandler(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
+	comments, err := fe.getComments(r.Context(), id)
+	if err != nil {
+		renderHTTPError(log, r, w, errors.Wrap(err, "failed to get product comments"), http.StatusInternalServerError)
+		return
+	}
+	log.WithField("id", id).WithField("comments (nb) ", len(comments)).
+		Debug("serving product page")
+
 	product := struct {
 		Item  *pb.Product
 		Price *pb.Money
@@ -170,12 +178,44 @@ func (fe *frontendServer) productHandler(w http.ResponseWriter, r *http.Request)
 		"currencies":      currencies,
 		"product":         product,
 		"recommendations": recommendations,
+		"comments":				 comments,
 		"cart_size":       cartSize(cart),
 		"platform_css":    plat.css,
 		"platform_name":   plat.provider,
 	}); err != nil {
 		log.Println(err)
 	}
+}
+
+func (fe* frontendServer) addCommentToProductHandler( w http.ResponseWriter, r *http.Request){
+	log := r.Context().Value(ctxKeyLog{}).(logrus.FieldLogger)
+	var (
+		login					= r.FormValue("login")
+		stars	, _  		= strconv.ParseInt(r.FormValue("stars"), 10, 32)
+		productID    	= r.FormValue("product_id")
+		content				= r.FormValue("content")
+	)
+	var date = strconv.Itoa(time.Now().Day()) + "/" + time.Now().Month().String() + "/" + strconv.Itoa(time.Now().Year())
+
+	if productID == ""  {
+		renderHTTPError(log, r, w, errors.New("invalid form input"), http.StatusBadRequest)
+		return
+	}
+
+	p, err := fe.getProduct(r.Context(), productID)
+	if err != nil {
+		renderHTTPError(log, r, w, errors.Wrap(err, "could not retrieve product"), http.StatusInternalServerError)
+		return
+	}
+	log.WithField("product", productID).WithField("content", content).Debug("adding a comment")
+
+	if err := fe.addComment(r.Context(), p.GetId(), login, int32(stars), content, date); err != nil {
+		renderHTTPError(log, r, w, errors.Wrap(err, "failed to add comment"), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("location", "/cart")
+	w.WriteHeader(http.StatusFound)
 }
 
 func (fe *frontendServer) addToCartHandler(w http.ResponseWriter, r *http.Request) {

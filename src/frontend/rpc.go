@@ -54,6 +54,26 @@ func (fe *frontendServer) getProduct(ctx context.Context, id string) (*pb.Produc
 	return resp, err
 }
 
+
+func (fe *frontendServer) getComments(ctx context.Context, product_id string) ([]*pb.Comment, error) {
+	resp, err := pb.NewCommentServiceClient(fe.commentSvcConn).
+		GetComment(ctx, &pb.GetCommentRequest{ProductId : product_id})
+	return resp.GetComment(), err
+
+}
+
+func (fe *frontendServer) addComment(ctx context.Context, productId string, login string, stars int32, content string, date string) error {
+	_, err := pb.NewCommentServiceClient(fe.commentSvcConn).AddComment(ctx, &pb.AddCommentRequest{
+		Comment: &pb.Comment{
+			ProductId: productId,
+			UserName:  login,
+			Stars : stars,
+			CommentText : content,
+			Date : date},
+	})
+	return err
+}
+
 func (fe *frontendServer) getCart(ctx context.Context, userID string) ([]*pb.CartItem, error) {
 	resp, err := pb.NewCartServiceClient(fe.cartSvcConn).GetCart(ctx, &pb.GetCartRequest{UserId: userID})
 	return resp.GetItems(), err
