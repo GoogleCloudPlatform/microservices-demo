@@ -47,7 +47,7 @@ gcloud redis instances list --region ${REGION}
 ```sh
 cp ./release/kubernetes-manifests.yaml ./release/updated-manifests.yaml
 REDIS_IP=$(gcloud redis instances describe redis-cart --region=${REGION} --format='get(host)')
-sed -i 's/value: "redis-cart:6379"/value: "${REDIS_IP}"/g' ./release/updated-manifests.yaml
+sed -i "s/value: \"redis-cart:6379\"/value: \"${REDIS_IP}\"/g" ./release/updated-manifests.yaml
 ```
 
 In addition, in the `./release/updated-manifests.yaml` file you need also to manually remove the `Deployment` and `Service` sections of the `redis-cart` which are not needed anymore.
