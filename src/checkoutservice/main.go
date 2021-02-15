@@ -66,6 +66,7 @@ type checkoutService struct {
 	shippingSvcAddr       string
 	emailSvcAddr          string
 	paymentSvcAddr        string
+	couponSvcAddr         string
 }
 
 func main() {
@@ -95,6 +96,7 @@ func main() {
 	mustMapEnv(&svc.currencySvcAddr, "CURRENCY_SERVICE_ADDR")
 	mustMapEnv(&svc.emailSvcAddr, "EMAIL_SERVICE_ADDR")
 	mustMapEnv(&svc.paymentSvcAddr, "PAYMENT_SERVICE_ADDR")
+	mustMapEnv(&svc.couponSvcAddr, "COUPON_SERVICE_ADDR")
 
 	log.Infof("service config: %+v", svc)
 
@@ -229,12 +231,16 @@ func (cs *checkoutService) PlaceOrder(ctx context.Context, req *pb.PlaceOrderReq
 	}
 
 	// REDEEM COUPON HERE, APPLY THE DISCOUNT TO EVERY PRODUCT HERE
+	discountedOrder, err := cs.applyCoupon(ctx, prep, req.CouponCode)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, err.Error())
+	}
 
 	total := pb.Money{CurrencyCode: req.UserCurrency,
 		Units: 0,
 		Nanos: 0}
-	total = money.Must(money.Sum(total, *prep.shippingCostLocalized))
-	for _, it := range prep.orderItems {
+	total = money.Must(money.Sum(total, *discountedOrder.shippingCostLocalized))
+	for _, it := range discountedOrder.orderItems {
 		multPrice := money.MultiplySlow(*it.Cost, uint32(it.GetItem().GetQuantity()))
 		total = money.Must(money.Sum(total, multPrice))
 	}
@@ -245,7 +251,7 @@ func (cs *checkoutService) PlaceOrder(ctx context.Context, req *pb.PlaceOrderReq
 	}
 	log.Infof("payment went through (transaction_id: %s)", txID)
 
-	shippingTrackingID, err := cs.shipOrder(ctx, req.Address, prep.cartItems)
+	shippingTrackingID, err := cs.shipOrder(ctx, req.Address, discountedOrder.cartItems)
 	if err != nil {
 		return nil, status.Errorf(codes.Unavailable, "shipping error: %+v", err)
 	}
@@ -255,9 +261,9 @@ func (cs *checkoutService) PlaceOrder(ctx context.Context, req *pb.PlaceOrderReq
 	orderResult := &pb.OrderResult{
 		OrderId:            orderID.String(),
 		ShippingTrackingId: shippingTrackingID,
-		ShippingCost:       prep.shippingCostLocalized,
+		ShippingCost:       discountedOrder.shippingCostLocalized,
 		ShippingAddress:    req.Address,
-		Items:              prep.orderItems,
+		Items:              discountedOrder.orderItems,
 	}
 
 	if err := cs.sendOrderConfirmation(ctx, req.Email, orderResult); err != nil {
@@ -273,6 +279,31 @@ type orderPrep struct {
 	orderItems            []*pb.OrderItem
 	cartItems             []*pb.CartItem
 	shippingCostLocalized *pb.Money
+}
+
+func (cs *checkoutService) applyCoupon(ctx context.Context, in orderPrep, code string) (*orderPrep, error) {
+	var out = in
+
+	conn, err := grpc.DialContext(ctx, cs.couponSvcAddr,
+		grpc.WithInsecure(),
+		grpc.WithStatsHandler(&ocgrpc.ClientHandler{}))
+	if err != nil {
+		return nil, fmt.Errorf("could not connect coupon service: %+v", err)
+	}
+	defer conn.Close()
+
+	redeemed, err := pb.NewCouponServiceClient(conn).RedeemCoupon(ctx, &pb.CouponRequest{CouponCode: code})
+	if err != nil {
+		return nil, fmt.Errorf("failed to validate the coupon: %+v", err)
+	}
+
+	if redeemed.Validity {
+		for _, it := range out.orderItems {
+			*it.Cost = money.Must(money.Discount(*it.Cost, redeemed.DiscountPercentage))
+		}
+	}
+
+	return &out, nil
 }
 
 func (cs *checkoutService) prepareOrderItemsAndShippingQuoteFromCart(ctx context.Context, userID, userCurrency string, address *pb.Address) (orderPrep, error) {
