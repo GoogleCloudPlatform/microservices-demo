@@ -35,7 +35,7 @@ spec:
         image: loadgenerator
         env:
         - name: FRONTEND_ADDR
-          value: "frontend:80"
+          value: "http://frontend:80"
         - name: USERS
           value: "10"
         resources:
