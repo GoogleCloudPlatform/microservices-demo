@@ -8,11 +8,12 @@ This doc explains how to build and run the OnlineBoutique source code locally us
 - kubectl (can be installed via `gcloud components install kubectl`)
 - [skaffold]( https://skaffold.dev/docs/install/), a tool that builds and deploys Docker images in bulk. 
 - A Google Cloud Project with Google Container Registry enabled. 
-- Enable GCP APIs for Cloud Monitoring, Tracing, Debugger:
+- Enable GCP APIs for Cloud Monitoring, Tracing, Debugger, Profiler:
 ```
 gcloud services enable monitoring.googleapis.com \
     cloudtrace.googleapis.com \
-    clouddebugger.googleapis.com
+    clouddebugger.googleapis.com \
+    cloudprofiler.googleapis.com
 ```
 - [Minikube](https://minikube.sigs.k8s.io/docs/start/) (optional - see Local Cluster)
 - [Kind](https://kind.sigs.k8s.io/) (optional - see Local Cluster)
@@ -28,7 +29,6 @@ gcloud services enable monitoring.googleapis.com \
 
     ```sh
     gcloud services enable container.googleapis.com
-    gcloud services enable cloudprofiler.googleapis.com
     ```
 
     ```sh
@@ -79,7 +79,7 @@ gcloud services enable monitoring.googleapis.com \
 
     - To launch **Minikube** (tested with Ubuntu Linux). Please, ensure that the
        local Kubernetes cluster has at least:
-        - 4 CPU's
+        - 4 CPUs
         - 4.0 GiB memory
         - 32 GB disk space
 
@@ -98,7 +98,7 @@ gcloud services enable monitoring.googleapis.com \
       kind create cluster
       ```
 
-2. Run `kubectl get nodes` to verify you're connected to “Kubernetes on Docker”.
+2. Run `kubectl get nodes` to verify you're connected to the respective control plane.
 
 3. Run `skaffold run` (first time will be slow, it can take ~20 minutes).
    This will build and deploy the application. If you need to rebuild the images

@@ -1,5 +1,5 @@
 <p align="center">
-<img src="src/frontend/static/icons/Hipster_HeroLogoCyan.svg" width="300"/>
+<img src="src/frontend/static/icons/Hipster_HeroLogoCyan.svg" width="300" alt="Online Boutique" />
 </p>
 
 
@@ -33,11 +33,18 @@ Looking for the old Hipster Shop frontend interface? Use the [manifests](https:/
 
 ## Quickstart (GKE)
 
-1. **[Create a Google Cloud Platform project](https://cloud.google.com/resource-manager/docs/creating-managing-projects#creating_a_project)** or use an existing project. Set the `PROJECT_ID` environment variable and ensure the Google Kubernetes Engine API is enabled.
+[![Open in Cloud Shell](https://gstatic.com/cloudssh/images/open-btn.svg)](https://ssh.cloud.google.com/cloudshell/editor?cloudshell_git_repo=https://github.com/GoogleCloudPlatform/microservices-demo&cloudshell_tutorial=README.md)
+
+1. **[Create a Google Cloud Platform project](https://cloud.google.com/resource-manager/docs/creating-managing-projects#creating_a_project)** or use an existing project. Set the `PROJECT_ID` environment variable and ensure the Google Kubernetes Engine and Cloud Operations APIs are enabled.
 
 ```
 PROJECT_ID="<your-project-id>"
-gcloud services enable container --project ${PROJECT_ID}
+gcloud services enable container.googleapis.com --project ${PROJECT_ID}
+gcloud services enable monitoring.googleapis.com \
+    cloudtrace.googleapis.com \
+    clouddebugger.googleapis.com \
+    cloudprofiler.googleapis.com \
+    --project ${PROJECT_ID}
 ```
 
 2. **Clone this repository.**
@@ -47,7 +54,7 @@ git clone https://github.com/GoogleCloudPlatform/microservices-demo.git
 cd microservices-demo
 ```
 
-3. **Create a GKE cluster.** 
+3. **Create a GKE cluster.**
 
 ```
 ZONE=us-central1-b
@@ -56,13 +63,13 @@ gcloud container clusters create onlineboutique \
     --machine-type=e2-standard-2 --num-nodes=4
 ```
 
-4. **Deploy the sample app to the cluster.** 
+4. **Deploy the sample app to the cluster.**
 
 ```
 kubectl apply -f ./release/kubernetes-manifests.yaml
 ```
 
-5. **Wait for the Pods to be ready.** 
+5. **Wait for the Pods to be ready.**
 
 ```
 kubectl get pods
@@ -86,7 +93,7 @@ redis-cart-5f59546cdd-5jnqf              1/1     Running   0          2m58s
 shippingservice-6ccc89f8fd-v686r         1/1     Running   0          2m58s
 ```
 
-7. **Access the web frontend in a browser** using the frontend's `EXTERNAL_IP`. 
+7. **Access the web frontend in a browser** using the frontend's `EXTERNAL_IP`.
 
 ```
 kubectl get service frontend-external | awk '{print $4}'
@@ -99,21 +106,22 @@ EXTERNAL-IP
 <your-ip>
 ```
 
-**Note**- you may see `<pending>` while GCP provisions the load balancer. If this happens, wait a few minutes and re-run the command. 
+**Note**- you may see `<pending>` while GCP provisions the load balancer. If this happens, wait a few minutes and re-run the command.
 
-8. [Optional] **Clean up**: 
+8. [Optional] **Clean up**:
 
 ```
-gcloud container clusters delete onlineboutique \ 
+gcloud container clusters delete onlineboutique \
     --project=${PROJECT_ID} --zone=${ZONE}
 ```
 
-## Other Deployment Options 
+## Other Deployment Options
 
 - **Workload Identity**: [See these instructions.](docs/workload-identity.md)
-- **Istio**: [See these instructions.](docs/service-mesh.md) 
+- **Istio**: [See these instructions.](docs/service-mesh.md)
 - **Anthos Service Mesh**: ASM requires Workload Identity to be enabled in your GKE cluster. [See the workload identity instructions](docs/workload-identity.md) to configure and deploy the app. Then, use the [service mesh guide](/docs/service-mesh.md).
 - **non-GKE clusters (Minikube, Kind)**: see the [Development Guide](/docs/development-guide.md)
+- **Memorystore**: [See these instructions](/docs/memorystore.md) to replace the in-cluster `redis` database with hosted Google Cloud Memorystore (redis).
 
 
 ## Architecture
@@ -161,20 +169,23 @@ Find **Protocol Buffers Descriptions** at the [`./pb` directory](./pb).
   job that creates realistic usage patterns on the website using
   [Locust](https://locust.io/) load generator.
 
-## Local Development 
+## Local Development
 
-If you would like to contribute features or fixes to this app, see the [Development Guide](/docs/development-guide.md) on how to build this demo locally. 
+If you would like to contribute features or fixes to this app, see the [Development Guide](/docs/development-guide.md) on how to build this demo locally.
 
 ## Demos featuring Online Boutique
 
-- [Google Cloud Next'18 London – Keynote](https://youtu.be/nIq2pkNcfEI?t=3071)
-  showing Stackdriver Incident Response Management
+- [Take the first step toward SRE with Cloud Operations Sandbox](https://cloud.google.com/blog/products/operations/on-the-road-to-sre-with-cloud-operations-sandbox)
+- [Deploying the Online Boutique sample application on Anthos Service Mesh](https://cloud.google.com/service-mesh/docs/onlineboutique-install-kpt)
+- [Anthos Service Mesh Workshop: Lab Guide](https://codelabs.developers.google.com/codelabs/anthos-service-mesh-workshop)
+- [KubeCon EU 2019 - Reinventing Networking: A Deep Dive into Istio's Multicluster Gateways - Steve Dake, Independent](https://youtu.be/-t2BfT59zJA?t=982)
 - Google Cloud Next'18 SF
   - [Day 1 Keynote](https://youtu.be/vJ9OaAqfxo4?t=2416) showing GKE On-Prem
-  - [Day 3 – Keynote](https://youtu.be/JQPOPV_VH5w?t=815) showing Stackdriver
+  - [Day 3 Keynote](https://youtu.be/JQPOPV_VH5w?t=815) showing Stackdriver
     APM (Tracing, Code Search, Profiler, Google Cloud Build)
   - [Introduction to Service Management with Istio](https://www.youtube.com/watch?v=wCJrdKdD6UM&feature=youtu.be&t=586)
-- [KubeCon EU 2019 - Reinventing Networking: A Deep Dive into Istio's Multicluster Gateways - Steve Dake, Independent](https://youtu.be/-t2BfT59zJA?t=982)
+- [Google Cloud Next'18 London – Keynote](https://youtu.be/nIq2pkNcfEI?t=3071)
+  showing Stackdriver Incident Response Management
 
 ---
 

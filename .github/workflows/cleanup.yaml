@@ -24,7 +24,10 @@ jobs:
     runs-on: self-hosted
     steps:
       - uses: actions/checkout@v2
-      - name: Delete test namespaces deployment
+        with:
+          ref: ${{github.event.pull_request.head.ref}}
+          repository: ${{github.event.pull_request.head.repo.full_name}}
+      - name: Delete PR namespace in staging cluster
         if: ${{ always() }}
         timeout-minutes: 20
         run: |
@@ -33,7 +36,7 @@ jobs:
           NAMESPACE="pr${PR_NUMBER}"
           kubectl delete namespace $NAMESPACE
         env:
-          PROJECT_ID: ${{ secrets.PROJECT_ID }}
-          PR_CLUSTER: ${{ secrets.PR_CLUSTER }}
-          ZONE: ${{ secrets.PR_CLUSTER_ZONE }}
+          PROJECT_ID: "onlineboutique-ci"
+          PR_CLUSTER: "online-boutique-pr"
+          ZONE: "us-east1-b"
           PR_NUMBER: ${{ github.event.number }}
