@@ -1,3 +1,7 @@
 **/*.sh
 **/*.bat
 tests/
+**/bin/
+**/obj/
+**/out/
+Dockerfile*

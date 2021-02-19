@@ -48,23 +48,9 @@ spec:
           number: 80
 ---
 apiVersion: networking.istio.io/v1alpha3
-kind: VirtualService
-metadata:
-  name: frontend
-spec:
-  hosts:
-  - "frontend.default.svc.cluster.local"
-  http:
-  - route:
-    - destination:
-        host: frontend
-        port:
-          number: 80
----
-apiVersion: networking.istio.io/v1alpha3
 kind: ServiceEntry
 metadata:
-  name: whitelist-egress-googleapis
+  name: allow-egress-googleapis
 spec:
   hosts:
   - "accounts.google.com" # Used to get token
@@ -80,7 +66,7 @@ spec:
 apiVersion: networking.istio.io/v1alpha3
 kind: ServiceEntry
 metadata:
-  name: whitelist-egress-google-metadata
+  name: allow-egress-google-metadata
 spec:
   hosts:
   - metadata.google.internal
@@ -93,4 +79,18 @@ spec:
   - number: 443
     name: https
     protocol: HTTPS
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: frontend
+spec:
+  hosts:
+  - "frontend.default.svc.cluster.local"
+  http:
+  - route:
+    - destination:
+        host: frontend
+        port:
+          number: 80
 ---
