@@ -95,8 +95,16 @@ namespace cartservice
                 case "otlp":
                     var otlpEndpoint = Environment.GetEnvironmentVariable("OTEL_EXPORTER_OTLP_SPAN_ENDPOINT")
                         ?? Environment.GetEnvironmentVariable("OTEL_EXPORTER_OTLP_ENDPOINT");
+
+                    if (!otlpEndpoint.StartsWith("http"))
+                    {
+                        otlpEndpoint = $"http://{otlpEndpoint}";
+                    }
+
                     builder
-                        .AddOtlpExporter(options => options.Endpoint = otlpEndpoint);
+                        .AddOtlpExporter(options => {
+                            options.Endpoint = new Uri(otlpEndpoint);
+                        });
                     break;
                 case "zipkin":
                     var zipkinEndpoint = $"{newRelicTraceUrl}?Api-Key={newRelicApiKey}&Data-Format=zipkin&Data-Format-Version=2";

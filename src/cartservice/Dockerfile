@@ -31,11 +31,6 @@ RUN GRPC_HEALTH_PROBE_VERSION=v0.3.6 && \
 WORKDIR /app
 COPY --from=builder /cartservice .
 
-# Work-around to make gRPC native library work on alpine containers
-RUN echo 'http://dl-cdn.alpinelinux.org/alpine/v3.8/main' >> /etc/apk/repositories && \
-    apk update --no-cache && \
-    apk add --no-cache bash libc6-compat=1.1.19-r11
-
 ARG NEW_RELIC_API_KEY
 ENV NEW_RELIC_API_KEY=${NEW_RELIC_API_KEY}
 
