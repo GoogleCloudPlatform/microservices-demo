@@ -98,12 +98,13 @@ namespace cartservice
 
                     if (!otlpEndpoint.StartsWith("http"))
                     {
-                        otlpEndpoint = $"http://{otlpEndpoint}";
+                        otlpEndpoint = $"https://{otlpEndpoint}";
                     }
 
                     builder
                         .AddOtlpExporter(options => {
                             options.Endpoint = new Uri(otlpEndpoint);
+                            options.Headers = $"x-nr-key={newRelicApiKey}";
                         });
                     break;
                 case "zipkin":

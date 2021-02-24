@@ -75,7 +75,7 @@ build:
         NEW_RELIC_API_KEY: "{{.NEW_RELIC_API_KEY}}"
         NEW_RELIC_TRACE_URL: "{{.NEW_RELIC_TRACE_URL}}"
         NEW_RELIC_METRIC_URL: "{{.NEW_RELIC_METRIC_URL}}"
-        OTEL_EXPORTER_OTLP_SPAN_ENDPOINT: "otel-collector:4317"
+        OTEL_EXPORTER_OTLP_SPAN_ENDPOINT: "{{.OTEL_EXPORTER_OTLP_SPAN_ENDPOINT}}"
   - image: frontend
     context: src/frontend
     docker:
