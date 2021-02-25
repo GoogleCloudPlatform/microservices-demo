@@ -28,6 +28,9 @@ exporters:
 service:
   extensions: [health_check, zpages]
   pipelines:
+    metrics:
+      receivers: [otlp]
+      exporters: [newrelic]
     traces:
       receivers: [otlp, zipkin, jaeger]
       processors: [memory_limiter, batch, queued_retry]
