@@ -89,9 +89,7 @@ build:
     context: src/adservice
     docker:
       buildArgs:
-        NEW_RELIC_API_KEY: "{{.NEW_RELIC_API_KEY}}"
-        NEW_RELIC_TRACE_URL: "{{.NEW_RELIC_TRACE_URL}}"
-        NEW_RELIC_METRIC_URL: "{{.NEW_RELIC_METRIC_URL}}"
+        OTEL_EXPORTER_OTLP_ENDPOINT: "otel-collector:4317"
   - image: otel-collector
     context: src/otel-collector
     docker:

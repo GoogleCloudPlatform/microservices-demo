@@ -25,7 +25,8 @@ def opencensusVersion = "0.25.0"
 def grpcVersion = "1.26.0"
 def jacksonVersion = "2.10.2"
 def protocVersion = "3.11.4"
-def openTelemetryVersion = "0.8.0"
+def openTelemetryVersion = "0.17.1"
+def openTelemetryAlphaVersion = "0.17.1-alpha"
 
 tasks.withType(JavaCompile) {
     sourceCompatibility = JavaVersion.VERSION_11
@@ -37,21 +38,13 @@ ext {
     offlineCompile = new File("$buildDir/output/lib")
 }
 
-configurations {
-    exporters
-}
-
 dependencies {
     if (speed) {
         implementation fileTree(dir: offlineCompile, include: '*.jar')
     } else {
-        exporters ("com.newrelic.telemetry:opentelemetry-exporters-newrelic-auto:0.8.1") {
-            transitive = false
-        }
-
         implementation "com.google.api.grpc:proto-google-common-protos:1.17.0",
                 "io.opentelemetry:opentelemetry-api:${openTelemetryVersion}",
-                "io.opentelemetry:opentelemetry-extension-auto-annotations:${openTelemetryVersion}",
+                "io.opentelemetry:opentelemetry-api-metrics:${openTelemetryAlphaVersion}",
                 "com.newrelic.agent.java:newrelic-api:5.14.0",
                 "io.grpc:grpc-protobuf:${grpcVersion}",
                 "io.grpc:grpc-stub:${grpcVersion}",
@@ -70,11 +63,6 @@ dependencies {
                 "io.netty:netty-tcnative-boringssl-static:2.0.26.Final"
 
     }
-}
-
-task copyExporters(type: Copy) {
-    from configurations.exporters
-    into "$buildDir/exporters"
 }
 
 protobuf {

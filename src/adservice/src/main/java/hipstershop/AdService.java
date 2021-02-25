@@ -28,15 +28,17 @@ import io.grpc.StatusRuntimeException;
 import io.grpc.health.v1.HealthCheckResponse.ServingStatus;
 import io.grpc.services.HealthStatusManager;
 import io.grpc.stub.StreamObserver;
-import io.opentelemetry.OpenTelemetry;
-import io.opentelemetry.common.Labels;
+import io.opentelemetry.api.GlobalOpenTelemetry;
+import io.opentelemetry.api.metrics.DoubleValueRecorder;
+import io.opentelemetry.api.metrics.GlobalMetricsProvider;
+import io.opentelemetry.api.metrics.LongUpDownCounter;
+import io.opentelemetry.api.metrics.Meter;
+import io.opentelemetry.api.metrics.MeterProvider;
+import io.opentelemetry.api.metrics.common.Labels;
+import io.opentelemetry.api.trace.Span;
+import io.opentelemetry.api.trace.SpanKind;
+import io.opentelemetry.api.trace.Tracer;
 import io.opentelemetry.context.Scope;
-import io.opentelemetry.metrics.DoubleValueRecorder;
-import io.opentelemetry.metrics.LongUpDownCounter;
-import io.opentelemetry.metrics.Meter;
-import io.opentelemetry.metrics.MeterProvider;
-import io.opentelemetry.trace.Span;
-import io.opentelemetry.trace.Tracer;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.util.ArrayList;
@@ -109,8 +111,14 @@ public final class AdService {
   }
 
   private static class AdServiceImpl extends hipstershop.AdServiceGrpc.AdServiceImplBase {
-    private final Executor backgroundJobber = new ThreadPoolExecutor(1, 5, 100, TimeUnit.SECONDS,
-        new LinkedBlockingQueue<>(), new ThreadPoolExecutor.CallerRunsPolicy());
+    private final Executor backgroundJobber =
+        new ThreadPoolExecutor(
+            1,
+            5,
+            100,
+            TimeUnit.SECONDS,
+            new LinkedBlockingQueue<>(),
+            new ThreadPoolExecutor.CallerRunsPolicy());
     private final Random random = new Random();
     private final AdService service;
 
@@ -120,7 +128,7 @@ public final class AdService {
     private final DoubleValueRecorder backgroundLatency;
     private final LongUpDownCounter numberOfAdsRequested;
     // used for doing some manual span instrumentation.
-    private final Tracer tracer = OpenTelemetry.getTracer("hipstershop.adservice");
+    private final Tracer tracer = GlobalOpenTelemetry.getTracer("hipstershop.adservice");
 
     public AdServiceImpl(AdService service) {
       this.service = service;
@@ -131,7 +139,6 @@ public final class AdService {
           meter
               .doubleValueRecorderBuilder("grpc.server.duration")
               .setDescription("Timings of gRPC requests to a service")
-              .setConstantLabels(Labels.of("host", AdService.getHost()))
               .setUnit("ms")
               .build();
 
@@ -139,18 +146,17 @@ public final class AdService {
       numberOfAdsRequested =
           meter
               .longUpDownCounterBuilder("ads_requested")
-              .setConstantLabels(Labels.of("host", AdService.getHost()))
               .setUnit("one")
               .setDescription("Number of Ads Requested per Request")
               .build();
 
-      //custom timer for the background job.
-      backgroundLatency = meter
-          .doubleValueRecorderBuilder("background.job.duration")
-          .setDescription("Background job timings")
-          .setConstantLabels(Labels.of("host", AdService.getHost()))
-          .setUnit("ms")
-          .build();
+      // custom timer for the background job.
+      backgroundLatency =
+          meter
+              .doubleValueRecorderBuilder("background.job.duration")
+              .setDescription("Background job timings")
+              .setUnit("ms")
+              .build();
     }
 
     /**
@@ -158,22 +164,32 @@ public final class AdService {
      *
      * @param req the request containing context.
      * @param responseObserver the stream observer which gets notified with the value of {@code
-     * AdResponse}
+     *     AdResponse}
      */
     @Override
     public void getAds(AdRequest req, StreamObserver<AdResponse> responseObserver) {
       // note: these could be pulled into constants to reduce allocations
       String methodName = "hipstershop.AdService/GetAds";
-      Labels nonErrorLabels = Labels
-          .of("method.name", methodName,
-              "span.name", methodName,
-              "error", "false",
-              "span.kind", Span.Kind.SERVER.name());
-      Labels errorLabels = Labels
-          .of("method.name", methodName,
-              "span.name", methodName,
-              "error", "true",
-              "span.kind", Span.Kind.SERVER.name());
+      Labels nonErrorLabels =
+          Labels.of(
+              "method.name",
+              methodName,
+              "span.name",
+              methodName,
+              "error",
+              "false",
+              "span.kind",
+              SpanKind.SERVER.name());
+      Labels errorLabels =
+          Labels.of(
+              "method.name",
+              methodName,
+              "span.name",
+              methodName,
+              "error",
+              "true",
+              "span.kind",
+              SpanKind.SERVER.name());
 
       long startTime = System.currentTimeMillis();
       numberOfAdsRequested.add(req.getContextKeysCount(), Labels.empty());
@@ -200,28 +216,28 @@ public final class AdService {
     private void reportAdsRequest(List<Ad> allAds) {
       long startTime = System.currentTimeMillis();
       String spanName = "ReportRequestedAds";
-      Span span = tracer.spanBuilder(spanName)
-          .setNoParent()
-          .setAttribute("numberOfAds", allAds.size())
-          .startSpan();
-      try (Scope ignored = tracer.withSpan(span)) {
+      Span span =
+          tracer
+              .spanBuilder(spanName)
+              .setNoParent()
+              .setAttribute("numberOfAds", allAds.size())
+              .startSpan();
+      try (Scope ignored = span.makeCurrent()) {
         anotherSpan();
       } catch (InterruptedException e) {
         throw new RuntimeException(e);
       } finally {
-        backgroundLatency.record((System.currentTimeMillis() - startTime),
-            Labels.of("span.name", spanName,
-                "error", "false",
-                "span.kind", Span.Kind.INTERNAL.name()
-            ));
+        backgroundLatency.record(
+            (System.currentTimeMillis() - startTime),
+            Labels.of(
+                "span.name", spanName, "error", "false", "span.kind", SpanKind.INTERNAL.name()));
         span.end();
       }
     }
 
     private void anotherSpan() throws InterruptedException {
-      Span innerSpan = tracer.spanBuilder("InnerBackgroundThing")
-          .startSpan();
-      try (Scope ignored = tracer.withSpan(innerSpan)) {
+      Span innerSpan = tracer.spanBuilder("InnerBackgroundThing").startSpan();
+      try (Scope ignored = innerSpan.makeCurrent()) {
         Thread.sleep(random.nextInt(200));
       } finally {
         innerSpan.end();
@@ -230,7 +246,7 @@ public final class AdService {
 
     private List<Ad> chooseAds(AdRequest req) {
       Span getSomeAds = tracer.spanBuilder("chooseAds").startSpan();
-      try (Scope ignored = tracer.withSpan(getSomeAds)) {
+      try (Scope ignored = getSomeAds.makeCurrent()) {
         List<Ad> allAds = new ArrayList<>();
         logger.info("received ad request (context_words=" + req.getContextKeysCount() + ")");
         if (req.getContextKeysCount() > 0) {
@@ -256,22 +272,24 @@ public final class AdService {
   }
 
   private Collection<Ad> getAdsByCategory(String category) {
-    return jdbcTemplate.query("select redirectUrl, text from ads where category = ?",
-        (rs, rowNum) -> Ad.newBuilder()
-            .setRedirectUrl(rs.getString("redirectUrl"))
-            .setText(rs.getString("text"))
-            .build(),
+    return jdbcTemplate.query(
+        "select redirectUrl, text from ads where category = ?",
+        (rs, rowNum) ->
+            Ad.newBuilder()
+                .setRedirectUrl(rs.getString("redirectUrl"))
+                .setText(rs.getString("text"))
+                .build(),
         category);
   }
 
   private List<Ad> getRandomAds() {
-    return jdbcTemplate
-        .query("select redirectUrl, text from ads order by rand() limit " + MAX_ADS_TO_SERVE,
-            (rs, rowNum) -> Ad.newBuilder()
+    return jdbcTemplate.query(
+        "select redirectUrl, text from ads order by rand() limit " + MAX_ADS_TO_SERVE,
+        (rs, rowNum) ->
+            Ad.newBuilder()
                 .setRedirectUrl(rs.getString("redirectUrl"))
                 .setText(rs.getString("text"))
-                .build()
-            );
+                .build());
   }
 
   /** Await termination on the main thread since the grpc library uses daemon threads. */
@@ -331,7 +349,7 @@ public final class AdService {
       throws IOException, InterruptedException, ClassNotFoundException {
     JdbcTemplate jdbcTemplate = setUpDatabase();
 
-    MeterProvider meterProvider = OpenTelemetry.getMeterProvider();
+    MeterProvider meterProvider = GlobalMetricsProvider.get();
 
     // Start the RPC server. You shouldn't see any output from gRPC before this.
     logger.info("AdService starting.");
@@ -342,8 +360,8 @@ public final class AdService {
 
   private static JdbcTemplate setUpDatabase() throws ClassNotFoundException {
     Class.forName("org.h2.Driver");
-    SingleConnectionDataSource dataSource = new SingleConnectionDataSource(
-        "jdbc:h2:mem:myDb;DB_CLOSE_DELAY=-1", "sa", "sa", true);
+    SingleConnectionDataSource dataSource =
+        new SingleConnectionDataSource("jdbc:h2:mem:myDb;DB_CLOSE_DELAY=-1", "sa", "sa", true);
 
     JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
     jdbcTemplate.update(
@@ -352,8 +370,11 @@ public final class AdService {
     for (String category : adsMap.keys()) {
       ImmutableList<Ad> ads = adsMap.get(category);
       for (Ad ad : ads) {
-        jdbcTemplate.update("insert into ads(category, redirectUrl, text) values (?,?,?)", category,
-            ad.getRedirectUrl(), ad.getText());
+        jdbcTemplate.update(
+            "insert into ads(category, redirectUrl, text) values (?,?,?)",
+            category,
+            ad.getRedirectUrl(),
+            ad.getText());
       }
     }
     Integer count = jdbcTemplate.queryForObject("select count(*) from ads", Integer.class);
