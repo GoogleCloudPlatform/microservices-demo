@@ -36,8 +36,12 @@ spec:
         env:
         - name: PORT
           value: "9555"
+        - name: POD_ID
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.id
         - name: OTEL_RESOURCE_ATTRIBUTES
-          value: 'service.name=AdService'
+          value: "service.name=AdService,pod.id=$(POD_ID)"
         # - name: DISABLE_STATS
         #   value: "1"
         # - name: DISABLE_TRACING
