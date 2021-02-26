@@ -41,7 +41,7 @@ spec:
             fieldRef:
               fieldPath: metadata.name
         - name: OTEL_RESOURCE_ATTRIBUTES
-          value: "service.name=AdService,pod.name=$(POD_NAME)"
+          value: "service.name=AdService,pod.name=$(POD_NAME),service.instance.id=$(POD_NAME)"
         # - name: DISABLE_STATS
         #   value: "1"
         # - name: DISABLE_TRACING
