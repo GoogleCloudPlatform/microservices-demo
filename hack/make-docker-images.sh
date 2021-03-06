@@ -21,20 +21,26 @@ SCRIPTDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 log() { echo "$1" >&2; }
 
-TAG="${TAG:?TAG env variable must be specified}"
-REPO_PREFIX="${REPO_PREFIX:?REPO_PREFIX env variable must be specified}"
+TAG="${TAG:--}"
+REPO_PREFIX="${REPO_PREFIX:-quay.io/signalfuse/microservices-demo-}"
 
 while IFS= read -d $'\0' -r dir; do
     # build image
     svcname="$(basename "${dir}")"
-    image="${REPO_PREFIX}$svcname:$TAG"
+    image="${REPO_PREFIX}$svcname"
     (
         cd "${dir}"
         log "Building: ${image}"
-        docker build -t "${image}" .
+        docker build -t "${image}:latest" .
 
         log "Pushing: ${image}"
-        docker push "${image}"
+        docker push "${image}:latest"
+
+        if [ ${TAG} != "-" ]
+        then
+            docker tag "${image}:latest" "${image}:$TAG"
+            docker push "${image}:$TAG"
+        fi
     )
 done < <(find "${SCRIPTDIR}/../src" -mindepth 1 -maxdepth 1 -type d -print0)
 

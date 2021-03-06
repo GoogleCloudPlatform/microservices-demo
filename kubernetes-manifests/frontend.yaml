@@ -67,7 +67,11 @@ spec:
             value: "checkoutservice:5050"
           - name: AD_SERVICE_ADDR
             value: "adservice:9555"
-          - name: FRONTEND_EXTRA_HEADERS
+          - name: RUM_REALM
+          - name: RUM_AUTH
+          - name: RUM_APP_NAME
+          - name: RUM_ENVIRONMENT
+          - name: RUM_DEBUG
           - name: ENV_PLATFORM
             value: "gcp"
           - name: NODE_IP

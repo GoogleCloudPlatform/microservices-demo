@@ -23,15 +23,20 @@ SCRIPTDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 log() { echo "$1" >&2; }
 
-TAG="${TAG:?TAG env variable must be specified}"
-REPO_PREFIX="${REPO_PREFIX:?REPO_PREFIX env variable must be specified}"
-DOMAIN="${DOMAIN:?DOMAIN env variable must be specified}"
+TAG="${TAG:-latest}"
+REPO_PREFIX="${REPO_PREFIX:-quay.io/signalfuse/microservices-demo-}"
 OUT_DIR="${OUT_DIR:-${SCRIPTDIR}/../release}"
 NODE_SELECTOR_KEY="${NODE_SELECTOR_KEY:--}"
 NODE_SELECTOR_VALUE="${NODE_SELECTOR_VALUE:--}"
 TOLERATION_KEY="${TOLERATION_KEY:--}"
 TOLERATION_VALUE="${TOLERATION_VALUE:--}"
-FRONTEND_EXTRA_HEADERS="${FRONTEND_EXTRA_HEADERS:-}"
+
+# Optional Splunk RUM configuration
+RUM_REALM="${RUM_REALM:--}"
+RUM_AUTH="${RUM_AUTH:--}"
+RUM_APP_NAME="${RUM_APP_NAME:-hipster-shop-demo}"
+RUM_ENVIRONMENT="${RUM_ENVIRONMENT:--}"
+RUM_DEBUG="${RUM_DEBUG:--}"
 
 print_license_header() {
     cat "${SCRIPTDIR}/license_header.txt"
@@ -99,10 +104,35 @@ mk_kubernetes_manifests() {
         out_manifest="$(gsed -r "s|$pattern|$replace|g" <(echo "${out_manifest}") )"
     fi
 
-    # insert FRONTEND_EXTRA_HEADERS
-    pattern="^(\s*)- name: FRONTEND_EXTRA_HEADERS"
-    replace="\1- name: FRONTEND_EXTRA_HEADERS\n\1  value: \"${FRONTEND_EXTRA_HEADERS}\""
-    out_manifest="$(gsed -r "s|$pattern|$replace|g" <(echo "${out_manifest}") )"
+    # insert RUM instrumentation
+    if [ ${RUM_REALM} != "-" ] && [ ${RUM_AUTH} != "-" ]
+    then
+        pattern="^(\s*)- name: RUM_REALM"
+        replace="\1- name: RUM_REALM\n\1  value: \"${RUM_REALM}\""
+        out_manifest="$(gsed -r "s|$pattern|$replace|g" <(echo "${out_manifest}") )"
+
+        pattern="^(\s*)- name: RUM_AUTH"
+        replace="\1- name: RUM_AUTH\n\1  value: \"${RUM_AUTH}\""
+        out_manifest="$(gsed -r "s|$pattern|$replace|g" <(echo "${out_manifest}") )"
+
+        pattern="^(\s*)- name: RUM_APP_NAME"
+        replace="\1- name: RUM_APP_NAME\n\1  value: \"${RUM_APP_NAME}\""
+        out_manifest="$(gsed -r "s|$pattern|$replace|g" <(echo "${out_manifest}") )"
+
+        if [ ${RUM_ENVIRONMENT} != "-" ]
+        then
+            pattern="^(\s*)- name: RUM_ENVIRONMENT"
+            replace="\1- name: RUM_ENVIRONMENT\n\1  value: \"${RUM_ENVIRONMENT}\""
+            out_manifest="$(gsed -r "s|$pattern|$replace|g" <(echo "${out_manifest}") )"
+        fi
+        
+        if [ ${RUM_DEBUG} != "-" ]
+        then
+            pattern="^(\s*)- name: RUM_DEBUG"
+            replace="\1- name: RUM_DEBUG\n\1  value: \"${RUM_DEBUG}\""
+            out_manifest="$(gsed -r "s|$pattern|$replace|g" <(echo "${out_manifest}") )"
+        fi
+    fi
 
     # substitude loadgenerator port: 8089 -> 80
     pattern="^(\s*)port:\s+8089(\s*)"

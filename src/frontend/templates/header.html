@@ -14,7 +14,10 @@
     <link rel="stylesheet" type="text/css" href="/static/styles/cart.css">
     <link rel="stylesheet" type="text/css" href="/static/styles/order.css">
     <link rel='shortcut icon' type='image/x-icon' href='/static/favicon.ico' />
-    {{$.extra_headers}}
+    {{- if and $.rum_realm $.rum_auth }}
+    <script src="https://cdn.signalfx.com/o11y-gdi-rum/latest/splunk-otel-web.js" type="text/javascript"></script>
+    <script>window.SplunkRum && window.SplunkRum.init({beaconUrl: "https://rum-ingest.{{ $.rum_realm }}.signalfx.com/v1/rum", rumAuth: "{{ $.rum_auth }}"{{ if $.rum_app_name }}, app: "{{ $.rum_app_name }}"{{ end }}{{ if $.rum_environment }}, environment: "{{ $.rum_environment }}"{{ end }}{{ if $.rum_debug }}, debug: "true"{{ end }}});</script>
+    {{- end }}
 </head>
 
 <body>
@@ -55,4 +58,4 @@
             </div>
         </div>
     </header>
-    {{end}}
+{{ end }}

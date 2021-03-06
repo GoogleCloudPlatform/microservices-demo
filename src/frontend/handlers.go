@@ -87,17 +87,21 @@ func (fe *frontendServer) homeHandler(w http.ResponseWriter, r *http.Request) {
 	plat.setPlatformDetails(strings.ToLower(env))
 
 	if err := templates.ExecuteTemplate(w, "home", map[string]interface{}{
-		"session_id":    sessionID(r),
-		"request_id":    r.Context().Value(ctxKeyRequestID{}),
-		"user_currency": currentCurrency(r),
-		"currencies":    currencies,
-		"products":      ps,
-		"cart_size":     cartSize(cart),
-		"banner_color":  os.Getenv("BANNER_COLOR"), // illustrates canary deployments
-		"ad":            fe.chooseAd(r.Context(), []string{}, log),
-		"platform_css":  plat.css,
-		"platform_name": plat.provider,
-		"extra_headers": template.HTML(os.Getenv("FRONTEND_EXTRA_HEADERS")),
+		"session_id":      sessionID(r),
+		"request_id":      r.Context().Value(ctxKeyRequestID{}),
+		"user_currency":   currentCurrency(r),
+		"currencies":      currencies,
+		"products":        ps,
+		"cart_size":       cartSize(cart),
+		"banner_color":    os.Getenv("BANNER_COLOR"), // illustrates canary deployments
+		"ad":              fe.chooseAd(r.Context(), []string{}, log),
+		"platform_css":    plat.css,
+		"platform_name":   plat.provider,
+		"rum_realm":       os.Getenv("RUM_REALM"),
+		"rum_auth":        os.Getenv("RUM_AUTH"),
+		"rum_app_name":    os.Getenv("RUM_APP_NAME"),
+		"rum_environment": os.Getenv("RUM_ENVIRONMENT"),
+		"rum_debug":       os.Getenv("RUM_DEBUG"),
 	}); err != nil {
 		log.Error(err)
 	}
@@ -174,7 +178,11 @@ func (fe *frontendServer) productHandler(w http.ResponseWriter, r *http.Request)
 		"cart_size":       cartSize(cart),
 		"platform_css":    plat.css,
 		"platform_name":   plat.provider,
-		"extra_headers":   template.HTML(os.Getenv("FRONTEND_EXTRA_HEADERS")),
+		"rum_realm":       os.Getenv("RUM_REALM"),
+		"rum_auth":        os.Getenv("RUM_AUTH"),
+		"rum_app_name":    os.Getenv("RUM_APP_NAME"),
+		"rum_environment": os.Getenv("RUM_ENVIRONMENT"),
+		"rum_debug":       os.Getenv("RUM_DEBUG"),
 	}); err != nil {
 		log.Println(err)
 	}
@@ -286,7 +294,11 @@ func (fe *frontendServer) viewCartHandler(w http.ResponseWriter, r *http.Request
 		"expiration_years": []int{year, year + 1, year + 2, year + 3, year + 4},
 		"platform_css":     plat.css,
 		"platform_name":    plat.provider,
-		"extra_headers":    template.HTML(os.Getenv("FRONTEND_EXTRA_HEADERS")),
+		"rum_realm":        os.Getenv("RUM_REALM"),
+		"rum_auth":         os.Getenv("RUM_AUTH"),
+		"rum_app_name":     os.Getenv("RUM_APP_NAME"),
+		"rum_environment":  os.Getenv("RUM_ENVIRONMENT"),
+		"rum_debug":        os.Getenv("RUM_DEBUG"),
 	}); err != nil {
 		log.Println(err)
 	}
@@ -356,7 +368,11 @@ func (fe *frontendServer) placeOrderHandler(w http.ResponseWriter, r *http.Reque
 		"recommendations": recommendations,
 		"platform_css":    plat.css,
 		"platform_name":   plat.provider,
-		"extra_headers":   template.HTML(os.Getenv("FRONTEND_EXTRA_HEADERS")),
+		"rum_realm":       os.Getenv("RUM_REALM"),
+		"rum_auth":        os.Getenv("RUM_AUTH"),
+		"rum_app_name":    os.Getenv("RUM_APP_NAME"),
+		"rum_environment": os.Getenv("RUM_ENVIRONMENT"),
+		"rum_debug":       os.Getenv("RUM_DEBUG"),
 	}); err != nil {
 		log.Println(err)
 	}
@@ -412,12 +428,16 @@ func renderHTTPError(log logrus.FieldLogger, r *http.Request, w http.ResponseWri
 
 	w.WriteHeader(code)
 	templates.ExecuteTemplate(w, "error", map[string]interface{}{
-		"session_id":    sessionID(r),
-		"request_id":    r.Context().Value(ctxKeyRequestID{}),
-		"error":         errMsg,
-		"status_code":   code,
-		"extra_headers": template.HTML(os.Getenv("FRONTEND_EXTRA_HEADERS")),
-		"status":        http.StatusText(code)})
+		"session_id":      sessionID(r),
+		"request_id":      r.Context().Value(ctxKeyRequestID{}),
+		"error":           errMsg,
+		"status_code":     code,
+		"rum_realm":       os.Getenv("RUM_REALM"),
+		"rum_auth":        os.Getenv("RUM_AUTH"),
+		"rum_app_name":    os.Getenv("RUM_APP_NAME"),
+		"rum_environment": os.Getenv("RUM_ENVIRONMENT"),
+		"rum_debug":       os.Getenv("RUM_DEBUG"),
+		"status":          http.StatusText(code)})
 }
 
 func currentCurrency(r *http.Request) string {
