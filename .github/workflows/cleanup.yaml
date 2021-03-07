@@ -31,12 +31,10 @@ jobs:
         if: ${{ always() }}
         timeout-minutes: 20
         run: |
-          gcloud container clusters get-credentials $PR_CLUSTER \
-              --zone $ZONE --project $PROJECT_ID
+          az aks get-credentials --resource-group $RESOURCE_GROUP --name $PR_CLUSTER
           NAMESPACE="pr${PR_NUMBER}"
           kubectl delete namespace $NAMESPACE
         env:
-          PROJECT_ID: "onlineboutique-ci"
           PR_CLUSTER: "online-boutique-pr"
-          ZONE: "us-east1-b"
+          RESOURCE_GROUP: "yy4resources"
           PR_NUMBER: ${{ github.event.number }}

@@ -56,7 +56,7 @@ jobs:
         NAMESPACE="pr${PR_NUMBER}"
         echo "::set-env name=NAMESPACE::$NAMESPACE"
 
-        gcloud container clusters get-credentials $PR_CLUSTER --zone $ZONE --project $PROJECT_ID
+        az aks get-credentials --resource-group $RESOURCE_GROUP --name $PR_CLUSTER
         cat <<EOF | kubectl apply -f -
         apiVersion: v1
         kind: Namespace
@@ -65,13 +65,13 @@ jobs:
         EOF
         echo Deploying application
         skaffold config set --global local-cluster false
-        skaffold run --default-repo=gcr.io/$PROJECT_ID/refs/pull/$PR_NUMBER --tag=$PR_NUMBER --namespace=$NAMESPACE
+        skaffold run --default-repo=yy4registry.azurecr.io/$PROJECT_ID/refs/pull/$PR_NUMBER --tag=$PR_NUMBER --namespace=$NAMESPACE
       env:
         ACTIONS_ALLOW_UNSECURE_COMMANDS: true
         PR_NUMBER: ${{ github.event.pull_request.number }}
         PROJECT_ID: "onlineboutique-ci"
         PR_CLUSTER: "online-boutique-pr"
-        ZONE: "us-east1-b"
+        RESOURCE_GROUP: "yy4resources"
     - name: Wait For Pods
       timeout-minutes: 20
       run: |

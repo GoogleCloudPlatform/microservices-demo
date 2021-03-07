@@ -28,10 +28,10 @@ jobs:
       run: |
         skaffold config set --global local-cluster false
         # tag with git hash
-        skaffold build --default-repo=gcr.io/$PROJECT_ID \
+        skaffold build --default-repo=yy4registry.azurecr.io/$PROJECT_ID \
                        --tag=$GITHUB_SHA
         # tag as latest
-        skaffold build --default-repo=gcr.io/$PROJECT_ID \
+        skaffold build --default-repo=yy4registry.azurecr.io/$PROJECT_ID \
                        --tag=latest
       env:
         PROJECT_ID: ${{ secrets.PROJECT_ID }}

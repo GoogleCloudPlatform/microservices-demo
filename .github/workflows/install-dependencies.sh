@@ -18,6 +18,9 @@ set -euo pipefail
 # install wget
 sudo apt install -y wget
 
+# install gnupg2
+sudo apt install -y gnupg2
+
 # install dotnet CLI
 sudo apt-get update
 sudo apt-get install wget
@@ -34,8 +37,16 @@ sudo apt-get install -y dotnet-sdk-3.1
 echo "✅ dotnet installed"
 
 # install kubectl
+curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add -
+sudo echo "deb http://apt.kubernetes.io/ kubernetes-xenial main" > /etc/apt/sources.list.d/kubernetes.list
+sudo apt-get update
+
 sudo apt-get install -yqq kubectl git
 echo "✅ kubectl installed"
+
+# install azure cli
+curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
+echo "✅ azure cli installed"
 
 # install go
 wget https://golang.org/dl/go1.15.3.linux-amd64.tar.gz
