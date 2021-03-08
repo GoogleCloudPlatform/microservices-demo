@@ -25,10 +25,6 @@ exporters:
     apikey: NEW_RELIC_API_KEY
     spans_url_override: NEW_RELIC_TRACE_URL
     metrics_url_override: NEW_RELIC_METRIC_URL
-  otlp:
-    endpoint: OTEL_EXPORTER_OTLP_SPAN_ENDPOINT
-    headers:
-      "x-nr-key": "NEW_RELIC_API_KEY"
 service:
   extensions: [health_check, zpages]
   pipelines:
@@ -38,4 +34,4 @@ service:
     traces:
       receivers: [otlp, zipkin, jaeger]
       processors: [memory_limiter, batch, queued_retry]
-      exporters: [otlp]
+      exporters: [newrelic]
