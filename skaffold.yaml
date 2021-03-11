@@ -97,6 +97,7 @@ build:
         NEW_RELIC_API_KEY: "{{.NEW_RELIC_API_KEY}}"
         NEW_RELIC_TRACE_URL: "{{.NEW_RELIC_TRACE_URL}}"
         NEW_RELIC_METRIC_URL: "{{.NEW_RELIC_METRIC_URL}}"
+        OTEL_EXPORTER_OTLP_SPAN_ENDPOINT_NO_SCHEME: "{{.OTEL_EXPORTER_OTLP_SPAN_ENDPOINT_NO_SCHEME}}"
   - image: otel-system
     context: src/otel-system
     docker:
