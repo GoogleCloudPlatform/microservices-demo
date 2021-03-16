@@ -15,11 +15,16 @@
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
 using cartservice;
+using cartservice.OpenTelemetry;
 
 CreateHostBuilder(args).Build().Run();
 
 static IHostBuilder CreateHostBuilder(string[] args) =>
     Host.CreateDefaultBuilder(args)
+        .ConfigureLogging((loggingBuilder) =>
+        {
+            loggingBuilder.ConfigureOpenTelemetry();
+        })
         .ConfigureWebHostDefaults(webBuilder =>
         {
             webBuilder.UseStartup<Startup>();
