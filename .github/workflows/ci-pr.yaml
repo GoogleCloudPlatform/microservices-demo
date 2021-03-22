@@ -28,7 +28,7 @@ jobs:
     - name: Go Unit Tests
       timeout-minutes: 10
       run: |
-        for SERVICE in "shippingservice"; do
+        for SERVICE in "shippingservice" "productcatalogservice"; do
           echo "testing $SERVICE..."
           pushd src/$SERVICE
           go test
