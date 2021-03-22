@@ -49,7 +49,7 @@ httplib2==0.19.0
     #   google-auth-httplib2
 idna==2.8
     # via requests
-jinja2==2.10.1
+jinja2==2.11.3
     # via -r requirements.in
 markupsafe==1.1.0
     # via jinja2
