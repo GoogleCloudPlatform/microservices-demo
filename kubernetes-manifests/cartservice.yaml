@@ -62,7 +62,7 @@ spec:
         - name: EXTERNAL_DB_MAX_DURATION_MILLIS
           value: "750"
         - name: EXTERNAL_DB_ERROR_RATE
-          value: "0.33"
+          value: "0.0"
         resources:
           requests:
             cpu: 200m
