@@ -367,16 +367,15 @@ public final class AdService {
 
     InstrumentSelector selectorCounter = InstrumentSelector.builder().setInstrumentType(InstrumentType.COUNTER).build();
     InstrumentSelector selectorUpDownCounter = InstrumentSelector.builder().setInstrumentType(InstrumentType.UP_DOWN_COUNTER).build();
-    InstrumentSelector selectorSumObserver = InstrumentSelector.builder().setInstrumentType(InstrumentType.SUM_OBSERVER).build();
-    InstrumentSelector selectorUpDownSumObserver = InstrumentSelector.builder().setInstrumentType(InstrumentType.UP_DOWN_SUM_OBSERVER).build();
+    InstrumentSelector selectorValueRecorder = InstrumentSelector.builder().setInstrumentType(InstrumentType.VALUE_RECORDER).build();
 
     AggregatorFactory sumAggregationFactory = AggregatorFactory.sum(false);
     AggregatorFactory countAggregationFactory = AggregatorFactory.count(AggregationTemporality.DELTA);
 
     meterProvider.registerView(selectorCounter, countAggregationFactory);
     meterProvider.registerView(selectorUpDownCounter, countAggregationFactory);
-    meterProvider.registerView(selectorSumObserver, sumAggregationFactory);
-    meterProvider.registerView(selectorUpDownSumObserver, sumAggregationFactory);
+    meterProvider.registerView(selectorValueRecorder, sumAggregationFactory);
+    meterProvider.registerView(selectorValueRecorder, sumAggregationFactory);
 
     IntervalMetricReader.builder()
         .setExportIntervalMillis(2000)
