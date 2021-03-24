@@ -45,7 +45,6 @@ import io.opentelemetry.exporter.otlp.metrics.OtlpGrpcMetricExporter;
 import io.opentelemetry.sdk.metrics.SdkMeterProvider;
 import io.opentelemetry.sdk.metrics.aggregator.AggregatorFactory;
 import io.opentelemetry.sdk.metrics.common.InstrumentType;
-import io.opentelemetry.sdk.metrics.data.AggregationTemporality;
 import io.opentelemetry.sdk.metrics.export.IntervalMetricReader;
 import io.opentelemetry.sdk.metrics.view.InstrumentSelector;
 import io.opentelemetry.sdk.resources.Resource;
@@ -365,16 +364,9 @@ public final class AdService {
     // TODO: Generate resource from OTEL_RESOURCE_ATTRIBUTES
     SdkMeterProvider meterProvider = SdkMeterProvider.builder().setResource(resource).build();
 
-    InstrumentSelector selectorCounter = InstrumentSelector.builder().setInstrumentType(InstrumentType.COUNTER).build();
     InstrumentSelector selectorUpDownCounter = InstrumentSelector.builder().setInstrumentType(InstrumentType.UP_DOWN_COUNTER).build();
-    InstrumentSelector selectorValueRecorder = InstrumentSelector.builder().setInstrumentType(InstrumentType.VALUE_RECORDER).build();
-
-    AggregatorFactory sumAggregationFactory = AggregatorFactory.sum(false);
-    AggregatorFactory countAggregationFactory = AggregatorFactory.count(AggregationTemporality.DELTA);
-
-    meterProvider.registerView(selectorCounter, countAggregationFactory);
-    meterProvider.registerView(selectorUpDownCounter, countAggregationFactory);
-    meterProvider.registerView(selectorValueRecorder, sumAggregationFactory);
+    AggregatorFactory aggregationFactory = AggregatorFactory.sum(false);
+    meterProvider.registerView(selectorUpDownCounter, aggregationFactory);
 
     IntervalMetricReader.builder()
         .setExportIntervalMillis(2000)
