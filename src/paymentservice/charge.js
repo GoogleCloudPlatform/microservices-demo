@@ -54,14 +54,12 @@ const SERIALIZATION_FAILURE_RATE = Number.parseFloat(
 
 // Success attributes
 const SUCCESS_VERSION = 'v350.9';
-const SUCCESS_ENVIRONMENT = ['production', 'staging', 'development']; // note, some "production" traffic will succeed, which is part of demo script
 const SUCCESS_TENANT_LEVEL = ['gold', 'silver', 'bronze'];
 const SUCCESS_K8S_POD_UID = ['payment-service-449bc'];
 const API_TOKEN_SUCCESS_TOKEN = 'prod-a8cf28f9-1a1a-4994-bafa-cd4b143c3291';
 
 // Failure attributes
 const FAILURE_VERSION = 'v350.10';
-const FAILURE_ENVIRONMENT = 'production';
 const FAILURE_K8S_POD_UID = [
   'payment-service-3483d',
   'payment-service-ab82e',
@@ -102,7 +100,6 @@ module.exports = async function charge(request) {
   grpcActiveSpan.setAttributes({
     version: SUCCESS_VERSION,
     'tenant.level': random(SUCCESS_TENANT_LEVEL),
-    environment: random(SUCCESS_ENVIRONMENT),
     kubernetes_pod_uid: random(SUCCESS_K8S_POD_UID),
   });
 
@@ -121,7 +118,6 @@ module.exports = async function charge(request) {
 
       grpcActiveSpan.setAttributes({
         version: FAILURE_VERSION,
-        environment: FAILURE_ENVIRONMENT,
         kubernetes_pod_uid,
         error: true,
       });
@@ -129,7 +125,6 @@ module.exports = async function charge(request) {
       logger
         .child({
           version: FAILURE_VERSION,
-          environment: FAILURE_ENVIRONMENT,
           kubernetes_pod_uid,
         })
         .error(err);
@@ -184,7 +179,6 @@ module.exports = async function charge(request) {
         // Mark error conditions on the root span; we force these for the demo
         grpcActiveSpan.setAttributes({
           version: FAILURE_VERSION,
-          environment: FAILURE_ENVIRONMENT,
           kubernetes_pod_uid: random(FAILURE_K8S_POD_UID),
           error: true,
         });
