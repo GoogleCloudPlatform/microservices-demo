@@ -375,7 +375,6 @@ public final class AdService {
     meterProvider.registerView(selectorCounter, countAggregationFactory);
     meterProvider.registerView(selectorUpDownCounter, countAggregationFactory);
     meterProvider.registerView(selectorValueRecorder, sumAggregationFactory);
-    meterProvider.registerView(selectorValueRecorder, sumAggregationFactory);
 
     IntervalMetricReader.builder()
         .setExportIntervalMillis(2000)
