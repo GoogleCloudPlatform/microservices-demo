@@ -314,14 +314,7 @@ public final class AdService {
   /** Main launches the server from the command line. */
   public static void main(String[] args) throws IOException, InterruptedException {
     // Registers all RPC views.
-    /*
-     [TODO:rghetia] replace registerAllViews with registerAllGrpcViews. registerAllGrpcViews
-     registers new views using new measures however current grpc version records against old
-     measures. When new version of grpc (0.19) is release revert back to new. After reverting back
-     to new the new measure will not provide any tags (like method). This will create some
-     discrepencies when compared grpc measurements in Go services.
-    */
-    RpcViews.registerAllViews();
+    RpcViews.registerAllGrpcViews();
 
     new Thread(
             () -> {
