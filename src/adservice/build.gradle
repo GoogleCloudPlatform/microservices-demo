@@ -35,6 +35,7 @@ dependencies {
     } else {
         implementation "com.google.api.grpc:proto-google-common-protos:1.18.1",
                 "io.opencensus:opencensus-api:${opencensusVersion}",
+                "io.opencensus:opencensus-contrib-grpc-metrics:${opencensusVersion}",
                 "io.opencensus:opencensus-contrib-grpc-util:${opencensusVersion}",
                 "io.opencensus:opencensus-exporter-trace-jaeger:${opencensusVersion}",
                 "io.opencensus:opencensus-exporter-stats-stackdriver:${opencensusVersion}",
