@@ -11,6 +11,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Protobuf Include="protos\Cart.proto" GrpcServices="Server" />
+    <Protobuf Include="protos\Cart.proto" GrpcServices="Both" />
   </ItemGroup>
 </Project>
