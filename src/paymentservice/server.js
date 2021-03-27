@@ -12,13 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+const { context, getSpan }= require('@opentelemetry/api');
 const path = require('path');
 const grpc = require('grpc');
 const pino = require('pino');
 const protoLoader = require('@grpc/proto-loader');
 
 const charge = require('./charge');
-const { tracer } = require('./tracing');
 
 const logger = pino({
   name: 'paymentservice-server',
@@ -27,7 +27,7 @@ const logger = pino({
   useLevelLabels: true,
   timestamp: pino.stdTimeFunctions.unixTime,
   mixin() {
-    const span = tracer.getCurrentSpan()
+    const span = getSpan(context.active());
     if (!span) {
       return {};
     }

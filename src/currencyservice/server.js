@@ -14,27 +14,6 @@
  * limitations under the License.
  */
 
-const api = require("@opentelemetry/api");
-const { NodeTracerProvider } = require('@opentelemetry/node');
-const { B3Propagator } = require("@opentelemetry/core");
-const { ZipkinExporter } = require('@opentelemetry/exporter-zipkin');
-const { BatchSpanProcessor } = require('@opentelemetry/tracing');
-
-api.propagation.setGlobalPropagator(new B3Propagator());
-
-const provider = new NodeTracerProvider();
-provider.register({
-  propagator: new B3Propagator(),
-});
-
-const exporter = new ZipkinExporter({
-  serviceName: 'currencyservice',
-  url: process.env.SIGNALFX_ENDPOINT_URL,
-});
-
-const tracer = provider.getTracer('currencyservice')
-provider.addSpanProcessor(new BatchSpanProcessor(exporter));
-
 const path = require('path');
 const grpc = require('grpc');
 const pino = require('pino');
