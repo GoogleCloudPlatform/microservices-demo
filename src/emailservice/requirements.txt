@@ -7,7 +7,7 @@
 cachetools==4.2.0         # via google-auth
 certifi==2020.12.5       # via requests
 chardet==3.0.4            # via requests
-google-api-core[grpc]==1.24.1  # via -r requirements.in, google-api-python-client, google-cloud-core, google-cloud-monitoring, google-cloud-trace, opencensus
+google-api-core[grpc]==1.26.2  # via -r requirements.in, google-api-python-client, google-cloud-core, google-cloud-monitoring, google-cloud-trace, opencensus
 google-api-python-client==1.12.8  # via google-cloud-profiler
 google-auth-httplib2==0.0.4  # via google-api-python-client, google-cloud-profiler
 google-auth==1.24.0       # via google-api-core, google-api-python-client, google-auth-httplib2, google-cloud-profiler
