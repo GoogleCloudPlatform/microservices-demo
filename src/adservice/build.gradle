@@ -15,7 +15,7 @@ group = "adservice"
 version = "0.1.0-SNAPSHOT"
 
 def opencensusVersion = "0.27.0"
-def grpcVersion = "1.32.1"
+def grpcVersion = "1.36.1"
 def jacksonVersion = "2.12.1"
 def protocVersion = "3.12.3"
 
