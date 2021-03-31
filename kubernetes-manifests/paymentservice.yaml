@@ -40,8 +40,10 @@ spec:
           valueFrom:
             fieldRef:
               fieldPath: status.hostIP
-        - name: SIGNALFX_ENDPOINT_URL
+        - name: OTEL_EXPORTER_JAEGER_ENDPOINT
           value: "http://$(NODE_IP):14268/api/traces"
+        - name: SPLUNK_SERVICE_NAME 
+          value: "paymentservice"
         - name: API_TOKEN_FAILURE_RATE
           value: "0.75"
         - name: SERIALIZATION_FAILURE_RATE
