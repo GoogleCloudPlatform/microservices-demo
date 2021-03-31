@@ -42,8 +42,7 @@ spec:
             fieldRef:
               fieldPath: status.hostIP
         - name: SIGNALFX_ENDPOINT_URL
-          # value: "http://zipkin.default:9411/api/v2/spans"
-          value: "http://$(NODE_IP):14268/api/trace"
+          value: "http://$(NODE_IP):14268/api/traces"
         readinessProbe:
           exec:
             command: ["/bin/grpc_health_probe", "-addr=:7000"]
