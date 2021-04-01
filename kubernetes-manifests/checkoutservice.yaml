@@ -61,6 +61,8 @@ spec:
             value: "http://$(NODE_IP):14268/api/traces"
           - name: SIGNALFX_SERVICE_NAME 
             value: "checkoutservice"
+          - name: JAEGER_SERVICE_NAME
+            value: "checkoutservice"
           - name: MAX_RETRY_ATTEMPTS
             value: "20"
           - name: RETRY_INITIAL_SLEEP_MILLIS

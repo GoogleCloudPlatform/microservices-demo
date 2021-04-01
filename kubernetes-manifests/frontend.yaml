@@ -82,6 +82,8 @@ spec:
             value: "http://$(NODE_IP):14268/api/traces"
           - name: SIGNALFX_SERVICE_NAME 
             value: "frontendservice"
+          - name: JAEGER_SERVICE_NAME
+            value: "frontendservice"
           - name: SIGNALFX_SERVER_TIMING_CONTEXT
             value: "true"
           resources:
