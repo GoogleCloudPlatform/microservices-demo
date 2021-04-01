@@ -57,9 +57,9 @@ spec:
             valueFrom:
               fieldRef:
                 fieldPath: status.hostIP
-          - name: OTEL_EXPORTER_JAEGER_ENDPOINT
+          - name: SIGNALFX_ENDPOINT_NAME 
             value: "http://$(NODE_IP):14268/api/traces"
-          - name: SPLUNK_SERVICE_NAME 
+          - name: SIGNALFX_SERVICE_NAME 
             value: "checkoutservice"
           - name: MAX_RETRY_ATTEMPTS
             value: "20"
