@@ -41,7 +41,7 @@ spec:
             fieldRef:
               fieldPath: status.hostIP
         - name: SIGNALFX_ENDPOINT_URL 
-          value: "http://$(NODE_IP):9411/api/v2/spans"
+          value: "http://$(NODE_IP):14268/api/traces"
         - name: SIGNALFX_SERVICE_NAME 
           value: "productcatalogservice"
         - name: JAEGER_SERVICE_NAME

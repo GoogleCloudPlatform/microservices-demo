@@ -138,7 +138,7 @@ func run(port string) string {
 }
 
 func initTracing() func() {
-	sdk, err := distro.Run(distro.WithServiceName("checkoutservice"))
+	sdk, err := distro.Run(distro.WithServiceName("productcatalogservice"))
 	if err != nil {
 		panic(err)
 	}
@@ -226,7 +226,7 @@ func getTraceLogFields(ctx context.Context) logrus.Fields {
 		spanCtx := span.SpanContext()
 		fields["trace_id"] = spanCtx.TraceID().String()
 		fields["span_id"] = spanCtx.SpanID().String()
-		fields["service.name"] = "checkoutservice"
+		fields["service.name"] = "productcatalogservice"
 	}
 	return fields
 }
