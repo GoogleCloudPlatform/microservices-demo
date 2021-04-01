@@ -13,7 +13,7 @@
   "dependencies": {
     "@grpc/proto-loader": "^0.3.0",
     "@opentelemetry/instrumentation-dns": "^0.14.0",
-    "@opentelemetry/instrumentation-grpc": "^0.18.0",
+    "@opentelemetry/plugin-grpc": "^0.18.2",
     "@splunk/otel": "^0.6.0",
     "grpc": "^1.23.3",
     "pino": "^5.17.0",
