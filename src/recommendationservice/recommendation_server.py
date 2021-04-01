@@ -28,6 +28,7 @@ import demo_pb2
 import demo_pb2_grpc
 from grpc_health.v1 import health_pb2
 from grpc_health.v1 import health_pb2_grpc
+from opentelemetry import propagate
 
 from logger import getJSONLogger
 
@@ -38,8 +39,13 @@ logger = getJSONLogger('recommendationservice-server')
 class RecommendationService(demo_pb2_grpc.RecommendationServiceServicer):
     def ListRecommendations(self, request, context):
         max_responses = 5
+
         # fetch list of products from product catalog stub
-        cat_response = product_catalog_stub.ListProducts(demo_pb2.Empty())
+        # otel context propagation in grpc instrumentation is broken so we manually
+        # inject the context
+        metadata = {}
+        propagate.inject(metadata)
+        cat_response = product_catalog_stub.ListProducts(demo_pb2.Empty(), metadata=metadata)
         product_ids = [x.id for x in cat_response.products]
         filtered_products = list(set(product_ids)-set(request.product_ids))
         num_products = len(filtered_products)
