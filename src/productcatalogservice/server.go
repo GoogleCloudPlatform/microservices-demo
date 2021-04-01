@@ -28,14 +28,12 @@ import (
 	"syscall"
 	"time"
 
-	"cloud.google.com/go/profiler"
 	"github.com/golang/protobuf/jsonpb"
-	"github.com/opentracing/opentracing-go"
 	pb "github.com/signalfx/microservices-demo/src/productcatalogservice/genproto"
-	grpctrace "github.com/signalfx/signalfx-go-tracing/contrib/google.golang.org/grpc"
-	"github.com/signalfx/signalfx-go-tracing/ddtrace/tracer"
-	"github.com/signalfx/signalfx-go-tracing/tracing"
+	"github.com/signalfx/splunk-otel-go/distro"
 	"github.com/sirupsen/logrus"
+	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
+	"go.opentelemetry.io/otel/trace"
 	healthpb "google.golang.org/grpc/health/grpc_health_v1"
 
 	"google.golang.org/grpc"
@@ -79,13 +77,6 @@ func main() {
 		defer stopTracing()
 	} else {
 		logger.Info("Tracing disabled.")
-	}
-
-	if os.Getenv("DISABLE_PROFILER") == "" {
-		logger.Info("Profiling enabled.")
-		go initProfiling("productcatalogservice", "1.0.0")
-	} else {
-		logger.Info("Profiling disabled.")
 	}
 
 	flag.Parse()
@@ -133,8 +124,10 @@ func run(port string) string {
 	}
 
 	var srv *grpc.Server
-	statsHandler := grpctrace.NewServerStatsHandler(grpctrace.WithServiceName("productcatalogservice"))
-	srv = grpc.NewServer(grpc.StatsHandler(statsHandler))
+	srv = grpc.NewServer(
+		grpc.UnaryInterceptor(otelgrpc.UnaryServerInterceptor()),
+		grpc.StreamInterceptor(otelgrpc.StreamServerInterceptor()),
+	)
 
 	svc := &productCatalog{}
 
@@ -145,35 +138,17 @@ func run(port string) string {
 }
 
 func initTracing() func() {
-	opts := []tracing.StartOption{
-		tracing.WithServiceName("productcatalogservice"),
+	sdk, err := distro.Run(distro.WithServiceName("checkoutservice"))
+	if err != nil {
+		panic(err)
 	}
 
-	tracing.Start(opts...)
-	logger.Info("signalfx initialization completed.")
-	return tracing.Stop
-}
-
-func initProfiling(service, version string) {
-	// TODO(ahmetb) this method is duplicated in other microservices using Go
-	// since they are not sharing packages.
-	for i := 1; i <= 3; i++ {
-		if err := profiler.Start(profiler.Config{
-			Service:        service,
-			ServiceVersion: version,
-			// ProjectID must be set if not running on GCP.
-			// ProjectID: "my-project",
-		}); err != nil {
-			logger.Warnf("failed to start profiler: %+v", err)
-		} else {
-			logger.Info("started Stackdriver profiler")
-			return
+	logger.Info("otel initialization completed.")
+	return func() {
+		if err := sdk.Shutdown(context.Background()); err != nil {
+			panic(err)
 		}
-		d := time.Second * 10 * time.Duration(i)
-		logger.Infof("sleeping %v to retry initializing Stackdriver profiler", d)
-		time.Sleep(d)
 	}
-	logger.Warn("could not initialize Stackdriver profiler after retrying, giving up")
 }
 
 type productCatalog struct{}
@@ -247,11 +222,11 @@ func (p *productCatalog) SearchProducts(ctx context.Context, req *pb.SearchProdu
 
 func getTraceLogFields(ctx context.Context) logrus.Fields {
 	fields := logrus.Fields{}
-	if span := opentracing.SpanFromContext(ctx); span != nil {
-		spanCtx := span.Context()
-		fields["trace_id"] = tracer.TraceIDHex(spanCtx)
-		fields["span_id"] = tracer.SpanIDHex(spanCtx)
-		fields["service.name"] = "productcatalogservice"
+	if span := trace.SpanFromContext(ctx); span != nil {
+		spanCtx := span.SpanContext()
+		fields["trace_id"] = spanCtx.TraceID().String()
+		fields["span_id"] = spanCtx.SpanID().String()
+		fields["service.name"] = "checkoutservice"
 	}
 	return fields
 }

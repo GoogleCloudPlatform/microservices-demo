@@ -21,11 +21,10 @@ import (
 	"time"
 
 	"cloud.google.com/go/profiler"
-	"github.com/opentracing/opentracing-go"
-	grpctrace "github.com/signalfx/signalfx-go-tracing/contrib/google.golang.org/grpc"
-	"github.com/signalfx/signalfx-go-tracing/ddtrace/tracer"
-	"github.com/signalfx/signalfx-go-tracing/tracing"
+	"github.com/signalfx/splunk-otel-go/distro"
 	"github.com/sirupsen/logrus"
+	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
+	"go.opentelemetry.io/otel/trace"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
@@ -86,8 +85,10 @@ func main() {
 	var srv *grpc.Server
 	if os.Getenv("DISABLE_STATS") == "" {
 		logger.Info("Stats enabled.")
-		statsHandler := grpctrace.NewServerStatsHandler(grpctrace.WithServiceName("shippingservice"))
-		srv = grpc.NewServer(grpc.StatsHandler(statsHandler))
+		srv = grpc.NewServer(
+			grpc.UnaryInterceptor(otelgrpc.UnaryServerInterceptor()),
+			grpc.StreamInterceptor(otelgrpc.StreamServerInterceptor()),
+		)
 	} else {
 		logger.Info("Stats disabled.")
 		srv = grpc.NewServer()
@@ -158,13 +159,17 @@ func (s *server) ShipOrder(ctx context.Context, in *pb.ShipOrderRequest) (*pb.Sh
 }
 
 func initTracing() func() {
-	opts := []tracing.StartOption{
-		tracing.WithServiceName("shippingservice"),
+	sdk, err := distro.Run(distro.WithServiceName("checkoutservice"))
+	if err != nil {
+		panic(err)
 	}
 
-	tracing.Start(opts...)
-	logger.Info("signalfx initialization completed.")
-	return tracing.Stop
+	logger.Info("otel initialization completed.")
+	return func() {
+		if err := sdk.Shutdown(context.Background()); err != nil {
+			panic(err)
+		}
+	}
 }
 
 func initProfiling(service, version string) {
@@ -191,12 +196,11 @@ func initProfiling(service, version string) {
 
 func getTraceLogFields(ctx context.Context) logrus.Fields {
 	fields := logrus.Fields{}
-	if span := opentracing.SpanFromContext(ctx); span != nil {
-		spanCtx := span.Context()
-		fields["trace_id"] = tracer.TraceIDHex(spanCtx)
-		fields["span_id"] = tracer.SpanIDHex(spanCtx)
-		fields["service.name"] = "shippingservice"
+	if span := trace.SpanFromContext(ctx); span != nil {
+		spanCtx := span.SpanContext()
+		fields["trace_id"] = spanCtx.TraceID().String()
+		fields["span_id"] = spanCtx.SpanID().String()
+		fields["service.name"] = "checkoutservice"
 	}
-
 	return fields
 }

@@ -41,6 +41,10 @@ spec:
               fieldPath: status.hostIP
         - name: SIGNALFX_ENDPOINT_URL 
           value: "http://$(NODE_IP):9411/api/v2/spans"
+        - name: SIGNALFX_SERVICE_NAME 
+          value: "shippingservice"
+        - name: JAEGER_SERVICE_NAME
+          value: "shippingservice"
           # value: "http://zipkin.default:9411/api/v2/spans"
         readinessProbe:
           periodSeconds: 5
