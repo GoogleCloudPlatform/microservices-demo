@@ -35,7 +35,7 @@ build:
   - image: currencyservice
     context: src/currencyservice
   - image: cartservice
-    context: src/cartservice
+    context: src/cartservice/src
   - image: frontend
     context: src/frontend
   - image: loadgenerator

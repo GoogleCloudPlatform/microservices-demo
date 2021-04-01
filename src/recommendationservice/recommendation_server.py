@@ -24,11 +24,10 @@ import googleclouddebugger
 import googlecloudprofiler
 from google.auth.exceptions import DefaultCredentialsError
 import grpc
-from opencensus.trace.exporters import print_exporter
-from opencensus.trace.exporters import stackdriver_exporter
-from opencensus.trace.ext.grpc import server_interceptor
+from opencensus.ext.stackdriver import trace_exporter as stackdriver_exporter
+from opencensus.ext.grpc import server_interceptor
+from opencensus.trace import samplers
 from opencensus.common.transports.async_ import AsyncTransport
-from opencensus.trace.samplers import always_on
 
 import demo_pb2
 import demo_pb2_grpc
@@ -108,7 +107,7 @@ if __name__ == "__main__":
         raise KeyError()
       else:
         logger.info("Tracing enabled.")
-        sampler = always_on.AlwaysOnSampler()
+        sampler = samplers.AlwaysOnSampler()
         exporter = stackdriver_exporter.StackdriverExporter(
           project_id=os.environ.get('GCP_PROJECT_ID'),
           transport=AsyncTransport)

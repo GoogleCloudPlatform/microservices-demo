@@ -52,13 +52,13 @@ sed -i "s/value: \"redis-cart:6379\"/value: \"${REDIS_IP}\"/g" ./release/updated
 
 In addition, in the `./release/updated-manifests.yaml` file you need also to manually remove the `Deployment` and `Service` sections of the `redis-cart` which are not needed anymore.
 
-4. Apply all the updated manifests. 
+5. Apply all the updated manifests. 
 
 ```sh
 kubectl apply -f ./release/updated-manifests.yaml
 ```
 
-5. **Wait for the Pods to be ready.**
+6. **Wait for the Pods to be ready.**
 
 ```
 kubectl get pods
