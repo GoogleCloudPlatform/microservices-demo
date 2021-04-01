@@ -22,17 +22,7 @@ from concurrent import futures
 
 import grpc
 
-from opentelemetry import trace
-from opentelemetry import propagators
-from opentelemetry.sdk.trace import TracerProvider
-from opentelemetry.exporter import zipkin
-from opentelemetry.sdk.trace.export import BatchExportSpanProcessor
-#from opentelemetry.sdk.trace.propagation.b3_format import B3Format
-from opentelemetry.instrumentation.grpc import GrpcInstrumentorServer
-from opentelemetry.instrumentation.grpc import GrpcInstrumentorClient
-from opentelemetry.instrumentation.grpc.grpcext import intercept_server
-
-from fixed_propagator import FixedB3Format
+from splunk_otel.tracing import start_tracing
 
 import demo_pb2
 import demo_pb2_grpc
@@ -40,24 +30,10 @@ from grpc_health.v1 import health_pb2
 from grpc_health.v1 import health_pb2_grpc
 
 from logger import getJSONLogger
+
+start_tracing()
+
 logger = getJSONLogger('recommendationservice-server')
-
-zipkin_exporter = zipkin.ZipkinSpanExporter(
-    service_name="recommendationservice",
-    url=os.environ['SIGNALFX_ENDPOINT_URL']
-)
-span_processor = BatchExportSpanProcessor(zipkin_exporter)
-
-propagators.set_global_textmap(FixedB3Format())
-trace.set_tracer_provider(TracerProvider())
-trace.get_tracer_provider().add_span_processor(span_processor)
-tracer = trace.get_tracer(__name__)
-
-instrumentor = GrpcInstrumentorClient()
-instrumentor.instrument()
-grpc_server_instrumentor = GrpcInstrumentorServer()
-grpc_server_instrumentor.instrument()
-
 
 class RecommendationService(demo_pb2_grpc.RecommendationServiceServicer):
     def ListRecommendations(self, request, context):

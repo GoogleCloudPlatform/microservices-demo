@@ -11,14 +11,11 @@ grpcio==1.30.0            # via -r requirements.in, grpcio-health-checking, open
 idna==2.10                # via requests
 jinja2==2.10              # via -r requirements.in
 markupsafe==1.1.1         # via jinja2
-opentelemetry-api==0.12b0  # via -r requirements.in, opentelemetry-exporter-zipkin, opentelemetry-instrumentation, opentelemetry-instrumentation-dbapi, opentelemetry-instrumentation-grpc, opentelemetry-instrumentation-requests, opentelemetry-instrumentation-sqlite3, opentelemetry-sdk
-opentelemetry-exporter-zipkin==0.12b0  # via -r requirements.in
-opentelemetry-instrumentation-dbapi==0.12b0  # via opentelemetry-instrumentation-sqlite3
-opentelemetry-instrumentation-grpc==0.12b0  # via -r requirements.in
-opentelemetry-instrumentation-requests==0.12b0  # via -r requirements.in
-opentelemetry-instrumentation-sqlite3==0.12b0  # via -r requirements.in
-opentelemetry-instrumentation==0.12b0  # via -r requirements.in, opentelemetry-instrumentation-dbapi, opentelemetry-instrumentation-requests, opentelemetry-instrumentation-sqlite3
-opentelemetry-sdk==0.12b0  # via -r requirements.in, opentelemetry-exporter-zipkin, opentelemetry-instrumentation-grpc
+opentelemetry-instrumentation-dbapi==0.19b0  # via opentelemetry-instrumentation-sqlite3
+opentelemetry-instrumentation-grpc==0.19b0  # via -r requirements.in
+opentelemetry-instrumentation-requests==0.19b0  # via -r requirements.in
+opentelemetry-instrumentation-sqlite3==0.19b.0  # via -r requirements.in
+splunk-opentelemetry==0.11.0
 protobuf==3.13.0          # via grpcio-health-checking
 python-json-logger==0.1.11  # via -r requirements.in
 requests==2.24.0          # via opentelemetry-exporter-zipkin, opentelemetry-instrumentation-requests
