@@ -22,11 +22,12 @@ import (
 	"time"
 
 	"cloud.google.com/go/profiler"
+	"github.com/gorilla/mux"
 	"github.com/pkg/errors"
-	grpctrace "github.com/signalfx/signalfx-go-tracing/contrib/google.golang.org/grpc"
-	muxtrace "github.com/signalfx/signalfx-go-tracing/contrib/gorilla/mux"
-	"github.com/signalfx/signalfx-go-tracing/tracing"
+	"github.com/signalfx/splunk-otel-go/distro"
 	"github.com/sirupsen/logrus"
+	"go.opentelemetry.io/contrib/instrumentation/github.com/gorilla/mux/otelmux"
+	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
 	"google.golang.org/grpc"
 )
 
@@ -126,7 +127,9 @@ func main() {
 	mustConnGRPC(ctx, &svc.checkoutSvcConn, svc.checkoutSvcAddr)
 	mustConnGRPC(ctx, &svc.adSvcConn, svc.adSvcAddr)
 
-	r := muxtrace.NewRouter()
+	// r := muxtrace.NewRouter()
+	r := mux.NewRouter()
+	r.Use(otelmux.Middleware("frontendservice"))
 	r.HandleFunc("/", svc.homeHandler).Methods(http.MethodGet, http.MethodHead)
 	r.HandleFunc("/product/{id}", svc.productHandler).Methods(http.MethodGet, http.MethodHead)
 	r.HandleFunc("/cart", svc.viewCartHandler).Methods(http.MethodGet, http.MethodHead)
@@ -148,12 +151,17 @@ func main() {
 }
 
 func initTracing(log logrus.FieldLogger) func() {
-	opts := []tracing.StartOption{
-		tracing.WithServiceName("frontend"),
+	sdk, err := distro.Run(distro.WithServiceName("checkoutservice"))
+	if err != nil {
+		panic(err)
 	}
-	tracing.Start(opts...)
-	log.Info("signalfx initialization completed.")
-	return tracing.Stop
+
+	log.Info("otel initialization completed.")
+	return func() {
+		if err := sdk.Shutdown(context.Background()); err != nil {
+			panic(err)
+		}
+	}
 }
 
 func initProfiling(log logrus.FieldLogger, service, version string) {
@@ -192,7 +200,8 @@ func mustConnGRPC(ctx context.Context, conn **grpc.ClientConn, addr string) {
 	*conn, err = grpc.DialContext(ctx, addr,
 		grpc.WithInsecure(),
 		grpc.WithTimeout(time.Second*3),
-		grpc.WithStatsHandler(grpctrace.NewClientStatsHandler(grpctrace.WithServiceName("frontend"))))
+		grpc.WithUnaryInterceptor(otelgrpc.UnaryClientInterceptor()),
+		grpc.WithStreamInterceptor(otelgrpc.StreamClientInterceptor()))
 	if err != nil {
 		panic(errors.Wrapf(err, "grpc: failed to connect %s", addr))
 	}

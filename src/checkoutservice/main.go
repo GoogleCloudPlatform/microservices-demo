@@ -24,14 +24,12 @@ import (
 
 	"cloud.google.com/go/profiler"
 	"github.com/google/uuid"
-	"github.com/opentracing/opentracing-go"
-	grpctrace "github.com/signalfx/signalfx-go-tracing/contrib/google.golang.org/grpc"
-	"github.com/signalfx/signalfx-go-tracing/ddtrace/tracer"
-	"github.com/signalfx/signalfx-go-tracing/tracing"
+	"github.com/signalfx/splunk-otel-go/distro"
 	"github.com/sirupsen/logrus"
+	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
+	"go.opentelemetry.io/otel/trace"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/stats"
 	"google.golang.org/grpc/status"
 
 	pb "github.com/signalfx/microservices-demo/src/checkoutservice/genproto"
@@ -107,8 +105,10 @@ func main() {
 	}
 
 	var srv *grpc.Server
-	statsHandler := grpctrace.NewServerStatsHandler(grpctrace.WithServiceName(serviceName))
-	srv = grpc.NewServer(grpc.StatsHandler(statsHandler))
+	srv = grpc.NewServer(
+		grpc.UnaryInterceptor(otelgrpc.UnaryServerInterceptor()),
+		grpc.StreamInterceptor(otelgrpc.StreamServerInterceptor()),
+	)
 	pb.RegisterCheckoutServiceServer(srv, svc)
 	healthpb.RegisterHealthServer(srv, svc)
 	logger.Infof("starting to listen on tcp: %q", lis.Addr().String())
@@ -116,18 +116,18 @@ func main() {
 	logger.Fatal(err)
 }
 
-func clientStatsHandler() stats.Handler {
-	return grpctrace.NewClientStatsHandler(grpctrace.WithServiceName(serviceName))
-}
-
 func initTracing() func() {
-	opts := []tracing.StartOption{
-		tracing.WithServiceName("checkoutservice"),
+	sdk, err := distro.Run(distro.WithServiceName("checkoutservice"))
+	if err != nil {
+		panic(err)
 	}
 
-	tracing.Start(opts...)
-	logger.Info("signalfx initialization completed.")
-	return tracing.Stop
+	logger.Info("otel initialization completed.")
+	return func() {
+		if err := sdk.Shutdown(context.Background()); err != nil {
+			panic(err)
+		}
+	}
 }
 
 func initProfiling(service, version string) {
@@ -255,7 +255,9 @@ func (cs *checkoutService) prepareOrderItemsAndShippingQuoteFromCart(ctx context
 func (cs *checkoutService) quoteShipping(ctx context.Context, address *pb.Address, items []*pb.CartItem) (*pb.Money, error) {
 	conn, err := grpc.DialContext(ctx, cs.shippingSvcAddr,
 		grpc.WithInsecure(),
-		grpc.WithStatsHandler(clientStatsHandler()))
+		grpc.WithUnaryInterceptor(otelgrpc.UnaryClientInterceptor()),
+		grpc.WithStreamInterceptor(otelgrpc.StreamClientInterceptor()),
+	)
 	if err != nil {
 		return nil, fmt.Errorf("could not connect shipping service: %+v", err)
 	}
@@ -272,7 +274,10 @@ func (cs *checkoutService) quoteShipping(ctx context.Context, address *pb.Addres
 }
 
 func (cs *checkoutService) getUserCart(ctx context.Context, userID string) ([]*pb.CartItem, error) {
-	conn, err := grpc.DialContext(ctx, cs.cartSvcAddr, grpc.WithInsecure(), grpc.WithStatsHandler(clientStatsHandler()))
+	conn, err := grpc.DialContext(ctx, cs.cartSvcAddr, grpc.WithInsecure(),
+		grpc.WithUnaryInterceptor(otelgrpc.UnaryClientInterceptor()),
+		grpc.WithStreamInterceptor(otelgrpc.StreamClientInterceptor()),
+	)
 	if err != nil {
 		return nil, fmt.Errorf("could not connect cart service: %+v", err)
 	}
@@ -286,7 +291,10 @@ func (cs *checkoutService) getUserCart(ctx context.Context, userID string) ([]*p
 }
 
 func (cs *checkoutService) emptyUserCart(ctx context.Context, userID string) error {
-	conn, err := grpc.DialContext(ctx, cs.cartSvcAddr, grpc.WithInsecure(), grpc.WithStatsHandler(clientStatsHandler()))
+	conn, err := grpc.DialContext(ctx, cs.cartSvcAddr, grpc.WithInsecure(),
+		grpc.WithUnaryInterceptor(otelgrpc.UnaryClientInterceptor()),
+		grpc.WithStreamInterceptor(otelgrpc.StreamClientInterceptor()),
+	)
 	if err != nil {
 		return fmt.Errorf("could not connect cart service: %+v", err)
 	}
@@ -301,7 +309,10 @@ func (cs *checkoutService) emptyUserCart(ctx context.Context, userID string) err
 func (cs *checkoutService) prepOrderItems(ctx context.Context, items []*pb.CartItem, userCurrency string) ([]*pb.OrderItem, error) {
 	out := make([]*pb.OrderItem, len(items))
 
-	conn, err := grpc.DialContext(ctx, cs.productCatalogSvcAddr, grpc.WithInsecure(), grpc.WithStatsHandler(clientStatsHandler()))
+	conn, err := grpc.DialContext(ctx, cs.productCatalogSvcAddr, grpc.WithInsecure(),
+		grpc.WithUnaryInterceptor(otelgrpc.UnaryClientInterceptor()),
+		grpc.WithStreamInterceptor(otelgrpc.StreamClientInterceptor()),
+	)
 	if err != nil {
 		return nil, fmt.Errorf("could not connect product catalog service: %+v", err)
 	}
@@ -325,7 +336,10 @@ func (cs *checkoutService) prepOrderItems(ctx context.Context, items []*pb.CartI
 }
 
 func (cs *checkoutService) convertCurrency(ctx context.Context, from *pb.Money, toCurrency string) (*pb.Money, error) {
-	conn, err := grpc.DialContext(ctx, cs.currencySvcAddr, grpc.WithInsecure(), grpc.WithStatsHandler(clientStatsHandler()))
+	conn, err := grpc.DialContext(ctx, cs.currencySvcAddr, grpc.WithInsecure(),
+		grpc.WithUnaryInterceptor(otelgrpc.UnaryClientInterceptor()),
+		grpc.WithStreamInterceptor(otelgrpc.StreamClientInterceptor()),
+	)
 	if err != nil {
 		return nil, fmt.Errorf("could not connect currency service: %+v", err)
 	}
@@ -358,7 +372,12 @@ func chargeCardRetry(attempts int, sleep time.Duration, f func() (string, error)
 }
 
 func (cs *checkoutService) chargeCard(ctx context.Context, amount *pb.Money, paymentInfo *pb.CreditCardInfo) (string, error) {
-	conn, err := grpc.DialContext(ctx, cs.paymentSvcAddr, grpc.WithInsecure(), grpc.WithStatsHandler(clientStatsHandler()))
+	conn, err := grpc.DialContext(ctx, cs.paymentSvcAddr,
+		grpc.WithInsecure(),
+		grpc.WithUnaryInterceptor(otelgrpc.UnaryClientInterceptor()),
+		grpc.WithStreamInterceptor(otelgrpc.StreamClientInterceptor()),
+	)
+
 	if err != nil {
 		return "", fmt.Errorf("failed to connect payment service: %+v", err)
 	}
@@ -381,7 +400,10 @@ func (cs *checkoutService) chargeCard(ctx context.Context, amount *pb.Money, pay
 }
 
 func (cs *checkoutService) sendOrderConfirmation(ctx context.Context, email string, order *pb.OrderResult) error {
-	conn, err := grpc.DialContext(ctx, cs.emailSvcAddr, grpc.WithInsecure(), grpc.WithStatsHandler(clientStatsHandler()))
+	conn, err := grpc.DialContext(ctx, cs.emailSvcAddr, grpc.WithInsecure(),
+		grpc.WithUnaryInterceptor(otelgrpc.UnaryClientInterceptor()),
+		grpc.WithStreamInterceptor(otelgrpc.StreamClientInterceptor()),
+	)
 	if err != nil {
 		return fmt.Errorf("failed to connect email service: %+v", err)
 	}
@@ -393,7 +415,10 @@ func (cs *checkoutService) sendOrderConfirmation(ctx context.Context, email stri
 }
 
 func (cs *checkoutService) shipOrder(ctx context.Context, address *pb.Address, items []*pb.CartItem) (string, error) {
-	conn, err := grpc.DialContext(ctx, cs.shippingSvcAddr, grpc.WithInsecure(), grpc.WithStatsHandler(clientStatsHandler()))
+	conn, err := grpc.DialContext(ctx, cs.shippingSvcAddr, grpc.WithInsecure(),
+		grpc.WithUnaryInterceptor(otelgrpc.UnaryClientInterceptor()),
+		grpc.WithStreamInterceptor(otelgrpc.StreamClientInterceptor()),
+	)
 	if err != nil {
 		return "", fmt.Errorf("failed to connect email service: %+v", err)
 	}
@@ -411,10 +436,10 @@ func (cs *checkoutService) shipOrder(ctx context.Context, address *pb.Address, i
 
 func getTraceLogFields(ctx context.Context) logrus.Fields {
 	fields := logrus.Fields{}
-	if span := opentracing.SpanFromContext(ctx); span != nil {
-		spanCtx := span.Context()
-		fields["trace_id"] = tracer.TraceIDHex(spanCtx)
-		fields["span_id"] = tracer.SpanIDHex(spanCtx)
+	if span := trace.SpanFromContext(ctx); span != nil {
+		spanCtx := span.SpanContext()
+		fields["trace_id"] = spanCtx.TraceID().String()
+		fields["span_id"] = spanCtx.SpanID().String()
 		fields["service.name"] = "checkoutservice"
 	}
 	return fields
