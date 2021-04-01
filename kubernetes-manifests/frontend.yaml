@@ -78,7 +78,7 @@ spec:
             valueFrom:
               fieldRef:
                 fieldPath: status.hostIP
-          - name: SIGNALFX_ENDPOINT_NAME 
+          - name: SIGNALFX_ENDPOINT_URL
             value: "http://$(NODE_IP):14268/api/traces"
           - name: SIGNALFX_SERVICE_NAME 
             value: "frontendservice"
