@@ -23,8 +23,10 @@ using CommandLine;
 using Grpc.Core;
 using Microsoft.Extensions.Configuration;
 using OpenTelemetry;
+using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 using StackExchange.Redis;
+using System.Collections.Generic;
 
 namespace cartservice
 {
@@ -110,16 +112,37 @@ namespace cartservice
               (ServerOptions options) =>
               {
                 var redis = NewRedisConnection(options.Redis);
+                var resourceBuilder = ResourceBuilder.CreateDefault()
+                                    .AddEnvironmentVariableDetector()
+                                    .AddService("cartservice");
+
+                var deployment_environment = Environment.GetEnvironmentVariable("OTEL_ENVIRONMENT");
+                if (deployment_environment != null) {
+                    resourceBuilder.AddAttributes(new [] {
+                    new KeyValuePair<string,object>("deployment.environment", deployment_environment),
+                    });
+                }
+
+                var endpoint = Environment.GetEnvironmentVariable("SIGNALFX_ENDPOINT_URL"); // Thrift over UDP
+                string agenthost = null,agentport = null;
+                if (endpoint != null) {
+                    string[]endpoints = endpoint.ToString().Split(':');
+                    if (endpoints.Length == 2){
+                    agenthost = endpoints[0];
+                    agentport = endpoints[1];
+                    }
+                }
+
                 tracerProvider = Sdk.CreateTracerProviderBuilder()
+                              .SetResourceBuilder(resourceBuilder)
                               .AddSource("opentelemetry.dotnet")
                               .AddSource("cartservice")
                               .AddRedisInstrumentation(redis)
                               .AddProcessor(new AttrMappingProcessor())
-                            //   .AddConsoleExporter()
-                              .AddZipkinExporter(o =>
+                              .AddJaegerExporter(o =>
                               {
-                                o.ServiceName = "cartservice";
-                                o.Endpoint = new Uri(Environment.GetEnvironmentVariable("SIGNALFX_ENDPOINT_URL"));
+                                 o.AgentHost = agenthost;
+                                 o.AgentPort = Int32.Parse(agentport);	
                               })
                               .Build();
                 Console.WriteLine($"Started as process with id {System.Diagnostics.Process.GetCurrentProcess().Id}");

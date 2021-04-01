@@ -117,7 +117,7 @@ namespace cartservice.cartstore
       }
       catch (Exception ex)
       {
-        throw new RpcException(new Grpc.Core.Status(StatusCode.FailedPrecondition, $"Can't access cart storage. {ex}"));
+        throw new RpcException(new Grpc.Core.Status(Grpc.Core.StatusCode.FailedPrecondition, $"Can't access cart storage. {ex}"));
       }
     }
 
@@ -134,7 +134,7 @@ namespace cartservice.cartstore
       }
       catch (Exception ex)
       {
-        throw new RpcException(new Grpc.Core.Status(StatusCode.FailedPrecondition, $"Can't access cart storage. {ex}"));
+        throw new RpcException(new Grpc.Core.Status(Grpc.Core.StatusCode.FailedPrecondition, $"Can't access cart storage. {ex}"));
       }
     }
 
@@ -181,7 +181,7 @@ namespace cartservice.cartstore
       }
       catch (Exception ex)
       {
-        throw new RpcException(new Grpc.Core.Status(StatusCode.FailedPrecondition, $"Can't access cart storage. {ex}"));
+        throw new RpcException(new Grpc.Core.Status(Grpc.Core.StatusCode.FailedPrecondition, $"Can't access cart storage. {ex}"));
       }
     }
 

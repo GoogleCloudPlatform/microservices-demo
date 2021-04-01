@@ -14,9 +14,11 @@
 
 using System;
 using System.Diagnostics;
+using OpenTelemetry;
 using OpenTelemetry.Trace;
+using OpenTelemetry.Resources;
 
-internal class AttrMappingProcessor : ActivityProcessor
+internal class AttrMappingProcessor : BaseProcessor<Activity>
 {
 
   public Random _random;
