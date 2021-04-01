@@ -1,7 +1,7 @@
 google-api-core==1.24.1
 grpcio-health-checking==1.33.2
 grpcio==1.33.2
-jinja2==2.11.2
+jinja2==2.11.3
 opencensus==0.7.11
 opencensus-ext-stackdriver==0.7.3
 opencensus-ext-grpc==0.7.1
