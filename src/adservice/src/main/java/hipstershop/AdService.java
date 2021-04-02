@@ -29,6 +29,8 @@ import io.grpc.health.v1.HealthCheckResponse.ServingStatus;
 import io.grpc.services.HealthStatusManager;
 import io.grpc.stub.StreamObserver;
 import io.opentelemetry.api.GlobalOpenTelemetry;
+import io.opentelemetry.api.common.AttributeKey;
+import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.metrics.DoubleValueRecorder;
 import io.opentelemetry.api.metrics.GlobalMetricsProvider;
 import io.opentelemetry.api.metrics.LongUpDownCounter;
@@ -39,6 +41,13 @@ import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.api.trace.SpanKind;
 import io.opentelemetry.api.trace.Tracer;
 import io.opentelemetry.context.Scope;
+import io.opentelemetry.exporter.otlp.metrics.OtlpGrpcMetricExporter;
+import io.opentelemetry.sdk.metrics.SdkMeterProvider;
+import io.opentelemetry.sdk.metrics.aggregator.AggregatorFactory;
+import io.opentelemetry.sdk.metrics.common.InstrumentType;
+import io.opentelemetry.sdk.metrics.export.IntervalMetricReader;
+import io.opentelemetry.sdk.metrics.view.InstrumentSelector;
+import io.opentelemetry.sdk.resources.Resource;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.util.ArrayList;
@@ -349,7 +358,26 @@ public final class AdService {
       throws IOException, InterruptedException, ClassNotFoundException {
     JdbcTemplate jdbcTemplate = setUpDatabase();
 
-    MeterProvider meterProvider = GlobalMetricsProvider.get();
+    String serviceName = "AdService";
+    Resource resource = Resource.create(Attributes.of(AttributeKey.stringKey("service.name"), serviceName));
+
+    // TODO: Generate resource from OTEL_RESOURCE_ATTRIBUTES
+    SdkMeterProvider meterProvider = SdkMeterProvider.builder().setResource(resource).build();
+
+    InstrumentSelector selectorUpDownCounter = InstrumentSelector.builder().setInstrumentType(InstrumentType.UP_DOWN_COUNTER).build();
+    AggregatorFactory aggregationFactory = AggregatorFactory.sum(false);
+    meterProvider.registerView(selectorUpDownCounter, aggregationFactory);
+
+    IntervalMetricReader.builder()
+        .setExportIntervalMillis(2000)
+        .setMetricExporter(OtlpGrpcMetricExporter.builder()
+            .setEndpoint(System.getenv("OTEL_EXPORTER_OTLP_METRICS_ENDPOINT"))
+            .addHeader("api-key", System.getenv("NEW_RELIC_API_KEY"))
+            .build())
+        .setMetricProducers(List.of(meterProvider))
+        .build();
+
+    GlobalMetricsProvider.set(meterProvider);
 
     // Start the RPC server. You shouldn't see any output from gRPC before this.
     logger.info("AdService starting.");
