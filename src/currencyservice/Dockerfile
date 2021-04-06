@@ -29,4 +29,4 @@ COPY . .
 
 EXPOSE 7000
 
-ENTRYPOINT [ "node", "-r", "@splunk/otel/instrument", "server.js" ]
+ENTRYPOINT [ "node", "server.js" ]

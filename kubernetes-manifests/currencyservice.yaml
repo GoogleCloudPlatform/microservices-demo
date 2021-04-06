@@ -41,10 +41,9 @@ spec:
           valueFrom:
             fieldRef:
               fieldPath: status.hostIP
-        - name: OTEL_EXPORTER_JAEGER_ENDPOINT
-          value: "http://$(NODE_IP):14268/api/traces"
-        - name: SPLUNK_SERVICE_NAME 
-          value: "currencyservice"
+        - name: SIGNALFX_ENDPOINT_URL
+          # value: "http://zipkin.default:9411/api/v2/spans"
+          value: "http://$(NODE_IP):9411/api/v2/spans"
         readinessProbe:
           exec:
             command: ["/bin/grpc_health_probe", "-addr=:7000"]

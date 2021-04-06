@@ -3,16 +3,26 @@ module github.com/signalfx/microservices-demo/src/checkoutservice
 go 1.14
 
 require (
-	cloud.google.com/go v0.78.0
-	github.com/golang/protobuf v1.4.3
-	github.com/google/uuid v1.1.2
+	cloud.google.com/go v0.40.0
+	github.com/dropbox/godropbox v0.0.0-20200228041828-52ad444d3502 // indirect
+	github.com/facebookgo/stack v0.0.0-20160209184415-751773369052 // indirect
+	github.com/facebookgo/stackerr v0.0.0-20150612192056-c2fcf88613f4 // indirect
+	github.com/go-kit/kit v0.10.0 // indirect
+	github.com/golang/protobuf v1.3.2
+	github.com/google/pprof v0.0.0-20190515194954-54271f7e092f // indirect
+	github.com/google/uuid v1.1.1
+	github.com/juju/errors v0.0.0-20200330140219-3fe23663418f // indirect
+	github.com/juju/testing v0.0.0-20200706033705-4c23f9c453cd // indirect
 	github.com/konsorten/go-windows-terminal-sequences v1.0.2 // indirect
-	github.com/kr/pretty v0.2.0 // indirect
-	github.com/signalfx/splunk-otel-go v0.0.0-20210331191121-59c68c77a30c
+	github.com/mailru/easyjson v0.7.6 // indirect
+	github.com/opentracing/opentracing-go v1.2.0
+	github.com/philhofer/fwd v1.0.0 // indirect
+	github.com/signalfx/golib v2.5.1+incompatible // indirect
+	github.com/signalfx/signalfx-go-tracing v1.5.0
 	github.com/sirupsen/logrus v1.4.2
-	go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc v0.19.0
-	go.opentelemetry.io/otel/trace v0.19.0
-	golang.org/x/net v0.0.0-20210119194325-5f4716e94777
-	google.golang.org/grpc v1.36.0
-	gopkg.in/check.v1 v1.0.0-20190902080502-41f04d3bba15 // indirect
+	github.com/tinylib/msgp v1.1.2 // indirect
+	golang.org/x/net v0.0.0-20200202094626-16171245cfb2
+	google.golang.org/api v0.7.1-0.20190709010654-aae1d1b89c27 // indirect
+	google.golang.org/appengine v1.6.1 // indirect
+	google.golang.org/grpc v1.26.0
 )

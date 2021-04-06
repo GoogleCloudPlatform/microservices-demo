@@ -26,9 +26,10 @@ import (
 	"time"
 
 	"github.com/gorilla/mux"
+	"github.com/opentracing/opentracing-go"
 	"github.com/pkg/errors"
+	"github.com/signalfx/signalfx-go-tracing/ddtrace/tracer"
 	"github.com/sirupsen/logrus"
-	"go.opentelemetry.io/otel/trace"
 
 	pb "github.com/signalfx/microservices-demo/src/frontend/genproto"
 	"github.com/signalfx/microservices-demo/src/frontend/money"
@@ -479,11 +480,11 @@ func renderMoney(money pb.Money) string {
 func getLoggerWithTraceFields(ctx context.Context) *logrus.Entry {
 	log := ctx.Value(ctxKeyLog{}).(logrus.FieldLogger)
 	fields := logrus.Fields{}
-	if span := trace.SpanFromContext(ctx); span != nil {
-		spanCtx := span.SpanContext()
-		fields["trace_id"] = spanCtx.TraceID().String()
-		fields["span_id"] = spanCtx.SpanID().String()
-		fields["service.name"] = "frontendservice"
+	if span := opentracing.SpanFromContext(ctx); span != nil {
+		spanCtx := span.Context()
+		fields["trace_id"] = tracer.TraceIDHex(spanCtx)
+		fields["span_id"] = tracer.SpanIDHex(spanCtx)
+		fields["service.name"] = "frontend"
 	}
 	return log.WithFields(fields)
 }

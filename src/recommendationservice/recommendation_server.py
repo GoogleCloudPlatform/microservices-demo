@@ -22,30 +22,48 @@ from concurrent import futures
 
 import grpc
 
-from splunk_otel.tracing import start_tracing
+from opentelemetry import trace
+from opentelemetry import propagators
+from opentelemetry.sdk.trace import TracerProvider
+from opentelemetry.exporter import zipkin
+from opentelemetry.sdk.trace.export import BatchExportSpanProcessor
+#from opentelemetry.sdk.trace.propagation.b3_format import B3Format
+from opentelemetry.instrumentation.grpc import GrpcInstrumentorServer
+from opentelemetry.instrumentation.grpc import GrpcInstrumentorClient
+from opentelemetry.instrumentation.grpc.grpcext import intercept_server
+
+from fixed_propagator import FixedB3Format
 
 import demo_pb2
 import demo_pb2_grpc
 from grpc_health.v1 import health_pb2
 from grpc_health.v1 import health_pb2_grpc
-from opentelemetry import propagate
 
 from logger import getJSONLogger
-
-start_tracing()
-
 logger = getJSONLogger('recommendationservice-server')
+
+zipkin_exporter = zipkin.ZipkinSpanExporter(
+    service_name="recommendationservice",
+    url=os.environ['SIGNALFX_ENDPOINT_URL']
+)
+span_processor = BatchExportSpanProcessor(zipkin_exporter)
+
+propagators.set_global_textmap(FixedB3Format())
+trace.set_tracer_provider(TracerProvider())
+trace.get_tracer_provider().add_span_processor(span_processor)
+tracer = trace.get_tracer(__name__)
+
+instrumentor = GrpcInstrumentorClient()
+instrumentor.instrument()
+grpc_server_instrumentor = GrpcInstrumentorServer()
+grpc_server_instrumentor.instrument()
+
 
 class RecommendationService(demo_pb2_grpc.RecommendationServiceServicer):
     def ListRecommendations(self, request, context):
         max_responses = 5
-
         # fetch list of products from product catalog stub
-        # otel context propagation in grpc instrumentation is broken so we manually
-        # inject the context
-        metadata = {}
-        propagate.inject(metadata)
-        cat_response = product_catalog_stub.ListProducts(demo_pb2.Empty(), metadata=metadata)
+        cat_response = product_catalog_stub.ListProducts(demo_pb2.Empty())
         product_ids = [x.id for x in cat_response.products]
         filtered_products = list(set(product_ids)-set(request.product_ids))
         num_products = len(filtered_products)

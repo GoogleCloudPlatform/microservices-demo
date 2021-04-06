@@ -28,11 +28,39 @@ import demo_pb2_grpc
 from grpc_health.v1 import health_pb2
 from grpc_health.v1 import health_pb2_grpc
 
-from splunk_otel.tracing import start_tracing
+from opentelemetry import trace
+from opentelemetry import propagators
+from opentelemetry.sdk.trace import TracerProvider
+from opentelemetry.exporter import zipkin
+from opentelemetry.sdk.trace.export import BatchExportSpanProcessor
+from opentelemetry.sdk.trace.propagation.b3_format import B3Format
+from opentelemetry.instrumentation.grpc import GrpcInstrumentorServer
+from opentelemetry.instrumentation.grpc import GrpcInstrumentorClient
+from opentelemetry.instrumentation.grpc.grpcext import intercept_server
 
 from logger import getJSONLogger
 logger = getJSONLogger('emailservice-server')
-start_tracing()
+
+export_url = urllib.parse.urlparse(os.environ['SIGNALFX_ENDPOINT_URL'])
+zipkin_exporter = zipkin.ZipkinSpanExporter(
+    service_name="emailservice",
+    host_name=export_url.hostname,
+    port=export_url.port,
+    endpoint=export_url.path,
+    protocol=export_url.scheme
+)
+span_processor = BatchExportSpanProcessor(zipkin_exporter)
+
+propagators.set_global_httptextformat(B3Format())
+trace.set_tracer_provider(TracerProvider())
+trace.get_tracer_provider().add_span_processor(span_processor)
+tracer = trace.get_tracer(__name__)
+
+instrumentor = GrpcInstrumentorClient()
+instrumentor.instrument()
+grpc_server_instrumentor = GrpcInstrumentorServer()
+grpc_server_instrumentor.instrument()
+
 
 # Loads confirmation email template from file
 env = Environment(
@@ -65,7 +93,8 @@ class HealthCheck():
       context.write(health_pb2.HealthCheckResponse(status=health_pb2.HealthCheckResponse.SERVING))
 
 def start():
-  server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
+  server = grpc.server(futures.ThreadPoolExecutor(max_workers=10),
+                       interceptors=tuple())
   service = None
   service = DummyEmailService()
 
@@ -85,4 +114,5 @@ def start():
 
 if __name__ == '__main__':
   logger.info('starting the email service in dummy mode.')
+
   start()

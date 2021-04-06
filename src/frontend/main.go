@@ -22,12 +22,11 @@ import (
 	"time"
 
 	"cloud.google.com/go/profiler"
-	"github.com/gorilla/mux"
 	"github.com/pkg/errors"
-	"github.com/signalfx/splunk-otel-go/distro"
+	grpctrace "github.com/signalfx/signalfx-go-tracing/contrib/google.golang.org/grpc"
+	muxtrace "github.com/signalfx/signalfx-go-tracing/contrib/gorilla/mux"
+	"github.com/signalfx/signalfx-go-tracing/tracing"
 	"github.com/sirupsen/logrus"
-	"go.opentelemetry.io/contrib/instrumentation/github.com/gorilla/mux/otelmux"
-	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
 	"google.golang.org/grpc"
 )
 
@@ -127,9 +126,7 @@ func main() {
 	mustConnGRPC(ctx, &svc.checkoutSvcConn, svc.checkoutSvcAddr)
 	mustConnGRPC(ctx, &svc.adSvcConn, svc.adSvcAddr)
 
-	// r := muxtrace.NewRouter()
-	r := mux.NewRouter()
-	r.Use(otelmux.Middleware("frontendservice"))
+	r := muxtrace.NewRouter()
 	r.HandleFunc("/", svc.homeHandler).Methods(http.MethodGet, http.MethodHead)
 	r.HandleFunc("/product/{id}", svc.productHandler).Methods(http.MethodGet, http.MethodHead)
 	r.HandleFunc("/cart", svc.viewCartHandler).Methods(http.MethodGet, http.MethodHead)
@@ -151,17 +148,12 @@ func main() {
 }
 
 func initTracing(log logrus.FieldLogger) func() {
-	sdk, err := distro.Run(distro.WithServiceName("checkoutservice"))
-	if err != nil {
-		panic(err)
+	opts := []tracing.StartOption{
+		tracing.WithServiceName("frontend"),
 	}
-
-	log.Info("otel initialization completed.")
-	return func() {
-		if err := sdk.Shutdown(context.Background()); err != nil {
-			panic(err)
-		}
-	}
+	tracing.Start(opts...)
+	log.Info("signalfx initialization completed.")
+	return tracing.Stop
 }
 
 func initProfiling(log logrus.FieldLogger, service, version string) {
@@ -200,8 +192,7 @@ func mustConnGRPC(ctx context.Context, conn **grpc.ClientConn, addr string) {
 	*conn, err = grpc.DialContext(ctx, addr,
 		grpc.WithInsecure(),
 		grpc.WithTimeout(time.Second*3),
-		grpc.WithUnaryInterceptor(otelgrpc.UnaryClientInterceptor()),
-		grpc.WithStreamInterceptor(otelgrpc.StreamClientInterceptor()))
+		grpc.WithStatsHandler(grpctrace.NewClientStatsHandler(grpctrace.WithServiceName("frontend"))))
 	if err != nil {
 		panic(errors.Wrapf(err, "grpc: failed to connect %s", addr))
 	}
