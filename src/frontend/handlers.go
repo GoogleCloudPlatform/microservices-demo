@@ -88,6 +88,7 @@ func (fe *frontendServer) homeHandler(w http.ResponseWriter, r *http.Request) {
 		env = "gcp"
 	} else {
 		var envFromConfig = os.Getenv("ENV_PLATFORM")
+		fmt.Printf("⭐️ Env from config is: %s", envFromConfig)
 		if envFromConfig != "" {
 			env = envFromConfig
 		}
