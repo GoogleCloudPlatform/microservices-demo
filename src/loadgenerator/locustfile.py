@@ -53,9 +53,9 @@ def checkout(l):
     addToCart(l)
     l.client.post("/cart/checkout", {
         'email': 'someone@example.com',
-        'street_address': '1600 Amphitheatre Parkway',
-        'zip_code': '94043',
-        'city': 'Mountain View',
+        'street_address': '270 Brannan St',
+        'zip_code': '94107',
+        'city': 'Francisco',
         'state': 'CA',
         'country': 'United States',
         'credit_card_number': '4432-8015-6152-0454',
