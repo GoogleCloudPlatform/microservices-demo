@@ -19,6 +19,7 @@ import (
 	"fmt"
 	"html/template"
 	"math/rand"
+	"net"
 	"net/http"
 	"os"
 	"strconv"
@@ -79,8 +80,19 @@ func (fe *frontendServer) homeHandler(w http.ResponseWriter, r *http.Request) {
 		ps[i] = productView{p, price}
 	}
 
-	//get env and render correct platform banner.
-	var env = os.Getenv("ENV_PLATFORM")
+	// Set ENV_PLATFORM (checks for GCP. otherwise uses env value.)
+	var env = "local"
+	addrs, err := net.LookupHost("metadata.google.internal.")
+	if err == nil && len(addrs) >= 0 {
+		log.Debugf("Detected Google metadata servers: %v, setting ENV_PLATFORM to GCP.", addrs)
+		env = "gcp"
+	} else {
+		var envFromConfig = os.Getenv("ENV_PLATFORM")
+		if envFromConfig != "" {
+			env = envFromConfig
+		}
+	}
+	log.Debugf("ENV_PLATFORM is: %s", env)
 	plat = platformDetails{}
 	plat.setPlatformDetails(strings.ToLower(env))
 
@@ -111,9 +123,12 @@ func (plat *platformDetails) setPlatformDetails(env string) {
 	} else if env == "azure" {
 		plat.provider = "Azure"
 		plat.css = "azure-platform"
-	} else {
+	} else if env == "gcp" {
 		plat.provider = "Google Cloud"
 		plat.css = "gcp-platform"
+	} else {
+		plat.provider = "local"
+		plat.css = "local"
 	}
 }
 
