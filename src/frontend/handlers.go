@@ -458,7 +458,6 @@ func renderMoney(money pb.Money) string {
 }
 
 func renderCurrencyLogo(currencyCode string) string {
-	fmt.Println("💵 entered render currency logo")
 	logos := map[string]string{}
 	logos["USD"] = "$"
 	logos["CAD"] = "$"
@@ -468,7 +467,6 @@ func renderCurrencyLogo(currencyCode string) string {
 	logos["GBP"] = "£"
 
 	logo := "$" //default
-	fmt.Printf("⭐️ param currency code: %s", currencyCode)
 	if val, ok := logos[currencyCode]; ok {
 		logo = val
 	}
