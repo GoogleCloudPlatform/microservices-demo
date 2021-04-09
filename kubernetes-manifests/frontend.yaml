@@ -66,8 +66,10 @@ spec:
             value: "checkoutservice:5050"
           - name: AD_SERVICE_ADDR
             value: "adservice:9555"
-          - name: ENV_PLATFORM
-            value: "gcp"
+          # # ENV_PLATFORM: One of: local, gcp, aws, azure, onprem
+          # # When not set, defaults to "local" unless running in GKE, otherwies auto-sets to gcp 
+          # - name: ENV_PLATFORM 
+          #   value: "aws"
           # - name: DISABLE_TRACING
           #   value: "1"
           # - name: DISABLE_PROFILER

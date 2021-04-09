@@ -547,6 +547,7 @@ main.home {
 
 /*platform banner*/
 
+.local,
 .aws-platform,
 .onprem-platform,
 .azure-platform,
@@ -581,6 +582,12 @@ main.home {
 .azure-platform .platform-flag {
   background-color: #f35426;
 }
+
+.local,
+.local .platform-flag {
+  background-color: #2c0678;
+}
+
 
 .platform-flag {
   position: absolute;
