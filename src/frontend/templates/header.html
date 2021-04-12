@@ -42,7 +42,7 @@
                 {{ if $.show_currency }}
                 <div class="h-controls">
                     <div class="h-control">
-                        <img src="/static/icons/Hipster_CurrencyIcon.svg" alt="" class="icon" />
+                        <span class="currencyLogo"> {{ renderCurrencyLogo $.user_currency}}</span>
                         <form method="POST" class="controls-form" action="/setCurrency" id="currency_form" >
                             <select name="currency_code" onchange="document.getElementById('currency_form').submit();">
                                     {{range $.currencies}}

@@ -42,7 +42,8 @@ type platformDetails struct {
 var (
 	templates = template.Must(template.New("").
 			Funcs(template.FuncMap{
-			"renderMoney": renderMoney,
+			"renderMoney":        renderMoney,
+			"renderCurrencyLogo": renderCurrencyLogo,
 		}).ParseGlob("templates/*.html"))
 	plat platformDetails
 )
@@ -473,6 +474,23 @@ func cartSize(c []*pb.CartItem) int {
 
 func renderMoney(money pb.Money) string {
 	return fmt.Sprintf("%s %d.%02d", money.GetCurrencyCode(), money.GetUnits(), money.GetNanos()/10000000)
+}
+
+func renderCurrencyLogo(currencyCode string) string {
+	logos := map[string]string{
+		"USD": "$",
+		"CAD": "$",
+		"JPY": "¥",
+		"EUR": "€",
+		"TRY": "₺",
+		"GBP": "£",
+	}
+
+	logo := "$" //default
+	if val, ok := logos[currencyCode]; ok {
+		logo = val
+	}
+	return logo
 }
 
 func stringinSlice(slice []string, val string) bool {

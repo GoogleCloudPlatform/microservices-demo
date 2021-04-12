@@ -118,6 +118,12 @@ header .h-control input:focus {
   box-shadow: 0;
 }
 
+header .currencyLogo {
+  font-size: 1.3rem; 
+  padding-right: 6px; 
+  vertical-align: center;
+}
+
 header .icon {
   width: 20px;
   height: 20px;
