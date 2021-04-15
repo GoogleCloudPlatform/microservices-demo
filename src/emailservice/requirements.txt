@@ -50,7 +50,7 @@ grpcio==1.33.2
     #   google-api-core
     #   grpcio-health-checking
     #   opencensus-ext-grpc
-httplib2==0.18.1
+httplib2==0.19.0
     # via
     #   google-api-python-client
     #   google-auth-httplib2
@@ -83,6 +83,8 @@ pyasn1==0.4.8
     # via
     #   pyasn1-modules
     #   rsa
+pyparsing==2.4.7
+    # via httplib2
 python-json-logger==0.1.11
     # via -r requirements.in
 pytz==2018.9
