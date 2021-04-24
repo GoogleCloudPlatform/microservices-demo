@@ -1,25 +1,16 @@
-FROM python:3.7-slim as base
+FROM python:3.8-alpine3.12
 
-FROM base as builder
-
-RUN apt-get -qq update \
-    && apt-get install -y --no-install-recommends \
+RUN apk add --no-cache \
         g++ \
-    && rm -rf /var/lib/apt/lists/*
+        musl-dev \
+        libffi-dev
 
 # get packages
 COPY requirements.txt .
-RUN pip install -r requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
 
-FROM base as final
 # Enable unbuffered logging
 ENV PYTHONUNBUFFERED=1
-# Enable Profiler
-ENV ENABLE_PROFILER=1
-
-RUN apt-get -qq update \
-    && apt-get install -y --no-install-recommends \
-        wget
 
 # Download the grpc health probe
 RUN GRPC_HEALTH_PROBE_VERSION=v0.2.0 && \
@@ -27,9 +18,6 @@ RUN GRPC_HEALTH_PROBE_VERSION=v0.2.0 && \
     chmod +x /bin/grpc_health_probe
 
 WORKDIR /email_server
-
-# Grab packages from builder
-COPY --from=builder /usr/local/lib/python3.7/ /usr/local/lib/python3.7/
 
 # Add the application
 COPY . .
