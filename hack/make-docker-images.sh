@@ -27,9 +27,15 @@ REPO_PREFIX="${REPO_PREFIX:?REPO_PREFIX env variable must be specified}"
 while IFS= read -d $'\0' -r dir; do
     # build image
     svcname="$(basename "${dir}")"
+    builddir="${dir}"
+    #PR 516 moved cartservice build artifacts one level down to src
+    if [ $svcname == "cartservice" ] 
+    then
+        builddir="${dir}/src"
+    fi
     image="${REPO_PREFIX}/$svcname:$TAG"
     (
-        cd "${dir}"
+        cd "${builddir}"
         log "Building: ${image}"
         docker build -t "${image}" .
 
