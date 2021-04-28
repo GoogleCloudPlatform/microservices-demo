@@ -16,8 +16,7 @@ const cardValidator = require('simple-card-validator');
 const uuid = require('uuid/v4');
 const pino = require('pino');
 
-const { SpanKind } = require('@opentelemetry/api');
-const { tracer } = require('./tracing');
+const { context, getSpan, setSpan, SpanKind, trace } = require('@opentelemetry/api');
 
 const logger = pino({
   name: 'paymentservice',
@@ -26,7 +25,7 @@ const logger = pino({
   useLevelLabels: true,
   timestamp: pino.stdTimeFunctions.unixTime,
   mixin() {
-    const span = tracer.getCurrentSpan();
+    const span = getSpan(context.active());
     if (!span) {
       return {};
     }
@@ -96,7 +95,7 @@ function randomInt(from, to) {
 module.exports = async function charge(request) {
   // Get handle to the active span and some random attributes for every request. In a failure
   // case some of these might be overwritten to constrain the domain of the error.
-  const grpcActiveSpan = tracer.getCurrentSpan();
+  const grpcActiveSpan = getSpan(context.active());
   grpcActiveSpan.setAttributes({
     version: SUCCESS_VERSION,
     'tenant.level': random(SUCCESS_TENANT_LEVEL),
@@ -135,10 +134,10 @@ module.exports = async function charge(request) {
 
   // Represents an "external service call" to a payment processor. This is the "call" that will
   // either succeed or fail due to an API token issue.
+  const tracer = trace.getTracer('charge')
   const externalPaymentProcessorClientSpan = tracer.startSpan(
     'buttercup.payments.api',
     {
-      parent: grpcActiveSpan,
       kind: SpanKind.CLIENT,
       attributes: {
         'peer.service': 'ButtercupPayments',
@@ -146,7 +145,8 @@ module.exports = async function charge(request) {
         'http.method': 'POST',
         'http.status_code': '200',
       },
-    }
+    },
+    setSpan(context.active(), grpcActiveSpan),
   );
 
   // Call into our "external service" for charge processing

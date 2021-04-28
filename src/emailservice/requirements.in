@@ -1,4 +1,4 @@
-jinja2==2.10
+jinja2==2.11.3
 grpcio-health-checking==1.30.0
 grpcio==1.30.0
 opentelemetry-api==0.12b0

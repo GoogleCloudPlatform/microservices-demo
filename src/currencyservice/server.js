@@ -14,30 +14,10 @@
  * limitations under the License.
  */
 
-const api = require("@opentelemetry/api");
-const { NodeTracerProvider } = require('@opentelemetry/node');
-const { B3Propagator } = require("@opentelemetry/core");
-const { ZipkinExporter } = require('@opentelemetry/exporter-zipkin');
-const { BatchSpanProcessor } = require('@opentelemetry/tracing');
-
-api.propagation.setGlobalPropagator(new B3Propagator());
-
-const provider = new NodeTracerProvider();
-provider.register({
-  propagator: new B3Propagator(),
-});
-
-const exporter = new ZipkinExporter({
-  serviceName: 'currencyservice',
-  url: process.env.SIGNALFX_ENDPOINT_URL,
-});
-
-const tracer = provider.getTracer('currencyservice')
-provider.addSpanProcessor(new BatchSpanProcessor(exporter));
-
 const path = require('path');
-const grpc = require('grpc');
+const grpc = require('@grpc/grpc-js');
 const pino = require('pino');
+const { getSpan, context } = require("@opentelemetry/api");
 
 const protoLoader = require('@grpc/proto-loader');
 
@@ -54,7 +34,19 @@ const logger = pino({
   messageKey: 'message',
   changeLevelName: 'severity',
   useLevelLabels: true,
-  timestamp: pino.stdTimeFunctions.unixTime
+  timestamp: pino.stdTimeFunctions.unixTime,
+  mixin() {
+    const span = getSpan(context.active())
+    if (!span) {
+      return {};
+    }
+    const { traceId, spanId } = span.context();
+    return {
+      trace_id: traceId.slice(-16), // convert to 64-bit format
+      span_id: spanId,
+      'service.name': 'currencyservice'
+    };
+  }
 });
 
 /**
@@ -157,8 +149,17 @@ function main () {
   const server = new grpc.Server();
   server.addService(shopProto.CurrencyService.service, {getSupportedCurrencies, convert});
   server.addService(healthProto.Health.service, {check});
-  server.bind(`0.0.0.0:${PORT}`, grpc.ServerCredentials.createInsecure());
-  server.start();
+  server.bindAsync(
+    `0.0.0.0:${PORT}`, 
+    grpc.ServerCredentials.createInsecure(),
+    (err, port) => {
+      if (err != null) {
+        return console.error(err);
+      }
+      console.log(`CurrencyService grpc server listening on ${port}`);
+      server.start();
+    }
+  );
 }
 
 main();

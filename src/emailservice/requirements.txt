@@ -4,27 +4,73 @@
 #
 #    pip-compile --output-file=requirements.txt requirements.in
 #
-certifi==2020.6.20        # via requests
-chardet==3.0.4            # via requests
-grpcio-health-checking==1.30.0  # via -r requirements.in
-grpcio==1.30.0            # via -r requirements.in, grpcio-health-checking, opentelemetry-instrumentation-grpc
-idna==2.10                # via requests
-jinja2==2.10              # via -r requirements.in
-markupsafe==1.1.1         # via jinja2
-opentelemetry-api==0.12b0  # via -r requirements.in, opentelemetry-exporter-zipkin, opentelemetry-instrumentation, opentelemetry-instrumentation-dbapi, opentelemetry-instrumentation-grpc, opentelemetry-instrumentation-requests, opentelemetry-instrumentation-sqlite3, opentelemetry-sdk
-opentelemetry-exporter-zipkin==0.12b0  # via -r requirements.in
-opentelemetry-instrumentation-dbapi==0.12b0  # via opentelemetry-instrumentation-sqlite3
-opentelemetry-instrumentation-grpc==0.12b0  # via -r requirements.in
-opentelemetry-instrumentation-requests==0.12b0  # via -r requirements.in
-opentelemetry-instrumentation-sqlite3==0.12b0  # via -r requirements.in
-opentelemetry-instrumentation==0.12b0  # via -r requirements.in, opentelemetry-instrumentation-dbapi, opentelemetry-instrumentation-requests, opentelemetry-instrumentation-sqlite3
-opentelemetry-sdk==0.12b0  # via -r requirements.in, opentelemetry-exporter-zipkin, opentelemetry-instrumentation-grpc
-protobuf==3.13.0          # via grpcio-health-checking
-python-json-logger==0.1.11  # via -r requirements.in
-requests==2.24.0          # via opentelemetry-exporter-zipkin, opentelemetry-instrumentation-requests
-six==1.15.0               # via grpcio, protobuf
-urllib3==1.25.10          # via requests
-wrapt==1.12.1             # via opentelemetry-instrumentation, opentelemetry-instrumentation-dbapi, opentelemetry-instrumentation-sqlite3
+certifi==2020.6.20
+    # via requests
+chardet==3.0.4
+    # via requests
+grpcio-health-checking==1.30.0
+    # via -r requirements.in
+grpcio==1.30.0
+    # via
+    #   -r requirements.in
+    #   grpcio-health-checking
+    #   opentelemetry-instrumentation-grpc
+idna==2.10
+    # via requests
+jinja2==2.11.3
+    # via -r requirements.in
+markupsafe==1.1.1
+    # via jinja2
+opentelemetry-api==0.12b0
+    # via
+    #   -r requirements.in
+    #   opentelemetry-exporter-zipkin
+    #   opentelemetry-instrumentation
+    #   opentelemetry-instrumentation-dbapi
+    #   opentelemetry-instrumentation-grpc
+    #   opentelemetry-instrumentation-requests
+    #   opentelemetry-instrumentation-sqlite3
+    #   opentelemetry-sdk
+opentelemetry-exporter-zipkin==0.12b0
+    # via -r requirements.in
+opentelemetry-instrumentation-dbapi==0.12b0
+    # via opentelemetry-instrumentation-sqlite3
+opentelemetry-instrumentation-grpc==0.12b0
+    # via -r requirements.in
+opentelemetry-instrumentation-requests==0.12b0
+    # via -r requirements.in
+opentelemetry-instrumentation-sqlite3==0.12b0
+    # via -r requirements.in
+opentelemetry-instrumentation==0.12b0
+    # via
+    #   -r requirements.in
+    #   opentelemetry-instrumentation-dbapi
+    #   opentelemetry-instrumentation-requests
+    #   opentelemetry-instrumentation-sqlite3
+opentelemetry-sdk==0.12b0
+    # via
+    #   -r requirements.in
+    #   opentelemetry-exporter-zipkin
+    #   opentelemetry-instrumentation-grpc
+protobuf==3.13.0
+    # via grpcio-health-checking
+python-json-logger==0.1.11
+    # via -r requirements.in
+requests==2.24.0
+    # via
+    #   opentelemetry-exporter-zipkin
+    #   opentelemetry-instrumentation-requests
+six==1.15.0
+    # via
+    #   grpcio
+    #   protobuf
+urllib3==1.25.10
+    # via requests
+wrapt==1.12.1
+    # via
+    #   opentelemetry-instrumentation
+    #   opentelemetry-instrumentation-dbapi
+    #   opentelemetry-instrumentation-sqlite3
 
 # The following packages are considered to be unsafe in a requirements file:
 # setuptools

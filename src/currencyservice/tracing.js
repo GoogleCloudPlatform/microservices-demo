@@ -17,13 +17,9 @@ registerInstrumentations({
 });
 
 const exporter = new ZipkinExporter({
-  serviceName: 'paymentservice',
+  serviceName: 'currencyservice',
   url: process.env.SIGNALFX_ENDPOINT_URL,
 });
 
 provider.addSpanProcessor(new BatchSpanProcessor(exporter));
 
-const CONSOLE_SPAN = process.env['CONSOLE_SPAN'];
-if (CONSOLE_SPAN === 'true') {
-  provider.addSpanProcessor(new BatchSpanProcessor(new ConsoleSpanExporter(), { bufferTimeout: 1000 }));
-}

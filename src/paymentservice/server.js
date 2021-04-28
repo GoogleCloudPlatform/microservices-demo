@@ -13,12 +13,12 @@
 // limitations under the License.
 
 const path = require('path');
-const grpc = require('grpc');
+const grpc = require('@grpc/grpc-js');
 const pino = require('pino');
 const protoLoader = require('@grpc/proto-loader');
+const { getSpan, context } = require("@opentelemetry/api");
 
 const charge = require('./charge');
-const { tracer } = require('./tracing');
 
 const logger = pino({
   name: 'paymentservice-server',
@@ -27,7 +27,7 @@ const logger = pino({
   useLevelLabels: true,
   timestamp: pino.stdTimeFunctions.unixTime,
   mixin() {
-    const span = tracer.getCurrentSpan()
+    const span = getSpan(context.active())
     if (!span) {
       return {};
     }
@@ -85,12 +85,17 @@ class HipsterShopServer {
   }
 
   listen() {
-    this.server.bind(
+    this.server.bindAsync(
       `0.0.0.0:${this.port}`,
-      grpc.ServerCredentials.createInsecure()
+      grpc.ServerCredentials.createInsecure(),
+      (err, port) => {
+        if (err != null) {
+          return console.error(err);
+        }
+        console.log(`PaymentService grpc server listening on ${port}`);
+        this.server.start();
+      },
     );
-    logger.info(`PaymentService grpc server listening on ${this.port}`);
-    this.server.start();
   }
 
   loadProto(path) {
