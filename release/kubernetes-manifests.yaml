@@ -219,7 +219,7 @@ spec:
           requiredDuringSchedulingIgnoredDuringExecution:
             nodeSelectorTerms:
             - matchExpressions:
-              - key: type
+              - key: liqo.io/type
                 operator: NotIn
                 values:
                 - virtual-node
