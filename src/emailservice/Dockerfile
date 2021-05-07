@@ -31,6 +31,9 @@ ENV PYTHONUNBUFFERED=1
 # Enable Profiler
 ENV ENABLE_PROFILER=1
 
+ARG OTEL_EXPORTER_OTLP_SPAN_ENDPOINT
+ENV OTEL_EXPORTER_OTLP_SPAN_ENDPOINT=${OTEL_EXPORTER_OTLP_SPAN_ENDPOINT}
+
 RUN apt-get -qq update \
     && apt-get install -y --no-install-recommends \
         wget
