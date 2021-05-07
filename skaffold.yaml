@@ -24,7 +24,7 @@ build:
     context: src/emailservice
     docker:
       buildArgs:
-        OTEL_EXPORTER_OTLP_SPAN_ENDPOINT: "otel-collector:4317"
+        OTEL_EXPORTER_OTLP_SPAN_ENDPOINT: "http://otel-collector:4317"
   - image: productcatalogservice
     context: src/productcatalogservice
     docker:
@@ -34,7 +34,7 @@ build:
     context: src/recommendationservice
     docker:
       buildArgs:
-        OTEL_EXPORTER_OTLP_SPAN_ENDPOINT: "otel-collector:4317"
+        OTEL_EXPORTER_OTLP_SPAN_ENDPOINT: "http://otel-collector:4317"
   - image: shippingservice
     context: src/shippingservice
     docker:
