@@ -29,8 +29,10 @@ import (
 	"go.opentelemetry.io/contrib/detectors/gcp"
 	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
 	"go.opentelemetry.io/otel"
-	"go.opentelemetry.io/otel/label"
+	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/metric"
+	"go.opentelemetry.io/otel/metric/global"
+	"go.opentelemetry.io/otel/propagation"
 	"go.opentelemetry.io/otel/sdk/resource"
 	"go.opentelemetry.io/otel/semconv"
 	"go.opentelemetry.io/otel/trace"
@@ -52,7 +54,7 @@ var (
 )
 
 func init() {
-	meter := otel.GetMeterProvider().Meter(instName, metric.WithInstrumentationVersion(instVer))
+	meter := global.Meter(instName, metric.WithInstrumentationVersion(instVer))
 	httpLatency = metric.Must(meter).NewFloat64ValueRecorder(
 		"http.server.duration",
 		metric.WithDescription("duration of the inbound HTTP request"),
@@ -64,7 +66,7 @@ func init() {
 		metric.WithUnit(unit.Milliseconds),
 	)
 
-	var instID label.KeyValue
+	var instID attribute.KeyValue
 	if host, ok := os.LookupEnv("HOSTNAME"); ok && host != "" {
 		instID = semconv.ServiceInstanceIDKey.String(host)
 	} else {
@@ -74,7 +76,7 @@ func init() {
 	var err error
 	res, err = resource.New(
 		context.Background(),
-		resource.WithAttributes(instID),
+		resource.WithAttributes(instID, semconv.ServiceNameKey.String("Frontend")),
 		resource.WithDetectors(new(gcp.GCE)),
 	)
 	if err != nil {
@@ -170,7 +172,7 @@ type traceware struct {
 // ServeHTTP implements the http.Handler interface. It does the actual
 // tracing of the request.
 func (tw traceware) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	ctx := otel.GetTextMapPropagator().Extract(r.Context(), r.Header)
+	ctx := otel.GetTextMapPropagator().Extract(r.Context(), propagation.HeaderCarrier(r.Header))
 	spanName := ""
 	route := mux.CurrentRoute(r)
 	if route != nil {
@@ -186,9 +188,9 @@ func (tw traceware) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if spanName == "" {
 		spanName = fmt.Sprintf("HTTP %s route not found", r.Method)
 	}
-	labels := []label.KeyValue{
-		label.String("span.name", spanName),
-		label.String("span.kind", trace.SpanKindServer.String()),
+	labels := []attribute.KeyValue{
+		attribute.String("span.name", spanName),
+		attribute.String("span.kind", trace.SpanKindServer.String()),
 	}
 	labels = append(labels, semconv.HTTPServerMetricAttributesFromHTTPRequest(serviceName, r)...)
 
@@ -260,28 +262,28 @@ func StreamClientInterceptor() grpc.StreamClientInterceptor {
 * go.opentelemetry.io/otel/instrumentation/grpctrace/interceptor.go@v0.8.0
  */
 
-func labels(fullMethod, peerAddress string) []label.KeyValue {
-	attrs := []label.KeyValue{semconv.RPCSystemGRPC}
+func labels(fullMethod, peerAddress string) []attribute.KeyValue {
+	attrs := []attribute.KeyValue{semconv.RPCSystemGRPC}
 	name, mAttrs := parseFullMethod(fullMethod)
 	attrs = append(attrs, mAttrs...)
 	attrs = append(attrs, peerAttr(peerAddress)...)
-	attrs = append(attrs, label.String("span.name", name))
-	attrs = append(attrs, label.String("span.kind", trace.SpanKindServer.String()))
+	attrs = append(attrs, attribute.String("span.name", name))
+	attrs = append(attrs, attribute.String("span.kind", trace.SpanKindServer.String()))
 	return attrs
 }
 
 // peerAttr returns attributes about the peer address.
-func peerAttr(addr string) []label.KeyValue {
+func peerAttr(addr string) []attribute.KeyValue {
 	host, port, err := net.SplitHostPort(addr)
 	if err != nil {
-		return []label.KeyValue(nil)
+		return []attribute.KeyValue(nil)
 	}
 
 	if host == "" {
 		host = "127.0.0.1"
 	}
 
-	return []label.KeyValue{
+	return []attribute.KeyValue{
 		semconv.NetPeerIPKey.String(host),
 		semconv.NetPeerPortKey.String(port),
 	}
@@ -299,15 +301,15 @@ func peerFromCtx(ctx context.Context) string {
 // parseFullMethod returns a span name following the OpenTelemetry semantic
 // conventions as well as all applicable span label.KeyValue attributes based
 // on a gRPC's FullMethod.
-func parseFullMethod(fullMethod string) (string, []label.KeyValue) {
+func parseFullMethod(fullMethod string) (string, []attribute.KeyValue) {
 	name := strings.TrimLeft(fullMethod, "/")
 	parts := strings.SplitN(name, "/", 2)
 	if len(parts) != 2 {
 		// Invalid format, does not follow `/package.service/method`.
-		return name, []label.KeyValue(nil)
+		return name, []attribute.KeyValue(nil)
 	}
 
-	var attrs []label.KeyValue
+	var attrs []attribute.KeyValue
 	if service := parts[0]; service != "" {
 		attrs = append(attrs, semconv.RPCServiceKey.String(service))
 	}
