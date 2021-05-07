@@ -48,12 +48,5 @@ COPY --from=builder /usr/local/lib/python3.7/ /usr/local/lib/python3.7/
 # Add the application
 COPY . .
 
-ARG NEW_RELIC_API_KEY
-ARG NEW_RELIC_TRACE_URL
-ARG NEW_RELIC_METRIC_URL
-ENV NEW_RELIC_API_KEY=${NEW_RELIC_API_KEY}
-ENV NEW_RELIC_TRACE_URL=${NEW_RELIC_TRACE_URL}
-ENV NEW_RELIC_METRIC_URL=${NEW_RELIC_METRIC_URL}
-
 EXPOSE 8080
 ENTRYPOINT [ "python", "email_server.py" ]

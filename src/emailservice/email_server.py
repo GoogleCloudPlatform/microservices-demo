@@ -20,7 +20,6 @@ import os
 import sys
 import time
 import grpc
-from urllib.parse import urlparse
 from jinja2 import Environment, FileSystemLoader, select_autoescape, TemplateError
 from google.api_core.exceptions import GoogleAPICallError
 from google.auth.exceptions import DefaultCredentialsError
@@ -30,8 +29,9 @@ import demo_pb2_grpc
 from grpc_health.v1 import health_pb2
 from grpc_health.v1 import health_pb2_grpc
 
-from opencensus_ext_newrelic import NewRelicTraceExporter
+from opencensus.ext.stackdriver import trace_exporter as stackdriver_exporter
 from opencensus.ext.grpc import server_interceptor
+from opencensus.common.transports.async_ import AsyncTransport
 from opencensus.trace import samplers
 
 # import googleclouddebugger
@@ -59,6 +59,10 @@ class BaseEmailService(demo_pb2_grpc.EmailServiceServicer):
   def Check(self, request, context):
     return health_pb2.HealthCheckResponse(
       status=health_pb2.HealthCheckResponse.SERVING)
+  
+  def Watch(self, request, context):
+    return health_pb2.HealthCheckResponse(
+      status=health_pb2.HealthCheckResponse.UNIMPLEMENTED)
 
 class EmailService(BaseEmailService):
   def __init__(self):
@@ -185,11 +189,9 @@ if __name__ == '__main__':
     else:
       logger.info("Tracing enabled.")
       sampler = samplers.AlwaysOnSampler()
-      exporter = NewRelicTraceExporter(
-          insert_key=os.environ["NEW_RELIC_API_KEY"],
-          host=urlparse(os.environ["NEW_RELIC_TRACE_URL"]).hostname,
-          service_name="emailservice"
-      )
+      exporter = stackdriver_exporter.StackdriverExporter(
+        project_id=os.environ.get('GCP_PROJECT_ID'),
+        transport=AsyncTransport)
       tracer_interceptor = server_interceptor.OpenCensusServerInterceptor(sampler, exporter)
   except (KeyError, DefaultCredentialsError):
       logger.info("Tracing disabled.")

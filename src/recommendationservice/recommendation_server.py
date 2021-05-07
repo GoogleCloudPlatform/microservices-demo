@@ -18,16 +18,16 @@ import os
 import random
 import time
 import traceback
-from urllib.parse import urlparse
 from concurrent import futures
 
 import googleclouddebugger
 import googlecloudprofiler
 from google.auth.exceptions import DefaultCredentialsError
 import grpc
-from opencensus_ext_newrelic import NewRelicTraceExporter
+from opencensus.ext.stackdriver import trace_exporter as stackdriver_exporter
 from opencensus.ext.grpc import server_interceptor
 from opencensus.trace import samplers
+from opencensus.common.transports.async_ import AsyncTransport
 
 import demo_pb2
 import demo_pb2_grpc
@@ -108,11 +108,9 @@ if __name__ == "__main__":
       else:
         logger.info("Tracing enabled.")
         sampler = samplers.AlwaysOnSampler()
-        exporter = NewRelicTraceExporter(
-            insert_key=os.environ["NEW_RELIC_API_KEY"],
-            host=urlparse(os.environ["NEW_RELIC_TRACE_URL"]).hostname,
-            service_name="recommendationservice"
-        )
+        exporter = stackdriver_exporter.StackdriverExporter(
+          project_id=os.environ.get('GCP_PROJECT_ID'),
+          transport=AsyncTransport)
         tracer_interceptor = server_interceptor.OpenCensusServerInterceptor(sampler, exporter)
     except (KeyError, DefaultCredentialsError):
         logger.info("Tracing disabled.")

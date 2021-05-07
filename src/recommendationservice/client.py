@@ -14,16 +14,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import os
 import sys
-from urlparse import urlparse
 import grpc
 import demo_pb2
 import demo_pb2_grpc
 
 from opencensus.trace.tracer import Tracer
-from opencensus_ext_newrelic import NewRelicTraceExporter
-from opencensus.ext.grpc import client_interceptor
+from opencensus.trace.exporters import stackdriver_exporter
+from opencensus.trace.ext.grpc import client_interceptor
 
 from logger import getJSONLogger
 logger = getJSONLogger('recommendationservice-server')
@@ -36,11 +34,7 @@ if __name__ == "__main__":
         port = "8080"
 
     try:
-        exporter = NewRelicTraceExporter(
-            insert_key=os.environ["NEW_RELIC_API_KEY"],
-            host=urlparse(os.environ["NEW_RELIC_TRACE_URL"]).hostname,
-            service_name="recommendationservice"
-        )
+        exporter = stackdriver_exporter.StackdriverExporter()
         tracer = Tracer(exporter=exporter)
         tracer_interceptor = client_interceptor.OpenCensusClientInterceptor(tracer, host_port='localhost:'+port)
     except:

@@ -14,8 +14,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from urllib.parse import urlparse
-
 import grpc
 
 import demo_pb2
@@ -24,17 +22,12 @@ import demo_pb2_grpc
 from logger import getJSONLogger
 logger = getJSONLogger('emailservice-client')
 
-from opencensus_ext_newrelic import NewRelicTraceExporter
-from opencensus.ext.grpc import client_interceptor
-from opencensus.trace import samplers
+from opencensus.trace.tracer import Tracer
+from opencensus.trace.exporters import stackdriver_exporter
+from opencensus.trace.ext.grpc import client_interceptor
 
 try:
-    sampler = samplers.AlwaysOnSampler()
-    exporter = NewRelicTraceExporter(
-        insert_key=os.environ["NEW_RELIC_API_KEY"],
-        host=urlparse(os.environ["NEW_RELIC_TRACE_URL"]).hostname,
-        service_name="emailservice"
-    )
+    exporter = stackdriver_exporter.StackdriverExporter()
     tracer = Tracer(exporter=exporter)
     tracer_interceptor = client_interceptor.OpenCensusClientInterceptor(tracer, host_port='0.0.0.0:8080')
 except:
