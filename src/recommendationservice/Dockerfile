@@ -24,6 +24,9 @@ RUN GRPC_HEALTH_PROBE_VERSION=v0.3.6 && \
     wget -qO/bin/grpc_health_probe https://github.com/grpc-ecosystem/grpc-health-probe/releases/download/${GRPC_HEALTH_PROBE_VERSION}/grpc_health_probe-linux-amd64 && \
     chmod +x /bin/grpc_health_probe
 
+ARG OTEL_EXPORTER_OTLP_SPAN_ENDPOINT
+ENV OTEL_EXPORTER_OTLP_SPAN_ENDPOINT=${OTEL_EXPORTER_OTLP_SPAN_ENDPOINT}
+
 # get packages
 WORKDIR /recommendationservice
 COPY requirements.txt requirements.txt
