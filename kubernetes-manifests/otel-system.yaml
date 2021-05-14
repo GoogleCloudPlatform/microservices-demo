@@ -2,6 +2,7 @@ apiVersion: apps/v1
 kind: DaemonSet
 metadata:
   name: otel-system
+  namespace: opentelemetry-demo
   labels:
     app: opentelemetry
     component: otel-system-metrics

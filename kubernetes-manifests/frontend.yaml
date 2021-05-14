@@ -16,6 +16,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: frontend
+  namespace: opentelemetry-demo
 spec:
   replicas: 3
   selector:
@@ -100,6 +101,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: frontend-external
+  namespace: opentelemetry-demo
 spec:
   type: LoadBalancer
   selector:

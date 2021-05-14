@@ -32,7 +32,7 @@ import io.opentelemetry.api.GlobalOpenTelemetry;
 import io.opentelemetry.api.common.AttributeKey;
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.metrics.DoubleValueRecorder;
-import io.opentelemetry.api.metrics.GlobalMetricsProvider;
+import io.opentelemetry.api.metrics.GlobalMeterProvider;
 import io.opentelemetry.api.metrics.LongUpDownCounter;
 import io.opentelemetry.api.metrics.Meter;
 import io.opentelemetry.api.metrics.MeterProvider;
@@ -46,7 +46,9 @@ import io.opentelemetry.sdk.metrics.SdkMeterProvider;
 import io.opentelemetry.sdk.metrics.aggregator.AggregatorFactory;
 import io.opentelemetry.sdk.metrics.common.InstrumentType;
 import io.opentelemetry.sdk.metrics.export.IntervalMetricReader;
+import io.opentelemetry.sdk.metrics.processor.LabelsProcessorFactory;
 import io.opentelemetry.sdk.metrics.view.InstrumentSelector;
+import io.opentelemetry.sdk.metrics.view.View;
 import io.opentelemetry.sdk.resources.Resource;
 import java.io.IOException;
 import java.net.InetAddress;
@@ -360,13 +362,16 @@ public final class AdService {
 
     String serviceName = "AdService";
     Resource resource = Resource.create(Attributes.of(AttributeKey.stringKey("service.name"), serviceName));
+    InstrumentSelector selectorUpDownCounter = InstrumentSelector.builder().setInstrumentType(InstrumentType.UP_DOWN_COUNTER).build();
 
     // TODO: Generate resource from OTEL_RESOURCE_ATTRIBUTES
-    SdkMeterProvider meterProvider = SdkMeterProvider.builder().setResource(resource).build();
-
-    InstrumentSelector selectorUpDownCounter = InstrumentSelector.builder().setInstrumentType(InstrumentType.UP_DOWN_COUNTER).build();
-    AggregatorFactory aggregationFactory = AggregatorFactory.sum(false);
-    meterProvider.registerView(selectorUpDownCounter, aggregationFactory);
+    SdkMeterProvider meterProvider = SdkMeterProvider.builder()
+            .setResource(resource)
+            .registerView(selectorUpDownCounter, View.builder()
+                    .setLabelsProcessorFactory(LabelsProcessorFactory.noop())
+                    .setAggregatorFactory(AggregatorFactory.sum(false))
+            .build())
+            .build();
 
     IntervalMetricReader.builder()
         .setExportIntervalMillis(2000)
@@ -377,7 +382,7 @@ public final class AdService {
         .setMetricProducers(List.of(meterProvider))
         .build();
 
-    GlobalMetricsProvider.set(meterProvider);
+    GlobalMeterProvider.set(meterProvider);
 
     // Start the RPC server. You shouldn't see any output from gRPC before this.
     logger.info("AdService starting.");
