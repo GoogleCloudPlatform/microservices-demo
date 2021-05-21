@@ -66,7 +66,7 @@ gcloud container clusters create onlineboutique \
 4. **Deploy the sample app to the cluster.**
 
 ```
-kubectl apply -f ./release/kubernetes-manifests.yaml
+kubectl apply -f kubernetes-manifests/
 ```
 
 5. **Wait for the Pods to be ready.**
@@ -120,7 +120,7 @@ gcloud container clusters delete onlineboutique \
 - **Workload Identity**: [See these instructions.](docs/workload-identity.md)
 - **Istio**: [See these instructions.](docs/service-mesh.md)
 - **Anthos Service Mesh**: ASM requires Workload Identity to be enabled in your GKE cluster. [See the workload identity instructions](docs/workload-identity.md) to configure and deploy the app. Then, use the [service mesh guide](/docs/service-mesh.md).
-- **non-GKE clusters (Minikube, Kind)**: see the [Development Guide](/docs/development-guide.md)
+- **Running outside of GCP (Minikube, AWS, etc.)**: see the [guide](/docs/non-gke-clusters.md)
 - **Memorystore**: [See these instructions](/docs/memorystore.md) to replace the in-cluster `redis` database with hosted Google Cloud Memorystore (redis).
 
 
