@@ -126,7 +126,11 @@ to the downloaded file and execute the following commands:
   ENCODED=$(base64 <PATH_TO_DOWNLOADED_SERVICE_ACCOUNT_KEY_FILE>)
   sed -i -e "s/KEY_FILE_CONTENT/"$ENCODED"/" local/gcp-service-account.yaml
   ```
-#### 5. Run `skaffold run -p local` (first time will be slow, it can take ~20 minutes).
+#### 5. Run `skaffold run -p local`
+> 🎯 First time will be slow; it can take ~20 minutes. <br>
+> 🎯 If you see an error at the end of skaffold run (something similar to
+`9/12 deployment(s) failed`), give it some time. This can happen due to some
+resources depend on others being created first
 
 - This will build and deploy the application. If you need to rebuild the images
    automatically as you refactor the code, run `skaffold dev` command.
