@@ -22,8 +22,8 @@ gcloud services enable monitoring.googleapis.com \
 ```
 
 One of the following for _Local cluster_ setup:
-- [Minikube](https://minikube.sigs.k8s.io/docs/start/) _(optional - see Local Cluster)_
-- [Kind](https://kind.sigs.k8s.io/) _(optional - see Local Cluster)_
+- [Minikube](https://minikube.sigs.k8s.io/docs/start/) _(optional - [see Local Cluster](#option-2---local-cluster))_
+- [Kind](https://kind.sigs.k8s.io/) _(optional - [see Local Cluster](#option-2---local-cluster))_
 ---
 
 ## Option 1: Google Kubernetes Engine (GKE)
