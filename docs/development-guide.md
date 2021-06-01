@@ -28,9 +28,9 @@ One of the following for _Local cluster_ setup:
 
 ## Option 1: Google Kubernetes Engine (GKE)
 
-> 🎯 **Recommended** Use Google Cloud Platform if you want to try it on
+> 🎯 &nbsp;&nbsp;**Recommended** Use Google Cloud Platform if you want to try it on
 > a realistic cluster. <br>
-> 🎯 **Note**: If your cluster has Workload Identity enabled,
+> 🎯 &nbsp;&nbsp;**Note**: If your cluster has Workload Identity enabled,
 > [see these instructions](/docs/workload-identity.md)
 
 #### 1.  Create a Google Kubernetes Engine cluster and make sure `kubectl` is pointing to the cluster.
@@ -61,11 +61,11 @@ gcloud auth configure-docker -q
 
 This command:
 
-- builds the container images
-- pushes them to GCR
-- applies the `./kubernetes-manifests` deploying the application to Kubernetes.
+- Builds the container images
+- Pushes them to GCR
+- Applies the `./kubernetes-manifests` deploying the application to Kubernetes.
 
-> 🎯 **Troubleshooting:** If you get `"No space left on device"` error on Google
+> 🎯 &nbsp;&nbsp;**Troubleshooting:** If you get `"No space left on device"` error on Google
 Cloud Shell, you can build the images on Google Cloud Build: [Enable the
 Cloud Build
 API](https://console.cloud.google.com/flows/enableapi?apiid=cloudbuild.googleapis.com),
@@ -127,8 +127,8 @@ to the downloaded file and execute the following commands:
   sed -i -e "s/KEY_FILE_CONTENT/"$ENCODED"/" local/gcp-service-account.yaml
   ```
 #### 5. Run `skaffold run -p local`
-> 🎯 First time will be slow; it can take ~20 minutes. <br>
-> 🎯 If you see an error at the end of skaffold run (something similar to
+> 🎯 &nbsp;&nbsp;First time will be slow; it can take ~20 minutes. <br>
+> 🎯 &nbsp;&nbsp;If you see an error at the end of skaffold run (something similar to
 `9/12 deployment(s) failed`), give it some time. This can happen due to some
 resources depend on others being created first
 
@@ -146,9 +146,10 @@ resources depend on others being created first
 - **Docker For Desktop** should automatically provide the frontend at http://localhost:80
 
 - **Kind** cluster should expose the `frontend` via http://localhost:8080
-> 🎯 **Note:** The above is possible because, the `frontend` is exposed via a
-_NodePort_ service on port **30001**. This port is then associated to the host
-port **8080** via the kind cluster configuration `kind-cluster.yaml`.
+> 🎯 &nbsp;&nbsp;**Note:** The above is possible because, in this setup the
+ `frontend` is exposed via a _NodePort_ service on port **30001**. This port is
+  then associated to the host port **8080** via the kind cluster configuration
+   `kind-cluster.yaml`.
 ---
 
 ## Cleanup
