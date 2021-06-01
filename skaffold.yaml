@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-apiVersion: skaffold/v1beta2
+apiVersion: skaffold/v2alpha4
 kind: Config
 build:
   artifacts:
@@ -47,9 +47,9 @@ build:
   local:
     useBuildkit: false
 deploy:
-  kubectl:
-    manifests:
-    - ./kubernetes-manifests/**.yaml
+  kustomize:
+    paths: [kubernetes-manifests]
+  statusCheckDeadlineSeconds: 300
 profiles:
 # "gcb" profile allows building and pushing the images
 # on Google Container Builder without requiring docker
@@ -65,3 +65,8 @@ profiles:
       diskSizeGb: 300
       machineType: N1_HIGHCPU_32
       timeout: 4000s
+- name: local
+  deploy:
+    kustomize:
+      paths:
+      - ./local/

@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend
+spec:
+  selector:
+    matchLabels:
+      app: frontend
+  template:
+    spec:
+      containers:
+      - name: server
+        env:
+        - name: GOOGLE_APPLICATION_CREDENTIALS
+          value: /var/gcp/sa-key.json
+        volumeMounts:
+        - name: service-account
+          mountPath: /var/gcp
+          readOnly: true
+      volumes:
+      - name: service-account
+        secret:
+          secretName: gcp-service-account
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend-external
+spec:
+  type: NodePort
+  selector:
+    app: frontend
+  ports:
+    - port: 80
+      targetPort: 8080
+      nodePort: 30001
