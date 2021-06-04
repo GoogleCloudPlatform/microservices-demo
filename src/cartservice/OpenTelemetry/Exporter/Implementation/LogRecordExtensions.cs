@@ -39,7 +39,6 @@ namespace OpenTelemetry.Exporter.OpenTelemetryProtocol.Implementation
     {
         private static readonly ConcurrentBag<OtlpLogs.InstrumentationLibraryLogs> SpanListPool = new ConcurrentBag<OtlpLogs.InstrumentationLibraryLogs>();
         private static readonly Action<RepeatedField<OtlpLogs.LogRecord>, int> RepeatedFieldOfSpanSetCountAction = CreateRepeatedFieldOfSpanSetCountAction();
-        private static readonly Func<byte[], ByteString> ByteStringCtorFunc = CreateByteStringCtorFunc();
 
         internal static void AddBatch(
             this OtlpCollector.ExportLogsServiceRequest request,
@@ -135,8 +134,8 @@ namespace OpenTelemetry.Exporter.OpenTelemetryProtocol.Implementation
                 // TODO: convert LogLevel to OTel severity
                 // SeverityNumber = activity.LogLevel,
                 TimeUnixNano = (ulong)logRecord.Timestamp.ToUnixTimeNanoseconds(),
-                TraceId = ByteStringCtorFunc(traceIdBytes),
-                SpanId = ByteStringCtorFunc(spanIdBytes),
+                TraceId = UnsafeByteOperations.UnsafeWrap(traceIdBytes),
+                SpanId = UnsafeByteOperations.UnsafeWrap(spanIdBytes),
             };
 
             // TODO: Add attributes
@@ -165,26 +164,6 @@ namespace OpenTelemetry.Exporter.OpenTelemetryProtocol.Implementation
             generator.Emit(OpCodes.Ret);
 
             return (Action<RepeatedField<OtlpLogs.LogRecord>, int>)dynamicMethod.CreateDelegate(typeof(Action<RepeatedField<OtlpLogs.LogRecord>, int>));
-        }
-
-        private static Func<byte[], ByteString> CreateByteStringCtorFunc()
-        {
-            ConstructorInfo byteStringCtor = typeof(ByteString).GetConstructor(BindingFlags.NonPublic | BindingFlags.Instance, null, new[] { typeof(byte[]) }, null);
-
-            DynamicMethod dynamicMethod = new DynamicMethod(
-                "ByteStringCtor",
-                typeof(ByteString),
-                new[] { typeof(byte[]) },
-                typeof(ActivityExtensions).Module,
-                skipVisibility: true);
-
-            var generator = dynamicMethod.GetILGenerator();
-
-            generator.Emit(OpCodes.Ldarg_0);
-            generator.Emit(OpCodes.Newobj, byteStringCtor);
-            generator.Emit(OpCodes.Ret);
-
-            return (Func<byte[], ByteString>)dynamicMethod.CreateDelegate(typeof(Func<byte[], ByteString>));
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
