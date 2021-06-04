@@ -16,6 +16,7 @@
 FROM mcr.microsoft.com/dotnet/sdk:5.0.103 as builder
 WORKDIR /app
 COPY cartservice.csproj .
+COPY NuGet.config .
 RUN dotnet restore cartservice.csproj -r linux-musl-x64
 COPY . .
 
