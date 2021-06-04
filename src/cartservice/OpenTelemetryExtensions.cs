@@ -11,13 +11,16 @@ namespace cartservice.OpenTelemetry
 {
     public static class OpenTelemetryExtensions
     {
+        private static ResourceBuilder ResourceBuilder =
+            ResourceBuilder
+                .CreateDefault()
+                .AddService("CartService")
+                .AddTelemetrySdk();
+
         public static void AddOpenTelemetry(this IServiceCollection services, ICartStore cartStore)
         {
             services.AddOpenTelemetryTracing(builder => {
-                builder.SetResourceBuilder(
-                    ResourceBuilder
-                        .CreateDefault()
-                        .AddService("CartService"));
+                builder.SetResourceBuilder(ResourceBuilder);
                 
                 builder.AddAspNetCoreInstrumentation();
 
@@ -49,6 +52,7 @@ namespace cartservice.OpenTelemetry
                     };
 
                     options
+                        .SetResourceBuilder(ResourceBuilder)
                         .AddProcessor(new SpanEventLogProcessor())
                         .AddProcessor(new BatchLogRecordExportProcessor(new OtlpLogExporter(otlpExporterOptions)));
                 });
