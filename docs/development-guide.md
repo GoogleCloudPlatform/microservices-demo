@@ -79,7 +79,7 @@ kubectl get service frontend-external
 
 ## Option 2 - Local Cluster
 
-#### 1. A local Kubernetes cluster can be launched with one of the following tools:
+### 1. Launch a local Kubernetes cluster with one of the following tools:
 
 - **Minikube** (tested with Ubuntu Linux).
   - Please, ensure that the local Kubernetes cluster has at least:
@@ -104,13 +104,13 @@ kubectl get service frontend-external
     kind get clusters
     kubectl config use-context kind-hipster
     ```
-
-#### 2. Verify that you're connected to the respective control plane.
+#### Verify that you're connected to the respective control plane.
 ```sh
 kubectl get nodes
 # you should see the nodes in your local cluster
 ```
 
+### 2. Configure service account and deploy workloads
 #### 3. Create a _GCP IAM Service Account_ in your Google Cloud Project
 - Set the environment variable `PROJECT_ID` with the ID of the GCP project
 you are using.
@@ -178,7 +178,7 @@ resources depend on others being created first.
 kubectl get pods
 ```
 
-#### 9. Access the web frontend through your browser
+### 3. Access the web frontend through your browser
 - **Minikube** requires you to run a command to access the frontend service:
   ```shell
   minikube service frontend-external
