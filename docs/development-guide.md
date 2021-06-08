@@ -105,7 +105,11 @@ kubectl get service frontend-external
     kubectl config use-context kind-hipster
     ```
 
-#### 2. Run `kubectl get nodes` to verify you're connected to the respective control plane.
+#### 2. Verify that you're connected to the respective control plane.
+```sh
+kubectl get nodes
+# you should see the nodes in your local cluster
+```
 
 #### 3. Create a _GCP IAM Service Account_ in your Google Cloud Project
 - Set the environment variable `PROJECT_ID` with the ID of the GCP project
@@ -151,7 +155,7 @@ gcloud iam service-accounts keys create sa-key.json --iam-account=${SERVICE_ACCO
 
 #### 6. Update the `gcp-service-account.yaml` secret with the downloaded key file data
   ```sh
-  # to be run from the root diectory of this repository
+  # to be run from the root directory of this repository
   ENCODED=$(base64 sa-key.json)
   sed -i '' -e "s/KEY_FILE_CONTENT/"$ENCODED"/" local/gcp-service-account.yaml
   ```
@@ -168,7 +172,7 @@ Docker will build these from scratch.<br><br>
 `9/12 deployment(s) failed`), give it some time. This can happen due to some
 resources depend on others being created first.
 
-#### 8. Verify that the Pods are ready anbd running
+#### 8. Verify that the Pods are ready and running
 ```sh
 # use the -w (watch) flag to keep monitoring as the pods gets spawned
 kubectl get pods
@@ -183,10 +187,10 @@ kubectl get pods
 - **Docker For Desktop** should automatically provide the frontend at http://localhost:80
 
 - **Kind** cluster should expose the `frontend` via http://localhost:8080
-> 🎯 &nbsp;&nbsp;**Note:** The above is possible because, in this setup the
- `frontend` is exposed via a _NodePort_ service on port **30001**. This port is
-  then associated to the host port **8080** via the kind cluster configuration
-   `kind-cluster.yaml`.
+  > 🎯 &nbsp;&nbsp; The above is possible because, in this setup the
+  `frontend` is exposed via a _NodePort_ service on port **30001**. This port is
+    then associated to the host port **8080** via the kind cluster configuration
+    `kind-cluster.yaml`.
 ---
 
 ## Cleanup
