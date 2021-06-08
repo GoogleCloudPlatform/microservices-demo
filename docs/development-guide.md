@@ -153,11 +153,16 @@ gcloud projects add-iam-policy-binding ${PROJECT_ID} \
 gcloud iam service-accounts keys create sa-key.json --iam-account=${SERVICE_ACCOUNT_NAME}@${PROJECT_ID}.iam.gserviceaccount.com
 ```
 
-#### 2.4. Update the `gcp-service-account.yaml` secret with the downloaded key file data
+#### 2.4. Create a kubernetes secret with the downloaded key file data
   ```sh
   # to be run from the root directory of this repository
-  ENCODED=$(base64 sa-key.json)
-  sed -i '' -e "s/KEY_FILE_CONTENT/"$ENCODED"/" local/gcp-service-account.yaml
+  kubectl create secret generic gcp-service-account --from-file=sa-key.json=sa-key.json
+  ```
+
+  Verify that a secret with the name `gcp-service-account` was created with a
+  data field called `sa-key.json`
+  ```sh
+  kubectl get secret gcp-service-account -o jsonpath='{.data.sa-key\.json}' | base64 --decode
   ```
 #### 2.5. Run skaffold
 - The following will build and deploy the application. If you need to rebuild
