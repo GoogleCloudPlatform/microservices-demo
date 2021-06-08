@@ -127,19 +127,19 @@ gcloud iam service-accounts create $SERVICE_ACCOUNT_NAME
 #   - Cloud Debugger Agent
 #   - Monitoring Metric Writer
 
-gcloud projects add-iam-policy-binding hip-v2 \
+gcloud projects add-iam-policy-binding ${PROJECT_ID} \
     --member="serviceAccount:${SERVICE_ACCOUNT_NAME}@${PROJECT_ID}.iam.gserviceaccount.com" \
     --role="roles/cloudtrace.agent"
 
-gcloud projects add-iam-policy-binding hip-v2 \
+gcloud projects add-iam-policy-binding ${PROJECT_ID} \
     --member="serviceAccount:${SERVICE_ACCOUNT_NAME}@${PROJECT_ID}.iam.gserviceaccount.com" \
     --role="roles/cloudprofiler.agent"
 
-gcloud projects add-iam-policy-binding hip-v2 \
+gcloud projects add-iam-policy-binding ${PROJECT_ID} \
     --member="serviceAccount:${SERVICE_ACCOUNT_NAME}@${PROJECT_ID}.iam.gserviceaccount.com" \
     --role="roles/clouddebugger.agent"
 
-gcloud projects add-iam-policy-binding hip-v2 \
+gcloud projects add-iam-policy-binding ${PROJECT_ID} \
     --member="serviceAccount:${SERVICE_ACCOUNT_NAME}@${PROJECT_ID}.iam.gserviceaccount.com" \
     --role="roles/monitoring.metricWriter"
 ```
