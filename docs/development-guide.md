@@ -111,7 +111,7 @@ kubectl get nodes
 ```
 
 ### 2. Configure service account and deploy workloads
-#### 3. Create a _GCP IAM Service Account_ in your Google Cloud Project
+#### 2.1. Create a _GCP IAM Service Account_ in your Google Cloud Project
 - Set the environment variable `PROJECT_ID` with the ID of the GCP project
 you are using.
 - For `SERVICE_ACCOUNT_NAME` you can use any meaningful string.
@@ -121,9 +121,9 @@ export SERVICE_ACCOUNT_NAME=<A_NAME_FOR_THE_SERVICE_ACCOUNT>
 gcloud iam service-accounts create $SERVICE_ACCOUNT_NAME
   ```
 > 🎯 &nbsp;&nbsp;These variables will be used in the following steps; thus steps
-3 to 6 must be run on the same shell window
+2.1 to 2.3 must be run on the same shell window
 
-#### 4. Add the required _IAM Roles_ to the created Service Account
+#### 2.2. Add the required _IAM Roles_ to the created Service Account
 ```sh
 # Role bindings for the following roles are added:
 #   - Cloud Trace Agent
@@ -148,18 +148,18 @@ gcloud projects add-iam-policy-binding ${PROJECT_ID} \
     --role="roles/monitoring.metricWriter"
 ```
 
-#### 5. Download the **service account key file** to your local computer
+#### 2.3. Download the **service account key file** to your local computer
 ```sh\
 gcloud iam service-accounts keys create sa-key.json --iam-account=${SERVICE_ACCOUNT_NAME}@${PROJECT_ID}.iam.gserviceaccount.com
 ```
 
-#### 6. Update the `gcp-service-account.yaml` secret with the downloaded key file data
+#### 2.4. Update the `gcp-service-account.yaml` secret with the downloaded key file data
   ```sh
   # to be run from the root directory of this repository
   ENCODED=$(base64 sa-key.json)
   sed -i '' -e "s/KEY_FILE_CONTENT/"$ENCODED"/" local/gcp-service-account.yaml
   ```
-#### 7. Run skaffold
+#### 2.5. Run skaffold
 - The following will build and deploy the application. If you need to rebuild
 the images automatically as you refactor the code, run `skaffold dev` command.
 ```sh
@@ -172,7 +172,7 @@ Docker will build these from scratch.<br><br>
 `9/12 deployment(s) failed`), give it some time. This can happen due to some
 resources depend on others being created first.
 
-#### 8. Verify that the Pods are ready and running
+#### 2.6. Verify that the Pods are ready and running
 ```sh
 # use the -w (watch) flag to keep monitoring as the pods gets spawned
 kubectl get pods
