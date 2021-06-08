@@ -162,8 +162,10 @@ gcloud iam service-accounts keys create sa-key.json --iam-account=${SERVICE_ACCO
   Verify that a secret with the name `gcp-service-account` was created with a
   data field called `sa-key.json`
   ```sh
-  kubectl get secret gcp-service-account -o jsonpath='{.data.sa-key\.json}' | base64 --decode
+  ENCODED=$(kubectl get secret gcp-service-account -o jsonpath='{.data.sa-key\.json}')
+  echo $ENCODED | base64 --decode
   ```
+
 #### 2.5. Run skaffold
 - The following will build and deploy the application. If you need to rebuild
 the images automatically as you refactor the code, run `skaffold dev` command.
