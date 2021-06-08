@@ -12,13 +12,13 @@ Docker images in bulk.
 - [kustomize](https://kubectl.docs.kubernetes.io/installation/kustomize/), an
 open source tool that enables maintaining multiple flavors of yaml definiton
 for different environments.
-- A Google Cloud Project with Google Container Registry enabled.
-- Enable GCP APIs for Cloud Monitoring, Tracing, Debugger, Profiler:
+- A Google Cloud Project with the GCP APIs for Cloud Monitoring, Tracing, Debugger, Profiler and Container Registry enabled:
 ```
 gcloud services enable monitoring.googleapis.com \
     cloudtrace.googleapis.com \
     clouddebugger.googleapis.com \
-    cloudprofiler.googleapis.com
+    cloudprofiler.googleapis.com \
+    containerregistry.googleapis.com
 ```
 
 One of the following for _Local cluster_ setup:
@@ -98,9 +98,9 @@ kubectl get service frontend-external
     - On the "Disk" tab, set at least 32 GB disk space
 
 - **Kind** cluster:
-  - Use the basic cluster configuration provided at `local/kind-cluster.yaml`
+  - Use the basic cluster configuration provided at `extras/kind-cluster.yaml`
     ```shell
-    kind create cluster --config ./local/kind-cluster.yaml
+    kind create cluster --config ./extras/kind-cluster.yaml
     kind get clusters
     kubectl config use-context kind-hipster
     ```
@@ -108,36 +108,73 @@ kubectl get service frontend-external
 #### 2. Run `kubectl get nodes` to verify you're connected to the respective control plane.
 
 #### 3. Create a _GCP IAM Service Account_ in your Google Cloud Project
-- Create a new service account
-- Make sure the service account has the following roles _([see this image](img/service-account.png))_
-  ```sh
-  Cloud Trace Agent
-  Cloud Profiler Agent
-  Cloud Debugger Agent
-  Monitoring Metric Writer
+- Set the environment variable `PROJECT_ID` with the ID of the GCP project
+you are using.
+- For `SERVICE_ACCOUNT_NAME` you can use any meaningful string.
+```sh
+export PROJECT_ID=<YOUR_PROJECT_ID>
+export SERVICE_ACCOUNT_NAME=<A_NAME_FOR_THE_SERVICE_ACCOUNT>
+gcloud iam service-accounts create $SERVICE_ACCOUNT_NAME
   ```
-- Download the **service account key file** to your local computer
+> 🎯 &nbsp;&nbsp;These variables will be used in the following steps; thus steps
+3 to 6 must be run on the same shell window
 
-#### 4. Update the `gcp-service-account.yaml` secret with the downloaded key file data
-- Replace the `PATH_TO_DOWNLOADED_SERVICE_ACCOUNT_KEY_FILE` placeholder with the
-to the downloaded file and execute the following commands:
+#### 4. Add the required _IAM Roles_ to the created Service Account
+```sh
+# Role bindings for the following roles are added:
+#   - Cloud Trace Agent
+#   - Cloud Profiler Agent
+#   - Cloud Debugger Agent
+#   - Monitoring Metric Writer
+
+gcloud projects add-iam-policy-binding hip-v2 \
+    --member="serviceAccount:${SERVICE_ACCOUNT_NAME}@${PROJECT_ID}.iam.gserviceaccount.com" \
+    --role="roles/cloudtrace.agent"
+
+gcloud projects add-iam-policy-binding hip-v2 \
+    --member="serviceAccount:${SERVICE_ACCOUNT_NAME}@${PROJECT_ID}.iam.gserviceaccount.com" \
+    --role="roles/cloudprofiler.agent"
+
+gcloud projects add-iam-policy-binding hip-v2 \
+    --member="serviceAccount:${SERVICE_ACCOUNT_NAME}@${PROJECT_ID}.iam.gserviceaccount.com" \
+    --role="roles/clouddebugger.agent"
+
+gcloud projects add-iam-policy-binding hip-v2 \
+    --member="serviceAccount:${SERVICE_ACCOUNT_NAME}@${PROJECT_ID}.iam.gserviceaccount.com" \
+    --role="roles/monitoring.metricWriter"
+```
+
+#### 5. Download the **service account key file** to your local computer
+```sh\
+gcloud iam service-accounts keys create sa-key.json --iam-account=${SERVICE_ACCOUNT_NAME}@${PROJECT_ID}.iam.gserviceaccount.com
+```
+
+#### 6. Update the `gcp-service-account.yaml` secret with the downloaded key file data
   ```sh
   # to be run from the root diectory of this repository
-  ENCODED=$(base64 <PATH_TO_DOWNLOADED_SERVICE_ACCOUNT_KEY_FILE>)
-  sed -i -e "s/KEY_FILE_CONTENT/"$ENCODED"/" local/gcp-service-account.yaml
+  ENCODED=$(base64 sa-key.json)
+  sed -i '' -e "s/KEY_FILE_CONTENT/"$ENCODED"/" local/gcp-service-account.yaml
   ```
-#### 5. Run `skaffold run -p local`
-> 🎯 &nbsp;&nbsp;First time will be slow; it can take ~20 minutes. <br>
+#### 7. Run skaffold
+- The following will build and deploy the application. If you need to rebuild
+the images automatically as you refactor the code, run `skaffold dev` command.
+```sh
+skaffold run -p local
+```
+> 🎯 &nbsp;&nbsp;When run the first time, it can take ~20 minutes. This
+is because, none of the image layers have been cached. DUring the first run
+Docker will build these from scratch.<br><br>
 > 🎯 &nbsp;&nbsp;If you see an error at the end of skaffold run (something similar to
 `9/12 deployment(s) failed`), give it some time. This can happen due to some
-resources depend on others being created first
+resources depend on others being created first.
 
-- This will build and deploy the application. If you need to rebuild the images
-   automatically as you refactor the code, run `skaffold dev` command.
+#### 8. Verify that the Pods are ready anbd running
+```sh
+# use the -w (watch) flag to keep monitoring as the pods gets spawned
+kubectl get pods
+```
 
-#### 6. Run `kubectl get pods` to verify the Pods are ready and running.
-
-#### 7. Access the web frontend through your browser
+#### 9. Access the web frontend through your browser
 - **Minikube** requires you to run a command to access the frontend service:
   ```shell
   minikube service frontend-external
