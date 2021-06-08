@@ -11,4 +11,5 @@ pkg/
 .kubernetes-manifests-*/
 .project
 .eclipse.buildship.core.prefs
+sa-key.json
 release/wi-kubernetes-manifests.yaml
