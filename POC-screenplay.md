@@ -7,8 +7,7 @@ We assume that the following tools are already properly installed under the demo
 * [network connectivity analyzer tool](https://github.com/shift-left-netconfig/network-config-analyzer)
 * [baseline-rules verifier](https://github.com/shift-left-netconfig/baseline-rules-verifier)
 
-### Deploy Google's microservices demo (Hipster shop)
-
+### Deploy Google's microservices demo
 1. Clone a copy of the repo from https://github.com/shift-left-netconfig/microservices-demo
 1. `cd microservices-demo`
 1. Change context to `net-demo` namespace: `kubectl config set-context --current --namespace=net-demo`
