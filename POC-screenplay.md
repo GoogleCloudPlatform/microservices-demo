@@ -30,8 +30,14 @@ So frontend was able to connect to the payment service, it just didn't use the c
 
 ### Analyze the repo and synthesize relevant network policies
 
-1. Run analysis: `../gitsecure-net-top/bin/net-top -dirpath . -commitid bfa5ba496e1ad30cba4545ab93ffa7082bd17eb9 -giturl https://github.com/shift-left-netconfig/microservices-demo -gitbranch matser -outputfile microservices-demo.json` 
-2. Run synthesis: `../netpol-synthesizer/venv/Scripts/python ../netpol-synthesizer/src/netpol_synth.py microservices-demo.json -o release/microservices-netpols.yaml`
+**Run analysis**
+```
+../gitsecure-net-top/bin/net-top -dirpath . -commitid bfa5ba496e1ad30cba4545ab93ffa7082bd17eb9 -giturl https://github.com/shift-left-netconfig/microservices-demo -gitbranch matser -outputfile microservices-demo.json
+```
+**Run synthesis**
+```
+../netpol-synthesizer/venv/Scripts/python ../netpol-synthesizer/src/netpol_synth.py microservices-demo.json -o release/microservices-netpols.yaml
+```
 
 ### Apply network policies and verify security issue is fixed
 
