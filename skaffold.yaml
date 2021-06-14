@@ -24,9 +24,7 @@ build:
     context: src/emailservice
     docker:
       buildArgs:
-        NEW_RELIC_API_KEY: "{{.NEW_RELIC_API_KEY}}"
-        NEW_RELIC_TRACE_URL: "{{.NEW_RELIC_TRACE_URL}}"
-        NEW_RELIC_METRIC_URL: "{{.NEW_RELIC_METRIC_URL}}"
+        OTEL_EXPORTER_OTLP_ENDPOINT: "http://otel-collector:4317"
   - image: productcatalogservice
     context: src/productcatalogservice
     docker:
@@ -36,9 +34,7 @@ build:
     context: src/recommendationservice
     docker:
       buildArgs:
-        NEW_RELIC_API_KEY: "{{.NEW_RELIC_API_KEY}}"
-        NEW_RELIC_TRACE_URL: "{{.NEW_RELIC_TRACE_URL}}"
-        NEW_RELIC_METRIC_URL: "{{.NEW_RELIC_METRIC_URL}}"
+        OTEL_EXPORTER_OTLP_ENDPOINT: "http://otel-collector:4317"
   - image: shippingservice
     context: src/shippingservice
     docker:
@@ -53,20 +49,12 @@ build:
     context: src/paymentservice
     docker:
           buildArgs:
-            NEW_RELIC_API_KEY: "{{.NEW_RELIC_API_KEY}}"
-            NEW_RELIC_TRACE_URL: "{{.NEW_RELIC_TRACE_URL}}"
-            NEW_RELIC_METRIC_URL: "{{.NEW_RELIC_METRIC_URL}}"
             OTEL_EXPORTER_OTLP_SPAN_ENDPOINT: "otel-collector:4317"
-            NEW_RELIC_DEMO_EXPORT_TYPE: "{{.NEW_RELIC_DEMO_EXPORT_TYPE}}"
   - image: currencyservice
     context: src/currencyservice
     docker:
           buildArgs:
-            NEW_RELIC_API_KEY: "{{.NEW_RELIC_API_KEY}}"
-            NEW_RELIC_TRACE_URL: "{{.NEW_RELIC_TRACE_URL}}"
-            NEW_RELIC_METRIC_URL: "{{.NEW_RELIC_METRIC_URL}}"
             OTEL_EXPORTER_OTLP_SPAN_ENDPOINT: "otel-collector:4317"
-            NEW_RELIC_DEMO_EXPORT_TYPE: "{{.NEW_RELIC_DEMO_EXPORT_TYPE}}"
   - image: cartservice
     context: src/cartservice
     docker:
@@ -77,9 +65,7 @@ build:
     context: src/frontend
     docker:
       buildArgs:
-        NEW_RELIC_API_KEY: "{{.NEW_RELIC_API_KEY}}"
-        NEW_RELIC_TRACE_URL: "{{.NEW_RELIC_TRACE_URL}}"
-        NEW_RELIC_METRIC_URL: "{{.NEW_RELIC_METRIC_URL}}"
+        OTEL_EXPORTER_OTLP_ENDPOINT: "otel-collector:4317"
   - image: loadgenerator
     context: src/loadgenerator
   - image: adservice
@@ -87,15 +73,15 @@ build:
     docker:
       buildArgs:
         NEW_RELIC_API_KEY: "{{.NEW_RELIC_API_KEY}}"
-        OTEL_EXPORTER_OTLP_ENDPOINT: "http://otel-collector:4317"
+        OTEL_EXPORTER_OTLP_TRACES_ENDPOINT: "{{.OTEL_EXPORTER_OTLP_TRACES_ENDPOINT}}"
         OTEL_EXPORTER_OTLP_METRICS_ENDPOINT: "{{.OTEL_EXPORTER_OTLP_METRICS_ENDPOINT}}"
   - image: otel-collector
     context: src/otel-collector
     docker:
       buildArgs:
         NEW_RELIC_API_KEY: "{{.NEW_RELIC_API_KEY}}"
-        NEW_RELIC_TRACE_URL: "{{.NEW_RELIC_TRACE_URL}}"
-        NEW_RELIC_METRIC_URL: "{{.NEW_RELIC_METRIC_URL}}"
+        NEW_RELIC_TRACE_HOST: "{{.NEW_RELIC_TRACE_HOST}}"
+        NEW_RELIC_METRIC_HOST: "{{.NEW_RELIC_METRIC_HOST}}"
         OTEL_EXPORTER_OTLP_SPAN_ENDPOINT_NO_SCHEME: "{{.OTEL_EXPORTER_OTLP_SPAN_ENDPOINT_NO_SCHEME}}"
   - image: otel-system
     context: src/otel-system

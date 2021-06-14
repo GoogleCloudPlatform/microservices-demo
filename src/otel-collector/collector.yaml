@@ -7,14 +7,8 @@ receivers:
     protocols:
       grpc:
       http:
-  zipkin:
-  jaeger:
-    protocols:
-      grpc:
-      thrift_http:
 processors:
   batch:
-  queued_retry:
   memory_limiter:
     ballast_size_mib: 683
     check_interval: 2s
@@ -23,8 +17,10 @@ processors:
 exporters:
   newrelic:
     apikey: $NEW_RELIC_API_KEY
-    spans_url_override: $NEW_RELIC_TRACE_URL
-    metrics_url_override: $NEW_RELIC_METRIC_URL
+    traces:
+      host_override: $NEW_RELIC_TRACE_HOST
+    metrics:
+      host_override: $NEW_RELIC_METRIC_HOST
   otlp:
     endpoint: $OTEL_EXPORTER_OTLP_SPAN_ENDPOINT_NO_SCHEME
     headers:
@@ -36,6 +32,6 @@ service:
       receivers: [otlp]
       exporters: [newrelic]
     traces:
-      receivers: [otlp, zipkin, jaeger]
-      processors: [memory_limiter, batch, queued_retry]
+      receivers: [otlp]
+      processors: [memory_limiter, batch]
       exporters: [otlp]

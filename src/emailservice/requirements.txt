@@ -4,99 +4,92 @@
 #
 #    pip-compile --output-file=requirements.txt requirements.in
 #
-cachetools==3.0.0
+backoff==1.10.0
+    # via opentelemetry-exporter-otlp-proto-grpc
+cachetools==4.2.2
     # via google-auth
-certifi==2018.11.29
+certifi==2020.12.5
     # via requests
 chardet==3.0.4
     # via requests
-google-api-core==1.6.0
-    # via
-    #   -r requirements.in
-    #   opencensus
-google-api-python-client==1.7.8
-    # via google-cloud-profiler
-google-auth-httplib2==0.0.3
-    # via
-    #   google-api-python-client
-    #   google-cloud-profiler
-google-auth==1.6.2
+google-api-core==1.24.1
+    # via -r requirements.in
+google-auth==1.30.0
+    # via google-api-core
+googleapis-common-protos==1.52.0
     # via
     #   google-api-core
-    #   google-api-python-client
-    #   google-auth-httplib2
-    #   google-cloud-profiler
-google-cloud-profiler==1.0.8
+    #   opentelemetry-exporter-otlp-proto-grpc
+grpcio-health-checking==1.33.2
     # via -r requirements.in
-googleapis-common-protos==1.5.5
-    # via google-api-core
-grpcio-health-checking==1.12.1
-    # via -r requirements.in
-grpcio==1.31.0
+grpcio==1.33.2
     # via
     #   -r requirements.in
     #   grpcio-health-checking
-    #   opencensus-ext-grpc
-httplib2==0.19.0
-    # via
-    #   google-api-python-client
-    #   google-auth-httplib2
-idna==2.8
+    #   opentelemetry-exporter-otlp-proto-grpc
+    #   opentelemetry-instrumentation-grpc
+idna==2.10
     # via requests
-jinja2==2.10.1
+jinja2==2.11.3
     # via -r requirements.in
-markupsafe==1.1.0
+markupsafe==1.1.1
     # via jinja2
-newrelic-telemetry-sdk==0.4.1
-    # via opencensus-ext-newrelic
-opencensus-context==0.1.1
-    # via opencensus
-opencensus-ext-grpc==0.7.1
-    # via -r requirements.in
-opencensus-ext-newrelic==0.2.1
-    # via -r requirements.in
-opencensus==0.7.10
+opentelemetry-api==1.1.0
     # via
-    #   -r requirements.in
-    #   opencensus-ext-grpc
-    #   opencensus-ext-newrelic
-protobuf==3.6.1
+    #   opentelemetry-exporter-otlp-proto-grpc
+    #   opentelemetry-instrumentation
+    #   opentelemetry-instrumentation-grpc
+    #   opentelemetry-sdk
+opentelemetry-exporter-otlp-proto-grpc==1.1.0
+    # via -r requirements.in
+opentelemetry-instrumentation-grpc==0.20b0
+    # via -r requirements.in
+opentelemetry-instrumentation==0.20b0
+    # via opentelemetry-instrumentation-grpc
+opentelemetry-proto==1.1.0
+    # via opentelemetry-exporter-otlp-proto-grpc
+opentelemetry-sdk==1.1.0
+    # via
+    #   opentelemetry-exporter-otlp-proto-grpc
+    #   opentelemetry-instrumentation-grpc
+opentelemetry-semantic-conventions==0.20b0
+    # via
+    #   opentelemetry-instrumentation-grpc
+    #   opentelemetry-sdk
+protobuf==3.13.0
     # via
     #   google-api-core
-    #   google-cloud-profiler
     #   googleapis-common-protos
     #   grpcio-health-checking
-pyasn1-modules==0.2.3
+    #   opentelemetry-proto
+pyasn1-modules==0.2.8
     # via google-auth
-pyasn1==0.4.5
+pyasn1==0.4.8
     # via
     #   pyasn1-modules
     #   rsa
-pyparsing==2.4.7
-    # via httplib2
-python-json-logger==0.1.9
+python-json-logger==0.1.11
     # via -r requirements.in
-pytz==2018.9
+pytz==2021.1
     # via google-api-core
-requests==2.21.0
+requests==2.24.0
     # via
+    #   -r requirements.in
     #   google-api-core
-    #   google-cloud-profiler
-rsa==4.0
+rsa==4.7.2
     # via google-auth
-six==1.12.0
+six==1.15.0
     # via
     #   google-api-core
-    #   google-api-python-client
     #   google-auth
     #   grpcio
     #   protobuf
-uritemplate==3.0.0
-    # via google-api-python-client
-urllib3==1.24.2
+urllib3==1.25.10
+    # via requests
+wrapt==1.12.1
     # via
-    #   newrelic-telemetry-sdk
-    #   requests
+    #   opentelemetry-instrumentation
+    #   opentelemetry-instrumentation-grpc
 
 # The following packages are considered to be unsafe in a requirements file:
 # setuptools

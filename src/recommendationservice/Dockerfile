@@ -24,6 +24,9 @@ RUN GRPC_HEALTH_PROBE_VERSION=v0.3.6 && \
     wget -qO/bin/grpc_health_probe https://github.com/grpc-ecosystem/grpc-health-probe/releases/download/${GRPC_HEALTH_PROBE_VERSION}/grpc_health_probe-linux-amd64 && \
     chmod +x /bin/grpc_health_probe
 
+ARG OTEL_EXPORTER_OTLP_ENDPOINT
+ENV OTEL_EXPORTER_OTLP_ENDPOINT=${OTEL_EXPORTER_OTLP_ENDPOINT}
+
 # get packages
 WORKDIR /recommendationservice
 COPY requirements.txt requirements.txt
@@ -31,13 +34,6 @@ RUN pip install -r requirements.txt
 
 # add files into working directory
 COPY . .
-
-ARG NEW_RELIC_API_KEY
-ARG NEW_RELIC_TRACE_URL
-ARG NEW_RELIC_METRIC_URL
-ENV NEW_RELIC_API_KEY=${NEW_RELIC_API_KEY}
-ENV NEW_RELIC_TRACE_URL=${NEW_RELIC_TRACE_URL}
-ENV NEW_RELIC_METRIC_URL=${NEW_RELIC_METRIC_URL}
 
 # set listen port
 ENV PORT "8080"

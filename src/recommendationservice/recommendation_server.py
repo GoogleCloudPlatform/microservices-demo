@@ -18,49 +18,27 @@ import os
 import random
 import time
 import traceback
-from urllib.parse import urlparse
 from concurrent import futures
 
-import googleclouddebugger
-import googlecloudprofiler
-from google.auth.exceptions import DefaultCredentialsError
 import grpc
-from opencensus_ext_newrelic import NewRelicTraceExporter
-from opencensus.ext.grpc import server_interceptor
-from opencensus.trace import samplers
+from grpc_health.v1 import health_pb2, health_pb2_grpc
+from opentelemetry import trace
+from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
+from opentelemetry.instrumentation.grpc import GrpcInstrumentorServer
+from opentelemetry.sdk.resources import Resource
+from opentelemetry.sdk.trace import TracerProvider
+from opentelemetry.sdk.trace.export import BatchSpanProcessor
 
 import demo_pb2
 import demo_pb2_grpc
-from grpc_health.v1 import health_pb2
-from grpc_health.v1 import health_pb2_grpc
-
 from logger import getJSONLogger
-logger = getJSONLogger('recommendationservice-server')
 
-def initStackdriverProfiling():
-  project_id = None
-  try:
-    project_id = os.environ["GCP_PROJECT_ID"]
-  except KeyError:
-    # Environment variable not set
-    pass
+logger = getJSONLogger("recommendationservice-server")
 
-  for retry in range(1,4):
-    try:
-      if project_id:
-        googlecloudprofiler.start(service='recommendation_server', service_version='1.0.0', verbose=0, project_id=project_id)
-      else:
-        googlecloudprofiler.start(service='recommendation_server', service_version='1.0.0', verbose=0)
-      logger.info("Successfully started Stackdriver Profiler.")
-      return
-    except (BaseException) as exc:
-      logger.info("Unable to start Stackdriver Profiler Python agent. " + str(exc))
-      if (retry < 4):
-        logger.info("Sleeping %d seconds to retry Stackdriver Profiler agent initialization"%(retry*10))
-        time.sleep (1)
-      else:
-        logger.warning("Could not initialize Stackdriver Profiler after retrying, giving up")
-  return
+grpc_server_instrumentor = GrpcInstrumentorServer()
+grpc_server_instrumentor.instrument()
+otlp_exporter = OTLPSpanExporter()
+
 
 class RecommendationService(demo_pb2_grpc.RecommendationServiceServicer):
     def ListRecommendations(self, request, context):
@@ -68,7 +46,7 @@ class RecommendationService(demo_pb2_grpc.RecommendationServiceServicer):
         # fetch list of products from product catalog stub
         cat_response = product_catalog_stub.ListProducts(demo_pb2.Empty())
         product_ids = [x.id for x in cat_response.products]
-        filtered_products = list(set(product_ids)-set(request.product_ids))
+        filtered_products = list(set(product_ids) - set(request.product_ids))
         num_products = len(filtered_products)
         num_return = min(max_responses, num_products)
         # sample list of indicies to return
@@ -83,84 +61,47 @@ class RecommendationService(demo_pb2_grpc.RecommendationServiceServicer):
 
     def Check(self, request, context):
         return health_pb2.HealthCheckResponse(
-            status=health_pb2.HealthCheckResponse.SERVING)
+            status=health_pb2.HealthCheckResponse.SERVING
+        )
 
     def Watch(self, request, context):
         return health_pb2.HealthCheckResponse(
-            status=health_pb2.HealthCheckResponse.UNIMPLEMENTED)
+            status=health_pb2.HealthCheckResponse.UNIMPLEMENTED
+        )
 
 
 if __name__ == "__main__":
     logger.info("initializing recommendationservice")
 
-    try:
-      if "DISABLE_PROFILER" in os.environ:
-        raise KeyError()
-      else:
-        logger.info("Profiler enabled.")
-        initStackdriverProfiling()
-    except KeyError:
-        logger.info("Profiler disabled.")
-
-    try:
-      if "DISABLE_TRACING" in os.environ:
-        raise KeyError()
-      else:
-        logger.info("Tracing enabled.")
-        sampler = samplers.AlwaysOnSampler()
-        exporter = NewRelicTraceExporter(
-            insert_key=os.environ["NEW_RELIC_API_KEY"],
-            host=urlparse(os.environ["NEW_RELIC_TRACE_URL"]).hostname,
-            service_name="recommendationservice"
-        )
-        tracer_interceptor = server_interceptor.OpenCensusServerInterceptor(sampler, exporter)
-    except (KeyError, DefaultCredentialsError):
-        logger.info("Tracing disabled.")
-        tracer_interceptor = server_interceptor.OpenCensusServerInterceptor()
-
-
-    try:
-      if "DISABLE_DEBUGGER" in os.environ:
-        raise KeyError()
-      else:
-        logger.info("Debugger enabled.")
-        try:
-          googleclouddebugger.enable(
-              module='recommendationserver',
-              version='1.0.0'
-          )
-        except (Exception, DefaultCredentialsError):
-            logger.error("Could not enable debugger")
-            logger.error(traceback.print_exc())
-            pass
-    except (Exception, DefaultCredentialsError):
-        logger.info("Debugger disabled.")
-
-    port = os.environ.get('PORT', "8080")
-    catalog_addr = os.environ.get('PRODUCT_CATALOG_SERVICE_ADDR', '')
+    port = os.environ.get("PORT", "8080")
+    catalog_addr = os.environ.get("PRODUCT_CATALOG_SERVICE_ADDR", "")
     if catalog_addr == "":
-        raise Exception('PRODUCT_CATALOG_SERVICE_ADDR environment variable not set')
+        raise Exception("PRODUCT_CATALOG_SERVICE_ADDR environment variable not set")
     logger.info("product catalog address: " + catalog_addr)
     channel = grpc.insecure_channel(catalog_addr)
     product_catalog_stub = demo_pb2_grpc.ProductCatalogServiceStub(channel)
 
     # create gRPC server
-    server = grpc.server(futures.ThreadPoolExecutor(max_workers=10),
-                      interceptors=(tracer_interceptor,))
+    server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
 
     # add class to gRPC server
     service = RecommendationService()
     demo_pb2_grpc.add_RecommendationServiceServicer_to_server(service, server)
     health_pb2_grpc.add_HealthServicer_to_server(service, server)
 
+    # OpenTelemetry
+    resource = Resource(attributes={"service.name": "recommendationservice"})
+    trace.set_tracer_provider(TracerProvider(resource=resource))
+    trace.get_tracer_provider().add_span_processor(BatchSpanProcessor(otlp_exporter))
+
     # start server
     logger.info("listening on port: " + port)
-    server.add_insecure_port('[::]:'+port)
+    server.add_insecure_port("[::]:" + port)
     server.start()
 
     # keep alive
     try:
-         while True:
+        while True:
             time.sleep(10000)
     except KeyboardInterrupt:
-            server.stop(0)
+        server.stop(0)

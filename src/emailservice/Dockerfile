@@ -31,6 +31,9 @@ ENV PYTHONUNBUFFERED=1
 # Enable Profiler
 ENV ENABLE_PROFILER=1
 
+ARG OTEL_EXPORTER_OTLP_ENDPOINT
+ENV OTEL_EXPORTER_OTLP_ENDPOINT=${OTEL_EXPORTER_OTLP_ENDPOINT}
+
 RUN apt-get -qq update \
     && apt-get install -y --no-install-recommends \
         wget
@@ -47,13 +50,6 @@ COPY --from=builder /usr/local/lib/python3.7/ /usr/local/lib/python3.7/
 
 # Add the application
 COPY . .
-
-ARG NEW_RELIC_API_KEY
-ARG NEW_RELIC_TRACE_URL
-ARG NEW_RELIC_METRIC_URL
-ENV NEW_RELIC_API_KEY=${NEW_RELIC_API_KEY}
-ENV NEW_RELIC_TRACE_URL=${NEW_RELIC_TRACE_URL}
-ENV NEW_RELIC_METRIC_URL=${NEW_RELIC_METRIC_URL}
 
 EXPOSE 8080
 ENTRYPOINT [ "python", "email_server.py" ]

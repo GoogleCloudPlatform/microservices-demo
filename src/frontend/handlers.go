@@ -31,8 +31,8 @@ import (
 
 	"go.opentelemetry.io/contrib/instrumentation/net/http/httptrace/otelhttptrace"
 	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/baggage"
-	"go.opentelemetry.io/otel/label"
 	"go.opentelemetry.io/otel/trace"
 
 	pb "github.com/GoogleCloudPlatform/microservices-demo/src/frontend/genproto"
@@ -483,8 +483,8 @@ func startSpan(name string, r **http.Request) (context.Context, trace.Span) {
 		// TODO: handle this properly
 	}
 
-	hostKey := label.String("host", hostname)
-	kindKey := label.String("kind", "SERVER")
+	hostKey := attribute.String("host", hostname)
+	kindKey := attribute.String("kind", "SERVER")
 	attrs, entries, spanCtx := otelhttptrace.Extract(req.Context(), req)
 	attrs = append(attrs, hostKey, kindKey)
 	req = req.WithContext(baggage.ContextWithValues(req.Context(), entries...))

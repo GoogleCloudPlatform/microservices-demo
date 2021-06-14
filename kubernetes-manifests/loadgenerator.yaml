@@ -15,6 +15,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: loadgenerator
+  namespace: opentelemetry-demo
 spec:
   selector:
     matchLabels:

@@ -16,6 +16,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: shippingservice
+  namespace: opentelemetry-demo
 spec:
   selector:
     matchLabels:
@@ -61,6 +62,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: shippingservice
+  namespace: opentelemetry-demo
 spec:
   type: ClusterIP
   selector:

@@ -27,19 +27,18 @@ import (
 	"google.golang.org/grpc"
 
 	//"go.opentelemetry.io/otel/api/correlation"
-	"github.com/newrelic/newrelic-telemetry-sdk-go/telemetry"
-	"github.com/newrelic/opentelemetry-exporter-go/newrelic"
 	"go.opentelemetry.io/contrib/instrumentation/github.com/gorilla/mux/otelmux"
 	"go.opentelemetry.io/contrib/instrumentation/runtime"
 	"go.opentelemetry.io/otel"
-	"go.opentelemetry.io/otel/exporters/stdout"
+	"go.opentelemetry.io/otel/exporters/otlp"
+	"go.opentelemetry.io/otel/exporters/otlp/otlpgrpc"
+	"go.opentelemetry.io/otel/metric/global"
 	"go.opentelemetry.io/otel/propagation"
-	exportmetric "go.opentelemetry.io/otel/sdk/export/metric"
-	exporttrace "go.opentelemetry.io/otel/sdk/export/trace"
-	"go.opentelemetry.io/otel/sdk/metric/controller/push"
-	"go.opentelemetry.io/otel/sdk/metric/processor/basic"
+	metricsdk "go.opentelemetry.io/otel/sdk/export/metric"
+	controller "go.opentelemetry.io/otel/sdk/metric/controller/basic"
+	processor "go.opentelemetry.io/otel/sdk/metric/processor/basic"
 	"go.opentelemetry.io/otel/sdk/metric/selector/simple"
-	"go.opentelemetry.io/otel/sdk/trace"
+	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 )
 
 const (
@@ -103,52 +102,30 @@ func main() {
 	}
 	log.Out = os.Stdout
 
-	var traceExporter exporttrace.SpanExporter
-	var metricExporter exportmetric.Exporter
-	if apiKey, ok := os.LookupEnv("NEW_RELIC_API_KEY"); ok {
-		log.Info("Using New Relic exporter")
-		exporter, err := newrelic.NewExporter(
-			serviceName,
-			apiKey,
-			func(cfg *telemetry.Config) {
-				if u, ok := os.LookupEnv("NEW_RELIC_METRIC_URL"); ok {
-					log.Info("setting metric export endpoint to " + u)
-					cfg.MetricsURLOverride = u
-				}
-				if u, ok := os.LookupEnv("NEW_RELIC_TRACE_URL"); ok {
-					log.Info("setting trace export endpoint to " + u)
-					cfg.SpansURLOverride = u
-				}
-			},
+	var exporter *otlp.Exporter
+	if otlpEndpoint, ok := os.LookupEnv("OTEL_EXPORTER_OTLP_ENDPOINT"); ok {
+		log.Info("Using OTLP exporter")
+		driver := otlpgrpc.NewDriver(
+			otlpgrpc.WithInsecure(),
+			otlpgrpc.WithEndpoint(otlpEndpoint),
 		)
+		exp, err := otlp.NewExporter(ctx, driver, otlp.WithMetricExportKindSelector(metricsdk.DeltaExportKindSelector()))
 		if err != nil {
-			log.Fatal(err)
+			log.WithError(err).Fatal("failed to create exporter")
 		}
-		traceExporter = exporter
-		metricExporter = exporter
+		exporter = exp
 	} else {
-		log.Info("Defaulting to stdout exporter")
-		exporter, err := stdout.NewExporter(stdout.WithPrettyPrint())
-		if err != nil {
-			log.Fatal(err)
-		}
-		traceExporter = exporter
-		metricExporter = exporter
+		log.Fatal("OTEL_EXPORTER_OTLP_ENDPOINT must be set")
 	}
 
-	defer initMetric(log, metricExporter).Stop()
+	defer initMetric(log, exporter).Stop(ctx)
 
 	// Include runtime metric instrumentation.
 	if err := runtime.Start(runtime.WithMinimumReadMemStatsInterval(time.Second)); err != nil {
 		log.WithError(err).Fatal("failed to setup runtime instrumentation")
 	}
 
-	if os.Getenv("DISABLE_TRACING") == "" {
-		log.Info("Tracing enabled.")
-		initTracing(log, traceExporter)
-	} else {
-		log.Info("Tracing disabled.")
-	}
+	defer initTracing(log, exporter).Shutdown(ctx)
 
 	srvPort := port
 	if os.Getenv("PORT") != "" {
@@ -193,30 +170,36 @@ func main() {
 	log.Fatal(http.ListenAndServe(addr+":"+srvPort, handler))
 }
 
-func initTracing(log logrus.FieldLogger, syncer exporttrace.SpanExporter) {
-	tp := trace.NewTracerProvider(
-		trace.WithConfig(
-			trace.Config{
-				DefaultSampler: trace.AlwaysSample(),
-				Resource:       res,
-			},
-		),
-		trace.WithSyncer(syncer),
+func initTracing(log logrus.FieldLogger, exporter *otlp.Exporter) *sdktrace.TracerProvider {
+	bsp := sdktrace.NewBatchSpanProcessor(exporter)
+	tracerProvider := sdktrace.NewTracerProvider(
+		sdktrace.WithSampler(sdktrace.AlwaysSample()),
+		sdktrace.WithResource(res),
+		sdktrace.WithSpanProcessor(bsp),
 	)
-	otel.SetTracerProvider(tp)
+
 	otel.SetTextMapPropagator(propagation.NewCompositeTextMapPropagator(propagation.TraceContext{}, propagation.Baggage{}))
+	otel.SetTracerProvider(tracerProvider)
+	return tracerProvider
 }
 
-func initMetric(log logrus.FieldLogger, exporter exportmetric.Exporter) *push.Controller {
-	pusher := push.New(
-		basic.New(simple.NewWithExactDistribution(), exporter),
-		exporter,
-		push.WithPeriod(time.Second),
-		push.WithResource(res),
+func initMetric(log logrus.FieldLogger, exporter *otlp.Exporter) *controller.Controller {
+	cont := controller.New(
+		processor.New(
+			simple.NewWithExactDistribution(),
+			exporter,
+		),
+		controller.WithResource(res),
+		controller.WithExporter(exporter),
+		controller.WithCollectPeriod(2*time.Second),
 	)
-	pusher.Start()
-	otel.SetMeterProvider(pusher.MeterProvider())
-	return pusher
+
+	global.SetMeterProvider(cont.MeterProvider())
+	err := cont.Start(context.Background())
+	if err != nil {
+		log.Fatal("failed to start controller")
+	}
+	return cont
 }
 
 func mustMapEnv(target *string, envKey string) {

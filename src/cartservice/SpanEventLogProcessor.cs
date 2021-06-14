@@ -28,10 +28,10 @@ namespace cartservice.OpenTelemetry
             var activityEvent = new ActivityEvent("log", data.Timestamp, tags);
             Activity.Current.AddEvent(activityEvent);
 
-            if (data.Exception != null)
-            {
-                Activity.Current.RecordException(data.Exception);
-            }
+            // if (data.Exception != null)
+            // {
+            //     Activity.Current.RecordException(data.Exception);
+            // }
         }
     }
 }
