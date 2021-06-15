@@ -16,79 +16,79 @@ apiVersion: skaffold/v1beta2
 kind: Config
 build:
   artifacts:
-  # image tags are relative; to specify an image repo (e.g. GCR), you
-  # must provide a "default repo" using one of the methods described
-  # here:
-  # https://skaffold.dev/docs/concepts/#image-repository-handling
-  - image: emailservice
-    context: src/emailservice
-    docker:
-      buildArgs:
-        OTEL_EXPORTER_OTLP_ENDPOINT: "http://otel-collector:4317"
-  - image: productcatalogservice
-    context: src/productcatalogservice
-    docker:
-      buildArgs:
-        OTEL_EXPORTER_OTLP_SPAN_ENDPOINT: "otel-collector:4317"
-  - image: recommendationservice
-    context: src/recommendationservice
-    docker:
-      buildArgs:
-        OTEL_EXPORTER_OTLP_ENDPOINT: "http://otel-collector:4317"
-  - image: shippingservice
-    context: src/shippingservice
-    docker:
-      buildArgs:
-        JAEGER_SERVICE_ADDR: otel-collector:14268
-  - image: checkoutservice
-    context: src/checkoutservice
-    docker:
-      buildArgs:
-        JAEGER_SERVICE_ADDR: otel-collector:14268
-  - image: paymentservice
-    context: src/paymentservice
-    docker:
-          buildArgs:
-            OTEL_EXPORTER_OTLP_SPAN_ENDPOINT: "otel-collector:4317"
-  - image: currencyservice
-    context: src/currencyservice
-    docker:
-          buildArgs:
-            OTEL_EXPORTER_OTLP_SPAN_ENDPOINT: "otel-collector:4317"
-  - image: cartservice
-    context: src/cartservice
-    docker:
-      buildArgs:
-        NEW_RELIC_API_KEY: "{{.NEW_RELIC_API_KEY}}"
-        OTEL_EXPORTER_OTLP_ENDPOINT: "{{.OTEL_EXPORTER_OTLP_ENDPOINT}}"
-  - image: frontend
-    context: src/frontend
-    docker:
-      buildArgs:
-        OTEL_EXPORTER_OTLP_ENDPOINT: "otel-collector:4317"
-  - image: loadgenerator
-    context: src/loadgenerator
-  - image: adservice
-    context: src/adservice
-    docker:
-      buildArgs:
-        NEW_RELIC_API_KEY: "{{.NEW_RELIC_API_KEY}}"
-        OTEL_EXPORTER_OTLP_TRACES_ENDPOINT: "{{.OTEL_EXPORTER_OTLP_TRACES_ENDPOINT}}"
-        OTEL_EXPORTER_OTLP_METRICS_ENDPOINT: "{{.OTEL_EXPORTER_OTLP_METRICS_ENDPOINT}}"
-  - image: otel-collector
-    context: src/otel-collector
-    docker:
-      buildArgs:
-        NEW_RELIC_API_KEY: "{{.NEW_RELIC_API_KEY}}"
-        NEW_RELIC_TRACE_HOST: "{{.NEW_RELIC_TRACE_HOST}}"
-        NEW_RELIC_METRIC_HOST: "{{.NEW_RELIC_METRIC_HOST}}"
-        OTEL_EXPORTER_OTLP_SPAN_ENDPOINT_NO_SCHEME: "{{.OTEL_EXPORTER_OTLP_SPAN_ENDPOINT_NO_SCHEME}}"
-  - image: otel-system
-    context: src/otel-system
-    docker:
-      buildArgs:
-        NEW_RELIC_API_KEY: "{{.NEW_RELIC_API_KEY}}"
-        NEW_RELIC_METRIC_URL: "{{.NEW_RELIC_METRIC_URL}}"
+    # image tags are relative; to specify an image repo (e.g. GCR), you
+    # must provide a "default repo" using one of the methods described
+    # here:
+    # https://skaffold.dev/docs/concepts/#image-repository-handling
+    - image: emailservice
+      context: src/emailservice
+      docker:
+        buildArgs:
+          OTEL_EXPORTER_OTLP_ENDPOINT: 'http://otel-collector:4317'
+    - image: productcatalogservice
+      context: src/productcatalogservice
+      docker:
+        buildArgs:
+          OTEL_EXPORTER_OTLP_SPAN_ENDPOINT: 'otel-collector:4317'
+    - image: recommendationservice
+      context: src/recommendationservice
+      docker:
+        buildArgs:
+          OTEL_EXPORTER_OTLP_ENDPOINT: 'http://otel-collector:4317'
+    - image: shippingservice
+      context: src/shippingservice
+      docker:
+        buildArgs:
+          JAEGER_SERVICE_ADDR: otel-collector:14268
+    - image: checkoutservice
+      context: src/checkoutservice
+      docker:
+        buildArgs:
+          JAEGER_SERVICE_ADDR: otel-collector:14268
+    - image: paymentservice
+      context: src/paymentservice
+      docker:
+        buildArgs:
+          OTEL_EXPORTER_OTLP_SPAN_ENDPOINT: 'otel-collector:4317'
+    - image: currencyservice
+      context: src/currencyservice
+      docker:
+        buildArgs:
+          OTEL_EXPORTER_OTLP_ENDPOINT: 'http://otel-collector:4317'
+    - image: cartservice
+      context: src/cartservice
+      docker:
+        buildArgs:
+          NEW_RELIC_API_KEY: '{{.NEW_RELIC_API_KEY}}'
+          OTEL_EXPORTER_OTLP_ENDPOINT: '{{.OTEL_EXPORTER_OTLP_ENDPOINT}}'
+    - image: frontend
+      context: src/frontend
+      docker:
+        buildArgs:
+          OTEL_EXPORTER_OTLP_ENDPOINT: 'otel-collector:4317'
+    - image: loadgenerator
+      context: src/loadgenerator
+    - image: adservice
+      context: src/adservice
+      docker:
+        buildArgs:
+          NEW_RELIC_API_KEY: '{{.NEW_RELIC_API_KEY}}'
+          OTEL_EXPORTER_OTLP_TRACES_ENDPOINT: '{{.OTEL_EXPORTER_OTLP_TRACES_ENDPOINT}}'
+          OTEL_EXPORTER_OTLP_METRICS_ENDPOINT: '{{.OTEL_EXPORTER_OTLP_METRICS_ENDPOINT}}'
+    - image: otel-collector
+      context: src/otel-collector
+      docker:
+        buildArgs:
+          NEW_RELIC_API_KEY: '{{.NEW_RELIC_API_KEY}}'
+          NEW_RELIC_TRACE_HOST: '{{.NEW_RELIC_TRACE_HOST}}'
+          NEW_RELIC_METRIC_HOST: '{{.NEW_RELIC_METRIC_HOST}}'
+          OTEL_EXPORTER_OTLP_SPAN_ENDPOINT_NO_SCHEME: '{{.OTEL_EXPORTER_OTLP_SPAN_ENDPOINT_NO_SCHEME}}'
+    - image: otel-system
+      context: src/otel-system
+      docker:
+        buildArgs:
+          NEW_RELIC_API_KEY: '{{.NEW_RELIC_API_KEY}}'
+          NEW_RELIC_METRIC_URL: '{{.NEW_RELIC_METRIC_URL}}'
   tagPolicy:
     gitCommit: {}
   local:
@@ -96,19 +96,19 @@ build:
 deploy:
   kubectl:
     manifests:
-    - ./kubernetes-manifests/**.yaml
+      - ./kubernetes-manifests/**.yaml
 profiles:
-# "gcb" profile allows building and pushing the images
-# on Google Container Builder without requiring docker
-# installed on the developer machine. However, note that
-# since GCB does not cache the builds, each build will
-# start from scratch and therefore take a long time.
-#
-# This is not used by default. To use it, run:
-#     skaffold run -p gcb
-- name: gcb
-  build:
-    googleCloudBuild:
-      diskSizeGb: 300
-      machineType: N1_HIGHCPU_32
-      timeout: 4000s
+  # "gcb" profile allows building and pushing the images
+  # on Google Container Builder without requiring docker
+  # installed on the developer machine. However, note that
+  # since GCB does not cache the builds, each build will
+  # start from scratch and therefore take a long time.
+  #
+  # This is not used by default. To use it, run:
+  #     skaffold run -p gcb
+  - name: gcb
+    build:
+      googleCloudBuild:
+        diskSizeGb: 300
+        machineType: N1_HIGHCPU_32
+        timeout: 4000s
