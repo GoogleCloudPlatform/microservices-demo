@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-FROM node:12-alpine as base
+FROM node:14-alpine as base
 
 FROM base as builder
 
@@ -43,7 +43,7 @@ COPY . .
 
 EXPOSE 7000
 
-ARG OTEL_EXPORTER_OTLP_SPAN_ENDPOINT
-ENV OTEL_EXPORTER_OTLP_SPAN_ENDPOINT=${OTEL_EXPORTER_OTLP_SPAN_ENDPOINT}
+ARG OTEL_EXPORTER_OTLP_ENDPOINT
+ENV OTEL_EXPORTER_OTLP_ENDPOINT=${OTEL_EXPORTER_OTLP_ENDPOINT}
 
 ENTRYPOINT [ "node", "server.js" ]
