@@ -1,0 +1,151 @@
+version: 3
+
+references:
+  auth_google: &auth_google
+    run:
+      command: |
+        echo ${GOOGLE_AUTH} > gcp-key.json && gcloud auth activate-service-account --key-file gcp-key.json
+        gcloud --quiet config set project ${GOOGLE_PROJECT_ID} && gcloud docker --authorize-only
+  disable_strict_git: &disable_strict_git
+    run: mkdir -p ~/.ssh/ && echo -e "Host github.com\n\tStrictHostKeyChecking no\n" > ~/.ssh/config
+
+  docker_auth: &docker_auth
+    auth:
+      username: _json_key
+      password: $GOOGLE_AUTH
+
+  checkout_default_wd: &checkout_default_wd
+    checkout:
+      path: ~/demo
+
+  load_cache: &load_cache
+    restore_cache:
+      keys:
+        - v1-repo-{{ .Environment.CIRCLE_SHA1 }}
+
+  load_version: &load_version
+    run: cat ~/demo/workspace/VERSION >> $BASH_ENV
+
+  setup_workspace: &setup_workspace
+    attach_workspace:
+      at: ~/demo
+
+  setup_docker_layer_caching: &setup_docker_layer_caching
+    setup_remote_docker:
+      docker_layer_caching: true
+
+  setup_build_tools: &setup_build_tools
+    run:
+      command: |
+        mkdir -p ~/.ssh/ && echo -e "Host github.com\n\tStrictHostKeyChecking no\n" > ~/.ssh/config
+        pip install -e git+ssh://git@github.com/Rookout/build_tools.git#egg=rookout_build_tools
+  filter_master: &filter_master
+    filters:
+      branches:
+        only: master
+
+  docker_login: &docker_login
+    run: docker login -u $DOCKER_USER -p $DOCKER_PASSWORD
+
+
+jobs:
+  checkout_code_upver:
+    docker:
+      - image: python:3.8
+    working_directory: ~/demo
+    steps:
+      - *checkout_default_wd
+      - *setup_workspace
+      - *setup_build_tools
+      - add_ssh_keys
+      - run:
+          command: |
+            mkdir -p ~/demo/workspace
+            rbt version get-next > ~/demo/workspace/VERSION
+      - save_cache:
+          key: v1-repo-{{ .Environment.CIRCLE_SHA1 }}
+          paths:
+            - ~/demo
+      - persist_to_workspace:
+          root: .
+          paths:
+            - workspace/VERSION
+
+  build_and_push_demo_image:
+    docker:
+      - image: google/cloud-sdk:latest
+    working_directory: ~/demo
+    steps:
+      - *load_cache
+      - *setup_workspace
+      - *load_version
+      - *setup_docker_layer_caching
+      - *docker_login
+      - run: apt install make -y
+      - run: make build-and-upload
+
+  deploy_demo:
+    docker:
+      - image: google/cloud-sdk:latest
+    working_directory: ~/demo
+    steps:
+      - add_ssh_keys
+      - *disable_strict_git
+      - *load_cache
+      - *setup_workspace
+      - *auth_google
+      - *load_version
+      - run: git clone git@github.com:Rookout/deployment-demo
+      - run: apt install make -y
+      - run: export GOOGLE_APPLICATION_CREDENTIALS=/root/demo/gcp-key.json && cd deployment-demo && export env=staging && make install-helm deploy-demo
+      - run: export GOOGLE_APPLICATION_CREDENTIALS=/root/demo/gcp-key.json && cd deployment-demo && export env=production && make install-helm deploy-demo
+      - run: export GOOGLE_APPLICATION_CREDENTIALS=/root/demo/gcp-key.json && cd deployment-demo && export env=sandbox && make install-helm deploy-demo
+      - run: export GOOGLE_APPLICATION_CREDENTIALS=/root/demo/gcp-key.json && cd deployment-demo && export env=staging-sandbox && make install-helm deploy-demo
+
+  test_demo_servers_up:
+    docker:
+        - image: google/cloud-sdk:latest
+    working_directory: ~/demo
+    steps:
+      - run: sleep 15 && echo "Checking Staging..."
+      - run: curl 'http://staging.machina.rookout-demo.com/account/register'
+      - run: curl 'http://staging.python.rookout-demo.com/'
+      - run: curl 'http://staging.java.rookout-demo.com/'
+      - run: curl 'http://staging.nodejs.rookout-demo.com/'
+      - run: curl 'http://staging.ruby.rookout-demo.com/'
+      - run: sleep 15 && echo "Checking Production..."
+      - run: curl 'http://machina.rookout-demo.com/account/register'
+      - run: curl 'http://python.rookout-demo.com/'
+      - run: curl 'http://java.rookout-demo.com/'
+      - run: curl 'http://nodejs.rookout-demo.com/'
+      - run: curl 'http://ruby.rookout-demo.com/'
+
+  notify_slack:
+    docker:
+        - image: python:3.8
+    working_directory: ~/demo
+    steps:
+      - *setup_build_tools
+      - run: rbt notify deployment -t demo-deployed
+
+workflows:
+  version: 2
+  deploy-pipeline:
+    jobs:
+      - checkout_code_upver
+      - build_and_push_demo_image:
+          requires:
+            - checkout_code_upver
+          <<: *filter_master
+      - deploy_demo:
+          requires:
+            - build_and_push_demo_image
+          <<: *filter_master
+      - test_demo_servers_up:
+          requires:
+            - deploy_demo
+          <<: *filter_master
+      - notify_slack:
+          requires:
+            - test_demo_servers_up
+          <<: *filter_master

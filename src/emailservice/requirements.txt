@@ -7,9 +7,13 @@
 cachetools==4.2.0
     # via google-auth
 certifi==2020.12.5
-    # via requests
+    # via
+    #   requests
+    #   rook
 chardet==3.0.4
     # via requests
+funcsigs==1.0.2
+    # via rook
 google-api-core[grpc]==1.24.1
     # via
     #   -r requirements.in
@@ -77,6 +81,9 @@ protobuf==3.13.0
     #   google-cloud-profiler
     #   googleapis-common-protos
     #   grpcio-health-checking
+    #   rook
+psutil==5.8.0
+    # via rook
 pyasn1-modules==0.2.8
     # via google-auth
 pyasn1==0.4.8
@@ -94,6 +101,8 @@ requests==2.24.0
     #   -r requirements.in
     #   google-api-core
     #   google-cloud-profiler
+rook==0.1.146
+    # via -r requirements.in
 rsa==4.7
     # via google-auth
 six==1.15.0
@@ -105,10 +114,13 @@ six==1.15.0
     #   google-cloud-core
     #   grpcio
     #   protobuf
+    #   rook
 uritemplate==3.0.1
     # via google-api-python-client
 urllib3==1.25.10
     # via requests
+websocket-client==1.1.0
+    # via rook
 
 # The following packages are considered to be unsafe in a requirements file:
 # setuptools

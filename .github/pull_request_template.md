@@ -1,7 +1,1 @@
-Fixes # .
-
-Change summary:
-- 
-
-
-Remaining issues / concerns:
+## please make sure to define your merge request to rookout/microservices-demo:master instead of the default GoogleCloudPlatform/microservices-demo:master 

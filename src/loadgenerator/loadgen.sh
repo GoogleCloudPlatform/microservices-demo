@@ -24,6 +24,8 @@ fi
 
 set -x
 
+sleep 3s
+
 # if one request to the frontend fails, then exit
 STATUSCODE=$(curl --silent --output /dev/stderr --write-out "%{http_code}" http://${FRONTEND_ADDR})
 if test $STATUSCODE -ne 200; then

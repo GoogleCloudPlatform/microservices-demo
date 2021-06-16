@@ -28,25 +28,15 @@ import demo_pb2
 import demo_pb2_grpc
 from grpc_health.v1 import health_pb2
 from grpc_health.v1 import health_pb2_grpc
+import rook
 
 from opencensus.ext.stackdriver import trace_exporter as stackdriver_exporter
 from opencensus.ext.grpc import server_interceptor
 from opencensus.common.transports.async_ import AsyncTransport
 from opencensus.trace import samplers
 
-# import googleclouddebugger
-import googlecloudprofiler
-
 from logger import getJSONLogger
 logger = getJSONLogger('emailservice-server')
-
-# try:
-#     googleclouddebugger.enable(
-#         module='emailserver',
-#         version='1.0.0'
-#     )
-# except:
-#     pass
 
 # Loads confirmation email template from file
 env = Environment(
@@ -143,44 +133,11 @@ def start(dummy_mode):
   except KeyboardInterrupt:
     server.stop(0)
 
-def initStackdriverProfiling():
-  project_id = None
-  try:
-    project_id = os.environ["GCP_PROJECT_ID"]
-  except KeyError:
-    # Environment variable not set
-    pass
-
-  for retry in range(1,4):
-    try:
-      if project_id:
-        googlecloudprofiler.start(service='email_server', service_version='1.0.0', verbose=0, project_id=project_id)
-      else:
-        googlecloudprofiler.start(service='email_server', service_version='1.0.0', verbose=0)
-      logger.info("Successfully started Stackdriver Profiler.")
-      return
-    except (BaseException) as exc:
-      logger.info("Unable to start Stackdriver Profiler Python agent. " + str(exc))
-      if (retry < 4):
-        logger.info("Sleeping %d to retry initializing Stackdriver Profiler"%(retry*10))
-        time.sleep (1)
-      else:
-        logger.warning("Could not initialize Stackdriver Profiler after retrying, giving up")
-  return
-
 
 if __name__ == '__main__':
   logger.info('starting the email service in dummy mode.')
 
-  # Profiler
-  try:
-    if "DISABLE_PROFILER" in os.environ:
-      raise KeyError()
-    else:
-      logger.info("Profiler enabled.")
-      initStackdriverProfiling()
-  except KeyError:
-      logger.info("Profiler disabled.")
+  rook.start()
 
   # Tracing
   try:

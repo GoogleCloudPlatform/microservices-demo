@@ -9,3 +9,4 @@ python-json-logger==0.1.11
 google-cloud-profiler==1.1.2
 google-cloud-trace==0.24.0
 requests==2.24.0
+rook>=0.1.146
