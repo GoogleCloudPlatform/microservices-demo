@@ -557,6 +557,7 @@ main.home {
 .aws-platform,
 .onprem-platform,
 .azure-platform,
+.alibaba-platform,
 .gcp-platform {
   position: fixed;
   top: 0;
@@ -587,6 +588,11 @@ main.home {
 .azure-platform,
 .azure-platform .platform-flag {
   background-color: #f35426;
+}
+
+.alibaba-platform,
+.alibaba-platform .platform-flag {
+  background-color: #ffC300;
 }
 
 .local,
