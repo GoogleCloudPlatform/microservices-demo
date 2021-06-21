@@ -9,6 +9,7 @@ using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Hosting;
 using cartservice.cartstore;
 using cartservice.services;
+using Microsoft.EntityFrameworkCore;
 
 namespace cartservice
 {
@@ -26,23 +27,30 @@ namespace cartservice
         public void ConfigureServices(IServiceCollection services)
         {
             string redisAddress = Configuration["REDIS_ADDR"];
+            //MySql configuration
+            string mySqlConnectionString = Configuration.GetConnectionString("DataAccessMySqlProvider");
             ICartStore cartStore = null;
-            if (!string.IsNullOrEmpty(redisAddress))
+            if (!string.IsNullOrEmpty(mySqlConnectionString))
+            {
+                services.AddDbContext<MyCartItemsContext>(options => options.UseMySql(mySqlConnectionString, ServerVersion.AutoDetect(mySqlConnectionString)));
+                services.AddTransient<MySQLCartRepository>();
+                services.AddTransient<ICartStore, MySqlCartStore>();
+            }
+            else if (!string.IsNullOrEmpty(redisAddress))
             {
                 cartStore = new RedisCartStore(redisAddress);
+                services.AddSingleton<ICartStore>(cartStore);
+                // Initialize the redis store
+                cartStore.InitializeAsync().GetAwaiter().GetResult();
+                Console.WriteLine("Initialization completed");
             }
             else
             {
                 Console.WriteLine("Redis cache host(hostname+port) was not specified. Starting a cart service using local store");
                 Console.WriteLine("If you wanted to use Redis Cache as a backup store, you should provide its address via command line or REDIS_ADDR environment variable.");
-                cartStore = new LocalCartStore();
+                services.AddSingleton<ICartStore, LocalCartStore>();
+                //cartStore = new LocalCartStore();
             }
-
-            // Initialize the redis store
-            cartStore.InitializeAsync().GetAwaiter().GetResult();
-            Console.WriteLine("Initialization completed");
-
-            services.AddSingleton<ICartStore>(cartStore);
 
             services.AddGrpc();
         }
