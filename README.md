@@ -1,9 +1,20 @@
-<p align="center">
-<img src="src/frontend/static/icons/Hipster_HeroLogoCyan.svg" width="300" alt="Online Boutique" />
-</p>
+## how to run local developement environment
 
+### prerequisites
+- install minikube (for macOs: `brew install minikube`)
+- install skaffold (check out https://skaffold.dev/docs/install/)
+- minikube start (to create a local kubernetes cluster)
+- `skaffold build` (might take a-while on first time)
 
-![Continuous Integration](https://github.com/GoogleCloudPlatform/microservices-demo/workflows/Continuous%20Integration%20-%20Master/Release/badge.svg)
+### run
+- `minikube dashboard`
+- `skaffold dev` (cartservice is a bit unstable, if it breaks just re-run)
+- ensure all good by running `kubectl get pods` and seeing 11 healthy pods.
+- to find the url to browse to, run `minikube service frontend-external --url`
+
+### developing
+while `minikube dashboard` and `skaffold dev` are up, you can save changes into the code, and after ~30 seconds the browser will be updated.
+_______________________________
 
 
 **Online Boutique** is a cloud-native microservices demo application.
