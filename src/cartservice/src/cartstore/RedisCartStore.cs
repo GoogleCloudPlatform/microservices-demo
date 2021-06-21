@@ -95,7 +95,7 @@ namespace cartservice.cartstore
                 redis.ConnectionRestored += (o, e) =>
                 {
                     isRedisConnectionOpened = true;
-                    Console.WriteLine("Connection to redis was retored successfully");
+                    Console.WriteLine("Connection to redis was restored successfully");
                 };
                 redis.ConnectionFailed += (o, e) =>
                 {
