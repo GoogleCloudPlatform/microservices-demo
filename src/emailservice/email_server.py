@@ -19,17 +19,14 @@ import os
 import time
 import grpc
 from jinja2 import Environment, FileSystemLoader, select_autoescape
-from google.auth.exceptions import DefaultCredentialsError
+from jaeger_client import Config
+from grpc_opentracing import open_tracing_server_interceptor
+from grpc_opentracing.grpcext import intercept_server
+import rook
 
 from utils import demo_pb2_grpc, demo_pb2
 from grpc_health.v1 import health_pb2
 from grpc_health.v1 import health_pb2_grpc
-import rook
-
-from opencensus.ext.stackdriver import trace_exporter as stackdriver_exporter
-from opencensus.ext.grpc import server_interceptor
-from opencensus.common.transports.async_ import AsyncTransport
-from opencensus.trace import samplers
 
 from utils.logger import getJSONLogger
 logger = getJSONLogger('emailservice-server')
@@ -58,12 +55,12 @@ class EmailService(demo_pb2_grpc.EmailServiceServicer):
     logger.info("starting to handle order confirmation email for order_id \"{}\"".format(request.order.order_id))
 
     logger.debug('''
-    shipping address:\n
-    city: \"{}\"\n
-    country: \"{}\"\n
-    street_address_1: \"{}\"\n
-    street_address_2: \"{}\"\n
-    zip_code: \"{}\"
+    shipping address:
+    city: \"{}\";
+    country: \"{}\";
+    street_address_1: \"{}\";
+    street_address_2: \"{}\";
+    zip_code: \"{}\";
     '''.format(request.order.shipping_address.city,
                request.order.shipping_address.country,
                request.order.shipping_address.street_address_1,
@@ -79,9 +76,24 @@ class EmailService(demo_pb2_grpc.EmailServiceServicer):
     logger.debug("email-service failed to send email to address \"{}\"".format(email))
     logger.error("failed to send confirmation email for order_id \"{}\"".format(request.order.order_id))
 
+def init_tracer():
+  config = Config(
+    config={
+      'sampler': {'type': 'const', 'param': 1},
+      'local_agent': {
+        'reporting_host': 'jaeger-agent',
+        'reporting_port': 5775
+      }
+    },
+    service_name='microservices-demo-emailservice')
+  return config.initialize_tracer()
+
 def start():
-  server = grpc.server(futures.ThreadPoolExecutor(max_workers=10),
-                       interceptors=(tracer_interceptor,))
+  tracer = init_tracer()
+  tracer_interceptor = open_tracing_server_interceptor(tracer)
+  server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
+  server = intercept_server(server, tracer_interceptor)
+
   service = EmailService()
 
   demo_pb2_grpc.add_EmailServiceServicer_to_server(service, server)
@@ -99,22 +111,6 @@ def start():
 
 
 if __name__ == '__main__':
-  logger.info('starting the email service in dummy mode.')
-
+  logger.info('starting the emailservice.')
   rook.start()
-
-  try:
-    if "DISABLE_TRACING" in os.environ:
-      raise KeyError()
-    else:
-      logger.info("Tracing enabled.")
-      sampler = samplers.AlwaysOnSampler()
-      exporter = stackdriver_exporter.StackdriverExporter(
-        project_id=os.environ.get('GCP_PROJECT_ID'),
-        transport=AsyncTransport)
-      tracer_interceptor = server_interceptor.OpenCensusServerInterceptor(sampler, exporter)
-  except (KeyError, DefaultCredentialsError):
-      logger.info("Tracing disabled.")
-      tracer_interceptor = server_interceptor.OpenCensusServerInterceptor()
-
   start()

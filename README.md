@@ -11,7 +11,7 @@ in terminal #1:
 - `minikube dashboard`
 
 in terminal #2:
-- `skaffold dev` (cartservice is [a bit unstable](https://github.com/GoogleCloudPlatform/microservices-demo/issues/561), if it breaks just re-run until it works)
+- `skaffold dev` (cartservice is [a bit unstable](https://github.com/GoogleCloudPlatform/microservices-demo/issues/561), if it breaks try to re-run and see if it works)
 
 in terminal #3:
 - ensure all good by running `kubectl get pods` and seeing 11 healthy pods.
@@ -20,7 +20,7 @@ in terminal #3:
 copy the url address from terminal #3 and browse to it
 
 ### developing
-while `minikube dashboard` and `skaffold dev` are up, you can save changes into the code, and after ~30 seconds the browser will be updated.
+while `minikube dashboard` and `skaffold dev` are up, you can save changes into the code, and after ~30 seconds refresh the app in the browser.
 _______________________________
 
 
