@@ -17,11 +17,6 @@
 {{ define "home" }}
 
 {{ template "header" . }}
-<div {{ with $.platform_css }} class="{{.}}" {{ end }}>
-  <span class="platform-flag">
-    {{$.platform_name}}
-  </span>
-</div>
 <main role="main" class="home">
   <section class="jumbotron text-center mb-0 h-jumbotron">
     <div class="container">

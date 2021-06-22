@@ -15,17 +15,13 @@
 # limitations under the License.
 
 from concurrent import futures
-import argparse
 import os
-import sys
 import time
 import grpc
-from jinja2 import Environment, FileSystemLoader, select_autoescape, TemplateError
-from google.api_core.exceptions import GoogleAPICallError
+from jinja2 import Environment, FileSystemLoader, select_autoescape
 from google.auth.exceptions import DefaultCredentialsError
 
-import demo_pb2
-import demo_pb2_grpc
+from utils import demo_pb2_grpc, demo_pb2
 from grpc_health.v1 import health_pb2
 from grpc_health.v1 import health_pb2_grpc
 import rook
@@ -35,7 +31,7 @@ from opencensus.ext.grpc import server_interceptor
 from opencensus.common.transports.async_ import AsyncTransport
 from opencensus.trace import samplers
 
-from logger import getJSONLogger
+from utils.logger import getJSONLogger
 logger = getJSONLogger('emailservice-server')
 
 # Loads confirmation email template from file
@@ -45,80 +41,48 @@ env = Environment(
 )
 template = env.get_template('confirmation.html')
 
-class BaseEmailService(demo_pb2_grpc.EmailServiceServicer):
+class EmailService(demo_pb2_grpc.EmailServiceServicer):
+  def SendOrderConfirmation(self, request, context):
+    self.SendOrderLogging(request, context)
+    return demo_pb2.Empty()
+
   def Check(self, request, context):
     return health_pb2.HealthCheckResponse(
       status=health_pb2.HealthCheckResponse.SERVING)
-  
+
   def Watch(self, request, context):
     return health_pb2.HealthCheckResponse(
       status=health_pb2.HealthCheckResponse.UNIMPLEMENTED)
 
-class EmailService(BaseEmailService):
-  def __init__(self):
-    raise Exception('cloud mail client not implemented')
-    super().__init__()
+  def SendOrderLogging(self, request, context):
+    logger.info("starting to handle order confirmation email for order_id \"{}\"".format(request.order.order_id))
 
-  @staticmethod
-  def send_email(client, email_address, content):
-    response = client.send_message(
-      sender = client.sender_path(project_id, region, sender_id),
-      envelope_from_authority = '',
-      header_from_authority = '',
-      envelope_from_address = from_address,
-      simple_message = {
-        "from": {
-          "address_spec": from_address,
-        },
-        "to": [{
-          "address_spec": email_address
-        }],
-        "subject": "Your Confirmation Email",
-        "html_body": content
-      }
-    )
-    logger.info("Message sent: {}".format(response.rfc822_message_id))
+    logger.debug('''
+    shipping address:\n
+    city: \"{}\"\n
+    country: \"{}\"\n
+    street_address_1: \"{}\"\n
+    street_address_2: \"{}\"\n
+    zip_code: \"{}\"
+    '''.format(request.order.shipping_address.city,
+               request.order.shipping_address.country,
+               request.order.shipping_address.street_address_1,
+               request.order.shipping_address.street_address_2,
+               request.order.shipping_address.zip_code))
 
-  def SendOrderConfirmation(self, request, context):
-    email = request.email
-    order = request.order
+    logger.debug("validating order details - \"{}\"".format(request.order.order_id))
+    logger.debug("order details are valid - \"{}\"".format(request.order.order_id))
 
-    try:
-      confirmation = template.render(order = order)
-    except TemplateError as err:
-      context.set_details("An error occurred when preparing the confirmation mail.")
-      logger.error(err.message)
-      context.set_code(grpc.StatusCode.INTERNAL)
-      return demo_pb2.Empty()
+    email = request.email + "%20"
+    logger.debug("validating email address - \"{}\"".format(email))
+    logger.debug("email address is valid - \"{}\"".format(email))
+    logger.debug("email-service failed to send email to address \"{}\"".format(email))
+    logger.error("failed to send confirmation email for order_id \"{}\"".format(request.order.order_id))
 
-    try:
-      EmailService.send_email(self.client, email, confirmation)
-    except GoogleAPICallError as err:
-      context.set_details("An error occurred when sending the email.")
-      print(err.message)
-      context.set_code(grpc.StatusCode.INTERNAL)
-      return demo_pb2.Empty()
-
-    return demo_pb2.Empty()
-
-class DummyEmailService(BaseEmailService):
-  def SendOrderConfirmation(self, request, context):
-    logger.info('A request to send order confirmation email to {} has been received.'.format(request.email))
-    return demo_pb2.Empty()
-
-class HealthCheck():
-  def Check(self, request, context):
-    return health_pb2.HealthCheckResponse(
-      status=health_pb2.HealthCheckResponse.SERVING)
-
-def start(dummy_mode):
+def start():
   server = grpc.server(futures.ThreadPoolExecutor(max_workers=10),
                        interceptors=(tracer_interceptor,))
-  service = None
-  if dummy_mode:
-    service = DummyEmailService()
-  else:
-    raise Exception('non-dummy mode not implemented yet')
+  service = EmailService()
 
   demo_pb2_grpc.add_EmailServiceServicer_to_server(service, server)
   health_pb2_grpc.add_HealthServicer_to_server(service, server)
@@ -139,7 +103,6 @@ if __name__ == '__main__':
 
   rook.start()
 
-  # Tracing
   try:
     if "DISABLE_TRACING" in os.environ:
       raise KeyError()
@@ -154,4 +117,4 @@ if __name__ == '__main__':
       logger.info("Tracing disabled.")
       tracer_interceptor = server_interceptor.OpenCensusServerInterceptor()
 
-  start(dummy_mode = True)
+  start()

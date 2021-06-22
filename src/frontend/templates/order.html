@@ -16,11 +16,6 @@
 
 {{ define "order" }}
     {{ template "header" . }}
-    <div {{ with $.platform_css }} class="{{.}}" {{ end }}>
-        <span class="platform-flag">
-          {{$.platform_name}}
-        </span>
-      </div>
     <main role="main" class="order">
         <div class="py-5">
             <div class="container py-3 px-lg-5">

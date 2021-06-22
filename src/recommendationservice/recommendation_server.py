@@ -17,7 +17,6 @@
 import os
 import random
 import time
-import traceback
 from concurrent import futures
 
 from google.auth.exceptions import DefaultCredentialsError
@@ -28,12 +27,11 @@ from opencensus.trace import samplers
 from opencensus.common.transports.async_ import AsyncTransport
 import rook
 
-import demo_pb2
-import demo_pb2_grpc
+from utils import demo_pb2, demo_pb2_grpc
 from grpc_health.v1 import health_pb2
 from grpc_health.v1 import health_pb2_grpc
 
-from logger import getJSONLogger
+from utils.logger import getJSONLogger
 logger = getJSONLogger('recommendationservice-server')
 
 class RecommendationService(demo_pb2_grpc.RecommendationServiceServicer):
@@ -42,6 +40,7 @@ class RecommendationService(demo_pb2_grpc.RecommendationServiceServicer):
         # fetch list of products from product catalog stub
         cat_response = product_catalog_stub.ListProducts(demo_pb2.Empty())
         product_ids = [x.id for x in cat_response.products]
+        known_product_ids = list(set(request.product_ids))
         filtered_products = list(set(product_ids)-set(request.product_ids))
         num_products = len(filtered_products)
         num_return = min(max_responses, num_products)
@@ -49,7 +48,7 @@ class RecommendationService(demo_pb2_grpc.RecommendationServiceServicer):
         indices = random.sample(range(num_products), num_return)
         # fetch product ids from indices
         prod_list = [filtered_products[i] for i in indices]
-        logger.info("[Recv ListRecommendations] product_ids={}".format(prod_list))
+        self.RecommendationLogging(request.user_id, known_product_ids, prod_list)
         # build and return response
         response = demo_pb2.ListRecommendationsResponse()
         response.product_ids.extend(prod_list)
@@ -62,6 +61,12 @@ class RecommendationService(demo_pb2_grpc.RecommendationServiceServicer):
     def Watch(self, request, context):
         return health_pb2.HealthCheckResponse(
             status=health_pb2.HealthCheckResponse.UNIMPLEMENTED)
+
+    def RecommendationLogging(self, user_id, known_products, recommended_products):
+        logger.info("handling recommendations for user \"{}\"".format(user_id))
+        logger.debug("products the user is interested in - {}".format(known_products))
+        logger.debug("products recommended to the user - {}".format(recommended_products))
+        logger.info("done calculating recommendations for user \"{}\"".format(user_id))
 
 
 if __name__ == "__main__":

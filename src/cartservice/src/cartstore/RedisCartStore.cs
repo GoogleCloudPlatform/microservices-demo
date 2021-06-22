@@ -72,14 +72,28 @@ namespace cartservice.cartstore
                     return;
                 }
 
-                Console.WriteLine("Connecting to Redis: " + connectionString);
-                redis = ConnectionMultiplexer.Connect(redisConnectionOptions);
+                bool redisConnectionStatus = false;
 
-                if (redis == null || !redis.IsConnected)
+                for (int i = 1; i < 11; i++)
                 {
-                    Console.WriteLine("Wasn't able to connect to redis");
+                    if (redisConnectionStatus == false)
+                    {
+                        Console.WriteLine("Connecting to Redis try no. " + i +": " + connectionString);
+                        redis = ConnectionMultiplexer.Connect(redisConnectionOptions);
+                        if (redis == null || !redis.IsConnected)
+                        {
+                            Console.WriteLine("Wasn't able to connect to redis on try no. " + i);
+                        }
+                        else
+                        {
+                            redisConnectionStatus = true;
+                        }
 
-                    // We weren't able to connect to redis despite 5 retries with exponential backoff
+                    }
+                }
+
+                if (!redisConnectionStatus)
+                {
                     throw new ApplicationException("Wasn't able to connect to redis");
                 }
 

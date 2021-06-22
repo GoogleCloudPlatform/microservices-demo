@@ -7,10 +7,17 @@
 - `skaffold build` (might take a-while on first time)
 
 ### run
+in terminal #1:
 - `minikube dashboard`
-- `skaffold dev` (cartservice is a bit unstable, if it breaks just re-run)
+
+in terminal #2:
+- `skaffold dev` (cartservice is [a bit unstable](https://github.com/GoogleCloudPlatform/microservices-demo/issues/561), if it breaks just re-run until it works)
+
+in terminal #3:
 - ensure all good by running `kubectl get pods` and seeing 11 healthy pods.
-- to find the url to browse to, run `minikube service frontend-external --url`
+- `minikube service frontend-external --url`
+
+copy the url address from terminal #3 and browse to it
 
 ### developing
 while `minikube dashboard` and `skaffold dev` are up, you can save changes into the code, and after ~30 seconds the browser will be updated.
