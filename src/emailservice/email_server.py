@@ -193,7 +193,7 @@ if __name__ == '__main__':
         project_id=os.environ.get('GCP_PROJECT_ID'),
         transport=AsyncTransport)
       tracer_interceptor = server_interceptor.OpenCensusServerInterceptor(sampler, exporter)
-  except (KeyError, DefaultCredentialsError):
+  except (KeyError, DefaultCredentialsError, OSError):
       logger.info("Tracing disabled.")
       tracer_interceptor = server_interceptor.OpenCensusServerInterceptor()
 
