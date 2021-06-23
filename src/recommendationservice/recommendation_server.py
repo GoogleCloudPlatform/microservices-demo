@@ -19,13 +19,11 @@ import random
 import time
 from concurrent import futures
 
-from google.auth.exceptions import DefaultCredentialsError
 import grpc
-from opencensus.ext.stackdriver import trace_exporter as stackdriver_exporter
-from opencensus.ext.grpc import server_interceptor
-from opencensus.trace import samplers
-from opencensus.common.transports.async_ import AsyncTransport
 import rook
+from jaeger_client import Config
+from grpc_opentracing import open_tracing_server_interceptor
+from grpc_opentracing.grpcext import intercept_server
 
 from utils import demo_pb2, demo_pb2_grpc
 from grpc_health.v1 import health_pb2
@@ -69,25 +67,23 @@ class RecommendationService(demo_pb2_grpc.RecommendationServiceServicer):
         logger.info("done calculating recommendations for user \"{}\"".format(user_id))
 
 
+def init_tracer():
+  config = Config(
+    config={
+      'sampler': {'type': 'const', 'param': 1},
+      'local_agent': {
+        'reporting_host': 'jaeger-agent',
+        'reporting_port': 5775
+      }
+    },
+    service_name='microservices-demo-recommendationservice')
+  return config.initialize_tracer()
+
+
 if __name__ == "__main__":
     logger.info("initializing recommendationservice")
 
     rook.start()
-
-    try:
-      if "DISABLE_TRACING" in os.environ:
-        raise KeyError()
-      else:
-        logger.info("Tracing enabled.")
-        sampler = samplers.AlwaysOnSampler()
-        exporter = stackdriver_exporter.StackdriverExporter(
-          project_id=os.environ.get('GCP_PROJECT_ID'),
-          transport=AsyncTransport)
-        tracer_interceptor = server_interceptor.OpenCensusServerInterceptor(sampler, exporter)
-    except (KeyError, DefaultCredentialsError):
-        logger.info("Tracing disabled.")
-        tracer_interceptor = server_interceptor.OpenCensusServerInterceptor()
-
 
     port = os.environ.get('PORT', "8080")
     catalog_addr = os.environ.get('PRODUCT_CATALOG_SERVICE_ADDR', '')
@@ -98,8 +94,10 @@ if __name__ == "__main__":
     product_catalog_stub = demo_pb2_grpc.ProductCatalogServiceStub(channel)
 
     # create gRPC server
-    server = grpc.server(futures.ThreadPoolExecutor(max_workers=10),
-                      interceptors=(tracer_interceptor,))
+    tracer = init_tracer()
+    tracer_interceptor = open_tracing_server_interceptor(tracer)
+    server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
+    server = intercept_server(server, tracer_interceptor)
 
     # add class to gRPC server
     service = RecommendationService()

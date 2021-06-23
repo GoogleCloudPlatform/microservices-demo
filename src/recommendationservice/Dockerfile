@@ -24,8 +24,13 @@ RUN GRPC_HEALTH_PROBE_VERSION=v0.3.6 && \
     wget -qO/bin/grpc_health_probe https://github.com/grpc-ecosystem/grpc-health-probe/releases/download/${GRPC_HEALTH_PROBE_VERSION}/grpc_health_probe-linux-amd64 && \
     chmod +x /bin/grpc_health_probe
 
-# get packages
 WORKDIR /recommendationservice
+
+# pip installing the requirements.txt requires git because we're installing a fork
+RUN apt-get -y update
+RUN apt-get -y install git
+
+# get packages
 COPY requirements.txt requirements.txt
 RUN pip install -r requirements.txt
 

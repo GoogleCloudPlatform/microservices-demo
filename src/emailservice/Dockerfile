@@ -21,10 +21,6 @@ RUN apt-get -qq update \
         g++ \
     && rm -rf /var/lib/apt/lists/*
 
-# get packages
-COPY requirements.txt .
-RUN pip install -r requirements.txt
-
 FROM base as final
 # Enable unbuffered logging
 ENV PYTHONUNBUFFERED=1
@@ -41,6 +37,14 @@ RUN GRPC_HEALTH_PROBE_VERSION=v0.3.6 && \
     chmod +x /bin/grpc_health_probe
 
 WORKDIR /email_server
+
+# pip installing the requirements.txt requires git because we're installing a fork
+RUN apt-get -y update
+RUN apt-get -y install git
+
+# get packages
+COPY requirements.txt .
+RUN pip install -r requirements.txt
 
 # Grab packages from builder
 COPY --from=builder /usr/local/lib/python3.7/ /usr/local/lib/python3.7/

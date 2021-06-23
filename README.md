@@ -21,6 +21,24 @@ copy the url address from terminal #3 and browse to it
 
 ### developing
 while `minikube dashboard` and `skaffold dev` are up, you can save changes into the code, and after ~30 seconds refresh the app in the browser.
+
+if you wish to connect a service to rookout, go to `kubernetes-manifests/[the service name].yaml`
+and under the `env` attribute add:
+```yaml
+env:
+  - name: ROOKOUT_CONTROLLER_HOST
+    value: '[controller-url]'
+  - name: ROOKOUT_CONTROLLER_PORT
+    value: '443'
+  - name: ROOKOUT_TOKEN
+    value: '[your rookout org token]'
+  - name: ROOKOUT_LABELS
+    value: 'app:microservices-demo,microservice:[the service name]'
+  - name: ROOKOUT_REMOTE_ORIGIN
+    value: "https://github.com/rookout/microservices-demo.git"
+  - name: ROOKOUT_DEBUG
+    value: "1"
+```
 _______________________________
 
 
