@@ -17,10 +17,10 @@ resource "google_compute_subnetwork" "subnet" {
   ip_cidr_range = "${var.gke_nodes_cidr}"
   secondary_ip_range {
     range_name    = "services-range"
-    ip_cidr_range = "192.168.1.0/24"
+    ip_cidr_range = "${var.gke_services_cidr}"
   }
   secondary_ip_range {
     range_name    = "pods-range"
-    ip_cidr_range = "192.168.64.0/22"
+    ip_cidr_range = "${var.gke_pods_cidr}"
   }
 }
