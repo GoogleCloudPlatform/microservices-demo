@@ -30,6 +30,10 @@ spec:
       serviceAccountName: default
       terminationGracePeriodSeconds: 5
       restartPolicy: Always
+      initContainers:
+      - name: wait-for-frontend
+        image: busybox:1.28
+        command: ['sh', '-c', 'STATUSCODE=$(curl --silent --output /dev/stderr --write-out "%{http_code}" http://${FRONTEND_ADDR}); test $STATUSCODE -eq 200']
       containers:
       - name: main
         image: loadgenerator
