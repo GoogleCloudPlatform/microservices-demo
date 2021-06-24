@@ -33,7 +33,7 @@ spec:
       initContainers:
       - name: wait-for-frontend
         image: busybox:1.28
-        command: ['sh', '-c', 'STATUSCODE=$(wget --server-response http://${FRONTEND_ADDR} -O tmp 2>&1 | grep -c "HTTP/1.1 200 OK"); test $STATUSCODE -eq 1']
+        command: ['sh', '-c', 'STATUSCODE=$(wget --server-response http://${FRONTEND_ADDR} -O tmp.file 2>&1 | grep -c "HTTP/1.1 200 OK"); test $STATUSCODE -eq 1']
       containers:
       - name: main
         image: loadgenerator
