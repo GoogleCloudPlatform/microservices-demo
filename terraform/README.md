@@ -26,7 +26,8 @@ The following variables are defined in `variables.tf`.
 | `app_name` | Application name | "onlineboutique" |
 | `project_id` | GCP project id | |
 | `region` | GCP region | |
-| `machine_type` |  Machine type for cluster nodes | "e2-standard-2" |
+| `machine_type` |  [Machine type](https://cloud.google.com/compute/docs/machine-types) for GKE cluster nodes | "e2-standard-2" |
+| `preemptible` |  [Preemptible VMs](https://cloud.google.com/compute/docs/instances/preemptible) are cheaper however they might be stopped | true |
 | `min_node_count` | Minimum number of GKE nodes per zone | 1 |
 | `max_node_count` | Maximum number of GKE nodes per zone | 2 |
 | `gke_nodes_cidr` | CIDR range for the GKE Nodes subnet | "10.0.0.0/16" |

@@ -13,7 +13,12 @@ variable "region" {
 
 variable "machine_type" {
     default   = "e2-standard-2"
-    description = "Machine type for cluster nodes"
+    description = "Machine type for GKE cluster nodes"
+}
+
+variable "preemptible" {
+  default     = true
+  description = "Preemptible VMs are cheaper however they might be stopped"
 }
 
 variable "min_node_count" {
