@@ -32,17 +32,17 @@ spec:
       restartPolicy: Always
       initContainers:
       - command:
-        - /bin/bash
+        - /bin/sh
         - -exc
         - |
-          echo "Ping Frontend: ${FRONTEND_ADDR}"
-          STATUSCODE=$(curl --silent --output /dev/stderr --write-out "%{http_code}" http://${FRONTEND_ADDR})
+          echo "Init container pinging frontend: ${FRONTEND_ADDR}..."
+          STATUSCODE=$(wget --server-response http://${FRONTEND_ADDR} 2>&1 | awk '/^  HTTP/{print $2}')
           if test $STATUSCODE -ne 200; then
               echo "Error: Could not reach frontend - Status code: ${STATUSCODE}"
               exit 1
           fi
         name: frontend-check
-        image: ellerbrock/alpine-bash-curl-ssl:latest
+        image: busybox:latest
         env:
         - name: FRONTEND_ADDR
           value: "frontend:80"
