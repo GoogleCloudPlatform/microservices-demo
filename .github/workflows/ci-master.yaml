@@ -66,7 +66,7 @@ jobs:
         EOF
         echo Deploying application
         skaffold config set --global local-cluster false
-        skaffold run --default-repo=gcr.io/$PROJECT_ID/$GITHUB_REF --tag=$GITHUB_SHA --namespace=$NAMESPACE --status-check=false
+        skaffold run --default-repo=gcr.io/$PROJECT_ID/$GITHUB_REF --tag=$GITHUB_SHA --namespace=$NAMESPACE
       env:
         ACTIONS_ALLOW_UNSECURE_COMMANDS: true
         PROJECT_ID: "onlineboutique-ci"
