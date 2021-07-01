@@ -14,7 +14,6 @@ description = 'Ad Service'
 group = "adservice"
 version = "0.1.0-SNAPSHOT"
 
-def opencensusVersion = "0.27.0"
 def grpcVersion = "1.32.1"
 def jacksonVersion = "2.12.1"
 def protocVersion = "3.12.3"
@@ -34,23 +33,17 @@ dependencies {
         implementation fileTree(dir: offlineCompile, include: '*.jar')
     } else {
         implementation "com.google.api.grpc:proto-google-common-protos:1.18.1",
-                "io.opencensus:opencensus-api:${opencensusVersion}",
-                "io.opencensus:opencensus-contrib-grpc-metrics:${opencensusVersion}",
-                "io.opencensus:opencensus-contrib-grpc-util:${opencensusVersion}",
-                "io.opencensus:opencensus-exporter-trace-jaeger:${opencensusVersion}",
-                "io.opencensus:opencensus-exporter-stats-stackdriver:${opencensusVersion}",
-                "io.opencensus:opencensus-exporter-trace-stackdriver:${opencensusVersion}",
-                "io.opencensus:opencensus-exporter-trace-logging:${opencensusVersion}",
                 "io.grpc:grpc-protobuf:${grpcVersion}",
                 "io.grpc:grpc-stub:${grpcVersion}",
                 "io.grpc:grpc-netty:${grpcVersion}",
                 "io.grpc:grpc-services:${grpcVersion}",
-                "org.apache.logging.log4j:log4j-core:2.13.3"
+                "org.apache.logging.log4j:log4j-core:2.13.3",
+                "io.opentracing:opentracing-api:0.33.0",
+                "io.opentracing.contrib:opentracing-grpc:0.2.3",
+                "io.jaegertracing:jaeger-client:1.6.0"
 
         runtimeOnly "com.fasterxml.jackson.core:jackson-core:${jacksonVersion}",
                 "com.fasterxml.jackson.core:jackson-databind:${jacksonVersion}",
-                "io.opencensus:opencensus-contrib-log-correlation-log4j2:${opencensusVersion}",
-                "io.opencensus:opencensus-impl:${opencensusVersion}",
                 "io.netty:netty-tcnative-boringssl-static:2.0.34.Final"
     }
 }
@@ -87,6 +80,19 @@ sourceSets {
     }
 }
 
+class Download extends DefaultTask {
+    @Input
+    String sourceUrl
+
+    @OutputFile
+    File target
+
+    @TaskAction
+    void download() {
+        ant.get(src: sourceUrl, dest: target)
+    }
+}
+
 startScripts.enabled = false
 
 // This to cache dependencies during Docker image building. First build will take time.
@@ -98,28 +104,20 @@ task downloadRepos(type: Copy) {
     into offlineCompile
 }
 
+task downloadRookout(type: Download) {
+    sourceUrl = "https://repository.sonatype.org/service/local/artifact/maven/redirect?r=central-proxy&g=com.rookout&a=rook&v=0.1.179"
+    target = new File('rook.jar')
+}
+
 task adService(type: CreateStartScripts) {
     mainClassName = 'hipstershop.AdService'
     applicationName = 'AdService'
     outputDir = new File(project.buildDir, 'tmp')
     classpath = startScripts.classpath
-    defaultJvmOpts =
-            ["-Dlog4j2.contextDataInjector=io.opencensus.contrib.logcorrelation.log4j2.OpenCensusTraceContextDataInjector",
-             "-agentpath:/opt/cprof/profiler_java_agent.so=-cprof_service=adservice,-cprof_service_version=1.0.0"]
-}
-
-task adServiceClient(type: CreateStartScripts) {
-    mainClassName = 'hipstershop.AdServiceClient'
-    applicationName = 'AdServiceClient'
-    outputDir = new File(project.buildDir, 'tmp')
-    classpath = startScripts.classpath
-    defaultJvmOpts =
-            ["-Dlog4j2.contextDataInjector=io.opencensus.contrib.logcorrelation.log4j2.OpenCensusTraceContextDataInjector",
-             "-agentpath:/opt/cprof/profiler_java_agent.so=-cprof_service=adserviceclient,-cprof_service_version=1.0.0"]
+    defaultJvmOpts = ["-javaagent:rook.jar"]
 }
 
 applicationDistribution.into('bin') {
     from(adService)
-    from(adServiceClient)
     fileMode = 0755
 }

@@ -3,24 +3,21 @@
 ### prerequisites
 - install minikube (for macOs: `brew install minikube`)
 - install skaffold (check out https://skaffold.dev/docs/install/)
-- minikube start (to create a local kubernetes cluster)
-- `skaffold build` (might take a-while on first time)
 
 ### run
 in terminal #1:
-- `minikube dashboard`
+- `minikube start` (to create a local kubernetes cluster)
 
 in terminal #2:
-- `skaffold dev` (cartservice is [a bit unstable](https://github.com/GoogleCloudPlatform/microservices-demo/issues/561), if it breaks try to re-run and see if it works)
+- `skaffold dev`
 
-in terminal #3:
-- ensure all good by running `kubectl get pods` and seeing 11 healthy pods.
-- `minikube service frontend-external --url`
-
-copy the url address from terminal #3 and browse to it
+back terminal #1:
+- either ensure all good by running `kubectl get pods` and seeing 11 healthy pods or run `minikube dashboard` to see all the minikube assets in a nice web app.
+- `minikube service frontend-external --url` to expose a local port to the app's frontend service.
+- copy the localhost url and browse to it.
 
 ### developing
-while `minikube dashboard` and `skaffold dev` are up, you can save changes into the code, and after ~30 seconds refresh the app in the browser.
+while `skaffold dev` is up, you can save changes into the code, the docker image will be rebuilt and the browser will be updated on refresh.
 
 if you wish to connect a service to rookout, go to `kubernetes-manifests/[the service name].yaml`
 and under the `env` attribute add:
