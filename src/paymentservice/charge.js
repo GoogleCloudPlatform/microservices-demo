@@ -14,14 +14,14 @@
 
 const cardValidator = require('simple-card-validator');
 const uuid = require('uuid/v4');
-const pino = require('pino');
+const winston = require('winston');
 
-const logger = pino({
-  name: 'paymentservice-charge',
-  messageKey: 'message',
-  changeLevelName: 'severity',
-  useLevelLabels: true
-});
+const logger = winston.createLogger({
+  level: 'info',
+  transports: [
+    new winston.transports.Console({ level: 'info' })
+  ]
+})
 
 
 class CreditCardError extends Error {

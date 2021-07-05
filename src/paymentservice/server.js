@@ -14,17 +14,17 @@
 
 const path = require('path');
 const grpc = require('grpc');
-const pino = require('pino');
+const winston = require('winston');
 const protoLoader = require('@grpc/proto-loader');
 
 const charge = require('./charge');
 
-const logger = pino({
-  name: 'paymentservice-server',
-  messageKey: 'message',
-  changeLevelName: 'severity',
-  useLevelLabels: true
-});
+const logger = winston.createLogger({
+  level: 'info',
+  transports: [
+    new winston.transports.Console({ level: 'info' })
+  ]
+})
 
 class HipsterShopServer {
   constructor (protoRoot, port = HipsterShopServer.PORT) {
@@ -50,7 +50,7 @@ class HipsterShopServer {
       const response = charge(call.request);
       callback(null, response);
     } catch (err) {
-      console.warn(err);
+      logger.warn(err);
       callback(err);
     }
   }

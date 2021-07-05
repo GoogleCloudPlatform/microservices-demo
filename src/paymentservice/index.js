@@ -16,19 +16,8 @@
 
 'use strict';
 
-require('@google-cloud/profiler').start({
-  serviceContext: {
-    service: 'paymentservice',
-    version: '1.0.0'
-  }
-});
-require('@google-cloud/trace-agent').start();
-require('@google-cloud/debug-agent').start({
-  serviceContext: {
-    service: 'paymentservice',
-    version: 'VERSION'
-  }
-});
+const rookout = require('rookout');
+rookout.start();
 
 const path = require('path');
 const HipsterShopServer = require('./server');
