@@ -105,7 +105,7 @@ task downloadRepos(type: Copy) {
 }
 
 task downloadRookout(type: Download) {
-    sourceUrl = "https://repository.sonatype.org/service/local/artifact/maven/redirect?r=central-proxy&g=com.rookout&a=rook&v=0.1.179"
+    sourceUrl = "https://repository.sonatype.org/service/local/artifact/maven/redirect?r=central-proxy&g=com.rookout&a=rook&v=0.1.180"
     target = new File('rook.jar')
 }
 
