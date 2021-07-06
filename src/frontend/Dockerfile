@@ -23,6 +23,13 @@ COPY . .
 RUN go build -o /go/bin/frontend .
 
 FROM alpine as release
+
+ARG GIT_COMMIT=unspecified
+ENV ROOKOUT_COMMIT=$GIT_COMMIT
+
+ARG GIT_ORIGIN=unspecified
+ENV ROOKOUT_REMOTE_ORIGIN=$GIT_ORIGIN
+
 RUN apk add --no-cache ca-certificates \
     busybox-extras net-tools bind-tools
 WORKDIR /frontend

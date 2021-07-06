@@ -29,6 +29,12 @@ RUN ./gradlew -i downloadRookout
 
 FROM openjdk:8-slim
 
+ARG GIT_COMMIT=unspecified
+ENV ROOKOUT_COMMIT=$GIT_COMMIT
+
+ARG GIT_ORIGIN=unspecified
+ENV ROOKOUT_REMOTE_ORIGIN=$GIT_ORIGIN
+
 RUN apt-get -y update && apt-get install -qqy \
     wget \
     && rm -rf /var/lib/apt/lists/*

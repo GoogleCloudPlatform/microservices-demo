@@ -25,6 +25,13 @@ COPY requirements.txt .
 RUN pip install --prefix="/install" -r requirements.txt
 
 FROM base
+
+ARG GIT_COMMIT=unspecified
+ENV ROOKOUT_COMMIT=$GIT_COMMIT
+
+ARG GIT_ORIGIN=unspecified
+ENV ROOKOUT_REMOTE_ORIGIN=$GIT_ORIGIN
+
 COPY --from=builder /install /usr/local
 
 COPY . .

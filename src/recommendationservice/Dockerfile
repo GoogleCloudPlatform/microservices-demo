@@ -13,6 +13,13 @@
 # limitations under the License.
 
 FROM python:3.7-slim
+
+ARG GIT_COMMIT=unspecified
+ENV ROOKOUT_COMMIT=$GIT_COMMIT
+
+ARG GIT_ORIGIN=unspecified
+ENV ROOKOUT_REMOTE_ORIGIN=$GIT_ORIGIN
+
 RUN apt-get update -qqy && \
 	apt-get -qqy install wget g++ && \
 	rm -rf /var/lib/apt/lists/*

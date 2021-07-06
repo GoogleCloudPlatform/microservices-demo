@@ -22,6 +22,13 @@ RUN apt-get -qq update \
     && rm -rf /var/lib/apt/lists/*
 
 FROM base as final
+
+ARG GIT_COMMIT=unspecified
+ENV ROOKOUT_COMMIT=$GIT_COMMIT
+
+ARG GIT_ORIGIN=unspecified
+ENV ROOKOUT_REMOTE_ORIGIN=$GIT_ORIGIN
+
 # Enable unbuffered logging
 ENV PYTHONUNBUFFERED=1
 # Enable Profiler
