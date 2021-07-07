@@ -67,11 +67,14 @@ profiles:
       diskSizeGb: 300
       machineType: N1_HIGHCPU_32
       timeout: 4000s
+# "debug" profile replaces the default Dockerfile in cartservice with Dockerfile.debug, 
+# which enables debugging via skaffold.
+#
+# This profile is used by default when running skaffold debug.
 - name: debug
   activation:
     - command: debug
   patches:
     - op: replace
-      # cartservice requires a debug dockerfile
       path: /build/artifacts/7/docker/dockerfile
       value: Dockerfile.debug
