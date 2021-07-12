@@ -24,7 +24,7 @@ namespace cartservice.cartstore
     public class RedisCartStore : ICartStore
     {
         private const string CART_FIELD_NAME = "cart";
-        private const int REDIS_RETRY_NUM = 5;
+        private const int REDIS_RETRY_NUM = 30;
 
         private volatile ConnectionMultiplexer redis;
         private volatile bool isRedisConnectionOpened = false;
@@ -40,13 +40,13 @@ namespace cartservice.cartstore
             // Serialize empty cart into byte array.
             var cart = new Hipstershop.Cart();
             emptyCartBytes = cart.ToByteArray();
-            connectionString = $"{redisAddress},ssl=false,allowAdmin=true,connectRetry=5,abortConnect=false";
+            connectionString = $"{redisAddress},ssl=false,allowAdmin=true,abortConnect=false";
 
             redisConnectionOptions = ConfigurationOptions.Parse(connectionString);
 
-            // Try to reconnect if first retry failed (up to 5 times with exponential backoff)
+            // Try to reconnect multiple times if the first retry fails.
             redisConnectionOptions.ConnectRetry = REDIS_RETRY_NUM;
-            redisConnectionOptions.ReconnectRetryPolicy = new ExponentialRetry(100);
+            redisConnectionOptions.ReconnectRetryPolicy = new ExponentialRetry(1000);
 
             redisConnectionOptions.KeepAlive = 180;
         }
@@ -79,7 +79,7 @@ namespace cartservice.cartstore
                 {
                     Console.WriteLine("Wasn't able to connect to redis");
 
-                    // We weren't able to connect to redis despite 5 retries with exponential backoff
+                    // We weren't able to connect to Redis despite some retries with exponential backoff.
                     throw new ApplicationException("Wasn't able to connect to redis");
                 }
 
