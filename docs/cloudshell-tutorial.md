@@ -26,7 +26,9 @@ Minikube creates a local Kubernetes cluster on Cloud Shell.
 
 3. If prompted, authorize Cloud Shell to make a GCP API call with your credentials.
 
-Once minikube has finished starting, you're ready to move on to the next step.
+*It may take a few minutes for minikube to finish starting.*
+
+Once minikube has started, you're ready to move on to the next step. 
 
 
 --- 
