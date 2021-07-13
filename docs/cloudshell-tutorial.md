@@ -22,7 +22,7 @@ Minikube creates a local Kubernetes cluster on Cloud Shell.
 
 1. Click <walkthrough-editor-spotlight spotlightId="minikube-status-bar">minikube</walkthrough-editor-spotlight> on the status bar located at the bottom of the editor window.
 
-2. The command palette will prompt you to choose which minikube cluster to control. Select **minikube** and, in the next prompt, click **Start**. 
+2. The command palette will prompt you to choose which minikube cluster to control. Select **minikube** and, in the next prompt, click **Start** if the cluster has not already been started. 
 
 3. If prompted, authorize Cloud Shell to make a GCP API call with your credentials.
 
