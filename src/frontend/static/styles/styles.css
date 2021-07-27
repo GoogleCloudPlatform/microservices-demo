@@ -239,7 +239,19 @@ footer.py-5 {
 }
 
 footer .footer-top {
-  background-color: #f0f0f0;
+  padding: 60px 0px;
+  background-color: #570D2E;
+  color: white;
+}
+
+footer .footer-top a {
+  color: white;
+  text-decoration: underline;
+}
+
+/* The <p> containing the session-id. */
+footer .footer-top p:nth-child(3) {
+  margin-top: 56px;
 }
 
 footer .footer-top .footer-social,
@@ -615,8 +627,7 @@ main.home {
 @media (min-width: 1679px) {
 
   header .navbar,
-  header .navbar.sub-navbar,
-  footer .footer-top {
+  header .navbar.sub-navbar {
     padding: 0 16.96428571%;
   }
 }
