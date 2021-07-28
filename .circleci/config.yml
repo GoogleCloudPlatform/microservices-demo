@@ -1,24 +1,24 @@
 version: 2.1
 
-orbs:
-  # The python orb contains a set of prepackaged CircleCI configuration you can use repeatedly in your configuration files
-  # Orb commands and jobs help you with common scripting around a language/tool
-  # so you dont have to copy and paste it everywhere.
-  # See the orb documentation here: https://circleci.com/developer/orbs/orb/circleci/python
-  aws-cli: circleci/aws-cli@2.0.3
-  kubernetes: circleci/kubernetes@0.12.0
-
 jobs:
   build:
     docker:
-      - image: 'cimg/base:stable'
+      - image: circleci/golang:1.15
+        auth:
+          username: neatsunz@gmail.com
+          password: $DOCKERHUB_PASSWORD  # context / project UI env-var reference
     steps:
       - checkout
-      - kubernetes/install-kubectl
-      - kubernetes/create-or-update-resource:
-          get-rollout-status: true
-          resource-file-path: tests/nginx-deployment/deployment.yaml
-          resource-name: deployment/nginx-deployment
-          show-kubectl-command: true
+      # ... steps for building/testing app ...
 
+      - setup_remote_docker:
+          version: 19.03.13
+          docker_layer_caching: true
+
+      # build and push Docker image
+      - run: |
+          TAG=0.1.$CIRCLE_BUILD_NUM
+          docker build -t CircleCI-Public/circleci-demo-docker:$TAG .
+          echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin
+          docker push CircleCI-Public/circleci-demo-docker:$TAG
 
