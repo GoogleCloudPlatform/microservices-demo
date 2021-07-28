@@ -423,6 +423,26 @@ main.home {
   font-size: 18px;
 }
 
+.ad {
+  position: relative;
+  background-color: #FF9A9B;
+  font-size: 24px;
+  text-align: center;
+}
+
+/* "Ad" text. */
+.ad strong {
+  position: absolute;
+  top: 6px;
+  left: 12px;
+  font-size: 14px;
+  font-weight: normal;
+}
+
+.ad a {
+  color: black;
+}
+
 .ad-row {
   padding-left: 68px;
   height: 400px;
