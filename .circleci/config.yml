@@ -4,7 +4,7 @@ jobs:
     docker:
       - image: circleci/golang:1.15
         auth:
-          username: mydockerhub-user
+          username: neatsunz@gmail.com
           password: $DOCKERHUB_PASSWORD  # context / project UI env-var reference
     steps:
       - checkout
