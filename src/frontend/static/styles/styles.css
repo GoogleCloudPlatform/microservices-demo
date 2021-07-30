@@ -557,8 +557,6 @@ main.home {
   height: 80px !important;
 }
 
-/*recommendations*/
-
 .h-card.card {
   border: none;
   border-radius: 0 !important;
@@ -653,24 +651,37 @@ main.home {
 }
 
 .recommendations {
-  background: white;
+  background: #FEFCFD;
+  margin-bottom: 55px;
 }
 
-.recommendations .container .image {
+.recommendations .container {
+  max-width: calc(100% * 8 / 12);
+}
+
+@media (max-width: 992px) {
+  .recommendations .container {
+    max-width: none;
+  }
+}
+
+.recommendations h2 {
+  border-top: solid 1px;
+  padding: 40px 0;
+  font-weight: normal;
   text-align: center;
 }
 
-.recommendations .container .image>img {
-  height: 80px;
-  margin: 50px 0;
+.recommendations h5 {
+  margin-top: 8px;
+  font-weight: normal;
+  font-size: 18px;
 }
 
-.recommendations .prods {
-  padding-bottom: 50px;
-}
-
-.recommendations .card-img-top {
-  border-radius: 0;
+.recommendations img {
+  height: 100%;
+  width: 100%;
+  border-radius: 20% 0 20% 20%;
 }
 
 select {
