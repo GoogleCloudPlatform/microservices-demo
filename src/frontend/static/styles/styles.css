@@ -35,46 +35,56 @@ hr {
   color: #707070;
 }
 
-.badge {
-  display: inline-block !important;
-  width: 18px;
-  height: 18px;
-  color: #111111;
+/*header*/
+
+header {
+  background-color: #853B5C;
+  color: white;
+}
+
+/* This allow the sub-navbar (white strip containing logo) to be as wide as the browser window. */
+header > div:nth-child(2).navbar.sub-navbar {
+  padding-left: 0;
+  padding-right: 0;
+}
+header > div:nth-child(2) > .container {
+  max-width: none;
+}
+
+header .cart-link {
+  position: relative;
+  display: block;
+  margin-left: 25px;
+  display: flex;
+  flex-flow: column;
+  align-items: center;
+  justify-content: center;
+}
+
+header .cart-size-circle {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 10px;
+  position: absolute;
+  top: 28px;
+  left: 8px;
+  padding-top: 2px;
+  padding-left: 1px;
+  width: 16px;
+  height: 16px;
+  font-size: 11px;
   border-radius: 50%;
-  padding-left: 3px;
-}
-
-.badge.badge-blue {
-  background-color: #4bc7c7;
-  padding-top: 5px;
-}
-
-/*header*/
-
-header .badge.badge-blue {
-  transform: translateY(-3px);
+  color: white;
+  background-color: #853B5C;
 }
 
 header .navbar {
-  height: 38px;
+  padding-top: 5px;
+  padding-bottom: 5px;
 }
 
 header .h-free-shipping {
-  font-size: 15px;
-}
-
-header .h-free-shipping span:first-child {
-  font-weight: bold;
-}
-
-header .h-free-shipping span:last-child {
-  font-size: 12px;
-  cursor: pointer;
-  text-decoration: underline;
+  font-size: 14px;
 }
 
 header .h-controls {
@@ -95,12 +105,6 @@ header .h-control:first-child {
   margin-left: 0;
 }
 
-header .h-control img {
-  width: 20px;
-  height: 20px;
-  margin-right: 8px;
-}
-
 header .h-control input {
   border: none;
   padding: 0 31px 0 31px;
@@ -118,22 +122,9 @@ header .h-control input:focus {
   box-shadow: 0;
 }
 
-header .currencyLogo {
-  font-size: 1.3rem; 
-  padding-right: 6px; 
-  vertical-align: center;
-}
-
 header .icon {
   width: 20px;
   height: 20px;
-}
-
-header .icon.arrow {
-  position: absolute;
-  right: 4px;
-  width: 11px;
-  height: 7px;
 }
 
 header .icon.search-icon {
@@ -143,18 +134,44 @@ header .icon.search-icon {
   left: 10px;
 }
 
+/* The currency drop-down. */
+
+header img.currency-icon, header span.currency-icon {
+  position: relative;
+  left: 35px;
+  width: 20px;
+  display: inline-block;
+  height: 20px;
+}
+
+header span.currency-icon {
+  font-size: 11px;
+  padding-top: 1px;
+  border-radius: 50%;
+  border: solid 2px;
+  text-align: center;
+}
+
 header .h-control select {
+  display: flex;
+  align-items: center;
   background: transparent;
   border-radius: 0;
   border: 1px solid #acacac;
-  width: 100px;
-  height: 20px;
+  width: 130px;
+  height: 40px;
   flex-shrink: 0;
-  padding: 0 7px;
-  display: flex;
-  align-items: center;
+  padding: 1px 0 0 45px;
+  font-size: 16px;
+  border-radius: 8px;
 }
 
+header .icon.arrow {
+  position: absolute;
+  right: 25px;
+  width: 10px;
+  height: 5px;
+}
 
 header .h-control::-webkit-input-placeholder {
   /* Chrome/Opera/Safari */
@@ -182,11 +199,12 @@ header .h-control :-moz-placeholder {
 
 header .navbar.sub-navbar {
   height: 60px;
-  background-color: #111111;
+  background-color: white;
   font-size: 15px;
   color: #b4b2bb;
   padding-top: 0;
   padding-bottom: 0;
+  box-shadow: 0px 0px 4px rgba(0, 0, 0, 0.25);
 }
 
 header .navbar.sub-navbar .logo {
@@ -211,24 +229,10 @@ header .navbar.sub-navbar .controls {
   height: 60px;
 }
 
-header .navbar.sub-navbar .controls a {
-  display: block;
-  width: 120px;
-  border-left: 1px solid #b4b2bb;
-  display: flex;
-  flex-flow: column;
-  align-items: center;
-  justify-content: center;
-}
-
 header .navbar.sub-navbar .controls a img {
   width: 20px;
   height: 20px;
   margin-bottom: 3px;
-}
-
-header .navbar.sub-navbar .controls a:last-child {
-  border-right: 1px solid #b4b2bb;
 }
 
 /*footer*/
