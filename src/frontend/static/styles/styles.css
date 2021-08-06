@@ -468,55 +468,36 @@ main.home {
 /*Product*/
 
 .h-product {
-  background-color: #f0f0f0;
-  padding: 65px 16.96428571%;
-  color: #707070;
-  font-size: 18px;
+  margin-top: 56px;
+  margin-bottom: 112px;
+  max-width: 1200px;
+  background-color: #FEFCFD;
 }
 
-.h-product .col {
-  height: 540px;
+.h-product > .row {
+  align-items: flex-end;
 }
 
-.h-product .col img {
-  width: 540px;
+.h-product .product-image {
+  width: 100%;
+  border-radius: 20% 20% 0 20%;
 }
 
-.h-product .product-info {
-  width: calc(100% - 540px);
+.h-product .product-price {
+  font-size: 28px;
 }
 
 .h-product .product-info .product-wrapper {
-  border-top: 1px solid #b4b2bb;
-  border-bottom: 1px solid #b4b2bb;
-  height: 100%;
   margin-left: 15px;
-  display: flex;
-  flex-flow: column;
-  justify-content: center;
-}
-
-.h-product .text-muted {
-  color: #707070 !important;
-  margin: 20px 0;
 }
 
 .h-product .product-info h2 {
-  font-size: 48px;
-  line-height: 1.1;
-  letter-spacing: 9.6px;
+  margin-bottom: 16px;
+  margin-top: 16px;
+  font-size: 56px;
+  line-height: 1.14;
+  font-weight: normal;
   color: #111111;
-}
-
-.h-product .product-info h6 {
-  font-size: 18px;
-  color: #111111;
-  text-transform: uppercase;
-  margin: 0 0 3px 0;
-}
-
-.h-product .product-info form {
-  margin-top: 100px;
 }
 
 .h-product .input-group-text,
@@ -526,7 +507,6 @@ main.home {
   letter-spacing: 3.6px;
   text-align: center;
   color: #111111;
-  text-transform: uppercase;
   border-radius: 0;
 }
 
@@ -554,6 +534,10 @@ main.home {
   color: #fff;
   background-color: #138496;
   border-color: #117a8b;
+}
+
+.h-product .cymbal-button-primary {
+  margin-top: 16px;
 }
 
 .other-products-img {
@@ -691,4 +675,20 @@ main.home {
 select {
   -webkit-appearance: none;
   -webkit-border-radius: 0px;
+}
+
+/* Cymbal */
+
+.cymbal-button-primary, .cymbal-button-secondary {
+  border: solid 1px #CE0631;
+  padding: 8px 16px;
+  outline: none;
+  font-size: 14px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.cymbal-button-primary {
+  background-color: #CE0631;
+  color: white;
 }
