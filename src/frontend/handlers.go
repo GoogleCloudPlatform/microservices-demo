@@ -476,7 +476,8 @@ func cartSize(c []*pb.CartItem) int {
 }
 
 func renderMoney(money pb.Money) string {
-	return fmt.Sprintf("%s %d.%02d", money.GetCurrencyCode(), money.GetUnits(), money.GetNanos()/10000000)
+	currencyLogo := renderCurrencyLogo(money.GetCurrencyCode())
+	return fmt.Sprintf("%s%d.%02d", currencyLogo, money.GetUnits(), money.GetNanos()/10000000)
 }
 
 func renderCurrencyLogo(currencyCode string) string {
