@@ -14,8 +14,32 @@
  * limitations under the License.
  */
 
-.cart-bg {
-    background: #f0f0f0;
+.cart {
+    padding-bottom: 120px;
+    padding-top: 56px;
+    background-color: #FEFCFD;
+}
+
+/* Empty Cart Section */
+
+.empty-cart-section {
+    max-width: 458px;
+    margin: auto;
+    text-align: center;
+}
+
+.empty-cart-section h3 {
+    font-weight: normal;
+}
+
+.empty-cart-section a {
+    display: inline-block; /* So margin-top works. */
+    margin-top: 32px;
+}
+
+.empty-cart-section a:hover {
+    color: white;
+    text-decoration: none;
 }
 
 .cart .form-control {

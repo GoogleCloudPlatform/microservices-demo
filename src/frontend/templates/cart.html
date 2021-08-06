@@ -16,20 +16,24 @@
 
 {{ define "cart" }}
     {{ template "header" . }}
+    
     <div {{ with $.platform_css }} class="{{.}}" {{ end }}>
         <span class="platform-flag">
-          {{$.platform_name}}
+            {{$.platform_name}}
         </span>
-      </div>
+    </div>
+    
     <main role="main" class="cart">
+
+        {{ if eq (len $.items) 0 }}
+        <section class="empty-cart-section">
+            <h3>Your shopping cart is empty!</h3>
+            <p>Items you add to your shopping cart will appear here.</p>
+            <a class="cymbal-button-primary" href="/" role="button">Continue Shopping</a>
+        </section>
+        {{ else }}
         <div class="cart-bg">
             <div class="container py-3 px-lg-5 py-lg-5">
-                {{ if eq (len $.items) 0 }}
-                    <h3>Your shopping cart is empty!</h3>
-                    <p>Items you add to your shopping cart will appear here.</p>
-                    <a class="btn btn-info" href="/" role="button">Browse Products &rarr; </a>
-                {{ else }}
-
                     <div class="row mb-3 py-2">
                         <div class="col">
                             <h3>{{ $.cart_size }} item
@@ -163,13 +167,15 @@
                             </form>
                         </div>
                     </div>
-                {{ end }} <!-- end if $.items -->
-
             </div>
-            {{ if $.recommendations}}
-                {{ template "recommendations" $.recommendations }}
-            {{ end }}
         </div>
+        {{ end }} <!-- end if $.items -->
+
     </main>
+
+    {{ if $.recommendations}}
+        {{ template "recommendations" $.recommendations }}
+    {{ end }}
+
     {{ template "footer" . }}
     {{ end }}
