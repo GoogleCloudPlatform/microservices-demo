@@ -660,7 +660,7 @@ main.home {
 }
 
 .recommendations .container {
-  max-width: calc(100% * 8 / 12);
+  max-width: 1174px;
 }
 
 @media (max-width: 992px) {
