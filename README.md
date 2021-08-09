@@ -30,6 +30,13 @@ Looking for the old Hipster Shop frontend interface? Use the [manifests](https:/
 | ----------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
 | [![Screenshot of store homepage](./docs/img/online-boutique-frontend-1.png)](./docs/img/online-boutique-frontend-1.png) | [![Screenshot of checkout screen](./docs/img/online-boutique-frontend-2.png)](./docs/img/online-boutique-frontend-2.png) |
 
+## Quickstart (GKE Autopilot)
+
+The instructions are the same as for [Quickstart (GKE)](#quickstart-gke) in the
+next section, except that you do not need to configure nodes for the cluster.
+Replace step #3 with the following:
+
+3. **Create a GKE cluster.**
 
 ## Quickstart (GKE)
 
@@ -56,11 +63,22 @@ cd microservices-demo
 
 3. **Create a GKE cluster.**
 
+- GKE standard mode:
+
 ```
 ZONE=us-central1-b
 gcloud container clusters create onlineboutique \
     --project=${PROJECT_ID} --zone=${ZONE} \
     --machine-type=e2-standard-2 --num-nodes=4
+```
+
+- GKE autopilot mode (see [Using GKE Autopilot](./docs/gke-autopilot.md)
+for more details):
+
+```
+REGION=us-central1
+gcloud beta container clusters create onlineboutique \
+    --project=${PROJECT_ID} --region=${REGION}
 ```
 
 4. **Deploy the sample app to the cluster.**
