@@ -55,8 +55,9 @@ cd microservices-demo
 
 3. **Create a GKE cluster.**
 
-- GKE autopilot mode (see [Using GKE Autopilot](./docs/gke-autopilot.md)
-for more details):
+- GKE autopilot mode (see [Autopilot
+overview](https://cloud.google.com/kubernetes-engine/docs/concepts/autopilot-overview)
+to learn more):
 
 ```
 REGION=us-central1
@@ -64,7 +65,7 @@ gcloud container clusters create-auto onlineboutique \
     --project=${PROJECT_ID} --region=${REGION}
 ```
 
-- GKE standard mode:
+- GKE Standard mode:
 
 ```
 ZONE=us-central1-b
