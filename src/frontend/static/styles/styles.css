@@ -680,6 +680,7 @@ select {
 /* Cymbal */
 
 .cymbal-button-primary, .cymbal-button-secondary {
+  display: inline-block;
   border: solid 1px #CE0631;
   padding: 8px 16px;
   outline: none;
@@ -691,4 +692,44 @@ select {
 .cymbal-button-primary {
   background-color: #CE0631;
   color: white;
+}
+
+.cymbal-button-secondary {
+  background: none;
+  color: #CE0631;
+}
+
+.cymbal-form-field {
+  position: relative;
+  margin-top: 24px;
+}
+
+.cymbal-form-field label {
+  width: 100%;
+  margin: 0;
+  padding: 8px 16px 0 16px;
+  font-size: 12px;
+  font-weight: normal;
+  border-radius: 4px 4px 0px 0px;
+  color: #5C6063;
+  background-color: white;
+}
+
+.cymbal-form-field input[type='email'],
+.cymbal-form-field input[type='password'],
+.cymbal-form-field select,
+.cymbal-form-field input[type='text'] {
+  width: 100%;
+  border: none;
+  border-bottom: 1px solid #9AA0A6;
+  padding: 0 16px 8px 16px;
+  outline: none;
+  color: #1E2021;
+}
+
+.cymbal-form-field .cymbal-dropdown-chevron {
+  position: absolute;
+  right: 25px;
+  width: 10px;
+  height: 5px;
 }
