@@ -118,7 +118,7 @@ By creating an Autopilot cluster (with `create-auto`) you only need to give the
 cluster a name. You can't specify any options that configure cluster nodes.
 
 ```text
-gcloud beta container clusters create-auto microservices-demo
+gcloud container clusters create-auto microservices-demo
 ```
 
 Output:
@@ -214,7 +214,7 @@ of programming model. You can always create a new standard mode cluster on GKE
 and configure your own nodes the typical way (perhaps leveraging Terraform), and
 redeploy your workloads to the new cluster.
 
-### Rightsizing clusters is not easy
+### Autopilot makes rightsizing your clusters easy
 
 Choosing the optimal size for your cluster nodes is challenging and requires
 constant monitoring to ensure you're not under- or over-provisioning your
