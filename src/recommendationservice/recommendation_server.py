@@ -115,8 +115,10 @@ if __name__ == "__main__":
     except (KeyError, DefaultCredentialsError):
         logger.info("Tracing disabled.")
         tracer_interceptor = server_interceptor.OpenCensusServerInterceptor()
-
-
+    except Exception as e:
+        logger.warn(f"Exception on Cloud Trace setup: {traceback.format_exc()}, tracing disabled.") 
+        tracer_interceptor = server_interceptor.OpenCensusServerInterceptor()
+   
     try:
       if "DISABLE_DEBUGGER" in os.environ:
         raise KeyError()

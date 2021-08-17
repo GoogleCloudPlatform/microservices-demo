@@ -1,4 +1,4 @@
-# Copyright 2018 Google LLC
+# Copyright 2021 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-apiVersion: skaffold/v1beta2
+apiVersion: skaffold/v2beta1
 kind: Config
 build:
   artifacts:
@@ -36,6 +36,8 @@ build:
     context: src/currencyservice
   - image: cartservice
     context: src/cartservice/src
+    docker:
+      dockerfile: Dockerfile
   - image: frontend
     context: src/frontend
   - image: loadgenerator
@@ -65,3 +67,14 @@ profiles:
       diskSizeGb: 300
       machineType: N1_HIGHCPU_32
       timeout: 4000s
+# "debug" profile replaces the default Dockerfile in cartservice with Dockerfile.debug, 
+# which enables debugging via skaffold.
+#
+# This profile is used by default when running skaffold debug.
+- name: debug
+  activation:
+    - command: debug
+  patches:
+    - op: replace
+      path: /build/artifacts/7/docker/dockerfile
+      value: Dockerfile.debug

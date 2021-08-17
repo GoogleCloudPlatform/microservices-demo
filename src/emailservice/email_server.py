@@ -20,6 +20,7 @@ import os
 import sys
 import time
 import grpc
+import traceback
 from jinja2 import Environment, FileSystemLoader, select_autoescape, TemplateError
 from google.api_core.exceptions import GoogleAPICallError
 from google.auth.exceptions import DefaultCredentialsError
@@ -196,5 +197,8 @@ if __name__ == '__main__':
   except (KeyError, DefaultCredentialsError):
       logger.info("Tracing disabled.")
       tracer_interceptor = server_interceptor.OpenCensusServerInterceptor()
-
+  except Exception as e:
+      logger.warn(f"Exception on Cloud Trace setup: {traceback.format_exc()}, tracing disabled.") 
+      tracer_interceptor = server_interceptor.OpenCensusServerInterceptor()
+  
   start(dummy_mode = True)
