@@ -205,6 +205,7 @@ header .navbar.sub-navbar {
   padding-top: 0;
   padding-bottom: 0;
   box-shadow: 0px 0px 4px rgba(0, 0, 0, 0.25);
+  z-index: 1; /* Need this to see the box-shadow on the home page. */
 }
 
 header .navbar.sub-navbar .logo {
@@ -372,59 +373,98 @@ footer .footer-bottom p:first-child {
   color: white;
 }
 
-/*Home*/
+/* Home */
 
 main {
   flex: 1 0 auto;
+  background-color: #FEFCFD;
 }
 
-main.home {
-  background-color: white;
+.container-fluid {
+  height: calc(100vh - 91px); /* 91px is the height of the top/header bars. */
 }
 
-.h-jumbotron {
-  border-radius: 0;
-  background: url(/static/images/HeroBannerImage2.png) no-repeat top center;
+.container-fluid > .row > .col-4 {
+  height: calc(100vh - 91px);
+}
+
+.container-fluid > .row > .col-12 {
+  height: calc(100vh - 91px);
+  overflow-y: scroll;
+}
+
+.home-mobile-hero-banner {
+  height: 200px;
+  background: url(/static/images/bicycle-on-red-wall-wide.jpg) no-repeat top center;
   background-size: cover;
 }
 
-.h-jumbotron .container img {
-  width: 280px;
-  height: 210px;
+.home-desktop-left-image {
+  background: url(/static/images/bicycle-on-red-wall.jpg) no-repeat top center;
+  background-size: cover;
 }
 
-.h-row {
-  display: flex;
-  justify-content: center;
-  align-items: center;
+.hot-products-row h3 {
+  margin-bottom: 32px;
+  margin-top: 56px;
+  font-size: 36px;
+  font-weight: normal;
 }
 
-.h-row img {
-  width: 156px;
-  height: 100px;
-  margin-bottom: 45px;
+.hot-products-row {
+  padding-bottom: 70px;
+  padding-left: 10%;
+  padding-right: 10%;
 }
 
-.h-grid .bg-light {
-  background-color: white;
+.hot-product-card  {
+  margin-bottom: 52px;
+  padding-left: 16px;
+  padding-right: 16px;
 }
 
-.card-title.h-card-title {
+.hot-product-card img {
   width: 100%;
-  font-size: 22px;
-  letter-spacing: 4.8px;
-  text-align: center;
-  color: #111111;
-  text-transform: uppercase;
-  margin-bottom: 0;
+  height: auto;
+  border-radius: 20% 0 20% 20%;
 }
 
-.card-body.h-card-body {
-  padding: 1.25rem 0.75rem;
-}
-
-.h-card-body .text-muted {
+.hot-product-card-name {
+  margin-top: 8px;
   font-size: 18px;
+}
+
+.hot-product-card-price {
+  font-size: 14px;
+}
+
+.hot-product-card > a:first-child {
+  position: relative;
+  display: block;
+}
+
+.hot-product-card-img-overlay {
+  position: absolute;
+  height: 100%;
+  width: 100%;
+  top: 0;
+  left: 0;
+  border-radius: 20% 0 20% 20%;
+  background-color: transparent;
+}
+
+.hot-product-card:hover .hot-product-card-img-overlay {
+  background-color: rgba(71, 0, 29, 0.2);
+}
+
+/*
+This chunk ensures the left/right padding of the footer is
+similar to that of the hot-products-row.
+*/
+.home-desktop-footer-row {
+  padding-left: 9%;
+  padding-right: 9%;
+  background-color: #570D2E;
 }
 
 .ad {
@@ -540,35 +580,6 @@ main.home {
   margin-top: 16px;
 }
 
-.other-products-img {
-  width: 234px !important;
-  height: 80px !important;
-}
-
-.h-card.card {
-  border: none;
-  border-radius: 0 !important;
-  position: relative;
-  cursor: pointer;
-}
-
-.h-card.card a {
-  position: relative;
-}
-
-.h-card.card a .card-hover {
-  position: absolute;
-  height: 100%;
-  width: 100%;
-  top: 0;
-  left: 0;
-  background-color: transparent;
-}
-
-.h-card.card:hover a .card-hover {
-  background-color: rgba(0, 0, 0, 0.3);
-}
-
 /*platform banner*/
 
 .local,
@@ -628,14 +639,6 @@ main.home {
   display: flex;
   justify-content: center;
   align-items: center;
-}
-
-@media (min-width: 1679px) {
-
-  header .navbar,
-  header .navbar.sub-navbar {
-    padding: 0 16.96428571%;
-  }
 }
 
 .recommendations {
