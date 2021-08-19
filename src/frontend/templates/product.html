@@ -37,11 +37,8 @@
 
           <form method="POST" action="/cart">
             <input type="hidden" name="product_id" value="{{$.product.Item.Id}}" />
-            <div class="input-group">
-              <div class="input-group-prepend">
-                <label class="input-group-text" for="quantity">Quantity</label>
-              </div>
-              <select name="quantity" id="quantity" class="custom-select form-control form-control-lg">
+            <div class="product-quantity-dropdown">
+              <select name="quantity" id="quantity">
                 <option>1</option>
                 <option>2</option>
                 <option>3</option>
@@ -49,6 +46,7 @@
                 <option>5</option>
                 <option>10</option>
               </select>
+              <img src="/static/icons/Hipster_DownArrow.svg" alt="">
             </div>
             <button type="submit" class="cymbal-button-primary">Add to Cart</button>
           </form>

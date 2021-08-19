@@ -550,15 +550,25 @@ similar to that of the hot-products-row.
   border-radius: 0;
 }
 
-.h-product .input-group-text {
-  width: 150px;
-  height: 49px;
-  border: solid 1px #d1d7dc;
-  background-color: #e9ecef;
+.product-quantity-dropdown {
+  position: relative;
+  width: 100px;
 }
 
-.h-product select.form-control-lg.custom-select {
-  height: 49px;
+.product-quantity-dropdown select {
+  width: 100%;
+  height: 45px;
+  border: 1px solid #acacac;
+  padding: 10px 16px;
+  border-radius: 8px;
+}
+
+.product-quantity-dropdown img {
+  position: absolute;
+  right: 25px;
+  top: 20px;
+  width: 10px;
+  height: 5px;
 }
 
 .h-product .btn.btn-info {
