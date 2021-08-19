@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-/* general */
+/* General */
 
 html, body {
   height: 100%;
@@ -27,22 +27,17 @@ body {
   flex-direction: column;
 }
 
-hr {
-  border-top: 1px solid #b4b2bb;
-}
-
-.text-muted {
-  color: #707070;
-}
-
-/*header*/
+/* Header */
 
 header {
   background-color: #853B5C;
   color: white;
 }
 
-/* This allow the sub-navbar (white strip containing logo) to be as wide as the browser window. */
+/*
+This allows the sub-navbar (white strip containing logo)
+to be as wide as the browser window.
+*/
 header > div:nth-child(2).navbar.sub-navbar {
   padding-left: 0;
   padding-right: 0;
@@ -236,7 +231,7 @@ header .navbar.sub-navbar .controls a img {
   margin-bottom: 3px;
 }
 
-/*footer*/
+/* Footer */
 
 footer.py-5 {
   flex-shrink: 0;
@@ -280,99 +275,6 @@ footer .footer-top .footer-social div {
   width: 50%;
 }
 
-.footer-top .social {
-  border-right: 1px solid #b4b2bb;
-}
-
-.footer-top .social h4 {
-  font-size: 24px;
-  color: #111111;
-  font-weight: bold;
-  text-transform: uppercase;
-  margin-right: 37px;
-  line-height: 0.92;
-}
-
-.footer-top .social img {
-  margin-right: 16px;
-  width: 48px;
-  height: 48px;
-}
-
-.footer-top .app {
-  justify-content: flex-end;
-}
-
-.footer-top .app h4 {
-  font-size: 24px;
-  font-weight: bold;
-  color: #111111;
-  line-height: 0.92;
-}
-
-.footer-top .app h4 span {
-  color: #707070;
-  font-style: italic;
-}
-
-.footer-top .app img {
-  width: 136px;
-  height: 41px;
-  margin-left: 42px;
-}
-
-footer .footer-links {
-  padding-top: 37px;
-  justify-content: space-between;
-  align-items: flex-start;
-}
-
-footer .links-group {
-  width: 164px;
-  flex-shrink: 0;
-  list-style: none;
-  color: #707070;
-  padding: 0;
-}
-
-footer .links-group .group-header {
-  font-size: 16px;
-  text-transform: uppercase;
-  color: #111111;
-  font-weight: bold;
-  margin-bottom: 12px;
-}
-
-footer .links-group li {
-  margin-bottom: 10px;
-  cursor: pointer;
-}
-
-footer .links-group li:hover {
-  text-decoration: underline;
-}
-
-footer .footer-bottom {
-  background-color: #111111;
-  font-size: 16px;
-  height: 80px;
-  padding: 23px 0;
-  display: flex;
-  justify-content: center;
-  flex-flow: column;
-}
-
-footer .footer-bottom p {
-  text-align: center;
-  color: #b4b2bb;
-  padding: 0;
-  margin: 0;
-}
-
-footer .footer-bottom p:first-child {
-  color: white;
-}
-
 /* Home */
 
 main {
@@ -380,15 +282,15 @@ main {
   background-color: #FEFCFD;
 }
 
-.container-fluid {
+.home .container-fluid {
   height: calc(100vh - 91px); /* 91px is the height of the top/header bars. */
 }
 
-.container-fluid > .row > .col-4 {
+.home .container-fluid > .row > .col-4 {
   height: calc(100vh - 91px);
 }
 
-.container-fluid > .row > .col-12 {
+.home .container-fluid > .row > .col-12 {
   height: calc(100vh - 91px);
   overflow-y: scroll;
 }
@@ -467,6 +369,8 @@ similar to that of the hot-products-row.
   background-color: #570D2E;
 }
 
+/* Ad */
+
 .ad {
   position: relative;
   background-color: #FF9A9B;
@@ -487,25 +391,7 @@ similar to that of the hot-products-row.
   color: black;
 }
 
-.ad-row {
-  padding-left: 68px;
-  height: 400px;
-  display: flex;
-  align-items: center;
-  background: url(/static/images/AdvertBannerImage.png) no-repeat top center;
-  background-size: cover;
-}
-
-.ad-row-2 {
-  background: url(/static/images/Advert2BannerImage.png) no-repeat top center;
-}
-
-.ad-row img {
-  width: 292px;
-  height: 280px;
-}
-
-/*Product*/
+/* Product */
 
 .h-product {
   margin-top: 56px;
@@ -571,26 +457,11 @@ similar to that of the hot-products-row.
   height: 5px;
 }
 
-.h-product .btn.btn-info {
-  width: 178px;
-  height: 49px;
-  padding-left: 0.75rem;
-  padding-right: 0.75rem;
-  background-color: #4cc8c6;
-  margin-left: 30px;
-}
-
-.h-product .btn.btn-info:hover {
-  color: #fff;
-  background-color: #138496;
-  border-color: #117a8b;
-}
-
 .h-product .cymbal-button-primary {
   margin-top: 16px;
 }
 
-/*platform banner*/
+/* Platform Banner */
 
 .local,
 .aws-platform,
@@ -639,7 +510,6 @@ similar to that of the hot-products-row.
   background-color: #2c0678;
 }
 
-
 .platform-flag {
   position: absolute;
   top: 98px;
@@ -650,6 +520,8 @@ similar to that of the hot-products-row.
   justify-content: center;
   align-items: center;
 }
+
+/* Recommendation */
 
 .recommendations {
   background: #FEFCFD;
@@ -691,6 +563,11 @@ select {
 }
 
 /* Cymbal */
+
+/*
+If we ever decide to create a separate Cymbal CSS library for Cymbal components,
+the rules below could be extracted.
+*/
 
 .cymbal-button-primary, .cymbal-button-secondary {
   display: inline-block;
