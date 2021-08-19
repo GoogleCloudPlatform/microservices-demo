@@ -688,8 +688,12 @@ select {
   padding: 8px 16px;
   outline: none;
   font-size: 14px;
-  border-radius: 4px;
+  border-radius: 22px;
   cursor: pointer;
+}
+
+.cymbal-button-primary:focus, .cymbal-button-secondary:focus {
+  outline: none; /* To override browser (Chrome) default blue outline. */
 }
 
 .cymbal-button-primary {
