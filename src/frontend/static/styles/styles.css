@@ -282,17 +282,17 @@ main {
   background-color: #FEFCFD;
 }
 
-.home .container-fluid {
-  height: calc(100vh - 91px); /* 91px is the height of the top/header bars. */
-}
-
-.home .container-fluid > .row > .col-4 {
-  height: calc(100vh - 91px);
-}
-
-.home .container-fluid > .row > .col-12 {
-  height: calc(100vh - 91px);
-  overflow-y: scroll;
+@media (min-width: 992px) {
+  .home .container-fluid {
+    height: calc(100vh - 91px); /* 91px is the height of the top/header bars. */
+  }
+  .home .container-fluid > .row > .col-4 {
+    height: calc(100vh - 91px);
+  }
+  .home .container-fluid > .row > .col-lg-8 {
+    height: calc(100vh - 91px);
+    overflow-y: scroll;
+  }
 }
 
 .home-mobile-hero-banner {
