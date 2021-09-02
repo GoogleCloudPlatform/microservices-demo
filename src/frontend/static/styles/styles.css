@@ -203,6 +203,11 @@ header .navbar.sub-navbar {
   z-index: 1; /* Need this to see the box-shadow on the home page. */
 }
 
+header .navbar.sub-navbar > .container {
+  padding-left: 26px;
+  padding-right: 26px;
+}
+
 header .navbar.sub-navbar .logo {
   width: 209px;
   height: 40px;
