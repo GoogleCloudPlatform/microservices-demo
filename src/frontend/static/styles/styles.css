@@ -606,6 +606,7 @@ the rules below could be extracted.
   margin: 0;
   padding: 8px 16px 0 16px;
   font-size: 12px;
+  line-height: 1.8em; /* Without this, there might be a 1px gap underneath. */
   font-weight: normal;
   border-radius: 4px 4px 0px 0px;
   color: #5C6063;
