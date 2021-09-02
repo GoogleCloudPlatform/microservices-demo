@@ -279,7 +279,7 @@ footer .footer-top .footer-social div {
 
 main {
   flex: 1 0 auto;
-  background-color: #FEFCFD;
+  background-color: #F9F9F9;
 }
 
 @media (min-width: 992px) {
@@ -397,7 +397,7 @@ similar to that of the hot-products-row.
   margin-top: 56px;
   margin-bottom: 112px;
   max-width: 1200px;
-  background-color: #FEFCFD;
+  background-color: #F9F9F9;
 }
 
 .h-product > .row {
@@ -524,8 +524,8 @@ similar to that of the hot-products-row.
 /* Recommendation */
 
 .recommendations {
-  background: #FEFCFD;
-  margin-bottom: 55px;
+  background: #F9F9F9;
+  padding-bottom: 55px;
 }
 
 .recommendations .container {
