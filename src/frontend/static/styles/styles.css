@@ -134,16 +134,14 @@ header .icon.search-icon {
 header img.currency-icon, header span.currency-icon {
   position: relative;
   left: 35px;
+  top: -1px;
   width: 20px;
   display: inline-block;
   height: 20px;
 }
 
 header span.currency-icon {
-  font-size: 11px;
-  padding-top: 1px;
-  border-radius: 50%;
-  border: solid 2px;
+  font-size: 16px;
   text-align: center;
 }
 
