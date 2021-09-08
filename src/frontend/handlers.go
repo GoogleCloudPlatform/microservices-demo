@@ -19,6 +19,7 @@ import (
 	"fmt"
 	"html/template"
 	"math/rand"
+	"net"
 	"net/http"
 	"os"
 	"strconv"
@@ -47,10 +48,13 @@ type platformDetails struct {
 var (
 	templates = template.Must(template.New("").
 			Funcs(template.FuncMap{
-			"renderMoney": renderMoney,
+			"renderMoney":        renderMoney,
+			"renderCurrencyLogo": renderCurrencyLogo,
 		}).ParseGlob("templates/*.html"))
 	plat platformDetails
 )
+
+var validEnvs = []string{"local", "gcp", "azure", "aws", "onprem", "alibaba"}
 
 func (fe *frontendServer) homeHandler(w http.ResponseWriter, r *http.Request) {
 	_, span := startSpan("home", &r)
@@ -87,8 +91,21 @@ func (fe *frontendServer) homeHandler(w http.ResponseWriter, r *http.Request) {
 		ps[i] = productView{p, price}
 	}
 
-	//get env and render correct platform banner.
+	// Set ENV_PLATFORM (default to local if not set; use env var if set; otherwise detect GCP, which overrides env)_
 	var env = os.Getenv("ENV_PLATFORM")
+	// Only override from env variable if set + valid env
+	if env == "" || stringinSlice(validEnvs, env) == false {
+		fmt.Println("env platform is either empty or invalid")
+		env = "local"
+	}
+	// Autodetect GCP
+	addrs, err := net.LookupHost("metadata.google.internal.")
+	if err == nil && len(addrs) >= 0 {
+		log.Debugf("Detected Google metadata server: %v, setting ENV_PLATFORM to GCP.", addrs)
+		env = "gcp"
+	}
+
+	log.Debugf("ENV_PLATFORM is: %s", env)
 	plat = platformDetails{}
 	plat.setPlatformDetails(strings.ToLower(env))
 
@@ -119,9 +136,15 @@ func (plat *platformDetails) setPlatformDetails(env string) {
 	} else if env == "azure" {
 		plat.provider = "Azure"
 		plat.css = "azure-platform"
-	} else {
+	} else if env == "gcp" {
 		plat.provider = "Google Cloud"
 		plat.css = "gcp-platform"
+	} else if env == "alibaba" {
+		plat.provider = "Alibaba Cloud"
+		plat.css = "alibaba-platform"
+	} else {
+		plat.provider = "local"
+		plat.css = "local"
 	}
 }
 
@@ -500,4 +523,30 @@ func startSpan(name string, r **http.Request) (context.Context, trace.Span) {
 
 func renderMoney(money pb.Money) string {
 	return fmt.Sprintf("%s %d.%02d", money.GetCurrencyCode(), money.GetUnits(), money.GetNanos()/10000000)
+}
+
+func renderCurrencyLogo(currencyCode string) string {
+	logos := map[string]string{
+		"USD": "$",
+		"CAD": "$",
+		"JPY": "¥",
+		"EUR": "€",
+		"TRY": "₺",
+		"GBP": "£",
+	}
+
+	logo := "$" //default
+	if val, ok := logos[currencyCode]; ok {
+		logo = val
+	}
+	return logo
+}
+
+func stringinSlice(slice []string, val string) bool {
+	for _, item := range slice {
+		if item == val {
+			return true
+		}
+	}
+	return false
 }

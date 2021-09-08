@@ -22,7 +22,7 @@ html, body {
 
 body {
   color: #111111;
-  font-family: 'Roboto', sans-serif;
+  font-family: 'DM Sans', sans-serif;
   display: flex;
   flex-direction: column;
 }
@@ -116,6 +116,12 @@ header .h-control input:focus {
   outline: 0;
   border: 0;
   box-shadow: 0;
+}
+
+header .currencyLogo {
+  font-size: 1.3rem; 
+  padding-right: 6px; 
+  vertical-align: center;
 }
 
 header .icon {
@@ -547,9 +553,11 @@ main.home {
 
 /*platform banner*/
 
+.local,
 .aws-platform,
 .onprem-platform,
 .azure-platform,
+.alibaba-platform,
 .gcp-platform {
   position: fixed;
   top: 0;
@@ -581,6 +589,17 @@ main.home {
 .azure-platform .platform-flag {
   background-color: #f35426;
 }
+
+.alibaba-platform,
+.alibaba-platform .platform-flag {
+  background-color: #ffC300;
+}
+
+.local,
+.local .platform-flag {
+  background-color: #2c0678;
+}
+
 
 .platform-flag {
   position: absolute;

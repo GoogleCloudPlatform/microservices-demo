@@ -19,25 +19,28 @@ on:
       - master
 jobs:
   code-tests:
-    runs-on: self-hosted
+    runs-on: [self-hosted]
     steps:
     - uses: actions/checkout@v2
       with:
         ref: ${{github.event.pull_request.head.ref}}
         repository: ${{github.event.pull_request.head.repo.full_name}}
+    - uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: '5.0.201'
     - name: Go Unit Tests
       timeout-minutes: 10
       run: |
-        for SERVICE in "shippingservice"; do
+        for SERVICE in "shippingservice" "productcatalogservice"; do
           echo "testing $SERVICE..."
           pushd src/$SERVICE
           go test
           popd
         done
-    # - name: TODO - run C# Unit Tests
-    #   timeout-minutes: 10
-    #   run: |
-    #     dotnet test src/cartservice/tests/cartservice.tests.csproj
+    - name: C# Unit Tests
+      timeout-minutes: 10
+      run: |
+        dotnet test src/cartservice/
   deployment-tests:
     runs-on: self-hosted
     needs: code-tests

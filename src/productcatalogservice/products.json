@@ -14,8 +14,8 @@
         },
         {
             "id": "66VCHSJNUP",
-            "name": "Vintage Camera Lens",
-            "description": "You won't have a camera to use it and it probably doesn't work anyway.",
+            "name": "Antique Camera",
+            "description": "It probably doesn't work anyway.",
             "picture": "/static/img/products/camera-lens.jpg",
             "priceUsd": {
                 "currencyCode": "USD",

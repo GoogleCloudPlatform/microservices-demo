@@ -18,7 +18,12 @@
     "@opentelemetry/instrumentation-pino": "^0.20.0",
     "@opentelemetry/node": "^0.20.0",
     "@opentelemetry/tracing": "^0.20.0",
-    "pino": "^6.11.3"
+    "async": "3.2.0",
+    "google-protobuf": "3.13.0",
+    "grpc": "1.24.10",
+    "pino": "^6.11.3",
+    "request": "2.88.2",
+    "xml2js": "0.4.23"
   },
   "devDependencies": {
     "semistandard": "^16.0.1"

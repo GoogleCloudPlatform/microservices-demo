@@ -14,8 +14,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-#!/bin/bash -e
-
 # protos are needed in adservice folder for compiling during Docker build.
 
 mkdir -p proto && \

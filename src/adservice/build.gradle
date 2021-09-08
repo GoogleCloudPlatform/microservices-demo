@@ -1,6 +1,6 @@
 plugins {
-    id 'com.google.protobuf' version '0.8.11'
-    id 'com.github.sherter.google-java-format' version '0.8'
+    id 'com.google.protobuf' version '0.8.14'
+    id 'com.github.sherter.google-java-format' version '0.9'
     id 'idea'
     id 'application'
 }
@@ -21,10 +21,10 @@ description = 'Ad Service'
 group = "adservice"
 version = "0.1.0-SNAPSHOT"
 
-def opencensusVersion = "0.25.0"
+def opencensusVersion = "0.27.0"
 def grpcVersion = "1.35.0"
-def jacksonVersion = "2.10.2"
-def protocVersion = "3.11.4"
+def jacksonVersion = "2.12.1"
+def protocVersion = "3.12.3"
 def openTelemetryVersion = "1.1.0"
 def openTelemetryAlphaVersion = "1.1.0-alpha"
 
@@ -42,17 +42,24 @@ dependencies {
     if (speed) {
         implementation fileTree(dir: offlineCompile, include: '*.jar')
     } else {
-        implementation "com.google.api.grpc:proto-google-common-protos:1.17.0",
+        implementation "com.google.api.grpc:proto-google-common-protos:1.18.1",
                 "io.opentelemetry:opentelemetry-api:${openTelemetryVersion}",
                 "io.opentelemetry:opentelemetry-api-metrics:${openTelemetryAlphaVersion}",
                 "io.opentelemetry:opentelemetry-exporter-otlp-metrics:${openTelemetryAlphaVersion}",
                 "io.opentelemetry:opentelemetry-sdk-metrics:${openTelemetryAlphaVersion}",
                 "com.newrelic.agent.java:newrelic-api:5.14.0",
+                "io.opencensus:opencensus-api:${opencensusVersion}",
+                "io.opencensus:opencensus-contrib-grpc-metrics:${opencensusVersion}",
+                "io.opencensus:opencensus-contrib-grpc-util:${opencensusVersion}",
+                "io.opencensus:opencensus-exporter-trace-jaeger:${opencensusVersion}",
+                "io.opencensus:opencensus-exporter-stats-stackdriver:${opencensusVersion}",
+                "io.opencensus:opencensus-exporter-trace-stackdriver:${opencensusVersion}",
+                "io.opencensus:opencensus-exporter-trace-logging:${opencensusVersion}",
                 "io.grpc:grpc-protobuf:${grpcVersion}",
                 "io.grpc:grpc-stub:${grpcVersion}",
                 "io.grpc:grpc-netty:${grpcVersion}",
                 "io.grpc:grpc-services:${grpcVersion}",
-                "org.apache.logging.log4j:log4j-core:2.13.0",
+                "org.apache.logging.log4j:log4j-core:2.13.3",
                 "org.apache.logging.log4j:log4j-slf4j-impl:2.13.2",
                 "javax.annotation:javax.annotation-api:1.3.2",
                 "com.h2database:h2:1.4.200",
@@ -62,8 +69,7 @@ dependencies {
                 "com.fasterxml.jackson.core:jackson-databind:${jacksonVersion}",
                 "io.opencensus:opencensus-contrib-log-correlation-log4j2:${opencensusVersion}",
                 "io.opencensus:opencensus-impl:${opencensusVersion}",
-                "io.netty:netty-tcnative-boringssl-static:2.0.26.Final"
-
+                "io.netty:netty-tcnative-boringssl-static:2.0.34.Final"
     }
 }
 
