@@ -79,7 +79,7 @@ message Product {
     string picture = 4;
     Money price_usd = 5;
 
-    // Categories such as "vintage" or "gardening" that can be used to look up
+    // Categories such as "clothing" or "kitchen" that can be used to look up
     // other related products.
     repeated string categories = 6;
 }
