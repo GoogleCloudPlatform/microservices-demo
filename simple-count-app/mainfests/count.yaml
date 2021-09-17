@@ -1,0 +1,49 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: count-app-ns
+  labels:
+    ns: count-app-ns
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: count-app-deployment
+  namespace: count-app-ns
+spec:
+  selector:
+    matchLabels:
+      app: count-app
+  template:
+    metadata:
+      labels:
+        app: count-app
+    spec:
+      containers:
+      - name: count-app
+        image: madhuakula/k8s-security-count-app
+        resources:
+          limits:
+            memory: "50Mi"
+            cpu: "30m"
+        ports:
+        - containerPort: 3000
+        env:
+        - name: "CACHE_STORE_HOST"
+          value: "cache-db-service.cache-db-ns"
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: count-app-service
+  namespace: count-app-ns
+spec:
+  ports:
+  - protocol: TCP
+    port: 3000
+    targetPort: 3000
+  selector:
+    app: count-app

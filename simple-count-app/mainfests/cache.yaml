@@ -1,0 +1,46 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: cache-db-ns
+  labels:
+    ns: cache-db-ns
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cache-db-deployment
+  namespace: cache-db-ns
+spec:
+  selector:
+    matchLabels:
+      app: cache-db
+  template:
+    metadata:
+      labels:
+        app: cache-db
+    spec:
+      containers:
+      - name: cache-db
+        image: redis:alpine
+        resources:
+          limits:
+            memory: "50Mi"
+            cpu: "30m"
+        ports:
+        - containerPort: 6379
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: cache-db-service
+  namespace: cache-db-ns
+spec:
+  ports:
+  - protocol: TCP
+    port: 6379
+    targetPort: 6379
+  selector:
+    app: cache-db
