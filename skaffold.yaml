@@ -54,8 +54,7 @@ build:
     docker:
       dockerfile: Dockerfile
       buildArgs:
-        NEW_RELIC_API_KEY: '{{.NEW_RELIC_API_KEY}}'
-        OTEL_EXPORTER_OTLP_ENDPOINT: '{{.OTEL_EXPORTER_OTLP_ENDPOINT}}'
+        OTEL_EXPORTER_OTLP_ENDPOINT: 'http://otel-collector:4317'
   - image: frontend
     context: src/frontend
     docker:

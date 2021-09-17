@@ -11,10 +11,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.1.0-beta3.5" />
-    <PackageReference Include="OpenTelemetry.Extensions.Hosting" Version="1.0.0-rc4.15" />
-    <PackageReference Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.0.0-rc4.15" />
-    <PackageReference Include="OpenTelemetry.Instrumentation.StackExchangeRedis" Version="1.0.0-rc4.15" />
+    <PackageReference Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.2.0-alpha3.6" />
+    <PackageReference Include="OpenTelemetry.Extensions.Hosting" Version="1.0.0-rc7.122" />
+    <PackageReference Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.0.0-rc7.122" />
+    <PackageReference Include="OpenTelemetry.Instrumentation.StackExchangeRedis" Version="1.0.0-rc7.122" />
   </ItemGroup>
 
   <ItemGroup>
