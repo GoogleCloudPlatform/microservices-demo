@@ -21,9 +21,10 @@ import time
 from concurrent import futures
 
 import grpc
+import traceback
+from jinja2 import Environment, FileSystemLoader, select_autoescape, TemplateError
 from google.api_core.exceptions import GoogleAPICallError
 from grpc_health.v1 import health_pb2, health_pb2_grpc
-from jinja2 import Environment, FileSystemLoader, TemplateError, select_autoescape
 from opentelemetry import trace
 from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
 from opentelemetry.instrumentation.grpc import GrpcInstrumentorServer
@@ -33,6 +34,9 @@ from opentelemetry.sdk.trace.export import BatchSpanProcessor
 
 import demo_pb2
 import demo_pb2_grpc
+from grpc_health.v1 import health_pb2
+from grpc_health.v1 import health_pb2_grpc
+
 from logger import getJSONLogger
 
 logger = getJSONLogger("emailservice-server")
@@ -49,10 +53,13 @@ template = env.get_template("confirmation.html")
 
 
 class BaseEmailService(demo_pb2_grpc.EmailServiceServicer):
-    def Check(self, request, context):
-        return health_pb2.HealthCheckResponse(
-            status=health_pb2.HealthCheckResponse.SERVING
-        )
+  def Check(self, request, context):
+    return health_pb2.HealthCheckResponse(
+      status=health_pb2.HealthCheckResponse.SERVING)
+  
+  def Watch(self, request, context):
+    return health_pb2.HealthCheckResponse(
+      status=health_pb2.HealthCheckResponse.UNIMPLEMENTED)
 
     def Watch(self, request, context):
         return health_pb2.HealthCheckResponse(

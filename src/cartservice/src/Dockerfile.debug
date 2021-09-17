@@ -1,4 +1,4 @@
-# Copyright 2020 Google LLC
+# Copyright 2021 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,33 +12,25 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-FROM golang:1.15-alpine as builder
-RUN apk add --no-cache ca-certificates git
-RUN apk add build-base
-WORKDIR /src
-
-# restore dependencies
-COPY go.mod go.sum ./
-RUN go mod download
-
+FROM mcr.microsoft.com/dotnet/sdk:5.0 AS build
+WORKDIR /app
 COPY . .
+RUN dotnet restore cartservice.csproj
+RUN dotnet build "./cartservice.csproj" -c Debug -o /out
 
-# Skaffold passes in debug-oriented compiler flags
-ARG SKAFFOLD_GO_GCFLAGS
-RUN go build -gcflags="${SKAFFOLD_GO_GCFLAGS}" -o /checkoutservice .
+FROM build AS publish
+RUN dotnet publish cartservice.csproj -c Debug -o /out
 
-FROM alpine as release
-RUN apk add --no-cache ca-certificates
+# Building final image used in running container
+FROM mcr.microsoft.com/dotnet/aspnet:5.0 AS final
+# Installing procps on the container to enable debugging of .NET Core
+RUN apt-get update \
+    && apt-get install -y unzip procps wget
 RUN GRPC_HEALTH_PROBE_VERSION=v0.3.6 && \
     wget -qO/bin/grpc_health_probe https://github.com/grpc-ecosystem/grpc-health-probe/releases/download/${GRPC_HEALTH_PROBE_VERSION}/grpc_health_probe-linux-amd64 && \
     chmod +x /bin/grpc_health_probe
-WORKDIR /src
-COPY --from=builder /checkoutservice /src/checkoutservice
+WORKDIR /app
+COPY --from=publish /out .
+ENV ASPNETCORE_URLS=http://*:7070
 
-# Definition of this variable is used by 'skaffold debug' to identify a golang binary.
-# Default behavior - a failure prints a stack trace for the current goroutine.
-# See https://golang.org/pkg/runtime/
-ENV GOTRACEBACK=single
-
-EXPOSE 5050
-ENTRYPOINT ["/src/checkoutservice"]
+ENTRYPOINT ["dotnet", "cartservice.dll"]

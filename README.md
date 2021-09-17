@@ -30,10 +30,9 @@ Looking for the old Hipster Shop frontend interface? Use the [manifests](https:/
 | ----------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
 | [![Screenshot of store homepage](./docs/img/online-boutique-frontend-1.png)](./docs/img/online-boutique-frontend-1.png) | [![Screenshot of checkout screen](./docs/img/online-boutique-frontend-2.png)](./docs/img/online-boutique-frontend-2.png) |
 
-
 ## Quickstart (GKE)
 
-[![Open in Cloud Shell](https://gstatic.com/cloudssh/images/open-btn.svg)](https://ssh.cloud.google.com/cloudshell/editor?cloudshell_git_repo=https://github.com/GoogleCloudPlatform/microservices-demo&cloudshell_tutorial=README.md)
+[![Open in Cloud Shell](https://gstatic.com/cloudssh/images/open-btn.svg)](https://ssh.cloud.google.com/cloudshell/editor?cloudshell_git_repo=https://github.com/GoogleCloudPlatform/microservices-demo&cloudshell_workspace=.&cloudshell_tutorial=docs/cloudshell-tutorial.md)
 
 1. **[Create a Google Cloud Platform project](https://cloud.google.com/resource-manager/docs/creating-managing-projects#creating_a_project)** or use an existing project. Set the `PROJECT_ID` environment variable and ensure the Google Kubernetes Engine and Cloud Operations APIs are enabled.
 
@@ -55,6 +54,18 @@ cd microservices-demo
 ```
 
 3. **Create a GKE cluster.**
+
+- GKE autopilot mode (see [Autopilot
+overview](https://cloud.google.com/kubernetes-engine/docs/concepts/autopilot-overview)
+to learn more):
+
+```
+REGION=us-central1
+gcloud container clusters create-auto onlineboutique \
+    --project=${PROJECT_ID} --region=${REGION}
+```
+
+- GKE Standard mode:
 
 ```
 ZONE=us-central1-b
