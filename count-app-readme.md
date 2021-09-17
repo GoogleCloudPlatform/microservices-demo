@@ -12,7 +12,7 @@ We are going to deploy two different services (cache-db and count-app) and diffe
 Run the following command to deploy the **cache-db** service in **cache-db-ns** namespace.
 
 
-|Kubectl apply -f cache.yaml|
+```Kubectl apply -f cache.yaml```
 | :- |
 
 `            `Run the following command to deploy the **count-app** service in **count-app-ns** 
