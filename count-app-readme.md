@@ -16,27 +16,31 @@ Run the following command to deploy the **cache-db** service in **cache-db-ns** 
 Kubectl apply -f cache.yaml
 ```
 
-| :- |
+
 
 `            `Run the following command to deploy the **count-app** service in **count-app-ns** 
 
 `            `namespace.
 
 
-|Kubectl apply -f count.yaml|
-| :- |
+```
+Kubectl apply -f count.yaml
+```
 
 1. ### ` `**Run the following command to expose the count application locally**
 
 
-|kubectl -n count-app-ns port-forward service/count-app-service --address 0.0.0.0 3000:3000 > /dev/null 2>&1 &|
-| :- |
+```
+kubectl -n count-app-ns port-forward service/count-app-service --address 0.0.0.0 3000:3000 > /dev/null 2>&1 &
+```
 
 
 
 - Access the application in the custom-port 3000
 
-Command to access the application: curl localhost:3000
+Command to access the application: ```
+curl localhost:3000
+```
 
 When you access the application, it will show the banner like  **Welcome to Kubernetes** and how many times you have visited the website.
 
@@ -48,15 +52,16 @@ Gaining access to the cache-db service from default namespace
 - Run the hacker-container in default namespace
 
 
-|kubectl run -it hacker-container --image=madhuakula/hacker-container -- sh|
-| :- |
+```
+kubectl run -it hacker-container --image=madhuakula/hacker-container -- sh
+```
 - As we already know the cache-db-service name and namespace cache-db-ns we can use the below command to connect to cache-db
 
 Enter the commands in the hacker-container > # redis-cli -h cache-db-service.cache-db-ns
 
-`                                                                            `Then you will enter into the cache-db
+`Then you will enter into the cache-db
 
-`                                                                            `# KEYS \*
+`# KEYS \*
 
 Here you can see the number of hits in cache-db. Due to no default network security policy in the Kubernetes, we can access the different services in the different namespace from the default namespace from hacker-container.
 
