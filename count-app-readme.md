@@ -35,7 +35,7 @@ Command to access the application:
 curl localhost:3000
 ```
 
-When you access the application, it will show the banner like  **Welcome to Kubernetes** and how many times you have visited the website.
+When you access the application, it will show the banner like  **Welcome to Kubernetes 👋 Thanks for visiting** and how many times you have visited the website.
 
 Gaining access to the cache-db service from default namespace
 
