@@ -10,24 +10,16 @@ We are going to deploy two different services (cache-db and count-app) and diffe
 1. ### **Deploy these two services with  different namespaces** 
 
 Run the following command to deploy the **cache-db** service in **cache-db-ns** namespace.
-
-
 ```
 Kubectl apply -f cache.yaml
 ```
-
-
-
-`            `Run the following command to deploy the **count-app** service in **count-app-ns** 
-
-`            `namespace.
+Run the following command to deploy the **count-app** service in **count-app-ns** namespace.
 
 
 ```
 Kubectl apply -f count.yaml
 ```
-
-1. ### ` `**Run the following command to expose the count application locally**
+***Run the following command to expose the count application locally***
 
 
 ```
