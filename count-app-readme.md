@@ -2,7 +2,7 @@
 
 1. ### **Create a cluster on the Google cloud platform with minimum requirements to run microservices.**
 
-`      `By default, Kubernetes has a flat networking schema, which means any pod/service within the cluster can talk to others without any restrictions. The namespaces within the cluster don’t have any network security restrictions by default, anyone in the namespace can talk to other namespaces.
+By default, Kubernetes has a flat networking schema, which means any pod/service within the cluster can talk to others without any restrictions. The namespaces within the cluster don’t have any network security restrictions by default, anyone in the namespace can talk to other namespaces.
 
 ### **Deploying simple services into Kubernetes**
 
