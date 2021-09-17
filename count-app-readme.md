@@ -38,7 +38,8 @@ kubectl -n count-app-ns port-forward service/count-app-service --address 0.0.0.0
 
 - Access the application in the custom-port 3000
 
-Command to access the application: ```
+Command to access the application:
+```
 curl localhost:3000
 ```
 
