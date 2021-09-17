@@ -75,9 +75,7 @@ build:
     docker:
       buildArgs:
         NEW_RELIC_API_KEY: '{{.NEW_RELIC_API_KEY}}'
-        NEW_RELIC_TRACE_HOST: '{{.NEW_RELIC_TRACE_HOST}}'
-        NEW_RELIC_METRIC_HOST: '{{.NEW_RELIC_METRIC_HOST}}'
-        OTEL_EXPORTER_OTLP_SPAN_ENDPOINT_NO_SCHEME: '{{.OTEL_EXPORTER_OTLP_SPAN_ENDPOINT_NO_SCHEME}}'
+        OTEL_EXPORTER_OTLP_ENDPOINT: '{{.OTEL_EXPORTER_OTLP_ENDPOINT}}'
   - image: otel-system
     context: src/otel-system
     docker:

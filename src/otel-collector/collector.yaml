@@ -15,14 +15,8 @@ processors:
     limit_mib: 1800
     spike_limit_mib: 500
 exporters:
-  newrelic:
-    apikey: $NEW_RELIC_API_KEY
-    traces:
-      host_override: $NEW_RELIC_TRACE_HOST
-    metrics:
-      host_override: $NEW_RELIC_METRIC_HOST
   otlp:
-    endpoint: $OTEL_EXPORTER_OTLP_SPAN_ENDPOINT_NO_SCHEME
+    endpoint: $OTEL_EXPORTER_OTLP_ENDPOINT
     headers:
       api-key: $NEW_RELIC_API_KEY
 service:
@@ -30,7 +24,7 @@ service:
   pipelines:
     metrics:
       receivers: [otlp]
-      exporters: [newrelic]
+      exporters: [otlp]
     traces:
       receivers: [otlp]
       processors: [memory_limiter, batch]
