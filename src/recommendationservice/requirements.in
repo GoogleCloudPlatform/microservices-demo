@@ -4,7 +4,8 @@ opentelemetry-api==0.13b0
 opentelemetry-instrumentation==0.13b0
 opentelemetry-sdk==0.13b0
 opentelemetry-exporter-zipkin==0.13b0
-opentelemetry-instrumentation-grpc>=0.13b0
-opentelemetry-instrumentation-requests>=0.13b0
-opentelemetry-instrumentation-sqlite3>=0.13b0
+opentelemetry-instrumentation-grpc==0.13b0
+opentelemetry-instrumentation-requests==0.13b0
+opentelemetry-instrumentation-sqlite3==0.13b0
 python-json-logger==0.1.11
+urllib3==1.26.6
