@@ -58,7 +58,7 @@ func TestServer(t *testing.T) {
 		t.Errorf("got %s, want %s", got, want)
 	}
 
-	sres, err := client.SearchProducts(ctx, &pb.SearchProductsRequest{Query: "typewriter"})
+	sres, err := client.SearchProducts(ctx, &pb.SearchProductsRequest{Query: "sunglasses"})
 	if err != nil {
 		t.Fatal(err)
 	}
