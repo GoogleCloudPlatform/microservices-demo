@@ -14,102 +14,97 @@
  * limitations under the License.
  */
 
-.cart-bg {
-    background: #f0f0f0;
+.cart-sections {
+    padding-bottom: 120px;
+    padding-top: 56px;
+    background-color: #F9F9F9;
 }
 
-.cart .form-control {
-    border: none;
-    border-radius: 0;
-    -webkit-appearance: none;
-}
-
-.cart h3 {
+.cart-sections h3 {
     font-size: 36px;
+    font-weight: normal;
 }
 
-.cart form label {
-    color: #707070;
+.cart-sections a.cymbal-button-primary:hover {
+    text-decoration: none;
+    color: white;
 }
 
-.empty-btn {
-    margin-right: 20px;
+/* Empty Cart Section */
+
+.empty-cart-section {
+    max-width: 458px;
+    margin: auto;
+    text-align: center;
 }
 
-.btn {
-    border-radius: 0;
-    color: #111111;
-    background: #e9ecef;
-    border: 1px solid #d1d7dc;
+.empty-cart-section a {
+    display: inline-block; /* So margin-top works. */
+    margin-top: 32px;
+}
+
+.empty-cart-section a:hover {
+    color: white;
+    text-decoration: none;
+}
+
+/*  Cart Summary Section */
+
+.cart-summary-empty-cart-button {
+    margin-right: 10px;
+}
+
+.cart-summary-item-row,
+.cart-summary-shipping-row,
+.cart-summary-total-row {
+    padding-bottom: 24px;
+    padding-top: 24px;
+    border-top: solid 1px rgba(154, 160, 166, 0.5);
+}
+
+.cart-summary-item-row img {
+    border-radius: 20% 0 20% 20%;
+}
+
+.cart-summary-item-row-item-id-row {
+    font-size: 12px;
+    color: #5C6063;
+}
+
+.cart-summary-item-row h4 {
     font-size: 18px;
-    padding: 10px 15px;
-    text-transform: uppercase;
-    letter-spacing: 1.8px;
+    font-weight: normal;
 }
 
-.btn-info {
-    border: none;
-    background: #4cc8c6;
+/* Stick item quantity and cost to the bottom (for wider screens). */
+@media (min-width: 768px) {
+    .cart-summary-item-row .row:last-child {
+        position: absolute;
+        bottom: 0px;
+        width: 100%;
+    }
 }
 
-.center-contents > * {
-    margin: auto;
+/* Item cost (price). */
+.cart-summary-item-row .row:last-child strong {
+    font-weight: 500;
 }
 
-.product-item {
-    max-width: 540px;
-    margin: auto;
-    margin-bottom: 30px;
+.cart-summary-total-row {
+    font-size: 28px;
 }
 
-.product-item .image {
-    max-width: 180px;
-    padding: 0;
-}
+/* Cart Checkout Form */
 
-.product-item .image img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
-
-.product-item .text {
-    background: white;
-    padding: 25px 30px;
-}
-
-.product-item .text h4 {
-    font-size: 24px;
-    letter-spacing: 4.8px;
+.cart-checkout-form h3 {
     margin-bottom: 0;
 }
 
-.product-item .text p {
-    margin-bottom: 20px;
+.payment-method-heading {
+    margin-top: 36px;
 }
 
-.product-item .text small {
-    font-size: 18px;
-}
-
-.product-item .text .details {
-    font-size: 18px;
-}
-
-.order-summary {
-    font-size: 24px;
-    color: #000000;
-    margin-bottom: 30px;
-}
-
-.order-summary p {
-    font-size: 18px;
-}
-
-.checkout h3 {
-    font-size: 36px;
-    margin-bottom: 30px;
-}
-.last-row {
-    margin-top: 30px;
+/* "Place Order" button */
+.cart-checkout-form .cymbal-button-primary {
+    margin-top: 36px;
 }
