@@ -19,8 +19,11 @@ configargparse==1.4
 flask==2.0.1
     # via
     #   flask-basicauth
+    #   flask-cors
     #   locust
 flask-basicauth==0.2.0
+    # via locust
+flask-cors==3.0.10
     # via locust
 gevent==21.1.2
     # via
@@ -36,7 +39,7 @@ itsdangerous==2.0.1
     # via flask
 jinja2==3.0.1
     # via flask
-locust==1.4.4
+locust==2.2.3
     # via -r requirements.in
 markupsafe==2.0.1
     # via jinja2
@@ -48,8 +51,12 @@ pyzmq==22.3.0
     # via locust
 requests==2.25.1
     # via locust
+roundrobin==0.0.2
+    # via locust
 six==1.15.0
-    # via geventhttpclient
+    # via
+    #   flask-cors
+    #   geventhttpclient
 urllib3==1.26.4
     # via requests
 werkzeug==2.0.1
