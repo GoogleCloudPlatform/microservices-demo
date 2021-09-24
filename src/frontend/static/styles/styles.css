@@ -204,9 +204,12 @@ header .navbar.sub-navbar > .container {
   padding-right: 26px;
 }
 
-header .navbar.sub-navbar .logo {
-  width: 209px;
+header .top-left-logo {
   height: 40px;
+}
+
+header .top-left-logo-cymbal {
+  height: 30px;
 }
 
 header .navbar.sub-navbar .navbar-brand {
