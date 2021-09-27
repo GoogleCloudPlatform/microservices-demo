@@ -3,7 +3,7 @@
 By default, when you deploy this sample app, the "Online Boutique" branding (logo and wording) will be used.
 But you may want to use Google Cloud's fictitious company, _Cymbal Shops_, instead.
 
-To use "Cymbal Shops" branding, set the `CYMBAL_LOGO` environment variable to `"true"` in the the Kubernetes manifest (`.yaml`) for the `frontend` Deployment.
+To use "Cymbal Shops" branding, set the `CYMBAL_BRANDING` environment variable to `"true"` in the the Kubernetes manifest (`.yaml`) for the `frontend` Deployment.
 
 ```
 apiVersion: apps/v1
@@ -20,6 +20,6 @@ spec:
           ...
           env:
             ...
-          - name: CYMBAL_LOGO
+          - name: CYMBAL_BRANDING
             value: "true"
 ```
