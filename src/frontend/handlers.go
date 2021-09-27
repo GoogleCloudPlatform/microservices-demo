@@ -40,7 +40,8 @@ type platformDetails struct {
 }
 
 var (
-	templates = template.Must(template.New("").
+	isCymbalBrand = "true" == strings.ToLower(os.Getenv("CYMBAL_BRANDING"))
+	templates     = template.Must(template.New("").
 			Funcs(template.FuncMap{
 			"renderMoney":        renderMoney,
 			"renderCurrencyLogo": renderCurrencyLogo,
@@ -102,17 +103,18 @@ func (fe *frontendServer) homeHandler(w http.ResponseWriter, r *http.Request) {
 	plat.setPlatformDetails(strings.ToLower(env))
 
 	if err := templates.ExecuteTemplate(w, "home", map[string]interface{}{
-		"session_id":    sessionID(r),
-		"request_id":    r.Context().Value(ctxKeyRequestID{}),
-		"user_currency": currentCurrency(r),
-		"show_currency": true,
-		"currencies":    currencies,
-		"products":      ps,
-		"cart_size":     cartSize(cart),
-		"banner_color":  os.Getenv("BANNER_COLOR"), // illustrates canary deployments
-		"ad":            fe.chooseAd(r.Context(), []string{}, log),
-		"platform_css":  plat.css,
-		"platform_name": plat.provider,
+		"session_id":      sessionID(r),
+		"request_id":      r.Context().Value(ctxKeyRequestID{}),
+		"user_currency":   currentCurrency(r),
+		"show_currency":   true,
+		"currencies":      currencies,
+		"products":        ps,
+		"cart_size":       cartSize(cart),
+		"banner_color":    os.Getenv("BANNER_COLOR"), // illustrates canary deployments
+		"ad":              fe.chooseAd(r.Context(), []string{}, log),
+		"platform_css":    plat.css,
+		"platform_name":   plat.provider,
+		"is_cymbal_brand": isCymbalBrand,
 	}); err != nil {
 		log.Error(err)
 	}
@@ -196,6 +198,7 @@ func (fe *frontendServer) productHandler(w http.ResponseWriter, r *http.Request)
 		"cart_size":       cartSize(cart),
 		"platform_css":    plat.css,
 		"platform_name":   plat.provider,
+		"is_cymbal_brand": isCymbalBrand,
 	}); err != nil {
 		log.Println(err)
 	}
@@ -306,6 +309,7 @@ func (fe *frontendServer) viewCartHandler(w http.ResponseWriter, r *http.Request
 		"expiration_years": []int{year, year + 1, year + 2, year + 3, year + 4},
 		"platform_css":     plat.css,
 		"platform_name":    plat.provider,
+		"is_cymbal_brand":  isCymbalBrand,
 	}); err != nil {
 		log.Println(err)
 	}
@@ -377,6 +381,7 @@ func (fe *frontendServer) placeOrderHandler(w http.ResponseWriter, r *http.Reque
 		"recommendations": recommendations,
 		"platform_css":    plat.css,
 		"platform_name":   plat.provider,
+		"is_cymbal_brand": isCymbalBrand,
 	}); err != nil {
 		log.Println(err)
 	}
