@@ -31,22 +31,18 @@ import io.grpc.stub.StreamObserver;
 import io.opentelemetry.api.GlobalOpenTelemetry;
 import io.opentelemetry.api.common.AttributeKey;
 import io.opentelemetry.api.common.Attributes;
-import io.opentelemetry.api.metrics.DoubleValueRecorder;
-import io.opentelemetry.api.metrics.GlobalMeterProvider;
-import io.opentelemetry.api.metrics.LongUpDownCounter;
-import io.opentelemetry.api.metrics.Meter;
-import io.opentelemetry.api.metrics.MeterProvider;
-import io.opentelemetry.api.metrics.common.Labels;
+import io.opentelemetry.api.metrics.*;
 import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.api.trace.SpanKind;
 import io.opentelemetry.api.trace.Tracer;
 import io.opentelemetry.context.Scope;
 import io.opentelemetry.exporter.otlp.metrics.OtlpGrpcMetricExporter;
 import io.opentelemetry.sdk.metrics.SdkMeterProvider;
-import io.opentelemetry.sdk.metrics.aggregator.AggregatorFactory;
 import io.opentelemetry.sdk.metrics.common.InstrumentType;
+import io.opentelemetry.sdk.metrics.data.AggregationTemporality;
 import io.opentelemetry.sdk.metrics.export.IntervalMetricReader;
-import io.opentelemetry.sdk.metrics.processor.LabelsProcessorFactory;
+import io.opentelemetry.sdk.metrics.internal.view.AttributesProcessor;
+import io.opentelemetry.sdk.metrics.view.Aggregation;
 import io.opentelemetry.sdk.metrics.view.InstrumentSelector;
 import io.opentelemetry.sdk.metrics.view.View;
 import io.opentelemetry.sdk.resources.Resource;
@@ -135,8 +131,8 @@ public final class AdService {
 
     // note: these two instruments should be updated to match semantic conventions, when they are
     // defined.
-    private final DoubleValueRecorder getAdsRequestLatency;
-    private final DoubleValueRecorder backgroundLatency;
+    private final DoubleHistogram getAdsRequestLatency;
+    private final DoubleHistogram backgroundLatency;
     private final LongUpDownCounter numberOfAdsRequested;
     // used for doing some manual span instrumentation.
     private final Tracer tracer = GlobalOpenTelemetry.getTracer("hipstershop.adservice");
@@ -148,7 +144,7 @@ public final class AdService {
       // see https://github.com/open-telemetry/opentelemetry-specification/pull/657 for discussion
       getAdsRequestLatency =
           meter
-              .doubleValueRecorderBuilder("grpc.server.duration")
+              .histogramBuilder("rpc.server.duration")
               .setDescription("Timings of gRPC requests to a service")
               .setUnit("ms")
               .build();
@@ -156,7 +152,7 @@ public final class AdService {
       // this is a custom "business" metric, outside the scope of semantic conventions
       numberOfAdsRequested =
           meter
-              .longUpDownCounterBuilder("ads_requested")
+              .upDownCounterBuilder("ads_requested")
               .setUnit("one")
               .setDescription("Number of Ads Requested per Request")
               .build();
@@ -164,7 +160,7 @@ public final class AdService {
       // custom timer for the background job.
       backgroundLatency =
           meter
-              .doubleValueRecorderBuilder("background.job.duration")
+              .histogramBuilder("background.job.duration")
               .setDescription("Background job timings")
               .setUnit("ms")
               .build();
@@ -181,30 +177,30 @@ public final class AdService {
     public void getAds(AdRequest req, StreamObserver<AdResponse> responseObserver) {
       // note: these could be pulled into constants to reduce allocations
       String methodName = "hipstershop.AdService/GetAds";
-      Labels nonErrorLabels =
-          Labels.of(
-              "method.name",
+      Attributes nonErrorLabels =
+          Attributes.of(
+              AttributeKey.stringKey("method.name"),
               methodName,
-              "span.name",
+              AttributeKey.stringKey("span.name"),
               methodName,
-              "error",
+              AttributeKey.stringKey("error"),
               "false",
-              "span.kind",
+              AttributeKey.stringKey("span.kind"),
               SpanKind.SERVER.name());
-      Labels errorLabels =
-          Labels.of(
-              "method.name",
+      Attributes errorLabels =
+          Attributes.of(
+              AttributeKey.stringKey("method.name"),
               methodName,
-              "span.name",
+              AttributeKey.stringKey("span.name"),
               methodName,
-              "error",
+              AttributeKey.stringKey("error"),
               "true",
-              "span.kind",
+              AttributeKey.stringKey("span.kind"),
               SpanKind.SERVER.name());
 
       long startTime = System.currentTimeMillis();
-      numberOfAdsRequested.add(req.getContextKeysCount(), Labels.empty());
-      Labels labels = nonErrorLabels;
+      numberOfAdsRequested.add(req.getContextKeysCount(), Attributes.empty());
+      Attributes labels = nonErrorLabels;
       try {
         List<Ad> allAds = chooseAds(req);
         reportAdsToBackgroundService(allAds);
@@ -240,8 +236,8 @@ public final class AdService {
       } finally {
         backgroundLatency.record(
             (System.currentTimeMillis() - startTime),
-            Labels.of(
-                "span.name", spanName, "error", "false", "span.kind", SpanKind.INTERNAL.name()));
+            Attributes.of(
+                AttributeKey.stringKey("span.name"), spanName, AttributeKey.stringKey("error"), "false", AttributeKey.stringKey("span.kind"), SpanKind.INTERNAL.name()));
         span.end();
       }
     }
@@ -363,15 +359,18 @@ public final class AdService {
     String serviceName = "AdService";
     Resource resource = Resource.create(Attributes.of(AttributeKey.stringKey("service.name"), serviceName));
     InstrumentSelector selectorUpDownCounter = InstrumentSelector.builder().setInstrumentType(InstrumentType.UP_DOWN_COUNTER).build();
+    InstrumentSelector selectorHistogram = InstrumentSelector.builder().setInstrumentType(InstrumentType.HISTOGRAM).build();
 
     // TODO: Generate resource from OTEL_RESOURCE_ATTRIBUTES
     SdkMeterProvider meterProvider = SdkMeterProvider.builder()
-            .setResource(resource)
-            .registerView(selectorUpDownCounter, View.builder()
-                    .setLabelsProcessorFactory(LabelsProcessorFactory.noop())
-                    .setAggregatorFactory(AggregatorFactory.sum(false))
+        .setResource(resource)
+        .registerView(selectorUpDownCounter, View.builder()
+            .setAggregation(Aggregation.sum(AggregationTemporality.DELTA))
             .build())
-            .build();
+        .registerView(selectorHistogram, View.builder()
+            .setAggregation(Aggregation.explictBucketHistogram(AggregationTemporality.DELTA))
+            .build())
+        .buildAndRegisterGlobal();
 
     IntervalMetricReader.builder()
         .setExportIntervalMillis(2000)
@@ -380,9 +379,7 @@ public final class AdService {
             .addHeader("api-key", System.getenv("NEW_RELIC_API_KEY"))
             .build())
         .setMetricProducers(List.of(meterProvider))
-        .build();
-
-    GlobalMeterProvider.set(meterProvider);
+        .buildAndStart();
 
     // Start the RPC server. You shouldn't see any output from gRPC before this.
     logger.info("AdService starting.");

@@ -22,11 +22,11 @@ group = "adservice"
 version = "0.1.0-SNAPSHOT"
 
 def opencensusVersion = "0.27.0"
-def grpcVersion = "1.35.0"
+def grpcVersion = "1.39.0"
 def jacksonVersion = "2.12.1"
 def protocVersion = "3.12.3"
-def openTelemetryVersion = "1.1.0"
-def openTelemetryAlphaVersion = "1.1.0-alpha"
+def openTelemetryVersion = "1.6.0"
+def openTelemetryAlphaVersion = "1.6.0-alpha"
 
 tasks.withType(JavaCompile) {
     sourceCompatibility = JavaVersion.VERSION_11
@@ -57,7 +57,7 @@ dependencies {
                 "io.opencensus:opencensus-exporter-trace-logging:${opencensusVersion}",
                 "io.grpc:grpc-protobuf:${grpcVersion}",
                 "io.grpc:grpc-stub:${grpcVersion}",
-                "io.grpc:grpc-netty:${grpcVersion}",
+                "io.grpc:grpc-netty-shaded:${grpcVersion}",
                 "io.grpc:grpc-services:${grpcVersion}",
                 "org.apache.logging.log4j:log4j-core:2.13.3",
                 "org.apache.logging.log4j:log4j-slf4j-impl:2.13.2",
