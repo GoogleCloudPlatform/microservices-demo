@@ -105,6 +105,18 @@
                 "nanos": 300000000
             },
             "categories": ["gardening"]
+        },
+        {
+            "id": "",
+            "name": "",
+            "description": "",
+            "picture": "",
+            "priceUsd": {
+                "currencyCode": "",
+                "units": 0,
+                "nanos": 0
+            },
+            "categories": []
         }
     ]
 }

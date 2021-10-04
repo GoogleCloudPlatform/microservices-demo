@@ -15,12 +15,23 @@
 -->
 
 {{ define "recommendations" }}
+{{ $isAnEmpty := false }}
+{{ range . }}
+  {{ if .Description }}
+  {{else}}
+    {{$isAnEmpty = true }}
+  {{end}}
+{{end}}
+
+
 <section class="recommendations">
     <div class="container">
       <div class="image">
         <img src="/static/icons/Hipster_OtherProducts.svg" alt="Other products you might like" />
       </div>
       <div class="row prods">
+        {{ if $isAnEmpty }}
+        {{ else }}
           {{range . }}
           <div class="col-md-3">
             <div class="h-card card mb-3 box-shadow">
@@ -36,6 +47,7 @@
             </div>
           </div>
           {{ end }}
+        {{end}}
         </div>
     </div>
 </section>
