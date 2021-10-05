@@ -1,6 +1,6 @@
 module github.com/GoogleCloudPlatform/microservices-demo/src/frontend
 
-go 1.15
+go 1.17
 
 require (
 	cloud.google.com/go v0.40.0
@@ -21,4 +21,12 @@ require (
 	google.golang.org/appengine v1.6.1 // indirect
 	google.golang.org/genproto v0.0.0-20190708153700-3bdd9d9f5532 // indirect
 	google.golang.org/grpc v1.22.0
+)
+
+require (
+	github.com/googleapis/gax-go/v2 v2.0.4 // indirect
+	github.com/hashicorp/golang-lru v0.5.1 // indirect
+	golang.org/x/oauth2 v0.0.0-20190604053449-0f29369cfe45 // indirect
+	golang.org/x/sync v0.0.0-20190423024810-112230192c58 // indirect
+	golang.org/x/text v0.3.2 // indirect
 )
