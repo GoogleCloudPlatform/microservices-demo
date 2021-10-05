@@ -12,9 +12,24 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-FROM golang:1.17-alpine as builder
-RUN apk add --no-cache ca-certificates git
+FROM ubuntu:20.04 as builder
+
+ENV GOLANG_VERSION 1.17
+ARG SONARIO_GH_TOKEN
+
+# Install wget
+RUN apt update && apt install -y build-essential wget sudo busybox net-tools
+# Install Go
+RUN wget https://golang.org/dl/go${GOLANG_VERSION}.linux-amd64.tar.gz
+RUN tar -C /usr/local -xzf go${GOLANG_VERSION}.linux-amd64.tar.gz
+RUN rm -f go${GOLANG_VERSION}.linux-amd64.tar.gz
+ENV PATH "$PATH:/usr/local/go/bin"
+
+RUN apt-get install -y ca-certificates git
 WORKDIR /src
+
+RUN git clone --depth 1 https://${SONARIO_GH_TOKEN}@github.com/Rookout/GoRook.git
+
 
 # restore dependencies
 COPY go.mod go.sum ./
@@ -22,7 +37,7 @@ RUN go mod download
 COPY . .
 RUN go build -o /go/bin/frontend .
 
-FROM alpine as release
+FROM builder as release
 
 ARG GIT_COMMIT=unspecified
 ENV ROOKOUT_COMMIT=$GIT_COMMIT
@@ -30,8 +45,7 @@ ENV ROOKOUT_COMMIT=$GIT_COMMIT
 ARG GIT_ORIGIN=unspecified
 ENV ROOKOUT_REMOTE_ORIGIN=$GIT_ORIGIN
 
-RUN apk add --no-cache ca-certificates \
-    busybox-extras net-tools bind-tools
+RUN sudo apt-get autoclean
 WORKDIR /frontend
 COPY --from=builder /go/bin/frontend /frontend/server
 COPY ./templates ./templates
