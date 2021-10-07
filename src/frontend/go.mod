@@ -2,8 +2,8 @@ module github.com/GoogleCloudPlatform/microservices-demo/src/frontend
 
 go 1.17
 
-//replace	github.com/Rookout/GoRook => /src/GoRook
-replace github.com/Rookout/GoRook => /Users/gilad/dev/GoRook
+replace	github.com/Rookout/GoRook => /src/GoRook
+//replace github.com/Rookout/GoRook => /Users/gilad/dev/GoRook
 
 require (
 	cloud.google.com/go v0.40.0

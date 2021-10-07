@@ -34,6 +34,7 @@ import (
 	"google.golang.org/grpc/status"
 
 	pb "github.com/GoogleCloudPlatform/microservices-demo/src/shippingservice/genproto"
+	rook "github.com/Rookout/GoRook"
 	healthpb "google.golang.org/grpc/health/grpc_health_v1"
 )
 
@@ -58,6 +59,11 @@ func init() {
 }
 
 func main() {
+	err := rook.Start(map[string]string{})
+	if err != nil {
+		log.Error(fmt.Sprintf("Got error while setting Rookout: %w", err))
+	}
+
 	if os.Getenv("DISABLE_TRACING") == "" {
 		log.Info("Tracing enabled.")
 		go initTracing()

@@ -95,7 +95,7 @@ func main() {
 	}
 	log.Out = os.Stdout
 
-	err := rook.Start(map[string]string{"language": "golang"})
+	err := rook.Start(map[string]string{})
 	if err != nil {
 		log.Error(fmt.Sprintf("Got error while setting Rookout: %w", err))
 	}
