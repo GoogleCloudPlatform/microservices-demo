@@ -35,6 +35,7 @@ import (
 
 	pb "github.com/GoogleCloudPlatform/microservices-demo/src/checkoutservice/genproto"
 	money "github.com/GoogleCloudPlatform/microservices-demo/src/checkoutservice/money"
+	rook "github.com/Rookout/GoRook"
 	healthpb "google.golang.org/grpc/health/grpc_health_v1"
 )
 
@@ -69,6 +70,11 @@ type checkoutService struct {
 }
 
 func main() {
+	err := rook.Start(map[string]string{})
+	if err != nil {
+		log.Error(fmt.Sprintf("Got error while setting Rookout: %w", err))
+	}
+
 	if os.Getenv("DISABLE_TRACING") == "" {
 		log.Info("Tracing enabled.")
 		go initTracing()

@@ -34,6 +34,7 @@ import (
 	"cloud.google.com/go/profiler"
 	"contrib.go.opencensus.io/exporter/jaeger"
 	"contrib.go.opencensus.io/exporter/stackdriver"
+	rook "github.com/Rookout/GoRook"
 	"github.com/golang/protobuf/jsonpb"
 	"github.com/sirupsen/logrus"
 	//  "go.opencensus.io/exporter/jaeger"
@@ -75,6 +76,11 @@ func init() {
 }
 
 func main() {
+	err := rook.Start(map[string]string{})
+	if err != nil {
+		log.Error(fmt.Sprintf("Got error while setting Rookout: %w", err))
+	}
+
 	if os.Getenv("DISABLE_TRACING") == "" {
 		log.Info("Tracing enabled.")
 		go initTracing()
