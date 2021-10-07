@@ -31,24 +31,26 @@
       </div>
       <div class="row">
         {{ range $.products }}
-        <div class="col-md-4">
-          <div class="h-card card mb-4 box-shadow">
-            <a href="/product/{{.Item.Id}}">
-              <img alt="" style="width: 100%; height: auto;" src="{{.Item.Picture}}">
-              <div class="card-hover"></div>
-            </a>
-            <div class="card-body h-card-body">
-              <h5 class="card-title h-card-title">
-                {{ .Item.Name }}
-              </h5>
-              <div class="d-flex justify-content-center align-items-center">
-                <small class="text-muted">
-                  {{ renderMoney .Price }}
-                </small>
+          {{ if .Item.Description }}
+            <div class="col-md-4">
+              <div class="h-card card mb-4 box-shadow">
+                <a href="/product/{{.Item.Id}}">
+                  <img alt="" style="width: 100%; height: auto;" src="{{.Item.Picture}}">
+                  <div class="card-hover"></div>
+                </a>
+                <div class="card-body h-card-body">
+                  <h5 class="card-title h-card-title">
+                    {{ .Item.Name }}
+                  </h5>
+                  <div class="d-flex justify-content-center align-items-center">
+                    <small class="text-muted">
+                      {{ renderMoney .Price }}
+                    </small>
+                  </div>
+                </div>
               </div>
             </div>
-          </div>
-        </div>
+          {{ end }}
         {{ end }}
       </div>
     </div>
