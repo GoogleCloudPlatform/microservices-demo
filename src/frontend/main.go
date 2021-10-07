@@ -24,7 +24,6 @@ import (
 	"cloud.google.com/go/profiler"
 	"contrib.go.opencensus.io/exporter/jaeger"
 	"contrib.go.opencensus.io/exporter/stackdriver"
-	rook "github.com/Rookout/GoRook"
 	"github.com/gorilla/mux"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
@@ -34,6 +33,7 @@ import (
 	"go.opencensus.io/stats/view"
 	"go.opencensus.io/trace"
 	"google.golang.org/grpc"
+	rook "github.com/Rookout/GoRook"
 )
 
 const (
@@ -95,7 +95,7 @@ func main() {
 	}
 	log.Out = os.Stdout
 
-	err := rook.Start(map[string]string{})
+	err := rook.Start(map[string]string{"app": "frontendservice"})
 	if err != nil {
 		log.Error(fmt.Sprintf("Got error while setting Rookout: %w", err))
 	}
