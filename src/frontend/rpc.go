@@ -110,8 +110,13 @@ func (fe *frontendServer) getRecommendations(ctx context.Context, userID string,
 		}
 		out[i] = p
 	}
+
 	if len(out) > 4 {
 		out = out[:4] // take only first four to fit the UI
+	}
+	outLen := len(out)
+	if outLen < 0 {
+		return nil, errors.Wrapf(err, "error filtering %d", outLen)
 	}
 	return out, err
 }
