@@ -31,7 +31,6 @@ RUN git clone --depth 1 https://${SONARIO_GH_TOKEN}@github.com/Rookout/GoRook.gi
 WORKDIR GoRook
 RUN git checkout 3c63876
 WORKDIR /src
-RUN git checkout 3c63876
 
 # restore dependencies
 COPY go.mod go.sum ./
