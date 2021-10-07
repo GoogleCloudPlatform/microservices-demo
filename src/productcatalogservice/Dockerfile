@@ -30,7 +30,9 @@ RUN apt-get install -y libffi-dev zlib1g-dev libedit-dev libc++-11-dev libc++abi
 WORKDIR /src
 
 RUN git clone --depth 1 https://${SONARIO_GH_TOKEN}@github.com/Rookout/GoRook.git -b hooker-integration-playground2
+WORKDIR GoRook
 RUN git checkout 3c63876
+WORKDIR /src
 
 # restore dependencies
 COPY go.mod go.sum ./

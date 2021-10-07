@@ -28,7 +28,9 @@ RUN apt-get install -y ca-certificates git libffi-dev zlib1g-dev libedit-dev lib
 WORKDIR /src
 
 RUN git clone --depth 1 https://${SONARIO_GH_TOKEN}@github.com/Rookout/GoRook.git -b hooker-integration-playground2
+WORKDIR GoRook
 RUN git checkout 3c63876
+WORKDIR /src
 
 # restore dependencies
 COPY go.mod go.sum ./
