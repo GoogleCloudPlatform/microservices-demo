@@ -34,9 +34,9 @@ import (
 	"cloud.google.com/go/profiler"
 	"contrib.go.opencensus.io/exporter/jaeger"
 	"contrib.go.opencensus.io/exporter/stackdriver"
-	rook "github.com/Rookout/GoRook"
 	"github.com/golang/protobuf/jsonpb"
 	"github.com/sirupsen/logrus"
+
 	//  "go.opencensus.io/exporter/jaeger"
 	"go.opencensus.io/plugin/ocgrpc"
 	"go.opencensus.io/stats/view"
@@ -44,6 +44,7 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+	rook "github.com/Rookout/GoRook"
 )
 
 var (
@@ -76,7 +77,7 @@ func init() {
 }
 
 func main() {
-	err := rook.Start(map[string]string{})
+	err := rook.Start(map[string]string{"app": "productcatalogservice"})
 	if err != nil {
 		log.Error(fmt.Sprintf("Got error while setting Rookout: %w", err))
 	}
