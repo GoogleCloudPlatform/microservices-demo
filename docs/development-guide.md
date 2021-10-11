@@ -6,7 +6,7 @@ This doc explains how to build and run the OnlineBoutique source code locally us
 
 - [Docker for Desktop](https://www.docker.com/products/docker-desktop).
 - kubectl (can be installed via `gcloud components install kubectl`)
-- [skaffold]( https://skaffold.dev/docs/install/), a tool that builds and deploys Docker images in bulk. 
+- [skaffold **1.27+**](https://skaffold.dev/docs/install/) (latest version recommended), a tool that builds and deploys Docker images in bulk. 
 - A Google Cloud Project with Google Container Registry enabled. 
 - Enable GCP APIs for Cloud Monitoring, Tracing, Debugger, Profiler:
 ```
