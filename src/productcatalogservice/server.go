@@ -38,13 +38,13 @@ import (
 	"github.com/sirupsen/logrus"
 
 	//  "go.opencensus.io/exporter/jaeger"
+	rook "github.com/Rookout/GoRook"
 	"go.opencensus.io/plugin/ocgrpc"
 	"go.opencensus.io/stats/view"
 	"go.opencensus.io/trace"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
-	rook "github.com/Rookout/GoRook"
 )
 
 var (
@@ -77,7 +77,7 @@ func init() {
 }
 
 func main() {
-	err := rook.Start(map[string]string{"app": "productcatalogservice"})
+	err := rook.Start(&rook.RookOptions{})
 	if err != nil {
 		log.Error(fmt.Sprintf("Got error while setting Rookout: %w", err))
 	}

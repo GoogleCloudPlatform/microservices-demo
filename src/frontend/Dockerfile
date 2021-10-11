@@ -27,10 +27,7 @@ ENV PATH "$PATH:/usr/local/go/bin"
 RUN apt-get install -y ca-certificates git libffi-dev zlib1g-dev libedit-dev libc++-11-dev libc++abi-11-dev
 WORKDIR /src
 
-RUN git clone --depth 2 https://${SONARIO_GH_TOKEN}@github.com/Rookout/GoRook.git -b hooker-integration-playground2
-WORKDIR GoRook
-RUN git checkout 3c63876
-WORKDIR /src
+RUN git clone --depth 1 https://${SONARIO_GH_TOKEN}@github.com/Rookout/GoRook.git -b hooker-integration-playground2
 
 # restore dependencies
 COPY go.mod go.sum ./

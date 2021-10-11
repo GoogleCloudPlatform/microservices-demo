@@ -35,8 +35,8 @@ import (
 
 	pb "github.com/GoogleCloudPlatform/microservices-demo/src/checkoutservice/genproto"
 	money "github.com/GoogleCloudPlatform/microservices-demo/src/checkoutservice/money"
-	healthpb "google.golang.org/grpc/health/grpc_health_v1"
 	rook "github.com/Rookout/GoRook"
+	healthpb "google.golang.org/grpc/health/grpc_health_v1"
 )
 
 const (
@@ -70,7 +70,7 @@ type checkoutService struct {
 }
 
 func main() {
-	err := rook.Start(map[string]string{"app": "checkoutservice"})
+	err := rook.Start(&rook.RookOptions{})
 	if err != nil {
 		log.Error(fmt.Sprintf("Got error while setting Rookout: %w", err))
 	}

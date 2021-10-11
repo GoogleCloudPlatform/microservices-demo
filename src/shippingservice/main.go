@@ -59,7 +59,7 @@ func init() {
 }
 
 func main() {
-	err := rook.Start(map[string]string{"app": "shippingservice"})
+	err := rook.Start(&rook.RookOptions{})
 	if err != nil {
 		log.Error(fmt.Sprintf("Got error while setting Rookout: %w", err))
 	}
