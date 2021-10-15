@@ -3,32 +3,45 @@
 We'd love to accept your patches and contributions to this project. There are
 just a few small guidelines you need to follow.
 
-## Development Principles (for Googlers)
+### Fork
 
-There are a few principles for developing or refactoring the service
-implementations. Read the [Development Principles
-Guide](./docs/development-principles.md).
+In the interest of keeping this repository clean and manageable, you should
+work from a fork. To create a fork, click the 'Fork' button at the top of the
+repository, then clone the fork locally using `git clone
+git@https://github.com/signalfx/microservices-demo`.
 
-## Contributor License Agreement
+You should also add this repository as an "upstream" repo to your local copy,
+in order to keep it up to date. You can add this as a remote like so:
 
-Contributions to this project must be accompanied by a Contributor License
-Agreement. You (or your employer) retain the copyright to your contribution;
-this simply gives us permission to use and redistribute your contributions as
-part of the project. Head over to <https://cla.developers.google.com/> to see
-your current agreements on file or to sign a new one.
+`git remote add upstream https://github.com/signalfx/microservices-demo.git`
 
-You generally only need to submit a CLA once, so if you've already submitted one
-(even if it was for a different project), you probably don't need to do it
-again.
+Verify that the upstream exists:
 
-## Code reviews
+`git remote -v`
 
-All submissions, including submissions by project members, require review. We
-use GitHub pull requests for this purpose. Consult
-[GitHub Help](https://help.github.com/articles/about-pull-requests/) for more
-information on using pull requests.
+To update your fork, fetch the upstream repo's branches and commits, then merge
+your `main` with upstream's `main`:
 
-## Community Guidelines
+```
+git fetch upstream
+git checkout main
+git merge upstream/main
+```
 
-This project follows [Google's Open Source Community
-Guidelines](https://opensource.google.com/conduct/).
+Remember to always work in a branch of your local copy, as you might otherwise
+have to contend with conflicts in `main`.
+
+
+## Creating a PR
+
+Checkout a new branch, make modifications, build locally, and push the branch to your fork
+to open a new PR:
+
+```shell
+$ git checkout -b feature
+# edit
+$ make
+$ make fmt
+$ git commit
+$ git push fork feature
+```
