@@ -1,0 +1,152 @@
+version: '3'
+
+services:
+  adservice:
+    network_mode: bridge
+    container_name: adservice
+    restart: on-failure
+    image: rookout/microservices-demo-adservice
+    ports:
+      - "9555:9555"
+  cartservice:
+    network_mode: bridge
+    container_name: cartservice
+    restart: on-failure
+    image: rookout/microservices-demo-cartservice
+    ports:
+      - "7070:7070"
+    environment:
+      REDIS_ADDR: "host.docker.internal:6379"
+  checkoutservice:
+    network_mode: bridge
+    container_name: checkoutservice
+    restart: on-failure
+    image: rookout/microservices-demo-checkoutservice
+    ports:
+      - "5050:5050"
+    environment:
+      PORT: "5050"
+      PRODUCT_CATALOG_SERVICE_ADDR: "host.docker.internal:3550"
+      SHIPPING_SERVICE_ADDR: "host.docker.internal:50051"
+      PAYMENT_SERVICE_ADDR: "host.docker.internal:50052"
+      EMAIL_SERVICE_ADDR: "host.docker.internal:8081"
+      CURRENCY_SERVICE_ADDR: "host.docker.internal:7000"
+      CART_SERVICE_ADDR: "host.docker.internal:7070"
+      ROOKOUT_CONTROLLER_HOST: 'wss://staging.control.rookout.com'
+      ROOKOUT_CONTROLLER_PORT: '443'
+      ROOKOUT_TOKEN: '[Your token]'
+      ROOKOUT_TAGS: 'frontend'
+      ROOKOUT_LABELS: 'app:microservices-demo,microservice:checkoutservice,type:saas'
+      ROOKOUT_REMOTE_ORIGIN: "https://github.com/rookout/microservices-demo.git"
+      ROOKOUT_DEBUG: "1" 
+  emailservice:
+    network_mode: bridge
+    container_name: emailservice
+    restart: on-failure
+    image: rookout/microservices-demo-emailservice
+    ports:
+      - "8081:8081"
+    environment:
+      PORT: "8081"
+  frontend:
+    network_mode: bridge
+    container_name: frontend
+    restart: on-failure
+    image: rookout/microservices-demo-frontend 
+    ports:
+      - "8080:8080"
+    environment:
+      PORT: "8080"      
+      PRODUCT_CATALOG_SERVICE_ADDR: "host.docker.internal:3550"
+      CURRENCY_SERVICE_ADDR: "host.docker.internal:7000"
+      CART_SERVICE_ADDR: "host.docker.internal:7070"
+      RECOMMENDATION_SERVICE_ADDR: "host.docker.internal:8082"
+      SHIPPING_SERVICE_ADDR: "host.docker.internal:50051"
+      CHECKOUT_SERVICE_ADDR: "host.docker.internal:5050"
+      AD_SERVICE_ADDR: "host.docker.internal:9555"                  
+      ROOKOUT_CONTROLLER_HOST: 'wss://staging.control.rookout.com'
+      ROOKOUT_CONTROLLER_PORT: '443'
+      ROOKOUT_TOKEN: '[Your token]'
+      ROOKOUT_TAGS: 'frontend'
+      ROOKOUT_LABELS: 'app:microservices-demo,microservice:frontend,type:saas'
+      ROOKOUT_REMOTE_ORIGIN: "https://github.com/rookout/microservices-demo.git"
+      ROOKOUT_DEBUG: "1"  
+  paymentservice:
+      network_mode: bridge
+      container_name: paymentservice
+      restart: on-failure
+      image: rookout/microservices-demo-paymentservice
+      ports:
+        - "50052:50052"
+      environment:
+        PORT: "50052"      
+  productcatalogservice:
+    network_mode: bridge
+    container_name: productcatalogservice
+    restart: on-failure
+    image: rookout/microservices-demo-productcatalogservice 
+    ports:
+      - "3550:3550"
+    environment:
+      PORT: "3550"                  
+      ROOKOUT_CONTROLLER_HOST: 'wss://staging.control.rookout.com'
+      ROOKOUT_CONTROLLER_PORT: '443'
+      ROOKOUT_TOKEN: '[Your token]'      
+      ROOKOUT_REMOTE_ORIGIN: "https://github.com/rookout/microservices-demo.git"
+      ROOKOUT_DEBUG: "1"            
+      ROOKOUT_LABELS: 'app:microservices-demo,microservice:productcatalogservice,type:saas'
+      ROOKOUT_TAGS: 'productcatalogservice'
+  recommendationservice:
+    network_mode: bridge
+    container_name: recommendationservice
+    restart: on-failure
+    image: rookout/microservices-demo-recommendationservice
+    ports:
+      - "8082:8082"
+    environment:
+      PORT: "8082"      
+      PRODUCT_CATALOG_SERVICE_ADDR: "host.docker.internal:3550"
+  redis-cart:
+    network_mode: bridge
+    container_name: redis-cart
+    restart: on-failure
+    image: redis:alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-microservices-volume:/data
+  shippingservice:
+    network_mode: bridge
+    container_name: shippingservice
+    restart: on-failure
+    image: rookout/microservices-demo-shippingservice
+    ports:
+      - "50051:50051"
+    environment:
+      PORT: "50051"      
+      PRODUCT_CATALOG_SERVICE_ADDR: "host.docker.internal:3550"
+      CURRENCY_SERVICE_ADDR: "host.docker.internal:7000"
+      CART_SERVICE_ADDR: "host.docker.internal:7070"
+      RECOMMENDATION_SERVICE_ADDR: "host.docker.internal:8082"
+      SHIPPING_SERVICE_ADDR: "host.docker.internal:50051"
+      CHECKOUT_SERVICE_ADDR: "host.docker.internal:5050"
+      AD_SERVICE_ADDR: "host.docker.internal:9555"                  
+      ROOKOUT_CONTROLLER_HOST: 'wss://staging.control.rookout.com'
+      ROOKOUT_CONTROLLER_PORT: '443'
+      ROOKOUT_TOKEN: '[Your token]'      
+      ROOKOUT_REMOTE_ORIGIN: "https://github.com/rookout/microservices-demo.git"
+      ROOKOUT_DEBUG: "1"
+      ROOKOUT_LABELS: 'app:microservices-demo,microservice:shippingservice,type:saas'
+      ROOKOUT_TAGS: 'shippingservice'
+  currencyservice:
+    network_mode: bridge
+    container_name: currencyservice
+    restart: on-failure
+    image: rookout/microservices-demo-currencyservice
+    ports:
+      - "7000:7000"
+    environment:
+      PORT: "7000"      
+# in mac the volume is located at: docker inspect project_pgdata
+volumes:  
+  redis-microservices-volume:
