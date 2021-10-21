@@ -1,1 +1,4 @@
-locust==2.2.3
+locust==2.4.1
+
+# required for CVE-2021-33503
+urllib3>=1.26.5

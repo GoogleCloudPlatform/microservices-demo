@@ -39,7 +39,7 @@ itsdangerous==2.0.1
     # via flask
 jinja2==3.0.1
     # via flask
-locust==2.2.3
+locust==2.4.1
     # via -r requirements.in
 markupsafe==2.0.1
     # via jinja2
@@ -57,8 +57,12 @@ six==1.15.0
     # via
     #   flask-cors
     #   geventhttpclient
-urllib3==1.26.4
-    # via requests
+typing-extensions==3.10.0.2
+    # via locust
+urllib3==1.26.7
+    # via
+    #   -r requirements.in
+    #   requests
 werkzeug==2.0.1
     # via
     #   flask
