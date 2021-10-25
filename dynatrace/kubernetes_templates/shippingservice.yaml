@@ -15,26 +15,25 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: productcatalogservice
+  name: shippingservice
 spec:
   selector:
     matchLabels:
-      app: productcatalogservice
+      app: shippingservice
   template:
     metadata:
       labels:
-        app: productcatalogservice
+        app: shippingservice
     spec:
       serviceAccountName: default
-      terminationGracePeriodSeconds: 5
       containers:
       - name: server
-        image: productcatalogservice
+        image: ghcr.io/mreider/shippingservice:<TAG>
         ports:
-        - containerPort: 3550
+        - containerPort: 50051
         env:
         - name: PORT
-          value: "3550"
+          value: "50051"
         # - name: DISABLE_STATS
         #   value: "1"
         # - name: DISABLE_TRACING
@@ -44,11 +43,12 @@ spec:
         # - name: JAEGER_SERVICE_ADDR
         #   value: "jaeger-collector:14268"
         readinessProbe:
+          periodSeconds: 5
           exec:
-            command: ["/bin/grpc_health_probe", "-addr=:3550"]
+            command: ["/bin/grpc_health_probe", "-addr=:50051"]
         livenessProbe:
           exec:
-            command: ["/bin/grpc_health_probe", "-addr=:3550"]
+            command: ["/bin/grpc_health_probe", "-addr=:50051"]
         resources:
           requests:
             cpu: 100m
@@ -60,12 +60,12 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: productcatalogservice
+  name: shippingservice
 spec:
   type: ClusterIP
   selector:
-    app: productcatalogservice
+    app: shippingservice
   ports:
   - name: grpc
-    port: 3550
-    targetPort: 3550
+    port: 50051
+    targetPort: 50051

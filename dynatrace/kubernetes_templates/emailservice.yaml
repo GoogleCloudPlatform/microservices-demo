@@ -15,59 +15,55 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: adservice
+  name: emailservice
 spec:
   selector:
     matchLabels:
-      app: adservice
+      app: emailservice
   template:
     metadata:
       labels:
-        app: adservice
+        app: emailservice
     spec:
       serviceAccountName: default
       terminationGracePeriodSeconds: 5
       containers:
       - name: server
-        image: adservice
+        image: ghcr.io/mreider/emailservice:<TAG>
         ports:
-        - containerPort: 9555
+        - containerPort: 8080
         env:
         - name: PORT
-          value: "9555"
-        # - name: DISABLE_STATS
-        #   value: "1"
+          value: "8080"
         # - name: DISABLE_TRACING
         #   value: "1"
-        # - name: JAEGER_SERVICE_ADDR
-        #   value: "jaeger-collector:14268"
+        - name: DISABLE_PROFILER
+          value: "1"
+        readinessProbe:
+          periodSeconds: 5
+          exec:
+            command: ["/bin/grpc_health_probe", "-addr=:8080"]
+        livenessProbe:
+          periodSeconds: 5
+          exec:
+            command: ["/bin/grpc_health_probe", "-addr=:8080"]
         resources:
           requests:
-            cpu: 200m
-            memory: 180Mi
+            cpu: 100m
+            memory: 64Mi
           limits:
-            cpu: 300m
-            memory: 300Mi
-        readinessProbe:
-          initialDelaySeconds: 20
-          periodSeconds: 15
-          exec:
-            command: ["/bin/grpc_health_probe", "-addr=:9555"]
-        livenessProbe:
-          initialDelaySeconds: 20
-          periodSeconds: 15
-          exec:
-            command: ["/bin/grpc_health_probe", "-addr=:9555"]
+            cpu: 200m
+            memory: 128Mi
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: adservice
+  name: emailservice
 spec:
   type: ClusterIP
   selector:
-    app: adservice
+    app: emailservice
   ports:
   - name: grpc
-    port: 9555
-    targetPort: 9555
+    port: 5000
+    targetPort: 8080

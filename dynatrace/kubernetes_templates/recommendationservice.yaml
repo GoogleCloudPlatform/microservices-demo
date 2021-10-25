@@ -15,30 +15,23 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: emailservice
+  name: recommendationservice
 spec:
   selector:
     matchLabels:
-      app: emailservice
+      app: recommendationservice
   template:
     metadata:
       labels:
-        app: emailservice
+        app: recommendationservice
     spec:
       serviceAccountName: default
       terminationGracePeriodSeconds: 5
       containers:
       - name: server
-        image: emailservice
+        image: ghcr.io/mreider/recommendationservice:<TAG>
         ports:
         - containerPort: 8080
-        env:
-        - name: PORT
-          value: "8080"
-        # - name: DISABLE_TRACING
-        #   value: "1"
-        - name: DISABLE_PROFILER
-          value: "1"
         readinessProbe:
           periodSeconds: 5
           exec:
@@ -47,23 +40,34 @@ spec:
           periodSeconds: 5
           exec:
             command: ["/bin/grpc_health_probe", "-addr=:8080"]
+        env:
+        - name: PORT
+          value: "8080"
+        - name: PRODUCT_CATALOG_SERVICE_ADDR
+          value: "productcatalogservice:3550"
+        # - name: DISABLE_TRACING
+        #   value: "1"
+        # - name: DISABLE_PROFILER
+        #   value: "1"
+        # - name: DISABLE_DEBUGGER
+        #   value: "1"
         resources:
           requests:
             cpu: 100m
-            memory: 64Mi
+            memory: 220Mi
           limits:
             cpu: 200m
-            memory: 128Mi
+            memory: 450Mi
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: emailservice
+  name: recommendationservice
 spec:
   type: ClusterIP
   selector:
-    app: emailservice
+    app: recommendationservice
   ports:
   - name: grpc
-    port: 5000
+    port: 8080
     targetPort: 8080

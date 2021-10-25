@@ -15,56 +15,59 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: currencyservice
+  name: adservice
 spec:
   selector:
     matchLabels:
-      app: currencyservice
+      app: adservice
   template:
     metadata:
       labels:
-        app: currencyservice
+        app: adservice
     spec:
       serviceAccountName: default
       terminationGracePeriodSeconds: 5
       containers:
       - name: server
-        image: currencyservice
+        image: docker pull ghcr.io/mreider/adservice:<TAG>
         ports:
-        - name: grpc
-          containerPort: 7000
+        - containerPort: 9555
         env:
         - name: PORT
-          value: "7000"
+          value: "9555"
+        # - name: DISABLE_STATS
+        #   value: "1"
         # - name: DISABLE_TRACING
         #   value: "1"
-        # - name: DISABLE_PROFILER
-        #   value: "1"
-        # - name: DISABLE_DEBUGGER
-        #   value: "1"
-        readinessProbe:
-          exec:
-            command: ["/bin/grpc_health_probe", "-addr=:7000"]
-        livenessProbe:
-          exec:
-            command: ["/bin/grpc_health_probe", "-addr=:7000"]
+        # - name: JAEGER_SERVICE_ADDR
+        #   value: "jaeger-collector:14268"
         resources:
           requests:
-            cpu: 100m
-            memory: 64Mi
-          limits:
             cpu: 200m
-            memory: 128Mi
+            memory: 180Mi
+          limits:
+            cpu: 300m
+            memory: 300Mi
+        readinessProbe:
+          initialDelaySeconds: 20
+          periodSeconds: 15
+          exec:
+            command: ["/bin/grpc_health_probe", "-addr=:9555"]
+        livenessProbe:
+          initialDelaySeconds: 20
+          periodSeconds: 15
+          exec:
+            command: ["/bin/grpc_health_probe", "-addr=:9555"]
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: currencyservice
+  name: adservice
 spec:
   type: ClusterIP
   selector:
-    app: currencyservice
+    app: adservice
   ports:
   - name: grpc
-    port: 7000
-    targetPort: 7000
+    port: 9555
+    targetPort: 9555
