@@ -12,7 +12,7 @@
     <th>Description</th>
 </tr>
 <tr>
-    <td>Kubernetes Deployment Manifests</td>
+    <td>Kubernetes Deploy Manifests</td>
     <td>dynatrace/kubernetes_templates</td>
     <td>
         <ul>
