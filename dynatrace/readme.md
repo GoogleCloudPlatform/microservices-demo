@@ -44,6 +44,16 @@
     </td>
 </tr>
 <tr>
+    <td>Java memory leak</td>
+    <td>src/adservice/AdService.Java</td>
+    <td>
+       <ul>
+            <li>Added memory leak called createFancyAds()</li>
+            <li>Added some sleeping to increase response times</li>
+        </ul>
+      </td>
+</tr>
+<tr>
     <td>Go app Dockerfile changes</td>
     <td>src/(different)/Dockerfile</td>
     <td>
