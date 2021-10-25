@@ -7,6 +7,9 @@ jobs:
     name: Build and Publish images
     runs-on: ubuntu-latest
     steps:
+      - name: "Allow envrionment variables"
+        env:
+          ACTIONS_ALLOW_UNSECURE_COMMANDS: True
       - name: run number with offset
         env:
             NUM: ${{ github.run_number }}
