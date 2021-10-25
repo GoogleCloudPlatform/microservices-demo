@@ -1,0 +1,107 @@
+# Copyright 2021 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+apiVersion: skaffold/v2beta18
+kind: Config
+metadata:
+  name: app
+build:
+  artifacts:
+  # image tags are relative; to specify an image repo (e.g. GCR), you
+  # must provide a "default repo" using one of the methods described
+  # here:
+  # https://skaffold.dev/docs/concepts/#image-repository-handling
+  - image: emailservice
+    context: src/emailservice
+  - image: productcatalogservice
+    context: src/productcatalogservice
+  - image: recommendationservice
+    context: src/recommendationservice
+  - image: shippingservice
+    context: src/shippingservice
+  - image: checkoutservice
+    context: src/checkoutservice
+  - image: paymentservice
+    context: src/paymentservice
+  - image: currencyservice
+    context: src/currencyservice
+  - image: cartservice
+    context: src/cartservice/src
+    docker:
+      dockerfile: Dockerfile
+  - image: frontend
+    context: src/frontend
+  - image: adservice
+    context: src/adservice
+  tagPolicy:
+    gitCommit: {}
+  local:
+    useBuildkit: false
+deploy:
+  kubectl:
+    manifests:
+    - ./kubernetes-manifests/adservice.yaml
+    - ./kubernetes-manifests/cartservice.yaml
+    - ./kubernetes-manifests/checkoutservice.yaml
+    - ./kubernetes-manifests/currencyservice.yaml
+    - ./kubernetes-manifests/emailservice.yaml
+    - ./kubernetes-manifests/frontend.yaml
+    - ./kubernetes-manifests/paymentservice.yaml
+    - ./kubernetes-manifests/productcatalogservice.yaml
+    - ./kubernetes-manifests/recommendationservice.yaml
+    - ./kubernetes-manifests/redis.yaml
+    - ./kubernetes-manifests/shippingservice.yaml
+profiles:
+# "gcb" profile allows building and pushing the images
+# on Google Container Builder without requiring docker
+# installed on the developer machine. However, note that
+# since GCB does not cache the builds, each build will
+# start from scratch and therefore take a long time.
+#
+# This is not used by default. To use it, run:
+#     skaffold run -p gcb
+- name: gcb
+  build:
+    googleCloudBuild:
+      diskSizeGb: 300
+      machineType: N1_HIGHCPU_32
+      timeout: 4000s
+# "debug" profile replaces the default Dockerfile in cartservice with Dockerfile.debug, 
+# which enables debugging via skaffold.
+#
+# This profile is used by default when running skaffold debug.
+- name: debug
+  activation:
+    - command: debug
+  patches:
+    - op: replace
+      path: /build/artifacts/7/docker/dockerfile
+      value: Dockerfile.debug
+
+---
+
+apiVersion: skaffold/v2beta18
+kind: Config
+metadata:
+  name: loadgenerator
+requires:
+  - configs: [app]
+build:
+  artifacts:
+  - image: loadgenerator
+    context: src/loadgenerator
+deploy:
+  kubectl:
+    manifests:
+    - ./kubernetes-manifests/loadgenerator.yaml

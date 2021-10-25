@@ -15,69 +15,51 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: frontend
+  name: checkoutservice
 spec:
   selector:
     matchLabels:
-      app: frontend
+      app: checkoutservice
   template:
     metadata:
       labels:
-        app: frontend
-      annotations:
-        sidecar.istio.io/rewriteAppHTTPProbers: "true"
+        app: checkoutservice
     spec:
       serviceAccountName: default
       containers:
         - name: server
-          image: ghcr.io/mreider/frontend:<TAG>
+          image: checkoutservice
           ports:
-          - containerPort: 8080
+          - containerPort: 5050
           readinessProbe:
-            initialDelaySeconds: 10
-            httpGet:
-              path: "/_healthz"
-              port: 8080
-              httpHeaders:
-              - name: "Cookie"
-                value: "shop_session-id=x-readiness-probe"
+            exec:
+              command: ["/bin/grpc_health_probe", "-addr=:5050"]
           livenessProbe:
-            initialDelaySeconds: 10
-            httpGet:
-              path: "/_healthz"
-              port: 8080
-              httpHeaders:
-              - name: "Cookie"
-                value: "shop_session-id=x-liveness-probe"
+            exec:
+              command: ["/bin/grpc_health_probe", "-addr=:5050"]
           env:
           - name: PORT
-            value: "8080"
+            value: "5050"
           - name: PRODUCT_CATALOG_SERVICE_ADDR
             value: "productcatalogservice:3550"
+          - name: SHIPPING_SERVICE_ADDR
+            value: "shippingservice:50051"
+          - name: PAYMENT_SERVICE_ADDR
+            value: "paymentservice:50051"
+          - name: EMAIL_SERVICE_ADDR
+            value: "emailservice:5000"
           - name: CURRENCY_SERVICE_ADDR
             value: "currencyservice:7000"
           - name: CART_SERVICE_ADDR
             value: "cartservice:7070"
-          - name: RECOMMENDATION_SERVICE_ADDR
-            value: "recommendationservice:8080"
-          - name: SHIPPING_SERVICE_ADDR
-            value: "shippingservice:50051"
-          - name: CHECKOUT_SERVICE_ADDR
-            value: "checkoutservice:5050"
-          - name: AD_SERVICE_ADDR
-            value: "adservice:9555"
-          # # ENV_PLATFORM: One of: local, gcp, aws, azure, onprem, alibaba
-          # # When not set, defaults to "local" unless running in GKE, otherwies auto-sets to gcp 
-          # - name: ENV_PLATFORM 
-          #   value: "aws"
+          # - name: DISABLE_STATS
+          #   value: "1"
           # - name: DISABLE_TRACING
           #   value: "1"
           # - name: DISABLE_PROFILER
           #   value: "1"
           # - name: JAEGER_SERVICE_ADDR
           #   value: "jaeger-collector:14268"
-          # - name: CYMBAL_BRANDING
-          #   value: "true"
           resources:
             requests:
               cpu: 100m
@@ -89,25 +71,12 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: frontend
+  name: checkoutservice
 spec:
   type: ClusterIP
   selector:
-    app: frontend
+    app: checkoutservice
   ports:
-  - name: http
-    port: 80
-    targetPort: 8080
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: frontend-external
-spec:
-  type: LoadBalancer
-  selector:
-    app: frontend
-  ports:
-  - name: http
-    port: 80
-    targetPort: 8080
+  - name: grpc
+    port: 5050
+    targetPort: 5050
