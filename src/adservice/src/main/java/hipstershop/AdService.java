@@ -107,6 +107,7 @@ public final class AdService {
     public void getAds(AdRequest req, StreamObserver<AdResponse> responseObserver) {
       AdService service = AdService.getInstance();
       Span span = tracer.getCurrentSpan();
+      List<String> listOfFancyAds;
       try {
         span.putAttribute("method", AttributeValue.stringAttributeValue("getAds"));
         List<Ad> allAds = new ArrayList<>();
@@ -132,6 +133,9 @@ public final class AdService {
           span.addAnnotation("No Ads found based on context. Constructing random Ads.");
           allAds = service.getRandomAds();
         }
+        //to demo the allocation pattern activate the next two lines:
+        //listOfFancyAds = createFancyAds();
+        //logger.log(Level.WARN,"My List Size: ",listOfFancyAds.size());        
         AdResponse reply = AdResponse.newBuilder().addAllAds(allAds).build();
         responseObserver.onNext(reply);
         responseObserver.onCompleted();
@@ -141,6 +145,23 @@ public final class AdService {
       }
     }
   }
+
+
+  /**
+   * creating a large String  array to increase the memory allocation
+   * @return
+   */
+  private static List<String> createFancyAds(){
+    List<String> listOfAds = new ArrayList<>(100000);
+    for (int i = 0; i < 1000000; i++) {
+        listOfAds.add("My fany ad nr + " + i);
+    }
+    return listOfAds;
+  }
+
+  private static void fillLocalList() {
+
+    }
 
   private static final ImmutableListMultimap<String, Ad> adsMap = createAdsMap();
 
@@ -156,6 +177,7 @@ public final class AdService {
     for (int i = 0; i < MAX_ADS_TO_SERVE; i++) {
       ads.add(Iterables.get(allAds, random.nextInt(allAds.size())));
     }
+    // this.wait(500);
     return ads;
   }
 
@@ -171,48 +193,47 @@ public final class AdService {
   }
 
   private static ImmutableListMultimap<String, Ad> createAdsMap() {
-    Ad hairdryer =
+    Ad camera =
         Ad.newBuilder()
             .setRedirectUrl("/product/2ZYFJ3GM2N")
-            .setText("Hairdryer for sale. 50% off.")
+            .setText("Film camera for sale. 50% off.")
             .build();
-    Ad tankTop =
+    Ad lens =
         Ad.newBuilder()
             .setRedirectUrl("/product/66VCHSJNUP")
-            .setText("Tank top for sale. 20% off.")
+            .setText("Vintage camera lens for sale. 20% off.")
             .build();
-    Ad candleHolder =
+    Ad recordPlayer =
         Ad.newBuilder()
             .setRedirectUrl("/product/0PUK6V6EV0")
-            .setText("Candle holder for sale. 30% off.")
+            .setText("Vintage record player for sale. 30% off.")
             .build();
-    Ad bambooGlassJar =
+    Ad bike =
         Ad.newBuilder()
             .setRedirectUrl("/product/9SIQT8TOJO")
-            .setText("Bamboo glass jar for sale. 10% off.")
+            .setText("City Bike for sale. 10% off.")
             .build();
-    Ad watch =
+    Ad baristaKit =
         Ad.newBuilder()
             .setRedirectUrl("/product/1YMWWN1N4O")
-            .setText("Watch for sale. Buy one, get second kit for free")
+            .setText("Home Barista kitchen kit for sale. Buy one, get second kit for free")
             .build();
-    Ad mug =
+    Ad airPlant =
         Ad.newBuilder()
             .setRedirectUrl("/product/6E92ZMYYFZ")
-            .setText("Mug for sale. Buy two, get third one for free")
+            .setText("Air plants for sale. Buy two, get third one for free")
             .build();
-    Ad loafers =
+    Ad terrarium =
         Ad.newBuilder()
             .setRedirectUrl("/product/L9ECAV7KIM")
-            .setText("Loafers for sale. Buy one, get second one for free")
+            .setText("Terrarium for sale. Buy one, get second one for free")
             .build();
     return ImmutableListMultimap.<String, Ad>builder()
-        .putAll("clothing", tankTop)
-        .putAll("accessories", watch)
-        .putAll("footwear", loafers)
-        .putAll("hair", hairdryer)
-        .putAll("decor", candleHolder)
-        .putAll("kitchen", bambooGlassJar, mug)
+        .putAll("photography", camera, lens)
+        .putAll("vintage", camera, lens, recordPlayer)
+        .put("cycling", bike)
+        .put("cookware", baristaKit)
+        .putAll("gardening", airPlant, terrarium)
         .build();
   }
 
@@ -292,6 +313,20 @@ public final class AdService {
     }
     logger.info("Tracing enabled - Stackdriver exporter initialized.");
   }
+
+  
+  /**added a waiting to increase the response time */
+  private void wait(int ms)
+{
+    try
+    {
+        Thread.sleep(ms);
+    }
+    catch(InterruptedException ex)
+    {
+        Thread.currentThread().interrupt();
+    }
+}
 
 
 

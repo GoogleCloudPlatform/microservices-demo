@@ -18,13 +18,16 @@ using System.Threading.Tasks;
 using Grpc.Core;
 using StackExchange.Redis;
 using Google.Protobuf;
+using System.Diagnostics; //that our span example works
+using OpenTelemetry.Trace;
+using OpenTelemetry;
 
 namespace cartservice.cartstore
 {
     public class RedisCartStore : ICartStore
     {
         private const string CART_FIELD_NAME = "cart";
-        private const int REDIS_RETRY_NUM = 30;
+        private const int REDIS_RETRY_NUM = 5;
 
         private volatile ConnectionMultiplexer redis;
         private volatile bool isRedisConnectionOpened = false;
@@ -34,6 +37,16 @@ namespace cartservice.cartstore
         private readonly string connectionString;
 
         private readonly ConfigurationOptions redisConnectionOptions;
+
+        //Defines the OpenTelemetry resource attribute "service.name" which is mandatory
+            private const string servicename = "RedisCartStore";
+
+        //Defines the OpenTelemetry Instrumentation Library.
+        private const string activitySource = "Dynatrace.dotNet.Redis";
+
+        //Provides the API for starting/stopping activities.
+        private static readonly ActivitySource MyActivitySource = new ActivitySource(activitySource);
+
 
         public RedisCartStore(string redisAddress)
         {
@@ -83,6 +96,12 @@ namespace cartservice.cartstore
                     throw new ApplicationException("Wasn't able to connect to redis");
                 }
 
+                 // instrumenting the redis connection
+                /*using var tracerProvider = Sdk.CreateTracerProviderBuilder()
+                    .AddRedisInstrumentation(redis)
+                    .AddConsoleExporter()
+                    .Build();*/
+
                 Console.WriteLine("Successfully connected to Redis");
                 var cache = redis.GetDatabase();
 
@@ -109,6 +128,7 @@ namespace cartservice.cartstore
 
         public async Task AddItemAsync(string userId, string productId, int quantity)
         {
+            using (var activity = MyActivitySource.StartActivity("AddItemAsync", ActivityKind.Server)){
             Console.WriteLine($"AddItemAsync called with userId={userId}, productId={productId}, quantity={quantity}");
 
             try
@@ -145,7 +165,8 @@ namespace cartservice.cartstore
             }
             catch (Exception ex)
             {
-                throw new RpcException(new Status(StatusCode.FailedPrecondition, $"Can't access cart storage. {ex}"));
+                throw new RpcException(new Grpc.Core.Status(Grpc.Core.StatusCode.FailedPrecondition, $"Can't access cart storage. {ex}"));
+            }
             }
         }
 
@@ -163,7 +184,7 @@ namespace cartservice.cartstore
             }
             catch (Exception ex)
             {
-                throw new RpcException(new Status(StatusCode.FailedPrecondition, $"Can't access cart storage. {ex}"));
+                throw new RpcException(new Grpc.Core.Status(Grpc.Core.StatusCode.FailedPrecondition, $"Can't access cart storage. {ex}"));
             }
         }
 
@@ -190,20 +211,23 @@ namespace cartservice.cartstore
             }
             catch (Exception ex)
             {
-                throw new RpcException(new Status(StatusCode.FailedPrecondition, $"Can't access cart storage. {ex}"));
+                throw new RpcException(new Grpc.Core.Status(Grpc.Core.StatusCode.FailedPrecondition, $"Can't access cart storage. {ex}"));
             }
         }
 
         public bool Ping()
         {
+            //return true; -> bad thing than the health check always return true, even if it fails (but in this case OUR Root cause detection works :-) 
             try
             {
                 var cache = redis.GetDatabase();
                 var res = cache.Ping();
+                Console.WriteLine("Ping return:"+res);
                 return res != TimeSpan.Zero;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                Console.WriteLine("Catched exception: "+ ex);
                 return false;
             }
         }

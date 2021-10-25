@@ -46,12 +46,16 @@ dependencies {
                 "io.grpc:grpc-netty:${grpcVersion}",
                 "io.grpc:grpc-services:${grpcVersion}",
                 "org.apache.logging.log4j:log4j-core:2.13.3"
+                //"io.opentelemetry:opentelemetry-bom:1.7.0"
+                //"io.opentelemetry:opentelemetry-api"
 
         runtimeOnly "com.fasterxml.jackson.core:jackson-core:${jacksonVersion}",
                 "com.fasterxml.jackson.core:jackson-databind:${jacksonVersion}",
                 "io.opencensus:opencensus-contrib-log-correlation-log4j2:${opencensusVersion}",
                 "io.opencensus:opencensus-impl:${opencensusVersion}",
                 "io.netty:netty-tcnative-boringssl-static:2.0.34.Final"
+                //'io.github.michaljonko', name: 'dynatrace-log4j2-appender', version: '0.0.7'
+	            // 'org.apache.logging.log4j', name: 'log4j-slf4j-impl', version: '2.14.0'
     }
 }
 

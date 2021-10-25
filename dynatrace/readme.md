@@ -1,0 +1,46 @@
+
+# Dynatrace's Microservices Demo Fork 🍴 
+  
+## Changes from upstream
+
+### Note to collaborators: please update as you change stuff
+
+<table>
+<tr>
+    <th>Change</th>
+    <th>location</th>
+    <th>Description</th>
+</tr>
+<tr>
+    <td>Kubernetes Manifests</td>
+    <td>dynatrace/manifests</td>
+    <td>
+        <ul>
+            <li>Copied from forked /kubernetes-manifests</li>
+            <li>Requests values are lower to fit things into small clusters</li>
+            <li>MAX_LEAK added to cart service to control fibonacci leak</li>
+            <li>Added checkoutservice2.yaml to show versioning features</li>
+        </ul>
+    </td>
+</tr>
+<tr>
+    <td>Github workflows</td>
+    <td>.github/workflows</td>
+    <td>
+        <ul>
+            <li>Moved forked workflows to .github/upstream_flows_forked</li>
+            <li>Added image-builder.yaml to build new container images on git push</li>
+        </ul>
+    </td>
+</tr>
+<tr>
+    <td>Fibonacci CPU leak</td>
+    <td></td>
+    <td>
+        <ul>
+            <li>Moved forked workflows to .github/upstream_flows_forked</li>
+            <li>Added image-builder.yaml to build new container images on git push</li>
+        </ul>
+    </td>
+</tr>
+</table>

@@ -25,7 +25,7 @@ COPY . .
 
 # Skaffold passes in debug-oriented compiler flags
 ARG SKAFFOLD_GO_GCFLAGS
-RUN go build -gcflags="${SKAFFOLD_GO_GCFLAGS}" -o /checkoutservice .
+RUN go build -gcflags="${SKAFFOLD_GO_GCFLAGS}" -ldflags="-linkmode external" -o /checkoutservice .
 
 FROM alpine as release
 RUN apk add --no-cache ca-certificates

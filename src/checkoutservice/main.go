@@ -19,6 +19,7 @@ import (
 	"fmt"
 	"net"
 	"os"
+	"strconv"
 	"time"
 
 	"cloud.google.com/go/profiler"
@@ -263,8 +264,31 @@ func (cs *checkoutService) PlaceOrder(ctx context.Context, req *pb.PlaceOrderReq
 	} else {
 		log.Infof("order confirmation email sent to %q", req.Email)
 	}
+	//fibunaci calculation to make it slower - is too long
+	calcFibunacci()
 	resp := &pb.PlaceOrderResponse{Order: orderResult}
 	return resp, nil
+}
+
+func calcFibunacci() {
+	f := fibonacci()
+	strLeak := os.Getenv("LEAK_MAX")
+	intLeak, err := strconv.Atoi(strLeak)
+	if err == nil {
+		fmt.Printf("error")
+	}
+	for i := 0; i < intLeak; i++ {
+		fmt.Println(f())
+	}
+}
+
+//Fibunaci calculation to have some cpu usage
+func fibonacci() func() int {
+	x, y := 0, 1
+	return func() int {
+		x, y = y, x+y
+		return x
+	}
 }
 
 type orderPrep struct {

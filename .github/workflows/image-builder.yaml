@@ -1,0 +1,121 @@
+on: 
+  push:
+     branches:
+       - master
+jobs:
+  build-and-publish:
+    name: Build and Publish images
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2.3.2
+        name: Check out code
+      - uses: mr-smithers-excellent/docker-build-push@v5
+        name: build and publish email service
+        with:
+          image: emailservice
+          tags: ${{ github.run_number }}, latest
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GH_TOKEN }} 
+          directory: src/emailservice
+          dockerfile: src/emailservice/Dockerfile
+      - uses: mr-smithers-excellent/docker-build-push@v5
+        name: build and publish productcatalogservice service
+        with:
+          image: productcatalogservice
+          tags: ${{ github.run_number }}, latest
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GH_TOKEN }} 
+          directory: src/productcatalogservice
+          dockerfile: src/productcatalogservice/Dockerfile
+      - uses: mr-smithers-excellent/docker-build-push@v5
+        name: build and publish recommendationservice service
+        with:
+          image: recommendationservice
+          tags: ${{ github.run_number }}, latest
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GH_TOKEN }} 
+          directory: src/recommendationservice
+          dockerfile: src/recommendationservice/Dockerfile
+      - uses: mr-smithers-excellent/docker-build-push@v5
+        name: build and publish shippingservice service
+        with:
+          image: shippingservice
+          tags: ${{ github.run_number }}, latest
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GH_TOKEN }} 
+          directory: src/shippingservice
+          dockerfile: src/shippingservice/Dockerfile
+      - uses: mr-smithers-excellent/docker-build-push@v5
+        name: build and publish checkoutservice service
+        with:
+          image: checkoutservice
+          tags: ${{ github.run_number }}, latest
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GH_TOKEN }} 
+          directory: src/checkoutservice
+          dockerfile: src/checkoutservice/Dockerfile
+      - uses: mr-smithers-excellent/docker-build-push@v5
+        name: build and publish paymentservice service
+        with:
+          image: paymentservice
+          tags: ${{ github.run_number }}, latest
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GH_TOKEN }} 
+          directory: src/paymentservice
+          dockerfile: src/paymentservice/Dockerfile
+      - uses: mr-smithers-excellent/docker-build-push@v5
+        name: build and publish currencyservice service
+        with:
+          image: currencyservice
+          tags: ${{ github.run_number }}, latest
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GH_TOKEN }} 
+          directory: src/currencyservice
+          dockerfile: src/currencyservice/Dockerfile
+      - uses: mr-smithers-excellent/docker-build-push@v5
+        name: build and publish cartservice service
+        with:
+          image: cartservice
+          tags: ${{ github.run_number }}, latest
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GH_TOKEN }} 
+          directory: src/cartservice/src
+          dockerfile: src/cartservice/src/Dockerfile
+      - uses: mr-smithers-excellent/docker-build-push@v5
+        name: build and publish frontend service
+        with:
+          image: frontend
+          tags: ${{ github.run_number }}, latest
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GH_TOKEN }} 
+          directory: src/frontend
+          dockerfile: src/frontend/Dockerfile
+      - uses: mr-smithers-excellent/docker-build-push@v5
+        name: build and publish loadgenerator service
+        with:
+          image: loadgenerator
+          tags: ${{ github.run_number }}, latest
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GH_TOKEN }} 
+          directory: src/loadgenerator
+          dockerfile: src/loadgenerator/Dockerfile
+      - uses: mr-smithers-excellent/docker-build-push@v5
+        name: build and publish adservice service
+        with:
+          image: adservice
+          tags: ${{ github.run_number }}, latest
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GH_TOKEN }} 
+          directory: src/adservice
+          dockerfile: src/adservice/Dockerfile
