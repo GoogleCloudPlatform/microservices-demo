@@ -15,35 +15,27 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: shippingservice
+  name: paymentservice
 spec:
   selector:
     matchLabels:
-      app: shippingservice
+      app: paymentservice
   template:
     metadata:
       labels:
-        app: shippingservice
+        app: paymentservice
     spec:
       serviceAccountName: default
+      terminationGracePeriodSeconds: 5
       containers:
       - name: server
-        image: shippingservice
+        image: ghcr.io/mreider/paymentservice:<TAG>
         ports:
         - containerPort: 50051
         env:
         - name: PORT
           value: "50051"
-        # - name: DISABLE_STATS
-        #   value: "1"
-        # - name: DISABLE_TRACING
-        #   value: "1"
-        # - name: DISABLE_PROFILER
-        #   value: "1"
-        # - name: JAEGER_SERVICE_ADDR
-        #   value: "jaeger-collector:14268"
         readinessProbe:
-          periodSeconds: 5
           exec:
             command: ["/bin/grpc_health_probe", "-addr=:50051"]
         livenessProbe:
@@ -60,11 +52,11 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: shippingservice
+  name: paymentservice
 spec:
   type: ClusterIP
   selector:
-    app: shippingservice
+    app: paymentservice
   ports:
   - name: grpc
     port: 50051
