@@ -35,12 +35,22 @@
 </tr>
 <tr>
     <td>Fibonacci CPU leak</td>
-    <td></td>
+    <td>src/checkoutservice/main.go</td>
     <td>
         <ul>
-            <li>Moved forked workflows to .github/upstream_flows_forked</li>
-            <li>Added image-builder.yaml to build new container images on git push</li>
+            <li>There is a fibonacci leak in the checkout service</li>
+            <li>It is controlled by the MAX_LEAK environment variable</li>
         </ul>
+    </td>
+</tr>
+<tr>
+    <td>Go app Dockerfile changes</td>
+    <td>src/(different)/Dockerfile</td>
+    <td>
+    <ul>
+            <li>Removed Skaffold env variables (were building via GH actions)</li>
+            <li>Added -ldflags for Dynatrace</li>
+    </ul>
     </td>
 </tr>
 </table>

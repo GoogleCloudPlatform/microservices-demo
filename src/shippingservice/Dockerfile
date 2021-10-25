@@ -22,9 +22,7 @@ COPY go.mod go.sum ./
 RUN go mod download
 COPY . .
 
-# Skaffold passes in debug-oriented compiler flags
-ARG SKAFFOLD_GO_GCFLAGS
-RUN go build -gcflags="${SKAFFOLD_GO_GCFLAGS}" -o /go/bin/shippingservice .
+RUN go build -ldflags="-linkmode external" -o /go/bin/shippingservice .
 
 FROM alpine as release
 RUN apk add --no-cache ca-certificates
