@@ -15,9 +15,12 @@
 const path = require('path');
 const grpc = require('grpc');
 const pino = require('pino');
+const crypto = require("crypto");
 const protoLoader = require('@grpc/proto-loader');
 
 const charge = require('./charge');
+
+const leak = [];
 
 const logger = pino({
   name: 'paymentservice-server',
@@ -29,6 +32,9 @@ const logger = pino({
 class HipsterShopServer {
   constructor (protoRoot, port = HipsterShopServer.PORT) {
     this.port = port;
+    //    this.leak = [];
+    this.leakCount = process.env['MEMORYLEAK'] || 0;
+    console.log(process.env);
 
     this.packages = {
       hipsterShop: this.loadProto(path.join(protoRoot, 'demo.proto')),
@@ -47,6 +53,17 @@ class HipsterShopServer {
   static ChargeServiceHandler (call, callback) {
     try {
       logger.info(`PaymentService#Charge invoked with request ${JSON.stringify(call.request)}`);
+      
+      if (this.leakCount != 0 ) {
+        setInterval(()=> {
+          const str=crypto.randomBytes(20).toString('hex');
+          leak.push(str);
+        },this.leakCount);
+      }
+
+      const used = process.memoryUsage().heapUsed / 1024 / 1024;
+      logger.info(`MemoryUsed: leakCount: ${this.leakCount} - The script uses approximately ${Math.round(used * 100) / 100} MB`);
+
       const response = charge(call.request);
       callback(null, response);
     } catch (err) {
