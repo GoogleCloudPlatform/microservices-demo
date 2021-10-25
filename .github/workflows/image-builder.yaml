@@ -5,7 +5,7 @@ on:
 jobs:
   build-and-publish:
     name: Build and push images, bump versions in yaml files
-    if: "!contains(github.event.commits[0].message, 'Bump version')"
+    if: "contains(github.event.commits[0].message, 'build images')"
     runs-on: ubuntu-latest
     steps:
       - name: run number with offset
