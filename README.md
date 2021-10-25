@@ -1,3 +1,11 @@
+# Dynatrace forked version of Microservice demo
+
+Visit the Dynatrace [readme](dynatrace/readme.md) for help
+
+Original readme below
+
+<hr>
+
 <p align="center">
 <img src="src/frontend/static/icons/Hipster_HeroLogoCyan.svg" width="300" alt="Online Boutique" />
 </p>
