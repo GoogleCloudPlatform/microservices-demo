@@ -18,9 +18,9 @@ You will need the [gcloud CLI](https://cloud.google.com/sdk/gcloud) and [Terrafo
 
 The Terraform template uses:
 
-* [Terraform 1.0.0](https://www.hashicorp.com/blog/announcing-hashicorp-terraform-1-0-general-availability)
-* [Google Cloud Platform Provider 3.72.0](https://registry.terraform.io/providers/hashicorp/google/latest/docs)
-* [Gavin Bunney's kubectl Provider 1.11.1](https://registry.terraform.io/providers/gavinbunney/kubectl/latest/docs)
+* [Terraform](https://www.hashicorp.com/blog/announcing-hashicorp-terraform-1-0-general-availability) 1.0.0
+* [Google Cloud Platform Provider](https://registry.terraform.io/providers/hashicorp/google/latest/docs) 4.0.0
+* [Gavin Bunney's kubectl Provider](https://registry.terraform.io/providers/gavinbunney/kubectl/latest/docs) 1.13.0
 
 ## Terraform Variables
 
@@ -61,7 +61,7 @@ Initialize Terraform,
 terraform init
 ```
 
-Make sure you uodate `terraform.tfvars` with the values for your `project_id` and preferred `region`. You can also override any of the default values for the variables described above.
+Make sure you update `terraform.tfvars` with the values for your `project_id` and preferred `region`. You can also override any of the default values for the variables described above.
 
 Plan the deployment,
 

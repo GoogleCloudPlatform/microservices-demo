@@ -13,9 +13,17 @@
 # limitations under the License.
 
 # Cluster service account
-resource "google_service_account" "default" {
+resource "google_service_account" "gke_account" {
   account_id   = "${var.app_name}-gke"
   display_name = "${var.app_name} GKE Service Account"
+}
+
+resource "google_project_iam_member" "gke_account_permissions" {
+  for_each = toset(["roles/logging.logWriter", "roles/monitoring.metricWriter", "roles/monitoring.viewer"])
+
+  project = var.project_id
+  role    = each.value
+  member  = format("serviceAccount:%s", google_service_account.gke_account.email)
 }
 
 # GKE cluster
@@ -51,7 +59,7 @@ resource "google_container_cluster" "primary" {
 
   # Enable workload identity
   workload_identity_config {
-    identity_namespace = "${var.project_id}.svc.id.goog"
+    workload_pool = "${var.project_id}.svc.id.goog"
   }
 }
 
@@ -63,7 +71,7 @@ resource "google_container_node_pool" "primary_nodes" {
   node_count = var.min_node_count
 
   node_config {
-    service_account = google_service_account.default.email
+    service_account = google_service_account.gke_account.email
 
     oauth_scopes = [
       "https://www.googleapis.com/auth/logging.write",
@@ -88,7 +96,7 @@ resource "google_container_node_pool" "primary_nodes" {
     }
 
     workload_metadata_config {
-      node_metadata = "GKE_METADATA_SERVER"
+      mode = "GKE_METADATA"
     }
   }
 

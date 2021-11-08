@@ -14,7 +14,8 @@
 
 # Get deployment manifests
 data "kubectl_path_documents" "manifests" {
-    pattern = "${path.module}/../release/kubernetes-manifests.yaml"
+    pattern          = "${path.module}/../release/kubernetes-manifests.yaml"
+    disable_template = true
 }
 
 # Retrieve an access token as the Terraform runner
