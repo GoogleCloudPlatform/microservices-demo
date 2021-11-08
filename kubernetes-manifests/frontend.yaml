@@ -76,6 +76,8 @@ spec:
           #   value: "1"
           # - name: JAEGER_SERVICE_ADDR
           #   value: "jaeger-collector:14268"
+          # - name: CYMBAL_BRANDING
+          #   value: "true"
           resources:
             requests:
               cpu: 100m

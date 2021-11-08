@@ -12,8 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-apiVersion: skaffold/v2beta1
+apiVersion: skaffold/v2beta18
 kind: Config
+metadata:
+  name: app
 build:
   artifacts:
   # image tags are relative; to specify an image repo (e.g. GCR), you
@@ -40,8 +42,6 @@ build:
       dockerfile: Dockerfile
   - image: frontend
     context: src/frontend
-  - image: loadgenerator
-    context: src/loadgenerator
   - image: adservice
     context: src/adservice
   tagPolicy:
@@ -51,7 +51,17 @@ build:
 deploy:
   kubectl:
     manifests:
-    - ./kubernetes-manifests/**.yaml
+    - ./kubernetes-manifests/adservice.yaml
+    - ./kubernetes-manifests/cartservice.yaml
+    - ./kubernetes-manifests/checkoutservice.yaml
+    - ./kubernetes-manifests/currencyservice.yaml
+    - ./kubernetes-manifests/emailservice.yaml
+    - ./kubernetes-manifests/frontend.yaml
+    - ./kubernetes-manifests/paymentservice.yaml
+    - ./kubernetes-manifests/productcatalogservice.yaml
+    - ./kubernetes-manifests/recommendationservice.yaml
+    - ./kubernetes-manifests/redis.yaml
+    - ./kubernetes-manifests/shippingservice.yaml
 profiles:
 # "gcb" profile allows building and pushing the images
 # on Google Container Builder without requiring docker
@@ -78,3 +88,20 @@ profiles:
     - op: replace
       path: /build/artifacts/7/docker/dockerfile
       value: Dockerfile.debug
+
+---
+
+apiVersion: skaffold/v2beta18
+kind: Config
+metadata:
+  name: loadgenerator
+requires:
+  - configs: [app]
+build:
+  artifacts:
+  - image: loadgenerator
+    context: src/loadgenerator
+deploy:
+  kubectl:
+    manifests:
+    - ./kubernetes-manifests/loadgenerator.yaml

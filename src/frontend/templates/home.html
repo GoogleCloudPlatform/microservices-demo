@@ -23,43 +23,56 @@
   </span>
 </div>
 <main role="main" class="home">
-  <section class="jumbotron text-center mb-0 h-jumbotron">
-    <div class="container">
-      <img src="/static/icons/Hipster_HeroLogo.svg" alt="Online Boutique" class="icon search-icon" />
-    </div>
-  </section>
 
-  <div class="h-grid py-5 bg-light">
-    <div class="container">
-      <div class="row h-row">
-        <img src="/static/icons/Hipster_HotProducts.svg" alt="Hot products" class="icon search-icon" />
-      </div>
-      <div class="row">
-        {{ range $.products }}
-        <div class="col-md-4">
-          <div class="h-card card mb-4 box-shadow">
+  <!-- The image at the top of the home page, displayed on smaller screens. -->
+  <div class="home-mobile-hero-banner d-lg-none"></div>
+
+  <div class="container-fluid">
+    <div class="row">
+
+      <!-- The image on the left of the home page, displayed on larger screens. -->
+      <div class="col-4 d-none d-lg-block home-desktop-left-image"></div>
+
+      <div class="col-12 col-lg-8">
+
+        <div class="row hot-products-row px-xl-6">
+
+          <div class="col-12">
+            <h3>Hot Products</h3>
+          </div>
+
+          {{ range $.products }}
+          <div class="col-md-4 hot-product-card">
             <a href="/product/{{.Item.Id}}">
-              <img alt="" style="width: 100%; height: auto;" src="{{.Item.Picture}}">
-              <div class="card-hover"></div>
+              <img alt="" src="{{.Item.Picture}}">
+              <div class="hot-product-card-img-overlay"></div>
             </a>
-            <div class="card-body h-card-body">
-              <h5 class="card-title h-card-title">
-                {{ .Item.Name }}
-              </h5>
-              <div class="d-flex justify-content-center align-items-center">
-                <small class="text-muted">
-                  {{ renderMoney .Price }}
-                </small>
-              </div>
+            <div>
+              <div class="hot-product-card-name">{{ .Item.Name }}</div>
+              <div class="hot-product-card-price">{{ renderMoney .Price }}</div>
             </div>
           </div>
+          {{ end }}
+
         </div>
-        {{ end }}
+
+        <!-- Footer for larger screens. -->
+        <div class="row d-none d-lg-block home-desktop-footer-row">
+          <div class="col-12 p-0">
+            {{ template "footer" . }}
+          </div>
+        </div>
+
       </div>
+
     </div>
   </div>
+
 </main>
 
-{{ template "footer" . }}
+<!-- Footer for smaller screens. -->
+<div class="d-lg-none">
+  {{ template "footer" . }}
+</div>
 
 {{ end }}

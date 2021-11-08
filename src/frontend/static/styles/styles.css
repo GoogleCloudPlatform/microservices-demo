@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-/* general */
+/* General */
 
 html, body {
   height: 100%;
@@ -27,54 +27,57 @@ body {
   flex-direction: column;
 }
 
-hr {
-  border-top: 1px solid #b4b2bb;
+/* Header */
+
+header {
+  background-color: #853B5C;
+  color: white;
 }
 
-.text-muted {
-  color: #707070;
+/*
+This allows the sub-navbar (white strip containing logo)
+to be as wide as the browser window.
+*/
+header > div:nth-child(2).navbar.sub-navbar {
+  padding-left: 0;
+  padding-right: 0;
+}
+header > div:nth-child(2) > .container {
+  max-width: none;
 }
 
-.badge {
-  display: inline-block !important;
-  width: 18px;
-  height: 18px;
-  color: #111111;
+header .cart-link {
+  position: relative;
+  display: block;
+  margin-left: 25px;
+  display: flex;
+  flex-flow: column;
+  align-items: center;
+  justify-content: center;
+}
+
+header .cart-size-circle {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 10px;
-  border-radius: 50%;
-  padding-left: 3px;
-}
-
-.badge.badge-blue {
-  background-color: #4bc7c7;
-  padding-top: 5px;
-}
-
-/*header*/
-
-header .badge.badge-blue {
-  transform: translateY(-3px);
+  position: absolute;
+  top: 24px;
+  left: 11px;
+  width: 16px;
+  height: 16px;
+  font-size: 11px;
+  border-radius: 4px 4px 0 4px;
+  color: white;
+  background-color: #853B5C;
 }
 
 header .navbar {
-  height: 38px;
+  padding-top: 5px;
+  padding-bottom: 5px;
 }
 
 header .h-free-shipping {
-  font-size: 15px;
-}
-
-header .h-free-shipping span:first-child {
-  font-weight: bold;
-}
-
-header .h-free-shipping span:last-child {
-  font-size: 12px;
-  cursor: pointer;
-  text-decoration: underline;
+  font-size: 14px;
 }
 
 header .h-controls {
@@ -95,12 +98,6 @@ header .h-control:first-child {
   margin-left: 0;
 }
 
-header .h-control img {
-  width: 20px;
-  height: 20px;
-  margin-right: 8px;
-}
-
 header .h-control input {
   border: none;
   padding: 0 31px 0 31px;
@@ -118,22 +115,9 @@ header .h-control input:focus {
   box-shadow: 0;
 }
 
-header .currencyLogo {
-  font-size: 1.3rem; 
-  padding-right: 6px; 
-  vertical-align: center;
-}
-
 header .icon {
   width: 20px;
   height: 20px;
-}
-
-header .icon.arrow {
-  position: absolute;
-  right: 4px;
-  width: 11px;
-  height: 7px;
 }
 
 header .icon.search-icon {
@@ -143,18 +127,42 @@ header .icon.search-icon {
   left: 10px;
 }
 
+/* The currency drop-down. */
+
+header img.currency-icon, header span.currency-icon {
+  position: relative;
+  left: 35px;
+  top: -1px;
+  width: 20px;
+  display: inline-block;
+  height: 20px;
+}
+
+header span.currency-icon {
+  font-size: 16px;
+  text-align: center;
+}
+
 header .h-control select {
+  display: flex;
+  align-items: center;
   background: transparent;
   border-radius: 0;
   border: 1px solid #acacac;
-  width: 100px;
-  height: 20px;
+  width: 130px;
+  height: 40px;
   flex-shrink: 0;
-  padding: 0 7px;
-  display: flex;
-  align-items: center;
+  padding: 1px 0 0 45px;
+  font-size: 16px;
+  border-radius: 8px;
 }
 
+header .icon.arrow {
+  position: absolute;
+  right: 25px;
+  width: 10px;
+  height: 5px;
+}
 
 header .h-control::-webkit-input-placeholder {
   /* Chrome/Opera/Safari */
@@ -182,16 +190,26 @@ header .h-control :-moz-placeholder {
 
 header .navbar.sub-navbar {
   height: 60px;
-  background-color: #111111;
+  background-color: white;
   font-size: 15px;
   color: #b4b2bb;
   padding-top: 0;
   padding-bottom: 0;
+  box-shadow: 0px 0px 4px rgba(0, 0, 0, 0.25);
+  z-index: 1; /* Need this to see the box-shadow on the home page. */
 }
 
-header .navbar.sub-navbar .logo {
-  width: 209px;
+header .navbar.sub-navbar > .container {
+  padding-left: 26px;
+  padding-right: 26px;
+}
+
+header .top-left-logo {
   height: 40px;
+}
+
+header .top-left-logo-cymbal {
+  height: 30px;
 }
 
 header .navbar.sub-navbar .navbar-brand {
@@ -211,27 +229,13 @@ header .navbar.sub-navbar .controls {
   height: 60px;
 }
 
-header .navbar.sub-navbar .controls a {
-  display: block;
-  width: 120px;
-  border-left: 1px solid #b4b2bb;
-  display: flex;
-  flex-flow: column;
-  align-items: center;
-  justify-content: center;
-}
-
 header .navbar.sub-navbar .controls a img {
   width: 20px;
   height: 20px;
   margin-bottom: 3px;
 }
 
-header .navbar.sub-navbar .controls a:last-child {
-  border-right: 1px solid #b4b2bb;
-}
-
-/*footer*/
+/* Footer */
 
 footer.py-5 {
   flex-shrink: 0;
@@ -239,7 +243,19 @@ footer.py-5 {
 }
 
 footer .footer-top {
-  background-color: #f0f0f0;
+  padding: 60px 0px;
+  background-color: #570D2E;
+  color: white;
+}
+
+footer .footer-top a {
+  color: white;
+  text-decoration: underline;
+}
+
+/* The <p> containing the session-id. */
+footer .footer-top p:nth-child(3) {
+  margin-top: 56px;
 }
 
 footer .footer-top .footer-social,
@@ -263,224 +279,155 @@ footer .footer-top .footer-social div {
   width: 50%;
 }
 
-.footer-top .social {
-  border-right: 1px solid #b4b2bb;
-}
-
-.footer-top .social h4 {
-  font-size: 24px;
-  color: #111111;
-  font-weight: bold;
-  text-transform: uppercase;
-  margin-right: 37px;
-  line-height: 0.92;
-}
-
-.footer-top .social img {
-  margin-right: 16px;
-  width: 48px;
-  height: 48px;
-}
-
-.footer-top .app {
-  justify-content: flex-end;
-}
-
-.footer-top .app h4 {
-  font-size: 24px;
-  font-weight: bold;
-  color: #111111;
-  line-height: 0.92;
-}
-
-.footer-top .app h4 span {
-  color: #707070;
-  font-style: italic;
-}
-
-.footer-top .app img {
-  width: 136px;
-  height: 41px;
-  margin-left: 42px;
-}
-
-footer .footer-links {
-  padding-top: 37px;
-  justify-content: space-between;
-  align-items: flex-start;
-}
-
-footer .links-group {
-  width: 164px;
-  flex-shrink: 0;
-  list-style: none;
-  color: #707070;
-  padding: 0;
-}
-
-footer .links-group .group-header {
-  font-size: 16px;
-  text-transform: uppercase;
-  color: #111111;
-  font-weight: bold;
-  margin-bottom: 12px;
-}
-
-footer .links-group li {
-  margin-bottom: 10px;
-  cursor: pointer;
-}
-
-footer .links-group li:hover {
-  text-decoration: underline;
-}
-
-footer .footer-bottom {
-  background-color: #111111;
-  font-size: 16px;
-  height: 80px;
-  padding: 23px 0;
-  display: flex;
-  justify-content: center;
-  flex-flow: column;
-}
-
-footer .footer-bottom p {
-  text-align: center;
-  color: #b4b2bb;
-  padding: 0;
-  margin: 0;
-}
-
-footer .footer-bottom p:first-child {
-  color: white;
-}
-
-/*Home*/
+/* Home */
 
 main {
   flex: 1 0 auto;
+  background-color: #F9F9F9;
 }
 
-main.home {
-  background-color: white;
+@media (min-width: 992px) {
+  .home .container-fluid {
+    height: calc(100vh - 91px); /* 91px is the height of the top/header bars. */
+  }
+  .home .container-fluid > .row > .col-4 {
+    height: calc(100vh - 91px);
+  }
+  .home .container-fluid > .row > .col-lg-8 {
+    height: calc(100vh - 91px);
+    overflow-y: scroll;
+  }
 }
 
-.h-jumbotron {
-  border-radius: 0;
-  background: url(/static/images/HeroBannerImage2.png) no-repeat top center;
+.home-mobile-hero-banner {
+  height: 200px;
+  background: url(/static/images/folded-clothes-on-white-chair-wide.jpg) no-repeat top center;
   background-size: cover;
 }
 
-.h-jumbotron .container img {
-  width: 280px;
-  height: 210px;
+.home-desktop-left-image {
+  background: url(/static/images/folded-clothes-on-white-chair.jpg) no-repeat center;
+  background-size: cover;
 }
 
-.h-row {
-  display: flex;
-  justify-content: center;
-  align-items: center;
+.hot-products-row h3 {
+  margin-bottom: 32px;
+  margin-top: 56px;
+  font-size: 36px;
+  font-weight: normal;
 }
 
-.h-row img {
-  width: 156px;
-  height: 100px;
-  margin-bottom: 45px;
+.hot-products-row {
+  padding-bottom: 70px;
+  padding-left: 10%;
+  padding-right: 10%;
 }
 
-.h-grid .bg-light {
-  background-color: white;
+.hot-product-card  {
+  margin-bottom: 52px;
+  padding-left: 16px;
+  padding-right: 16px;
 }
 
-.card-title.h-card-title {
+.hot-product-card img {
   width: 100%;
-  font-size: 22px;
-  letter-spacing: 4.8px;
-  text-align: center;
-  color: #111111;
-  text-transform: uppercase;
-  margin-bottom: 0;
+  height: auto;
+  border-radius: 20% 0 20% 20%;
 }
 
-.card-body.h-card-body {
-  padding: 1.25rem 0.75rem;
-}
-
-.h-card-body .text-muted {
+.hot-product-card-name {
+  margin-top: 8px;
   font-size: 18px;
 }
 
-.ad-row {
-  padding-left: 68px;
-  height: 400px;
-  display: flex;
-  align-items: center;
-  background: url(/static/images/AdvertBannerImage.png) no-repeat top center;
-  background-size: cover;
+.hot-product-card-price {
+  font-size: 14px;
 }
 
-.ad-row-2 {
-  background: url(/static/images/Advert2BannerImage.png) no-repeat top center;
+.hot-product-card > a:first-child {
+  position: relative;
+  display: block;
 }
 
-.ad-row img {
-  width: 292px;
-  height: 280px;
+.hot-product-card-img-overlay {
+  position: absolute;
+  height: 100%;
+  width: 100%;
+  top: 0;
+  left: 0;
+  border-radius: 20% 0 20% 20%;
+  background-color: transparent;
 }
 
-/*Product*/
+.hot-product-card:hover .hot-product-card-img-overlay {
+  background-color: rgba(71, 0, 29, 0.2);
+}
+
+/*
+This chunk ensures the left/right padding of the footer is
+similar to that of the hot-products-row.
+*/
+.home-desktop-footer-row {
+  padding-left: 9%;
+  padding-right: 9%;
+  background-color: #570D2E;
+}
+
+/* Ad */
+
+.ad {
+  position: relative;
+  background-color: #FF9A9B;
+  font-size: 24px;
+  text-align: center;
+}
+
+/* "Ad" text. */
+.ad strong {
+  position: absolute;
+  top: 6px;
+  left: 12px;
+  font-size: 14px;
+  font-weight: normal;
+}
+
+.ad a {
+  color: black;
+}
+
+/* Product */
 
 .h-product {
-  background-color: #f0f0f0;
-  padding: 65px 16.96428571%;
-  color: #707070;
-  font-size: 18px;
+  margin-top: 56px;
+  margin-bottom: 112px;
+  max-width: 1200px;
+  background-color: #F9F9F9;
 }
 
-.h-product .col {
-  height: 540px;
+.h-product > .row {
+  align-items: flex-end;
 }
 
-.h-product .col img {
-  width: 540px;
+.h-product .product-image {
+  width: 100%;
+  border-radius: 20% 20% 0 20%;
 }
 
-.h-product .product-info {
-  width: calc(100% - 540px);
+.h-product .product-price {
+  font-size: 28px;
 }
 
 .h-product .product-info .product-wrapper {
-  border-top: 1px solid #b4b2bb;
-  border-bottom: 1px solid #b4b2bb;
-  height: 100%;
   margin-left: 15px;
-  display: flex;
-  flex-flow: column;
-  justify-content: center;
-}
-
-.h-product .text-muted {
-  color: #707070 !important;
-  margin: 20px 0;
 }
 
 .h-product .product-info h2 {
-  font-size: 48px;
-  line-height: 1.1;
-  letter-spacing: 9.6px;
+  margin-bottom: 16px;
+  margin-top: 16px;
+  font-size: 56px;
+  line-height: 1.14;
+  font-weight: normal;
   color: #111111;
-}
-
-.h-product .product-info h6 {
-  font-size: 18px;
-  color: #111111;
-  text-transform: uppercase;
-  margin: 0 0 3px 0;
-}
-
-.h-product .product-info form {
-  margin-top: 100px;
 }
 
 .h-product .input-group-text,
@@ -490,68 +437,35 @@ main.home {
   letter-spacing: 3.6px;
   text-align: center;
   color: #111111;
-  text-transform: uppercase;
   border-radius: 0;
 }
 
-.h-product .input-group-text {
-  width: 150px;
-  height: 49px;
-  border: solid 1px #d1d7dc;
-  background-color: #e9ecef;
-}
-
-.h-product select.form-control-lg.custom-select {
-  height: 49px;
-}
-
-.h-product .btn.btn-info {
-  width: 178px;
-  height: 49px;
-  padding-left: 0.75rem;
-  padding-right: 0.75rem;
-  background-color: #4cc8c6;
-  margin-left: 30px;
-}
-
-.h-product .btn.btn-info:hover {
-  color: #fff;
-  background-color: #138496;
-  border-color: #117a8b;
-}
-
-.other-products-img {
-  width: 234px !important;
-  height: 80px !important;
-}
-
-/*recommendations*/
-
-.h-card.card {
-  border: none;
-  border-radius: 0 !important;
+.product-quantity-dropdown {
   position: relative;
-  cursor: pointer;
+  width: 100px;
 }
 
-.h-card.card a {
-  position: relative;
-}
-
-.h-card.card a .card-hover {
-  position: absolute;
-  height: 100%;
+.product-quantity-dropdown select {
   width: 100%;
-  top: 0;
-  left: 0;
-  background-color: transparent;
+  height: 45px;
+  border: 1px solid #acacac;
+  padding: 10px 16px;
+  border-radius: 8px;
 }
 
-.h-card.card:hover a .card-hover {
-  background-color: rgba(0, 0, 0, 0.3);
+.product-quantity-dropdown img {
+  position: absolute;
+  right: 25px;
+  top: 20px;
+  width: 10px;
+  height: 5px;
 }
 
-/*platform banner*/
+.h-product .cymbal-button-primary {
+  margin-top: 16px;
+}
+
+/* Platform Banner */
 
 .local,
 .aws-platform,
@@ -600,7 +514,6 @@ main.home {
   background-color: #2c0678;
 }
 
-
 .platform-flag {
   position: absolute;
   top: 98px;
@@ -612,37 +525,110 @@ main.home {
   align-items: center;
 }
 
-@media (min-width: 1679px) {
+/* Recommendation */
 
-  header .navbar,
-  header .navbar.sub-navbar,
-  footer .footer-top {
-    padding: 0 16.96428571%;
+.recommendations {
+  background: #F9F9F9;
+  padding-bottom: 55px;
+}
+
+.recommendations .container {
+  max-width: 1174px;
+}
+
+@media (max-width: 992px) {
+  .recommendations .container {
+    max-width: none;
   }
 }
 
-.recommendations {
-  background: white;
-}
-
-.recommendations .container .image {
+.recommendations h2 {
+  border-top: solid 1px;
+  padding: 40px 0;
+  font-weight: normal;
   text-align: center;
 }
 
-.recommendations .container .image>img {
-  height: 80px;
-  margin: 50px 0;
+.recommendations h5 {
+  margin-top: 8px;
+  font-weight: normal;
+  font-size: 18px;
 }
 
-.recommendations .prods {
-  padding-bottom: 50px;
-}
-
-.recommendations .card-img-top {
-  border-radius: 0;
+.recommendations img {
+  height: 100%;
+  width: 100%;
+  border-radius: 20% 0 20% 20%;
 }
 
 select {
   -webkit-appearance: none;
   -webkit-border-radius: 0px;
+}
+
+/* Cymbal */
+
+/*
+If we ever decide to create a separate Cymbal CSS library for Cymbal components,
+the rules below could be extracted.
+*/
+
+.cymbal-button-primary, .cymbal-button-secondary {
+  display: inline-block;
+  border: solid 1px #CE0631;
+  padding: 8px 16px;
+  outline: none;
+  font-size: 14px;
+  border-radius: 22px;
+  cursor: pointer;
+}
+
+.cymbal-button-primary:focus, .cymbal-button-secondary:focus {
+  outline: none; /* To override browser (Chrome) default blue outline. */
+}
+
+.cymbal-button-primary {
+  background-color: #CE0631;
+  color: white;
+}
+
+.cymbal-button-secondary {
+  background: none;
+  color: #CE0631;
+}
+
+.cymbal-form-field {
+  position: relative;
+  margin-top: 24px;
+}
+
+.cymbal-form-field label {
+  width: 100%;
+  margin: 0;
+  padding: 8px 16px 0 16px;
+  font-size: 12px;
+  line-height: 1.8em; /* Without this, there might be a 1px gap underneath. */
+  font-weight: normal;
+  border-radius: 4px 4px 0px 0px;
+  color: #5C6063;
+  background-color: white;
+}
+
+.cymbal-form-field input[type='email'],
+.cymbal-form-field input[type='password'],
+.cymbal-form-field select,
+.cymbal-form-field input[type='text'] {
+  width: 100%;
+  border: none;
+  border-bottom: 1px solid #9AA0A6;
+  padding: 0 16px 8px 16px;
+  outline: none;
+  color: #1E2021;
+}
+
+.cymbal-form-field .cymbal-dropdown-chevron {
+  position: absolute;
+  right: 25px;
+  width: 10px;
+  height: 5px;
 }
