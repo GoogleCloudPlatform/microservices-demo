@@ -25,6 +25,8 @@ spec:
       labels:
         app: checkoutservice
     spec:
+      strategy:
+        type: recreate
       serviceAccountName: default
       containers:
         - name: server
