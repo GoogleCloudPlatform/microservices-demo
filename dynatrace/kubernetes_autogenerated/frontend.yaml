@@ -30,7 +30,7 @@ spec:
       serviceAccountName: default
       containers:
         - name: server
-          image: ghcr.io/mreider/frontend:48
+          image: ghcr.io/mreider/frontend:50
           ports:
           - containerPort: 8080
           readinessProbe:
@@ -80,8 +80,8 @@ spec:
           #   value: "true"
           resources:
             requests:
-              cpu: 100m
-              memory: 64Mi
+              cpu: 50m
+              memory: 32Mi
             limits:
               cpu: 200m
               memory: 128Mi
