@@ -17,6 +17,8 @@ kind: Deployment
 metadata:
   name: checkoutservice
 spec:
+  strategy:
+    type: Recreate
   selector:
     matchLabels:
       app: checkoutservice
@@ -25,8 +27,6 @@ spec:
       labels:
         app: checkoutservice
     spec:
-      strategy:
-        type: recreate
       serviceAccountName: default
       containers:
         - name: server

@@ -53,8 +53,8 @@ spec:
         #   value: "1"
         resources:
           requests:
-            cpu: 100m
-            memory: 220Mi
+            cpu: 50m
+            memory: 110Mi
           limits:
             cpu: 200m
             memory: 450Mi
