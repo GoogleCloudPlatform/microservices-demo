@@ -25,10 +25,12 @@ spec:
       labels:
         app: checkoutservice
     spec:
+      strategy:
+        type: recreate
       serviceAccountName: default
       containers:
         - name: server
-          image: ghcr.io/mreider/checkoutservice:42
+          image: ghcr.io/mreider/checkoutservice:48
           ports:
           - containerPort: 5050
           readinessProbe:

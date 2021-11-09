@@ -30,7 +30,7 @@ spec:
       serviceAccountName: default
       containers:
         - name: server
-          image: ghcr.io/mreider/frontend:42
+          image: ghcr.io/mreider/frontend:48
           ports:
           - containerPort: 8080
           readinessProbe:
