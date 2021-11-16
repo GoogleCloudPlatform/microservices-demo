@@ -29,7 +29,7 @@ spec:
       terminationGracePeriodSeconds: 5
       containers:
       - name: server
-        image: ghcr.io/mreider/recommendationservice:50
+        image: ghcr.io/mreider/recommendationservice:54
         ports:
         - containerPort: 8080
         readinessProbe:
@@ -64,7 +64,7 @@ kind: Service
 metadata:
   name: recommendationservice
 spec:
-  type: ClusterIP
+  clusterIP: none
   selector:
     app: recommendationservice
   ports:

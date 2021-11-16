@@ -28,7 +28,7 @@ spec:
       serviceAccountName: default
       containers:
       - name: server
-        image: ghcr.io/mreider/shippingservice:50
+        image: ghcr.io/mreider/shippingservice:54
         ports:
         - containerPort: 50051
         env:
@@ -62,7 +62,7 @@ kind: Service
 metadata:
   name: shippingservice
 spec:
-  type: ClusterIP
+  clusterIP: none
   selector:
     app: shippingservice
   ports:
