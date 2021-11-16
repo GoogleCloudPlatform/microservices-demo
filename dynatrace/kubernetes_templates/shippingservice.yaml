@@ -62,7 +62,7 @@ kind: Service
 metadata:
   name: shippingservice
 spec:
-  type: ClusterIP
+  clusterIP: none
   selector:
     app: shippingservice
   ports:

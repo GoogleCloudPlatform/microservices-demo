@@ -57,7 +57,7 @@ kind: Service
 metadata:
   name: cartservice
 spec:
-  type: ClusterIP
+  clusterIP: none
   selector:
     app: cartservice
   ports:

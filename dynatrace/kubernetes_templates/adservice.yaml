@@ -64,7 +64,7 @@ kind: Service
 metadata:
   name: adservice
 spec:
-  type: ClusterIP
+  clusterIP: none
   selector:
     app: adservice
   ports:

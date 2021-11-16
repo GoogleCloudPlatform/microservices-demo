@@ -60,7 +60,7 @@ kind: Service
 metadata:
   name: emailservice
 spec:
-  type: ClusterIP
+  clusterIP: none
   selector:
     app: emailservice
   ports:

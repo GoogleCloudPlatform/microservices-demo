@@ -54,7 +54,7 @@ kind: Service
 metadata:
   name: paymentservice
 spec:
-  type: ClusterIP
+  clusterIP: none
   selector:
     app: paymentservice
   ports:

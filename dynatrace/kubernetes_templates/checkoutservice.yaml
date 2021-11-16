@@ -75,7 +75,7 @@ kind: Service
 metadata:
   name: checkoutservice
 spec:
-  type: ClusterIP
+  clusterIP: none
   selector:
     app: checkoutservice
   ports:
