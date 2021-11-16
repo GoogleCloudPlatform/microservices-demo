@@ -29,7 +29,7 @@ spec:
       terminationGracePeriodSeconds: 5
       containers:
       - name: server
-        image: ghcr.io/mreider/currencyservice:50
+        image: ghcr.io/mreider/currencyservice:54
         ports:
         - name: grpc
           containerPort: 7000
@@ -61,7 +61,7 @@ kind: Service
 metadata:
   name: currencyservice
 spec:
-  type: ClusterIP
+  clusterIP: none
   selector:
     app: currencyservice
   ports:

@@ -29,7 +29,7 @@ spec:
       terminationGracePeriodSeconds: 5
       containers:
       - name: server
-        image: ghcr.io/mreider/adservice:50
+        image: ghcr.io/mreider/adservice:54
         ports:
         - containerPort: 9555
         env:
@@ -64,7 +64,7 @@ kind: Service
 metadata:
   name: adservice
 spec:
-  type: ClusterIP
+  clusterIP: none
   selector:
     app: adservice
   ports:

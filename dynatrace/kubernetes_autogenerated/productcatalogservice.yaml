@@ -29,7 +29,7 @@ spec:
       terminationGracePeriodSeconds: 5
       containers:
       - name: server
-        image: ghcr.io/mreider/productcatalogservice:50
+        image: ghcr.io/mreider/productcatalogservice:54
         ports:
         - containerPort: 3550
         env:
@@ -62,7 +62,7 @@ kind: Service
 metadata:
   name: productcatalogservice
 spec:
-  type: ClusterIP
+  clusterIP: none
   selector:
     app: productcatalogservice
   ports:

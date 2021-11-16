@@ -29,7 +29,7 @@ spec:
       terminationGracePeriodSeconds: 5
       containers:
       - name: server
-        image: ghcr.io/mreider/cartservice:50
+        image: ghcr.io/mreider/cartservice:54
         ports:
         - containerPort: 7070
         env:
@@ -57,7 +57,7 @@ kind: Service
 metadata:
   name: cartservice
 spec:
-  type: ClusterIP
+  clusterIP: none
   selector:
     app: cartservice
   ports:

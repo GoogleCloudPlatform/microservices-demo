@@ -29,7 +29,7 @@ spec:
       terminationGracePeriodSeconds: 5
       containers:
       - name: server
-        image: ghcr.io/mreider/paymentservice:50
+        image: ghcr.io/mreider/paymentservice:54
         ports:
         - containerPort: 50051
         env:
@@ -54,7 +54,7 @@ kind: Service
 metadata:
   name: paymentservice
 spec:
-  type: ClusterIP
+  clusterIP: none
   selector:
     app: paymentservice
   ports:

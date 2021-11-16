@@ -29,7 +29,7 @@ spec:
       terminationGracePeriodSeconds: 5
       containers:
       - name: server
-        image: ghcr.io/mreider/emailservice:50
+        image: ghcr.io/mreider/emailservice:54
         ports:
         - containerPort: 8080
         env:
@@ -60,7 +60,7 @@ kind: Service
 metadata:
   name: emailservice
 spec:
-  type: ClusterIP
+  clusterIP: none
   selector:
     app: emailservice
   ports:
