@@ -29,7 +29,7 @@ spec:
       terminationGracePeriodSeconds: 5
       containers:
       - name: server
-        image: ghcr.io/mreider/recommendationservice:54
+        image: ghcr.io/mreider/recommendationservice:55
         ports:
         - containerPort: 8080
         readinessProbe:
