@@ -17,6 +17,7 @@ kind: Deployment
 metadata:
   name: checkoutservice
 spec:
+  replicas: 3
   strategy:
     type: Recreate
   selector:
@@ -40,6 +41,8 @@ spec:
             exec:
               command: ["/bin/grpc_health_probe", "-addr=:5050"]
           env:
+          - name: LEAK_MAX
+            value: "10000"
           - name: PORT
             value: "5050"
           - name: PRODUCT_CATALOG_SERVICE_ADDR

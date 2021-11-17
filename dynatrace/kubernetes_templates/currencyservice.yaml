@@ -17,6 +17,7 @@ kind: Deployment
 metadata:
   name: currencyservice
 spec:
+  replicas: 3
   selector:
     matchLabels:
       app: currencyservice
