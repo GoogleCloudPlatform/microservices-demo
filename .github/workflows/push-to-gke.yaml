@@ -2,7 +2,7 @@ name: push to gke
 on:
   workflow_dispatch:
 jobs:
-  say_hello:
+  push_to_gke:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2.3.2
