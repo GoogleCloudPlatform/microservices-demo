@@ -29,7 +29,7 @@ spec:
       terminationGracePeriodSeconds: 5
       containers:
       - name: server
-        image: ghcr.io/mreider/cartservice:65
+        image: ghcr.io/mreider/cartservice:66
         ports:
         - containerPort: 7070
         env:
@@ -40,8 +40,8 @@ spec:
             cpu: 40m
             memory: 32Mi
           limits:
-            cpu: 300m
-            memory: 128Mi
+            cpu: 60m
+            memory: 50Mi
         readinessProbe:
           initialDelaySeconds: 15
           exec:

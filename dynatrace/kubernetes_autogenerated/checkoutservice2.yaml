@@ -30,7 +30,7 @@ spec:
       serviceAccountName: default
       containers:
         - name: server
-          image: ghcr.io/mreider/checkoutservice:65
+          image: ghcr.io/mreider/checkoutservice:66
           ports:
           - containerPort: 5050
           readinessProbe:
@@ -64,11 +64,11 @@ spec:
             value: "2021-10-21"
           resources:
             requests:
-              cpu: 50m
-              memory: 64Mi
+              cpu: 20m
+              memory: 32Mi
             limits:
-              cpu: 100m
-              memory: 128Mi
+              cpu: 30m
+              memory: 50Mi
 ---
 apiVersion: v1
 kind: Service

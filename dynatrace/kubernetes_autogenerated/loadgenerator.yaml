@@ -48,7 +48,7 @@ spec:
           value: "frontend:80"
       containers:
       - name: main
-        image: ghcr.io/mreider/frontend:65
+        image: ghcr.io/mreider/frontend:66
         env:
         - name: FRONTEND_ADDR
           value: "frontend:80"
@@ -58,8 +58,8 @@ spec:
           value: "1000"
         resources:
           requests:
-            cpu: 150m
-            memory: 256Mi
+            cpu: 100m
+            memory: 50Mi
           limits:
-            cpu: 500m
-            memory: 512Mi
+            cpu: 100m
+            memory: 50Mi
