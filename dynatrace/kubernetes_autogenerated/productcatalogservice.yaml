@@ -29,7 +29,7 @@ spec:
       terminationGracePeriodSeconds: 5
       containers:
       - name: server
-        image: ghcr.io/mreider/productcatalogservice:68
+        image: ghcr.io/mreider/productcatalogservice:72
         ports:
         - containerPort: 3550
         env:
