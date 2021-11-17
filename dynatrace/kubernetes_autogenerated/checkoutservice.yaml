@@ -17,6 +17,7 @@ kind: Deployment
 metadata:
   name: checkoutservice
 spec:
+  replicas: 3
   strategy:
     type: Recreate
   selector:
@@ -30,7 +31,7 @@ spec:
       serviceAccountName: default
       containers:
         - name: server
-          image: ghcr.io/mreider/checkoutservice:68
+          image: ghcr.io/mreider/checkoutservice:75
           ports:
           - containerPort: 5050
           readinessProbe:

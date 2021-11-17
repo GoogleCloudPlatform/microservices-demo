@@ -17,6 +17,7 @@ kind: Deployment
 metadata:
   name: paymentservice
 spec:
+  replicas: 3
   selector:
     matchLabels:
       app: paymentservice
@@ -29,7 +30,7 @@ spec:
       terminationGracePeriodSeconds: 5
       containers:
       - name: server
-        image: ghcr.io/mreider/paymentservice:68
+        image: ghcr.io/mreider/paymentservice:75
         ports:
         - containerPort: 50051
         env:

@@ -17,6 +17,7 @@ kind: Deployment
 metadata:
   name: paymentservice
 spec:
+  replicas: 3
   selector:
     matchLabels:
       app: paymentservice
