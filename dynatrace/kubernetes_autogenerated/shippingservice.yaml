@@ -28,7 +28,7 @@ spec:
       serviceAccountName: default
       containers:
       - name: server
-        image: ghcr.io/mreider/shippingservice:55
+        image: ghcr.io/mreider/shippingservice:56
         ports:
         - containerPort: 50051
         env:
