@@ -29,7 +29,7 @@ spec:
       terminationGracePeriodSeconds: 5
       containers:
       - name: server
-        image: ghcr.io/mreider/cartservice:61
+        image: ghcr.io/mreider/cartservice:62
         ports:
         - containerPort: 7070
         env:
@@ -37,7 +37,7 @@ spec:
           value: "redis-cart:6379"
         resources:
           requests:
-            cpu: 80m
+            cpu: 40m
             memory: 32Mi
           limits:
             cpu: 300m

@@ -29,7 +29,7 @@ spec:
       terminationGracePeriodSeconds: 5
       containers:
       - name: server
-        image: ghcr.io/mreider/productcatalogservice:61
+        image: ghcr.io/mreider/productcatalogservice:62
         ports:
         - containerPort: 3550
         env:
@@ -51,7 +51,7 @@ spec:
             command: ["/bin/grpc_health_probe", "-addr=:3550"]
         resources:
           requests:
-            cpu: 50m
+            cpu: 30m
             memory: 32Mi
           limits:
             cpu: 200m
