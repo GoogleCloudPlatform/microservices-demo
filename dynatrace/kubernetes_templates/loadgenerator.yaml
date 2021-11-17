@@ -56,8 +56,8 @@ spec:
           value: "1000"
         resources:
           requests:
-            cpu: 1000m
+            cpu: 50m
             memory: 60Mi
           limits:
-            cpu: 1000m
+            cpu: 3000m
             memory: 60Mi
