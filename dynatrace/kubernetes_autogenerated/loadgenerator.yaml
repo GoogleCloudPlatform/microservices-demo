@@ -48,12 +48,14 @@ spec:
           value: "frontend:80"
       containers:
       - name: main
-        image: ghcr.io/mreider/frontend:63
+        image: ghcr.io/mreider/frontend:65
         env:
         - name: FRONTEND_ADDR
           value: "frontend:80"
+        - name: PRODUCT_CATALOG_SERVICE_ADDR
+          value: "productcatalogservice:3550"
         - name: USERS
-          value: "10"
+          value: "1000"
         resources:
           requests:
             cpu: 150m
