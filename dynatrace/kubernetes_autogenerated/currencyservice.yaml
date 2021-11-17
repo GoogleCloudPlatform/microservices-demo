@@ -61,7 +61,7 @@ kind: Service
 metadata:
   name: currencyservice
 spec:
-  clusterIP: none
+  clusterIP: None
   selector:
     app: currencyservice
   ports:

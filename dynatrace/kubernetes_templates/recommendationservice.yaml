@@ -64,7 +64,7 @@ kind: Service
 metadata:
   name: recommendationservice
 spec:
-  clusterIP: none
+  clusterIP: None
   selector:
     app: recommendationservice
   ports:

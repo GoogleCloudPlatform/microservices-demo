@@ -62,7 +62,7 @@ kind: Service
 metadata:
   name: productcatalogservice
 spec:
-  clusterIP: none
+  clusterIP: None
   selector:
     app: productcatalogservice
   ports:
