@@ -29,7 +29,7 @@ spec:
       terminationGracePeriodSeconds: 5
       containers:
       - name: server
-        image: ghcr.io/mreider/paymentservice:63
+        image: ghcr.io/mreider/paymentservice:66
         ports:
         - containerPort: 50051
         env:
@@ -44,10 +44,10 @@ spec:
         resources:
           requests:
             cpu: 30m
-            memory: 32Mi
+            memory: 70Mi
           limits:
-            cpu: 200m
-            memory: 128Mi
+            cpu: 50m
+            memory: 100Mi
 ---
 apiVersion: v1
 kind: Service

@@ -40,8 +40,8 @@ spec:
             cpu: 40m
             memory: 32Mi
           limits:
-            cpu: 300m
-            memory: 128Mi
+            cpu: 60m
+            memory: 50Mi
         readinessProbe:
           initialDelaySeconds: 15
           exec:

@@ -29,7 +29,7 @@ spec:
       terminationGracePeriodSeconds: 5
       containers:
       - name: server
-        image: ghcr.io/mreider/currencyservice:63
+        image: ghcr.io/mreider/currencyservice:66
         ports:
         - name: grpc
           containerPort: 7000
@@ -50,11 +50,11 @@ spec:
             command: ["/bin/grpc_health_probe", "-addr=:7000"]
         resources:
           requests:
-            cpu: 50m
-            memory: 32Mi
+            cpu: 30m
+            memory: 50Mi
           limits:
-            cpu: 200m
-            memory: 128Mi
+            cpu: 50m
+            memory: 75Mi
 ---
 apiVersion: v1
 kind: Service

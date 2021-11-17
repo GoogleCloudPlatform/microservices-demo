@@ -29,7 +29,7 @@ spec:
       terminationGracePeriodSeconds: 5
       containers:
       - name: server
-        image: ghcr.io/mreider/recommendationservice:63
+        image: ghcr.io/mreider/recommendationservice:66
         ports:
         - containerPort: 8080
         readinessProbe:
@@ -53,11 +53,11 @@ spec:
         #   value: "1"
         resources:
           requests:
-            cpu: 50m
-            memory: 110Mi
+            cpu: 20m
+            memory: 60Mi
           limits:
-            cpu: 200m
-            memory: 450Mi
+            cpu: 50m
+            memory: 100Mi
 ---
 apiVersion: v1
 kind: Service
