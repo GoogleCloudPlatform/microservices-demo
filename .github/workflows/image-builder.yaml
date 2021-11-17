@@ -2,6 +2,7 @@ on:
   push:
      branches:
        - master
+  workflow_dispatch:
 jobs:
   build-and-publish:
     name: Build and push images, bump versions in yaml files
