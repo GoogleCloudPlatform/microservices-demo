@@ -52,6 +52,8 @@ spec:
         env:
         - name: FRONTEND_ADDR
           value: "frontend:80"
+        - name: PRODUCT_CATALOG_SERVICE_ADDR
+          value: "productcatalogservice:3550"
         - name: USERS
           value: "1000"
         resources:
