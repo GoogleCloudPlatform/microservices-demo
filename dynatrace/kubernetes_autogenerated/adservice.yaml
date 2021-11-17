@@ -29,7 +29,7 @@ spec:
       terminationGracePeriodSeconds: 5
       containers:
       - name: server
-        image: ghcr.io/mreider/adservice:62
+        image: ghcr.io/mreider/adservice:63
         ports:
         - containerPort: 9555
         env:
