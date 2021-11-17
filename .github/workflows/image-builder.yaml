@@ -26,8 +26,7 @@ jobs:
       - uses: docker/build-push-action@v2
         name: build and publish email service
         with:
-          image: emailservice
-          tags: ${{ env.GITHUB_RUN_NUMBER_WITH_OFFSET }}, latest
+          tags: emailservice:${{ env.GITHUB_RUN_NUMBER_WITH_OFFSET }}, emailservice:latest
           pull: True
           push: True
           secrets: |
