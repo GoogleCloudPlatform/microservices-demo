@@ -29,7 +29,7 @@ spec:
       terminationGracePeriodSeconds: 5
       containers:
       - name: server
-        image: ghcr.io/mreider/currencyservice:57
+        image: ghcr.io/mreider/currencyservice:61
         ports:
         - name: grpc
           containerPort: 7000
