@@ -17,6 +17,7 @@ kind: Deployment
 metadata:
   name: frontend
 spec:
+  replicas: 3
   selector:
     matchLabels:
       app: frontend
@@ -30,7 +31,7 @@ spec:
       serviceAccountName: default
       containers:
         - name: server
-          image: ghcr.io/mreider/frontend:72
+          image: ghcr.io/mreider/frontend:75
           ports:
           - containerPort: 8080
           readinessProbe:

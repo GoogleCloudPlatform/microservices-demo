@@ -17,6 +17,7 @@ kind: Deployment
 metadata:
   name: adservice
 spec:
+  replicas: 3
   selector:
     matchLabels:
       app: adservice
@@ -29,7 +30,7 @@ spec:
       terminationGracePeriodSeconds: 5
       containers:
       - name: server
-        image: ghcr.io/mreider/adservice:72
+        image: ghcr.io/mreider/adservice:75
         ports:
         - containerPort: 9555
         env:
