@@ -46,6 +46,8 @@ spec:
         env:
         - name: FRONTEND_ADDR
           value: "frontend:80"
+        - name: PRODUCT_CATALOG_SERVICE_ADDR
+          value: "productcatalogservice:3550"
       containers:
       - name: main
         image: ghcr.io/mreider/frontend:61
