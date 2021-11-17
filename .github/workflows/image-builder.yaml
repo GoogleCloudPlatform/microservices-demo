@@ -26,13 +26,17 @@ jobs:
       - uses: docker/build-push-action@v2
         name: build and publish email service
         with:
-          tags: emailservice:${{ env.GITHUB_RUN_NUMBER_WITH_OFFSET }}, emailservice:latest
+          tags: |
+            ghcr.io/mreider/emailservice:${{ env.GITHUB_RUN_NUMBER_WITH_OFFSET }}
+            ghcr.io/mreider/emailservice:latest
           pull: True
           push: True
           secrets: |
             GIT_AUTH_TOKEN=${{ secrets.MYTOKEN }}
           context: src/emailservice
           file: src/emailservice/Dockerfile
+          cache-from: type=registry,ref=emailservice:latest
+          cache-to: type=inline
       - uses: mr-smithers-excellent/docker-build-push@v5
         name: build and publish productcatalogservice service
         with:
