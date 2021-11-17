@@ -16,16 +16,23 @@ jobs:
             echo ::set-env name=GITHUB_RUN_NUMBER_WITH_OFFSET::$(($NUM+15))
       - uses: actions/checkout@v2.3.2
         name: Check out code
-      - uses: mr-smithers-excellent/docker-build-push@v5
+      - uses: docker/login-action@v1
+        name: Login to registry
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GH_TOKEN }} 
+      - uses: docker/build-push-action@v2
         name: build and publish email service
         with:
           image: emailservice
           tags: ${{ env.GITHUB_RUN_NUMBER_WITH_OFFSET }}, latest
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GH_TOKEN }} 
-          directory: src/emailservice
-          dockerfile: src/emailservice/Dockerfile
+          pull: True
+          push: True
+          secrets: |
+            GIT_AUTH_TOKEN=${{ secrets.MYTOKEN }}
+          context: src/emailservice
+          file: src/emailservice/Dockerfile
       - uses: mr-smithers-excellent/docker-build-push@v5
         name: build and publish productcatalogservice service
         with:
