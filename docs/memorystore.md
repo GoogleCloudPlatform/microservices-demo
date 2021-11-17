@@ -33,7 +33,7 @@ gcloud services enable redis.googleapis.com --project=${PROJECT_ID}
 3. Create the Memorystore (redis) instance. 
 
 ```sh
-gcloud redis instances create redis-cart --size=1 --region=${REGION} --zone=${ZONE} --redis-version=redis_5_0 --project=${PROJECT_ID}
+gcloud redis instances create redis-cart --size=1 --region=${REGION} --zone=${ZONE} --redis-version=redis_6_X --project=${PROJECT_ID}
 ```
 
 After a few minutes, you will see the `STATUS` as `READY` when your Memorystore instance will be successfully provisioned:
