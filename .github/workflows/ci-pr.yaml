@@ -27,7 +27,7 @@ jobs:
         repository: ${{github.event.pull_request.head.repo.full_name}}
     - uses: actions/setup-dotnet@v1
       with:
-        dotnet-version: '5.0.201'
+        dotnet-version: '6.0.100'
     - name: Go Unit Tests
       timeout-minutes: 10
       run: |
