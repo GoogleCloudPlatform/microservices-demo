@@ -86,6 +86,8 @@ func (fe *frontendServer) homeHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Set ENV_PLATFORM (default to local if not set; use env var if set; otherwise detect GCP, which overrides env)_
 	var env = os.Getenv("ENV_PLATFORM")
+	// Set ENV_REGION (default to empty if not set; use env var if set)_
+	var envRegion = os.Getenv("ENV_REGION")
 	// Only override from env variable if set + valid env
 	if env == "" || stringinSlice(validEnvs, env) == false {
 		fmt.Println("env platform is either empty or invalid")
@@ -115,6 +117,7 @@ func (fe *frontendServer) homeHandler(w http.ResponseWriter, r *http.Request) {
 		"platform_css":    plat.css,
 		"platform_name":   plat.provider,
 		"is_cymbal_brand": isCymbalBrand,
+		"env_region":      envRegion,
 	}); err != nil {
 		log.Error(err)
 	}
