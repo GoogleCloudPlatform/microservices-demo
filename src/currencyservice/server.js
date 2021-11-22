@@ -120,8 +120,6 @@ function getSupportedCurrencies (call, callback) {
  * Converts between currencies
  */
 function convert (call, callback) {
-  logger.info('MOCK - received conversion request');
-  callback(null, 0);
   try {
     _getCurrencyData((data) => {
       const request = call.request;

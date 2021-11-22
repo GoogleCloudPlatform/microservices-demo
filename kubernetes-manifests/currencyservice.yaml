@@ -30,8 +30,6 @@ spec:
       containers:
       - name: server
         image: currencyservice
-        # image: gcr.io/hipstershop-memory-leak/currencyservice:nov20-1
-        # imagePullPolicy: Always
         ports:
         - name: grpc
           containerPort: 7000
