@@ -7,28 +7,28 @@ assignees: ''
 
 ---
 
-### Describe the bug ###
+### Describe the bug 
 <!-- A clear and concise description of what the bug is. -->
 
-### To Reproduce ###
+### To Reproduce 
 <!-- Steps to reproduce the behavior: -->
 <!-- 1. Built image '...' -->
 <!-- 2. Ran command '....' -->
 <!-- 3. See error -->
 
-### Logs ### 
+### Logs  
 <!-- Add logs to help explain your problem -->
 
-### Screenshots ###
+### Screenshots 
 <!-- If applicable, add screenshots to help explain your problem -->
 
-### Environment ###
+### Environment 
 <!--  - OS: [e.g. MacOS Big Sur v11.6] -->
 <!--  - Kubernetes distribution, version,: [e.g. minikube, GKE (Standard or Autopilot), EKS, AWS ... ] -->
 <!--  - Any relevant tool version: [e.g. Docker v20.10.8] -->
 
-### Additional context ###
+### Additional context 
 <!-- Add any other context about the problem here -->
 
-### Exposure ###
+### Exposure 
 <!-- Is the bug intermittent, persistent? Is it widespread, local? -->
