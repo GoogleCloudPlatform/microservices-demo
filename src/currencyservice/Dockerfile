@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-FROM node:16-alpine3.14 as base
+FROM node:16-alpine as base
 
 FROM base as builder
 
