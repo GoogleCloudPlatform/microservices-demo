@@ -18,7 +18,7 @@
     "@grpc/grpc-js": "1.4.4",
     "pino": "5.17.0",
     "simple-card-validator": "^1.1.0",
-    "uuid": "^3.2.1"
+    "uuid": "^8.3.2"
   },
   "devDependencies": {
     "semistandard": "12.0.1"
