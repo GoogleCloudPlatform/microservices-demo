@@ -173,9 +173,9 @@ function main () {
     `0.0.0.0:${PORT}`,
     grpc.ServerCredentials.createInsecure(),
     function() {
-    server.start();
-     logger.info("gRPC server started.")
-    }
+      logger.info(`CurrencyService gRPC server started on port ${PORT}`);
+      server.start();
+    },
    );
 }
 
