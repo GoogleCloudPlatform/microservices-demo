@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-FROM node:16-alpine as base
+FROM node:16-alpine3.14 as base
 
 FROM base as builder
 
@@ -21,7 +21,7 @@ FROM base as builder
 RUN apk add --update --no-cache \
     python3 \
     make \
-    g++ 
+    g++
 
 WORKDIR /usr/src/app
 
