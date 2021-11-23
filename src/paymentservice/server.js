@@ -13,7 +13,7 @@
 // limitations under the License.
 
 const path = require('path');
-const grpc = require('grpc');
+const grpc = require('@grpc/grpc-js');
 const pino = require('pino');
 const protoLoader = require('@grpc/proto-loader');
 
@@ -59,19 +59,18 @@ class HipsterShopServer {
     callback(null, { status: 'SERVING' });
   }
 
+
   listen() {
-    this.server.bindAsync(
-      `0.0.0.0:${this.port}`,
+    const server = this.server 
+    const port = this.port
+    server.bindAsync(
+      `0.0.0.0:${port}`,
       grpc.ServerCredentials.createInsecure(),
       function () {
+        logger.info(`PaymentService gRPC server started on port ${port}`);
         server.start();
-        logger.info(`PaymentService grpc server listening on ${this.port}`);
-        this.server.start();
       }
     );
-
-
-
   }
 
   loadProto(path) {
