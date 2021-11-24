@@ -24,7 +24,7 @@ assignees: ''
 
 ### Environment 
 <!--  - OS: [e.g. MacOS Big Sur v11.6] -->
-<!--  - Kubernetes distribution, version,: [e.g. minikube, GKE (Standard or Autopilot), EKS, AWS ... ] -->
+<!--  - Kubernetes distribution, version: [e.g. minikube, GKE (Standard or Autopilot), EKS, AWS ... ] -->
 <!--  - Any relevant tool version: [e.g. Docker v20.10.8] -->
 
 ### Additional context 
