@@ -1,13 +1,13 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
-    <TargetFramework>net5.0</TargetFramework>
+    <TargetFramework>net6.0</TargetFramework>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Grpc.AspNetCore" Version="2.40.0" />
-    <PackageReference Include="Grpc.HealthCheck" Version="2.41.1" />
-    <PackageReference Include="StackExchange.Redis" Version="2.2.79" />
+    <PackageReference Include="Grpc.AspNetCore" Version="2.41.0-pre1" />
+    <PackageReference Include="Grpc.HealthCheck" Version="2.42.0" />
+    <PackageReference Include="StackExchange.Redis" Version="2.2.88" />
   </ItemGroup>
 
   <ItemGroup>
