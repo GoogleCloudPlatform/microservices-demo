@@ -29,7 +29,7 @@ ENV PATH "$PATH:/usr/local/go/bin"
 RUN apt-get install -y libffi-dev zlib1g-dev libedit-dev libc++-11-dev libc++abi-11-dev build-essential
 WORKDIR /src
 
-RUN git clone --depth 1 https://${SONARIO_GH_TOKEN}@github.com/Rookout/GoRook.git -b 0.0.3
+RUN git clone --depth 1 https://${SONARIO_GH_TOKEN}@github.com/Rookout/GoRook.git -b v0.0.5
 
 # restore dependencies
 COPY go.mod go.sum ./
