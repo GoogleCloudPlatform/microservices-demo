@@ -26,6 +26,7 @@ import (
 	"strings"
 	"time"
 
+	"cloud.google.com/go/compute/metadata"
 	"github.com/gorilla/mux"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
@@ -40,9 +41,13 @@ type platformDetails struct {
 }
 
 var (
-	isCymbalBrand = "true" == strings.ToLower(os.Getenv("CYMBAL_BRANDING"))
-	templates     = template.Must(template.New("").
-			Funcs(template.FuncMap{
+	ZONE                 string = "ZONE"
+	HOSTNAME             string = "HOSTNAME"
+	CLUSTERNAME          string = "CLUSTERNAME"
+	METADATA_CLUSTERNAME string = "cluster-name"
+	isCymbalBrand               = "true" == strings.ToLower(os.Getenv("CYMBAL_BRANDING"))
+	templates                   = template.Must(template.New("").
+				Funcs(template.FuncMap{
 			"renderMoney":        renderMoney,
 			"renderCurrencyLogo": renderCurrencyLogo,
 		}).ParseGlob("templates/*.html"))
@@ -101,6 +106,7 @@ func (fe *frontendServer) homeHandler(w http.ResponseWriter, r *http.Request) {
 	log.Debugf("ENV_PLATFORM is: %s", env)
 	plat = platformDetails{}
 	plat.setPlatformDetails(strings.ToLower(env))
+	deploymentDetails := getDeploymentDetails(r)
 
 	if err := templates.ExecuteTemplate(w, "home", map[string]interface{}{
 		"session_id":      sessionID(r),
@@ -115,6 +121,9 @@ func (fe *frontendServer) homeHandler(w http.ResponseWriter, r *http.Request) {
 		"platform_css":    plat.css,
 		"platform_name":   plat.provider,
 		"is_cymbal_brand": isCymbalBrand,
+		"cluster":         deploymentDetails[CLUSTERNAME],
+		"zone":            deploymentDetails[ZONE],
+		"pod":             deploymentDetails[HOSTNAME],
 	}); err != nil {
 		log.Error(err)
 	}
@@ -509,4 +518,37 @@ func stringinSlice(slice []string, val string) bool {
 		}
 	}
 	return false
+}
+
+func getDeploymentDetails(httpRequest *http.Request) map[string]string {
+	var deploymentDetailsMap = make(map[string]string)
+	var metaServerClient = metadata.NewClient(&http.Client{})
+	var log = httpRequest.Context().Value(ctxKeyLog{}).(logrus.FieldLogger)
+
+	podHostname, err := os.Hostname()
+	if err != nil {
+		log.Error("Failed to fetch the hostname for the Pod", err)
+	}
+
+	podCluster, err := metaServerClient.InstanceAttributeValue(METADATA_CLUSTERNAME)
+	if err != nil {
+		log.Error("Failed to fetch the name of the cluster in which the pod is running", err)
+	}
+
+	podZone, err := metaServerClient.Zone()
+	if err != nil {
+		log.Error("Failed to fetch the Zone of the node where the pod is scheduled", err)
+	}
+
+	deploymentDetailsMap[HOSTNAME] = podHostname
+	deploymentDetailsMap[CLUSTERNAME] = podCluster
+	deploymentDetailsMap[ZONE] = podZone
+
+	log.WithFields(logrus.Fields{
+		"cluster":  podCluster,
+		"zone":     podZone,
+		"hostname": podHostname,
+	}).Debug("Fetched pod details")
+
+	return deploymentDetailsMap
 }
