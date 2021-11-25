@@ -13,7 +13,7 @@
 // limitations under the License.
 
 const path = require('path');
-const grpc = require('grpc');
+const grpc = require('@grpc/grpc-js');
 const pino = require('pino');
 const protoLoader = require('@grpc/proto-loader');
 
@@ -27,7 +27,7 @@ const logger = pino({
 });
 
 class HipsterShopServer {
-  constructor (protoRoot, port = HipsterShopServer.PORT) {
+  constructor(protoRoot, port = HipsterShopServer.PORT) {
     this.port = port;
 
     this.packages = {
@@ -44,7 +44,7 @@ class HipsterShopServer {
    * @param {*} call  { ChargeRequest }
    * @param {*} callback  fn(err, ChargeResponse)
    */
-  static ChargeServiceHandler (call, callback) {
+  static ChargeServiceHandler(call, callback) {
     try {
       logger.info(`PaymentService#Charge invoked with request ${JSON.stringify(call.request)}`);
       const response = charge(call.request);
@@ -55,17 +55,25 @@ class HipsterShopServer {
     }
   }
 
-  static CheckHandler (call, callback) {
+  static CheckHandler(call, callback) {
     callback(null, { status: 'SERVING' });
   }
 
-  listen () {
-    this.server.bind(`0.0.0.0:${this.port}`, grpc.ServerCredentials.createInsecure());
-    logger.info(`PaymentService grpc server listening on ${this.port}`);
-    this.server.start();
+
+  listen() {
+    const server = this.server 
+    const port = this.port
+    server.bindAsync(
+      `0.0.0.0:${port}`,
+      grpc.ServerCredentials.createInsecure(),
+      function () {
+        logger.info(`PaymentService gRPC server started on port ${port}`);
+        server.start();
+      }
+    );
   }
 
-  loadProto (path) {
+  loadProto(path) {
     const packageDefinition = protoLoader.loadSync(
       path,
       {
@@ -79,7 +87,7 @@ class HipsterShopServer {
     return grpc.loadPackageDefinition(packageDefinition);
   }
 
-  loadAllProtos (protoRoot) {
+  loadAllProtos(protoRoot) {
     const hipsterShopPackage = this.packages.hipsterShop.hipstershop;
     const healthPackage = this.packages.health.grpc.health.v1;
 
