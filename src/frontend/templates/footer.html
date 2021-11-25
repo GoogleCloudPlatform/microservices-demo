@@ -26,7 +26,7 @@
                     {{ if $.session_id }}session-id: {{ $.session_id }} — {{end}}
                     {{ if $.request_id }}request-id: {{ $.request_id }}{{end}}
                 </small>
-                </br>
+                <br/>
                 <small>
                     {{ if $.deploymentDetails }}
                     <b>Cluster: </b>{{index .deploymentDetails "CLUSTERNAME" }}<br/>
