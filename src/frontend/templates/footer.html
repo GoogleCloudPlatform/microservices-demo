@@ -28,9 +28,11 @@
                 </small>
                 </br>
                 <small>
-                    {{ if $.cluster }}<b>Cluster: </b>: {{ $.cluster }} {{end}}</br>
-                    {{ if $.zone }}<b>Zone: </b>: {{ $.zone }} {{end}}</br>
-                    {{ if $.pod }}<b>Pod: </b>: {{ $.pod }} {{end}}</br>
+                    {{ if $.deploymentDetails }}
+                    <b>Cluster: </b>{{index .deploymentDetails "CLUSTERNAME" }}</br>
+                    <b>Zone: </b>{{index .deploymentDetails "ZONE" }}</br>
+                    <b>Pod: </b>{{index .deploymentDetails "HOSTNAME" }}
+                    {{ end }}
                 </small>
             </p>
         </div>
