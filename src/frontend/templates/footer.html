@@ -29,8 +29,8 @@
                 </br>
                 <small>
                     {{ if $.deploymentDetails }}
-                    <b>Cluster: </b>{{index .deploymentDetails "CLUSTERNAME" }}</br>
-                    <b>Zone: </b>{{index .deploymentDetails "ZONE" }}</br>
+                    <b>Cluster: </b>{{index .deploymentDetails "CLUSTERNAME" }}<br/>
+                    <b>Zone: </b>{{index .deploymentDetails "ZONE" }}<br/>
                     <b>Pod: </b>{{index .deploymentDetails "HOSTNAME" }}
                     {{ end }}
                 </small>
