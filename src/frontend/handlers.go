@@ -194,6 +194,7 @@ func (fe *frontendServer) productHandler(w http.ResponseWriter, r *http.Request)
 		Item  *pb.Product
 		Price *pb.Money
 	}{p, price}
+	deploymentDetails := getDeploymentDetails(r)
 
 	if err := templates.ExecuteTemplate(w, "product", map[string]interface{}{
 		"session_id":      sessionID(r),
@@ -208,6 +209,9 @@ func (fe *frontendServer) productHandler(w http.ResponseWriter, r *http.Request)
 		"platform_css":    plat.css,
 		"platform_name":   plat.provider,
 		"is_cymbal_brand": isCymbalBrand,
+		"cluster":         deploymentDetails[CLUSTERNAME],
+		"zone":            deploymentDetails[ZONE],
+		"pod":             deploymentDetails[HOSTNAME],
 	}); err != nil {
 		log.Println(err)
 	}
@@ -302,8 +306,9 @@ func (fe *frontendServer) viewCartHandler(w http.ResponseWriter, r *http.Request
 		totalPrice = money.Must(money.Sum(totalPrice, multPrice))
 	}
 	totalPrice = money.Must(money.Sum(totalPrice, *shippingCost))
-
 	year := time.Now().Year()
+	deploymentDetails := getDeploymentDetails(r)
+
 	if err := templates.ExecuteTemplate(w, "cart", map[string]interface{}{
 		"session_id":       sessionID(r),
 		"request_id":       r.Context().Value(ctxKeyRequestID{}),
@@ -319,6 +324,9 @@ func (fe *frontendServer) viewCartHandler(w http.ResponseWriter, r *http.Request
 		"platform_css":     plat.css,
 		"platform_name":    plat.provider,
 		"is_cymbal_brand":  isCymbalBrand,
+		"cluster":          deploymentDetails[CLUSTERNAME],
+		"zone":             deploymentDetails[ZONE],
+		"pod":              deploymentDetails[HOSTNAME],
 	}); err != nil {
 		log.Println(err)
 	}
@@ -378,6 +386,7 @@ func (fe *frontendServer) placeOrderHandler(w http.ResponseWriter, r *http.Reque
 		renderHTTPError(log, r, w, errors.Wrap(err, "could not retrieve currencies"), http.StatusInternalServerError)
 		return
 	}
+	deploymentDetails := getDeploymentDetails(r)
 
 	if err := templates.ExecuteTemplate(w, "order", map[string]interface{}{
 		"session_id":      sessionID(r),
@@ -391,6 +400,9 @@ func (fe *frontendServer) placeOrderHandler(w http.ResponseWriter, r *http.Reque
 		"platform_css":    plat.css,
 		"platform_name":   plat.provider,
 		"is_cymbal_brand": isCymbalBrand,
+		"cluster":         deploymentDetails[CLUSTERNAME],
+		"zone":            deploymentDetails[ZONE],
+		"pod":             deploymentDetails[HOSTNAME],
 	}); err != nil {
 		log.Println(err)
 	}
@@ -445,12 +457,17 @@ func renderHTTPError(log logrus.FieldLogger, r *http.Request, w http.ResponseWri
 	errMsg := fmt.Sprintf("%+v", err)
 
 	w.WriteHeader(code)
+	deploymentDetails := getDeploymentDetails(r)
+
 	if templateErr := templates.ExecuteTemplate(w, "error", map[string]interface{}{
 		"session_id":  sessionID(r),
 		"request_id":  r.Context().Value(ctxKeyRequestID{}),
 		"error":       errMsg,
 		"status_code": code,
 		"status":      http.StatusText(code),
+		"cluster":     deploymentDetails[CLUSTERNAME],
+		"zone":        deploymentDetails[ZONE],
+		"pod":         deploymentDetails[HOSTNAME],
 	}); templateErr != nil {
 		log.Println(templateErr)
 	}
