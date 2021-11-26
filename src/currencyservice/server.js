@@ -24,6 +24,7 @@ else {
       service: 'currencyservice',
       version: '1.0.0'
     },
+    maxRetries: 3,
   });
 }
 
