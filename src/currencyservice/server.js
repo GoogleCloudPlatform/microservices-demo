@@ -24,7 +24,6 @@ else {
       service: 'currencyservice',
       version: '1.0.0'
     },
-    maxRetries: 3,
   });
 }
 
@@ -46,7 +45,8 @@ else {
     serviceContext: {
       service: 'currencyservice',
       version: 'VERSION'
-    }
+    },
+    maxRetries: 3,
   });
 }
 
