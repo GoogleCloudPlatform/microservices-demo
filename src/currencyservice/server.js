@@ -36,18 +36,18 @@ else {
   require('@google-cloud/trace-agent').start();
 }
 
-if(process.env.DISABLE_DEBUGGER) {
-  console.log("Debugger disabled.")
-}
-else {
-  console.log("Debugger enabled.")
-  require('@google-cloud/debug-agent').start({
-    serviceContext: {
-      service: 'currencyservice',
-      version: 'VERSION'
-    }
-  });
-}
+// if(process.env.DISABLE_DEBUGGER) {
+//   console.log("Debugger disabled.")
+// }
+// else {
+//   console.log("Debugger enabled.")
+//   require('@google-cloud/debug-agent').start({
+//     serviceContext: {
+//       service: 'currencyservice',
+//       version: 'VERSION'
+//     }
+//   });
+// }
 
 const path = require('path');
 const grpc = require('@grpc/grpc-js');
