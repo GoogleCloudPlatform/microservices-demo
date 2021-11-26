@@ -28,13 +28,13 @@ else {
 }
 
 
-if(process.env.DISABLE_TRACING) {
-  console.log("Tracing disabled.")
-}
-else {
-  console.log("Tracing enabled.")
-  require('@google-cloud/trace-agent').start();
-}
+// if(process.env.DISABLE_TRACING) {
+//   console.log("Tracing disabled.")
+// }
+// else {
+//   console.log("Tracing enabled.")
+//   require('@google-cloud/trace-agent').start();
+// }
 
 if(process.env.DISABLE_DEBUGGER) {
   console.log("Debugger disabled.")
