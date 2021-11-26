@@ -14,18 +14,18 @@
  * limitations under the License.
  */
 
-if(process.env.DISABLE_PROFILER) {
-  console.log("Profiler disabled.")
-}
-else {
-  console.log("Profiler enabled.")
-  require('@google-cloud/profiler').start({
-    serviceContext: {
-      service: 'currencyservice',
-      version: '1.0.0'
-    }
-  });
-}
+// if(process.env.DISABLE_PROFILER) {
+//   console.log("Profiler disabled.")
+// }
+// else {
+//   console.log("Profiler enabled.")
+//   require('@google-cloud/profiler').start({
+//     serviceContext: {
+//       service: 'currencyservice',
+//       version: '1.0.0'
+//     }
+//   });
+// }
 
 
 if(process.env.DISABLE_TRACING) {
