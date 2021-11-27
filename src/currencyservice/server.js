@@ -25,6 +25,7 @@ else {
       version: '1.0.0'
     },
     maxRetries: 3,
+    autoRetry: false
   });
 }
 
@@ -34,7 +35,10 @@ if(process.env.DISABLE_TRACING) {
 }
 else {
   console.log("Tracing enabled.")
-  require('@google-cloud/trace-agent').start();
+  require('@google-cloud/trace-agent').start({
+    maxRetries: 3,
+    autoRetry: false
+  });
 }
 
 if(process.env.DISABLE_DEBUGGER) {
@@ -48,6 +52,7 @@ else {
       version: 'VERSION'
     },
     maxRetries: 3,
+    autoRetry: false
   });
 }
 
