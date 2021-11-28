@@ -22,7 +22,7 @@ else {
   require('@google-cloud/profiler').start({
     serviceContext: {
       service: 'currencyservice',
-      version: '1.0.0'
+      version: 'add-max-retry-pr642'
     },
   });
 }
