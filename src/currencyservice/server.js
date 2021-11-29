@@ -22,7 +22,7 @@ else {
   require('@google-cloud/profiler').start({
     serviceContext: {
       service: 'currencyservice',
-      version: '1.0.0'
+      version: 'v0.3.1'
     }
   });
 }
@@ -44,7 +44,7 @@ else {
   require('@google-cloud/debug-agent').start({
     serviceContext: {
       service: 'currencyservice',
-      version: 'VERSION'
+      version: 'v0.3.1'
     }
   });
 }
