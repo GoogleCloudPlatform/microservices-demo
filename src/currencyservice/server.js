@@ -27,7 +27,8 @@ else {
     maxRetries: 0,
     retries: 0,
     noResponseRetries: 0,
-    autoRetry: false
+    autoRetry: false,
+    resetV8DebuggerThreshold: 1,
   });
 }
 
@@ -56,7 +57,8 @@ else {
     maxRetries: 0,
     retries: 0,
     noResponseRetries: 0,
-    autoRetry: false
+    autoRetry: false,
+    resetV8DebuggerThreshold: 1,
   });
 }
 
