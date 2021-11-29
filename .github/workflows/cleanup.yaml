@@ -37,6 +37,6 @@ jobs:
           kubectl delete namespace $NAMESPACE
         env:
           PROJECT_ID: "onlineboutique-ci"
-          PR_CLUSTER: "online-boutique-pr"
-          ZONE: "us-east1-b"
+          PR_CLUSTER: "onlineboutique-pr-v2"
+          ZONE: "us-west1-a"
           PR_NUMBER: ${{ github.event.number }}
