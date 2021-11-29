@@ -46,7 +46,7 @@ else {
       service: 'currencyservice',
       version: 'VERSION'
     },
-    maxRetries: 3,
+    maxRetries: 0,
   });
 }
 
