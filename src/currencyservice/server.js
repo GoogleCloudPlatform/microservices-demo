@@ -24,7 +24,7 @@ else {
       service: 'currencyservice',
       version: 'add-max-retry-all-pr643'
     },
-    maxRetries: 3,
+    maxRetries: 0,
     autoRetry: false
   });
 }
@@ -36,7 +36,7 @@ if(process.env.DISABLE_TRACING) {
 else {
   console.log("Tracing enabled.")
   require('@google-cloud/trace-agent').start({
-    maxRetries: 3,
+    maxRetries: 0,
     autoRetry: false
   });
 }
