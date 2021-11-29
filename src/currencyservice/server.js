@@ -25,6 +25,8 @@ else {
       version: 'add-max-retry-all-pr643'
     },
     maxRetries: 0,
+    retries: 0,
+    noResponseRetries: 0,
     autoRetry: false
   });
 }
@@ -51,7 +53,9 @@ else {
       service: 'currencyservice',
       version: 'VERSION'
     },
-    maxRetries: 3,
+    maxRetries: 0,
+    retries: 0,
+    noResponseRetries: 0,
     autoRetry: false
   });
 }
