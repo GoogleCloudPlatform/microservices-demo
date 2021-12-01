@@ -1,13 +1,13 @@
-# Development Guide 
+# Development Guide
 
-This doc explains how to build and run the OnlineBoutique source code locally using the `skaffold` command-line tool.  
+This doc explains how to build and run the OnlineBoutique source code locally using the `skaffold` command-line tool.
 
-## Prerequisites 
+## Prerequisites
 
 - [Docker for Desktop](https://www.docker.com/products/docker-desktop).
 - kubectl (can be installed via `gcloud components install kubectl`)
-- [skaffold]( https://skaffold.dev/docs/install/), a tool that builds and deploys Docker images in bulk. 
-- A Google Cloud Project with Google Container Registry enabled. 
+- [skaffold]( https://skaffold.dev/docs/install/), a tool that builds and deploys Docker images in bulk.
+- A Google Cloud Project with Google Container Registry enabled.
 - Enable GCP APIs for Cloud Monitoring, Tracing, Debugger, Profiler:
 ```
 gcloud services enable monitoring.googleapis.com \
@@ -21,7 +21,7 @@ gcloud services enable monitoring.googleapis.com \
 ## Option 1: Google Kubernetes Engine (GKE)
 
 > 💡 Recommended if you're using Google Cloud Platform and want to try it on
-> a realistic cluster. **Note**: If your cluster has Workload Identity enabled, 
+> a realistic cluster. **Note**: If your cluster has Workload Identity enabled,
 > [see these instructions](/docs/workload-identity.md)
 
 1.  Create a Google Kubernetes Engine cluster and make sure `kubectl` is pointing
@@ -73,7 +73,7 @@ gcloud services enable monitoring.googleapis.com \
         kubectl get service frontend-external
 
 
-## Option 2 - Local Cluster 
+## Option 2 - Local Cluster
 
 1. Launch a local Kubernetes cluster with one of the following tools:
 
@@ -126,3 +126,10 @@ gcloud services enable monitoring.googleapis.com \
 
 If you've deployed the application with `skaffold run` command, you can run
 `skaffold delete` to clean up the deployed resources.
+
+## Troubleshooting
+
+If you get the following error: `Error from server (NotFound): error when creating "STDIN": namespaces "opentelemetry-demo" not found` then run the following command:
+
+    `kubectl config set-context --current --namespace=opentelemetry-demo`
+
