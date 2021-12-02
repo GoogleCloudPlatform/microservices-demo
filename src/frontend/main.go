@@ -95,7 +95,7 @@ func main() {
 	}
 	log.Out = os.Stdout
 
-	err := rook.Start(&rook.RookOptions{})
+	err := rook.Start(rook.RookOptions{})
 	if err != nil {
 		log.Error(fmt.Sprintf("Got error while setting Rookout: %w", err))
 	}

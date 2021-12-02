@@ -2,16 +2,13 @@ module github.com/GoogleCloudPlatform/microservices-demo/src/productcatalogservi
 
 go 1.17
 
-replace	github.com/Rookout/GoRook => /src/GoRook
-//replace github.com/Rookout/GoRook => /Users/gilad/dev/GoRook
-
 require (
 	cloud.google.com/go v0.40.0
 	contrib.go.opencensus.io/exporter/jaeger v0.2.0
 	contrib.go.opencensus.io/exporter/stackdriver v0.5.0
-	github.com/Rookout/GoRook v0.0.0
-	github.com/golang/protobuf v1.4.2
-	github.com/google/go-cmp v0.5.0
+	github.com/Rookout/GoRook v0.0.5
+	github.com/golang/protobuf v1.5.0
+	github.com/google/go-cmp v0.5.5
 	github.com/google/pprof v0.0.0-20190515194954-54271f7e092f // indirect
 	github.com/sirupsen/logrus v1.8.1
 	github.com/uber/jaeger-client-go v2.21.1+incompatible // indirect
@@ -32,11 +29,13 @@ require (
 	github.com/gorilla/websocket v1.4.2 // indirect
 	github.com/hashicorp/golang-lru v0.5.4 // indirect
 	github.com/mattn/go-isatty v0.0.12 // indirect
+	github.com/pkg/errors v0.9.1 // indirect
 	golang.org/x/arch v0.0.0-20190927153633-4e8777c89be4 // indirect
 	golang.org/x/oauth2 v0.0.0-20190604053449-0f29369cfe45 // indirect
 	golang.org/x/sync v0.0.0-20190911185100-cd5d95a43a6e // indirect
 	golang.org/x/text v0.3.2 // indirect
 	golang.org/x/time v0.0.0-20201208040808-7e3f01d25324 // indirect
-	google.golang.org/protobuf v1.25.0 // indirect
+	google.golang.org/protobuf v1.26.0 // indirect
 	gopkg.in/yaml.v2 v2.2.8 // indirect
+	gotest.tools v2.2.0+incompatible // indirect
 )

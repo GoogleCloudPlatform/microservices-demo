@@ -12,32 +12,24 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-FROM ubuntu:20.04 as builder
+FROM golang:1.17-alpine as builder
+RUN apk --update --no-cache add curl make git gcc musl-dev protobuf-dev openssl-libs-static openssl-dev build-base zlib-static
 
-ENV GOLANG_VERSION 1.17
 ARG SONARIO_GH_TOKEN
 
+ENV GO111MODULE=on
+RUN go env -w GOPRIVATE=github.com/Rookout/GoRook
+# Why all the echos? It hides the credentials from showing up partially. If they show up partially then Jenkins won't censor them.
+RUN echo && echo && echo && git config --global url."https://${SONARIO_GH_TOKEN}@github.com".insteadOf "https://github.com"
+ENV GOROOK_OS_TAG=alpine314
 
-RUN apt update && apt install -y ca-certificates git wget
-
-# Install Go
-RUN wget https://golang.org/dl/go${GOLANG_VERSION}.linux-amd64.tar.gz
-RUN tar -C /usr/local -xzf go${GOLANG_VERSION}.linux-amd64.tar.gz
-RUN rm -f go${GOLANG_VERSION}.linux-amd64.tar.gz
-ENV PATH "$PATH:/usr/local/go/bin"
-
-RUN apt-get install -y libffi-dev zlib1g-dev libedit-dev libc++-11-dev libc++abi-11-dev build-essential
 WORKDIR /src
-
-RUN git clone --depth 1 https://${SONARIO_GH_TOKEN}@github.com/Rookout/GoRook.git -b v0.0.5
-
-# restore dependencies
-COPY go.mod go.sum ./
-RUN go mod download
 COPY . .
-RUN go build -gcflags='-N -l' -o /go/bin/productcatalogservice .
+RUN go mod download
+RUN go build -tags=${GOROOK_OS_TAG} -gcflags='-N -l' -o /go/bin/productcatalogservice .
 
 FROM builder AS release
+RUN apk add --update --no-cache ca-certificates
 
 ARG GIT_COMMIT=unspecified
 ENV ROOKOUT_COMMIT=$GIT_COMMIT
