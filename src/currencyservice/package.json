@@ -9,21 +9,23 @@
   },
   "license": "Apache-2.0",
   "dependencies": {
-    "@grpc/grpc-js": "^1.3.2",
-    "@grpc/proto-loader": "^0.6.2",
+    "@google-cloud/debug-agent": "5.1.3",
+    "@google-cloud/profiler": "4.1.5",
+    "@google-cloud/trace-agent": "5.1.3",
+    "@grpc/proto-loader": "0.5.6",
+    "async": "3.2.0",
+    "google-protobuf": "3.13.0",
+    "@grpc/grpc-js": "1.4.4",
+    "pino": "5.17.0",
+    "request": "2.88.2",
+    "xml2js": "0.4.23",
     "@opentelemetry/api": "^0.20.0",
     "@opentelemetry/exporter-collector-grpc": "^0.20.0",
     "@opentelemetry/instrumentation": "^0.20.0",
     "@opentelemetry/instrumentation-grpc": "^0.20.0",
     "@opentelemetry/instrumentation-pino": "^0.20.0",
     "@opentelemetry/node": "^0.20.0",
-    "@opentelemetry/tracing": "^0.20.0",
-    "async": "3.2.0",
-    "google-protobuf": "3.13.0",
-    "grpc": "1.24.10",
-    "pino": "^6.11.3",
-    "request": "2.88.2",
-    "xml2js": "0.4.23"
+    "@opentelemetry/tracing": "^0.20.0"
   },
   "devDependencies": {
     "semistandard": "^16.0.1"

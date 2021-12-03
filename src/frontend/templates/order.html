@@ -15,42 +15,65 @@
 -->
 
 {{ define "order" }}
+
     {{ template "header" . }}
+
     <div {{ with $.platform_css }} class="{{.}}" {{ end }}>
         <span class="platform-flag">
-          {{$.platform_name}}
+            {{$.platform_name}}
         </span>
-      </div>
-    <main role="main" class="order">
-        <div class="py-5">
-            <div class="container py-3 px-lg-5">
-                <div class="row mt-5 py-2">
-                    <div class="col text-center">
-                        <img class="order-logo" src="/static/icons/Hipster_HeroLogoCyan.svg" alt="Online Boutique" />
-                        <h3>
-                            Your order is complete!
-                        </h3>
-                        <p>Order Confirmation ID</p>
-                        <p class="mg-bt"><strong>{{.order.OrderId}}</strong></p>
-                        <p>Shipping Tracking ID</p>
-                        <p class="mg-bt"><strong>{{.order.ShippingTrackingId}}</strong></p>
-                        <p>Shipping Cost</p>
-                        <p class="mg-bt"><strong>{{renderMoney .order.ShippingCost}}</strong></p>
-                        <p>Total Paid</p>
-                        <p class="mg-bt"><strong>{{renderMoney .total_paid}}</strong></p>
-                    </div>
-                </div>
+    </div>
 
-            </div>
-            <div class="container py-3 px-lg-5">
-                <div class="row py-2 text-center">
-                    <a class="btn btn-info" href="/" role="button" style="margin-top: 40px; margin-bottom: 40px;">Keep Browsing</a>
+    <main role="main" class="order">
+
+        <section class="container order-complete-section">
+            <div class="row">
+                <div class="col-12 text-center">
+                    <h3>
+                        Your order is complete!
+                    </h3>
+                </div>
+                <div class="col-12 text-center">
+                    <p>We've sent you a confirmation email.</p>
                 </div>
             </div>
-            {{ if $.recommendations }}
-                {{ template "recommendations" $.recommendations }}
-            {{ end }}
-        </div>
+            <div class="row border-bottom-solid padding-y-24">
+                <div class="col-6 pl-md-0">
+                    Confirmation #
+                </div>
+                <div class="col-6 pr-md-0 text-right">
+                    {{.order.OrderId}}
+                </div>
+            </div>
+            <div class="row border-bottom-solid padding-y-24">
+                <div class="col-6 pl-md-0">
+                    Tracking #
+                </div>
+                <div class="col-6 pr-md-0 text-right">
+                    {{.order.ShippingTrackingId}}
+                </div>
+            </div>
+            <div class="row padding-y-24">
+                <div class="col-6 pl-md-0">
+                    Total Paid
+                </div>
+                <div class="col-6 pr-md-0 text-right">
+                    {{renderMoney .total_paid}}
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-12 text-center">
+                    <a class="cymbal-button-primary" href="/" role="button">
+                        Continue Shopping
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        {{ if $.recommendations }}
+            {{ template "recommendations" $.recommendations }}
+        {{ end }}
+
     </main>
 
     {{ template "footer" . }}

@@ -23,30 +23,22 @@
 </div>
 
 <main role="main">
-  <div class="h-product">
+  <div class="h-product container">
     <div class="row">
-      <div class="col">
-        <img alt="" src="{{$.product.Item.Picture}}" />
+      <div class="col-md-6">
+        <img class="product-image" alt="" src="{{$.product.Item.Picture}}" />
       </div>
-      <div class="product-info col">
+      <div class="product-info col-md-5">
         <div class="product-wrapper">
-          <h2>{{$.product.Item.Name}}</h2>
 
-          <p class="text-muted">
-            {{ renderMoney $.product.Price}}
-          </p>
-          <div>
-            <h6>Product Description:</h6>
-            {{$.product.Item.Description}}
-          </div>
+          <h2>{{ $.product.Item.Name }}</h2>
+          <p class="product-price">{{ renderMoney $.product.Price }}</p>
+          <p>{{ $.product.Item.Description }}</p>
 
-          <form method="POST" action="/cart" class="form-inline">
+          <form method="POST" action="/cart">
             <input type="hidden" name="product_id" value="{{$.product.Item.Id}}" />
-            <div class="input-group">
-              <div class="input-group-prepend">
-                <label class="input-group-text" for="quantity">Quantity</label>
-              </div>
-              <select name="quantity" id="quantity" class="custom-select form-control form-control-lg">
+            <div class="product-quantity-dropdown">
+              <select name="quantity" id="quantity">
                 <option>1</option>
                 <option>2</option>
                 <option>3</option>
@@ -54,20 +46,21 @@
                 <option>5</option>
                 <option>10</option>
               </select>
-              <button type="submit" class="btn btn-info btn-lg ml-3">Add to Cart</button>
+              <img src="/static/icons/Hipster_DownArrow.svg" alt="">
             </div>
+            <button type="submit" class="cymbal-button-primary">Add To Cart</button>
           </form>
         </div>
       </div>
     </div>
   </div>
-  <div class="container py-3 px-lg-5 py-lg-5">
+  <div>
     {{ if $.recommendations}}
       {{ template "recommendations" $.recommendations }}
     {{ end }}
-
-   {{ with $.ad }}{{ template "text_ad" . }}{{ end}}
-
+  </div>
+  <div class="ad">
+   {{ with $.ad }}{{ template "text_ad" . }}{{ end }}
   </div>
 </main>
 {{ template "footer" . }}

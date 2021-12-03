@@ -26,6 +26,14 @@
                     {{ if $.session_id }}session-id: {{ $.session_id }} — {{end}}
                     {{ if $.request_id }}request-id: {{ $.request_id }}{{end}}
                 </small>
+                <br/>
+                <small>
+                    {{ if $.deploymentDetails }}
+                    <b>Cluster: </b>{{index .deploymentDetails "CLUSTERNAME" }}<br/>
+                    <b>Zone: </b>{{index .deploymentDetails "ZONE" }}<br/>
+                    <b>Pod: </b>{{index .deploymentDetails "HOSTNAME" }}
+                    {{ end }}
+                </small>
             </p>
         </div>
     </div>

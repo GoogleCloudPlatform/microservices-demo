@@ -381,7 +381,7 @@ type Product struct {
 	Description string `protobuf:"bytes,3,opt,name=description,proto3" json:"description,omitempty"`
 	Picture     string `protobuf:"bytes,4,opt,name=picture,proto3" json:"picture,omitempty"`
 	PriceUsd    *Money `protobuf:"bytes,5,opt,name=price_usd,json=priceUsd,proto3" json:"price_usd,omitempty"`
-	// Categories such as "vintage" or "gardening" that can be used to look up
+	// Categories such as "clothing" or "kitchen" that can be used to look up
 	// other related products.
 	Categories           []string `protobuf:"bytes,6,rep,name=categories,proto3" json:"categories,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
