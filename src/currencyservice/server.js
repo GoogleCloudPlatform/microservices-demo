@@ -85,8 +85,7 @@ function getSupportedCurrencies(call, callback) {
 /**
  * Converts between currencies
  */
-function convert(call, callback) {
-  logger.info('received conversion request');
+function convert (call, callback) {
   try {
     _getCurrencyData((data) => {
       const request = call.request;
@@ -133,18 +132,17 @@ function check(call, callback) {
 function main() {
   logger.info(`Starting gRPC server on port ${PORT}...`);
   const server = new grpc.Server();
-  server.addService(shopProto.CurrencyService.service, {
-    getSupportedCurrencies,
-    convert,
-  });
-  server.addService(healthProto.Health.service, { check });
+  server.addService(shopProto.CurrencyService.service, {getSupportedCurrencies, convert});
+  server.addService(healthProto.Health.service, {check});
+
   server.bindAsync(
     `0.0.0.0:${PORT}`,
     grpc.ServerCredentials.createInsecure(),
-    () => {
+    function() {
+      logger.info(`CurrencyService gRPC server started on port ${PORT}`);
       server.start();
-    }
-  );
+    },
+   );
 }
 
 main();

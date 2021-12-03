@@ -29,7 +29,7 @@ import (
 func TestServer(t *testing.T) {
 	ctx := context.Background()
 	addr := run(port)
-	conn, err := grpc.Dial(addr,
+	conn, err := grpc.DialContext(ctx, addr,
 		grpc.WithInsecure(),
 	)
 	if err != nil {
@@ -57,7 +57,7 @@ func TestServer(t *testing.T) {
 		t.Errorf("got %s, want %s", got, want)
 	}
 
-	sres, err := client.SearchProducts(ctx, &pb.SearchProductsRequest{Query: "typewriter"})
+	sres, err := client.SearchProducts(ctx, &pb.SearchProductsRequest{Query: "sunglasses"})
 	if err != nil {
 		t.Fatal(err)
 	}
