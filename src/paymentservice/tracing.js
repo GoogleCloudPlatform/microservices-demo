@@ -1,35 +1,45 @@
-'use strict'
-const { NodeTracerProvider } = require('@opentelemetry/node')
-const { BatchSpanProcessor } = require('@opentelemetry/tracing')
-const { CollectorTraceExporter } =  require('@opentelemetry/exporter-collector-grpc')
-const { Resource, SERVICE_RESOURCE } = require('@opentelemetry/resources')
-const os = require('os')
+'use strict';
 
-const identifier = process.env.HOSTNAME || os.hostname()
-const instanceResource = new Resource({
- [SERVICE_RESOURCE.INSTANCE_ID]: identifier,
- [SERVICE_RESOURCE.NAME]: 'PaymentService'
-})
+const { NodeTracerProvider } = require('@opentelemetry/sdk-trace-node');
+const { registerInstrumentations } = require('@opentelemetry/instrumentation');
+const { BatchSpanProcessor } = require('@opentelemetry/sdk-trace-base');
+const { CollectorTraceExporter } = require('@opentelemetry/exporter-collector-grpc');
+const { GrpcInstrumentation } = require('@opentelemetry/instrumentation-grpc');
+const { PinoInstrumentation } = require('@opentelemetry/instrumentation-pino');
+const { Resource } = require('@opentelemetry/resources');
+const { SemanticResourceAttributes } = require('@opentelemetry/semantic-conventions');
+const os = require('os');
 
-const mergedResource = Resource.createTelemetrySDKResource().merge(instanceResource)
+const identifier = process.env.HOSTNAME || os.hostname();
+const resource = new Resource({
+  [SemanticResourceAttributes.SERVICE_INSTANCE_ID]: identifier,
+  [SemanticResourceAttributes.SERVICE_NAME]: 'PaymentService'
+});
 
-function getExporter() {
-  return new CollectorTraceExporter({
-    url: process.env.OTEL_EXPORTER_OTLP_SPAN_ENDPOINT
-  })
-}
+const traceProvider = new NodeTracerProvider({
+  resource,
+});
 
-const exporter = getExporter()
+let url = process.env.OTEL_EXPORTER_OTLP_ENDPOINT;
 
-if (exporter != null)
-{
-  const traceProvider = new NodeTracerProvider({
-    resource: mergedResource
-  })
+const collectorOptions = {
+  url,
+};
 
-  traceProvider.addSpanProcessor(
-    new BatchSpanProcessor(exporter)
-  )
+const traceExporter = new CollectorTraceExporter(collectorOptions);
 
-  traceProvider.register()
-}
+traceProvider.addSpanProcessor(new BatchSpanProcessor(traceExporter));
+
+traceProvider.register();
+
+registerInstrumentations({
+  instrumentations: [
+    new PinoInstrumentation({
+      logHook: (_span, record) => {
+        record['service.name'] =
+          traceProvider.resource.attributes['service.name'];
+      },
+    }),
+    new GrpcInstrumentation(),
+  ],
+});
