@@ -22,7 +22,7 @@ else {
   require('@google-cloud/profiler').start({
     serviceContext: {
       service: 'currencyservice',
-      version: 'vNew-HasDebug'
+      version: 'vNew-NoDebug'
     }
   });
 }
@@ -34,19 +34,6 @@ if(process.env.DISABLE_TRACING) {
 else {
   console.log("Tracing enabled.")
   require('@google-cloud/trace-agent').start();
-}
-
-if(process.env.DISABLE_DEBUGGER) {
-  console.log("Debugger disabled.")
-}
-else {
-  console.log("Debugger enabled.")
-  require('@google-cloud/debug-agent').start({
-    serviceContext: {
-      service: 'currencyservice',
-      version: 'vNew-HasDebug'
-    }
-  });
 }
 
 const path = require('path');
