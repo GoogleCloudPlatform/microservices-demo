@@ -3,8 +3,8 @@ kind: Ingress
 metadata:
   name: frontend-ingress
   annotations:
-    kubernetes.io/ingress.global-static-ip-name: ob-global-ip
-    networking.gke.io/managed-certificates: ob-cert
+    kubernetes.io/ingress.global-static-ip-name: online-boutique-ip
+    networking.gke.io/managed-certificates: online-boutique-certificate
 spec:
   backend:
     serviceName: frontend-nodeport
