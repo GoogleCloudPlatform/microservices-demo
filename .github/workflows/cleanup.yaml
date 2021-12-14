@@ -21,7 +21,7 @@ on:
     types: closed
 jobs:
   cleanup-namespace:
-    runs-on: self-hosted
+    runs-on: [self-hosted, is-enabled]
     steps:
       - uses: actions/checkout@v2
         with:

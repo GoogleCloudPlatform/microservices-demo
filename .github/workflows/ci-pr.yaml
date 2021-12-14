@@ -19,7 +19,7 @@ on:
       - master
 jobs:
   code-tests:
-    runs-on: [self-hosted]
+    runs-on: [self-hosted, is-enabled]
     steps:
     - uses: actions/checkout@v2
       with:
@@ -42,7 +42,7 @@ jobs:
       run: |
         dotnet test src/cartservice/
   deployment-tests:
-    runs-on: self-hosted
+    runs-on: [self-hosted, is-enabled]
     needs: code-tests
     strategy:
       matrix:
