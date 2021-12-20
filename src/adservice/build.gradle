@@ -37,7 +37,7 @@ dependencies {
                 "io.grpc:grpc-stub:${grpcVersion}",
                 "io.grpc:grpc-netty:${grpcVersion}",
                 "io.grpc:grpc-services:${grpcVersion}",
-                "org.apache.logging.log4j:log4j-core:2.15.0",
+                "org.apache.logging.log4j:log4j-core:2.17.0",
                 "io.opentracing:opentracing-api:0.33.0",
                 "io.opentracing.contrib:opentracing-grpc:0.2.3",
                 "io.jaegertracing:jaeger-client:1.6.0"
