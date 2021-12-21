@@ -21,7 +21,7 @@ on:
     types: closed
 jobs:
   cleanup-namespace:
-    runs-on: self-hosted
+    runs-on: [self-hosted, is-enabled]
     steps:
       - uses: actions/checkout@v2
         with:
@@ -36,7 +36,7 @@ jobs:
           NAMESPACE="pr${PR_NUMBER}"
           kubectl delete namespace $NAMESPACE
         env:
-          PROJECT_ID: "onlineboutique-ci"
-          PR_CLUSTER: "online-boutique-pr"
-          ZONE: "us-east1-b"
+          PROJECT_ID: "online-boutique-ci"
+          PR_CLUSTER: "online-boutique-prs"
+          ZONE: "us-central1-c"
           PR_NUMBER: ${{ github.event.number }}

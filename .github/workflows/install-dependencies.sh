@@ -52,6 +52,9 @@ sudo apt install -y build-essential
 go install github.com/google/addlicense@latest
 sudo ln -s $HOME/go/bin/addlicense /bin
 
+# install build-essential (gcc, used for go test)
+sudo apt install -y build-essential
+
 # install skaffold
 curl -Lo skaffold https://storage.googleapis.com/skaffold/releases/latest/skaffold-linux-amd64 && \
 chmod +x skaffold && \
