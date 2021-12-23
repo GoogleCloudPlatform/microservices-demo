@@ -226,7 +226,7 @@ spec:
       serviceAccountName: default
       containers:
         - name: server
-          image: cr-cn-beijing.volces.com/hackathon/frontend:v0.3.5
+          image: cr-cn-beijing.volces.com/hackathon/frontend:v0.3.6
           ports:
           - containerPort: 8080
           readinessProbe:
