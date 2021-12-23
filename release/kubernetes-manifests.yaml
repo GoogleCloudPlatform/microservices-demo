@@ -723,6 +723,19 @@ spec:
       labels:
         app: adservice
     spec:
+      volumes:
+        - name: aos-auto-instrumentation
+          emptyDir: {}
+      initContainers:
+        - name: aos-auto-instrumentation
+          image: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-java:latest
+          volumeMounts:
+            - mountPath: /aos-auto-instrumentation
+              name: aos-auto-instrumentation
+          command:
+            - "cp"
+            - "/javaagent.jar"
+            - "/aos-auto-instrumentation/javaagent.jar"
       serviceAccountName: default
       terminationGracePeriodSeconds: 5
       containers:
@@ -730,15 +743,28 @@ spec:
         image: cr-cn-beijing.volces.com/hackathon/adservice:v0.3.4
         ports:
         - containerPort: 9555
+        volumeMounts:
+          - mountPath: /aos-auto-instrumentation
+            name: aos-auto-instrumentation
         env:
         - name: PORT
           value: "9555"
         - name: DISABLE_STATS
           value: "1"
-        - name: DISABLE_TRACING
-          value: "1"
-        # - name: JAEGER_SERVICE_ADDR
-        #   value: "jaeger-collector:14268"
+        - name: JAEGER_SERVICE_ADDR
+          value: "aos-user-gateway-collector.kube-system.svc.cluster.local:14268"
+        - name: OTEL_EXPORTER_OTLP_ENDPOINT
+          value: "http://aos-user-gateway-collector.kube-system:4317"
+        - name: OTEL_TRACES_EXPORTER
+          value: otlp
+        - name: OTEL_METRICS_EXPORTER
+          value: otlp
+        - name: OTEL_RESOURCE_ATTRIBUTES
+          value: service.name=adservice,service.namespace=hackathon,deployment.environment=hackathon,service.protocol=grpc,service.version=v0.1.0
+        - name: OTEL_PROPAGATORS
+          value: b3
+        - name: JAVA_TOOL_OPTIONS
+          value: "-javaagent:/aos-auto-instrumentation/javaagent.jar"
         resources:
           requests:
             cpu: 200m
