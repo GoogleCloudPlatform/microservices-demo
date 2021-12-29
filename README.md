@@ -5,6 +5,10 @@
 
 ![Continuous Integration](https://github.com/GoogleCloudPlatform/microservices-demo/workflows/Continuous%20Integration%20-%20Master/Release/badge.svg)
 
+> **⚠ ATTENTION: Apache Log4j 2 advisory.**  
+> Due to [vulnerabilities](https://cloud.google.com/log4j2-security-advisory) present in earlier versions
+> of Log4j 2, we have taken down all affected container images. We highly recommend all demos and forks to now
+> use images from releases [>= v0.3.4](https://github.com/GoogleCloudPlatform/microservices-demo/releases).
 
 **Online Boutique** is a cloud-native microservices demo application.
 Online Boutique consists of a 10-tier microservices application. The application is a
@@ -21,8 +25,6 @@ If you’re using this demo, please **★Star** this repository to show your int
 > 👓**Note to Googlers:** Please fill out the form at
 > [go/microservices-demo](http://go/microservices-demo) if you are using this
 > application.
-
-Looking for the old Hipster Shop frontend interface? Use the [manifests](https://github.com/GoogleCloudPlatform/microservices-demo/tree/v0.1.5/kubernetes-manifests) in release [v0.1.5](https://github.com/GoogleCloudPlatform/microservices-demo/releases/v0.1.5).
 
 ## Screenshots
 

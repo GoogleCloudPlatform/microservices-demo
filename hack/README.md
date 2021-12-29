@@ -47,15 +47,16 @@ export REPO_PREFIX=gcr.io/google-samples/microservices-demo
 
 #### 8. Once your pull-request is approved, merge it.
 
-#### 9. Connect to our [onlineboutique-master GKE cluster](https://pantheon.corp.google.com/kubernetes/clusters/details/us-central1-c/online-boutique-master/details?project=onlineboutique-ci)
+#### 9. Connect to our [online-boutique-release GKE cluster](https://pantheon.corp.google.com/kubernetes/clusters/details/us-central1-c/online-boutique-release/details?project=online-boutique-ci)
 
 - To do this, you can use:
 ```
-gcloud container clusters get-credentials online-boutique-master \
-  --zone us-central1-c --project onlineboutique-ci
+gcloud container clusters get-credentials online-boutique-release \
+  --zone us-central1-c --project online-boutique-ci
 ```
 
-#### 10. Deploy `release/kubernetes-manifests.yaml` to our [onlineboutique-master GKE cluster](https://pantheon.corp.google.com/kubernetes/clusters/details/us-central1-c/online-boutique-master/details?project=onlineboutique-ci).
+#### 10. Deploy `release/kubernetes-manifests.yaml` to our [online-boutique-release GKE cluster](https://pantheon.corp.google.com/kubernetes/clusters/details/us-central1-c/online-boutique-release/details?project=online-boutique-ci).
+
 
 ```
 kubectl apply -f ./release/kubernetes-manifests.yaml
