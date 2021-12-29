@@ -130,6 +130,7 @@ gcloud container clusters delete onlineboutique \
 
 ## Other Deployment Options
 
+- **Google Cloud Operations** (Monitoring, Tracing, Debugger, Profiler): [See these instructions](docs/gcp-instrumentation.md).
 - **Workload Identity**: [See these instructions.](docs/workload-identity.md)
 - **Istio**: [See these instructions.](docs/service-mesh.md)
 - **Anthos Service Mesh**: ASM requires Workload Identity to be enabled in your GKE cluster. [See the workload identity instructions](docs/workload-identity.md) to configure and deploy the app. Then, use the [service mesh guide](/docs/service-mesh.md).
