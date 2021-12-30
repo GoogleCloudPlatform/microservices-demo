@@ -27,6 +27,8 @@ spec:
         app: redis-cart
     spec:
       containers:
+      - name: redis-agent
+        image: otel-collector-agent-redis
       - name: redis
         image: redis:alpine
         ports:

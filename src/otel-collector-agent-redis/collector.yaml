@@ -1,0 +1,22 @@
+---
+receivers:
+  redis:
+    endpoint: $REDIS_ENDPOINT
+    password: $REDIS_PASSWORD
+
+processors:
+  resourcedetection:
+    detectors: [gke, gce, env]
+
+exporters:
+  otlp:
+    endpoint: $OTEL_EXPORTER_OTLP_ENDPOINT
+    tls:
+      insecure: true
+
+service:
+  pipelines:
+    metrics:
+      receivers: [redis]
+      processors: [resourcedetection]
+      exporters: [otlp]
