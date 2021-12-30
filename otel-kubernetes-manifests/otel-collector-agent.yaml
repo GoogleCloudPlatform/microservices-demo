@@ -1,25 +1,25 @@
 apiVersion: apps/v1
 kind: DaemonSet
 metadata:
-  name: otel-system
+  name: otel-collector-agent
   namespace: opentelemetry-demo
   labels:
     app: opentelemetry
-    component: otel-system-metrics
+    component: otel-collector-agent
 spec:
   selector:
     matchLabels:
       app: opentelemetry
-      component: otel-system-metrics
+      component: otel-collector-agent
   template:
     metadata:
       labels:
         app: opentelemetry
-        component: otel-system-metrics
+        component: otel-collector-agent
     spec:
       containers:
-      - name: otel-system
-        image: otel-system
+      - name: otel-collector-agent
+        image: otel-collector-agent
         resources:
           requests:
             cpu: 100m
