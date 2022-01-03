@@ -12,14 +12,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-FROM node:12-alpine as base
+FROM node:16-alpine as base
 
 FROM base as builder
 
 # Some packages (e.g. @google-cloud/profiler) require additional
 # deps for post-install scripts
 RUN apk add --update --no-cache \
-    python \
+    python3 \
     make \
     g++
 

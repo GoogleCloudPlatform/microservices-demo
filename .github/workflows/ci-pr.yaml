@@ -19,7 +19,7 @@ on:
       - master
 jobs:
   code-tests:
-    runs-on: [self-hosted]
+    runs-on: [self-hosted, is-enabled]
     steps:
     - uses: actions/checkout@v2
       with:
@@ -27,7 +27,10 @@ jobs:
         repository: ${{github.event.pull_request.head.repo.full_name}}
     - uses: actions/setup-dotnet@v1
       with:
-        dotnet-version: '5.0.201'
+        dotnet-version: '6.0.100'
+    - uses: actions/setup-go@v2
+      with:
+        go-version: '1.17.5'
     - name: Go Unit Tests
       timeout-minutes: 10
       run: |
@@ -42,7 +45,7 @@ jobs:
       run: |
         dotnet test src/cartservice/
   deployment-tests:
-    runs-on: self-hosted
+    runs-on: [self-hosted, is-enabled]
     needs: code-tests
     strategy:
       matrix:
@@ -72,9 +75,9 @@ jobs:
       env:
         ACTIONS_ALLOW_UNSECURE_COMMANDS: true
         PR_NUMBER: ${{ github.event.pull_request.number }}
-        PROJECT_ID: "onlineboutique-ci"
-        PR_CLUSTER: "online-boutique-pr"
-        ZONE: "us-east1-b"
+        PROJECT_ID: "online-boutique-ci"
+        PR_CLUSTER: "online-boutique-prs"
+        ZONE: "us-central1-c"
     - name: Wait For Pods
       timeout-minutes: 20
       run: |
