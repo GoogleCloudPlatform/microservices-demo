@@ -13,7 +13,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# [START gke_hack_make_docker_images]
 #!/usr/bin/env bash
 
 # Builds and pushes docker image for each demo microservice.
@@ -47,5 +46,3 @@ while IFS= read -d $'\0' -r dir; do
 done < <(find "${SCRIPTDIR}/../src" -mindepth 1 -maxdepth 1 -type d -print0)
 
 log "Successfully built and pushed all images."
-
-# [END gke_hack_make_docker_images]

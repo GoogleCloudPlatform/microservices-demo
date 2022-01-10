@@ -13,7 +13,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# [START gke_hack_make_release]
 #!/usr/bin/env bash
 
 # This script creates a new release by:
@@ -52,5 +51,3 @@ git push --set-upstream origin "release/${TAG}"
 git push --tags
 
 log "Successfully tagged release $TAG."
-
-# [END gke_hack_make_release]

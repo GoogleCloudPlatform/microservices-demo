@@ -13,7 +13,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# [START gke_hack_make_release_artifacts]
 #!/usr/bin/env bash
 
 # This script compiles manifest files with the image tags and places them in
@@ -101,5 +100,3 @@ main() {
 }
 
 main
-
-# [END gke_hack_make_release_artifacts]

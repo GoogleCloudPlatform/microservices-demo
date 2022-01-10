@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# [START gke_istio_manifests_frontend_gateway_gateway_frontend_gateway]
+# [START servicemesh_istio_manifests_frontend_gateway_gateway_frontend_gateway]
 apiVersion: networking.istio.io/v1alpha3
 kind: Gateway
 metadata:
@@ -28,9 +28,9 @@ spec:
       protocol: HTTP
     hosts:
     - "*"
-# [END gke_istio_manifests_frontend_gateway_gateway_frontend_gateway]
+# [END servicemesh_istio_manifests_frontend_gateway_gateway_frontend_gateway]
 ---
-# [START gke_istio_manifests_frontend_gateway_virtualservice_frontend_ingress]
+# [START servicemesh_istio_manifests_frontend_gateway_virtualservice_frontend_ingress]
 apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService
 metadata:
@@ -46,5 +46,5 @@ spec:
         host: frontend
         port:
           number: 80
-# [END gke_istio_manifests_frontend_gateway_virtualservice_frontend_ingress]
+# [END servicemesh_istio_manifests_frontend_gateway_virtualservice_frontend_ingress]
 ---

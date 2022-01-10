@@ -13,7 +13,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# [START gke_workflows_install_dependencies]
 #!/bin/bash
 
 set -euo pipefail
@@ -75,5 +74,3 @@ echo "✅ docker installed, rebooting..."
 
 # reboot for docker setup
 sudo reboot
-
-# [END gke_workflows_install_dependencies]

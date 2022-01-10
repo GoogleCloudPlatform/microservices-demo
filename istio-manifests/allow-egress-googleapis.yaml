@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# [START gke_istio_manifests_allow_egress_googleapis_serviceentry_allow_egress_googleapis]
+# [START servicemesh_istio_manifests_allow_egress_googleapis_serviceentry_allow_egress_googleapis]
 apiVersion: networking.istio.io/v1alpha3
 kind: ServiceEntry
 metadata:
@@ -29,9 +29,9 @@ spec:
   - number: 443
     protocol: HTTPS
     name: https
-# [END gke_istio_manifests_allow_egress_googleapis_serviceentry_allow_egress_googleapis]
+# [END servicemesh_istio_manifests_allow_egress_googleapis_serviceentry_allow_egress_googleapis]
 ---
-# [START gke_istio_manifests_allow_egress_googleapis_serviceentry_allow_egress_google_metadata]
+# [START servicemesh_istio_manifests_allow_egress_googleapis_serviceentry_allow_egress_google_metadata]
 apiVersion: networking.istio.io/v1alpha3
 kind: ServiceEntry
 metadata:
@@ -48,5 +48,5 @@ spec:
   - number: 443
     name: https
     protocol: HTTPS
-# [END gke_istio_manifests_allow_egress_googleapis_serviceentry_allow_egress_google_metadata]
+# [END servicemesh_istio_manifests_allow_egress_googleapis_serviceentry_allow_egress_google_metadata]
 ---
