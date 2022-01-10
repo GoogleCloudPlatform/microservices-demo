@@ -40,4 +40,4 @@ timeout: '3600s'
 options:
   machineType: 'N1_HIGHCPU_8'
   
-# [ END gke_cloudbuild_microservice_demo_cloudbuild]
+# [END gke_cloudbuild_microservice_demo_cloudbuild]

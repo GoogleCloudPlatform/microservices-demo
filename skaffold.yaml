@@ -85,20 +85,21 @@ profiles:
 # This profile is used by default when running skaffold debug.
 - name: debug
   activation:
-    - command: debug
+  - command: debug
   patches:
-    - op: replace
-      path: /build/artifacts/7/docker/dockerfile
-      value: Dockerfile.debug
-# [END gke_skaffold_config_app]
+  - op: replace
+    path: /build/artifacts/7/docker/dockerfile
+    value: Dockerfile.debug
+# [END gke_microservice_demo_skaffold_config_app]
 ---
-# [START gke_skaffold_config_loadgenerator]
+# [START gke_microservice_demo_skaffold_config_loadgenerator]
 apiVersion: skaffold/v2beta18
 kind: Config
 metadata:
   name: loadgenerator
 requires:
-  - configs: [app]
+- configs:
+  - app
 build:
   artifacts:
   - image: loadgenerator
@@ -107,5 +108,5 @@ deploy:
   kubectl:
     manifests:
     - ./kubernetes-manifests/loadgenerator.yaml
-# [END gke_skaffold_config_loadgenerator]
+# [END gke_microservice_demo_skaffold_config_loadgenerator]
 ---
