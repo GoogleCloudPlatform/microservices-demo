@@ -1,5 +1,3 @@
-#!/bin/bash -eu
-#
 # Copyright 2018 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,7 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# [START gke_shippingservice_genproto]
+#!/bin/bash -eu
+
 PATH=$PATH:$GOPATH/bin
 protodir=../../pb
 
 protoc --go_out=plugins=grpc:genproto -I $protodir $protodir/demo.proto
+
+# [END gke_shippingservice_genproto]

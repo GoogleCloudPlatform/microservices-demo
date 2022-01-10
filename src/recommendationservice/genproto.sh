@@ -1,6 +1,4 @@
-#!/bin/bash -eu
-#
-# Copyright 2018 Google LLC
+# Copyright 2021 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,9 +12,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# [START gke_recommendationservice_genproto]
+#!/bin/bash -eu
+
 # script to compile python protos
 #
 # requires gRPC tools:
 #   pip install -r requirements.txt
 
 python -m grpc_tools.protoc -I../../pb --python_out=. --grpc_python_out=. ../../pb/demo.proto
+
+# [END gke_recommendationservice_genproto]

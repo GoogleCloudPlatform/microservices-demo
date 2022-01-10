@@ -1,6 +1,5 @@
-#!/usr/bin/env bash
 
-# Copyright 2019 Google LLC
+# Copyright 2021 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,6 +12,9 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
+# [START gke_hack_make_docker_images]
+#!/usr/bin/env bash
 
 # Builds and pushes docker image for each demo microservice.
 
@@ -45,3 +47,5 @@ while IFS= read -d $'\0' -r dir; do
 done < <(find "${SCRIPTDIR}/../src" -mindepth 1 -maxdepth 1 -type d -print0)
 
 log "Successfully built and pushed all images."
+
+# [END gke_hack_make_docker_images]

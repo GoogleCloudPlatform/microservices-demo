@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# [START gke_kubernetes_manifests_adservice_deployment_adservice]
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -58,7 +59,9 @@ spec:
           periodSeconds: 15
           exec:
             command: ["/bin/grpc_health_probe", "-addr=:9555"]
+# [END gke_kubernetes_manifests_adservice_deployment_adservice]
 ---
+# [START gke_kubernetes_manifests_adservice_service_adservice]
 apiVersion: v1
 kind: Service
 metadata:
@@ -71,3 +74,5 @@ spec:
   - name: grpc
     port: 9555
     targetPort: 9555
+# [END gke_kubernetes_manifests_adservice_service_adservice]
+---

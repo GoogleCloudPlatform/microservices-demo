@@ -11,6 +11,8 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
+# [START gke_kubernetes_manifests_loadgenerator_deployment_loadgenerator]
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -61,3 +63,5 @@ spec:
           limits:
             cpu: 500m
             memory: 512Mi
+# [END gke_kubernetes_manifests_loadgenerator_deployment_loadgenerator]
+---

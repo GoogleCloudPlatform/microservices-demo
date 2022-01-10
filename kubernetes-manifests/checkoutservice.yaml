@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# [START gke_kubernetes_manifests_checkoutservice_deployment_checkoutservice]
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -67,7 +68,9 @@ spec:
             limits:
               cpu: 200m
               memory: 128Mi
+# [END gke_kubernetes_manifests_checkoutservice_deployment_checkoutservice]
 ---
+# [START gke_kubernetes_manifests_checkoutservice_service_checkoutservice]
 apiVersion: v1
 kind: Service
 metadata:
@@ -80,3 +83,5 @@ spec:
   - name: grpc
     port: 5050
     targetPort: 5050
+# [END gke_kubernetes_manifests_checkoutservice_service_checkoutservice]
+---

@@ -1,4 +1,5 @@
-# Copyright 2018 Google LLC
+
+# Copyright 2021 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# [START gke_istio_manifests_allow_egress_googleapis_serviceentry_allow_egress_googleapis]
 apiVersion: networking.istio.io/v1alpha3
 kind: ServiceEntry
 metadata:
@@ -27,7 +29,9 @@ spec:
   - number: 443
     protocol: HTTPS
     name: https
+# [END gke_istio_manifests_allow_egress_googleapis_serviceentry_allow_egress_googleapis]
 ---
+# [START gke_istio_manifests_allow_egress_googleapis_serviceentry_allow_egress_google_metadata]
 apiVersion: networking.istio.io/v1alpha3
 kind: ServiceEntry
 metadata:
@@ -44,3 +48,5 @@ spec:
   - number: 443
     name: https
     protocol: HTTPS
+# [END gke_istio_manifests_allow_egress_googleapis_serviceentry_allow_egress_google_metadata]
+---

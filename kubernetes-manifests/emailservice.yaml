@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# [START gke_kubernetes_manifests_emailservice_deployment_emailservice]
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -54,7 +55,9 @@ spec:
           limits:
             cpu: 200m
             memory: 128Mi
+# [END gke_kubernetes_manifests_emailservice_deployment_emailservice]
 ---
+# [START gke_kubernetes_manifests_emailservice_service_emailservice]
 apiVersion: v1
 kind: Service
 metadata:
@@ -67,3 +70,5 @@ spec:
   - name: grpc
     port: 5000
     targetPort: 8080
+# [END gke_kubernetes_manifests_emailservice_service_emailservice]
+---
