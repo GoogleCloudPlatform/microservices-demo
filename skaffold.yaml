@@ -98,8 +98,7 @@ kind: Config
 metadata:
   name: loadgenerator
 requires:
-- configs:
-  - app
+- configs: [app]
 build:
   artifacts:
   - image: loadgenerator
