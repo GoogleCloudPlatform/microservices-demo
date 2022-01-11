@@ -1,3 +1,5 @@
+#!/bin/bash -eu
+
 # Copyright 2018 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,7 +15,6 @@
 # limitations under the License.
 
 # [START gke_shippingservice_genproto]
-#!/bin/bash -eu
 
 PATH=$PATH:$GOPATH/bin
 protodir=../../pb

@@ -1,3 +1,4 @@
+#!/bin/bash -eu
 
 # Copyright 2021 Google LLC
 #
@@ -14,7 +15,6 @@
 # limitations under the License.
 
 # [START gke_currencyservice_genproto]
-#!/bin/bash -eu
 
 # protos are loaded dynamically for node, simply copies over the proto.
 mkdir -p proto

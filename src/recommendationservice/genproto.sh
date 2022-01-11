@@ -1,3 +1,4 @@
+#!/bin/bash -eu
 # Copyright 2021 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,7 +14,6 @@
 # limitations under the License.
 
 # [START gke_recommendationservice_genproto]
-#!/bin/bash -eu
 
 # script to compile python protos
 #

@@ -1,3 +1,4 @@
+#!/bin/bash -eu
 
 # Copyright 2021 Google LLC
 #
@@ -14,8 +15,6 @@
 # limitations under the License.
 
 # [START gke_frontend_genproto]
-#!/bin/bash -eu
-
 
 PATH=$PATH:$GOPATH/bin
 protodir=../../pb
