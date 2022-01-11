@@ -72,4 +72,3 @@ spec:
     port: 7000
     targetPort: 7000
 # [END gke_kubernetes_manifests_currencyservice_service_currencyservice]
----

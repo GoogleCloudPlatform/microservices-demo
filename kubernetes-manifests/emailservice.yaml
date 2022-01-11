@@ -71,4 +71,3 @@ spec:
     port: 5000
     targetPort: 8080
 # [END gke_kubernetes_manifests_emailservice_service_emailservice]
----

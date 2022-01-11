@@ -117,4 +117,3 @@ spec:
     port: 80
     targetPort: 8080
 # [END gke_kubernetes_manifests_frontend_service_frontend_external]
----

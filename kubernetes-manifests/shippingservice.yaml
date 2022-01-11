@@ -73,4 +73,3 @@ spec:
     port: 50051
     targetPort: 50051
 # [END gke_kubernetes_manifests_shippingservice_service_shippingservice]
----

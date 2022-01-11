@@ -84,4 +84,3 @@ spec:
     port: 5050
     targetPort: 5050
 # [END gke_kubernetes_manifests_checkoutservice_service_checkoutservice]
----

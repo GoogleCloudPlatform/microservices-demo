@@ -68,4 +68,3 @@ spec:
     port: 7070
     targetPort: 7070
 # [END gke_kubernetes_manifests_cartservice_service_cartservice]
----

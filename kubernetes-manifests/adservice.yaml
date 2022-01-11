@@ -75,4 +75,3 @@ spec:
     port: 9555
     targetPort: 9555
 # [END gke_kubernetes_manifests_adservice_service_adservice]
----

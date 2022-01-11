@@ -27,4 +27,3 @@ spec:
         port:
           number: 80
 # [END servicemesh_istio_manifests_frontend_virtualservice_frontend]
----

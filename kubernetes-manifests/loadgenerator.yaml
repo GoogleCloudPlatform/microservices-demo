@@ -64,4 +64,3 @@ spec:
             cpu: 500m
             memory: 512Mi
 # [END gke_kubernetes_manifests_loadgenerator_deployment_loadgenerator]
----

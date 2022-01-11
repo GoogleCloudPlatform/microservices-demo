@@ -49,4 +49,3 @@ spec:
     name: https
     protocol: HTTPS
 # [END servicemesh_istio_manifests_allow_egress_googleapis_serviceentry_allow_egress_google_metadata]
----

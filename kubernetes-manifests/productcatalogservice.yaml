@@ -73,4 +73,3 @@ spec:
     port: 3550
     targetPort: 3550
 # [END gke_kubernetes_manifests_productcatalogservice_service_productcatalogservice]
----

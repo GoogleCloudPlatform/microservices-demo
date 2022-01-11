@@ -75,4 +75,3 @@ spec:
     port: 8080
     targetPort: 8080
 # [END gke_kubernetes_manifests_recommendationservice_service_recommendationservice]
----

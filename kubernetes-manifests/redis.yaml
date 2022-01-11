@@ -69,4 +69,3 @@ spec:
     port: 6379
     targetPort: 6379
 # [END gke_kubernetes_manifests_redis_service_redis_cart]
----

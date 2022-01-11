@@ -50,13 +50,13 @@ EOF
 read_manifests() {
     local dir
     dir="$1"
-
+    
     while IFS= read -d $'\0' -r file; do
         # strip license headers (pattern "^# ")
         awk '
         /^[^# ]/ { found = 1 }
         found { print }' "${file}"
-
+        
         echo "---"
     done < <(find "${dir}" -name '*.yaml' -type f -print0)
 }
@@ -92,11 +92,15 @@ main() {
 
     k8s_manifests_file="${OUT_DIR}/kubernetes-manifests.yaml"
     mk_kubernetes_manifests > "${k8s_manifests_file}"
+    # removes region tags to the release manifests
+    sed -i '' '/[^# \[]]/d' "${k8s_manifests_file}" 
     log "Written ${k8s_manifests_file}"
 
     istio_manifests_file="${OUT_DIR}/istio-manifests.yaml"
     mk_istio_manifests > "${istio_manifests_file}"
+    # removes region tags to the release manifests
+    sed -i '' '/[^# \[]]/d' "${istio_manifests_file}" 
     log "Written ${istio_manifests_file}"
 }
-
+# "$@"
 main
