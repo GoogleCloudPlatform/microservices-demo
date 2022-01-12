@@ -30,7 +30,7 @@ resource "google_project_iam_member" "gke_account_permissions" {
 resource "google_container_cluster" "primary" {
   name     = var.app_name
   location = var.region
-  
+
   # We can't create a cluster with no node pool defined, but we want to only use
   # separately managed node pools. So we create the smallest possible default
   # node pool and immediately delete it.
@@ -101,7 +101,7 @@ resource "google_container_node_pool" "primary_nodes" {
   }
 
   management {
-    auto_repair = true
+    auto_repair  = true
     auto_upgrade = true
   }
 

@@ -19,8 +19,8 @@ You will need the [gcloud CLI](https://cloud.google.com/sdk/gcloud) and [Terrafo
 The Terraform template uses:
 
 * [Terraform](https://www.hashicorp.com/blog/announcing-hashicorp-terraform-1-0-general-availability) 1.0.0
-* [Google Cloud Platform Provider](https://registry.terraform.io/providers/hashicorp/google/latest/docs) 4.0.0
-* [Gavin Bunney's kubectl Provider](https://registry.terraform.io/providers/gavinbunney/kubectl/latest/docs) 1.13.0
+* [Google Cloud Platform Provider](https://registry.terraform.io/providers/hashicorp/google/latest/docs) 4.6.0
+* [Gavin Bunney's kubectl Provider](https://registry.terraform.io/providers/gavinbunney/kubectl/latest/docs) 1.13.1
 
 ## Terraform Variables
 
@@ -75,7 +75,7 @@ After reviewing the plan you can apply it,
 terraform apply "demo.tfplan"
 ```
 
-After the deployment finishes you will be presented with some data about your cluster. You can retrieve the endpoint for the application as well,
+After the deployment finishes you will be presented with some data about your cluster, and how You can retrieve the endpoint for the application.
 
 ```sh
 gcloud container clusters get-credentials [app_name] --region [region] --project [project_id]

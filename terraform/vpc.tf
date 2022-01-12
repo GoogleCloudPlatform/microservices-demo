@@ -12,11 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-provider "google" {
-  project = var.project_id
-  region  = var.region
-}
-
 # VPC
 resource "google_compute_network" "vpc" {
   name                    = "${var.app_name}-vpc"
@@ -25,9 +20,9 @@ resource "google_compute_network" "vpc" {
 
 # Subnets
 resource "google_compute_subnetwork" "subnet" {
-  name          = "${var.app_name}-subnet"
-  region        = var.region
-  network       = google_compute_network.vpc.name
+  name    = "${var.app_name}-subnet"
+  region  = var.region
+  network = google_compute_network.vpc.name
 
   ip_cidr_range = var.gke_nodes_cidr
 

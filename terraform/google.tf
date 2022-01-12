@@ -1,4 +1,4 @@
-# Copyright 2021 Paulo Albuquerque
+# Copyright 2022 Paulo Albuquerque
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,17 +12,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-terraform {
-  required_providers {
-    google = {
-      source  = "hashicorp/google"
-      version = "~> 4.6.0"
-    }
-    kubectl = {
-      source  = "gavinbunney/kubectl"
-      version = "~> 1.13.1"
-    }
-  }
+# Set Google provider defaults
+provider "google" {
+  project = var.project_id
+  region  = var.region
+}
 
-  required_version = "~> 1.0.0"
+# Activate the necessary GCP APIs
+resource "google_project_service" "gcp_apis" {
+  for_each                   = toset(["cloudresourcemanager.googleapis.com", "compute.googleapis.com", "container.googleapis.com", "servicenetworking.googleapis.com"])
+  project                    = var.project_id
+  service                    = each.value
+  disable_dependent_services = false
+  disable_on_destroy         = false
 }

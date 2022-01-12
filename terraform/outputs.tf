@@ -31,3 +31,12 @@ output "kubernetes_cluster_host" {
   value       = google_container_cluster.primary.endpoint
   description = "GKE Cluster Host"
 }
+
+output "instructions" {
+  value       = <<EOF
+  Run the following commands to retrieve the endpoint for the application:
+  gcloud container clusters get-credentials ${var.app_name} --zone ${var.region} --project ${var.project_id}
+  kubectl get service frontend-external | awk '{print $4}'
+  EOF
+  description = "Instructions for retrieving the endpoint for the application"
+}

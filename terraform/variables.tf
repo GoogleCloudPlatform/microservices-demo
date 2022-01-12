@@ -13,7 +13,7 @@
 # limitations under the License.
 
 variable "app_name" {
-  default = "onlineboutique"
+  default     = "onlineboutique"
   description = "Application name"
 }
 
@@ -26,8 +26,8 @@ variable "region" {
 }
 
 variable "machine_type" {
-    default   = "e2-standard-2"
-    description = "Machine type for GKE cluster nodes."
+  default     = "e2-standard-2"
+  description = "Machine type for GKE cluster nodes."
 }
 
 variable "preemptible" {
@@ -46,21 +46,21 @@ variable "max_node_count" {
 }
 
 variable "gke_nodes_cidr" {
-  default = "10.0.0.0/16"
+  default     = "10.0.0.0/16"
   description = "The IP range in CIDR notation to use for the nodes network. This range will be used for assigning private IP addresses to cluster nodes. This range must not overlap with any other ranges in use within the cluster's network."
 }
 
 variable "gke_pods_cidr" {
-  default = "10.1.0.0/16"
+  default     = "10.1.0.0/16"
   description = "The IP range in CIDR notation to use for the pods network. This range will be used for assigning private IP addresses to pods deployed in the cluster. This range must not overlap with any other ranges in use within the cluster's network."
 }
 
 variable "gke_services_cidr" {
-  default = "10.2.0.0/16"
+  default     = "10.2.0.0/16"
   description = "The IP range in CIDR notation to use for the services network. This range will be used for assigning private IP addresses to services deployed in the cluster. This range must not overlap with any other ranges in use within the cluster's network."
 }
 
 variable "gke_master_cidr" {
-  default = "10.3.0.0/28"
+  default     = "10.3.0.0/28"
   description = "The IP range in CIDR notation to use for the hosted master network. This range will be used for assigning private IP addresses to the cluster master(s) and the ILB VIP. This range must not overlap with any other ranges in use within the cluster's network, and it must be a /28 subnet. "
 }
