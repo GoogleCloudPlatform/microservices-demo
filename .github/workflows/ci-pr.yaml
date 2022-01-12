@@ -16,7 +16,7 @@ name: "Continuous Integration - Pull Request"
 on:
   pull_request:
     branches:
-      - master
+      - main
 jobs:
   code-tests:
     runs-on: [self-hosted, is-enabled]
