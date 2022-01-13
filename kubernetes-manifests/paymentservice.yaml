@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# [START gke_kubernetes_manifests_paymentservice_deployment_paymentservice]
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -55,9 +54,7 @@ spec:
           limits:
             cpu: 200m
             memory: 128Mi
-# [END gke_kubernetes_manifests_paymentservice_deployment_paymentservice]
 ---
-# [START gke_kubernetes_manifests_paymentservice_service_paymentservice]
 apiVersion: v1
 kind: Service
 metadata:
@@ -70,4 +67,3 @@ spec:
   - name: grpc
     port: 50051
     targetPort: 50051
-# [END gke_kubernetes_manifests_paymentservice_service_paymentservice]

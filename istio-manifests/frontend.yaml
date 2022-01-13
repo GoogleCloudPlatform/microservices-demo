@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# [START servicemesh_istio_manifests_frontend_virtualservice_frontend]
 apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService
 metadata:
@@ -26,4 +25,3 @@ spec:
         host: frontend
         port:
           number: 80
-# [END servicemesh_istio_manifests_frontend_virtualservice_frontend]

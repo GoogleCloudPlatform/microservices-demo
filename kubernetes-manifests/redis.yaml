@@ -13,7 +13,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# [START gke_kubernetes_manifests_redis_deployment_redis_cart]
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -53,9 +52,7 @@ spec:
       volumes:
       - name: redis-data
         emptyDir: {}
-# [END gke_kubernetes_manifests_redis_deployment_redis_cart]
 ---
-# [START gke_kubernetes_manifests_redis_service_redis_cart]
 apiVersion: v1
 kind: Service
 metadata:
@@ -68,4 +65,3 @@ spec:
   - name: redis
     port: 6379
     targetPort: 6379
-# [END gke_kubernetes_manifests_redis_service_redis_cart]

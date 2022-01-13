@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# [START gke_kubernetes_manifests_currencyservice_deployment_currencyservice]
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -56,9 +55,7 @@ spec:
           limits:
             cpu: 200m
             memory: 128Mi
-# [END gke_kubernetes_manifests_currencyservice_deployment_currencyservice]
 ---
-# [START gke_kubernetes_manifests_currencyservice_service_currencyservice]
 apiVersion: v1
 kind: Service
 metadata:
@@ -71,4 +68,3 @@ spec:
   - name: grpc
     port: 7000
     targetPort: 7000
-# [END gke_kubernetes_manifests_currencyservice_service_currencyservice]

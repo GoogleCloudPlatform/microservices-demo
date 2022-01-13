@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# [START gke_kubernetes_manifests_recommendationservice_deployment_recommendationservice]
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -59,9 +58,7 @@ spec:
           limits:
             cpu: 200m
             memory: 450Mi
-# [END gke_kubernetes_manifests_recommendationservice_deployment_recommendationservice]
 ---
-# [START gke_kubernetes_manifests_recommendationservice_service_recommendationservice]
 apiVersion: v1
 kind: Service
 metadata:
@@ -74,4 +71,3 @@ spec:
   - name: grpc
     port: 8080
     targetPort: 8080
-# [END gke_kubernetes_manifests_recommendationservice_service_recommendationservice]

@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# [START gke_kubernetes_manifests_cartservice_deployment_cartservice]
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -52,9 +51,7 @@ spec:
           periodSeconds: 10
           exec:
             command: ["/bin/grpc_health_probe", "-addr=:7070", "-rpc-timeout=5s"]
-# [END gke_kubernetes_manifests_cartservice_deployment_cartservice]
 ---
-# [START gke_kubernetes_manifests_cartservice_service_cartservice]
 apiVersion: v1
 kind: Service
 metadata:
@@ -67,4 +64,3 @@ spec:
   - name: grpc
     port: 7070
     targetPort: 7070
-# [END gke_kubernetes_manifests_cartservice_service_cartservice]

@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# [START gke_kubernetes_manifests_frontend_deployment_frontend]
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -86,9 +85,7 @@ spec:
             limits:
               cpu: 200m
               memory: 128Mi
-# [END gke_kubernetes_manifests_frontend_deployment_frontend]
 ---
-# [START gke_kubernetes_manifests_frontend_service_frontend]
 apiVersion: v1
 kind: Service
 metadata:
@@ -101,9 +98,7 @@ spec:
   - name: http
     port: 80
     targetPort: 8080
-# [END gke_kubernetes_manifests_frontend_service_frontend]
 ---
-# [START gke_kubernetes_manifests_frontend_service_frontend_external]
 apiVersion: v1
 kind: Service
 metadata:
@@ -116,4 +111,3 @@ spec:
   - name: http
     port: 80
     targetPort: 8080
-# [END gke_kubernetes_manifests_frontend_service_frontend_external]
