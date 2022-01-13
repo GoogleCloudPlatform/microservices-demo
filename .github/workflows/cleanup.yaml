@@ -15,9 +15,9 @@
 name: "Clean up deployment"
 on:
   pull_request:
-    # run on pull requests targeting master
+    # run on pull requests targeting main
     branches:
-      - master
+      - main
     types: closed
 jobs:
   cleanup-namespace:
