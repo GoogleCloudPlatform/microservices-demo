@@ -1,5 +1,6 @@
-
-# Copyright 2021 Google LLC
+#!/bin/bash -eu
+#
+# Copyright 2018 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,8 +15,6 @@
 # limitations under the License.
 
 # [START gke_adservice_genproto]
-#!/bin/bash -eu
-
 # protos are needed in adservice folder for compiling during Docker build.
 
 mkdir -p proto && \
