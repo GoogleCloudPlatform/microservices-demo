@@ -47,3 +47,7 @@ Deploy the Kubernetes manifests:
 ```
 kubectl apply -f .
 ```
+
+Remove the default `LoadBalancer` `Service` not used anymore:
+```
+kubectl delete service frontend-external
