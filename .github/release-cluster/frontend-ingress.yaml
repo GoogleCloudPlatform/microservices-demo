@@ -7,5 +7,5 @@ metadata:
     networking.gke.io/managed-certificates: online-boutique-certificate
 spec:
   backend:
-    serviceName: frontend-nodeport
+    serviceName: frontend
     servicePort: 80
