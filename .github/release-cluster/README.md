@@ -16,7 +16,7 @@ gcloud compute addresses describe $staticIpName \
 
 Setup Cloud Armor:
 ```
-securityPolicyName=onlineboutique # Name hard-coded in: backendconfig.yaml
+securityPolicyName=online-boutique-security-policy # Name hard-coded in: backendconfig.yaml
 gcloud compute security-policies create $securityPolicyName \
     --description "Block XSS attacks"
 gcloud compute security-policies rules create 1000 \
@@ -37,7 +37,7 @@ gcloud compute security-policies update $securityPolicyName \
 
 Setup an SSL policy in order to setup later a redirect from http to https:
 ```
-sslPolicyName=onlineboutique # Name hard-coded in: frontendconfig.yaml
+sslPolicyName=online-boutique-ssl-policy # Name hard-coded in: frontendconfig.yaml
 gcloud compute ssl-policies create $sslPolicyName \
     --profile COMPATIBLE  \
     --min-tls-version 1.0
@@ -51,3 +51,4 @@ kubectl apply -f .
 Remove the default `LoadBalancer` `Service` not used anymore:
 ```
 kubectl delete service frontend-external
+```
