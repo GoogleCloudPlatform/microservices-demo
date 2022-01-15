@@ -4,41 +4,42 @@ This directory contains extra deploy manifests for configuring a domain name/sta
 
 Create the static Public IP address:
 ```
-gcloud compute addresses create online-boutique-ip --global
+STATIC_IP_NAME=online-boutique-ip # name hard-coded in: frontend-ingress.yaml
+gcloud compute addresses create $STATIC_IP_NAME --global
 ```
 
 When ready to do so, you could grab this Public IP address and update your DNS:
 ```
-gcloud compute addresses describe $staticIpName \
+gcloud compute addresses describe $STATIC_IP_NAME \
     --global \
     --format "value(address)"
 ```
 
 Setup Cloud Armor:
 ```
-securityPolicyName=online-boutique-security-policy # Name hard-coded in: backendconfig.yaml
-gcloud compute security-policies create $securityPolicyName \
+SECURITY_POLICY_NAME=online-boutique-security-policy # Name hard-coded in: backendconfig.yaml
+gcloud compute security-policies create $SECURITY_POLICY_NAME \
     --description "Block XSS attacks"
 gcloud compute security-policies rules create 1000 \
-    --security-policy $securityPolicyName \
+    --security-policy $SECURITY_POLICY_NAME \
     --expression "evaluatePreconfiguredExpr('xss-stable')" \
     --action "deny-403" \
     --description "XSS attack filtering"
 gcloud compute security-policies rules create 12345 \
-    --security-policy $securityPolicyName \
+    --security-policy $SECURITY_POLICY_NAME \
     --expression "evaluatePreconfiguredExpr('cve-canary')" \
     --action "deny-403" \
     --description "CVE-2021-44228 and CVE-2021-45046"
-gcloud compute security-policies update $securityPolicyName \
+gcloud compute security-policies update $SECURITY_POLICY_NAME \
     --enable-layer7-ddos-defense
-gcloud compute security-policies update $securityPolicyName \
+gcloud compute security-policies update $SECURITY_POLICY_NAME \
     --log-level=VERBOSE
 ```
 
 Setup an SSL policy in order to setup later a redirect from http to https:
 ```
-sslPolicyName=online-boutique-ssl-policy # Name hard-coded in: frontendconfig.yaml
-gcloud compute ssl-policies create $sslPolicyName \
+SSL_POLICY_NAME=online-boutique-ssl-policy # Name hard-coded in: frontendconfig.yaml
+gcloud compute ssl-policies create $SSL_POLICY_NAME \
     --profile COMPATIBLE  \
     --min-tls-version 1.0
 ```
@@ -48,7 +49,17 @@ Deploy the Kubernetes manifests:
 kubectl apply -f .
 ```
 
-Remove the default `LoadBalancer` `Service` not used anymore:
+Wait for the ManagedCertificate to be provisioned. This usually takes about 30 minutes.
+```
+kubectl get managedcertificates
+```
+
+Remove the default `LoadBalancer` `Service` not used at this point:
 ```
 kubectl delete service frontend-external
+```
+
+Remove the `loadgenerator` `Deployment` not used at this point:
+```
+kubectl delete deployment loadgenerator
 ```

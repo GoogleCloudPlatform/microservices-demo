@@ -3,9 +3,5 @@ kind: BackendConfig
 metadata:
   name: frontend-backend-config
 spec:
-  healthCheck:
-    requestPath: /healthz/ready
-    port: 15021
-    type: HTTP
   securityPolicy:
     name: online-boutique-security-policy
