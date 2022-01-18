@@ -18,7 +18,7 @@
 # - 1. building/pushing images
 # - 2. injecting tags into YAML manifests
 # - 3. creating a new git tag
-# - 4. pushing the tag/commit to master.
+# - 4. pushing the tag/commit to main.
 
 set -euo pipefail
 SCRIPTDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
