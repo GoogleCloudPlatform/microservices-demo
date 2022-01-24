@@ -21,9 +21,9 @@ markupsafe==1.1.1         # via jinja2
 msgpack==1.0.0            # via locust
 psutil==5.7.2             # via locust
 pyzmq==19.0.2             # via locust
-requests==2.24.0          # via locust
+requests==2.27.1          # via locust
 six==1.15.0               # via geventhttpclient
-urllib3==1.25.10          # via requests
+urllib3==1.26.5          # via requests
 werkzeug==1.0.1           # via flask, locust
 zope.event==4.5.0         # via gevent
 zope.interface==5.1.0     # via gevent

@@ -89,7 +89,7 @@ python-json-logger==0.1.11
     # via -r requirements.in
 pytz==2018.9
     # via google-api-core
-requests==2.24.0
+requests==2.27.1
     # via
     #   -r requirements.in
     #   google-api-core
@@ -107,7 +107,7 @@ six==1.15.0
     #   protobuf
 uritemplate==3.0.1
     # via google-api-python-client
-urllib3==1.25.10
+urllib3==1.26.5
     # via requests
 
 # The following packages are considered to be unsafe in a requirements file:
