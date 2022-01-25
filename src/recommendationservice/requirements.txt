@@ -31,11 +31,11 @@ pyasn1==0.4.8             # via pyasn1-modules, rsa
 python-json-logger==0.1.11  # via -r requirements.in
 pytz==2018.9              # via google-api-core
 pyyaml==5.3.1             # via google-python-cloud-debugger
-requests==2.27.1          # via -r requirements.in, google-api-core
+requests==2.24.0          # via -r requirements.in, google-api-core
 rsa==4.6                  # via google-auth
 six==1.15.0               # via google-api-core, google-api-python-client, google-auth, google-auth-httplib2, google-cloud-core, google-python-cloud-debugger, grpcio, protobuf
 uritemplate==3.0.1        # via google-api-python-client
-urllib3==1.26.5          # via requests
+urllib3==1.25.10          # via requests
 
 # The following packages are considered to be unsafe in a requirements file:
 # setuptools
