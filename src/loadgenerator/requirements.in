@@ -1,1 +1,3 @@
-locust==1.2.3
+locust==1.6.0
+requests==2.27.1
+urllib3==1.26.5
