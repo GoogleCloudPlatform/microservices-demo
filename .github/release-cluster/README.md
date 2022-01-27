@@ -2,6 +2,8 @@
 
 This directory contains extra deploy manifests for configuring a domain name/static IP to point to an Online Boutique deployment running in GKE and for setting up Cloud Armor.
 
+_Note: before moving forward, the OnlineBoutique apps should already be deployed [on the online-boutique-release GKE cluster](../../hack#10-deploy-releasekubernetes-manifestsyaml-to-our-online-boutique-release-gke-cluster)._
+
 Create the static public IP address:
 ```
 STATIC_IP_NAME=online-boutique-ip # name hard-coded in: frontend-ingress.yaml
@@ -19,7 +21,7 @@ Set up Cloud Armor:
 ```
 SECURITY_POLICY_NAME=online-boutique-security-policy # Name hard-coded in: backendconfig.yaml
 gcloud compute security-policies create $SECURITY_POLICY_NAME \
-    --description "Block XSS attacks"
+    --description "Block various attacks"
 gcloud compute security-policies rules create 1000 \
     --security-policy $SECURITY_POLICY_NAME \
     --expression "evaluatePreconfiguredExpr('xss-stable')" \
@@ -44,12 +46,12 @@ gcloud compute ssl-policies create $SSL_POLICY_NAME \
     --min-tls-version 1.0
 ```
 
-Deploy the Kubernetes manifests:
+Deploy the Kubernetes manifests in this current folder:
 ```
 kubectl apply -f .
 ```
 
-Wait for the ManagedCertificate to be provisioned. This usually takes about 30 minutes.
+Wait for the `ManagedCertificate` to be provisioned. This usually takes about 30 minutes.
 ```
 kubectl get managedcertificates
 ```
