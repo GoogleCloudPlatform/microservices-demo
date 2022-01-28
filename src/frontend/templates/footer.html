@@ -32,6 +32,9 @@
                     <b>Cluster: </b>{{index .deploymentDetails "CLUSTERNAME" }}<br/>
                     <b>Zone: </b>{{index .deploymentDetails "ZONE" }}<br/>
                     <b>Pod: </b>{{index .deploymentDetails "HOSTNAME" }}
+                    {{ else }}
+                    Deployment details are either still loading or failed to load.
+                    Try refreshing this page.
                     {{ end }}
                 </small>
             </p>
