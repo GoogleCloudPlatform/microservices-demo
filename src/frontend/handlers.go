@@ -56,6 +56,8 @@ func (fe *frontendServer) homeHandler(w http.ResponseWriter, r *http.Request) {
 	log := r.Context().Value(ctxKeyLog{}).(logrus.FieldLogger)
 	log.WithField("currency", currentCurrency(r)).Info("home")
 	currencies, err := fe.getCurrencies(r.Context())
+	
+	
 	if err != nil {
 		renderHTTPError(log, r, w, errors.Wrap(err, "could not retrieve currencies"), http.StatusInternalServerError)
 		return
@@ -117,9 +119,42 @@ func (fe *frontendServer) homeHandler(w http.ResponseWriter, r *http.Request) {
 		"platform_name":     plat.provider,
 		"is_cymbal_brand":   isCymbalBrand,
 		"deploymentDetails": getDeploymentDetails(r),
+		// Get AvgRating to use in HTML
+		"avgRating"			: "3.0",
 	}); err != nil {
 		log.Error(err)
 	}
+}
+
+// Handler for Route /setRating
+
+func (fe *frontendServer) setRatingHandler(w http.ResponseWriter, r *http.Request) {
+	log := r.Context().Value(ctxKeyLog{}).(logrus.FieldLogger)
+	
+	// get vars
+	orderId := r.FormValue("orderId")
+	rate := r.FormValue("rate")
+
+	if orderId != "" && rate != "" {
+		 // log 
+		log.WithField("orderId", orderId).WithField("Rating", rate).Debug("New Rating")
+
+		// Send Rating to Backend
+		// order, err := pb.NewCheckoutServiceClient(fe.checkoutSvcConn).
+		// 	SetRating(r.Context(), &pb.SetRatingRequest{
+		// 		Rating: rate[0],
+		// 		OrderId: orderId[0]
+		// 	})
+
+		// if err != nil {
+		// 	renderHTTPError(log, r, w, errors.Wrap(err, "failed to complete the order"), http.StatusInternalServerError)
+		// 	return
+		// }
+	}
+	
+	// redirect to "/"
+	w.Header().Set("location", "/")
+	w.WriteHeader(http.StatusFound)
 }
 
 func (plat *platformDetails) setPlatformDetails(env string) {
@@ -318,6 +353,7 @@ func (fe *frontendServer) viewCartHandler(w http.ResponseWriter, r *http.Request
 		log.Println(err)
 	}
 }
+
 
 func (fe *frontendServer) placeOrderHandler(w http.ResponseWriter, r *http.Request) {
 	log := r.Context().Value(ctxKeyLog{}).(logrus.FieldLogger)
