@@ -34,7 +34,7 @@ import (
 	"google.golang.org/grpc/status"
 
 	pb "github.com/GoogleCloudPlatform/microservices-demo/src/shippingservice/genproto"
-	rook "github.com/Rookout/GoRook"
+	rook "github.com/Rookout/GoSDK"
 	healthpb "google.golang.org/grpc/health/grpc_health_v1"
 )
 

@@ -1,0 +1,465 @@
+#!/usr/bin/env bash
+
+# This script is meant for quick & easy install of the Rookout controller:
+#
+#   $ curl -fs https://get.rookout.com | bash
+#
+#       Or
+#
+#   $ curl -fs https://get.rookout.com | bash -s -k token
+
+function print_usage {
+    echo "Usage: setup.sh [-h] [-dv] [-k=token] [--site=url] [--https-proxy=url]"
+    echo ""
+    echo "Installs rookout-controller"
+    echo ""
+    echo "Flags:"
+    echo "-h, --help                    Display this usage prompt"
+    echo "-v, --verbose                 Verbose mode"
+    echo "-d, --debug                   Debug mode (echo on)"
+    echo "-k=<token>, --token=<token>   Rookout Token"
+    echo "--site=<url>                  Alternative URL for controller"
+    echo "--https-proxy=<url>           HTTPS Proxy for controller to use"
+    echo "--listen-all                  Enable listening on all interfaces"
+    echo "--no-data-export              Don't export data for interactive debugging sessions to Rookout"
+    echo "--max-mem=<max memory>        Limit controller max memory to <max memory> MB"
+    echo "--keep-old-config             Keep old configuration when updating"
+}
+
+function format() {
+    echo -e "\e[${1}m${*:2}\e[0m";
+}
+
+function bold() {
+    format 1 "$@";
+}
+
+########################################################################################################################
+# Command arguments parsing
+
+DEBUG=0
+VERBOSE=0
+HELP=0
+SITE="https://get.rookout.com"
+HTTPS_PROXY=""
+COMMAND=""
+LISTEN_ALL_INTERFACES="FALSE"
+SEND_COLLECTED_DATA="TRUE"
+ERROR=0
+OLD_VERSION_INSTALLED=false
+
+for i in "$@"
+do
+case ${i} in
+    -d|--debug)
+    DEBUG=1
+    ;;
+    -v|--verbose)
+    VERBOSE=1
+    ;;
+    -h|--help)
+    HELP=1
+    ;;
+    -k=*|--token=*)
+    ROOKOUT_TOKEN="${i#*=}"
+    ;;
+    --max-mem=*)
+    MAX_MEMORY="${i#*=}"
+    ;;
+    --site=*)
+    SITE="${i#*=}"
+    echo "Using alternative site {$SITE}"
+    shift # past argument=value
+    ;;
+    --https-proxy=*)
+    HTTPS_PROXY=${i#*=}
+    echo "Using https_proxy in controller init.d env"
+    ;;
+    --listen-all)
+    LISTEN_ALL_INTERFACES="TRUE"
+    echo "Controller will listen on all interfaces - configured in controller init.d env"
+    ;;
+    --no-data-export)
+    SEND_COLLECTED_DATA="FALSE"
+    echo "Controller will not export data for interactive debugging session to Rookout - configured in controller init.d env"
+    ;;
+    --keep-old-config)
+    KEEP_OLD_CONFIG=1
+    echo "Will not overwrite /etc/default/rookout when updating"
+    ;;
+    "controller"|"agent")
+    if [ ! -z ${COMMAND} ] ; then
+        echo "ERROR: Multiple commands specified!"
+        ERROR=1
+    fi
+    COMMAND="controller"
+    ;;
+    "python-rook"|"python3-rook")
+    bold "Installing a Rook with this script is no longer supported"
+    echo "See https://docs.rookout.com/docs/installation-python.html for installation instructions"
+    echo
+    ERROR=1
+    ;;
+    *)
+    echo "ERROR: Unknown option- ${i}"
+    ERROR=1 # unknown option
+    ;;
+esac
+done
+
+if [ ${DEBUG} -ne 0 ] ; then
+    echo "Debug mode on"
+    set -xv #echo on
+fi
+
+if [ ${VERBOSE} -eq 0 ] ; then
+    QUIET='-q'
+else
+    echo "Verbose mode on"
+    QUIET=''
+fi
+
+if [ ${HELP} -ne 0 ] ; then
+    print_usage
+    exit 0
+fi
+
+if [ -z ${COMMAND} ] ; then
+    COMMAND="controller"
+fi
+
+if [ ${ERROR} -ne 0 ] ; then
+    print_usage
+    exit 1
+fi
+
+########################################################################################################################
+
+function verify_success {
+    "$@"
+    local status=$?
+    if [ ${status} -ne 0 ]; then
+        echo "error with $1" >&2
+        exit 1
+    fi
+}
+
+function create_temporary_folder {
+    echo "Building an empty workspace"
+    verify_success ${SUDO} mkdir -p /tmp/rookout
+    verify_success ${SUDO} rm -rf /tmp/rookout/*
+    cd /tmp/rookout
+}
+
+function delete_temporary_folder {
+    verify_success cd /tmp
+    verify_success ${SUDO} rm -rf /tmp/rookout/*
+    verify_success ${SUDO} rmdir /tmp/rookout
+}
+
+function verify_not_docker {
+    if [ -f /.dockerenv ] ; then
+        echo "Running Rookout Controller inside Docker Not supported"
+        exit 1
+    fi
+}
+
+function init {
+    SUDO="$(command -v sudo)"
+
+    verify_not_docker
+
+    SYSTEM_D=$(pidof systemd)
+    INIT_D=$(pidof /sbin/init)
+    if ! [ -z "${SYSTEM_D}" ] || ! [ -z "${INIT_D}" ] ; then
+        echo "Running Rookout Controller in systemd/init.d"
+    else
+        echo "ERROR: Unsupported OS - systemd or init.d required!"
+        exit 1
+    fi
+
+    create_temporary_folder
+}
+
+function cleanup {
+    echo "Cleaning workspace"
+
+    delete_temporary_folder
+}
+
+function install_go_controller {
+
+    if [ -z ${ROOKOUT_TOKEN} ]; then
+        if [ -z ${KEEP_OLD_CONFIG} ]; then
+            echo "Rookout token was not specified, please use -k=<token> or --token=<token>"
+            exit 1
+        fi
+    fi
+
+    verify_success ${SUDO} mkdir -p /etc/rookout
+    verify_success ${SUDO} mkdir -p /etc/default
+
+    echo "Downloading controller binary"
+    verify_success curl -1 -fs ${SITE}/controller | ${SUDO} tee /etc/rookout/rookout-controller > /dev/null
+    ${SUDO} chmod +x /etc/rookout/rookout-controller
+
+    echo "Setting up controller config"
+    # If no parameter was passed to override, we use the environment variable
+    # If it is empty too, the service will start with no proxy as usual
+    if [ -z HTTPS_PROXY ]; then
+        HTTPS_PROXY=${https_proxy}
+    fi
+
+    verify_success ${SUDO} tee /etc/default/rookout-controller > /dev/null <<EOF
+# Insert your rookout token here:
+export ROOKOUT_TOKEN=${ROOKOUT_TOKEN}
+
+# The Rookout controller has HTTPS proxy support for advanced network configurations.
+export https_proxy=${HTTPS_PROXY}
+
+# By default, the Controller listens only on localhost when running in daemon mode
+# uncomment the following line to enable non local traffic
+export ROOKOUT_LISTEN_ALL=${LISTEN_ALL_INTERFACES}
+
+# By default, the Controller sends the collected data to Rookout for interactive debugging sessions
+# uncomment the following line to disable it
+export ROOKOUT_SEND_DATA=${SEND_COLLECTED_DATA}
+
+# The Rookout controller will limit itself to 512MB by default
+export ROOKOUT_CONTROLLER_MAX_MEMORY=${MAX_MEMORY:-512}
+EOF
+
+    # BREAKING CHANGES!!!!!
+    echo "Installing service"
+    verify_success ${SUDO} tee /etc/init.d/rookout-controller > /dev/null <<'EOF'
+#!/bin/sh
+### BEGIN INIT INFO
+# Provides: rookout-controller
+# Required-Start:    $remote_fs $syslog
+# Required-Stop:     $remote_fs $syslog
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: Start daemon at boot time
+# Description:       Enable service provided by daemon.
+### END INIT INFO
+
+
+dir=""
+cmd=/etc/rookout/rookout-controller
+user=""
+
+# Importing variables from config file
+. /etc/default/rookout-controller
+
+if [ ! -d "/var/log/rookout" ]; then
+    mkdir /var/log/rookout
+fi
+
+name=`basename $0`
+pid_file="/var/run/$name.pid"
+stdout_log="/var/log/rookout/controller.log"
+stderr_log="/var/log/rookout/controller.log"
+
+get_pid() {
+    cat "$pid_file"
+}
+
+is_running() {
+    [ -f "$pid_file" ] && ps -p `get_pid` > /dev/null 2>&1
+}
+
+case "$1" in
+    start)
+    if is_running; then
+        echo "Already started"
+    else
+        echo "Starting $name"
+        cd "$dir"
+        if [ -z "$user" ]; then
+            $cmd >> "$stdout_log" 2>> "$stderr_log" &
+        else
+            sudo -u "$user" $cmd >> "$stdout_log" 2>> "$stderr_log" &
+        fi
+        echo $! > "$pid_file"
+        if ! is_running; then
+            echo "Unable to start, see $stdout_log and $stderr_log"
+            exit 1
+        fi
+    fi
+    ;;
+    stop)
+    if is_running; then
+        echo -n "Stopping $name.."
+        kill `get_pid`
+        for i in 1 2 3 4 5 6 7 8 9 10
+        # for i in `seq 10`
+        do
+            if ! is_running; then
+                break
+            fi
+
+            echo -n "."
+            sleep 1
+        done
+        echo
+
+        if is_running; then
+            echo "Not stopped; may still be shutting down or shutdown may have failed"
+            exit 1
+        else
+            echo "Stopped"
+            if [ -f "$pid_file" ]; then
+                rm "$pid_file"
+            fi
+        fi
+    else
+        echo "Not running"
+    fi
+    ;;
+    restart)
+    $0 stop
+    if is_running; then
+        echo "Unable to stop, will not attempt to start"
+        exit 1
+    fi
+    $0 start
+    ;;
+    status)
+    if is_running; then
+        echo "Running"
+    else
+        echo "Stopped"
+        exit 1
+    fi
+    ;;
+    *)
+    echo "Usage: $0 {start|stop|restart|status}"
+    exit 1
+    ;;
+esac
+
+exit 0
+EOF
+    ${SUDO} chmod +x /etc/init.d/rookout-controller
+
+    #update-rc.d doesn't exist on Red Hat distros such as Fedora/CentOS/etc
+    ${SUDO} update-rc.d rookout-controller defaults > /dev/null
+    if [ $? -eq 0 ]; then
+        #update-rc.d exist
+        verify_success ${SUDO} update-rc.d rookout-controller enable
+    else
+        echo "update-rc.d not found - using chkconfig instead"
+        verify_success ${SUDO} chkconfig rookout-controller on
+    fi
+
+    echo "Installation finished successfully"
+}
+
+function start_controller {
+    echo "Attempting to start controller..."
+
+    if ! [ -z "${SYSTEM_D}" ] ; then
+        verify_success ${SUDO} systemctl daemon-reload
+        verify_success ${SUDO} systemctl start rookout-controller
+        echo "rookout-controller service started!"
+        return 0
+    fi
+
+    if ! [ -z "${INIT_D}" ] ; then
+        verify_success ${SUDO} /etc/init.d/rookout-controller start
+        echo "rookout-controller service started!"
+        return 0
+    fi
+}
+
+function stop_controller {
+    echo "Stopping controller"
+
+    if [ "$OLD_VERSION_INSTALLED" = true ] ; then
+        if ! [ -z "${SYSTEM_D}" ] ; then
+            verify_success ${SUDO} systemctl stop rookout-agent
+        fi
+
+        if [ -z "${SYSTEM_D}" ] && ! [ -z "${INIT_D}" ] ; then
+            verify_success ${SUDO} service rookout-agent stop
+        fi
+    else
+        if ! [ -z "${SYSTEM_D}" ] ; then
+            verify_success ${SUDO} systemctl stop rookout-controller
+        fi
+
+        if [ -z "${SYSTEM_D}" ] && ! [ -z "${INIT_D}" ] ; then
+            verify_success ${SUDO} service rookout-controller stop
+        fi
+    fi
+}
+
+function uninstall_old_controller {
+    echo "Uninstalling old controller"
+
+    if [ "$OLD_VERSION_INSTALLED" = true ] ; then
+        verify_success ${SUDO} /etc/init.d/rookout-agent stop
+        verify_success ${SUDO} rm -rf /etc/init.d/rookout-agent
+        verify_success ${SUDO} rm -rf /etc/default/rookout-agent
+    else
+        verify_success ${SUDO} /etc/init.d/rookout-controller stop
+        verify_success ${SUDO} rm -rf /etc/init.d/rookout-controller
+        verify_success ${SUDO} rm -rf /etc/default/rookout-controller
+    fi
+
+    verify_success ${SUDO} rm -rf /etc/rookout
+}
+
+function backup_old_config {
+    echo "Backing up configuration"
+
+    if [ "$OLD_VERSION_INSTALLED" = true ] ; then
+        if [ -e /etc/default/rookout-agent ] && ! [ -z "${KEEP_OLD_CONFIG}" ] ; then
+            verify_success ${SUDO} cp /etc/default/rookout-agent /tmp/rookout/rookout-controller.old
+        fi
+    else
+        if [ -e /etc/default/rookout-controller ] && ! [ -z "${KEEP_OLD_CONFIG}" ] ; then
+            verify_success ${SUDO} cp /etc/default/rookout-controller /tmp/rookout/rookout-controller.old
+        fi
+    fi
+}
+
+function restore_old_config {
+    echo "Using old configuration"
+    verify_success ${SUDO} cp -f /tmp/rookout/rookout-controller.old /etc/default/rookout-controller
+}
+
+function update_controller {
+    if ! [ -z "${KEEP_OLD_CONFIG}" ] ; then
+        backup_old_config
+    fi
+
+    stop_controller
+    uninstall_old_controller
+    install_go_controller
+
+    if ! [ -z "${KEEP_OLD_CONFIG}" ] ; then
+        restore_old_config
+    fi
+}
+
+if [ ${COMMAND} == "controller" ]; then
+    init
+
+    if ! [ -e /etc/init.d/rookout-controller ] && ! [ -e /etc/init.d/rookout-agent ] ; then
+        echo "Installing Controller"
+        install_go_controller
+    else
+        if [ -e /etc/init.d/rookout-agent ] ; then
+            echo "Legacy agent detected - Updating to controller"
+            OLD_VERSION_INSTALLED=true
+        fi
+
+        echo "Updating Controller"
+        update_controller
+    fi
+
+    start_controller
+
+    cleanup
+fi

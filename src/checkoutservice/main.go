@@ -35,7 +35,7 @@ import (
 
 	pb "github.com/GoogleCloudPlatform/microservices-demo/src/checkoutservice/genproto"
 	money "github.com/GoogleCloudPlatform/microservices-demo/src/checkoutservice/money"
-	rook "github.com/Rookout/GoRook"
+	rook "github.com/Rookout/GoSDK"
 	healthpb "google.golang.org/grpc/health/grpc_health_v1"
 )
 

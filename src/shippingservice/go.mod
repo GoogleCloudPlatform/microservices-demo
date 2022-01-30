@@ -3,10 +3,9 @@ module github.com/GoogleCloudPlatform/microservices-demo/src/shippingservice
 go 1.17
 
 require (
-	cloud.google.com/go v0.97.0
+	cloud.google.com/go v0.97.0 // indirect
 	contrib.go.opencensus.io/exporter/jaeger v0.2.0
 	contrib.go.opencensus.io/exporter/stackdriver v0.5.0
-	github.com/Rookout/GoRook v0.0.6-0.20211212134802-70dcc769ac80
 	github.com/golang/protobuf v1.5.2
 	github.com/google/pprof v0.0.0-20211008130755-947d60d73cc0 // indirect
 	github.com/sirupsen/logrus v1.8.1
@@ -21,10 +20,13 @@ require (
 )
 
 require (
+	cloud.google.com/go/profiler v0.1.1
+	github.com/Rookout/GoSDK v0.1.1
+)
+
+require (
 	cloud.google.com/go/monitoring v1.1.0 // indirect
-	cloud.google.com/go/profiler v0.1.1 // indirect
 	cloud.google.com/go/trace v1.0.0 // indirect
-	github.com/Jeffail/gabs v1.4.0 // indirect
 	github.com/fallais/logrus-lumberjack-hook v0.0.0-20210917073259-3227e1ab93b0 // indirect
 	github.com/go-errors/errors v1.4.1 // indirect
 	github.com/golang/groupcache v0.0.0-20200121045136-8c9f03a8e57e // indirect

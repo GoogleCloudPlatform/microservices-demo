@@ -15,19 +15,17 @@
 FROM golang:1.17-alpine as builder
 RUN apk --update --no-cache add curl make git gcc musl-dev protobuf-dev openssl-libs-static openssl-dev build-base zlib-static
 
-ARG SONARIO_GH_TOKEN
-
 ENV GO111MODULE=on
-RUN go env -w GOPRIVATE=github.com/Rookout/GoRook
-# Why all the echos? It hides the credentials from showing up partially. If they show up partially then Jenkins won't censor them.
-RUN echo && echo && echo && git config --global url."https://${SONARIO_GH_TOKEN}@github.com".insteadOf "https://github.com"
+ARG ARTIFACTORY_CREDS
+RUN go env -w GONOSUMDB="github.com/Rookout/GoSDK"
+RUN go env -w GOPROXY="https://${ARTIFACTORY_CREDS}@rookout.jfrog.io/artifactory/api/go/rookout-go,https://proxy.golang.org,direct"
 ENV GOROOK_OS_TAG=alpine314
 
 WORKDIR /src
 COPY . .
 RUN go mod download
 
-RUN go build -tags=${GOROOK_OS_TAG} -gcflags='-N -l' -o /go/bin/shippingservice
+RUN go build -tags=${GOROOK_OS_TAG},rookout_static -gcflags='-N -l' -o /go/bin/shippingservice
 
 FROM builder AS release
 RUN apk add --update --no-cache ca-certificates

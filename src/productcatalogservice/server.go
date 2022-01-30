@@ -38,7 +38,7 @@ import (
 	"github.com/sirupsen/logrus"
 
 	//  "go.opencensus.io/exporter/jaeger"
-	rook "github.com/Rookout/GoRook"
+	rook "github.com/Rookout/GoSDK"
 	"go.opencensus.io/plugin/ocgrpc"
 	"go.opencensus.io/stats/view"
 	"go.opencensus.io/trace"

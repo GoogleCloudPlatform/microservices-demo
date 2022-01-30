@@ -6,7 +6,6 @@ require (
 	cloud.google.com/go v0.97.0 // indirect
 	contrib.go.opencensus.io/exporter/jaeger v0.2.0
 	contrib.go.opencensus.io/exporter/stackdriver v0.5.0
-	github.com/Rookout/GoRook v0.0.6-0.20211208102731-bec568131101
 	github.com/golang/protobuf v1.5.2
 	github.com/google/pprof v0.0.0-20211008130755-947d60d73cc0 // indirect
 	github.com/google/uuid v1.3.0
@@ -23,7 +22,10 @@ require (
 	google.golang.org/grpc v1.42.0
 )
 
-require cloud.google.com/go/profiler v0.1.1
+require (
+	cloud.google.com/go/profiler v0.1.1
+	github.com/Rookout/GoSDK v0.1.1
+)
 
 require (
 	cloud.google.com/go/monitoring v1.1.0 // indirect
