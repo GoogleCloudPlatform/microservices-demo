@@ -37,7 +37,18 @@ namespace cartservice.services
 
         public async override Task<Empty> AddItem(AddItemRequest request, ServerCallContext context)
         {
-            MaybeThrowError();
+            try
+            {
+                MaybeThrowError();
+            }
+            catch (RpcException ex)
+            {
+                var activity = System.Diagnostics.Activity.Current;
+                activity?.SetStatus(global::OpenTelemetry.Trace.Status.Error.WithDescription(ex.Message));
+                activity?.RecordException(ex);
+                throw;
+            }
+
             await _cartStore.AddItemAsync(request.UserId, request.Item.ProductId, request.Item.Quantity);
             _logger.LogInformation("CartService.AddItem UserId={UserId}, ProductId={ProductId}, Quantity={Quantity}",
                 request.UserId,
@@ -48,14 +59,36 @@ namespace cartservice.services
 
         public override Task<Cart> GetCart(GetCartRequest request, ServerCallContext context)
         {
-            MaybeThrowError();
+            try
+            {
+                MaybeThrowError();
+            }
+            catch (RpcException ex)
+            {
+                var activity = System.Diagnostics.Activity.Current;
+                activity?.SetStatus(global::OpenTelemetry.Trace.Status.Error.WithDescription(ex.Message));
+                activity?.RecordException(ex);
+                throw;
+            }
+
             _logger.LogInformation("CartService.GetCart UserId={UserId}", request.UserId);
             return _cartStore.GetCartAsync(request.UserId);
         }
 
         public async override Task<Empty> EmptyCart(EmptyCartRequest request, ServerCallContext context)
         {
-            MaybeThrowError();
+            try
+            {
+                MaybeThrowError();
+            }
+            catch (RpcException ex)
+            {
+                var activity = System.Diagnostics.Activity.Current;
+                activity?.SetStatus(global::OpenTelemetry.Trace.Status.Error.WithDescription(ex.Message));
+                activity?.RecordException(ex);
+                throw;
+            }
+            
             await _cartStore.EmptyCartAsync(request.UserId);
             _logger.LogInformation("CartService.EmptyCart UserId={UserId}", request.UserId);
             return Empty;
@@ -65,14 +98,8 @@ namespace cartservice.services
         {
             if (_random.Next() % 10 == 0)
             {
-                var ex = new RpcException(new Grpc.Core.Status(Grpc.Core.StatusCode.Unknown, "Unknown error"));
-                var activity = System.Diagnostics.Activity.Current;
-                if (activity != null)
-                {
-                    activity.RecordException(ex);
-                    activity.SetStatus(global::OpenTelemetry.Trace.Status.Error);
-                }
-                _logger.LogError(ex, "Unknown error");
+                var ex = new RpcException(new Grpc.Core.Status(Grpc.Core.StatusCode.Unknown, "I'm a random error"));
+                _logger.LogError(ex, "I'm a random error");
                 throw ex;
             }
         }
