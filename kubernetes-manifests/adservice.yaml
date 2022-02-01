@@ -28,14 +28,6 @@ spec:
       terminationGracePeriodSeconds: 5
       tolerations:
       nodeSelector:
-      initContainers:
-        - name: sfx-instrumentation
-          image: quay.io/signalfuse/sfx-zero-config-agent:latest
-          # image: sfx-zero-config-agent
-          # imagePullPolicy: Never
-          volumeMounts:
-            - mountPath: /opt/sfx/
-              name: sfx-instrumentation
       containers:
         - name: server
           image: adservice
@@ -44,21 +36,18 @@ spec:
           env:
             - name: PORT
               value: '9555'
-            - name: OTEL_EXPORTER_ZIPKIN_SERVICE_NAME
+            - name: OTEL_SERVICE_NAME
               value: adservice
             - name: NODE_IP
               valueFrom:
                 fieldRef:
                   fieldPath: status.hostIP
-            - name: OTEL_EXPORTER
-              value: zipkin
             - name: JAVA_TOOL_OPTIONS
               value: -javaagent:/opt/sfx/splunk-otel-javaagent-all.jar
-            - name: OTEL_EXPORTER_ZIPKIN_ENDPOINT
-              value: 'http://$(NODE_IP):9411/v1/trace'
-          volumeMounts:
-            - mountPath: /opt/sfx
-              name: sfx-instrumentation
+            - name: OTEL_EXPORTER_OTLP_ENDPOINT
+              value: 'http://$(NODE_IP):4317'
+            - name: OTEL_TRACES_EXPORTER
+              value: otlp
           resources:
             requests:
               cpu: 200m
@@ -76,9 +65,6 @@ spec:
             periodSeconds: 30
             exec:
               command: ['/bin/grpc_health_probe', '-addr=:9555']
-      volumes:
-        - emptyDir: {}
-          name: sfx-instrumentation
 ---
 apiVersion: v1
 kind: Service
