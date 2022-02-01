@@ -9,8 +9,7 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-var areDeploymentDetailsLoaded = false
-var deploymentDetailsMap = make(map[string]string)
+var deploymentDetailsMap map[string]string
 var log *logrus.Logger
 
 func init() {
@@ -34,7 +33,8 @@ func initializeLogger() {
 	log.Out = os.Stdout
 }
 
-func loadDeploymentDetails() map[string]string {
+func loadDeploymentDetails() {
+	deploymentDetailsMap = make(map[string]string)
 	var metaServerClient = metadata.NewClient(&http.Client{})
 
 	podHostname, err := os.Hostname()
@@ -61,15 +61,8 @@ func loadDeploymentDetails() map[string]string {
 		"zone":     podZone,
 		"hostname": podHostname,
 	}).Debug("Loaded deployment details")
-
-	areDeploymentDetailsLoaded = true
-
-	return deploymentDetailsMap
 }
 
-func getDeploymentDetailsIfLoaded(httpRequest *http.Request) map[string]string {
-	if areDeploymentDetailsLoaded {
-		return deploymentDetailsMap
-	}
-	return nil
+func getDeploymentDetailsIfLoaded() map[string]string {
+	return deploymentDetailsMap
 }

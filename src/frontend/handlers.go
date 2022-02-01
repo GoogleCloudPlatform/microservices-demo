@@ -115,7 +115,7 @@ func (fe *frontendServer) homeHandler(w http.ResponseWriter, r *http.Request) {
 		"platform_css":      plat.css,
 		"platform_name":     plat.provider,
 		"is_cymbal_brand":   isCymbalBrand,
-		"deploymentDetails": getDeploymentDetailsIfLoaded(r),
+		"deploymentDetails": getDeploymentDetailsIfLoaded(),
 	}); err != nil {
 		log.Error(err)
 	}
@@ -200,7 +200,7 @@ func (fe *frontendServer) productHandler(w http.ResponseWriter, r *http.Request)
 		"platform_css":      plat.css,
 		"platform_name":     plat.provider,
 		"is_cymbal_brand":   isCymbalBrand,
-		"deploymentDetails": getDeploymentDetailsIfLoaded(r),
+		"deploymentDetails": getDeploymentDetailsIfLoaded(),
 	}); err != nil {
 		log.Println(err)
 	}
@@ -312,7 +312,7 @@ func (fe *frontendServer) viewCartHandler(w http.ResponseWriter, r *http.Request
 		"platform_css":      plat.css,
 		"platform_name":     plat.provider,
 		"is_cymbal_brand":   isCymbalBrand,
-		"deploymentDetails": getDeploymentDetailsIfLoaded(r),
+		"deploymentDetails": getDeploymentDetailsIfLoaded(),
 	}); err != nil {
 		log.Println(err)
 	}
@@ -385,7 +385,7 @@ func (fe *frontendServer) placeOrderHandler(w http.ResponseWriter, r *http.Reque
 		"platform_css":      plat.css,
 		"platform_name":     plat.provider,
 		"is_cymbal_brand":   isCymbalBrand,
-		"deploymentDetails": getDeploymentDetailsIfLoaded(r),
+		"deploymentDetails": getDeploymentDetailsIfLoaded(),
 	}); err != nil {
 		log.Println(err)
 	}
@@ -447,7 +447,7 @@ func renderHTTPError(log logrus.FieldLogger, r *http.Request, w http.ResponseWri
 		"error":             errMsg,
 		"status_code":       code,
 		"status":            http.StatusText(code),
-		"deploymentDetails": getDeploymentDetailsIfLoaded(r),
+		"deploymentDetails": getDeploymentDetailsIfLoaded(),
 	}); templateErr != nil {
 		log.Println(templateErr)
 	}
