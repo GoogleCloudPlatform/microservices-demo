@@ -20,7 +20,7 @@ provider "google" {
 
 # Activate the necessary GCP APIs
 resource "google_project_service" "gcp_apis" {
-  for_each                   = toset(["cloudresourcemanager.googleapis.com", "compute.googleapis.com", "container.googleapis.com", "servicenetworking.googleapis.com"])
+  for_each                   = toset(["cloudresourcemanager.googleapis.com", "compute.googleapis.com", "container.googleapis.com", "servicenetworking.googleapis.com", "monitoring.googleapis.com", "cloudtrace.googleapis.com", "clouddebugger.googleapis.com", "cloudprofiler.googleapis.com"])
   project                    = var.project_id
   service                    = each.value
   disable_dependent_services = false
