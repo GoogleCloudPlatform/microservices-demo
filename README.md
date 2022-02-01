@@ -3,7 +3,7 @@
 </p>
 
 
-![Continuous Integration](https://github.com/GoogleCloudPlatform/microservices-demo/workflows/Continuous%20Integration%20-%20Master/Release/badge.svg)
+![Continuous Integration](https://github.com/GoogleCloudPlatform/microservices-demo/workflows/Continuous%20Integration%20-%20Main/Release/badge.svg)
 
 > **⚠ ATTENTION: Apache Log4j 2 advisory.**  
 > Due to [vulnerabilities](https://cloud.google.com/log4j2-security-advisory) present in earlier versions

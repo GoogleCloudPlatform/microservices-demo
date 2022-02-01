@@ -5,7 +5,7 @@ This directory contains the scripts for creating a new `microservices-demo` rele
 ### Create a New Release
 
 #### 1. Decide on the next release version number using [semantic versioning](https://semver.org/).
-- Look at the [commits since the previous release](https://github.com/GoogleCloudPlatform/microservices-demo/commits/master).
+- Look at the [commits since the previous release](https://github.com/GoogleCloudPlatform/microservices-demo/commits/main).
 
 #### 2. Open a new terminal.
 
@@ -37,7 +37,7 @@ export REPO_PREFIX=gcr.io/google-samples/microservices-demo
 
 #### 8. [Draft a new release on GitHub](https://github.com/GoogleCloudPlatform/microservices-demo/releases).
 
-- Summarize the [commits since the previous release](https://github.com/GoogleCloudPlatform/microservices-demo/commits/master).
+- Summarize the [commits since the previous release](https://github.com/GoogleCloudPlatform/microservices-demo/commits/main).
 - See previous releases for inspiration on release notes.
 
 #### 7. Create a new pull-request.

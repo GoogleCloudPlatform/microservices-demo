@@ -12,12 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-name: "Continuous Integration - Master/Release"
+name: "Continuous Integration - Main/Release"
 on:
   push:
-    # run on pushes to master or release/*
+    # run on pushes to main or release/*
     branches:
-      - master
+      - main
       - release/*
 jobs:
   code-tests:
