@@ -42,7 +42,7 @@ The following variables are defined in `variables.tf`.
 
 ## Quickstart
 
-[![Open in Cloud Shell](https://gstatic.com/cloudssh/images/open-btn.svg)](https://ssh.cloud.google.com/cloudshell/editor?cloudshell_git_repo=https://github.com/compalmanel/microservices-demo&cloudshell_workspace=./terraform)
+[![Open in Cloud Shell](https://gstatic.com/cloudssh/images/open-btn.svg)](https://ssh.cloud.google.com/cloudshell/editor?cloudshell_git_repo=https://github.com/compalmanel/microservices-demo&cloudshell_workspace=.&cloudshell_open_in_editor=terraform/terraform.tfvars)
 
 **[Create a Google Cloud Platform project](https://cloud.google.com/resource-manager/docs/creating-managing-projects#creating_a_project)** or use an existing project. Make sure you update `terraform.tfvars` with the values for your `project_id` and preferred `region`. You can also override any of the default values for the variables described above.
 
