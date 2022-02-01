@@ -3,27 +3,37 @@ package main
 import (
 	"net/http"
 	"os"
-	"sync"
+	"time"
 
 	"cloud.google.com/go/compute/metadata"
 	"github.com/sirupsen/logrus"
 )
 
-const (
-	DetailsAreNotLoaded = 0
-	DetailsAreLoading   = 1
-	DetailsAreLoaded    = 2
-)
-
+var areDeploymentDetailsLoaded = false
 var deploymentDetailsMap = make(map[string]string)
-var detailsLoadingStatus = DetailsAreNotLoaded
-var detailsLoadingStatusMutex sync.Mutex // Ensures only 1 HTTP request loads deployment details.
+var log *logrus.Logger
 
-func loadDeploymentDetails(httpRequest *http.Request) map[string]string {
+func init() {
+	initializeLogger()
+	go loadDeploymentDetails()
+}
+
+func initializeLogger() {
+	log = logrus.New()
+	log.Level = logrus.DebugLevel
+	log.Formatter = &logrus.JSONFormatter{
+		FieldMap: logrus.FieldMap{
+			logrus.FieldKeyTime:  "timestamp",
+			logrus.FieldKeyLevel: "severity",
+			logrus.FieldKeyMsg:   "message",
+		},
+		TimestampFormat: time.RFC3339Nano,
+	}
+	log.Out = os.Stdout
+}
+
+func loadDeploymentDetails() map[string]string {
 	var metaServerClient = metadata.NewClient(&http.Client{})
-
-	// The use of httpRequest here lets us to see HTTP request info in the logs.
-	var log = httpRequest.Context().Value(ctxKeyLog{}).(logrus.FieldLogger)
 
 	podHostname, err := os.Hostname()
 	if err != nil {
@@ -50,18 +60,14 @@ func loadDeploymentDetails(httpRequest *http.Request) map[string]string {
 		"hostname": podHostname,
 	}).Debug("Loaded deployment details")
 
-	detailsLoadingStatus = DetailsAreLoaded
+	areDeploymentDetailsLoaded = true
 
 	return deploymentDetailsMap
 }
 
 func getDeploymentDetailsIfLoaded(httpRequest *http.Request) map[string]string {
-	detailsLoadingStatusMutex.Lock()
-	defer detailsLoadingStatusMutex.Unlock()
-	if detailsLoadingStatus == DetailsAreNotLoaded {
-		detailsLoadingStatus = DetailsAreLoading
-		go loadDeploymentDetails(httpRequest)
-		return nil
+	if areDeploymentDetailsLoaded {
+		return deploymentDetailsMap
 	}
-	return deploymentDetailsMap
+	return nil
 }
