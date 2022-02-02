@@ -14,11 +14,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# [START container_frontend_genproto]
+# [START gke_frontend_genproto]
 
 PATH=$PATH:$GOPATH/bin
 protodir=../../pb
 
 protoc --go_out=plugins=grpc:genproto -I $protodir $protodir/demo.proto
 
-# [END container_frontend_genproto]
+# [END gke_frontend_genproto]

@@ -14,10 +14,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# [START container_currencyservice_genproto]
+# [START gke_currencyservice_genproto]
 
 # protos are loaded dynamically for node, simply copies over the proto.
 mkdir -p proto
 cp -r ../../pb/* ./proto
 
-# [END container_currencyservice_genproto]
+# [END gke_currencyservice_genproto]

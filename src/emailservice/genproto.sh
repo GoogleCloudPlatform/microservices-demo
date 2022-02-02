@@ -14,8 +14,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# [START container_emailservice_genproto]
+# [START gke_emailservice_genproto]
 
 python -m grpc_tools.protoc -I../../pb --python_out=. --grpc_python_out=. ../../pb/demo.proto
 
-# [END container_emailservice_genproto]
+# [END gke_emailservice_genproto]
