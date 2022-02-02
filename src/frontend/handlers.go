@@ -26,7 +26,6 @@ import (
 	"strings"
 	"time"
 
-	"cloud.google.com/go/compute/metadata"
 	"github.com/gorilla/mux"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
@@ -116,7 +115,7 @@ func (fe *frontendServer) homeHandler(w http.ResponseWriter, r *http.Request) {
 		"platform_css":      plat.css,
 		"platform_name":     plat.provider,
 		"is_cymbal_brand":   isCymbalBrand,
-		"deploymentDetails": getDeploymentDetails(r),
+		"deploymentDetails": deploymentDetailsMap,
 	}); err != nil {
 		log.Error(err)
 	}
@@ -201,7 +200,7 @@ func (fe *frontendServer) productHandler(w http.ResponseWriter, r *http.Request)
 		"platform_css":      plat.css,
 		"platform_name":     plat.provider,
 		"is_cymbal_brand":   isCymbalBrand,
-		"deploymentDetails": getDeploymentDetails(r),
+		"deploymentDetails": deploymentDetailsMap,
 	}); err != nil {
 		log.Println(err)
 	}
@@ -313,7 +312,7 @@ func (fe *frontendServer) viewCartHandler(w http.ResponseWriter, r *http.Request
 		"platform_css":      plat.css,
 		"platform_name":     plat.provider,
 		"is_cymbal_brand":   isCymbalBrand,
-		"deploymentDetails": getDeploymentDetails(r),
+		"deploymentDetails": deploymentDetailsMap,
 	}); err != nil {
 		log.Println(err)
 	}
@@ -386,7 +385,7 @@ func (fe *frontendServer) placeOrderHandler(w http.ResponseWriter, r *http.Reque
 		"platform_css":      plat.css,
 		"platform_name":     plat.provider,
 		"is_cymbal_brand":   isCymbalBrand,
-		"deploymentDetails": getDeploymentDetails(r),
+		"deploymentDetails": deploymentDetailsMap,
 	}); err != nil {
 		log.Println(err)
 	}
@@ -448,7 +447,7 @@ func renderHTTPError(log logrus.FieldLogger, r *http.Request, w http.ResponseWri
 		"error":             errMsg,
 		"status_code":       code,
 		"status":            http.StatusText(code),
-		"deploymentDetails": getDeploymentDetails(r),
+		"deploymentDetails": deploymentDetailsMap,
 	}); templateErr != nil {
 		log.Println(templateErr)
 	}
@@ -516,37 +515,4 @@ func stringinSlice(slice []string, val string) bool {
 		}
 	}
 	return false
-}
-
-func getDeploymentDetails(httpRequest *http.Request) map[string]string {
-	var deploymentDetailsMap = make(map[string]string)
-	var metaServerClient = metadata.NewClient(&http.Client{})
-	var log = httpRequest.Context().Value(ctxKeyLog{}).(logrus.FieldLogger)
-
-	podHostname, err := os.Hostname()
-	if err != nil {
-		log.Error("Failed to fetch the hostname for the Pod", err)
-	}
-
-	podCluster, err := metaServerClient.InstanceAttributeValue("cluster-name")
-	if err != nil {
-		log.Error("Failed to fetch the name of the cluster in which the pod is running", err)
-	}
-
-	podZone, err := metaServerClient.Zone()
-	if err != nil {
-		log.Error("Failed to fetch the Zone of the node where the pod is scheduled", err)
-	}
-
-	deploymentDetailsMap["HOSTNAME"] = podHostname
-	deploymentDetailsMap["CLUSTERNAME"] = podCluster
-	deploymentDetailsMap["ZONE"] = podZone
-
-	log.WithFields(logrus.Fields{
-		"cluster":  podCluster,
-		"zone":     podZone,
-		"hostname": podHostname,
-	}).Debug("Fetched pod details")
-
-	return deploymentDetailsMap
 }
