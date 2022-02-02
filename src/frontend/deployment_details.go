@@ -62,7 +62,3 @@ func loadDeploymentDetails() {
 		"hostname": podHostname,
 	}).Debug("Loaded deployment details")
 }
-
-func getDeploymentDetailsIfLoaded() map[string]string {
-	return deploymentDetailsMap
-}
