@@ -61,7 +61,7 @@ jobs:
       run: |
         NAMESPACE="pr${PR_NUMBER}"
         echo "::set-env name=NAMESPACE::$NAMESPACE"
-        
+
         gcloud container clusters get-credentials $PR_CLUSTER --zone $ZONE --project $PROJECT_ID
         cat <<EOF | kubectl apply -f -
         apiVersion: v1
