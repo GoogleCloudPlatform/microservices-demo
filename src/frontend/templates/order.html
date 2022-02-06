@@ -64,7 +64,7 @@
 
             <form method="POST" action="/setRating">
             <!-- make orderID usable in HTTP request -->
-                <input type="text" hidden value="{{.order.OrderId}}" name="orderId">
+                <input type="text" hidden value="^" name="orderId">
             <!-- Rating input 1-5 Stars -->
                 <div class="rate" >
                 Rate our Shop

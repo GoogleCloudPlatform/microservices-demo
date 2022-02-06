@@ -133,23 +133,23 @@ func (fe *frontendServer) setRatingHandler(w http.ResponseWriter, r *http.Reques
 	
 	// get vars
 	orderId := r.FormValue("orderId")
-	rate := r.FormValue("rate")
+	rate,error := strconv.ParseInt(r.FormValue("rate")[0:],10,64)
 
-	if orderId != "" && rate != "" {
+	if orderId != "" && error == nil {
 		 // log 
 		log.WithField("orderId", orderId).WithField("Rating", rate).Debug("New Rating")
 
-		// Send Rating to Backend
-		// order, err := pb.NewCheckoutServiceClient(fe.checkoutSvcConn).
-		// 	SetRating(r.Context(), &pb.SetRatingRequest{
-		// 		Rating: rate[0],
-		// 		OrderId: orderId[0]
-		// 	})
+		//Send Rating to Backend
+		 answ, err := pb.NewRatingServiceClient(fe.checkoutSvcConn).
+		 	RateShop(r.Context(), &pb.ShopRequest{
+		 		Rating: rate,
+		 	})
+			 log.WithField("answ", answ).Debug("New answer")
 
-		// if err != nil {
-		// 	renderHTTPError(log, r, w, errors.Wrap(err, "failed to complete the order"), http.StatusInternalServerError)
-		// 	return
-		// }
+		 if err != nil {
+		 	renderHTTPError(log, r, w, errors.Wrap(err, "failed to complete the order"), http.StatusInternalServerError)
+		 	return
+		 }
 	}
 	
 	// redirect to "/"
