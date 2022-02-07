@@ -67,7 +67,7 @@ spec:
           - name: AD_SERVICE_ADDR
             value: "adservice:9555"
           - name: "RATING_SERVICE_ADDR"
-            value: "localhost:9095"
+            value: "ratingService:9090"
           # # ENV_PLATFORM: One of: local, gcp, aws, azure, onprem, alibaba
           # # When not set, defaults to "local" unless running in GKE, otherwies auto-sets to gcp 
           # - name: ENV_PLATFORM 
