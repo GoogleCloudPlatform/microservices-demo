@@ -1,0 +1,36 @@
+syntax = "proto3";
+option java_multiple_files = true;
+option java_package = "cse.project.grpc";
+
+service RatingService{
+	rpc RateProduct(ProductRequest) returns (ApiResponse) {}
+	rpc GetProductRating(ProductRatingRequest) returns (ProductRatingResponse) {}
+	rpc RateShop(ShopRequest) returns (ApiResponse) {}
+	rpc GetShopRating(Empty) returns (ShopRatingResponse) {}
+}
+
+message ProductRequest {
+	string productId = 1;
+	int64 rating = 2;
+}
+message ProductRatingRequest {
+	string productId = 1;
+}
+message ProductRatingResponse {
+	double rating = 1;
+	int64 ratingCount = 2;
+	string responseMessage = 3;
+}
+message ApiResponse{
+	string responseMessage = 1;
+}
+message ShopRequest{
+	int64 rating = 1;
+}
+message Empty{
+}
+message ShopRatingResponse{
+	double rating = 1;
+	int64 ratingCount = 2;
+	string responseMessage = 3;
+}
