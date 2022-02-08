@@ -15,21 +15,21 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: ratingService
+  name: ratingservice
 spec:
   selector:
     matchLabels:
-      app: ratingService
+      app: ratingservice
   template:
     metadata:
       labels:
-        app: ratingService
+        app: ratingservice
     spec:
       serviceAccountName: default
       terminationGracePeriodSeconds: 5
       containers:
       - name: server
-        image: ratingService
+        image: ratingservice
         ports:
         - name: grpc
           containerPort: 9090
@@ -59,11 +59,11 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: ratingService
+  name: ratingservice
 spec:
   type: ClusterIP
   selector:
-    app: ratingService
+    app: ratingservice
   ports:
   - name: grpc
     port: 9090
