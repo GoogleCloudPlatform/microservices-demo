@@ -55,7 +55,7 @@ grpcio==1.33.2
     #   opencensus-ext-grpc
 grpcio-health-checking==1.33.2
     # via -r requirements.in
-httplib2==0.18.1
+httplib2==0.19.0
     # via
     #   google-api-python-client
     #   google-auth-httplib2
