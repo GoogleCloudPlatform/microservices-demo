@@ -8,24 +8,25 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="CommandLineParser" Version="2.2.1" />
-    <PackageReference Include="Google.Protobuf" Version="3.6.1" />
-    <PackageReference Include="Google.Protobuf.Tools" Version="3.5.1" />
-    <!-- PackageReference Include="grpc" Version="1.12.0" /-->
-    <PackageReference Include="grpc" Version="2.31.0" />
-    <PackageReference Include="Grpc.HealthCheck" Version="1.12.0" />
-    <PackageReference Include="grpc.tools" Version="1.12.0" />
-    <PackageReference Include="Microsoft.Extensions.Configuration" Version="2.1.1" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="2.1.1" />
+    <PackageReference Include="CommandLineParser" Version="2.8.0" />
+    <PackageReference Include="Google.Protobuf" Version="3.19.4" />
+    <PackageReference Include="Google.Protobuf.Tools" Version="3.19.4" />
+    <PackageReference Include="Grpc" Version="2.43.0" />
+    <PackageReference Include="Grpc.HealthCheck" Version="2.43.0" />
+    <PackageReference Include="Grpc.Tools" Version="1.12.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration" Version="6.0.0" />
     <PackageReference Include="OpenTelemetry.Exporter.Console" Version="0.5.0-beta.2" />
     <PackageReference Include="OpenTelemetry.Exporter.Zipkin" Version="0.5.0-beta.2" />
     <PackageReference Include="OpenTelemetry.Instrumentation.StackExchangeRedis" Version="0.5.0-beta.2" />
-    <PackageReference Include="StackExchange.Redis" Version="2.1.58" />
+    <PackageReference Include="StackExchange.Redis" Version="2.2.88" />
   </ItemGroup>
 
   <ItemGroup>
     <None Update="Dockerfile">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    
+    <!-- Nested test projects are atypical for .NET and for the build of both projects to work correctly it needs to be excluded from root project -->
+    <Compile Remove="tests/**" />
   </ItemGroup>
 </Project>
