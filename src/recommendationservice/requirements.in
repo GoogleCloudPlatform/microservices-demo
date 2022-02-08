@@ -9,3 +9,4 @@ python-json-logger==0.1.11
 google-cloud-profiler==1.1.2
 requests==2.27.1
 urllib3==1.26.5
+pyyaml==6.0
