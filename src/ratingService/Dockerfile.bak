@@ -7,6 +7,6 @@ COPY mvnw pom.xml ./
 RUN ./mvnw dependency:go-offline
 
 COPY src ./src
-ENTRYPOINT ["app\src\main\java\cse\project\grpcserver","GrpcServer"]
+ENTRYPOINT ["src\main\java\cse\project\grpcserver","GrpcServer"]
 
 EXPOSE 9090
