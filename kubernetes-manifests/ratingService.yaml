@@ -42,12 +42,6 @@ spec:
           value: "1"
         - name: DISABLE_DEBUGGER
           value: "1"
-        readinessProbe:
-          exec:
-            command: ["/bin/grpc_health_probe", "-addr=:9090"]
-        livenessProbe:
-          exec:
-            command: ["/bin/grpc_health_probe", "-addr=:9090"]
         resources:
           requests:
             cpu: 100m
