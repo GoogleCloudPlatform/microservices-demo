@@ -10,3 +10,4 @@ python-json-logger==0.1.11
 requests==2.27.1
 urllib3==1.26.5
 rsa==4.7
+pyyaml==6.0
