@@ -61,7 +61,7 @@ httplib2==0.18.1
     #   google-auth-httplib2
 idna==2.10
     # via requests
-opencensus==0.7.11
+opencensus==0.8.0
     # via
     #   -r requirements.in
     #   opencensus-ext-grpc
