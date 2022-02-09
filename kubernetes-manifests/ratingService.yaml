@@ -26,7 +26,7 @@ spec:
         app: ratingservice
     spec:
       serviceAccountName: default
-      terminationGracePeriodSeconds: 5
+      terminationGracePeriodSeconds: 20
       containers:
       - name: server
         image: ratingservice
@@ -49,13 +49,13 @@ spec:
             cpu: 300m
             memory: 300Mi
         readinessProbe:
-          initialDelaySeconds: 20
-          periodSeconds: 15
+          initialDelaySeconds: 30
+          periodSeconds: 20
           exec:
             command: ["/bin/grpc_health_probe", "-addr=:9090"]
         livenessProbe:
-          initialDelaySeconds: 20
-          periodSeconds: 15
+          initialDelaySeconds: 30
+          periodSeconds: 20
           exec:
             command: ["/bin/grpc_health_probe", "-addr=:9090"]
 ---
