@@ -92,7 +92,12 @@ namespace cartservice.cartstore
         // Attempt to access "external database" some percentage of the time
         if (_random.NextDouble() < EXTERNAL_DB_ACCESS_RATE)
         {
-            Thread.Sleep(TimeSpan.FromMilliseconds(_random.Next(0, EXTERNAL_DB_MAX_DURATION_MILLIS)));
+            await Task.Delay(_random.Next(0, EXTERNAL_DB_MAX_DURATION_MILLIS));
+        }
+
+        if (_random.NextDouble() < EXTERNAL_DB_ERROR_RATE)
+        {
+          throw new ApplicationException($"External error at {nameof(AddItemAsync)}. Error rate: {EXTERNAL_DB_ACCESS_RATE:N}");
         }
 
       }
@@ -137,7 +142,7 @@ namespace cartservice.cartstore
           // in the redis cache.
           if (_random.NextDouble() < EXTERNAL_DB_ACCESS_RATE)
           {
-              Thread.Sleep(TimeSpan.FromMilliseconds(_random.Next(0, EXTERNAL_DB_MAX_DURATION_MILLIS)));
+              await Task.Delay(_random.Next(0, EXTERNAL_DB_MAX_DURATION_MILLIS));
           }
 
           return Hipstershop.Cart.Parser.ParseFrom(value);
