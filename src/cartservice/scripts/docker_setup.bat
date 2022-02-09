@@ -38,7 +38,7 @@ GOTO End1
 :docker_local
   set REDIS_PORT=6379
   rem set REDIS_ADDR=redis:%REDIS_PORT%
-  set LISTEN_ADDR=localhost
+  set LISTEN_ADDR=0.0.0.0
   set PORT=7070
 
   echo run docker container with redis
