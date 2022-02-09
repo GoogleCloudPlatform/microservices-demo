@@ -39,7 +39,7 @@ google-cloud-core==1.5.0
     # via google-cloud-trace
 google-cloud-monitoring==0.36.0
     # via opencensus-ext-stackdriver
-google-cloud-profiler==1.1.2
+google-cloud-profiler==3.0.7
     # via -r requirements.in
 google-cloud-trace==0.24.0
     # via opencensus-ext-stackdriver
@@ -61,7 +61,7 @@ httplib2==0.19.0
     #   google-auth-httplib2
 idna==2.10
     # via requests
-opencensus==0.7.11
+opencensus==0.8.0
     # via
     #   -r requirements.in
     #   opencensus-ext-grpc
@@ -99,8 +99,10 @@ requests==2.27.1
     #   -r requirements.in
     #   google-api-core
     #   google-cloud-profiler
-rsa==4.6
-    # via google-auth
+rsa==4.7
+    # via
+    #   -r requirements.in
+    #   google-auth
 six==1.15.0
     # via
     #   google-api-core
