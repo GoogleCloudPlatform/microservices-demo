@@ -13,17 +13,12 @@
 // limitations under the License.
 
 using System;
-using System.IO;
-using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 using cartservice.cartstore;
 using cartservice.interfaces;
 using CommandLine;
 using Grpc.Core;
-using Microsoft.Extensions.Configuration;
-using OpenTelemetry;
-using OpenTelemetry.Trace;
 using StackExchange.Redis;
 
 namespace cartservice
@@ -34,8 +29,6 @@ namespace cartservice
     const string REDIS_ADDRESS = "REDIS_ADDR";
     const string CART_SERVICE_PORT = "PORT";
     private const int REDIS_RETRY_NUM = 5;
-
-    public static TracerProvider tracerProvider;
 
     [Verb("start", HelpText = "Starts the server listening on provided port")]
     class ServerOptions
@@ -110,18 +103,6 @@ namespace cartservice
               (ServerOptions options) =>
               {
                 var redis = NewRedisConnection(options.Redis);
-                tracerProvider = Sdk.CreateTracerProviderBuilder()
-                              .AddSource("opentelemetry.dotnet")
-                              .AddSource("cartservice")
-                              .AddRedisInstrumentation(redis)
-                              .AddProcessor(new AttrMappingProcessor())
-                            //   .AddConsoleExporter()
-                              .AddZipkinExporter(o =>
-                              {
-                                o.ServiceName = "cartservice";
-                                o.Endpoint = new Uri(Environment.GetEnvironmentVariable("SIGNALFX_ENDPOINT_URL"));
-                              })
-                              .Build();
                 Console.WriteLine($"Started as process with id {System.Diagnostics.Process.GetCurrentProcess().Id}");
 
                 // Set hostname/ip address

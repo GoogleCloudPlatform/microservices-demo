@@ -13,16 +13,13 @@
 // limitations under the License.
 
 using System;
-using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using cartservice.interfaces;
 using Google.Protobuf;
 using Grpc.Core;
-using Hipstershop;
 using StackExchange.Redis;
-using OpenTelemetry.Trace;
 
 namespace cartservice.cartstore
 {
@@ -41,7 +38,6 @@ namespace cartservice.cartstore
 
     public static string EXTERNAL_DB_NAME = Environment.GetEnvironmentVariable("EXTERNAL_DB_NAME") ?? "global.datastore";
 
-    private readonly Tracer _tracer;
     private readonly Random _random;
 
     public RedisCartStore(ConnectionMultiplexer connection)
@@ -51,7 +47,6 @@ namespace cartservice.cartstore
       var cart = new Hipstershop.Cart();
       emptyCartBytes = cart.ToByteArray();
 
-      _tracer = Program.tracerProvider.GetTracer("cartservice");
       _random = new Random();
     }
 
@@ -97,21 +92,7 @@ namespace cartservice.cartstore
         // Attempt to access "external database" some percentage of the time
         if (_random.NextDouble() < EXTERNAL_DB_ACCESS_RATE)
         {
-          using (var span = _tracer.StartActiveSpan("Cart.DbQuery.UpdateCart", SpanKind.Client))
-          {
-            span
-                .SetAttribute("db.system", "postgres")
-                .SetAttribute("db.type", "postgres")
-                .SetAttribute("peer.service", EXTERNAL_DB_NAME + ":98321");
-
-            if (_random.NextDouble() < EXTERNAL_DB_ERROR_RATE)
-            {
-              span.SetAttribute("error", "true");
-            }
-
             Thread.Sleep(TimeSpan.FromMilliseconds(_random.Next(0, EXTERNAL_DB_MAX_DURATION_MILLIS)));
-            span.End();
-          }
         }
 
       }
@@ -156,21 +137,7 @@ namespace cartservice.cartstore
           // in the redis cache.
           if (_random.NextDouble() < EXTERNAL_DB_ACCESS_RATE)
           {
-            using (var span = _tracer.StartActiveSpan("Cart.DbQuery.GetCart", SpanKind.Client))
-            {
-              span
-                  .SetAttribute("db.system", "postgres")
-                  .SetAttribute("db.type", "postgres")
-                  .SetAttribute("peer.service", EXTERNAL_DB_NAME + ":98321");
-
-              if (_random.NextDouble() < EXTERNAL_DB_ERROR_RATE)
-              {
-                span.SetAttribute("error", "true");
-              }
-
               Thread.Sleep(TimeSpan.FromMilliseconds(_random.Next(0, EXTERNAL_DB_MAX_DURATION_MILLIS)));
-              span.End();
-            }
           }
 
           return Hipstershop.Cart.Parser.ParseFrom(value);
