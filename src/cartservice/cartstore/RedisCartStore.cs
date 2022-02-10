@@ -14,11 +14,12 @@
 
 using System;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 using cartservice.interfaces;
 using Google.Protobuf;
 using Grpc.Core;
+using OpenTracing;
+using OpenTracing.Util;
 using StackExchange.Redis;
 
 namespace cartservice.cartstore
@@ -38,6 +39,7 @@ namespace cartservice.cartstore
 
     public static string EXTERNAL_DB_NAME = Environment.GetEnvironmentVariable("EXTERNAL_DB_NAME") ?? "global.datastore";
 
+    private readonly ITracer _tracer;
     private readonly Random _random;
 
     public RedisCartStore(ConnectionMultiplexer connection)
@@ -47,6 +49,7 @@ namespace cartservice.cartstore
       var cart = new Hipstershop.Cart();
       emptyCartBytes = cart.ToByteArray();
 
+      _tracer = GlobalTracer.Instance;
       _random = new Random();
     }
 
@@ -92,14 +95,21 @@ namespace cartservice.cartstore
         // Attempt to access "external database" some percentage of the time
         if (_random.NextDouble() < EXTERNAL_DB_ACCESS_RATE)
         {
+          using (IScope scope = _tracer.BuildSpan("Cart.DbQuery.UpdateCart").WithTag("span.kind", "client").StartActive())
+          {
+            ISpan span = scope.Span;
+            span.SetTag("db.system", "postgres");
+            span.SetTag("db.type", "postgres");
+            span.SetTag("peer.service", EXTERNAL_DB_NAME + ":98321");
+
+            if (_random.NextDouble() < EXTERNAL_DB_ERROR_RATE)
+            {
+              span.SetTag("error", "true");
+            }
+
             await Task.Delay(_random.Next(0, EXTERNAL_DB_MAX_DURATION_MILLIS));
+          }
         }
-
-        if (_random.NextDouble() < EXTERNAL_DB_ERROR_RATE)
-        {
-          throw new ApplicationException($"External error at {nameof(AddItemAsync)}. Error rate: {EXTERNAL_DB_ACCESS_RATE:N}");
-        }
-
       }
       catch (Exception ex)
       {
@@ -142,7 +152,20 @@ namespace cartservice.cartstore
           // in the redis cache.
           if (_random.NextDouble() < EXTERNAL_DB_ACCESS_RATE)
           {
+            using (IScope scope = _tracer.BuildSpan("Cart.DbQuery.GetCart").WithTag("span.kind", "client").StartActive())
+            {
+              ISpan span = scope.Span;
+              span.SetTag("db.system", "postgres");
+              span.SetTag("db.type", "postgres");
+              span.SetTag("peer.service", EXTERNAL_DB_NAME + ":98321");
+
+              if (_random.NextDouble() < EXTERNAL_DB_ERROR_RATE)
+              {
+                span.SetTag("error", "true");
+              }
+
               await Task.Delay(_random.Next(0, EXTERNAL_DB_MAX_DURATION_MILLIS));
+            }
           }
 
           return Hipstershop.Cart.Parser.ParseFrom(value);
