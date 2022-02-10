@@ -14,39 +14,57 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# This script creates a new release by:
-# - 1. building/pushing images
-# - 2. injecting tags into YAML manifests
-# - 3. creating a new git tag
-# - 4. pushing the tag/commit to main.
+set -euxo pipefail
 
-set -euo pipefail
-SCRIPTDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-[[ -n "${DEBUG:-}" ]] && set -x
+# set default repo
+REPO_PREFIX="${REPO_PREFIX:-gcr.io/google-samples/microservices-demo}"
 
-log() { echo "$1" >&2; }
-fail() { log "$1"; exit 1; }
+# move to repo root
+SCRIPT_DIR=$(dirname $(realpath -s $0))
+REPO_ROOT=$SCRIPT_DIR/..
+cd $REPO_ROOT
 
-TAG="${TAG:?TAG env variable must be specified}"
-REPO_PREFIX="${REPO_PREFIX:?REPO_PREFIX env variable must be specified e.g. gcr.io\/google-samples\/microservices-demo}"
-
-if [[ "$TAG" != v* ]]; then
-    fail "\$TAG must start with 'v', e.g. v0.1.0 (got: $TAG)"
+# validate version number (format: v0.0.0)
+if [[ ! "${NEW_VERSION}" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+    echo "${NEW_VERSION} argument must conform to regex string:  ^v[0-9]+\.[0-9]+\.[0-9]+$ "
+    echo "ex. v1.0.1"
+    exit 1
 fi
 
-# build and push images
-"${SCRIPTDIR}"/make-docker-images.sh
+# ensure there are no uncommitted changes
+if [[ $(git status -s | wc -l) -gt 0 ]]; then
+    echo "error: can't have uncommitted changes"
+    exit 1
+fi
 
-# update yaml
-"${SCRIPTDIR}"/make-release-artifacts.sh
+# ensure that gcloud is in the PATH
+if ! command -v gcloud &> /dev/null
+then
+    echo "gcloud could not be found"
+    exit 1
+fi
 
-# create git release / push to new branch
-git checkout -b "release/${TAG}"
-git add "${SCRIPTDIR}/../release/"
-git commit --allow-empty -m "Release $TAG"
-log "Pushing k8s manifests to release/${TAG}..."
-git tag "$TAG"
-git push --set-upstream origin "release/${TAG}"
+# replace kubernetes-manifests/ contents 
+rm -rf "${REPO_ROOT}/kubernetes-manifests"
+mkdir "${REPO_ROOT}/kubernetes-manifests"
+cp -a "${REPO_ROOT}/dev-kubernetes-manifests/." "${REPO_ROOT}/kubernetes-manifests/"
+
+# update version in manifests
+find "${REPO_ROOT}/kubernetes-manifests" -name '*.yaml' -exec sed -i -e "s'image: \(.*\)'image: ${REPO_PREFIX}\/\1:${NEW_VERSION}'g" {} \;
+
+# push release PR
+git checkout -b "release/${NEW_VERSION}"
+git add "${REPO_ROOT}/kubernetes-manifests/*.yaml"
+git commit -m "release/${NEW_VERSION}"
+
+# add tag
+git tag "${NEW_VERSION}"
+
+# build and push release images
+skaffold config set local-cluster false
+skaffold build --default-repo="${REPO_PREFIX}" --tag="${NEW_VERSION}"
+skaffold config unset local-cluster
+
+# push to repo
+git push --set-upstream origin "release/${NEW_VERSION}"
 git push --tags
-
-log "Successfully tagged release $TAG."

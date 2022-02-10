@@ -15,25 +15,26 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: shippingservice
+  name: productcatalogservice
 spec:
   selector:
     matchLabels:
-      app: shippingservice
+      app: productcatalogservice
   template:
     metadata:
       labels:
-        app: shippingservice
+        app: productcatalogservice
     spec:
       serviceAccountName: default
+      terminationGracePeriodSeconds: 5
       containers:
       - name: server
-        image: gcr.io/google-samples/microservices-demo/shippingservice:v0.3.6
+        image: productcatalogservice
         ports:
-        - containerPort: 50051
+        - containerPort: 3550
         env:
         - name: PORT
-          value: "50051"
+          value: "3550"
         - name: DISABLE_STATS
           value: "1"
         - name: DISABLE_TRACING
@@ -43,12 +44,11 @@ spec:
         # - name: JAEGER_SERVICE_ADDR
         #   value: "jaeger-collector:14268"
         readinessProbe:
-          periodSeconds: 5
           exec:
-            command: ["/bin/grpc_health_probe", "-addr=:50051"]
+            command: ["/bin/grpc_health_probe", "-addr=:3550"]
         livenessProbe:
           exec:
-            command: ["/bin/grpc_health_probe", "-addr=:50051"]
+            command: ["/bin/grpc_health_probe", "-addr=:3550"]
         resources:
           requests:
             cpu: 100m
@@ -60,12 +60,12 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: shippingservice
+  name: productcatalogservice
 spec:
   type: ClusterIP
   selector:
-    app: shippingservice
+    app: productcatalogservice
   ports:
   - name: grpc
-    port: 50051
-    targetPort: 50051
+    port: 3550
+    targetPort: 3550

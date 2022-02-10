@@ -42,13 +42,13 @@ spec:
               exit 1
           fi
         name: frontend-check
-        image: gcr.io/google-samples/microservices-demo/busybox:latest:v0.3.6
+        image: busybox:latest
         env:
         - name: FRONTEND_ADDR
           value: "frontend:80"
       containers:
       - name: main
-        image: gcr.io/google-samples/microservices-demo/loadgenerator:v0.3.6
+        image: loadgenerator
         env:
         - name: FRONTEND_ADDR
           value: "frontend:80"

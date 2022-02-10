@@ -28,7 +28,7 @@ spec:
       serviceAccountName: default
       containers:
         - name: server
-          image: gcr.io/google-samples/microservices-demo/checkoutservice:v0.3.6
+          image: checkoutservice
           ports:
           - containerPort: 5050
           readinessProbe:

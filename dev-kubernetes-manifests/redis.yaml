@@ -15,57 +15,52 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: shippingservice
+  name: redis-cart
 spec:
   selector:
     matchLabels:
-      app: shippingservice
+      app: redis-cart
   template:
     metadata:
       labels:
-        app: shippingservice
+        app: redis-cart
     spec:
-      serviceAccountName: default
       containers:
-      - name: server
-        image: gcr.io/google-samples/microservices-demo/shippingservice:v0.3.6
+      - name: redis
+        image: redis:alpine
         ports:
-        - containerPort: 50051
-        env:
-        - name: PORT
-          value: "50051"
-        - name: DISABLE_STATS
-          value: "1"
-        - name: DISABLE_TRACING
-          value: "1"
-        - name: DISABLE_PROFILER
-          value: "1"
-        # - name: JAEGER_SERVICE_ADDR
-        #   value: "jaeger-collector:14268"
+        - containerPort: 6379
         readinessProbe:
           periodSeconds: 5
-          exec:
-            command: ["/bin/grpc_health_probe", "-addr=:50051"]
+          tcpSocket:
+            port: 6379
         livenessProbe:
-          exec:
-            command: ["/bin/grpc_health_probe", "-addr=:50051"]
+          periodSeconds: 5
+          tcpSocket:
+            port: 6379
+        volumeMounts:
+        - mountPath: /data
+          name: redis-data
         resources:
-          requests:
-            cpu: 100m
-            memory: 64Mi
           limits:
-            cpu: 200m
-            memory: 128Mi
+            memory: 256Mi
+            cpu: 125m
+          requests:
+            cpu: 70m
+            memory: 200Mi
+      volumes:
+      - name: redis-data
+        emptyDir: {}
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: shippingservice
+  name: redis-cart
 spec:
   type: ClusterIP
   selector:
-    app: shippingservice
+    app: redis-cart
   ports:
-  - name: grpc
-    port: 50051
-    targetPort: 50051
+  - name: redis
+    port: 6379
+    targetPort: 6379

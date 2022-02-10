@@ -28,7 +28,7 @@ spec:
       serviceAccountName: default
       containers:
       - name: server
-        image: gcr.io/google-samples/microservices-demo/shippingservice:v0.3.6
+        image: shippingservice
         ports:
         - containerPort: 50051
         env:
