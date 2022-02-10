@@ -45,14 +45,17 @@ spec:
             fieldRef:
               fieldPath: status.hostIP
         - name: SIGNALFX_ENDPOINT_URL 
-          # value: "http://zipkin.default:9411/api/v2/spans"
           value: "http://$(NODE_IP):9411/api/v2/spans"
+        - name: SIGNALFX_LOGS_ENDPOINT_URL
+          value: "http://$(NODE_IP):4318/v1/logs"
+        - name: SIGNALFX_METRICS_ENDPOINT_URL
+          value: "http://$(NODE_IP):9943/v2/datapoint"
+        - name: SIGNALFX_RUNTIME_METRICS_ENABLED
+          value: "true"
+        - name: SIGNALFX_THREAD_SAMPLING_ENABLED
+          value: "true"
         - name: SIGNALFX_SERVICE_NAME
           value: "cartservice"
-        - name: SIGNALFX_SERVER_TIMING_CONTEXT
-          value: "true"
-        - name: SIGNALFX_TRACE_DEBUG
-          value: "true"
         - name: SIGNALFX_ENV
           value: "demo"
         - name: EXTERNAL_DB_NAME
