@@ -13,25 +13,7 @@ public class GrpcServer {
 		Server server = ServerBuilder.forPort(9090).addService(new RatingService()).build();
 		server.start();
 		System.out.print("Service started at "+server.getPort());
-		
-		Thread thread = new Thread(()->
-				doX()	
-		);
-		thread.start();
 		server.awaitTermination();
-	            
-		
-	}
-	
-	private static void doX() {
-		while(true) {
-			try {
-				Thread.sleep(100);
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
 	}
 
 }
