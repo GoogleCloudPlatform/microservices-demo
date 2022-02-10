@@ -1,0 +1,46 @@
+version: "2"
+services:
+
+  redis:
+    image: redis:alpine
+
+  cartservice:
+    image: cartservice
+    environment:
+      - REDIS_ADDR=redis:6379
+      - LISTEN_ADDR=0.0.0.0
+      - PORT=7070
+      - SIGNALFX_ENDPOINT_URL=http://otel-collector:9411/api/v2/spans
+      - SIGNALFX_LOGS_ENDPOINT_URL=http://otel-collector:4318/v1/logs
+      - SIGNALFX_METRICS_ENDPOINT_URL=http://localhost:9943/v2/datapoint
+      - SIGNALFX_RUNTIME_METRICS_ENABLED=true
+      - SIGNALFX_THREAD_SAMPLING_ENABLED=true
+      - SIGNALFX_ENV
+      - EXTERNAL_DB_NAME=Galactus.Postgres
+      - EXTERNAL_DB_ACCESS_RATE=0.75
+      - EXTERNAL_DB_MAX_DURATION_MILLIS=750
+      - EXTERNAL_DB_ERROR_RATE=0.1
+    ports:
+      - 7070:7070
+    depends_on:
+      - redis
+      - otel-collector
+
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:0.42.0
+    volumes:
+      - ./otel-config.yaml:/etc/otel/config.yaml
+    command: --config /etc/otel/config.yaml
+    environment:
+      - SPLUNK_ACCESS_TOKEN
+      - SPLUNK_REALM=us0
+    ports:
+      - "1777:1777"  # pprof extension
+      - "8888:8888"  # Prometheus metrics exposed by the collector
+      - "8889:8889"  # Prometheus exporter metrics
+      - "13133:13133" # health_check extension
+      - "4317:4317"  # OTLP gRPC receiver
+      - "4318:4318"  # OTLP HTTP receiver
+      - "55679:55679" # zpages extension
+      - "9411:9411"  # zipkin receiver
+      - "9943:9943"  # signalfx receiver
