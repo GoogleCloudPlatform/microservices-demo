@@ -14,6 +14,7 @@
 
 using System;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using cartservice.interfaces;
 using Google.Protobuf;
@@ -107,7 +108,7 @@ namespace cartservice.cartstore
               span.SetTag("error", "true");
             }
 
-            await Task.Delay(_random.Next(0, EXTERNAL_DB_MAX_DURATION_MILLIS));
+            Thread.Sleep(_random.Next(0, EXTERNAL_DB_MAX_DURATION_MILLIS));
           }
         }
       }
@@ -164,7 +165,7 @@ namespace cartservice.cartstore
                 span.SetTag("error", "true");
               }
 
-              await Task.Delay(_random.Next(0, EXTERNAL_DB_MAX_DURATION_MILLIS));
+              Thread.Sleep(_random.Next(0, EXTERNAL_DB_MAX_DURATION_MILLIS));
             }
           }
 
