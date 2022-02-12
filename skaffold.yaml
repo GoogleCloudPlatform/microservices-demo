@@ -41,9 +41,7 @@ build:
     docker:
       dockerfile: Dockerfile
   - image: ratingservice
-    context: src/ratingservice
-    docker:
-      dockerfile: Dockerfile    
+    context: src/ratingService
   - image: frontend
     context: src/frontend
   - image: adservice
@@ -66,7 +64,7 @@ deploy:
     - ./kubernetes-manifests/recommendationservice.yaml
     - ./kubernetes-manifests/redis.yaml
     - ./kubernetes-manifests/shippingservice.yaml
-    - ./kubernetes-manifests/ratingservice.yaml
+    - ./kubernetes-manifests/ratingService.yaml
 profiles:
 # "gcb" profile allows building and pushing the images
 # on Google Container Builder without requiring docker
