@@ -263,11 +263,6 @@ message Ad {
 
 // ------------Rating Service------------------
 
-
-
-option java_multiple_files = true;
-option java_package = "cse.project.grpc";
-
 service RatingService{
 rpc RateProduct(ProductRequest) returns (ApiResponse) {}
 rpc GetProductRating(ProductRatingRequest) returns (ProductRatingResponse) {}
