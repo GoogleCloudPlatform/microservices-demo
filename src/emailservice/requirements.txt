@@ -71,8 +71,9 @@ opencensus-ext-grpc==0.7.1
     # via -r requirements.in
 opencensus-ext-stackdriver==0.7.3
     # via -r requirements.in
-protobuf==3.13.0
+protobuf==3.15.0
     # via
+    #   -r requirements.in
     #   google-api-core
     #   google-cloud-profiler
     #   googleapis-common-protos
