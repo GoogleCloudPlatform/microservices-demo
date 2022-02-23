@@ -11,3 +11,4 @@ requests==2.27.1
 urllib3==1.26.5
 rsa==4.7
 pyyaml==6.0
+protobuf==3.15.0 # transitive dependency, move when google-api is bumped safely
