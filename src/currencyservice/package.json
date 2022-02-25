@@ -21,6 +21,6 @@
     "xml2js": "0.4.23"
   },
   "devDependencies": {
-    "semistandard": "^16.0.1"
+    "semistandard": "16.0.1"
   }
 }

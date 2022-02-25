@@ -21,6 +21,6 @@
     "uuid": "^3.2.1"
   },
   "devDependencies": {
-    "semistandard": "^16.0.1"
+    "semistandard": "16.0.1"
   }
 }
