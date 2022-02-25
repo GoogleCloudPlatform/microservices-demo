@@ -116,7 +116,7 @@ six==1.15.0
     #   protobuf
 uritemplate==3.0.1
     # via google-api-python-client
-urllib3==1.26.5
+urllib3==1.26.8
     # via
     #   -r requirements.in
     #   requests
