@@ -13,13 +13,19 @@ value: "1"
 value: "1"
 ```
 
-If you **are** running this app on GKE, and want to re-enable Google Cloud Operations instrumentation, set one or more of the `DISABLE_STATS`, `DISABLE_TRACING`, etc. fields to `0`. This re-enables the integrations. You can re-enable some or all of these integrations, for some or all Online Boutique services. Note that you will accumulate Google Cloud Operations [billing](https://cloud.google.com/stackdriver/pricing) if you re-enable these fields.
+If you **are** running this app on GKE, and want to re-enable Google Cloud Operations instrumentation, remove those environment variables from deployment YAML. This can re-enable some or all of these integrations, for some or all Online Boutique services. Note that you will accumulate Google Cloud Operations [billing](https://cloud.google.com/stackdriver/pricing) if you re-enable these fields.
 
-```YAML
+<del>
 - name: DISABLE_STATS
+<br>
 value: "0"
+<br>
 - name: DISABLE_TRACING
+<br>
 value: "0"
+<br>
 - name: DISABLE_PROFILER
+<br>
 value: "0"
-```
+<br>
+</del>
