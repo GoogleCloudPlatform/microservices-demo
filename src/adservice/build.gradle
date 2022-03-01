@@ -1,5 +1,5 @@
 plugins {
-    id 'com.google.protobuf' version '0.8.14'
+    id 'com.google.protobuf' version '0.8.18'
     id 'com.github.sherter.google-java-format' version '0.9'
     id 'idea'
     id 'application'
@@ -45,7 +45,7 @@ dependencies {
                 "io.grpc:grpc-stub:${grpcVersion}",
                 "io.grpc:grpc-netty:${grpcVersion}",
                 "io.grpc:grpc-services:${grpcVersion}",
-                "org.apache.logging.log4j:log4j-core:2.17.1"
+                "org.apache.logging.log4j:log4j-core:2.17.2"
 
         runtimeOnly "com.fasterxml.jackson.core:jackson-core:${jacksonVersion}",
                 "com.fasterxml.jackson.core:jackson-databind:${jacksonVersion}",
