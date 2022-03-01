@@ -2,7 +2,11 @@
   "extends": [
     "config:base"
   ],
-  "python": {
+  "pip-compile": {
+    "enabled": true,
+    "fileMatch": ["(^|/)requirements\\.in$"]
+  },
+  "pip_requirements": {
     "enabled": false
   }
 }
