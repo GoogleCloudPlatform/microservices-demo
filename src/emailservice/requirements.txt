@@ -20,7 +20,7 @@ google-api-core[grpc]==1.24.1
     #   opencensus
 google-api-python-client==1.12.8
     # via google-cloud-profiler
-google-auth==1.24.0
+google-auth==1.35.0
     # via
     #   google-api-core
     #   google-api-python-client
