@@ -9,6 +9,9 @@
       "enabled": true
     }
   },
+  "constraints": {
+    "python": "3.7"
+  },
   "pip_requirements": {
     "enabled": false
   }
