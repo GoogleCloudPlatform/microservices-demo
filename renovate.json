@@ -6,7 +6,7 @@
     "enabled": true,
     "fileMatch": ["(^|/)requirements\\.in$"],
     "lockFileMaintenance": {
-      "schedule": null
+      "enabled": true,
     }
   },
   "pip_requirements": {
