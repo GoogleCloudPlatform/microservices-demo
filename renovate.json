@@ -4,7 +4,10 @@
   ],
   "pip-compile": {
     "enabled": true,
-    "fileMatch": ["(^|/)requirements\\.in$"]
+    "fileMatch": ["(^|/)requirements\\.in$"],
+    "lockFileMaintenance": {
+      "enabled": true
+    }
   },
   "pip_requirements": {
     "enabled": false
