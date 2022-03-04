@@ -1,0 +1,18 @@
+{
+  "extends": [
+    "config:base"
+  ],
+  "pip-compile": {
+    "enabled": true,
+    "fileMatch": ["(^|/)requirements\\.in$"],
+    "lockFileMaintenance": {
+      "enabled": true
+    }
+  },
+  "constraints": {
+    "python": "3.7"
+  },
+  "pip_requirements": {
+    "enabled": false
+  }
+}

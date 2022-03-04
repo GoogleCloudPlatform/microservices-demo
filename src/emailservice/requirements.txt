@@ -4,13 +4,13 @@
 #
 #    pip-compile
 #
-cachetools==4.2.0
+cachetools==4.2.4
     # via google-auth
 certifi==2020.12.5
     # via requests
 charset-normalizer==2.0.10
     # via requests
-google-api-core[grpc]==1.24.1
+google-api-core[grpc]==1.31.5
     # via
     #   -r requirements.in
     #   google-api-python-client
@@ -20,7 +20,7 @@ google-api-core[grpc]==1.24.1
     #   opencensus
 google-api-python-client==1.12.8
     # via google-cloud-profiler
-google-auth==1.24.0
+google-auth==1.35.0
     # via
     #   google-api-core
     #   google-api-python-client
@@ -71,8 +71,11 @@ opencensus-ext-grpc==0.7.1
     # via -r requirements.in
 opencensus-ext-stackdriver==0.7.3
     # via -r requirements.in
-protobuf==3.13.0
+packaging==21.3
+    # via google-api-core
+protobuf==3.15.0
     # via
+    #   -r requirements.in
     #   google-api-core
     #   google-cloud-profiler
     #   googleapis-common-protos
@@ -84,7 +87,9 @@ pyasn1==0.4.8
 pyasn1-modules==0.2.8
     # via google-auth
 pyparsing==2.4.7
-    # via httplib2
+    # via
+    #   httplib2
+    #   packaging
 python-json-logger==0.1.11
     # via -r requirements.in
 pytz==2018.9
