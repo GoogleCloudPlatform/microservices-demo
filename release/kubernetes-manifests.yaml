@@ -652,6 +652,8 @@ spec:
         image: redis:alpine
         ports:
         - containerPort: 6379
+          name: tcp-redis
+          protocol: TCP
         readinessProbe:
           periodSeconds: 5
           tcpSocket:
@@ -683,7 +685,8 @@ spec:
   selector:
     app: redis-cart
   ports:
-  - name: redis
+  - name: tcp-redis
+    protocol: TCP
     port: 6379
     targetPort: 6379
 ---
