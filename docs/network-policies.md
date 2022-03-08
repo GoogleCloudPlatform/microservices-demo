@@ -30,7 +30,6 @@ You should see:
 ```
 NAME                    POD-SELECTOR                AGE
 adservice               app=adservice               2m58s
-allow-egress-to-all     <none>                      2m58s
 cartservice             app=cartservice             2m58s
 checkoutservice         app=checkoutservice         2m58s
 currencyservice         app=currencyservice         2m58s
@@ -44,7 +43,7 @@ recommendationservice   app=recommendationservice   2m58s
 shippingservice         app=shippingservice         2m58s
 ```
 
-_Note: we define the `allow-egress-to-all` for all the apps in the current namespace. In our case, there is multiple egress destinations like: the Kubernetes's DNS, Istio control plane (`istiod`), Cloud Trace API, Cloud Profiler API, Cloud Debugger API, etc._
+_Note: `Egress` is wide-open in these `NetworkPolicy`. In our case, we do that on purpose because there is multiple egress destinations to take into consideration like: the Kubernetes's DNS, Istio control plane (`istiod`), Cloud Trace API, Cloud Profiler API, Cloud Debugger API, etc._
 
 4. Verify you could still access the frontend's `EXTERNAL_IP` with no issues.
 
