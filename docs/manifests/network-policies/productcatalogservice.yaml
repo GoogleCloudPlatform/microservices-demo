@@ -22,6 +22,7 @@ spec:
       app: productcatalogservice
   policyTypes:
   - Ingress
+  - Egress
   ingress:
   - from:
     - podSelector:
@@ -36,3 +37,5 @@ spec:
     ports:
      - port: 3550
        protocol: TCP
+  egress:
+  - {}

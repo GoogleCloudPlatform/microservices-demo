@@ -15,21 +15,12 @@
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
-  name: adservice
+  name: loadgenerator
 spec:
   podSelector:
     matchLabels:
-      app: adservice
+      app: loadgenerator
   policyTypes:
-  - Ingress
   - Egress
-  ingress:
-  - from:
-    - podSelector:
-        matchLabels:
-          app: frontend
-    ports:
-     - port: 9555
-       protocol: TCP
   egress:
   - {}

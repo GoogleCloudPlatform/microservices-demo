@@ -22,6 +22,7 @@ spec:
       app: paymentservice
   policyTypes:
   - Ingress
+  - Egress
   ingress:
   - from:
     - podSelector:
@@ -30,3 +31,5 @@ spec:
     ports:
      - port: 50051
        protocol: TCP
+  egress:
+  - {}
