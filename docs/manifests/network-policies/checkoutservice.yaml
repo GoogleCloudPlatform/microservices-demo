@@ -22,7 +22,6 @@ spec:
       app: checkoutservice
   policyTypes:
   - Ingress
-  - Egress
   ingress:
   - from:
     - podSelector:
@@ -31,5 +30,3 @@ spec:
     ports:
      - port: 5050
        protocol: TCP
-  egress:
-  - {}

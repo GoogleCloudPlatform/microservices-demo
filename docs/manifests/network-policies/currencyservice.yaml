@@ -22,7 +22,6 @@ spec:
       app: currencyservice
   policyTypes:
   - Ingress
-  - Egress
   ingress:
   - from:
     - podSelector:
@@ -34,5 +33,3 @@ spec:
     ports:
      - port: 7000
        protocol: TCP
-  egress:
-  - {}

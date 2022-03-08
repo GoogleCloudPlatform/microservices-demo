@@ -22,7 +22,6 @@ spec:
       app: recommendationservice
   policyTypes:
   - Ingress
-  - Egress
   ingress:
   - from:
     - podSelector:
@@ -31,5 +30,3 @@ spec:
     ports:
      - port: 8080
        protocol: TCP
-  egress:
-  - {}
