@@ -15,9 +15,21 @@
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
-  name: deny-all
+  name: emailservice
 spec:
-  podSelector: {}
+  podSelector:
+    matchLabels:
+      app: emailservice
   policyTypes:
   - Ingress
   - Egress
+  ingress:
+  - from:
+    - podSelector:
+        matchLabels:
+          app: checkoutservice
+    ports:
+     - port: 8080
+       protocol: TCP
+  egress:
+  - {}

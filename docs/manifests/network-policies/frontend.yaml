@@ -15,9 +15,15 @@
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
-  name: deny-all
+  name: frontend
 spec:
-  podSelector: {}
+  podSelector:
+    matchLabels:
+      app: frontend
   policyTypes:
   - Ingress
   - Egress
+  ingress:
+  - {}
+  egress:
+  - {}

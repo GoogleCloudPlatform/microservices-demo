@@ -15,9 +15,27 @@
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
-  name: deny-all
+  name: productcatalogservice
 spec:
-  podSelector: {}
+  podSelector:
+    matchLabels:
+      app: productcatalogservice
   policyTypes:
   - Ingress
   - Egress
+  ingress:
+  - from:
+    - podSelector:
+        matchLabels:
+          app: frontend
+    - podSelector:
+        matchLabels:
+          app: checkoutservice
+    - podSelector:
+        matchLabels:
+          app: recommendationservice
+    ports:
+     - port: 3550
+       protocol: TCP
+  egress:
+  - {}

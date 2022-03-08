@@ -15,9 +15,24 @@
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
-  name: deny-all
+  name: cartservice
 spec:
-  podSelector: {}
+  podSelector:
+    matchLabels:
+      app: cartservice
   policyTypes:
   - Ingress
   - Egress
+  ingress:
+  - from:
+    - podSelector:
+        matchLabels:
+          app: frontend
+    - podSelector:
+        matchLabels:
+          app: checkoutservice
+    ports:
+     - port: 7070
+       protocol: TCP
+  egress:
+  - {}

@@ -15,9 +15,21 @@
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
-  name: deny-all
+  name: checkoutservice
 spec:
-  podSelector: {}
+  podSelector:
+    matchLabels:
+      app: checkoutservice
   policyTypes:
   - Ingress
   - Egress
+  ingress:
+  - from:
+    - podSelector:
+        matchLabels:
+          app: frontend
+    ports:
+     - port: 5050
+       protocol: TCP
+  egress:
+  - {}
