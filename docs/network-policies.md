@@ -43,7 +43,7 @@ recommendationservice   app=recommendationservice   2m58s
 shippingservice         app=shippingservice         2m58s
 ```
 
-_Note: `Egress` is wide-open in these `NetworkPolicy`. In our case, we do that on purpose because there is multiple egress destinations to take into consideration like: the Kubernetes's DNS, Istio control plane (`istiod`), Cloud Trace API, Cloud Profiler API, Cloud Debugger API, etc._
+_Note: `Egress` is wide-open in these `NetworkPolicy` resources. In our case, we do that on purpose because there is multiple egress destinations to take into consideration like: the Kubernetes's DNS, Istio control plane (`istiod`), Cloud Trace API, Cloud Profiler API, Cloud Debugger API, etc._
 
 4. Verify you could still access the frontend's `EXTERNAL_IP` with no issues.
 
@@ -51,11 +51,13 @@ _Note: `Egress` is wide-open in these `NetworkPolicy`. In our case, we do that o
 kubectl get service frontend-external | awk '{print $4}'
 ```
 
-5. Leverage the Network Policies logging feature
+5. Leverage the Network policy logging feature
 
-https://cloud.google.com/kubernetes-engine/docs/how-to/network-policy-logging
+[Network policy logging](https://cloud.google.com/kubernetes-engine/docs/how-to/network-policy-logging) lets you record when a connection is allowed or denied by a network policy.
 
+To leverage this feature you need to deploy this `NetworkLogging` resource in your cluster:
 ```sh
+cat << EOF | kubectl apply -f -
 kind: NetworkLogging
 apiVersion: networking.gke.io/v1alpha1
 metadata:
@@ -68,11 +70,18 @@ spec:
     deny:
       log: true
       delegate: false
+EOF
 ```
 
-6. Leverage the Anthos Security features
+From there, you are able to see the `allow` and `deny` logs generated:
+```sh
+gcloud logging read --project "PROJECT_NAME" 'resource.type="k8s_node"
+    resource.labels.location="CLUSTER_LOCATION"
+    resource.labels.cluster_name="CLUSTER_NAME"
+    logName="projects/PROJECT_NAME/logs/policy-action"'
+```
 
-https://cloud.google.com/service-mesh/docs/observability/explore-dashboard#viewing_security_features
+_Note: you could even get more insights based on these logs if you go throught the ["Anthos > Security > Policy Summary > Kubernetes network policy" page](https://cloud.google.com/service-mesh/docs/observability/explore-dashboard#viewing_security_features) in the GCP console._
 
 ## Resources
 
