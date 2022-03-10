@@ -25,7 +25,7 @@ ENV GOROOK_OS_TAG=alpine314
 WORKDIR /src
 COPY . .
 RUN go mod download
-RUN go build -tags=${GOROOK_OS_TAG},rookout_static -gcflags='-N -l' -o /go/bin/frontend .
+RUN go build -tags=${GOROOK_OS_TAG},rookout_static -gcflags='all=-N -l' -o /go/bin/frontend .
 
 FROM builder as release
 RUN apk add --update --no-cache ca-certificates
