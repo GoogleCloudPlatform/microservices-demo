@@ -1,4 +1,4 @@
-FROM otel/opentelemetry-collector:0.34.0
+FROM otel/opentelemetry-collector:0.45.0
 
 ARG NEW_RELIC_API_KEY
 ARG OTEL_EXPORTER_OTLP_ENDPOINT
@@ -10,6 +10,6 @@ ENV OTEL_EXPORTER_OTLP_ENDPOINT_INFINITE_TRACING=${OTEL_EXPORTER_OTLP_ENDPOINT_I
 
 COPY ./collector.yaml /etc/otel/config.yaml
 
-ENTRYPOINT ["/otelcol"]
+ENTRYPOINT ["/otelcorecol"]
 CMD ["--config", "/etc/otel/config.yaml"]
-EXPOSE 55680 55679 9411 14250 14268 13133 4317
+EXPOSE 55680 55679 9411 14250 14268 13133 4317 4318

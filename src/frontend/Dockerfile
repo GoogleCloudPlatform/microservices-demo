@@ -12,6 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+FROM node:16-alpine as js-build
+WORKDIR /src
+COPY . .
+RUN npm install
+RUN npm run build
+
 FROM golang:1.15-alpine as builder
 RUN apk add --no-cache ca-certificates git
 RUN apk add build-base
@@ -31,6 +37,7 @@ RUN apk add --no-cache ca-certificates \
     busybox-extras net-tools bind-tools
 WORKDIR /src
 COPY --from=builder /go/bin/frontend /src/server
+COPY --from=js-build /src/static/scripts static/scripts
 COPY ./templates ./templates
 COPY ./static ./static
 

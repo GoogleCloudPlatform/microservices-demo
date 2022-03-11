@@ -1,0 +1,36 @@
+{
+  "name": "microservices-demo",
+  "version": "1.0.0",
+  "description": "<p align=\"center\"> <img src=\"src/frontend/static/icons/Hipster_HeroLogoCyan.svg\" width=\"300\" alt=\"Online Boutique\" /> </p>",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "webpack"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/newrelic-forks/microservices-demo.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/newrelic-forks/microservices-demo/issues"
+  },
+  "homepage": "https://github.com/newrelic-forks/microservices-demo#readme",
+  "dependencies": {
+    "@opentelemetry/api": "^1.0.4",
+    "@opentelemetry/context-zone": "^1.0.1",
+    "@opentelemetry/exporter-trace-otlp-http": "^0.27.0",
+    "@opentelemetry/instrumentation": "^0.27.0",
+    "@opentelemetry/instrumentation-document-load": "^0.27.1",
+    "@opentelemetry/resources": "^1.0.1",
+    "@opentelemetry/sdk-trace-web": "^1.0.1",
+    "webpack": "^5.70.0"
+  },
+  "devDependencies": {
+    "webpack-cli": "^4.9.2"
+  }
+}

@@ -2,6 +2,8 @@
 extensions:
   health_check: {}
   zpages: {}
+  memory_ballast:
+    size_mib: 683
 receivers:
   otlp:
     protocols:
@@ -10,7 +12,6 @@ receivers:
 processors:
   batch:
   memory_limiter:
-    ballast_size_mib: 683
     check_interval: 2s
     limit_mib: 1800
     spike_limit_mib: 500
@@ -25,7 +26,7 @@ exporters:
       api-key: $NEW_RELIC_API_KEY
     compression: gzip
 service:
-  extensions: [health_check, zpages]
+  extensions: [health_check, zpages, memory_ballast]
   pipelines:
     metrics:
       receivers: [otlp]
