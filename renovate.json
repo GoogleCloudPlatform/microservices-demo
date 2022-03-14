@@ -10,9 +10,14 @@
     }
   },
   "constraints": {
-    "python": "3.7"
+    "python": "~=3.7.0"
   },
-  "pip_requirements": {
-    "enabled": false
+  "prConcurrentLimit":5,
+  "stabilityDays":7,
+  "vulnerabilityAlerts":{
+     "labels":[
+       "type:security" 
+     ],
+     "stabilityDays":0
   }
 }
