@@ -19,5 +19,15 @@
        "type:security" 
      ],
      "stabilityDays":0
+  },
+  "labels": ["dependencies"],
+  "python":{
+    "addLabels": ["lang: python"]
+  },
+  "java":{
+    "addLabels": ["lang: java"]
+  },
+  "golang":{
+    "addLabels": ["lang: go"]
   }
 }
