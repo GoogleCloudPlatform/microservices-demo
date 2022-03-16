@@ -51,40 +51,9 @@ _Note: `Egress` is wide-open in these `NetworkPolicy` resources. In our case, we
 kubectl get service frontend-external | awk '{print $4}'
 ```
 
-5. Leverage the Network policy logging feature
-
-[Network policy logging](https://cloud.google.com/kubernetes-engine/docs/how-to/network-policy-logging) lets you record when a connection is allowed or denied by a network policy.
-
-To leverage this feature you need to deploy this `NetworkLogging` resource in your cluster:
-```sh
-cat << EOF | kubectl apply -f -
-kind: NetworkLogging
-apiVersion: networking.gke.io/v1alpha1
-metadata:
-  name: default
-spec:
-  cluster:
-    allow:
-      log: true
-      delegate: false
-    deny:
-      log: true
-      delegate: false
-EOF
-```
-
-From there, you are able to see the `allow` and `deny` logs generated:
-```sh
-gcloud logging read --project "PROJECT_NAME" 'resource.type="k8s_node"
-    resource.labels.location="CLUSTER_LOCATION"
-    resource.labels.cluster_name="CLUSTER_NAME"
-    logName="projects/PROJECT_NAME/logs/policy-action"'
-```
-
-_Note: you could even get more insights based on these logs if you go throught the ["Anthos > Security > Policy Summary > Kubernetes network policy" page](https://cloud.google.com/service-mesh/docs/observability/explore-dashboard#viewing_security_features) in the GCP console._
-
 ## Resources
 
 - [GKE Dataplane V2 announcement](https://cloud.google.com/blog/products/containers-kubernetes/bringing-ebpf-and-cilium-to-google-kubernetes-engine)
 - [Kubernetes Network Policies](https://kubernetes.io/docs/concepts/services-networking/network-policies/)
 - [Kubernetes Network Policy Recipes](https://github.com/ahmetb/kubernetes-network-policy-recipes)
+- [Network policy logging](https://cloud.google.com/kubernetes-engine/docs/how-to/network-policy-logging)
