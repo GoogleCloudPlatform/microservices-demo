@@ -1,0 +1,23 @@
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+  name: shippingservice
+spec:
+  selector:
+    matchLabels:
+      app: shippingservice
+  rules:
+  - from:
+    - source:
+        principals:
+        - cluster.local/ns/default/sa/frontend
+        - cluster.local/ns/default/sa/checkoutservice
+    to:
+    - operation:
+        paths:
+        - /hipstershop.ShippingService/GetQuote
+        - /hipstershop.ShippingService/ShipOrder
+        methods:
+        - POST
+        ports:
+        - "50051"

@@ -25,6 +25,7 @@ spec:
       labels:
         app: redis-cart
     spec:
+      serviceAccountName: default
       containers:
       - name: redis
         image: redis:alpine

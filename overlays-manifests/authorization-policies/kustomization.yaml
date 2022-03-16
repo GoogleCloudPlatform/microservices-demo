@@ -1,0 +1,111 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+- ../service-accounts
+- authorizationpolicy_adservice.yaml
+- authorizationpolicy_cartservice.yaml
+- authorizationpolicy_checkoutservice.yaml
+- authorizationpolicy_currencyservice.yaml
+- authorizationpolicy_denyall.yaml
+- authorizationpolicy_emailservice.yaml
+- authorizationpolicy_frontend.yaml
+- authorizationpolicy_paymentservice.yaml
+- authorizationpolicy_productcatalogservice.yaml
+- authorizationpolicy_recommendationservice.yaml
+- authorizationpolicy_redis.yaml
+- authorizationpolicy_shippingservice.yaml
+namespace: default
+patchesJson6902:
+- target:
+    kind: AuthorizationPolicy
+    name: adservice
+  patch: |-
+    - op: replace
+      path: /spec/rules/0/from/0/source/principals
+      value:
+        - cluster.local/ns/default/sa/frontend
+- target:
+    kind: AuthorizationPolicy
+    name: cartservice
+  patch: |-
+    - op: replace
+      path: /spec/rules/0/from/0/source/principals
+      value:
+        - cluster.local/ns/default/sa/frontend
+        - cluster.local/ns/default/sa/checkoutservice
+- target:
+    kind: AuthorizationPolicy
+    name: checkoutservice
+  patch: |-
+    - op: replace
+      path: /spec/rules/0/from/0/source/principals
+      value:
+        - cluster.local/ns/default/sa/frontend
+- target:
+    kind: AuthorizationPolicy
+    name: currencyservice
+  patch: |-
+    - op: replace
+      path: /spec/rules/0/from/0/source/principals
+      value:
+        - cluster.local/ns/default/sa/frontend
+        - cluster.local/ns/default/sa/checkoutservice
+- target:
+    kind: AuthorizationPolicy
+    name: emailservice
+  patch: |-
+    - op: replace
+      path: /spec/rules/0/from/0/source/principals
+      value:
+        - cluster.local/ns/default/sa/checkoutservice
+- target:
+    kind: AuthorizationPolicy
+    name: frontend
+  patch: |-
+    - op: replace
+      path: /spec/rules/0/from/0/source/principals
+      value:
+        - '*'
+- target:
+    kind: AuthorizationPolicy
+    name: paymentservice
+  patch: |-
+    - op: replace
+      path: /spec/rules/0/from/0/source/principals
+      value:
+        - cluster.local/ns/default/sa/checkoutservice
+- target:
+    kind: AuthorizationPolicy
+    name: productcatalogservice
+  patch: |-
+    - op: replace
+      path: /spec/rules/0/from/0/source/principals
+      value:
+        - cluster.local/ns/default/sa/frontend
+        - cluster.local/ns/default/sa/checkoutservice
+        - cluster.local/ns/default/sa/recommendationservice
+- target:
+    kind: AuthorizationPolicy
+    name: recommendationservice
+  patch: |-
+    - op: replace
+      path: /spec/rules/0/from/0/source/principals
+      value:
+        - cluster.local/ns/default/sa/frontend
+- target:
+    kind: AuthorizationPolicy
+    name: redis-cart
+  patch: |-
+    - op: replace
+      path: /spec/rules/0/from/0/source/principals
+      value:
+        - cluster.local/ns/default/sa/cartservice
+- target:
+    kind: AuthorizationPolicy
+    name: shippingservice
+  patch: |-
+    - op: replace
+      path: /spec/rules/0/from/0/source/principals
+      value:
+        - cluster.local/ns/default/sa/frontend
+        - cluster.local/ns/default/sa/checkoutservice

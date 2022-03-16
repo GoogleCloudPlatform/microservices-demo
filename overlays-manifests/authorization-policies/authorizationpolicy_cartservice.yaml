@@ -1,0 +1,24 @@
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+  name: cartservice
+spec:
+  selector:
+    matchLabels:
+      app: cartservice
+  rules:
+  - from:
+    - source:
+        principals:
+        - cluster.local/ns/default/sa/frontend
+        - cluster.local/ns/default/sa/checkoutservice
+    to:
+    - operation:
+        paths:
+        - /hipstershop.CartService/AddItem
+        - /hipstershop.CartService/GetCart
+        - /hipstershop.CartService/EmptyCart
+        methods:
+        - POST
+        ports:
+        - "7070"

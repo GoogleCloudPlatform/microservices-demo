@@ -1,0 +1,102 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+- ../../release
+- serviceaccount_adservice.yaml
+- serviceaccount_cartservice.yaml
+- serviceaccount_checkoutservice.yaml
+- serviceaccount_currencyservice.yaml
+- serviceaccount_emailservice.yaml
+- serviceaccount_frontend.yaml
+- serviceaccount_loadgenerator.yaml
+- serviceaccount_paymentservice.yaml
+- serviceaccount_productcatalogservice.yaml
+- serviceaccount_recommendationservice.yaml
+- serviceaccount_redis.yaml
+- serviceaccount_shippingservice.yaml
+namespace: default
+patchesJson6902:
+- target:
+    kind: Deployment
+    name: adservice
+  patch: |-
+    - op: replace
+      path: /spec/template/spec/serviceAccountName
+      value: adservice
+- target:
+    kind: Deployment
+    name: cartservice
+  patch: |-
+    - op: replace
+      path: /spec/template/spec/serviceAccountName
+      value: cartservice
+- target:
+    kind: Deployment
+    name: checkoutservice
+  patch: |-
+    - op: replace
+      path: /spec/template/spec/serviceAccountName
+      value: checkoutservice
+- target:
+    kind: Deployment
+    name: currencyservice
+  patch: |-
+    - op: replace
+      path: /spec/template/spec/serviceAccountName
+      value: currencyservice
+- target:
+    kind: Deployment
+    name: emailservice
+  patch: |-
+    - op: replace
+      path: /spec/template/spec/serviceAccountName
+      value: emailservice
+- target:
+    kind: Deployment
+    name: frontend
+  patch: |-
+    - op: replace
+      path: /spec/template/spec/serviceAccountName
+      value: frontend
+- target:
+    kind: Deployment
+    name: loadgenerator
+  patch: |-
+    - op: replace
+      path: /spec/template/spec/serviceAccountName
+      value: loadgenerator
+- target:
+    kind: Deployment
+    name: paymentservice
+  patch: |-
+    - op: replace
+      path: /spec/template/spec/serviceAccountName
+      value: paymentservice
+- target:
+    kind: Deployment
+    name: productcatalogservice
+  patch: |-
+    - op: replace
+      path: /spec/template/spec/serviceAccountName
+      value: productcatalogservice
+- target:
+    kind: Deployment
+    name: recommendationservice
+  patch: |-
+    - op: replace
+      path: /spec/template/spec/serviceAccountName
+      value: recommendationservice
+- target:
+    kind: Deployment
+    name: redis-cart
+  patch: |-
+    - op: replace
+      path: /spec/template/spec/serviceAccountName
+      value: redis-cart
+- target:
+    kind: Deployment
+    name: shippingservice
+  patch: |-
+    - op: replace
+      path: /spec/template/spec/serviceAccountName
+      value: shippingservice

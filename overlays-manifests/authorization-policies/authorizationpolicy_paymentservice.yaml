@@ -1,0 +1,21 @@
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+  name: paymentservice
+spec:
+  selector:
+    matchLabels:
+      app: paymentservice
+  rules:
+  - from:
+    - source:
+        principals:
+        - cluster.local/ns/default/sa/checkoutservice
+    to:
+    - operation:
+        paths:
+        - /hipstershop.PaymentService/Charge
+        methods:
+        - POST
+        ports:
+        - "50051"

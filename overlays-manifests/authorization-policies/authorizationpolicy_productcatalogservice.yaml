@@ -1,0 +1,24 @@
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+  name: productcatalogservice
+spec:
+  selector:
+    matchLabels:
+      app: productcatalogservice
+  rules:
+  - from:
+    - source:
+        principals:
+        - cluster.local/ns/default/sa/frontend
+        - cluster.local/ns/default/sa/checkoutservice
+        - cluster.local/ns/default/sa/recommendationservice
+    to:
+    - operation:
+        paths:
+        - /hipstershop.ProductCatalogService/GetProduct
+        - /hipstershop.ProductCatalogService/ListProducts
+        methods:
+        - POST
+        ports:
+        - "3550"

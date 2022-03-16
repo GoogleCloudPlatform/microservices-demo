@@ -1,0 +1,17 @@
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+  name: redis-cart
+spec:
+  selector:
+    matchLabels:
+      app: redis-cart
+  rules:
+  - from:
+    - source:
+        principals:
+        - cluster.local/ns/default/sa/cartservice
+    to:
+    - operation:
+        ports:
+        - "6379"
