@@ -73,10 +73,3 @@ Remove the `loadgenerator` `Deployment` not used at this point:
 ```
 kubectl delete deployment loadgenerator
 ```
-
-## Deploy NetworkPolicies
-
-Deploy the Kubernetes manifests from extra folder where reside the `NetworkPolicy` resources:
-```
-kubectl apply -f ../../docs/manifests/network-policies/
-```
