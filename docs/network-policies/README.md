@@ -16,7 +16,7 @@ gcloud container clusters create \
 
 After you applied the Kubernetes manifests of the Online Boutique sample apps, you could apply the `NetworkPolicy` resources:
 ```sh
-kubectl apply -f ./manifests/network-policies/
+kubectl apply -f ./docs/network-policies/
 ```
 
 3. Verify the resources deployed.
@@ -43,7 +43,7 @@ recommendationservice   app=recommendationservice   2m58s
 shippingservice         app=shippingservice         2m58s
 ```
 
-_Note: `Egress` is wide-open in these `NetworkPolicy` resources. In our case, we do that on purpose because there is multiple egress destinations to take into consideration like: the Kubernetes's DNS, Istio control plane (`istiod`), Cloud Trace API, Cloud Profiler API, Cloud Debugger API, etc._
+_Note: `Egress` is wide open in these `NetworkPolicy` resources. In our case, we do this is on purpose because there are multiple egress destinations to take into consideration like the Kubernetes DNS, Istio control plane (`istiod`), Cloud Trace API, Cloud Profiler API, Cloud Debugger API, etc._
 
 4. Verify you could still access the frontend's `EXTERNAL_IP` with no issues.
 
