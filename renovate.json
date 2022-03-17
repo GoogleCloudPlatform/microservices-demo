@@ -29,5 +29,8 @@
   },
   "golang":{
     "addLabels": ["lang: go"]
+  },
+  "nuget":{
+    "addLabels": ["lang: C#"]
   }
 }
