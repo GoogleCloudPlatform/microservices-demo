@@ -12,7 +12,20 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-apiVersion: v1
-kind: ServiceAccount
-metadata:
-  name: adservice
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+- network-policy-adservice.yaml
+- network-policy-cartservice.yaml
+- network-policy-checkoutservice.yaml
+- network-policy-currencyservice.yaml
+- network-policy-denyall.yaml
+- network-policy-emailservice.yaml
+- network-policy-frontend.yaml
+- network-policy-loadgenerator.yaml
+- network-policy-paymentservice.yaml
+- network-policy-productcatalogservice.yaml
+- network-policy-recommendationservice.yaml
+- network-policy-redis.yaml
+- network-policy-shippingservice.yaml
+namespace: default
