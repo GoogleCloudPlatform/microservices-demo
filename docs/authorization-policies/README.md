@@ -2,6 +2,8 @@
 
 This guide contains instructions for configuring `AuthorizationPolicy` resources for the OnlineBoutique apps.
 
+_Disclaimer: this part is trying an experimental approach with Kustomize, subject to change as our tests will move forward._
+
 ## Steps
  
 1. You need to have a GKE cluster created with Istio or Anthos Service Mesh (ASM) installed on it.
