@@ -16,18 +16,18 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
 - ../base
-- serviceaccount_adservice.yaml
-- serviceaccount_cartservice.yaml
-- serviceaccount_checkoutservice.yaml
-- serviceaccount_currencyservice.yaml
-- serviceaccount_emailservice.yaml
-- serviceaccount_frontend.yaml
-- serviceaccount_loadgenerator.yaml
-- serviceaccount_paymentservice.yaml
-- serviceaccount_productcatalogservice.yaml
-- serviceaccount_recommendationservice.yaml
-- serviceaccount_redis.yaml
-- serviceaccount_shippingservice.yaml
+- service-account-adservice.yaml
+- service-account-cartservice.yaml
+- service-account-checkoutservice.yaml
+- service-account-currencyservice.yaml
+- service-account-emailservice.yaml
+- service-account-frontend.yaml
+- service-account-loadgenerator.yaml
+- service-account-paymentservice.yaml
+- service-account-productcatalogservice.yaml
+- service-account-recommendationservice.yaml
+- service-account-redis.yaml
+- service-account-shippingservice.yaml
 namespace: default
 patchesJson6902:
 - target:

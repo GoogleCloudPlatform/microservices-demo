@@ -16,18 +16,18 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
 - ../service-accounts
-- authorizationpolicy_adservice.yaml
-- authorizationpolicy_cartservice.yaml
-- authorizationpolicy_checkoutservice.yaml
-- authorizationpolicy_currencyservice.yaml
-- authorizationpolicy_denyall.yaml
-- authorizationpolicy_emailservice.yaml
-- authorizationpolicy_frontend.yaml
-- authorizationpolicy_paymentservice.yaml
-- authorizationpolicy_productcatalogservice.yaml
-- authorizationpolicy_recommendationservice.yaml
-- authorizationpolicy_redis.yaml
-- authorizationpolicy_shippingservice.yaml
+- authorization-policy-adservice.yaml
+- authorization-policy-cartservice.yaml
+- authorization-policy-checkoutservice.yaml
+- authorization-policy-currencyservice.yaml
+- authorization-policy-denyall.yaml
+- authorization-policy-emailservice.yaml
+- authorization-policy-frontend.yaml
+- authorization-policy-paymentservice.yaml
+- authorization-policy-productcatalogservice.yaml
+- authorization-policy-recommendationservice.yaml
+- authorization-policy-redis.yaml
+- authorization-policy-shippingservice.yaml
 namespace: default
 patchesJson6902:
 - target:
