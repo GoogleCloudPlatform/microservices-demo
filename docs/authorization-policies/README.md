@@ -16,11 +16,16 @@ export NAMESPACE=default
 sed -i "s/namespace: default/namespace: ${NAMESPACE}/g;s,ns/default,ns/${NAMESPACE},g" ./manifests/authorization-policies/kustomization.yaml
 ```
 
+Get the base manifests:
+```
+cp ../../../release/kubernetes-manifests.yaml ../base/
+```
+
 Deploy the manifests:
 ```sh
 kubectl apply -k ./overlays-manifests/authorization-policies/
 ```
-_Note: this command above leverage `Kustomize` in order to deploy both base and overlays manifests. Overlays manifests contain the `ServiceAccount` and `AuthorizationPolicies`.
+_Note: this command above leverage `Kustomize` in order to deploy both base and overlays manifests. Overlays manifests contain the `ServiceAccount` and `AuthorizationPolicies`._
 
 3. Verify the resources deployed.
 
