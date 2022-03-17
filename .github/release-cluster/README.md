@@ -1,8 +1,10 @@
 # onlineboutique.dev manifests
 
-This directory contains extra deploy manifests for configuring a domain name/static IP to point to an Online Boutique deployment running in GKE and for setting up Cloud Armor.
+This directory contains extra deploy manifests for configuring Online Boutique solution on GKE for onlineboutique.dev.
 
 _Note: before moving forward, the OnlineBoutique apps should already be deployed [on the online-boutique-release GKE cluster](../../hack#10-deploy-releasekubernetes-manifestsyaml-to-our-online-boutique-release-gke-cluster)._
+
+## Public static IP address
 
 Create the static public IP address:
 ```
@@ -16,6 +18,8 @@ gcloud compute addresses describe $STATIC_IP_NAME \
     --global \
     --format "value(address)"
 ```
+
+## Cloud Armor
 
 Set up Cloud Armor:
 ```
@@ -38,6 +42,8 @@ gcloud compute security-policies update $SECURITY_POLICY_NAME \
     --log-level=VERBOSE
 ```
 
+## SSL Policy
+
 Set up an SSL policy in order to later set up a redirect from HTTP to HTTPs:
 ```
 SSL_POLICY_NAME=online-boutique-ssl-policy # Name hard-coded in: frontendconfig.yaml
@@ -45,6 +51,8 @@ gcloud compute ssl-policies create $SSL_POLICY_NAME \
     --profile COMPATIBLE  \
     --min-tls-version 1.0
 ```
+
+## Deploy Kubernetes manifests
 
 Deploy the Kubernetes manifests in this current folder:
 ```
