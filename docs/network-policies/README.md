@@ -16,7 +16,8 @@ gcloud container clusters create \
 
 After you applied the Kubernetes manifests of the Online Boutique sample apps, you could apply the `NetworkPolicy` resources:
 ```sh
-kubectl apply -k ./manifests/
+cp ../../kubernetes-manifests.yaml .
+kubectl apply -k .
 ```
 
 3. Verify the resources deployed.
