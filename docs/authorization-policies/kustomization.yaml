@@ -12,7 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-apiVersion: v1
-kind: ServiceAccount
-metadata:
-  name: shippingservice
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+- kubernetes-manifests.yaml # needs to be copied from ../../release/kubernetes-manifests.yaml
+components:
+- all
+#- for-ingress-gateway
+#- for-memorystore

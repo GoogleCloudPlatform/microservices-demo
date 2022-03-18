@@ -12,7 +12,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-apiVersion: v1
-kind: ServiceAccount
-metadata:
-  name: checkoutservice
+apiVersion: kustomize.config.k8s.io/v1alpha1
+kind: Component
+patchesJson6902:
+- target:
+    kind: AuthorizationPolicy
+    name: frontend
+  patch: |-
+    - op: replace
+      path: /spec/rules/0/from/0/source/principals
+      value:
+        - cluster.local/ns/default/sa/loadgenerator
+        - cluster.local/ns/asm-ingress/sa/asm-ingressgateway

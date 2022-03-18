@@ -12,10 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-apiVersion: kustomize.config.k8s.io/v1beta1
-kind: Kustomization
+apiVersion: kustomize.config.k8s.io/v1alpha1
+kind: Component
 resources:
-- ../service-accounts
 - authorization-policy-adservice.yaml
 - authorization-policy-cartservice.yaml
 - authorization-policy-checkoutservice.yaml
@@ -28,7 +27,6 @@ resources:
 - authorization-policy-recommendationservice.yaml
 - authorization-policy-redis.yaml
 - authorization-policy-shippingservice.yaml
-namespace: default
 patchesJson6902:
 - target:
     kind: AuthorizationPolicy
