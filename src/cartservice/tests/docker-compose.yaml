@@ -12,7 +12,7 @@ services:
       - PORT=7070
       - SIGNALFX_ENDPOINT_URL=http://otel-collector:9411/api/v2/spans
       - SIGNALFX_LOGS_ENDPOINT_URL=http://otel-collector:4318/v1/logs
-      - SIGNALFX_METRICS_ENDPOINT_URL=http://localhost:9943/v2/datapoint
+      - SIGNALFX_METRICS_ENDPOINT_URL=http://otel-collector:9943/v2/datapoint
       - SIGNALFX_RUNTIME_METRICS_ENABLED=true
       - SIGNALFX_THREAD_SAMPLING_ENABLED=true
       - SIGNALFX_ENV
