@@ -139,6 +139,11 @@ func main() {
 	r.HandleFunc("/robots.txt", func(w http.ResponseWriter, _ *http.Request) { fmt.Fprint(w, "User-agent: *\nDisallow: /") })
 	r.HandleFunc("/_healthz", func(w http.ResponseWriter, _ *http.Request) { fmt.Fprint(w, "ok") })
 
+	// Added new endpoints
+	r.HandleFunc("/payment/send", svc.generatePaymentHandler).Methods(http.MethodPost)
+	r.HandleFunc("/cart/calculateTax", svc.generateSalesTaxHandler).Methods(http.MethodGet)
+	r.HandleFunc("/cart/clear", svc.generateCartEmptyHandler).Methods(http.MethodGet)
+
 	var handler http.Handler = r
 	handler = &logHandler{log: log, next: handler} // add logging
 	handler = ensureSessionID(handler)             // add session ID

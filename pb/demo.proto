@@ -207,6 +207,22 @@ message SendOrderConfirmationRequest {
 
 service CheckoutService {
     rpc PlaceOrder(PlaceOrderRequest) returns (PlaceOrderResponse) {}
+    rpc GeneratePayment(GeneratePaymentRequest) returns (Empty) {}
+    rpc GenerateSalesTax(GenerateSalesTaxRequest) returns (Empty) {}
+    rpc GenerateCartEmpty(GenerateCartEmptyRequest) returns (Empty) {}
+}
+
+message GeneratePaymentRequest {
+    string product_id = 1;
+    int32  quantity = 2;
+}
+
+message GenerateSalesTaxRequest {
+    string country = 1;
+}
+
+message GenerateCartEmptyRequest {
+    uint32 delay = 1;
 }
 
 message PlaceOrderRequest {
