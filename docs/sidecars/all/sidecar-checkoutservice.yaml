@@ -22,10 +22,10 @@ spec:
       app: checkoutservice
   egress:
   - hosts:
-    - "istio-system/*"
-    - "./cartservice.default.svc.cluster.local"
-    - "./currencyservice.default.svc.cluster.local"
-    - "./emailservice.default.svc.cluster.local"
-    - "./paymentservice.default.svc.cluster.local"
-    - "./productcatalogservice.default.svc.cluster.local"
-    - "./shippingservice.default.svc.cluster.local"
+    - istio-system/*
+    - ./cartservice.default.svc.cluster.local
+    - ./currencyservice.default.svc.cluster.local
+    - ./emailservice.default.svc.cluster.local
+    - ./paymentservice.default.svc.cluster.local
+    - ./productcatalogservice.default.svc.cluster.local
+    - ./shippingservice.default.svc.cluster.local

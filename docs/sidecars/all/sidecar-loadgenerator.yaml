@@ -22,5 +22,5 @@ spec:
       app: loadgenerator
   egress:
   - hosts:
-    - "istio-system/*"
-    - "./frontend.default.svc.cluster.local"
+    - istio-system/*
+    - ./frontend.default.svc.cluster.local

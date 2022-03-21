@@ -22,4 +22,4 @@ spec:
       app: shippingservice
   egress:
   - hosts:
-    - "istio-system/*"
+    - istio-system/*

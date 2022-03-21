@@ -19,4 +19,5 @@ resources:
 components:
 - all
 #- for-memorystore
+#- for-namespace
 namespace: default

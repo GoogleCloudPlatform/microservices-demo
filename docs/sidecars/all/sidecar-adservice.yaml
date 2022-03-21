@@ -22,4 +22,4 @@ spec:
       app: adservice
   egress:
   - hosts:
-    - "istio-system/*"
+    - istio-system/*

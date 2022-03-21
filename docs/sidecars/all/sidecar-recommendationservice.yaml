@@ -22,5 +22,5 @@ spec:
       app: recommendationservice
   egress:
   - hosts:
-    - "istio-system/*"
-    - "./productcatalogservice.default.svc.cluster.local"
+    - istio-system/*
+    - ./productcatalogservice.default.svc.cluster.local

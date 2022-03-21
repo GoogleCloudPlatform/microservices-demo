@@ -22,4 +22,4 @@ spec:
       app: paymentservice
   egress:
   - hosts:
-    - "istio-system/*"
+    - istio-system/*

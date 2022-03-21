@@ -22,4 +22,4 @@ spec:
       app: redis-cart
   egress:
   - hosts:
-    - "istio-system/*"
+    - istio-system/*

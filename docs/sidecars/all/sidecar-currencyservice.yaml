@@ -22,4 +22,4 @@ spec:
       app: currencyservice
   egress:
   - hosts:
-    - "istio-system/*"
+    - istio-system/*

@@ -22,11 +22,11 @@ spec:
       app: frontend
   egress:
   - hosts:
-    - "istio-system/*"
-    - "./adservice.default.svc.cluster.local"
-    - "./cartservice.default.svc.cluster.local"
-    - "./checkoutservice.default.svc.cluster.local"
-    - "./currencyservice.default.svc.cluster.local"
-    - "./productcatalogservice.default.svc.cluster.local"
-    - "./recommendationservice.default.svc.cluster.local"
-    - "./shippingservice.default.svc.cluster.local"
+    - istio-system/*
+    - ./adservice.default.svc.cluster.local
+    - ./cartservice.default.svc.cluster.local
+    - ./checkoutservice.default.svc.cluster.local
+    - ./currencyservice.default.svc.cluster.local
+    - ./productcatalogservice.default.svc.cluster.local
+    - ./recommendationservice.default.svc.cluster.local
+    - ./shippingservice.default.svc.cluster.local

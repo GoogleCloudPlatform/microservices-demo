@@ -22,4 +22,4 @@ spec:
       app: emailservice
   egress:
   - hosts:
-    - "istio-system/*"
+    - istio-system/*

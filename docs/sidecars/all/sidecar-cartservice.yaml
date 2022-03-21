@@ -22,5 +22,5 @@ spec:
       app: cartservice
   egress:
   - hosts:
-    - "istio-system/*"
-    - "./redis-cart.default.svc.cluster.local"
+    - istio-system/*
+    - ./redis-cart.default.svc.cluster.local

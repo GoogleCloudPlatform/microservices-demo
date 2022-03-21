@@ -22,4 +22,4 @@ spec:
       app: productcatalogservice
   egress:
   - hosts:
-    - "istio-system/*"
+    - istio-system/*
