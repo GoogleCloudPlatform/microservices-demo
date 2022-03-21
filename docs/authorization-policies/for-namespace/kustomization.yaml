@@ -22,7 +22,7 @@ patchesJson6902:
     - op: replace
       path: /spec/rules/0/from/0/source/principals
       value:
-        - cluster.local/ns/NAMESPACE/sa/frontend
+        - cluster.local/ns/ONLINEBOUTIQUE_NAMESPACE/sa/frontend
 - target:
     kind: AuthorizationPolicy
     name: cartservice
@@ -30,8 +30,8 @@ patchesJson6902:
     - op: replace
       path: /spec/rules/0/from/0/source/principals
       value:
-        - cluster.local/ns/NAMESPACE/sa/frontend
-        - cluster.local/ns/NAMESPACE/sa/checkoutservice
+        - cluster.local/ns/ONLINEBOUTIQUE_NAMESPACE/sa/frontend
+        - cluster.local/ns/ONLINEBOUTIQUE_NAMESPACE/sa/checkoutservice
 - target:
     kind: AuthorizationPolicy
     name: checkoutservice
@@ -39,7 +39,7 @@ patchesJson6902:
     - op: replace
       path: /spec/rules/0/from/0/source/principals
       value:
-        - cluster.local/ns/NAMESPACE/sa/frontend
+        - cluster.local/ns/ONLINEBOUTIQUE_NAMESPACE/sa/frontend
 - target:
     kind: AuthorizationPolicy
     name: currencyservice
@@ -47,8 +47,8 @@ patchesJson6902:
     - op: replace
       path: /spec/rules/0/from/0/source/principals
       value:
-        - cluster.local/ns/NAMESPACE/sa/frontend
-        - cluster.local/ns/NAMESPACE/sa/checkoutservice
+        - cluster.local/ns/ONLINEBOUTIQUE_NAMESPACE/sa/frontend
+        - cluster.local/ns/ONLINEBOUTIQUE_NAMESPACE/sa/checkoutservice
 - target:
     kind: AuthorizationPolicy
     name: emailservice
@@ -56,7 +56,7 @@ patchesJson6902:
     - op: replace
       path: /spec/rules/0/from/0/source/principals
       value:
-        - cluster.local/ns/NAMESPACE/sa/checkoutservice
+        - cluster.local/ns/ONLINEBOUTIQUE_NAMESPACE/sa/checkoutservice
 - target:
     kind: AuthorizationPolicy
     name: paymentservice
@@ -64,7 +64,7 @@ patchesJson6902:
     - op: replace
       path: /spec/rules/0/from/0/source/principals
       value:
-        - cluster.local/ns/NAMESPACE/sa/checkoutservice
+        - cluster.local/ns/ONLINEBOUTIQUE_NAMESPACE/sa/checkoutservice
 - target:
     kind: AuthorizationPolicy
     name: productcatalogservice
@@ -72,9 +72,9 @@ patchesJson6902:
     - op: replace
       path: /spec/rules/0/from/0/source/principals
       value:
-        - cluster.local/ns/NAMESPACE/sa/frontend
-        - cluster.local/ns/NAMESPACE/sa/checkoutservice
-        - cluster.local/ns/NAMESPACE/sa/recommendationservice
+        - cluster.local/ns/ONLINEBOUTIQUE_NAMESPACE/sa/frontend
+        - cluster.local/ns/ONLINEBOUTIQUE_NAMESPACE/sa/checkoutservice
+        - cluster.local/ns/ONLINEBOUTIQUE_NAMESPACE/sa/recommendationservice
 - target:
     kind: AuthorizationPolicy
     name: recommendationservice
@@ -82,7 +82,7 @@ patchesJson6902:
     - op: replace
       path: /spec/rules/0/from/0/source/principals
       value:
-        - cluster.local/ns/NAMESPACE/sa/frontend
+        - cluster.local/ns/ONLINEBOUTIQUE_NAMESPACE/sa/frontend
 - target:
     kind: AuthorizationPolicy
     name: redis-cart
@@ -90,7 +90,7 @@ patchesJson6902:
     - op: replace
       path: /spec/rules/0/from/0/source/principals
       value:
-        - cluster.local/ns/NAMESPACE/sa/cartservice
+        - cluster.local/ns/ONLINEBOUTIQUE_NAMESPACE/sa/cartservice
 - target:
     kind: AuthorizationPolicy
     name: shippingservice
@@ -98,5 +98,5 @@ patchesJson6902:
     - op: replace
       path: /spec/rules/0/from/0/source/principals
       value:
-        - cluster.local/ns/NAMESPACE/sa/frontend
-        - cluster.local/ns/NAMESPACE/sa/checkoutservice
+        - cluster.local/ns/ONLINEBOUTIQUE_NAMESPACE/sa/frontend
+        - cluster.local/ns/ONLINEBOUTIQUE_NAMESPACE/sa/checkoutservice

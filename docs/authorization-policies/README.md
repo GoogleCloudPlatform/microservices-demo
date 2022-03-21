@@ -6,59 +6,53 @@ This guide contains instructions for configuring `AuthorizationPolicy` resources
  
 1. You need to have a GKE cluster created with Istio or Anthos Service Mesh (ASM) installed on it.
 
-2. Apply all the manifests.
+You also need to have an Ingress Gateway deployed in your GKE cluster. `AuthorizationPolicy` needs to have mTLS `STRICT` enabled in both the Ingress Gateway's namespace and the OnlineBoutique's namespace. With that in place, when the end-user hits the Ingress Gateway's public IP address, the Ingress Gateway will transform the request in plain text in mTLS and will forward the request to the OnlineBoutique `frontend` app.
 
-Update the manifests locally if you need to deploy the solution in a different namespace than `default`:
-```
-export NAMESPACE=default
-sed -i "s/namespace: default/namespace: ${NAMESPACE}/g;s,ns/default,ns/${NAMESPACE},g" ./manifests/authorization-policies/kustomization.yaml
-```
+2. Apply all the manifests.
 
 Get the base manifests:
 ```
 cp ../../release/kubernetes-manifests.yaml .
+cp ../../release/istio-manifests.yaml .
+```
+
+Update the manifests locally with the corresponding Ingress Gateway setup:
+```
+INGRESS_GATEWAY_NAME=asm-ingressgateway
+INGRESS_GATEWAY_NAMESPACE=asm-ingress
+sed -i "s/INGRESS_GATEWAY_NAME/${INGRESS_GATEWAY_NAME}/g;s/INGRESS_GATEWAY_NAMESPACE/${INGRESS_GATEWAY_NAMESPACE}/g" ./for-ingress-gateway/kustomization.yaml
+kustomize edit add component for-ingress-gateway
+```
+
+Update the manifests locally with your OnlineBoutique namespace:
+```
+export ONLINEBOUTIQUE_NAMESPACE=default
+sed -i "s/ONLINEBOUTIQUE_NAMESPACE/${ONLINEBOUTIQUE_NAMESPACE}/g" ./for-namespace/kustomization.yaml
+sed -i "s/ONLINEBOUTIQUE_NAMESPACE/${ONLINEBOUTIQUE_NAMESPACE}/g" ./for-ingress-gateway/kustomization.yaml
+kustomize edit add component for-namespace
+kustomize edit set namespace ${ONLINEBOUTIQUE_NAMESPACE}
 ```
 
 Deploy the manifests:
 ```sh
 kubectl apply -k .
 ```
-_Note: this command above leverage `Kustomize` in order to deploy both base and overlays manifests. Overlays manifests contain the `ServiceAccount` and `AuthorizationPolicy` resources._
 
 3. Verify the resources deployed.
 
 If you run:
 ```
-kubectl get serviceaccount,pod,authorizationpolicy -n $NAMESPACE
+kubectl get serviceaccount,pod,authorizationpolicy
 ```
 You should see:
 ```
 FIXME
 ```
 
-4. Verify you could still access the frontend's `EXTERNAL_IP` with no issues.
+4. Verify you could still access OnlineBoutique solution.
 
 ```
-kubectl get service frontend-external -n $NAMESPACE | awk '{print $4}'
-```
-
-5. _(Optional)_ Update `frontend` manifest if you use an Ingress Gateway
-
-Update the manifests locally if you need to deploy the solution in a different namespace than `default`:
-```
-sed -i "s/namespace: default/namespace: ${NAMESPACE}/g;s,ns/default,ns/${NAMESPACE},g" ./manifests/authorization-policies-ingress-gateway/kustomization.yaml
-```
-
-Update the manifests locally if you have a different name for your Ingress Gateway name rather than `asm-ingressgateway` in the `asm-ingress` namespace:
-```
-INGRESS_GATEWAY_NAME=asm-ingressgateway
-INGRESS_GATEWAY_NAMESPACE=asm-ingress
-sed -i "s,ns/asm-ingress/sa/asm-ingressgateway,ns/${INGRESS_GATEWAY_NAMESPACE}/sa/${INGRESS_GATEWAY_NAME},g" ./manifests/authorization-policies-ingress-gateway/kustomization.yaml
-```
-
-Deploy the manifests:
-```
-kubectl apply -k ./overlays-manifests/authorization-policies-ingress-gateway/
+kubectl get service ${INGRESS_GATEWAY_NAME} -n ${INGRESS_GATEWAY_NAMESPACE} | awk '{print $4}'
 ```
 
 ## Resources

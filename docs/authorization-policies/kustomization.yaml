@@ -16,6 +16,7 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
 - kubernetes-manifests.yaml # needs to be copied from ../../release/kubernetes-manifests.yaml
+- istio-manifests.yaml # needs to be copied from ../../release/istio-manifests.yaml
 components:
 - all
 - ../service-accounts/all
