@@ -5,7 +5,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Grpc.AspNetCore" Version="2.42.0" />
+    <PackageReference Include="Grpc.AspNetCore" Version="2.44.0" />
     <PackageReference Include="Grpc.HealthCheck" Version="2.43.0" />
     <PackageReference Include="StackExchange.Redis" Version="2.2.88" />
   </ItemGroup>
