@@ -18,5 +18,7 @@ resources:
 - kubernetes-manifests.yaml # needs to be copied from ../../release/kubernetes-manifests.yaml
 components:
 - all
+- ../service-accounts/all
 #- for-ingress-gateway
 #- for-memorystore
+#- ../service-accounts/for-memorystore

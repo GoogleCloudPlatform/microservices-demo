@@ -22,5 +22,5 @@ patchesJson6902:
     - op: replace
       path: /spec/rules/0/from/0/source/principals
       value:
-        - cluster.local/ns/default/sa/loadgenerator
-        - cluster.local/ns/asm-ingress/sa/asm-ingressgateway
+        - cluster.local/ns/$(NAMESPACE)/sa/loadgenerator
+        - cluster.local/ns/$(INGRESS_GATEWAY_NAMESPACE)/sa/$(INGRESS_GATEWAY_NAME)

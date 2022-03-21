@@ -2,8 +2,6 @@
 
 This guide contains instructions for configuring `AuthorizationPolicy` resources for the OnlineBoutique apps.
 
-_Disclaimer: this part is trying an experimental approach with Kustomize, subject to change as our tests will move forward._
-
 ## Steps
  
 1. You need to have a GKE cluster created with Istio or Anthos Service Mesh (ASM) installed on it.
@@ -18,14 +16,14 @@ sed -i "s/namespace: default/namespace: ${NAMESPACE}/g;s,ns/default,ns/${NAMESPA
 
 Get the base manifests:
 ```
-cp ../../../release/kubernetes-manifests.yaml ../base/
+cp ../../release/kubernetes-manifests.yaml .
 ```
 
 Deploy the manifests:
 ```sh
-kubectl apply -k ./overlays-manifests/authorization-policies/
+kubectl apply -k .
 ```
-_Note: this command above leverage `Kustomize` in order to deploy both base and overlays manifests. Overlays manifests contain the `ServiceAccount` and `AuthorizationPolicies`._
+_Note: this command above leverage `Kustomize` in order to deploy both base and overlays manifests. Overlays manifests contain the `ServiceAccount` and `AuthorizationPolicy` resources._
 
 3. Verify the resources deployed.
 
@@ -65,5 +63,4 @@ kubectl apply -k ./overlays-manifests/authorization-policies-ingress-gateway/
 
 ## Resources
 
-- [`Kustomize`](https://kustomize.io/)
 - [`Authorization Policy`](https://cloud.google.com/service-mesh/docs/security/authorization-policy-overview)
