@@ -8,4 +8,4 @@ rook>=0.1.165
 opentracing==2.4.0
 jaeger-client==4.5.0
 markupsafe<=2.0.1
--e git://github.com/Rookout/python-grpc.git@35b7456cdc7a91d743f29492e67429fce7f27963#egg=grpcio_opentracing
+-e https://github.com/Rookout/python-grpc.git@35b7456cdc7a91d743f29492e67429fce7f27963#egg=grpcio_opentracing
