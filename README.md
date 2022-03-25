@@ -137,6 +137,7 @@ gcloud container clusters delete onlineboutique \
 - **non-GKE clusters (Minikube, Kind)**: see the [Development Guide](/docs/development-guide.md)
 - **Memorystore**: [See these instructions](/docs/memorystore.md) to replace the in-cluster `redis` database with hosted Google Cloud Memorystore (redis).
 - **Cymbal Shops Branding**: [See these instructions](/docs/cymbal-shops.md)
+- **NetworkPolicies**: [See these instructions](/docs/network-policies/README.md)
 
 
 ## Architecture
