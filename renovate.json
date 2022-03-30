@@ -31,6 +31,6 @@
     "addLabels": ["lang: go"]
   },
   "nuget":{
-    "addLabels": ["lang: C#"]
+    "addLabels": ["lang: dotnet"]
   }
 }
