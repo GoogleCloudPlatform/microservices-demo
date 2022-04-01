@@ -33,7 +33,7 @@ metadata:
   name: frontend-ingress
 spec:
   hosts:
-  - "*"
+  - "hipster.j22o.cloud"
   gateways:
   - frontend-gateway
   http:
