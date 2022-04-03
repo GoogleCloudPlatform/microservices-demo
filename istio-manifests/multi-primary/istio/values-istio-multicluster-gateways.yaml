@@ -1,0 +1,70 @@
+# Copyright 2018 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+global:
+  # Provides dns resolution for global services
+  podDNSSearchNamespaces:
+  - global
+  - "{{ valueOrDefault .DeploymentMeta.Namespace \"default\" }}.global"
+
+  multiCluster:
+    enabled: true
+
+  controlPlaneSecurityEnabled: true
+
+# Multicluster with gateways requires a root CA
+# Cluster local CAs are bootstrapped with the root CA.
+security:
+  selfSigned: false
+
+# Provides dns resolution for service entries of form
+# name.namespace.global
+istiocoredns:
+  enabled: true
+
+gateways:
+  istio-egressgateway:
+    enabled: true
+    env:
+      # Needed to route traffic via egress gateway if desired.
+      ISTIO_META_REQUESTED_NETWORK_VIEW: "external"
+
+mixer:
+  telemtery:
+    autoscaleEnabled: false
+
+pilot:
+  env:
+    PILOT_ENABLE_FALLTHROUGH_ROUTE: 1
+
+sidecarInjectorWebhook:
+  rewriteAppHTTPProbe: true
+
+prometheus:
+  enabled: true
+
+grafana:
+  enabled: true
+
+kiali:
+  enabled: true
+  createDemoSecret: true
+  dashboard:
+    grafanaURL: http://grafana:3000
+
+tracing:
+  enabled: true
+
+jaeger:
+  enabled: true 
