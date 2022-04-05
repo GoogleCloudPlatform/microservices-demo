@@ -1,5 +1,5 @@
 google-api-core==1.31.5
-grpcio-health-checking==1.33.2
+grpcio-health-checking==1.44.0
 grpcio==1.33.2
 jinja2==2.11.3
 opencensus==0.7.11
