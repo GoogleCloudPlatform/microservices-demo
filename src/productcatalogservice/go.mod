@@ -1,6 +1,6 @@
 module github.com/GoogleCloudPlatform/microservices-demo/src/productcatalogservice
 
-go 1.17
+go 1.18
 
 require (
 	cloud.google.com/go/profiler v0.1.1
