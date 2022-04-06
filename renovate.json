@@ -4,9 +4,33 @@
   ],
   "pip-compile": {
     "enabled": true,
-    "fileMatch": ["(^|/)requirements\\.in$"]
+    "fileMatch": ["(^|/)requirements\\.in$"],
+    "lockFileMaintenance": {
+      "enabled": true
+    }
   },
-  "pip_requirements": {
-    "enabled": false
+  "constraints": {
+    "python": "~=3.7.0"
+  },
+  "prConcurrentLimit":5,
+  "stabilityDays":7,
+  "vulnerabilityAlerts":{
+     "labels":[
+       "type:security" 
+     ],
+     "stabilityDays":0
+  },
+  "labels": ["dependencies"],
+  "python":{
+    "addLabels": ["lang: python"]
+  },
+  "java":{
+    "addLabels": ["lang: java"]
+  },
+  "golang":{
+    "addLabels": ["lang: go"]
+  },
+  "nuget":{
+    "addLabels": ["lang: dotnet"]
   }
 }
