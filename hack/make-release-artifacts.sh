@@ -51,12 +51,12 @@ read_manifests() {
     dir="$1"
 
     while IFS= read -d $'\0' -r file; do
+        echo "---"
+        
         # strip license headers (pattern "^# ")
         awk '
         /^[^# ]/ { found = 1 }
         found { print }' "${file}"
-
-        echo "---"
     done < <(find "${dir}" -name '*.yaml' -type f -print0)
 }
 
