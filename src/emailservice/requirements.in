@@ -9,5 +9,5 @@ python-json-logger==0.1.11
 google-cloud-profiler==1.1.2
 google-cloud-trace==0.24.0
 requests==2.27.1
-urllib3==1.26.5
+urllib3==1.26.9
 protobuf==3.15.0 # transitive dependency, move when google-api is bumped safely
