@@ -8,7 +8,7 @@ opencensus-ext-stackdriver==0.7.3
 opencensus-ext-grpc==0.7.1
 python-json-logger==0.1.11
 requests==2.27.1
-urllib3==1.26.5
+urllib3==1.26.9
 rsa==4.7
 pyyaml==6.0
 protobuf==3.15.0 # transitive dependency, move when google-api is bumped safely
