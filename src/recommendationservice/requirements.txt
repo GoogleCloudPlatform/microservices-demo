@@ -74,7 +74,7 @@ opencensus-ext-stackdriver==0.7.3
     # via -r requirements.in
 packaging==21.3
     # via google-api-core
-protobuf==3.15.0
+protobuf==3.20.0
     # via
     #   -r requirements.in
     #   google-api-core
@@ -117,7 +117,6 @@ six==1.15.0
     #   google-cloud-core
     #   google-python-cloud-debugger
     #   grpcio
-    #   protobuf
 uritemplate==3.0.1
     # via google-api-python-client
 urllib3==1.26.9
