@@ -46,8 +46,5 @@ func CreateQuoteFromFloat(value float64) Quote {
 
 // quoteByCountFloat takes a number of items and generates a price quote represented as a float.
 func quoteByCountFloat(count int32) float64 {
-	var y float64 = float64(count)
-	if (y > 0) return y
-	
 	return 8.99
 }
