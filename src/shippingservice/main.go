@@ -122,12 +122,21 @@ func (s *server) GetQuote(ctx context.Context, in *pb.GetQuoteRequest) (*pb.GetQ
 
 	// 1. Our quote system requires the total number of items to be shipped.
 	count := 0
+	var totalPrice int32 = 0
 	for _, item := range in.Items {
 		count += int(item.Quantity)
+		gpr := new(GetProductRequest)
+		gpr.Id = item.ProductId
+		product := srv.(ProductCatalogServiceServer).GetProduct(ctx, in)
+		totalPrice += product.PriceUsd.Nanos
+		log.Info("Charlie test total price:", totalPrice)
 	}
 
+
+
+
 	// 2. Generate a quote based on the total number of items to be shipped.
-	quote := CreateQuoteFromCount(count)
+	quote := CreateQuoteFromCount(totalPrice)
 
 	// 3. Generate a response.
 	return &pb.GetQuoteResponse{
