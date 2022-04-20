@@ -60,7 +60,7 @@ jinja2==2.11.3
     # via -r requirements.in
 markupsafe==1.1.1
     # via jinja2
-opencensus==0.7.11
+opencensus==0.8.0
     # via
     #   -r requirements.in
     #   opencensus-ext-grpc
