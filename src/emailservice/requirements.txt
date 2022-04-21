@@ -42,7 +42,7 @@ google-cloud-trace==0.24.0
     #   opencensus-ext-stackdriver
 googleapis-common-protos==1.52.0
     # via google-api-core
-grpcio==1.33.2
+grpcio==1.44.0
     # via
     #   -r requirements.in
     #   google-api-core
