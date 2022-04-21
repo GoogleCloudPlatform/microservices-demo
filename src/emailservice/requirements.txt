@@ -32,7 +32,7 @@ google-auth-httplib2==0.0.4
     #   google-cloud-profiler
 google-cloud-core==1.5.0
     # via google-cloud-trace
-google-cloud-monitoring==0.36.0
+google-cloud-monitoring==2.9.1
     # via opencensus-ext-stackdriver
 google-cloud-profiler==1.1.2
     # via -r requirements.in
@@ -69,10 +69,12 @@ opencensus-context==0.1.2
     # via opencensus
 opencensus-ext-grpc==0.7.1
     # via -r requirements.in
-opencensus-ext-stackdriver==0.7.3
+opencensus-ext-stackdriver==0.8.0
     # via -r requirements.in
 packaging==21.3
     # via google-api-core
+proto-plus==1.20.3
+    # via google-cloud-monitoring
 protobuf==3.20.0
     # via
     #   -r requirements.in
@@ -80,6 +82,7 @@ protobuf==3.20.0
     #   google-cloud-profiler
     #   googleapis-common-protos
     #   grpcio-health-checking
+    #   proto-plus
 pyasn1==0.4.8
     # via
     #   pyasn1-modules
