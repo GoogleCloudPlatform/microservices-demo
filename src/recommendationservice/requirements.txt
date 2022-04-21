@@ -47,7 +47,7 @@ google-python-cloud-debugger==2.18
     # via -r requirements.in
 googleapis-common-protos==1.52.0
     # via google-api-core
-grpcio==1.33.2
+grpcio==1.44.0
     # via
     #   -r requirements.in
     #   google-api-core
