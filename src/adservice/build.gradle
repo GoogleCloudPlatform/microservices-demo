@@ -8,25 +8,16 @@ plugins {
 repositories {
     mavenCentral()
     mavenLocal()
-    maven() {
-        url "https://oss.sonatype.org/content/repositories/snapshots/"
-
-        mavenContent {
-            snapshotsOnly()
-        }
-    }
 }
 
 description = 'Ad Service'
 group = "adservice"
 version = "0.1.0-SNAPSHOT"
 
-def opencensusVersion = "0.27.0"
 def grpcVersion = "1.39.0"
 def jacksonVersion = "2.12.1"
 def protocVersion = "3.12.3"
-def openTelemetryVersion = "1.6.0"
-def openTelemetryAlphaVersion = "1.6.0-alpha"
+def openTelemetryVersion = "1.13.0"
 
 tasks.withType(JavaCompile) {
     sourceCompatibility = JavaVersion.VERSION_11
@@ -44,17 +35,6 @@ dependencies {
     } else {
         implementation "com.google.api.grpc:proto-google-common-protos:1.18.1",
                 "io.opentelemetry:opentelemetry-api:${openTelemetryVersion}",
-                "io.opentelemetry:opentelemetry-api-metrics:${openTelemetryAlphaVersion}",
-                "io.opentelemetry:opentelemetry-exporter-otlp-metrics:${openTelemetryAlphaVersion}",
-                "io.opentelemetry:opentelemetry-sdk-metrics:${openTelemetryAlphaVersion}",
-                "com.newrelic.agent.java:newrelic-api:5.14.0",
-                "io.opencensus:opencensus-api:${opencensusVersion}",
-                "io.opencensus:opencensus-contrib-grpc-metrics:${opencensusVersion}",
-                "io.opencensus:opencensus-contrib-grpc-util:${opencensusVersion}",
-                "io.opencensus:opencensus-exporter-trace-jaeger:${opencensusVersion}",
-                "io.opencensus:opencensus-exporter-stats-stackdriver:${opencensusVersion}",
-                "io.opencensus:opencensus-exporter-trace-stackdriver:${opencensusVersion}",
-                "io.opencensus:opencensus-exporter-trace-logging:${opencensusVersion}",
                 "io.grpc:grpc-protobuf:${grpcVersion}",
                 "io.grpc:grpc-stub:${grpcVersion}",
                 "io.grpc:grpc-netty-shaded:${grpcVersion}",
@@ -67,8 +47,6 @@ dependencies {
 
         runtimeOnly "com.fasterxml.jackson.core:jackson-core:${jacksonVersion}",
                 "com.fasterxml.jackson.core:jackson-databind:${jacksonVersion}",
-                "io.opencensus:opencensus-contrib-log-correlation-log4j2:${opencensusVersion}",
-                "io.opencensus:opencensus-impl:${opencensusVersion}",
                 "io.netty:netty-tcnative-boringssl-static:2.0.34.Final"
     }
 }
@@ -121,11 +99,7 @@ task adService(type: CreateStartScripts) {
     applicationName = 'AdService'
     outputDir = new File(project.buildDir, 'tmp')
     classpath = startScripts.classpath
-    defaultJvmOpts = ["-javaagent:auto-agent/opentelemetry-agent.jar",
-                      "-Dio.opentelemetry.auto.slf4j.simpleLogger.log.com.newrelic.telemetry=debug",
-                      "-Dotel.imr.export.interval=10000",
-                      "-Dlog4j2.contextDataInjector=io.opencensus.contrib.logcorrelation.log4j2.OpenCensusTraceContextDataInjector",
-                      "-agentpath:/opt/cprof/profiler_java_agent.so=-cprof_service=adservice,-cprof_service_version=1.0.0"]
+    defaultJvmOpts = ["-javaagent:auto-agent/opentelemetry-agent.jar"]
 
 }
 
@@ -134,9 +108,7 @@ task adServiceClient(type: CreateStartScripts) {
     applicationName = 'AdServiceClient'
     outputDir = new File(project.buildDir, 'tmp')
     classpath = startScripts.classpath
-    defaultJvmOpts =
-            ["-Dlog4j2.contextDataInjector=io.opencensus.contrib.logcorrelation.log4j2.OpenCensusTraceContextDataInjector",
-             "-agentpath:/opt/cprof/profiler_java_agent.so=-cprof_service=adserviceclient,-cprof_service_version=1.0.0"]
+    defaultJvmOpts = []
 }
 
 applicationDistribution.into('bin') {

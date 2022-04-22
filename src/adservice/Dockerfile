@@ -14,13 +14,13 @@ RUN ./gradlew --refresh-dependencies installDist
 FROM adoptopenjdk/openjdk11
 
 ARG NEW_RELIC_API_KEY
-ARG OTEL_EXPORTER_OTLP_TRACES_ENDPOINT
-ARG OTEL_EXPORTER_OTLP_METRICS_ENDPOINT
+ARG OTEL_EXPORTER_OTLP_ENDPOINT
 
-ENV NEW_RELIC_API_KEY=${NEW_RELIC_API_KEY}
+ENV OTEL_SERVICE_NAME=AdService
+ENV OTEL_EXPORTER_OTLP_ENDPOINT=${OTEL_EXPORTER_OTLP_ENDPOINT}
 ENV OTEL_EXPORTER_OTLP_HEADERS="api-key=${NEW_RELIC_API_KEY}"
-ENV OTEL_EXPORTER_OTLP_TRACES_ENDPOINT=${OTEL_EXPORTER_OTLP_TRACES_ENDPOINT}
-ENV OTEL_EXPORTER_OTLP_METRICS_ENDPOINT=${OTEL_EXPORTER_OTLP_METRICS_ENDPOINT}
+ENV OTEL_LOGS_EXPORTER=otlp
+ENV OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE=DELTA
 
 # Download Stackdriver Profiler Java agent
 RUN apt-get -y update && apt-get install -qqy \
@@ -37,7 +37,7 @@ RUN GRPC_HEALTH_PROBE_VERSION=v0.4.6 && \
 
 RUN mkdir -p /app/auto-agent && \
     wget -q -O /app/auto-agent/opentelemetry-agent.jar \
-    https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/download/v1.6.0/opentelemetry-javaagent-all.jar
+    https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/download/v1.13.0/opentelemetry-javaagent.jar
 
 WORKDIR /app
 COPY --from=builder /app .

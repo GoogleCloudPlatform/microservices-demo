@@ -67,8 +67,7 @@ build:
     docker:
       buildArgs:
         NEW_RELIC_API_KEY: '{{.NEW_RELIC_API_KEY}}'
-        OTEL_EXPORTER_OTLP_TRACES_ENDPOINT: '{{.OTEL_EXPORTER_OTLP_TRACES_ENDPOINT}}'
-        OTEL_EXPORTER_OTLP_METRICS_ENDPOINT: '{{.OTEL_EXPORTER_OTLP_METRICS_ENDPOINT}}'
+        OTEL_EXPORTER_OTLP_ENDPOINT: '{{.OTEL_EXPORTER_OTLP_ENDPOINT}}'
   - image: otel-collector
     context: src/otel-collector
     docker:

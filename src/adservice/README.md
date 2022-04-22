@@ -23,6 +23,16 @@ If you need to upgrade the version of gradle then run
 From `src/adservice/`, run:
 
 ```
-docker build ./
+docker build \
+ --build-arg NEW_RELIC_API_KEY={NEW_RELIC_API_KEY} \
+ --build-arg OTEL_EXPORTER_OTLP_ENDPOINT=https://otlp.nr-data.net:4317 \
+ -t adservice \
+ ./
+```
+
+## Running docker image
+
+```
+docker run -p 9555:9555 adservice
 ```
 

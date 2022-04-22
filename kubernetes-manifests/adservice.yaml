@@ -42,13 +42,7 @@ spec:
             fieldRef:
               fieldPath: metadata.name
         - name: OTEL_RESOURCE_ATTRIBUTES
-          value: "service.name=AdService,pod.name=$(POD_NAME),service.instance.id=$(POD_NAME)"
-        # - name: DISABLE_STATS
-        #   value: "1"
-        # - name: DISABLE_TRACING
-        #   value: "1"
-        # - name: JAEGER_SERVICE_ADDR
-        #   value: "jaeger-collector:14268"
+          value: "pod.name=$(POD_NAME),service.instance.id=$(POD_NAME)"
         resources:
           requests:
             cpu: 200m

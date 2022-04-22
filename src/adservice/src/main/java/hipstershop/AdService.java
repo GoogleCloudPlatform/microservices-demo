@@ -31,21 +31,19 @@ import io.grpc.stub.StreamObserver;
 import io.opentelemetry.api.GlobalOpenTelemetry;
 import io.opentelemetry.api.common.AttributeKey;
 import io.opentelemetry.api.common.Attributes;
-import io.opentelemetry.api.metrics.*;
+import io.opentelemetry.api.metrics.DoubleHistogram;
+import io.opentelemetry.api.metrics.LongUpDownCounter;
+import io.opentelemetry.api.metrics.Meter;
 import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.api.trace.SpanKind;
 import io.opentelemetry.api.trace.Tracer;
 import io.opentelemetry.context.Scope;
-import io.opentelemetry.exporter.otlp.metrics.OtlpGrpcMetricExporter;
-import io.opentelemetry.sdk.metrics.SdkMeterProvider;
-import io.opentelemetry.sdk.metrics.common.InstrumentType;
-import io.opentelemetry.sdk.metrics.data.AggregationTemporality;
-import io.opentelemetry.sdk.metrics.export.IntervalMetricReader;
-import io.opentelemetry.sdk.metrics.internal.view.AttributesProcessor;
-import io.opentelemetry.sdk.metrics.view.Aggregation;
-import io.opentelemetry.sdk.metrics.view.InstrumentSelector;
-import io.opentelemetry.sdk.metrics.view.View;
-import io.opentelemetry.sdk.resources.Resource;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.datasource.SingleConnectionDataSource;
+
 import java.io.IOException;
 import java.net.InetAddress;
 import java.util.ArrayList;
@@ -56,25 +54,18 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
-import org.apache.logging.log4j.Level;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.datasource.SingleConnectionDataSource;
 
 public final class AdService {
 
   private static final Logger logger = LogManager.getLogger(AdService.class);
 
   private static final int MAX_ADS_TO_SERVE = 2;
-  private final MeterProvider meterProvider;
   private final JdbcTemplate jdbcTemplate;
 
   private Server server;
   private HealthStatusManager healthMgr;
 
-  public AdService(MeterProvider meterProvider, JdbcTemplate jdbcTemplate) {
-    this.meterProvider = meterProvider;
+  public AdService(JdbcTemplate jdbcTemplate) {
     this.jdbcTemplate = jdbcTemplate;
   }
 
@@ -136,10 +127,10 @@ public final class AdService {
     private final LongUpDownCounter numberOfAdsRequested;
     // used for doing some manual span instrumentation.
     private final Tracer tracer = GlobalOpenTelemetry.getTracer("hipstershop.adservice");
+    private final Meter meter = GlobalOpenTelemetry.getMeter("hipstershop.adservice");
 
     public AdServiceImpl(AdService service) {
       this.service = service;
-      Meter meter = service.meterProvider.get(AdService.class.getName());
       // note: preliminary spec discussion has things leaning toward this for the instrument name.
       // see https://github.com/open-telemetry/opentelemetry-specification/pull/657 for discussion
       getAdsRequestLatency =
@@ -237,7 +228,13 @@ public final class AdService {
         backgroundLatency.record(
             (System.currentTimeMillis() - startTime),
             Attributes.of(
-                AttributeKey.stringKey("span.name"), spanName, AttributeKey.stringKey("error"), "false", AttributeKey.stringKey("span.kind"), SpanKind.INTERNAL.name()));
+                AttributeKey.stringKey("span.name"),
+                spanName,
+                AttributeKey.stringKey("error"),
+                "false",
+                AttributeKey.stringKey("span.kind"),
+                SpanKind.INTERNAL.name()));
+        span.end();
         span.end();
       }
     }
@@ -356,35 +353,9 @@ public final class AdService {
   public static void main(String[] args)
       throws IOException, InterruptedException, ClassNotFoundException {
     JdbcTemplate jdbcTemplate = setUpDatabase();
-
-    String serviceName = "AdService";
-    Resource resource = Resource.create(Attributes.of(AttributeKey.stringKey("service.name"), serviceName));
-    InstrumentSelector selectorUpDownCounter = InstrumentSelector.builder().setInstrumentType(InstrumentType.UP_DOWN_COUNTER).build();
-    InstrumentSelector selectorHistogram = InstrumentSelector.builder().setInstrumentType(InstrumentType.HISTOGRAM).build();
-
-    // TODO: Generate resource from OTEL_RESOURCE_ATTRIBUTES
-    SdkMeterProvider meterProvider = SdkMeterProvider.builder()
-        .setResource(resource)
-        .registerView(selectorUpDownCounter, View.builder()
-            .setAggregation(Aggregation.sum(AggregationTemporality.DELTA))
-            .build())
-        .registerView(selectorHistogram, View.builder()
-            .setAggregation(Aggregation.explictBucketHistogram(AggregationTemporality.DELTA))
-            .build())
-        .buildAndRegisterGlobal();
-
-    IntervalMetricReader.builder()
-        .setExportIntervalMillis(2000)
-        .setMetricExporter(OtlpGrpcMetricExporter.builder()
-            .setEndpoint(System.getenv("OTEL_EXPORTER_OTLP_METRICS_ENDPOINT"))
-            .addHeader("api-key", System.getenv("NEW_RELIC_API_KEY"))
-            .build())
-        .setMetricProducers(List.of(meterProvider))
-        .buildAndStart();
-
     // Start the RPC server. You shouldn't see any output from gRPC before this.
     logger.info("AdService starting.");
-    AdService adService = new AdService(meterProvider, jdbcTemplate);
+    AdService adService = new AdService(jdbcTemplate);
     adService.start();
     adService.blockUntilShutdown();
   }
