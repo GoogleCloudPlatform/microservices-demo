@@ -36,9 +36,17 @@ spec:
         - name: PORT
           value: "9555"
         - name: DISABLE_STATS
-          value: "1"
+          value: "0"
         - name: DISABLE_TRACING
-          value: "1"
+          value: "0"
+        - name: SERVICE_NAME
+          value: "adservice"
+        - name: HONEYCOMB_API_KEY
+          value: "fd7c037a2729ce3ddc9d53449f665aaf"
+        - name: HONEYCOMB_TRACES_DATASET
+          value: "adservice-traces"
+        - name: HONEYCOMB_METRICS_DATASET
+          value: "adservice-metrics"
         # - name: JAEGER_SERVICE_ADDR
         #   value: "jaeger-collector:14268"
         resources:
