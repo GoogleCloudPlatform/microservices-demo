@@ -1,0 +1,260 @@
+// Copyright 2020 Google LLC
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+syntax = "proto3";
+
+package hipstershop;
+
+// -----------------Cart service-----------------
+
+service CartService {
+    rpc AddItem(AddItemRequest) returns (Empty) {}
+    rpc GetCart(GetCartRequest) returns (Cart) {}
+    rpc EmptyCart(EmptyCartRequest) returns (Empty) {}
+}
+
+message CartItem {
+    string product_id = 1;
+    int32  quantity = 2;
+}
+
+message AddItemRequest {
+    string user_id = 1;
+    CartItem item = 2;
+}
+
+message EmptyCartRequest {
+    string user_id = 1;
+}
+
+message GetCartRequest {
+    string user_id = 1;
+}
+
+message Cart {
+    string user_id = 1;
+    repeated CartItem items = 2;
+}
+
+message Empty {}
+
+// ---------------Recommendation service----------
+
+service RecommendationService {
+  rpc ListRecommendations(ListRecommendationsRequest) returns (ListRecommendationsResponse){}
+}
+
+message ListRecommendationsRequest {
+    string user_id = 1;
+    repeated string product_ids = 2;
+}
+
+message ListRecommendationsResponse {
+    repeated string product_ids = 1;
+}
+
+// ---------------Product Catalog----------------
+
+service ProductCatalogService {
+    rpc ListProducts(Empty) returns (ListProductsResponse) {}
+    rpc GetProduct(GetProductRequest) returns (Product) {}
+    rpc SearchProducts(SearchProductsRequest) returns (SearchProductsResponse) {}
+}
+
+message Product {
+    string id = 1;
+    string name = 2;
+    string description = 3;
+    string picture = 4;
+    Money price_usd = 5;
+
+    // Categories such as "clothing" or "kitchen" that can be used to look up
+    // other related products.
+    repeated string categories = 6;
+}
+
+message ListProductsResponse {
+    repeated Product products = 1;
+}
+
+message GetProductRequest {
+    string id = 1;
+}
+
+message SearchProductsRequest {
+    string query = 1;
+}
+
+message SearchProductsResponse {
+    repeated Product results = 1;
+}
+
+// ---------------Shipping Service----------
+
+service ShippingService {
+    rpc GetQuote(GetQuoteRequest) returns (GetQuoteResponse) {}
+    rpc ShipOrder(ShipOrderRequest) returns (ShipOrderResponse) {}
+}
+
+message GetQuoteRequest {
+    Address address = 1;
+    repeated CartItem items = 2;
+}
+
+message GetQuoteResponse {
+    Money cost_usd = 1;
+}
+
+message ShipOrderRequest {
+    Address address = 1;
+    repeated CartItem items = 2;
+}
+
+message ShipOrderResponse {
+    string tracking_id = 1;
+}
+
+message Address {
+    string street_address = 1;
+    string city = 2;
+    string state = 3;
+    string country = 4;
+    int32 zip_code = 5;
+}
+
+// -----------------Currency service-----------------
+
+service CurrencyService {
+    rpc GetSupportedCurrencies(Empty) returns (GetSupportedCurrenciesResponse) {}
+    rpc Convert(CurrencyConversionRequest) returns (Money) {}
+}
+
+// Represents an amount of money with its currency type.
+message Money {
+    // The 3-letter currency code defined in ISO 4217.
+    string currency_code = 1;
+
+    // The whole units of the amount.
+    // For example if `currencyCode` is `"USD"`, then 1 unit is one US dollar.
+    int64 units = 2;
+
+    // Number of nano (10^-9) units of the amount.
+    // The value must be between -999,999,999 and +999,999,999 inclusive.
+    // If `units` is positive, `nanos` must be positive or zero.
+    // If `units` is zero, `nanos` can be positive, zero, or negative.
+    // If `units` is negative, `nanos` must be negative or zero.
+    // For example $-1.75 is represented as `units`=-1 and `nanos`=-750,000,000.
+    int32 nanos = 3;
+}
+
+message GetSupportedCurrenciesResponse {
+    // The 3-letter currency code defined in ISO 4217.
+    repeated string currency_codes = 1;
+}
+
+message CurrencyConversionRequest {
+    Money from = 1;
+
+    // The 3-letter currency code defined in ISO 4217.
+    string to_code = 2;
+}
+
+// -------------Payment service-----------------
+
+service PaymentService {
+    rpc Charge(ChargeRequest) returns (ChargeResponse) {}
+}
+
+message CreditCardInfo {
+    string credit_card_number = 1;
+    int32 credit_card_cvv = 2;
+    int32 credit_card_expiration_year = 3;
+    int32 credit_card_expiration_month = 4;
+}
+
+message ChargeRequest {
+    Money amount = 1;
+    CreditCardInfo credit_card = 2;
+}
+
+message ChargeResponse {
+    string transaction_id = 1;
+}
+
+// -------------Email service-----------------
+
+service EmailService {
+    rpc SendOrderConfirmation(SendOrderConfirmationRequest) returns (Empty) {}
+}
+
+message OrderItem {
+    CartItem item = 1;
+    Money cost = 2;
+}
+
+message OrderResult {
+    string   order_id = 1;
+    string   shipping_tracking_id = 2;
+    Money shipping_cost = 3;
+    Address  shipping_address = 4;
+    repeated OrderItem items = 5;
+}
+
+message SendOrderConfirmationRequest {
+    string email = 1;
+    OrderResult order = 2;
+}
+
+
+// -------------Checkout service-----------------
+
+service CheckoutService {
+    rpc PlaceOrder(PlaceOrderRequest) returns (PlaceOrderResponse) {}
+}
+
+message PlaceOrderRequest {
+    string user_id = 1;
+    string user_currency = 2;
+
+    Address address = 3;
+    string email = 5;
+    CreditCardInfo credit_card = 6;
+}
+
+message PlaceOrderResponse {
+    OrderResult order = 1;
+}
+
+// ------------Ad service------------------
+
+service AdService {
+    rpc GetAds(AdRequest) returns (AdResponse) {}
+}
+
+message AdRequest {
+    // List of important key words from the current page describing the context.
+    repeated string context_keys = 1;
+}
+
+message AdResponse {
+    repeated Ad ads = 1;
+}
+
+message Ad {
+    // url to redirect to when an ad is clicked.
+    string redirect_url = 1;
+
+    // short advertisement text to display.
+    string text = 2;
+}
