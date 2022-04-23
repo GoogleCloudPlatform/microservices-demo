@@ -47,8 +47,8 @@ spec:
           value: "adservice-traces"
         - name: HONEYCOMB_METRICS_DATASET
           value: "adservice-metrics"
-        # - name: JAEGER_SERVICE_ADDR
-        #   value: "jaeger-collector:14268"
+        - name: OTEL_LOG_LEVEL
+          value: "error"
         resources:
           requests:
             cpu: 200m
