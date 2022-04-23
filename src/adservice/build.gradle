@@ -109,7 +109,7 @@ task adService(type: CreateStartScripts) {
     classpath = startScripts.classpath
     defaultJvmOpts =
             ["-Dlog4j2.contextDataInjector=io.opencensus.contrib.logcorrelation.log4j2.OpenCensusTraceContextDataInjector",
-             "-agentpath:/opt/cprof/profiler_java_agent.so=-cprof_service=adservice,-cprof_service_version=1.0.0"],
+             "-agentpath:/opt/cprof/profiler_java_agent.so=-cprof_service=adservice,-cprof_service_version=1.0.0",
              "-javaagent:honeycomb-opentelemetry-javaagent-1.0.0.jar"]
 }
 
@@ -120,7 +120,7 @@ task adServiceClient(type: CreateStartScripts) {
     classpath = startScripts.classpath
     defaultJvmOpts =
             ["-Dlog4j2.contextDataInjector=io.opencensus.contrib.logcorrelation.log4j2.OpenCensusTraceContextDataInjector",
-             "-agentpath:/opt/cprof/profiler_java_agent.so=-cprof_service=adserviceclient,-cprof_service_version=1.0.0"],
+             "-agentpath:/opt/cprof/profiler_java_agent.so=-cprof_service=adserviceclient,-cprof_service_version=1.0.0",
              "-javaagent:/app/honeycomb-opentelemetry-javaagent-1.0.0.jar"]
 }
 
