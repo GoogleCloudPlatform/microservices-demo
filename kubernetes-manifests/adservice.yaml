@@ -20,7 +20,7 @@ spec:
           env:
             - name: PORT
               value: "9555"
-            # Lightstep config
+              #honeycomb config
             - name: SERVICE_NAME
               value: "adservice"
             - name: HONEYCOMB_API_KEY
