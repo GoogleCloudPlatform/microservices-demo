@@ -55,7 +55,7 @@ public class AdServiceClient {
         ManagedChannelBuilder.forAddress(host, port)
             // Channels are secure by default (via SSL/TLS). For the example we disable TLS to avoid
             // needing certificates.
-            .usePlaintext()
+            .usePlaintext(true)
             .build());
   }
 
@@ -81,7 +81,7 @@ public class AdServiceClient {
             .setRecordEvents(true)
             .setSampler(Samplers.alwaysSample())
             .startSpan();
-    try (Scope ignored = tracer.withSpan(span)) {
+    try (Scope scope = tracer.withSpan(span)) {
       tracer.getCurrentSpan().addAnnotation("Getting Ads");
       response = blockingStub.getAds(request);
       tracer.getCurrentSpan().addAnnotation("Received response from Ads Service.");
@@ -97,13 +97,14 @@ public class AdServiceClient {
     }
   }
 
-  private static int getPortOrDefaultFromArgs(String[] args) {
-    int portNumber = 9555;
-    if (2 < args.length) {
+  private static int getPortOrDefaultFromArgs(String[] args, int index, int defaultPort) {
+    int portNumber = defaultPort;
+    if (index < args.length) {
       try {
-        portNumber = Integer.parseInt(args[2]);
+        portNumber = Integer.parseInt(args[index]);
       } catch (NumberFormatException e) {
-        logger.warn(String.format("Port %s is invalid, use default port %d.", args[2], 9555));
+        logger.warn(
+            String.format("Port %s is invalid, use default port %d.", args[index], defaultPort));
       }
     }
     return portNumber;
@@ -126,7 +127,7 @@ public class AdServiceClient {
     // Add final keyword to pass checkStyle.
     final String contextKeys = getStringOrDefaultFromArgs(args, 0, "camera");
     final String host = getStringOrDefaultFromArgs(args, 1, "localhost");
-    final int serverPort = getPortOrDefaultFromArgs(args);
+    final int serverPort = getPortOrDefaultFromArgs(args, 2, 9555);
 
     // Registers all RPC views.
     RpcViews.registerAllGrpcViews();
