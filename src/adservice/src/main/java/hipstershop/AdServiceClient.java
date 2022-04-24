@@ -81,7 +81,7 @@ public class AdServiceClient {
             .setRecordEvents(true)
             .setSampler(Samplers.alwaysSample())
             .startSpan();
-    try (Scope ignore = tracer.withSpan(span)) {
+    try (Scope ignored = tracer.withSpan(span)) {
       tracer.getCurrentSpan().addAnnotation("Getting Ads");
       response = blockingStub.getAds(request);
       tracer.getCurrentSpan().addAnnotation("Received response from Ads Service.");
