@@ -35,19 +35,22 @@ spec:
         env:
         - name: PORT
           value: "9555"
-        - name: DISABLE_STATS
-          value: "1"
-        - name: DISABLE_TRACING
-          value: "1"
-        # - name: JAEGER_SERVICE_ADDR
-        #   value: "jaeger-collector:14268"
+          # Honeycomb config
+        - name: OTEL_SERVICE_NAME
+          value: "adservice"
+        - name: SERVICE_NAME
+          value: "adservice"          
+        - name: HONEYCOMB_API_KEY
+          value: "fd7c037a2729ce3ddc9d53449f665aaf"
+        - name: HONEYCOMB_TRACES_DATASET
+          value: "adservice-traces"
         resources:
           requests:
             cpu: 200m
             memory: 180Mi
           limits:
-            cpu: 300m
-            memory: 300Mi
+            cpu: 400m
+            memory: 400Mi
         readinessProbe:
           initialDelaySeconds: 20
           periodSeconds: 15
