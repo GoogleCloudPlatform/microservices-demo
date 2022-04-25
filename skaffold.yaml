@@ -55,8 +55,6 @@ build:
     context: src/cartservice/src
     docker:
       dockerfile: Dockerfile
-      buildArgs:
-        OTEL_EXPORTER_OTLP_ENDPOINT: 'http://otel-collector:4317'
   - image: frontend
     context: src/frontend
     docker:
