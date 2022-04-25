@@ -8,14 +8,11 @@
     <PackageReference Include="Grpc.AspNetCore" Version="2.45.0" />
     <PackageReference Include="Grpc.HealthCheck" Version="2.45.0" />
     <PackageReference Include="StackExchange.Redis" Version="2.5.61" />
+    <PackageReference Include="io.honeycomb.opentelemetry" Version="0.21.0-beta" />    
   </ItemGroup>
 
   <ItemGroup>
     <Protobuf Include="protos\Cart.proto" GrpcServices="Both" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Protobuf Include="io.honeycomb.opentelemetry" Version="0.21.0-beta" />
   </ItemGroup>
 
 </Project>
