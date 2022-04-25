@@ -1,8 +1,6 @@
-using System;
 using cartservice.cartstore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using OpenTelemetry.Exporter;
 using OpenTelemetry.Logs;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
@@ -30,15 +28,17 @@ namespace cartservice.OpenTelemetry
                     builder.AddRedisInstrumentation(redisCartStore.ConnectionMultiplexer);
                 }
 
-                builder
-                    .AddOtlpExporter(ConfigureOtlpExporter);
+                builder.AddOtlpExporter();
             });
 
             services.AddOpenTelemetryMetrics(builder => {
                 builder
                     .SetResourceBuilder(ResourceBuilder)
                     .AddAspNetCoreInstrumentation()
-                    .AddOtlpExporter(ConfigureOtlpExporter);
+                    .AddOtlpExporter((exporterOptions, metricReaderOptions) =>
+                    {
+                        metricReaderOptions.TemporalityPreference = MetricReaderTemporalityPreference.Delta;
+                    });
             });
         }
 
@@ -52,14 +52,8 @@ namespace cartservice.OpenTelemetry
                     options
                         .SetResourceBuilder(ResourceBuilder)
                         .AddProcessor(new SpanEventLogProcessor())
-                        .AddOtlpExporter(ConfigureOtlpExporter);
+                        .AddOtlpExporter();
                 });
-        }
-
-        private static void ConfigureOtlpExporter(OtlpExporterOptions options)
-        {
-            options.Endpoint = new Uri(Environment.GetEnvironmentVariable("OTEL_EXPORTER_OTLP_ENDPOINT"));
-            options.AggregationTemporality = AggregationTemporality.Delta;
         }
     }
 }
