@@ -9,6 +9,7 @@ using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Hosting;
 using cartservice.cartstore;
 using cartservice.services;
+using Honeycomb.OpenTelemetry;
 
 namespace cartservice
 {
@@ -46,7 +47,13 @@ namespace cartservice
 
             services.AddGrpc();
         }
+        public void ConfigureServices(IServiceCollection services)
+        {
+            services.AddControllers();
 
+            // configure OpenTelemetry SDK to send data to Honeycomb
+            services.AddHoneycomb(Configuration);
+        }
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {

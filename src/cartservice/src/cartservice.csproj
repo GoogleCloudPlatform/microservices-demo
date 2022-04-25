@@ -13,4 +13,9 @@
   <ItemGroup>
     <Protobuf Include="protos\Cart.proto" GrpcServices="Both" />
   </ItemGroup>
+
+  <ItemGroup>
+    <Protobuf Include="Honeycomb.OpenTelemetry" Version="0.21.0-beta" />
+  </ItemGroup>
+
 </Project>
