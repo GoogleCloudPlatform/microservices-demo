@@ -15,7 +15,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Protobuf Include="Honeycomb.OpenTelemetry" Version="0.21.0-beta" />
+    <Protobuf Include="io.honeycomb.opentelemetry" Version="0.21.0-beta" />
   </ItemGroup>
 
 </Project>
