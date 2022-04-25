@@ -1,16 +1,14 @@
-FROM otel/opentelemetry-collector-contrib:0.40.0
+FROM otel/opentelemetry-collector-contrib:0.49.0
 
 ARG OTEL_EXPORTER_OTLP_ENDPOINT
-ARG OTEL_RESOURCE_ATTRIBUTES
 ARG REDIS_ENDPOINT
 ARG REDIS_PASSWORD
 
 ENV OTEL_EXPORTER_OTLP_ENDPOINT=${OTEL_EXPORTER_OTLP_ENDPOINT}
-ENV OTEL_RESOURCE_ATTRIBUTES=${OTEL_RESOURCE_ATTRIBUTES}
 ENV REDIS_ENDPOINT=${REDIS_ENDPOINT}
 ENV REDIS_PASSWORD=${REDIS_PASSWORD}
 
 COPY ./collector.yaml /etc/otel/config.yaml
 
-ENTRYPOINT ["/otelcontribcol"]
+ENTRYPOINT ["/otelcol-contrib"]
 CMD ["--config", "/etc/otel/config.yaml"]

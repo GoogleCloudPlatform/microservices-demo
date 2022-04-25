@@ -80,7 +80,6 @@ build:
     docker:
       buildArgs:
         OTEL_EXPORTER_OTLP_ENDPOINT: 'otel-collector:4317'
-        OTEL_RESOURCE_ATTRIBUTES: 'service.name=infrastructure'
   - image: otel-collector-agent-redis
     context: src/otel-collector-agent-redis
     docker:
