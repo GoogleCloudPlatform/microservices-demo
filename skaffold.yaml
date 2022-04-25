@@ -24,9 +24,6 @@ build:
   # https://skaffold.dev/docs/concepts/#image-repository-handling
   - image: emailservice
     context: src/emailservice
-    docker:
-      buildArgs:
-        OTEL_EXPORTER_OTLP_ENDPOINT: 'http://otel-collector:4317'
   - image: productcatalogservice
     context: src/productcatalogservice
     docker:
