@@ -18,6 +18,7 @@ metadata:
   name: redis-cart
   namespace: opentelemetry-demo
 spec:
+  revisionHistoryLimit: 1
   selector:
     matchLabels:
       app: redis-cart

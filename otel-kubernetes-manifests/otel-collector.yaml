@@ -33,6 +33,7 @@ metadata:
     app: opentelemetry
     component: otel-collector
 spec:
+  revisionHistoryLimit: 1
   selector:
     matchLabels:
       app: opentelemetry

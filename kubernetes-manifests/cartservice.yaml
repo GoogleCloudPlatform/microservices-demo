@@ -18,6 +18,7 @@ metadata:
   name: cartservice
   namespace: opentelemetry-demo
 spec:
+  revisionHistoryLimit: 1
   selector:
     matchLabels:
       app: cartservice

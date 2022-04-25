@@ -7,6 +7,7 @@ metadata:
     app: opentelemetry
     component: otel-collector-agent
 spec:
+  revisionHistoryLimit: 1
   selector:
     matchLabels:
       app: opentelemetry
