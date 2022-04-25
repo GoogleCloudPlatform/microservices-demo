@@ -217,7 +217,7 @@ public final class AdService {
   }
 
   private static void initStats() {
-    if (System.getenv("DISABLE_STATS") != null) {
+    if (System.getenv("DISABLE_STATS") == "1") {
       logger.info("Stats disabled.");
       return;
     }
@@ -256,7 +256,7 @@ public final class AdService {
   }
 
   private static void initTracing() {
-    if (System.getenv("DISABLE_TRACING") == 1) {
+    if (System.getenv("DISABLE_TRACING") == "1") {
       logger.info("Tracing disabled.");
       return;
     }
