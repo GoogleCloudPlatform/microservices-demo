@@ -38,6 +38,12 @@ spec:
           env:
             - name: PORT
               value: '7000'
+            - name: HOST_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.hostIP
+            - name: OTEL_EXPORTER_OTLP_ENDPOINT
+              value: "http://$(HOST_IP):4317"
           # - name: DISABLE_TRACING
           #   value: "1"
           # - name: DISABLE_PROFILER
