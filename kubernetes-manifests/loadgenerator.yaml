@@ -17,6 +17,7 @@ metadata:
   name: loadgenerator
   namespace: opentelemetry-demo
 spec:
+  revisionHistoryLimit: 1
   selector:
     matchLabels:
       app: loadgenerator

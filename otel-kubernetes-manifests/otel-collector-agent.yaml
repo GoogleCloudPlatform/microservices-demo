@@ -7,6 +7,7 @@ metadata:
     app: opentelemetry
     component: otel-collector-agent
 spec:
+  revisionHistoryLimit: 1
   selector:
     matchLabels:
       app: opentelemetry
@@ -27,3 +28,7 @@ spec:
           limits:
             cpu: 200m
             memory: 128Mi
+        ports:
+          - containerPort: 4317
+            hostPort: 4317
+            protocol: TCP
