@@ -18,7 +18,7 @@ COPY . .
 RUN npm install
 RUN npm run build
 
-FROM golang:1.15-alpine as builder
+FROM golang:1.18-alpine as builder
 RUN apk add --no-cache ca-certificates git
 RUN apk add build-base
 WORKDIR /src
@@ -45,9 +45,6 @@ COPY ./static ./static
 # Default behavior - a failure prints a stack trace for the current goroutine.
 # See https://golang.org/pkg/runtime/
 ENV GOTRACEBACK=single
-
-ARG OTEL_EXPORTER_OTLP_ENDPOINT
-ENV OTEL_EXPORTER_OTLP_ENDPOINT=${OTEL_EXPORTER_OTLP_ENDPOINT}
 
 EXPOSE 8080
 ENTRYPOINT ["/src/server"]
