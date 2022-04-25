@@ -27,3 +27,7 @@ spec:
           limits:
             cpu: 200m
             memory: 128Mi
+        ports:
+          - containerPort: 4317
+            hostPort: 4317
+            protocol: TCP

@@ -8,20 +8,38 @@ receivers:
       filesystem:
       memory:
       network:
+  otlp:
+    protocols:
+      grpc:
 
 processors:
   resourcedetection:
-    detectors: [gke, gce, env]
+    detectors: [ gke, gce ]
+  resourcedetection/env:
+    detectors: [ env]
+  batch:
 
 exporters:
   otlp:
     endpoint: $OTEL_EXPORTER_OTLP_ENDPOINT
-    tls:
-      insecure: true
+    headers:
+      "api-key": $NEW_RELIC_API_KEY
 
 service:
   pipelines:
+    metrics/hostmetrics:
+      receivers: [ hostmetrics ]
+      processors: [ resourcedetection, resourcedetection/env ]
+      exporters: [ otlp ]
     metrics:
-      receivers: [hostmetrics]
-      processors: [resourcedetection]
-      exporters: [otlp]
+      receivers: [ otlp ]
+      processors: [ resourcedetection, batch ]
+      exporters: [ otlp ]
+    traces:
+      receivers: [ otlp ]
+      processors: [ resourcedetection, batch ]
+      exporters: [ otlp ]
+    logs:
+      receivers: [ otlp ]
+      processors: [ resourcedetection, batch ]
+      exporters: [ otlp ]
