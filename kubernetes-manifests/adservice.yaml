@@ -44,6 +44,8 @@ spec:
           value: "fd7c037a2729ce3ddc9d53449f665aaf"
         - name: HONEYCOMB_TRACES_DATASET
           value: "adservice-traces"
+        - name: DISABLE_TRACING
+          value: "0"
         resources:
           requests:
             cpu: 200m
