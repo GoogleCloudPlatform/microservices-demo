@@ -1,45 +1,68 @@
 ---
 receivers:
   hostmetrics:
-    collection_interval: 30s
+    collection_interval: 20s
     scrapers:
       cpu:
+        metrics:
+          system.cpu.utilization:
+            enabled: true
+      load:
+      memory:
+        metrics:
+          system.memory.utilization:
+            enabled: true
       disk:
       filesystem:
-      memory:
+        metrics:
+          system.filesystem.utilization:
+            enabled: true
       network:
+      paging:
+        metrics:
+          system.paging.utilization:
+            enabled: true
+      processes:
   otlp:
     protocols:
       grpc:
 
 processors:
+  batch:
+  cumulativetodelta:
+    metrics:
+      - system.network.io
+      - system.disk.operations
+      - system.network.dropped
+      - system.network.packets
+      - process.cpu.time
+  resource:
+    attributes:
+      - key: host.id
+        from_attribute: host.name
+        action: upsert
   resourcedetection:
     detectors: [ gke, gce ]
-  resourcedetection/env:
-    detectors: [ env]
-  batch:
 
 exporters:
   otlp:
     endpoint: $OTEL_EXPORTER_OTLP_ENDPOINT
     headers:
-      "api-key": $NEW_RELIC_API_KEY
+      api-key: $NEW_RELIC_API_KEY
+  logging:
+    logLevel: DEBUG
 
 service:
   pipelines:
-    metrics/hostmetrics:
-      receivers: [ hostmetrics ]
-      processors: [ resourcedetection, resourcedetection/env ]
-      exporters: [ otlp ]
     metrics:
-      receivers: [ otlp ]
-      processors: [ resourcedetection, batch ]
+      receivers: [ hostmetrics, otlp ]
+      processors: [ batch, resourcedetection, resource, cumulativetodelta ]
       exporters: [ otlp ]
     traces:
       receivers: [ otlp ]
-      processors: [ resourcedetection, batch ]
+      processors: [ batch, resourcedetection, resource ]
       exporters: [ otlp ]
     logs:
       receivers: [ otlp ]
-      processors: [ resourcedetection, batch ]
+      processors: [ batch, resourcedetection, resource ]
       exporters: [ otlp ]
