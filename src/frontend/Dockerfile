@@ -18,7 +18,7 @@ COPY . .
 RUN npm install
 RUN npm run build
 
-FROM golang:1.15-alpine as builder
+FROM golang:1.18.1-alpine as builder
 RUN apk add --no-cache ca-certificates git
 RUN apk add build-base
 WORKDIR /src

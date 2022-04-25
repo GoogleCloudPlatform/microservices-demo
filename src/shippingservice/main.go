@@ -120,16 +120,10 @@ func (s *server) GetQuote(ctx context.Context, in *pb.GetQuoteRequest) (*pb.GetQ
 	log.Info("[GetQuote] received request")
 	defer log.Info("[GetQuote] completed request")
 
-	// 1. Our quote system requires the total number of items to be shipped.
-	count := 0
-	for _, item := range in.Items {
-		count += int(item.Quantity)
-	}
+	// 1. Generate a quote based on the total number of items to be shipped.
+	quote := CreateQuoteFromCount(0)
 
-	// 2. Generate a quote based on the total number of items to be shipped.
-	quote := CreateQuoteFromCount(count)
-
-	// 3. Generate a response.
+	// 2. Generate a response.
 	return &pb.GetQuoteResponse{
 		CostUsd: &pb.Money{
 			CurrencyCode: "USD",

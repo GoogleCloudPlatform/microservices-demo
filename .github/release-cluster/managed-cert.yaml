@@ -1,7 +1,7 @@
-apiVersion: networking.gke.io/v1beta2
+apiVersion: networking.gke.io/v1
 kind: ManagedCertificate
 metadata:
-  name: ob-cert
+  name: online-boutique-certificate
 spec:
   domains:
     - onlineboutique.dev

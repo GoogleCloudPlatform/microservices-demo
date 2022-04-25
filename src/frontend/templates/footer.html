@@ -29,9 +29,18 @@
                 <br/>
                 <small>
                     {{ if $.deploymentDetails }}
-                    <b>Cluster: </b>{{index .deploymentDetails "CLUSTERNAME" }}<br/>
-                    <b>Zone: </b>{{index .deploymentDetails "ZONE" }}<br/>
-                    <b>Pod: </b>{{index .deploymentDetails "HOSTNAME" }}
+                        {{ if index .deploymentDetails "CLUSTERNAME" }}
+                        <b>Cluster: </b>{{ index .deploymentDetails "CLUSTERNAME" }}<br/>
+                        {{ end }}
+                        {{ if index .deploymentDetails "ZONE" }}
+                        <b>Zone: </b>{{ index .deploymentDetails "ZONE" }}<br/>
+                        {{ end }}
+                        {{ if index .deploymentDetails "HOSTNAME" }}
+                        <b>Pod: </b>{{ index .deploymentDetails "HOSTNAME" }}
+                        {{ end }}
+                    {{ else }}
+                    Deployment details are still loading.
+                    Try refreshing this page.
                     {{ end }}
                 </small>
             </p>

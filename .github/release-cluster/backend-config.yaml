@@ -1,0 +1,7 @@
+apiVersion: cloud.google.com/v1
+kind: BackendConfig
+metadata:
+  name: frontend-backend-config
+spec:
+  securityPolicy:
+    name: online-boutique-security-policy
