@@ -15,18 +15,14 @@
 name: "Clean up deployment"
 on:
   pull_request:
-    # run on pull requests targeting master
+    # run on pull requests targeting main
     branches:
-      - master
+      - main
     types: closed
 jobs:
   cleanup-namespace:
-    runs-on: self-hosted
+    runs-on: [self-hosted, is-enabled]
     steps:
-      - uses: actions/checkout@v2
-        with:
-          ref: ${{github.event.pull_request.head.ref}}
-          repository: ${{github.event.pull_request.head.repo.full_name}}
       - name: Delete PR namespace in staging cluster
         if: ${{ always() }}
         timeout-minutes: 20
@@ -36,7 +32,7 @@ jobs:
           NAMESPACE="pr${PR_NUMBER}"
           kubectl delete namespace $NAMESPACE
         env:
-          PROJECT_ID: "onlineboutique-ci"
-          PR_CLUSTER: "online-boutique-pr"
-          ZONE: "us-east1-b"
+          PROJECT_ID: "online-boutique-ci"
+          PR_CLUSTER: "online-boutique-prs"
+          ZONE: "us-central1-c"
           PR_NUMBER: ${{ github.event.number }}
