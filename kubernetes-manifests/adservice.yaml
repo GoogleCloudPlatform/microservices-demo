@@ -47,7 +47,7 @@ spec:
         - name: DISABLE_TRACING
           value: "0"
         - name: DISABLE_STATS
-          value: "0"          
+          value: "0"         
         resources:
           requests:
             cpu: 200m

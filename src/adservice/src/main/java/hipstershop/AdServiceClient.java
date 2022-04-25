@@ -55,7 +55,7 @@ public class AdServiceClient {
         ManagedChannelBuilder.forAddress(host, port)
             // Channels are secure by default (via SSL/TLS). For the example we disable TLS to avoid
             // needing certificates.
-            .usePlaintext()
+            .usePlaintext(true)
             .build());
   }
 
@@ -81,7 +81,7 @@ public class AdServiceClient {
             .setRecordEvents(true)
             .setSampler(Samplers.alwaysSample())
             .startSpan();
-    try (Scope ignored = tracer.withSpan(span)) {
+    try (Scope scope = tracer.withSpan(span)) {
       tracer.getCurrentSpan().addAnnotation("Getting Ads");
       response = blockingStub.getAds(request);
       tracer.getCurrentSpan().addAnnotation("Received response from Ads Service.");
@@ -126,7 +126,7 @@ public class AdServiceClient {
     // Add final keyword to pass checkStyle.
     final String contextKeys = getStringOrDefaultFromArgs(args, 0, "camera");
     final String host = getStringOrDefaultFromArgs(args, 1, "localhost");
-    final int serverPort = getPortOrDefaultFromArgs(args);
+    final int serverPort = getPortOrDefaultFromArgs(args, 2, 9555);
 
     // Registers all RPC views.
     RpcViews.registerAllGrpcViews();
