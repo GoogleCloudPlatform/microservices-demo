@@ -11,5 +11,6 @@ google-cloud-trace==0.24.0
 requests==2.27.1
 urllib3==1.26.9
 protobuf==3.20.0 # transitive dependency, move when google-api is bumped safely
+markupsafe==1.1.1 # added to make it work for New Relic fork. Might be able to be removed in the future.
 opentelemetry-instrumentation-grpc==0.20b0
 opentelemetry-exporter-otlp-proto-grpc==1.1.0
