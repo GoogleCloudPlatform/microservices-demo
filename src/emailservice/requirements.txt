@@ -6,13 +6,13 @@
 #
 backoff==1.10.0
     # via opentelemetry-exporter-otlp-proto-grpc
-cachetools==4.2.2
+cachetools==4.2.4
     # via google-auth
-certifi==2021.5.30
+certifi==2021.10.8
     # via requests
-chardet==3.0.4
+charset-normalizer==2.0.12
     # via requests
-google-api-core[grpc]==1.24.1
+google-api-core[grpc]==1.31.5
     # via
     #   -r requirements.in
     #   google-api-python-client
@@ -20,7 +20,7 @@ google-api-core[grpc]==1.24.1
     #   google-cloud-monitoring
     #   google-cloud-trace
     #   opencensus
-google-api-python-client==2.20.0
+google-api-python-client==2.45.0
     # via google-cloud-profiler
 google-auth==1.35.0
     # via
@@ -35,7 +35,7 @@ google-auth-httplib2==0.1.0
     #   google-cloud-profiler
 google-cloud-core==1.7.2
     # via google-cloud-trace
-google-cloud-monitoring==0.36.0
+google-cloud-monitoring==2.9.1
     # via opencensus-ext-stackdriver
 google-cloud-profiler==1.1.2
     # via -r requirements.in
@@ -43,11 +43,11 @@ google-cloud-trace==0.24.0
     # via
     #   -r requirements.in
     #   opencensus-ext-stackdriver
-googleapis-common-protos==1.53.0
+googleapis-common-protos==1.56.0
     # via
     #   google-api-core
     #   opentelemetry-exporter-otlp-proto-grpc
-grpcio==1.33.2
+grpcio==1.44.0
     # via
     #   -r requirements.in
     #   google-api-core
@@ -57,17 +57,19 @@ grpcio==1.33.2
     #   opentelemetry-instrumentation-grpc
 grpcio-health-checking==1.33.2
     # via -r requirements.in
-httplib2==0.19.1
+httplib2==0.20.4
     # via
     #   google-api-python-client
     #   google-auth-httplib2
-idna==2.10
+idna==3.3
     # via requests
 jinja2==2.11.3
     # via -r requirements.in
-markupsafe==2.0.1
-    # via jinja2
-opencensus==0.7.11
+markupsafe==1.1.1
+    # via
+    #   -r requirements.in
+    #   jinja2
+opencensus==0.9.0
     # via
     #   -r requirements.in
     #   opencensus-ext-grpc
@@ -76,7 +78,7 @@ opencensus-context==0.1.2
     # via opencensus
 opencensus-ext-grpc==0.7.1
     # via -r requirements.in
-opencensus-ext-stackdriver==0.7.3
+opencensus-ext-stackdriver==0.8.0
     # via -r requirements.in
 opentelemetry-api==1.1.0
     # via
@@ -100,31 +102,39 @@ opentelemetry-semantic-conventions==0.20b0
     # via
     #   opentelemetry-instrumentation-grpc
     #   opentelemetry-sdk
-protobuf==3.17.3
+packaging==21.3
+    # via google-api-core
+proto-plus==1.20.3
+    # via google-cloud-monitoring
+protobuf==3.20.0
     # via
+    #   -r requirements.in
     #   google-api-core
     #   google-cloud-profiler
     #   googleapis-common-protos
     #   grpcio-health-checking
     #   opentelemetry-proto
+    #   proto-plus
 pyasn1==0.4.8
     # via
     #   pyasn1-modules
     #   rsa
 pyasn1-modules==0.2.8
     # via google-auth
-pyparsing==2.4.7
-    # via httplib2
+pyparsing==3.0.8
+    # via
+    #   httplib2
+    #   packaging
 python-json-logger==0.1.11
     # via -r requirements.in
-pytz==2021.1
+pytz==2022.1
     # via google-api-core
-requests==2.24.0
+requests==2.27.1
     # via
     #   -r requirements.in
     #   google-api-core
     #   google-cloud-profiler
-rsa==4.7.2
+rsa==4.8
     # via google-auth
 six==1.16.0
     # via
@@ -133,12 +143,13 @@ six==1.16.0
     #   google-auth-httplib2
     #   google-cloud-core
     #   grpcio
-    #   protobuf
-uritemplate==3.0.1
+uritemplate==4.1.1
     # via google-api-python-client
-urllib3==1.25.11
-    # via requests
-wrapt==1.12.1
+urllib3==1.26.9
+    # via
+    #   -r requirements.in
+    #   requests
+wrapt==1.14.0
     # via
     #   opentelemetry-instrumentation
     #   opentelemetry-instrumentation-grpc

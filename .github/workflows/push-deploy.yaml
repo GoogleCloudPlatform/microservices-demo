@@ -15,12 +15,12 @@
 name: "Push and Deploy"
 on:
   push:
-    # run on pushes to master
+    # run on pushes to main
     branches:
-      - master
+      - main
 jobs:
   push-deploy:
-    runs-on: self-hosted
+    runs-on: [self-hosted, is-enabled]
     steps:
     - uses: actions/checkout@v2
     - name: Push latest images to GCR
