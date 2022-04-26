@@ -28,9 +28,6 @@ build:
     context: src/productcatalogservice
   - image: recommendationservice
     context: src/recommendationservice
-    docker:
-      buildArgs:
-        OTEL_EXPORTER_OTLP_ENDPOINT: 'http://otel-collector:4317'
   - image: shippingservice
     context: src/shippingservice
   - image: checkoutservice
