@@ -40,9 +40,6 @@ build:
     context: src/checkoutservice
   - image: paymentservice
     context: src/paymentservice
-    docker:
-      buildArgs:
-        OTEL_EXPORTER_OTLP_ENDPOINT: 'http://otel-collector:4317'
   - image: currencyservice
     context: src/currencyservice
   - image: cartservice
