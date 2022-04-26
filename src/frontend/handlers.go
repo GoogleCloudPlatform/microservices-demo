@@ -519,9 +519,9 @@ func startSpan(name string, r **http.Request) (context.Context, trace.Span) {
 	}
 
 	hostKey := attribute.String("host", hostname)
-	attrs, entries, spanCtx := otelhttptrace.Extract(req.Context(), req)
+	attrs, baggageEntries, spanCtx := otelhttptrace.Extract(req.Context(), req)
 	attrs = append(attrs, hostKey)
-	req = req.WithContext(baggage.ContextWithValues(req.Context(), entries...))
+	req = req.WithContext(baggage.ContextWithBaggage(req.Context(), baggageEntries))
 	ctx, span := tr.Start(
 		trace.ContextWithRemoteSpanContext(req.Context(), spanCtx),
 		"hipstershop.Frontend/"+name,

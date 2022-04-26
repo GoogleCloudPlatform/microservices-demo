@@ -17,6 +17,9 @@ package main
 import (
 	"context"
 	"fmt"
+	"go.opentelemetry.io/otel/metric/instrument"
+	"go.opentelemetry.io/otel/metric/instrument/syncfloat64"
+	"go.opentelemetry.io/otel/metric/unit"
 	"net"
 	"net/http"
 	"os"
@@ -26,7 +29,6 @@ import (
 	"github.com/google/uuid"
 	"github.com/gorilla/mux"
 	"github.com/sirupsen/logrus"
-	"go.opentelemetry.io/contrib/detectors/gcp"
 	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
@@ -34,9 +36,8 @@ import (
 	"go.opentelemetry.io/otel/metric/global"
 	"go.opentelemetry.io/otel/propagation"
 	"go.opentelemetry.io/otel/sdk/resource"
-	"go.opentelemetry.io/otel/semconv"
+	semconv "go.opentelemetry.io/otel/semconv/v1.7.0"
 	"go.opentelemetry.io/otel/trace"
-	"go.opentelemetry.io/otel/unit"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/peer"
 )
@@ -47,24 +48,31 @@ const (
 )
 
 var (
-	httpLatency metric.Float64ValueRecorder
-	grpcLatency metric.Float64ValueRecorder
+	httpLatency syncfloat64.Histogram
+	grpcLatency syncfloat64.Histogram
 
 	res *resource.Resource
 )
 
 func init() {
-	meter := global.Meter(instName, metric.WithInstrumentationVersion(instVer))
-	httpLatency = metric.Must(meter).NewFloat64ValueRecorder(
+	meter := global.MeterProvider().Meter(instName, metric.WithInstrumentationVersion(instVer))
+	httpLatencyInstrument, err := meter.SyncFloat64().Histogram(
 		"http.server.duration",
-		metric.WithDescription("duration of the inbound HTTP request"),
-		metric.WithUnit(unit.Milliseconds),
-	)
-	grpcLatency = metric.Must(meter).NewFloat64ValueRecorder(
+		instrument.WithDescription("duration of the inbound HTTP request"),
+		instrument.WithUnit(unit.Milliseconds))
+	if err != nil {
+		logrus.WithError(err).Fatal("failed to create httpLatency instrument")
+	}
+	httpLatency = httpLatencyInstrument
+
+	grpcLatencyInstrument, err := meter.SyncFloat64().Histogram(
 		"grpc.client.duration",
-		metric.WithDescription("duration of the inbound gRPC request"),
-		metric.WithUnit(unit.Milliseconds),
-	)
+		instrument.WithDescription("duration of the outbound gRPC request"),
+		instrument.WithUnit(unit.Milliseconds))
+	if err != nil {
+		logrus.WithError(err).Fatal("failed to create grpcLatency instrument")
+	}
+	grpcLatency = grpcLatencyInstrument
 
 	var instID attribute.KeyValue
 	if host, ok := os.LookupEnv("HOSTNAME"); ok && host != "" {
@@ -73,11 +81,9 @@ func init() {
 		instID = semconv.ServiceInstanceIDKey.String(uuid.New().String())
 	}
 
-	var err error
 	res, err = resource.New(
 		context.Background(),
 		resource.WithAttributes(instID, semconv.ServiceNameKey.String("Frontend")),
-		resource.WithDetectors(new(gcp.GCE)),
 	)
 	if err != nil {
 		logrus.WithError(err).Fatal("failed to detect environment resource")
@@ -224,7 +230,7 @@ func UnaryClientInterceptor() grpc.UnaryClientInterceptor {
 			grpcLatency.Record(
 				ctx,
 				float64(time.Now().Sub(start).Milliseconds()),
-				labels(method, cc.Target())...,
+				attributes(method, cc.Target())...,
 			)
 		}()
 
@@ -249,7 +255,7 @@ func StreamClientInterceptor() grpc.StreamClientInterceptor {
 			grpcLatency.Record(
 				ctx,
 				float64(time.Now().Sub(start).Milliseconds()),
-				labels(method, cc.Target())...,
+				attributes(method, cc.Target())...,
 			)
 		}()
 
@@ -262,8 +268,8 @@ func StreamClientInterceptor() grpc.StreamClientInterceptor {
 * go.opentelemetry.io/otel/instrumentation/grpctrace/interceptor.go@v0.8.0
  */
 
-func labels(fullMethod, peerAddress string) []attribute.KeyValue {
-	attrs := []attribute.KeyValue{semconv.RPCSystemGRPC}
+func attributes(fullMethod, peerAddress string) []attribute.KeyValue {
+	attrs := []attribute.KeyValue{semconv.RPCSystemKey.String("grpc")}
 	name, mAttrs := parseFullMethod(fullMethod)
 	attrs = append(attrs, mAttrs...)
 	attrs = append(attrs, peerAttr(peerAddress)...)

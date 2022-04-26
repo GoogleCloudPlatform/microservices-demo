@@ -17,6 +17,13 @@ package main
 import (
 	"context"
 	"fmt"
+	"go.opentelemetry.io/otel/exporters/otlp/otlpmetric"
+	"go.opentelemetry.io/otel/exporters/otlp/otlpmetric/otlpmetricgrpc"
+	"go.opentelemetry.io/otel/exporters/otlp/otlptrace"
+	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc"
+	"go.opentelemetry.io/otel/sdk/metric/export/aggregation"
+	"go.opentelemetry.io/otel/sdk/metric/sdkapi"
+	"google.golang.org/grpc/credentials/insecure"
 	"net/http"
 	"os"
 	"time"
@@ -30,11 +37,8 @@ import (
 	"go.opentelemetry.io/contrib/instrumentation/github.com/gorilla/mux/otelmux"
 	"go.opentelemetry.io/contrib/instrumentation/runtime"
 	"go.opentelemetry.io/otel"
-	"go.opentelemetry.io/otel/exporters/otlp"
-	"go.opentelemetry.io/otel/exporters/otlp/otlpgrpc"
 	"go.opentelemetry.io/otel/metric/global"
 	"go.opentelemetry.io/otel/propagation"
-	metricsdk "go.opentelemetry.io/otel/sdk/export/metric"
 	controller "go.opentelemetry.io/otel/sdk/metric/controller/basic"
 	processor "go.opentelemetry.io/otel/sdk/metric/processor/basic"
 	"go.opentelemetry.io/otel/sdk/metric/selector/simple"
@@ -61,6 +65,8 @@ var (
 		"JPY": true,
 		"GBP": true,
 		"TRY": true}
+
+	preferDelta = deltaPreferred{}
 )
 
 type ctxKeySessionID struct{}
@@ -102,30 +108,40 @@ func main() {
 	}
 	log.Out = os.Stdout
 
-	var exporter *otlp.Exporter
+	var metricExporter *otlpmetric.Exporter
+	var traceExporter *otlptrace.Exporter
 	if otlpEndpoint, ok := os.LookupEnv("OTEL_EXPORTER_OTLP_ENDPOINT"); ok {
 		log.Info("Using OTLP exporter")
-		driver := otlpgrpc.NewDriver(
-			otlpgrpc.WithInsecure(),
-			otlpgrpc.WithEndpoint(otlpEndpoint),
+		metricClient := otlpmetricgrpc.NewClient(
+			otlpmetricgrpc.WithInsecure(),
+			otlpmetricgrpc.WithEndpoint(otlpEndpoint),
 		)
-		exp, err := otlp.NewExporter(ctx, driver, otlp.WithMetricExportKindSelector(metricsdk.DeltaExportKindSelector()))
+		me, err := otlpmetric.New(ctx, metricClient, otlpmetric.WithMetricAggregationTemporalitySelector(preferDelta))
 		if err != nil {
-			log.WithError(err).Fatal("failed to create exporter")
+			log.WithError(err).Fatal("failed to create metricExporter")
 		}
-		exporter = exp
+		metricExporter = me
+		traceClient := otlptracegrpc.NewClient(
+			otlptracegrpc.WithInsecure(),
+			otlptracegrpc.WithEndpoint(otlpEndpoint),
+		)
+		te, err := otlptrace.New(ctx, traceClient)
+		if err != nil {
+			log.WithError(err).Fatal("failed to create metricExporter")
+		}
+		traceExporter = te
 	} else {
 		log.Fatal("OTEL_EXPORTER_OTLP_ENDPOINT must be set")
 	}
 
-	defer initMetric(log, exporter).Stop(ctx)
+	defer initMetric(log, metricExporter).Stop(ctx)
 
 	// Include runtime metric instrumentation.
 	if err := runtime.Start(runtime.WithMinimumReadMemStatsInterval(time.Second)); err != nil {
 		log.WithError(err).Fatal("failed to setup runtime instrumentation")
 	}
 
-	defer initTracing(log, exporter).Shutdown(ctx)
+	defer initTracing(log, traceExporter).Shutdown(ctx)
 
 	srvPort := port
 	if os.Getenv("PORT") != "" {
@@ -170,7 +186,19 @@ func main() {
 	log.Fatal(http.ListenAndServe(addr+":"+srvPort, handler))
 }
 
-func initTracing(log logrus.FieldLogger, exporter *otlp.Exporter) *sdktrace.TracerProvider {
+type deltaPreferred struct{}
+
+func (d deltaPreferred) TemporalityFor(descriptor *sdkapi.Descriptor, _ aggregation.Kind) aggregation.Temporality {
+	switch descriptor.InstrumentKind() {
+	case sdkapi.UpDownCounterInstrumentKind:
+	case sdkapi.UpDownCounterObserverInstrumentKind:
+		return aggregation.CumulativeTemporality
+	default:
+	}
+	return aggregation.DeltaTemporality
+}
+
+func initTracing(log logrus.FieldLogger, exporter *otlptrace.Exporter) *sdktrace.TracerProvider {
 	bsp := sdktrace.NewBatchSpanProcessor(exporter)
 	tracerProvider := sdktrace.NewTracerProvider(
 		sdktrace.WithSampler(sdktrace.AlwaysSample()),
@@ -183,18 +211,14 @@ func initTracing(log logrus.FieldLogger, exporter *otlp.Exporter) *sdktrace.Trac
 	return tracerProvider
 }
 
-func initMetric(log logrus.FieldLogger, exporter *otlp.Exporter) *controller.Controller {
+func initMetric(log logrus.FieldLogger, exporter *otlpmetric.Exporter) *controller.Controller {
 	cont := controller.New(
-		processor.New(
-			simple.NewWithExactDistribution(),
-			exporter,
-		),
+		processor.NewFactory(simple.NewWithHistogramDistribution(), preferDelta),
 		controller.WithResource(res),
 		controller.WithExporter(exporter),
-		controller.WithCollectPeriod(2*time.Second),
-	)
+		controller.WithCollectPeriod(30*time.Second))
 
-	global.SetMeterProvider(cont.MeterProvider())
+	global.SetMeterProvider(cont)
 	err := cont.Start(context.Background())
 	if err != nil {
 		log.Fatal("failed to start controller")
@@ -212,11 +236,10 @@ func mustMapEnv(target *string, envKey string) {
 
 func mustConnGRPC(ctx context.Context, conn **grpc.ClientConn, addr string) {
 	var err error
-	ctx, cancel := context.WithTimeout(ctx, time.Second*3)
+	ctx, cancel := context.WithTimeout(ctx, time.Second*10)
 	defer cancel()
 	*conn, err = grpc.DialContext(ctx, addr,
-		grpc.WithInsecure(),
-		grpc.WithTimeout(time.Second*3),
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
 		grpc.WithUnaryInterceptor(UnaryClientInterceptor()),
 		grpc.WithStreamInterceptor(StreamClientInterceptor()),
 	)

@@ -12,3 +12,5 @@ pkg/
 .project
 .eclipse.buildship.core.prefs
 release/wi-kubernetes-manifests.yaml
+node_modules/
+src/frontend/static/

@@ -51,9 +51,6 @@ build:
       dockerfile: Dockerfile
   - image: frontend
     context: src/frontend
-    docker:
-      buildArgs:
-        OTEL_EXPORTER_OTLP_ENDPOINT: 'otel-collector:4317'
   - image: adservice
     context: src/adservice
   - image: otel-collector
