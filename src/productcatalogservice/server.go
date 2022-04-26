@@ -20,9 +20,6 @@ import (
 	"errors"
 	"flag"
 	"fmt"
-	"go.opentelemetry.io/otel/attribute"
-	"go.opentelemetry.io/otel/exporters/otlp/otlptrace"
-	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc"
 	"io/ioutil"
 	"net"
 	"os"
@@ -31,6 +28,10 @@ import (
 	"sync"
 	"syscall"
 	"time"
+
+	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/exporters/otlp/otlptrace"
+	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc"
 
 	pb "github.com/GoogleCloudPlatform/microservices-demo/src/productcatalogservice/genproto"
 	"github.com/google/uuid"
@@ -80,58 +81,6 @@ func init() {
 	}
 }
 
-func detectResource() (*resource.Resource, error) {
-	var instID attribute.KeyValue
-	if host, ok := os.LookupEnv("HOSTNAME"); ok && host != "" {
-		instID = semconv.ServiceInstanceIDKey.String(host)
-	} else {
-		instID = semconv.ServiceInstanceIDKey.String(uuid.New().String())
-	}
-
-	return resource.New(
-		context.Background(),
-		resource.WithAttributes(
-			instID,
-			semconv.ServiceNameKey.String(serviceName),
-		),
-	)
-}
-
-func spanExporter() (*otlptrace.Exporter, error) {
-	var otlpEndpoint = os.Getenv("OTEL_EXPORTER_OTLP_ENDPOINT")
-	if otlpEndpoint != "" {
-		log.Infof("exporting to OTLP collector at %s", otlpEndpoint)
-		traceClient := otlptracegrpc.NewClient(
-			otlptracegrpc.WithInsecure(),
-			otlptracegrpc.WithEndpoint(otlpEndpoint),
-		)
-		return otlptrace.New(context.Background(), traceClient)
-	}
-	return nil, errors.New("OTEL_EXPORTER_OTLP_ENDPOINT must not be empty")
-}
-
-func initTracing() {
-	res, err := detectResource()
-	if err != nil {
-		log.WithError(err).Fatal("failed to detect environment resource")
-	}
-
-	exp, err := spanExporter()
-	if err != nil {
-		log.WithError(err).Fatal("failed to initialize Span exporter")
-		return
-	}
-
-	otel.SetTracerProvider(
-		trace.NewTracerProvider(
-			trace.WithSampler(trace.AlwaysSample()),
-			trace.WithResource(res),
-			trace.WithSpanProcessor(trace.NewBatchSpanProcessor(exp)),
-		),
-	)
-	otel.SetTextMapPropagator(propagation.NewCompositeTextMapPropagator(propagation.TraceContext{}, propagation.Baggage{}))
-}
-
 type errorHandler struct {
 	log *logrus.Logger
 }
@@ -179,6 +128,58 @@ func main() {
 	log.Infof("starting grpc server at :%s", port)
 	run(port)
 	select {}
+}
+
+func initTracing() {
+	res, err := detectResource()
+	if err != nil {
+		log.WithError(err).Fatal("failed to detect environment resource")
+	}
+
+	exp, err := spanExporter()
+	if err != nil {
+		log.WithError(err).Fatal("failed to initialize Span exporter")
+		return
+	}
+
+	otel.SetTracerProvider(
+		trace.NewTracerProvider(
+			trace.WithSampler(trace.AlwaysSample()),
+			trace.WithResource(res),
+			trace.WithSpanProcessor(trace.NewBatchSpanProcessor(exp)),
+		),
+	)
+	otel.SetTextMapPropagator(propagation.NewCompositeTextMapPropagator(propagation.TraceContext{}, propagation.Baggage{}))
+}
+
+func detectResource() (*resource.Resource, error) {
+	var instID attribute.KeyValue
+	if host, ok := os.LookupEnv("HOSTNAME"); ok && host != "" {
+		instID = semconv.ServiceInstanceIDKey.String(host)
+	} else {
+		instID = semconv.ServiceInstanceIDKey.String(uuid.New().String())
+	}
+
+	return resource.New(
+		context.Background(),
+		resource.WithAttributes(
+			instID,
+			semconv.ServiceNameKey.String(serviceName),
+		),
+	)
+}
+
+func spanExporter() (*otlptrace.Exporter, error) {
+	var otlpEndpoint = os.Getenv("OTEL_EXPORTER_OTLP_ENDPOINT")
+	if otlpEndpoint != "" {
+		log.Infof("exporting to OTLP collector at %s", otlpEndpoint)
+		traceClient := otlptracegrpc.NewClient(
+			otlptracegrpc.WithInsecure(),
+			otlptracegrpc.WithEndpoint(otlpEndpoint),
+		)
+		return otlptrace.New(context.Background(), traceClient)
+	}
+	return nil, errors.New("OTEL_EXPORTER_OTLP_ENDPOINT must not be empty")
 }
 
 func run(port string) string {
