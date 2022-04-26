@@ -17,8 +17,12 @@ package main
 import (
 	"bytes"
 	"context"
+	"errors"
 	"flag"
 	"fmt"
+	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/exporters/otlp/otlptrace"
+	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc"
 	"io/ioutil"
 	"net"
 	"os"
@@ -30,18 +34,12 @@ import (
 
 	pb "github.com/GoogleCloudPlatform/microservices-demo/src/productcatalogservice/genproto"
 	"github.com/google/uuid"
-	"go.opentelemetry.io/contrib/detectors/gcp"
 	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
 	"go.opentelemetry.io/otel"
-	"go.opentelemetry.io/otel/exporters/otlp"
-	"go.opentelemetry.io/otel/exporters/stdout"
-	"go.opentelemetry.io/otel/exporters/trace/jaeger"
-	"go.opentelemetry.io/otel/label"
 	"go.opentelemetry.io/otel/propagation"
-	exporttrace "go.opentelemetry.io/otel/sdk/export/trace"
 	"go.opentelemetry.io/otel/sdk/resource"
 	"go.opentelemetry.io/otel/sdk/trace"
-	"go.opentelemetry.io/otel/semconv"
+	semconv "go.opentelemetry.io/otel/semconv/v1.7.0"
 	healthpb "google.golang.org/grpc/health/grpc_health_v1"
 
 	"github.com/golang/protobuf/jsonpb"
@@ -83,7 +81,7 @@ func init() {
 }
 
 func detectResource() (*resource.Resource, error) {
-	var instID label.KeyValue
+	var instID attribute.KeyValue
 	if host, ok := os.LookupEnv("HOSTNAME"); ok && host != "" {
 		instID = semconv.ServiceInstanceIDKey.String(host)
 	} else {
@@ -96,49 +94,23 @@ func detectResource() (*resource.Resource, error) {
 			instID,
 			semconv.ServiceNameKey.String(serviceName),
 		),
-		resource.WithDetectors(new(gcp.GCE)),
 	)
 }
 
-func spanExporter() (exporttrace.SpanExporter, error) {
-	var otlpEndpoint string
-	if ep := os.Getenv("OTEL_EXPORTER_OTLP_SPAN_ENDPOINT"); ep != "" {
-		otlpEndpoint = ep
-	} else if ep = os.Getenv("OTEL_EXPORTER_OTLP_ENDPOINT"); ep != "" {
-		otlpEndpoint = ep
-	}
+func spanExporter() (*otlptrace.Exporter, error) {
+	var otlpEndpoint = os.Getenv("OTEL_EXPORTER_OTLP_ENDPOINT")
 	if otlpEndpoint != "" {
 		log.Infof("exporting to OTLP collector at %s", otlpEndpoint)
-		return otlp.NewExporter(
-			otlp.WithInsecure(),
-			otlp.WithAddress(otlpEndpoint),
+		traceClient := otlptracegrpc.NewClient(
+			otlptracegrpc.WithInsecure(),
+			otlptracegrpc.WithEndpoint(otlpEndpoint),
 		)
+		return otlptrace.New(context.Background(), traceClient)
 	}
-
-	if addr := os.Getenv("JAEGER_SERVICE_ADDR"); addr != "" {
-		log.Infof("exporting to Jaeger endpoint at %s", addr)
-		return jaeger.NewRawExporter(
-			jaeger.WithCollectorEndpoint(addr),
-			jaeger.WithProcess(jaeger.Process{
-				ServiceName: serviceName,
-			}),
-		)
-
-	}
-
-	log.Info("exporting with STDOUT logger")
-	return stdout.NewExporter(
-		stdout.WithPrettyPrint(),
-		stdout.WithWriter(log.Writer()),
-	)
+	return nil, errors.New("OTEL_EXPORTER_OTLP_ENDPOINT must not be empty")
 }
 
 func initTracing() {
-	if os.Getenv("DISABLE_TRACING") != "" {
-		log.Info("tracing disabled")
-		return
-	}
-
 	res, err := detectResource()
 	if err != nil {
 		log.WithError(err).Fatal("failed to detect environment resource")
@@ -150,18 +122,11 @@ func initTracing() {
 		return
 	}
 
-	log.Info("tracing enabled")
 	otel.SetTracerProvider(
 		trace.NewTracerProvider(
-			trace.WithConfig(
-				trace.Config{
-					DefaultSampler: trace.AlwaysSample(),
-					Resource:       res,
-				},
-			),
-			trace.WithSpanProcessor(
-				trace.NewBatchSpanProcessor(exp),
-			),
+			trace.WithSampler(trace.AlwaysSample()),
+			trace.WithResource(res),
+			trace.WithSpanProcessor(trace.NewBatchSpanProcessor(exp)),
 		),
 	)
 	otel.SetTextMapPropagator(propagation.NewCompositeTextMapPropagator(propagation.TraceContext{}, propagation.Baggage{}))
@@ -221,15 +186,10 @@ func run(port string) string {
 	if err != nil {
 		log.Fatal(err)
 	}
-	var srv *grpc.Server
-	if os.Getenv("DISABLE_STATS") == "" {
-		srv = grpc.NewServer(
-			grpc.UnaryInterceptor(otelgrpc.UnaryServerInterceptor()),
-			grpc.StreamInterceptor(otelgrpc.StreamServerInterceptor()),
-		)
-	} else {
-		srv = grpc.NewServer()
-	}
+	var srv = grpc.NewServer(
+		grpc.UnaryInterceptor(otelgrpc.UnaryServerInterceptor()),
+		grpc.StreamInterceptor(otelgrpc.StreamServerInterceptor()),
+	)
 
 	svc := &productCatalog{}
 

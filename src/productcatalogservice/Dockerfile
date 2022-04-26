@@ -35,26 +35,12 @@ WORKDIR /src
 COPY --from=builder /productcatalogservice ./server
 COPY products.json .
 
-ARG JAEGER_SERVICE_ADDR
-ENV JAEGER_SERVICE_ADDR=${JAEGER_SERVICE_ADDR}
-
-ARG OTEL_EXPORTER_OTLP_SPAN_ENDPOINT
-ENV OTEL_EXPORTER_OTLP_SPAN_ENDPOINT=${OTEL_EXPORTER_OTLP_SPAN_ENDPOINT}
-
-ARG OTEL_EXPORTER_OTLP_ENDPOINT
-ENV OTEL_EXPORTER_OTLP_ENDPOINT=${OTEL_EXPORTER_OTLP_ENDPOINT}
-
-ARG DISABLE_TRACING
-ENV DISABLE_TRACING=${DISABLE_TRACING}
-
 ARG EXTRA_LATENCY
 ENV EXTRA_LATENCY=${EXTRA_LATENCY}
 
 ARG PORT
 ENV PORT=${PORT}
 
-ARG DISABLE_STATS
-ENV DISABLE_STATS=${DISABLE_STATS}
 # Definition of this variable is used by 'skaffold debug' to identify a golang binary.
 # Default behavior - a failure prints a stack trace for the current goroutine.
 # See https://golang.org/pkg/runtime/

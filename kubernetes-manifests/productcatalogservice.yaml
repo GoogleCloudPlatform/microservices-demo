@@ -37,14 +37,18 @@ spec:
         env:
         - name: PORT
           value: "3550"
+        - name: HOST_IP
+          valueFrom:
+            fieldRef:
+              fieldPath: status.hostIP
+        - name: OTEL_EXPORTER_OTLP_ENDPOINT
+          value: "$(HOST_IP):4317"
         - name: DISABLE_STATS
           value: "1"
         - name: DISABLE_TRACING
           value: "1"
         - name: DISABLE_PROFILER
           value: "1"
-        # - name: JAEGER_SERVICE_ADDR
-        #   value: "jaeger-collector:14268"
         readinessProbe:
           exec:
             command: ["/bin/grpc_health_probe", "-addr=:3550"]
