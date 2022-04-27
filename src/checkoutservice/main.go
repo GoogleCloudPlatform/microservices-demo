@@ -36,17 +36,8 @@ import (
 	pb "github.com/GoogleCloudPlatform/microservices-demo/src/checkoutservice/genproto"
 	money "github.com/GoogleCloudPlatform/microservices-demo/src/checkoutservice/money"
 	healthpb "google.golang.org/grpc/health/grpc_health_v1"
-)
-
-package main
-
-import (
-    "context"
-    "log"
-    "os"
-
-    "google.golang.org/grpc/credentials"
-
+	"google.golang.org/grpc/credentials"
+//honeycomb added from here down
     "go.opentelemetry.io/otel"
     "go.opentelemetry.io/otel/exporters/otlp/otlptrace"
     "go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc"
@@ -58,6 +49,8 @@ import (
     "net/http"
     "go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 )
+
+package main
 
 func newExporter(ctx context.Context) (*otlptrace.Exporter, error) {
     // Configuration to export data to Honeycomb:
@@ -109,37 +102,6 @@ func wrapHandler() {
     http.Handle("/hello", wrappedHandler)
 }
 
-func main() {
-    ctx := context.Background()
-
-    // Configure a new exporter using environment variables for sending data to Honeycomb over gRPC.
-    exp, err := newExporter(ctx)
-    if err != nil {
-        log.Fatalf("failed to initialize exporter: %v", err)
-    }
-
-    // Create a new tracer provider with a batch span processor and the otlp exporter.
-    tp := newTraceProvider(exp)
-
-    // Handle this error in a sensible manner where possible
-    defer func() { _ = tp.Shutdown(ctx) }()
-
-    // Set the Tracer Provider and the W3C Trace Context propagator as globals
-    otel.SetTracerProvider(tp)
-
-    // Register the trace context and baggage propagators so data is propagated across services/processes.
-    otel.SetTextMapPropagator(
-        propagation.NewCompositeTextMapPropagator(
-            propagation.TraceContext{},
-            propagation.Baggage{},
-        ),
-    )
-
-    // Initialize HTTP handler instrumentation and run the server
-    wrapHandler()
-    log.Fatal(http.ListenAndServe(":3030", nil))
-}
-
 
 const (
 	listenPort  = "5050"
@@ -172,14 +134,14 @@ type checkoutService struct {
 }
 
 func main() {
-	if os.Getenv("DISABLE_TRACING") == "" {
+	if os.Getenv("DISABLE_TRACING") != "1" {
 		log.Info("Tracing enabled.")
 		go initTracing()
 	} else {
 		log.Info("Tracing disabled.")
 	}
 
-	if os.Getenv("DISABLE_PROFILER") == "" {
+	if os.Getenv("DISABLE_PROFILER") != "1" {
 		log.Info("Profiling enabled.")
 		go initProfiling("checkoutservice", "1.0.0")
 	} else {
@@ -207,7 +169,7 @@ func main() {
 	}
 
 	var srv *grpc.Server
-	if os.Getenv("DISABLE_STATS") == "" {
+	if os.Getenv("DISABLE_STATS") != "1" {
 		log.Info("Stats enabled.")
 		srv = grpc.NewServer(grpc.StatsHandler(&ocgrpc.ServerHandler{}))
 	} else {
@@ -219,6 +181,36 @@ func main() {
 	log.Infof("starting to listen on tcp: %q", lis.Addr().String())
 	err = srv.Serve(lis)
 	log.Fatal(err)
+
+	//honeycomb added from here down
+    ctx := context.Background()
+
+    // Configure a new exporter using environment variables for sending data to Honeycomb over gRPC.
+    exp, err := newExporter(ctx)
+    if err != nil {
+        log.Fatalf("failed to initialize exporter: %v", err)
+    }
+
+    // Create a new tracer provider with a batch span processor and the otlp exporter.
+    tp := newTraceProvider(exp)
+
+    // Handle this error in a sensible manner where possible
+    defer func() { _ = tp.Shutdown(ctx) }()
+
+    // Set the Tracer Provider and the W3C Trace Context propagator as globals
+    otel.SetTracerProvider(tp)
+
+    // Register the trace context and baggage propagators so data is propagated across services/processes.
+    otel.SetTextMapPropagator(
+        propagation.NewCompositeTextMapPropagator(
+            propagation.TraceContext{},
+            propagation.Baggage{},
+        ),
+    )
+
+    // Initialize HTTP handler instrumentation and run the server
+    wrapHandler()
+    log.Fatal(http.ListenAndServe(":3030", nil))	
 }
 
 func initJaegerTracing() {
