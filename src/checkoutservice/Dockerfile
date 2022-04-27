@@ -28,6 +28,7 @@ RUN go get go.opentelemetry.io/otel \
 
 RUN go mod download
 RUN go mod tidy
+RUN GOFLAGS=-mod=mod go generate ./...
 
 COPY . .
 
