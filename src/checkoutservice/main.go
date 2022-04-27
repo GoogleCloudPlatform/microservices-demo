@@ -65,7 +65,7 @@ func newExporter(ctx context.Context) (*otlptrace.Exporter, error) {
         otlptracegrpc.WithEndpoint("api.honeycomb.io:443"),
         otlptracegrpc.WithHeaders(map[string]string{
             "x-honeycomb-team":    "fd7c037a2729ce3ddc9d53449f665aaf",
-            "x-honeycomb-dataset": "HONEYCOMB_DATASET",
+            "x-honeycomb-dataset": "checkoutservice-traces",
         }),
         otlptracegrpc.WithTLSCredentials(credentials.NewClientTLSFromCert(nil, "")),
     }
