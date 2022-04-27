@@ -17,14 +17,15 @@ package main
 import (
 	"context"
 	"fmt"
-	"go.opentelemetry.io/otel/metric/instrument"
-	"go.opentelemetry.io/otel/metric/instrument/syncfloat64"
-	"go.opentelemetry.io/otel/metric/unit"
 	"net"
 	"net/http"
 	"os"
 	"strings"
 	"time"
+
+	"go.opentelemetry.io/otel/metric/instrument"
+	"go.opentelemetry.io/otel/metric/instrument/syncfloat64"
+	"go.opentelemetry.io/otel/metric/unit"
 
 	"github.com/google/uuid"
 	"github.com/gorilla/mux"
@@ -83,7 +84,10 @@ func init() {
 
 	res, err = resource.New(
 		context.Background(),
-		resource.WithAttributes(instID, semconv.ServiceNameKey.String("Frontend")),
+		resource.WithAttributes(
+			instID,
+			semconv.ServiceNameKey.String("Frontend"),
+			semconv.K8SPodUIDKey.String(os.Getenv("POD_UID"))),
 	)
 	if err != nil {
 		logrus.WithError(err).Fatal("failed to detect environment resource")

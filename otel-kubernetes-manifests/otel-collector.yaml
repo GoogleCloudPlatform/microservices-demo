@@ -61,10 +61,7 @@ spec:
             cpu: 100m
             memory: 512Mi
         ports:
-        - containerPort: 4317 # Default OpenTelemetry RPC receiver port.
-        - containerPort: 9411 # Default endpoint for Zipkin trace receiver.
-        - containerPort: 14250 # Default endpoint for Jaeger gRPC trace receiver.
-        - containerPort: 14268 # Default endpoint for Jaeger thrift HTTP trace receiver.
+        - containerPort: 4317 # Default OpenTelemetry gRPC receiver port.
         - containerPort: 55679 # Default endpoint for ZPages.
         - containerPort: 4318 # Default OpenTelemetry HTTP receiver port.
         livenessProbe:

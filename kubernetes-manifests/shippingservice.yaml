@@ -36,6 +36,10 @@ spec:
         env:
         - name: PORT
           value: "50051"
+        - name: POD_UID
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.uid
         - name: HOST_IP
           valueFrom:
             fieldRef:

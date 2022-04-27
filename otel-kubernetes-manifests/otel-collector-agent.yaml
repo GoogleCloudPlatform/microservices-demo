@@ -32,3 +32,38 @@ spec:
           - containerPort: 4317
             hostPort: 4317
             protocol: TCP
+        env:
+          - name: KUBE_NODE_NAME
+            valueFrom:
+              fieldRef:
+                apiVersion: v1
+                fieldPath: spec.nodeName
+      serviceAccountName: opentelemetry-collector-agent
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: opentelemetry-collector-agent
+  namespace: opentelemetry-demo
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: otel-collector-agent-role
+rules:
+  - apiGroups: [""]
+    resources: ["pods"]
+    verbs: ["watch", "list"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: otel-collector-agent-role-binding
+subjects:
+  - kind: ServiceAccount
+    name: opentelemetry-collector-agent
+    namespace: opentelemetry-demo
+roleRef:
+  kind: ClusterRole
+  name: otel-collector-agent-role
+  apiGroup: rbac.authorization.k8s.io

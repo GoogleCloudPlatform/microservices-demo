@@ -130,6 +130,7 @@ func detectResource() (*resource.Resource, error) {
 		resource.WithAttributes(
 			instID,
 			semconv.ServiceNameKey.String(serviceName),
+			semconv.K8SPodUIDKey.String(os.Getenv("POD_UID")),
 		),
 	)
 }

@@ -10,10 +10,10 @@ const { Resource } = require('@opentelemetry/resources');
 const { SemanticResourceAttributes } = require('@opentelemetry/semantic-conventions');
 const os = require('os');
 
-const identifier = process.env.HOSTNAME || os.hostname();
 const resource = new Resource({
-  [SemanticResourceAttributes.SERVICE_INSTANCE_ID]: identifier,
-  [SemanticResourceAttributes.SERVICE_NAME]: 'PaymentService'
+  [SemanticResourceAttributes.SERVICE_INSTANCE_ID]: process.env.HOSTNAME || os.hostname(),
+  [SemanticResourceAttributes.SERVICE_NAME]: 'PaymentService',
+  [SemanticResourceAttributes.K8S_POD_UID]: process.env.POD_UID
 });
 
 const traceProvider = new NodeTracerProvider({

@@ -90,7 +90,7 @@ if __name__ == "__main__":
     health_pb2_grpc.add_HealthServicer_to_server(service, server)
 
     # OpenTelemetry
-    resource = Resource(attributes={"service.name": "recommendationservice"})
+    resource = Resource(attributes={"service.name": "recommendationservice", "k8s.pod.uid": os.environ.get("POD_UID", "")})
     trace.set_tracer_provider(TracerProvider(resource=resource))
     trace.get_tracer_provider().add_span_processor(BatchSpanProcessor(otlp_exporter))
 

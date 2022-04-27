@@ -37,6 +37,12 @@ spec:
         env:
         - name: REDIS_ADDR
           value: "redis-cart:6379"
+        - name: POD_UID
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.uid
+        - name: OTEL_RESOURCE_ATTRIBUTES
+          value: "k8s.pod.uid=$(POD_UID)"
         - name: HOST_IP
           valueFrom:
             fieldRef:
