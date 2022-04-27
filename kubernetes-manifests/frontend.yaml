@@ -92,7 +92,7 @@ spec:
               cpu: 100m
               memory: 64Mi
             limits:
-              cpu: 200m
+              cpu: 100m
               memory: 128Mi
 ---
 apiVersion: v1

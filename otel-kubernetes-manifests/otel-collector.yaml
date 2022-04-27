@@ -55,11 +55,11 @@ spec:
         name: otel-collector
         resources:
           limits:
-            cpu: 1
-            memory: 2Gi
+            cpu: 100m
+            memory: 512Mi
           requests:
-            cpu: 200m
-            memory: 400Mi
+            cpu: 100m
+            memory: 512Mi
         ports:
         - containerPort: 4317 # Default OpenTelemetry RPC receiver port.
         - containerPort: 9411 # Default endpoint for Zipkin trace receiver.
