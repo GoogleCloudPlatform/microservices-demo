@@ -29,21 +29,11 @@ import io.grpc.health.v1.HealthCheckResponse.ServingStatus;
 import io.grpc.services.HealthStatusManager;
 import io.grpc.stub.StreamObserver;
 import io.opentelemetry.api.GlobalOpenTelemetry;
-import io.opentelemetry.api.common.AttributeKey;
-import io.opentelemetry.api.common.Attributes;
-import io.opentelemetry.api.metrics.DoubleHistogram;
-import io.opentelemetry.api.metrics.LongUpDownCounter;
+import io.opentelemetry.api.metrics.LongHistogram;
 import io.opentelemetry.api.metrics.Meter;
 import io.opentelemetry.api.trace.Span;
-import io.opentelemetry.api.trace.SpanKind;
 import io.opentelemetry.api.trace.Tracer;
 import io.opentelemetry.context.Scope;
-import org.apache.logging.log4j.Level;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.datasource.SingleConnectionDataSource;
-
 import java.io.IOException;
 import java.net.InetAddress;
 import java.util.ArrayList;
@@ -54,6 +44,11 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.datasource.SingleConnectionDataSource;
 
 public final class AdService {
 
@@ -120,32 +115,21 @@ public final class AdService {
     private final Random random = new Random();
     private final AdService service;
 
-    // note: these two instruments should be updated to match semantic conventions, when they are
-    // defined.
-    private final DoubleHistogram getAdsRequestLatency;
-    private final DoubleHistogram backgroundLatency;
-    private final LongUpDownCounter numberOfAdsRequested;
     // used for doing some manual span instrumentation.
     private final Tracer tracer = GlobalOpenTelemetry.getTracer("hipstershop.adservice");
-    private final Meter meter = GlobalOpenTelemetry.getMeter("hipstershop.adservice");
+    private final LongHistogram backgroundLatency;
+    private final LongHistogram numberOfAdsRequested;
 
     public AdServiceImpl(AdService service) {
       this.service = service;
-      // note: preliminary spec discussion has things leaning toward this for the instrument name.
-      // see https://github.com/open-telemetry/opentelemetry-specification/pull/657 for discussion
-      getAdsRequestLatency =
-          meter
-              .histogramBuilder("rpc.server.duration")
-              .setDescription("Timings of gRPC requests to a service")
-              .setUnit("ms")
-              .build();
 
       // this is a custom "business" metric, outside the scope of semantic conventions
+      Meter meter = GlobalOpenTelemetry.getMeter("hipstershop.adservice");
       numberOfAdsRequested =
           meter
-              .upDownCounterBuilder("ads_requested")
-              .setUnit("one")
+              .histogramBuilder("ads_requested")
               .setDescription("Number of Ads Requested per Request")
+              .ofLongs()
               .build();
 
       // custom timer for the background job.
@@ -154,6 +138,7 @@ public final class AdService {
               .histogramBuilder("background.job.duration")
               .setDescription("Background job timings")
               .setUnit("ms")
+              .ofLongs()
               .build();
     }
 
@@ -166,32 +151,7 @@ public final class AdService {
      */
     @Override
     public void getAds(AdRequest req, StreamObserver<AdResponse> responseObserver) {
-      // note: these could be pulled into constants to reduce allocations
-      String methodName = "hipstershop.AdService/GetAds";
-      Attributes nonErrorLabels =
-          Attributes.of(
-              AttributeKey.stringKey("method.name"),
-              methodName,
-              AttributeKey.stringKey("span.name"),
-              methodName,
-              AttributeKey.stringKey("error"),
-              "false",
-              AttributeKey.stringKey("span.kind"),
-              SpanKind.SERVER.name());
-      Attributes errorLabels =
-          Attributes.of(
-              AttributeKey.stringKey("method.name"),
-              methodName,
-              AttributeKey.stringKey("span.name"),
-              methodName,
-              AttributeKey.stringKey("error"),
-              "true",
-              AttributeKey.stringKey("span.kind"),
-              SpanKind.SERVER.name());
-
-      long startTime = System.currentTimeMillis();
-      numberOfAdsRequested.add(req.getContextKeysCount(), Attributes.empty());
-      Attributes labels = nonErrorLabels;
+      numberOfAdsRequested.record(req.getContextKeysCount());
       try {
         List<Ad> allAds = chooseAds(req);
         reportAdsToBackgroundService(allAds);
@@ -200,10 +160,7 @@ public final class AdService {
         responseObserver.onCompleted();
       } catch (StatusRuntimeException e) {
         logger.log(Level.WARN, "GetAds Failed with status {}", e.getStatus());
-        labels = errorLabels;
         responseObserver.onError(e);
-      } finally {
-        getAdsRequestLatency.record((System.currentTimeMillis() - startTime), labels);
       }
     }
 
@@ -215,26 +172,13 @@ public final class AdService {
       long startTime = System.currentTimeMillis();
       String spanName = "ReportRequestedAds";
       Span span =
-          tracer
-              .spanBuilder(spanName)
-              .setNoParent()
-              .setAttribute("numberOfAds", allAds.size())
-              .startSpan();
+          tracer.spanBuilder(spanName).setAttribute("numberOfAds", allAds.size()).startSpan();
       try (Scope ignored = span.makeCurrent()) {
         anotherSpan();
       } catch (InterruptedException e) {
         throw new RuntimeException(e);
       } finally {
-        backgroundLatency.record(
-            (System.currentTimeMillis() - startTime),
-            Attributes.of(
-                AttributeKey.stringKey("span.name"),
-                spanName,
-                AttributeKey.stringKey("error"),
-                "false",
-                AttributeKey.stringKey("span.kind"),
-                SpanKind.INTERNAL.name()));
-        span.end();
+        backgroundLatency.record((System.currentTimeMillis() - startTime));
         span.end();
       }
     }
