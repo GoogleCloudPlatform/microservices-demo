@@ -14,25 +14,13 @@
 
 package main
 
-go get (
-	"go.opentelemetry.io/otel"
-    "go.opentelemetry.io/otel/exporters/otlp/otlptrace"
-    "go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc"
-    "go.opentelemetry.io/otel/propagation"
-    "go.opentelemetry.io/otel/sdk/resource"
-    sdktrace "go.opentelemetry.io/otel/sdk/trace"
-    semconv "go.opentelemetry.io/otel/semconv/v1.7.0"
-
-    "net/http"
-    "go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
-)
-
 import (
 	"context"
 	"fmt"
 	"net"
 	"os"
 	"time"
+
 
 	"cloud.google.com/go/profiler"
 	"contrib.go.opencensus.io/exporter/jaeger"
@@ -51,6 +39,11 @@ import (
 	healthpb "google.golang.org/grpc/health/grpc_health_v1"
 	"google.golang.org/grpc/credentials"
 //honeycomb added from here down
+	"io/ioutil"
+	"log"
+	"net/http"
+	"strconv"
+	"sync"	
     "go.opentelemetry.io/otel"
     "go.opentelemetry.io/otel/exporters/otlp/otlptrace"
     "go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc"
@@ -59,7 +52,6 @@ import (
     sdktrace "go.opentelemetry.io/otel/sdk/trace"
     semconv "go.opentelemetry.io/otel/semconv/v1.7.0"
 
-    "net/http"
     "go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 )
 
