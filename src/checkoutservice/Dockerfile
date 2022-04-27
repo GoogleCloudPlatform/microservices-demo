@@ -27,6 +27,7 @@ RUN go get go.opentelemetry.io/otel \
     go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp
 
 RUN go mod download
+RUN go mod tidy
 
 COPY . .
 
