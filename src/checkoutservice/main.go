@@ -53,8 +53,6 @@ import (
 	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 )
 
-package main
-
 func newExporter(ctx context.Context) (*otlptrace.Exporter, error) {
     // Configuration to export data to Honeycomb:
     //
