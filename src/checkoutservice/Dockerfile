@@ -19,19 +19,16 @@ WORKDIR /src
 
 # restore dependencies
 COPY go.mod go.sum ./
+RUN go mod download
+
+COPY . .
+#honeycomb
 RUN go get go.opentelemetry.io/otel \
     go.opentelemetry.io/otel/trace \
     go.opentelemetry.io/otel/sdk \
     go.opentelemetry.io/otel/exporters/otlp/otlptrace \
     go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc \
     go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp
-
-RUN go mod download
-RUN go mod tidy
-RUN GOFLAGS=-mod=mod go generate ./...
-
-COPY . .
-
 # Skaffold passes in debug-oriented compiler flags
 ARG SKAFFOLD_GO_GCFLAGS
 RUN go build -gcflags="${SKAFFOLD_GO_GCFLAGS}" -o /checkoutservice .
