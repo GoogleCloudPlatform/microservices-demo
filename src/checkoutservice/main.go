@@ -39,7 +39,7 @@ import (
 	healthpb "google.golang.org/grpc/health/grpc_health_v1"
 	"google.golang.org/grpc/credentials"
 //honeycomb added from here down
-	"log"
+	logpkg "log"
 	
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/exporters/otlp/otlptrace"
@@ -109,12 +109,12 @@ const (
 	usdCurrency = "USD"
 )
 
-var logger *logrus.Logger
+var log *logrus.Logger
 
 func init() {
-	logger = logrus.New()
-	logger.Level = logrus.DebugLevel
-	logger.Formatter = &logrus.JSONFormatter{
+	log = logrus.New()
+	log.Level = logrus.DebugLevel
+	log.Formatter = &logrus.JSONFormatter{
 		FieldMap: logrus.FieldMap{
 			logrus.FieldKeyTime:  "timestamp",
 			logrus.FieldKeyLevel: "severity",
@@ -122,7 +122,7 @@ func init() {
 		},
 		TimestampFormat: time.RFC3339Nano,
 	}
-	logger.Out = os.Stdout
+	log.Out = os.Stdout
 }
 
 type checkoutService struct {
