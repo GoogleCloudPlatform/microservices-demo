@@ -25,6 +25,9 @@ RUN apt-get -qq update \
 COPY requirements.txt .
 RUN pip install -r requirements.txt
 
+# Install newrelic agent
+RUN pip install --no-cache-dir newrelic
+
 FROM base as final
 # Enable unbuffered logging
 ENV PYTHONUNBUFFERED=1
@@ -47,6 +50,11 @@ COPY --from=builder /usr/local/lib/python3.7/ /usr/local/lib/python3.7/
 
 # Add the application
 COPY . .
+
+ARG NEW_RELIC_LICENSE_KEY
+ENV NEW_RELIC_LICENSE_KEY=$NEW_RELIC_LICENSE_KEY
+ARG NEW_RELIC_HOST
+ENV NEW_RELIC_HOST=$NEW_RELIC_HOST
 
 EXPOSE 8080
 ENTRYPOINT [ "python", "email_server.py" ]
