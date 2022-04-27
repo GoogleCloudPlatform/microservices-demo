@@ -39,7 +39,7 @@ import (
 	healthpb "google.golang.org/grpc/health/grpc_health_v1"
 	"google.golang.org/grpc/credentials"
 //honeycomb added from here down
-//	logpkg "log"
+	logpkg "log"
 	
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/exporters/otlp/otlptrace"
@@ -65,7 +65,7 @@ func newExporter(ctx context.Context) (*otlptrace.Exporter, error) {
         otlptracegrpc.WithEndpoint("api.honeycomb.io:443"),
         otlptracegrpc.WithHeaders(map[string]string{
             "x-honeycomb-team":    "fd7c037a2729ce3ddc9d53449f665aaf",
-            "x-honeycomb-dataset": "checkoutservice-traces",
+            "x-honeycomb-dataset": "HONEYCOMB_DATASET",
         }),
         otlptracegrpc.WithTLSCredentials(credentials.NewClientTLSFromCert(nil, "")),
     }
@@ -189,7 +189,7 @@ func main() {
     // Configure a new exporter using environment variables for sending data to Honeycomb over gRPC.
     exp, err := newExporter(ctx)
     if err != nil {
-        log.Fatalf("failed to initialize exporter: %v", err)
+        logpkg.Fatalf("failed to initialize exporter: %v", err)
     }
 
     // Create a new tracer provider with a batch span processor and the otlp exporter.
@@ -211,7 +211,7 @@ func main() {
 
     // Initialize HTTP handler instrumentation and run the server
     wrapHandler()
-    log.Fatal(http.ListenAndServe(":3030", nil))	
+    logpkg.Fatal(http.ListenAndServe(":3030", nil))	
 }
 
 func initJaegerTracing() {
