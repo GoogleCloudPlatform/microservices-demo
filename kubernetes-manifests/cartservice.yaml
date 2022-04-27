@@ -46,13 +46,13 @@ spec:
               fieldPath: status.hostIP
         - name: SIGNALFX_ENDPOINT_URL 
           value: "http://$(NODE_IP):9411/api/v2/spans"
-        - name: SIGNALFX_LOGS_ENDPOINT_URL
-          value: "http://$(NODE_IP):4318/v1/logs"
         - name: SIGNALFX_METRICS_ENDPOINT_URL
           value: "http://$(NODE_IP):9943/v2/datapoint"
-        - name: SIGNALFX_RUNTIME_METRICS_ENABLED
+        - name: SIGNALFX_PROFILER_ENABLED
           value: "true"
-        - name: SIGNALFX_THREAD_SAMPLING_ENABLED
+        - name: SIGNALFX_PROFILER_LOGS_ENDPOINT
+          value: "http://$(NODE_IP):4318/v1/logs"
+        - name: SIGNALFX_RUNTIME_METRICS_ENABLED
           value: "true"
         - name: SIGNALFX_SERVICE_NAME
           value: "cartservice"

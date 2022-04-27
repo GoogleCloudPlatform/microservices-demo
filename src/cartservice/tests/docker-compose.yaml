@@ -11,10 +11,10 @@ services:
       - LISTEN_ADDR=0.0.0.0
       - PORT=7070
       - SIGNALFX_ENDPOINT_URL=http://otel-collector:9411/api/v2/spans
-      - SIGNALFX_LOGS_ENDPOINT_URL=http://otel-collector:4318/v1/logs
       - SIGNALFX_METRICS_ENDPOINT_URL=http://otel-collector:9943/v2/datapoint
+      - SIGNALFX_PROFILER_ENABLED=true
+      - SIGNALFX_PROFILER_LOGS_ENDPOINT=http://otel-collector:4318/v1/logs
       - SIGNALFX_RUNTIME_METRICS_ENABLED=true
-      - SIGNALFX_THREAD_SAMPLING_ENABLED=true
       - SIGNALFX_ENV
       - EXTERNAL_DB_NAME=Galactus.Postgres
       - EXTERNAL_DB_ACCESS_RATE=0.75
