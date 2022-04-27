@@ -236,7 +236,7 @@ func initJaegerTracing() {
 	log.Info("jaeger initialization completed.")
 }
 
-func initStats(exporter *stackdriver.Exporter) {
+/* func initStats(exporter *stackdriver.Exporter) {
 	view.SetReportingPeriod(60 * time.Second)
 	view.RegisterExporter(exporter)
 	if err := view.Register(ocgrpc.DefaultServerViews...); err != nil {
@@ -244,9 +244,9 @@ func initStats(exporter *stackdriver.Exporter) {
 	} else {
 		log.Info("Registered default server views")
 	}
-}
+} */
 
-func initStackdriverTracing() {
+/*func initStackdriverTracing() {
 	// TODO(ahmetb) this method is duplicated in other microservices using Go
 	// since they are not sharing packages.
 	for i := 1; i <= 3; i++ {
@@ -266,12 +266,12 @@ func initStackdriverTracing() {
 		time.Sleep(d)
 	}
 	log.Warn("could not initialize Stackdriver exporter after retrying, giving up")
-}
+} */
 
-func initTracing() {
+/*func initTracing() {
 	initJaegerTracing()
 	initStackdriverTracing()
-}
+} */
 
 func initProfiling(service, version string) {
 	// TODO(ahmetb) this method is duplicated in other microservices using Go
