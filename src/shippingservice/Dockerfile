@@ -35,8 +35,6 @@ WORKDIR /src
 COPY --from=builder /go/bin/shippingservice /src/shippingservice
 ENV APP_PORT=50051
 
-ARG JAEGER_SERVICE_ADDR
-ENV JAEGER_SERVICE_ADDR=${JAEGER_SERVICE_ADDR}
 # Definition of this variable is used by 'skaffold debug' to identify a golang binary.
 # Default behavior - a failure prints a stack trace for the current goroutine.
 # See https://golang.org/pkg/runtime/
