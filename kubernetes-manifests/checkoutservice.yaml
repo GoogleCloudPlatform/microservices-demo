@@ -29,6 +29,7 @@ spec:
       containers:
         - name: server
           image: checkoutservice
+          command: ["go run main.go"]
           ports:
           - containerPort: 5050
           readinessProbe:
