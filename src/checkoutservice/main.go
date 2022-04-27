@@ -40,7 +40,7 @@ import (
 	"google.golang.org/grpc/credentials"
 //honeycomb added from here down
 	"log"
-
+	
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/exporters/otlp/otlptrace"
 	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc"
