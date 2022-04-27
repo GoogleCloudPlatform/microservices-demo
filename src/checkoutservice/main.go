@@ -38,6 +38,109 @@ import (
 	healthpb "google.golang.org/grpc/health/grpc_health_v1"
 )
 
+package main
+
+import (
+    "context"
+    "log"
+    "os"
+
+    "google.golang.org/grpc/credentials"
+
+    "go.opentelemetry.io/otel"
+    "go.opentelemetry.io/otel/exporters/otlp/otlptrace"
+    "go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc"
+    "go.opentelemetry.io/otel/propagation"
+    "go.opentelemetry.io/otel/sdk/resource"
+    sdktrace "go.opentelemetry.io/otel/sdk/trace"
+    semconv "go.opentelemetry.io/otel/semconv/v1.7.0"
+
+    "net/http"
+    "go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
+)
+
+func newExporter(ctx context.Context) (*otlptrace.Exporter, error) {
+    // Configuration to export data to Honeycomb:
+    //
+    // 1. The Honeycomb endpoint
+    // 2. Your API key, set as the x-honeycomb-team header
+    // 3. A Dataset name, set as the x-honeycomb-dataset header
+    //
+    // A Dataset is a bucket where data gets stored in Honeycomb.
+    opts := []otlptracegrpc.Option{
+        otlptracegrpc.WithEndpoint("api.honeycomb.io:443"),
+        otlptracegrpc.WithHeaders(map[string]string{
+            "x-honeycomb-team":    "fd7c037a2729ce3ddc9d53449f665aaf",
+            "x-honeycomb-dataset": "checkoutservice-traces",
+        }),
+        otlptracegrpc.WithTLSCredentials(credentials.NewClientTLSFromCert(nil, "")),
+    }
+
+    client := otlptracegrpc.NewClient(opts...)
+    return otlptrace.New(ctx, client)
+}
+
+func newTraceProvider(exp *otlptrace.Exporter) *sdktrace.TracerProvider {
+    // The service.name attribute is required.
+    //
+    //
+    // Your service name will be used as the Service Dataset in honeycomb, which is where data is stored.
+    resource :=
+        resource.NewWithAttributes(
+            semconv.SchemaURL,
+            semconv.ServiceNameKey.String("checkoutservice"),
+        )
+
+    return sdktrace.NewTracerProvider(
+        sdktrace.WithBatcher(exp),
+        sdktrace.WithResource(resource),
+    )
+}
+
+// Implement an HTTP Handler func to be instrumented
+func httpHandler(w http.ResponseWriter, r *http.Request) {
+    fmt.Fprintf(w, "Hello, World")
+}
+
+// Wrap the HTTP handler func with OTel HTTP instrumentation
+func wrapHandler() {
+    handler := http.HandlerFunc(httpHandler)
+    wrappedHandler := otelhttp.NewHandler(handler, "hello")
+    http.Handle("/hello", wrappedHandler)
+}
+
+func main() {
+    ctx := context.Background()
+
+    // Configure a new exporter using environment variables for sending data to Honeycomb over gRPC.
+    exp, err := newExporter(ctx)
+    if err != nil {
+        log.Fatalf("failed to initialize exporter: %v", err)
+    }
+
+    // Create a new tracer provider with a batch span processor and the otlp exporter.
+    tp := newTraceProvider(exp)
+
+    // Handle this error in a sensible manner where possible
+    defer func() { _ = tp.Shutdown(ctx) }()
+
+    // Set the Tracer Provider and the W3C Trace Context propagator as globals
+    otel.SetTracerProvider(tp)
+
+    // Register the trace context and baggage propagators so data is propagated across services/processes.
+    otel.SetTextMapPropagator(
+        propagation.NewCompositeTextMapPropagator(
+            propagation.TraceContext{},
+            propagation.Baggage{},
+        ),
+    )
+
+    // Initialize HTTP handler instrumentation and run the server
+    wrapHandler()
+    log.Fatal(http.ListenAndServe(":3030", nil))
+}
+
+
 const (
 	listenPort  = "5050"
 	usdCurrency = "USD"
