@@ -93,14 +93,14 @@ func newTraceProvider(exp *otlptrace.Exporter) *sdktrace.TracerProvider {
 
 // Implement an HTTP Handler func to be instrumented
 func httpHandler(w http.ResponseWriter, r *http.Request) {
-    fmt.Fprintf(w, "Hello, World")
+    fmt.Fprintf(w, "Cart is ready")
 }
 
 // Wrap the HTTP handler func with OTel HTTP instrumentation
 func wrapHandler() {
     handler := http.HandlerFunc(httpHandler)
-    wrappedHandler := otelhttp.NewHandler(handler, "hello")
-    http.Handle("/hello", wrappedHandler)
+    wrappedHandler := otelhttp.NewHandler(handler, "cart")
+    http.Handle("/cart", wrappedHandler)
 }
 
 
