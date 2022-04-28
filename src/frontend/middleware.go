@@ -19,7 +19,6 @@ import (
 	"fmt"
 	"net"
 	"net/http"
-	"os"
 	"strings"
 	"time"
 
@@ -75,22 +74,17 @@ func init() {
 	}
 	grpcLatency = grpcLatencyInstrument
 
-	var instID attribute.KeyValue
-	if host, ok := os.LookupEnv("HOSTNAME"); ok && host != "" {
-		instID = semconv.ServiceInstanceIDKey.String(host)
-	} else {
-		instID = semconv.ServiceInstanceIDKey.String(uuid.New().String())
-	}
-
-	res, err = resource.New(
+	appResource, err := resource.New(
 		context.Background(),
-		resource.WithAttributes(
-			instID,
-			semconv.ServiceNameKey.String("Frontend"),
-			semconv.K8SPodUIDKey.String(os.Getenv("POD_UID"))),
+		resource.WithAttributes(semconv.ServiceNameKey.String("Frontend")),
+		resource.WithFromEnv(),
 	)
 	if err != nil {
-		logrus.WithError(err).Fatal("failed to detect environment resource")
+		logrus.WithError(err).Fatal("failed to create resource resource")
+	}
+	res, err = resource.Merge(resource.Default(), appResource)
+	if err != nil {
+		logrus.WithError(err).Fatal("failed to create resource resource")
 	}
 }
 

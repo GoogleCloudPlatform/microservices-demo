@@ -21,11 +21,9 @@ import (
 	"os"
 	"time"
 
-	"github.com/google/uuid"
 	"github.com/sirupsen/logrus"
 	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
 	"go.opentelemetry.io/otel"
-	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/exporters/otlp/otlptrace"
 	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc"
 	"go.opentelemetry.io/otel/propagation"
@@ -118,21 +116,15 @@ func initTracing() {
 }
 
 func detectResource() (*resource.Resource, error) {
-	var instID attribute.KeyValue
-	if host, ok := os.LookupEnv("HOSTNAME"); ok && host != "" {
-		instID = semconv.ServiceInstanceIDKey.String(host)
-	} else {
-		instID = semconv.ServiceInstanceIDKey.String(uuid.New().String())
-	}
-
-	return resource.New(
+	appResource, err := resource.New(
 		context.Background(),
-		resource.WithAttributes(
-			instID,
-			semconv.ServiceNameKey.String(serviceName),
-			semconv.K8SPodUIDKey.String(os.Getenv("POD_UID")),
-		),
+		resource.WithAttributes(semconv.ServiceNameKey.String(serviceName)),
+		resource.WithFromEnv(),
 	)
+	if err != nil {
+		return nil, err
+	}
+	return resource.Merge(resource.Default(), appResource)
 }
 
 func spanExporter() (*otlptrace.Exporter, error) {

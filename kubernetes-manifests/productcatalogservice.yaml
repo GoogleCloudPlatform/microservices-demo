@@ -37,10 +37,16 @@ spec:
         env:
         - name: PORT
           value: "3550"
+        - name: POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
         - name: POD_UID
           valueFrom:
             fieldRef:
               fieldPath: metadata.uid
+        - name: OTEL_RESOURCE_ATTRIBUTES
+          value: "service.instance.id=$(POD_NAME),k8s.pod.uid=$(POD_UID)"
         - name: HOST_IP
           valueFrom:
             fieldRef:
