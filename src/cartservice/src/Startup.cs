@@ -26,23 +26,35 @@ namespace cartservice
         public void ConfigureServices(IServiceCollection services)
         {
             string redisAddress = Configuration["REDIS_ADDR"];
-            ICartStore cartStore = null;
             if (!string.IsNullOrEmpty(redisAddress))
             {
-                cartStore = new RedisCartStore(redisAddress);
+                services.AddStackExchangeRedisCache(options =>
+                {
+                    options.Configuration = redisAddress;
+                });
             }
             else
             {
-                Console.WriteLine("Redis cache host(hostname+port) was not specified. Starting a cart service using local store");
-                Console.WriteLine("If you wanted to use Redis Cache as a backup store, you should provide its address via command line or REDIS_ADDR environment variable.");
-                cartStore = new LocalCartStore();
+                services.AddDistributedMemoryCache();
             }
 
-            // Initialize the redis store
-            cartStore.InitializeAsync().GetAwaiter().GetResult();
-            Console.WriteLine("Initialization completed");
+            //ICartStore cartStore = null;
+            //if (!string.IsNullOrEmpty(redisAddress))
+            //{
+            //    cartStore = new RedisCartStore(redisAddress);
+            //}
+            //else
+            //{
+            //    Console.WriteLine("Redis cache host(hostname+port) was not specified. Starting a cart service using local store");
+            //    Console.WriteLine("If you wanted to use Redis Cache as a backup store, you should provide its address via command line or REDIS_ADDR environment variable.");
+            //    cartStore = new LocalCartStore();
+            //}
 
-            services.AddSingleton<ICartStore>(cartStore);
+            // Initialize the redis store
+            //cartStore.InitializeAsync().GetAwaiter().GetResult();
+            //Console.WriteLine("Initialization completed");
+
+            services.AddSingleton<ICartStore, RedisCartStore>();
 
             services.AddGrpc();
         }
