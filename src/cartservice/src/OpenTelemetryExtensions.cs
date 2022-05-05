@@ -51,7 +51,6 @@ namespace cartservice.OpenTelemetry
 
                     options
                         .SetResourceBuilder(ResourceBuilder)
-                        .AddProcessor(new SpanEventLogProcessor())
                         .AddOtlpExporter();
                 });
         }
