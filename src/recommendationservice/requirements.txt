@@ -19,7 +19,7 @@ google-api-core[grpc]==1.31.5
     #   google-cloud-trace
     #   google-python-cloud-debugger
     #   opencensus
-google-api-python-client==1.12.8
+google-api-python-client==1.12.11
     # via
     #   google-cloud-profiler
     #   google-python-cloud-debugger
