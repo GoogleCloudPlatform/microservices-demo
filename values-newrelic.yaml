@@ -1,6 +1,5 @@
 global:
   cluster: demo
-  nrStaging: true
 
 prometheus:
   # Automatically scrape prometheus metrics for annotated services in the cluster
