@@ -1,6 +1,3 @@
-global:
-  cluster: demo
-
 prometheus:
   # Automatically scrape prometheus metrics for annotated services in the cluster
   # Collecting prometheus metrics for large clusters might impact data usage significantly
