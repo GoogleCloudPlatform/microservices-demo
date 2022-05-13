@@ -75,7 +75,7 @@ packaging==21.3
     # via google-api-core
 proto-plus==1.20.3
     # via google-cloud-monitoring
-protobuf==3.20.0
+protobuf==3.20.1
     # via
     #   -r requirements.in
     #   google-api-core
@@ -102,7 +102,7 @@ requests==2.27.1
     #   -r requirements.in
     #   google-api-core
     #   google-cloud-profiler
-rsa==4.7
+rsa==4.8
     # via google-auth
 six==1.15.0
     # via
