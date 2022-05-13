@@ -26,7 +26,7 @@ google-auth==1.35.0
     #   google-api-python-client
     #   google-auth-httplib2
     #   google-cloud-profiler
-google-auth-httplib2==0.0.4
+google-auth-httplib2==0.1.0
     # via
     #   google-api-python-client
     #   google-cloud-profiler
