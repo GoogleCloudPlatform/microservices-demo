@@ -76,7 +76,7 @@ packaging==21.3
     # via google-api-core
 proto-plus==1.20.3
     # via google-cloud-monitoring
-protobuf==3.20.0
+protobuf==3.20.1
     # via
     #   -r requirements.in
     #   google-api-core
