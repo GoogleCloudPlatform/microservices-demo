@@ -35,7 +35,7 @@ COPY --from=builder /cartservice .
 COPY --from=builder /app/start .
 
 # Add the SFx.NET Instrumentation
-ARG TRACER_VERSION=0.2.3
+ARG TRACER_VERSION=0.2.4
 RUN mkdir -p /var/log/signalfx
 RUN mkdir -p /opt/signalfx
 RUN curl -L https://github.com/signalfx/signalfx-dotnet-tracing/releases/download/v${TRACER_VERSION}/signalfx-dotnet-tracing-${TRACER_VERSION}-musl.tar.gz \
