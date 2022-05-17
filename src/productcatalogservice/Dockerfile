@@ -40,6 +40,7 @@ ENV EXTRA_LATENCY=${EXTRA_LATENCY}
 
 ARG PORT
 ENV PORT=${PORT}
+TEST
 
 # Definition of this variable is used by 'skaffold debug' to identify a golang binary.
 # Default behavior - a failure prints a stack trace for the current goroutine.
