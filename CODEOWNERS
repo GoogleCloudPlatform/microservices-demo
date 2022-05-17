@@ -1,19 +1,19 @@
 # See https://help.github.com/en/articles/about-code-owners
 # for more info about CODEOWNERS file.
 * @newrelic-forks/oie
-src/adservice/                                      @jack-berg
-src/frontend/                                       @TylerHelmuth
-src/cartservice/                                    @alanwest @nrcventura
-src/productcatalogservice/                          @TylerHelmuth
-src/shippingservice/                                @TylerHelmuth
-src/checkoutservice/                                @TylerHelmuth
-src/currencyservice/                                @svetlanabrennan
-src/paymentservice/                                 @svetlanabrennan
-src/emailservice/                                   @TylerHelmuth
-src/recommendationservice                           @TylerHelmuth
-src/loadgenerator                                   @TylerHelmuth @jack-berg
-src/otel-collector/                                 @TylerHelmuth
-src/otel-collector-agent/                           @TylerHelmuth
-src/otel-collector-agent-redis/                     @TylerHelmuth
-otel-kubernetes-manifests/otel-collector-agent.yaml @TylerHelmuth
-otel-kubernetes-manifests/otel-collector.yaml       @TylerHelmuth
+src/adservice/                                      @newrelic-forks/oie @jack-berg
+src/frontend/                                       @newrelic-forks/oie @TylerHelmuth
+src/cartservice/                                    @newrelic-forks/oie @alanwest @nrcventura
+src/productcatalogservice/                          @newrelic-forks/oie @TylerHelmuth
+src/shippingservice/                                @newrelic-forks/oie @TylerHelmuth
+src/checkoutservice/                                @newrelic-forks/oie @TylerHelmuth
+src/currencyservice/                                @newrelic-forks/oie @svetlanabrennan
+src/paymentservice/                                 @newrelic-forks/oie @svetlanabrennan
+src/emailservice/                                   @newrelic-forks/oie @TylerHelmuth
+src/recommendationservice/                          @newrelic-forks/oie @TylerHelmuth
+src/loadgenerator/                                  @newrelic-forks/oie @TylerHelmuth @jack-berg
+src/otel-collector/                                 @newrelic-forks/oie @TylerHelmuth
+src/otel-collector-agent/                           @newrelic-forks/oie @TylerHelmuth
+src/otel-collector-agent-redis/                     @newrelic-forks/oie @TylerHelmuth
+otel-kubernetes-manifests/otel-collector-agent.yaml @newrelic-forks/oie @TylerHelmuth
+otel-kubernetes-manifests/otel-collector.yaml       @newrelic-forks/oie @TylerHelmuth
