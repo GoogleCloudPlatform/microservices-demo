@@ -1,6 +1,19 @@
 # See https://help.github.com/en/articles/about-code-owners
 # for more info about CODEOWNERS file.
-
-# These owners will be the default owners for everything in
-# the repo. Unless a later match takes precedence.
-*                   @GoogleCloudPlatform/anthos-dpe
+* @newrelic-forks/oie
+src/adservice/                                      @jack-berg
+src/frontend/                                       @TylerHelmuth
+src/cartservice/                                    @alanwest @nrcventura
+src/productcatalogservice/                          @TylerHelmuth
+src/shippingservice/                                @TylerHelmuth
+src/checkoutservice/                                @TylerHelmuth
+src/currencyservice/                                @svetlanabrennan
+src/paymentservice/                                 @svetlanabrennan
+src/emailservice/                                   @TylerHelmuth
+src/recommendationservice                           @TylerHelmuth
+src/loadgenerator                                   @TylerHelmuth @jack-berg
+src/otel-collector/                                 @TylerHelmuth
+src/otel-collector-agent/                           @TylerHelmuth
+src/otel-collector-agent-redis/                     @TylerHelmuth
+otel-kubernetes-manifests/otel-collector-agent.yaml @TylerHelmuth
+otel-kubernetes-manifests/otel-collector.yaml       @TylerHelmuth
