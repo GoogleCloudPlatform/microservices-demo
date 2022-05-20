@@ -25,7 +25,7 @@ spec:
       labels:
         app: cartservice
     spec:
-      terminationGracePeriodSeconds: 5
+      terminationGracePeriodSeconds: 4
       tolerations:
       nodeSelector:
       containers:
