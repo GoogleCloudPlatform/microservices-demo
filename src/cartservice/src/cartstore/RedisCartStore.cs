@@ -16,7 +16,8 @@ using System;
 using System.Linq;
 using System.Threading.Tasks;
 using Grpc.Core;
-using StackExchange.Redis;
+//using StackExchange.Redis;
+using Microsoft.Extensions.Caching.Distributed;
 using Google.Protobuf;
 
 namespace cartservice.cartstore
@@ -40,11 +41,9 @@ namespace cartservice.cartstore
 
             try
             {
-                // Access the cart from the cache
-                var value = await _cache.HashGetAsync(userId, CART_FIELD_NAME);
-
                 Hipstershop.Cart cart;
-                if (value.IsNull)
+                var value = await _cache.GetAsync(userId);
+                if (value == null)
                 {
                     cart = new Hipstershop.Cart();
                     cart.UserId = userId;
@@ -63,8 +62,7 @@ namespace cartservice.cartstore
                         existingItem.Quantity += quantity;
                     }
                 }
-
-                await _cache.HashSetAsync(userId, new[]{ new HashEntry(CART_FIELD_NAME, cart.ToByteArray()) });
+                await _cache.SetAsync(userId, cart.ToByteArray());
             }
             catch (Exception ex)
             {
@@ -78,9 +76,8 @@ namespace cartservice.cartstore
 
             try
             {
-                // Update the cache with empty cart for given user
                 var cart = new Hipstershop.Cart();
-                await _cache.HashSetAsync(userId, new[] { new HashEntry(CART_FIELD_NAME, cart.ToByteArray()) });
+                await _cache.SetAsync(userId, cart.ToByteArray());
             }
             catch (Exception ex)
             {
@@ -95,9 +92,9 @@ namespace cartservice.cartstore
             try
             {
                 // Access the cart from the cache
-                var value = await _cache.HashGetAsync(userId, CART_FIELD_NAME);
+                var value = await _cache.GetAsync(userId);
 
-                if (!value.IsNull)
+                if (value != null)
                 {
                     return Hipstershop.Cart.Parser.ParseFrom(value);
                 }
@@ -115,8 +112,9 @@ namespace cartservice.cartstore
         {
             try
             {
-                var res = _cache.Ping();
-                return res != TimeSpan.Zero;
+                return true;
+                //var res = _cache.Ping();
+                //return res != TimeSpan.Zero;
             }
             catch (Exception)
             {

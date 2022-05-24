@@ -9,6 +9,7 @@ using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Hosting;
 using cartservice.cartstore;
 using cartservice.services;
+using Microsoft.Extensions.Caching.StackExchangeRedis;
 
 namespace cartservice
 {
@@ -26,6 +27,7 @@ namespace cartservice
         public void ConfigureServices(IServiceCollection services)
         {
             string redisAddress = Configuration["REDIS_ADDR"];
+            Console.WriteLine($"{redisAddress}");
             if (!string.IsNullOrEmpty(redisAddress))
             {
                 services.AddStackExchangeRedisCache(options =>
@@ -33,10 +35,10 @@ namespace cartservice
                     options.Configuration = redisAddress;
                 });
             }
-            else
-            {
-                services.AddDistributedMemoryCache();
-            }
+            //else
+            //{
+            //    services.AddDistributedMemoryCache();
+            //}
 
             //ICartStore cartStore = null;
             //if (!string.IsNullOrEmpty(redisAddress))
