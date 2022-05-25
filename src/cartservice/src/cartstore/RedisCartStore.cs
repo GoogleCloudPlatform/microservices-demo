@@ -38,7 +38,7 @@ namespace cartservice.cartstore
             {
                 Hipstershop.Cart cart;
                 var value = await _cache.GetAsync(userId);
-                if (value == null)
+                if (value.IsNull)
                 {
                     cart = new Hipstershop.Cart();
                     cart.UserId = userId;
@@ -89,7 +89,7 @@ namespace cartservice.cartstore
                 // Access the cart from the cache
                 var value = await _cache.GetAsync(userId);
 
-                if (value != null)
+                if (!value.IsNull)
                 {
                     return Hipstershop.Cart.Parser.ParseFrom(value);
                 }
