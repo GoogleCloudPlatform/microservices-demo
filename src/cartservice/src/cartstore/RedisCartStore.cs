@@ -108,8 +108,6 @@ namespace cartservice.cartstore
             try
             {
                 return true;
-                //var res = _cache.Ping();
-                //return res != TimeSpan.Zero;
             }
             catch (Exception)
             {
