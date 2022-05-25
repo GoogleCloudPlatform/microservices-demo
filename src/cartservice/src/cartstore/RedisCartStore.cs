@@ -16,7 +16,6 @@ using System;
 using System.Linq;
 using System.Threading.Tasks;
 using Grpc.Core;
-//using StackExchange.Redis;
 using Microsoft.Extensions.Caching.Distributed;
 using Google.Protobuf;
 
@@ -24,15 +23,11 @@ namespace cartservice.cartstore
 {
     public class RedisCartStore : ICartStore
     {
-        private const string CART_FIELD_NAME = "cart";
-        private const int REDIS_RETRY_NUM = 30;
-
         private readonly IDistributedCache _cache;
 
         public RedisCartStore(IDistributedCache cache)
         {
             _cache = cache;
-            //FIXME: take example from https://github.com/referbruv/redis-heroes-dotnetcore-example/blob/main/RedisHeroes.Core/Services/CacheService.cs
         }
 
         public async Task AddItemAsync(string userId, string productId, int quantity)
