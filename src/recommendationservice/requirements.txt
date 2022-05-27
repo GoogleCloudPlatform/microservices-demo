@@ -45,7 +45,7 @@ google-cloud-trace==0.24.0
     # via opencensus-ext-stackdriver
 google-python-cloud-debugger==2.18
     # via -r requirements.in
-googleapis-common-protos==1.52.0
+googleapis-common-protos==1.56.2
     # via google-api-core
 grpcio==1.44.0
     # via
