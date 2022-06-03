@@ -23,18 +23,18 @@ namespace cartservice.services
 {
     internal class HealthCheckService : HealthBase
     {
-        private ICartStore _dependency { get; }
+        private ICartStore _cartStore { get; }
 
-        public HealthCheckService (ICartStore dependency) 
+        public HealthCheckService (ICartStore cartStore) 
         {
-            _dependency = dependency;
+            _cartStore = cartStore;
         }
 
         public override Task<HealthCheckResponse> Check(HealthCheckRequest request, ServerCallContext context)
         {
             Console.WriteLine ("Checking CartService Health");
             return Task.FromResult(new HealthCheckResponse {
-                Status = _dependency.Ping() ? HealthCheckResponse.Types.ServingStatus.Serving : HealthCheckResponse.Types.ServingStatus.NotServing
+                Status = _cartStore.Ping() ? HealthCheckResponse.Types.ServingStatus.Serving : HealthCheckResponse.Types.ServingStatus.NotServing
             });
         }
     }
