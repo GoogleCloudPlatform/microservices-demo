@@ -16,95 +16,18 @@ using System;
 using System.Linq;
 using System.Threading.Tasks;
 using Grpc.Core;
-using StackExchange.Redis;
+using Microsoft.Extensions.Caching.Distributed;
 using Google.Protobuf;
 
 namespace cartservice.cartstore
 {
     public class RedisCartStore : ICartStore
     {
-        private const string CART_FIELD_NAME = "cart";
-        private const int REDIS_RETRY_NUM = 30;
+        private readonly IDistributedCache _cache;
 
-        private volatile ConnectionMultiplexer redis;
-        private volatile bool isRedisConnectionOpened = false;
-
-        private readonly object locker = new object();
-        private readonly byte[] emptyCartBytes;
-        private readonly string connectionString;
-
-        private readonly ConfigurationOptions redisConnectionOptions;
-
-        public RedisCartStore(string redisAddress)
+        public RedisCartStore(IDistributedCache cache)
         {
-            // Serialize empty cart into byte array.
-            var cart = new Hipstershop.Cart();
-            emptyCartBytes = cart.ToByteArray();
-            connectionString = $"{redisAddress},ssl=false,allowAdmin=true,abortConnect=false";
-
-            redisConnectionOptions = ConfigurationOptions.Parse(connectionString);
-
-            // Try to reconnect multiple times if the first retry fails.
-            redisConnectionOptions.ConnectRetry = REDIS_RETRY_NUM;
-            redisConnectionOptions.ReconnectRetryPolicy = new ExponentialRetry(1000);
-
-            redisConnectionOptions.KeepAlive = 180;
-        }
-
-        public Task InitializeAsync()
-        {
-            EnsureRedisConnected();
-            return Task.CompletedTask;
-        }
-
-        private void EnsureRedisConnected()
-        {
-            if (isRedisConnectionOpened)
-            {
-                return;
-            }
-
-            // Connection is closed or failed - open a new one but only at the first thread
-            lock (locker)
-            {
-                if (isRedisConnectionOpened)
-                {
-                    return;
-                }
-
-                Console.WriteLine("Connecting to Redis: " + connectionString);
-                redis = ConnectionMultiplexer.Connect(redisConnectionOptions);
-
-                if (redis == null || !redis.IsConnected)
-                {
-                    Console.WriteLine("Wasn't able to connect to redis");
-
-                    // We weren't able to connect to Redis despite some retries with exponential backoff.
-                    throw new ApplicationException("Wasn't able to connect to redis");
-                }
-
-                Console.WriteLine("Successfully connected to Redis");
-                var cache = redis.GetDatabase();
-
-                Console.WriteLine("Performing small test");
-                cache.StringSet("cart", "OK" );
-                object res = cache.StringGet("cart");
-                Console.WriteLine($"Small test result: {res}");
-
-                redis.InternalError += (o, e) => { Console.WriteLine(e.Exception); };
-                redis.ConnectionRestored += (o, e) =>
-                {
-                    isRedisConnectionOpened = true;
-                    Console.WriteLine("Connection to redis was retored successfully");
-                };
-                redis.ConnectionFailed += (o, e) =>
-                {
-                    Console.WriteLine("Connection failed. Disposing the object");
-                    isRedisConnectionOpened = false;
-                };
-
-                isRedisConnectionOpened = true;
-            }
+            _cache = cache;
         }
 
         public async Task AddItemAsync(string userId, string productId, int quantity)
@@ -113,15 +36,9 @@ namespace cartservice.cartstore
 
             try
             {
-                EnsureRedisConnected();
-
-                var db = redis.GetDatabase();
-
-                // Access the cart from the cache
-                var value = await db.HashGetAsync(userId, CART_FIELD_NAME);
-
                 Hipstershop.Cart cart;
-                if (value.IsNull)
+                var value = await _cache.GetAsync(userId);
+                if (value == null)
                 {
                     cart = new Hipstershop.Cart();
                     cart.UserId = userId;
@@ -140,8 +57,7 @@ namespace cartservice.cartstore
                         existingItem.Quantity += quantity;
                     }
                 }
-
-                await db.HashSetAsync(userId, new[]{ new HashEntry(CART_FIELD_NAME, cart.ToByteArray()) });
+                await _cache.SetAsync(userId, cart.ToByteArray());
             }
             catch (Exception ex)
             {
@@ -155,11 +71,8 @@ namespace cartservice.cartstore
 
             try
             {
-                EnsureRedisConnected();
-                var db = redis.GetDatabase();
-
-                // Update the cache with empty cart for given user
-                await db.HashSetAsync(userId, new[] { new HashEntry(CART_FIELD_NAME, emptyCartBytes) });
+                var cart = new Hipstershop.Cart();
+                await _cache.SetAsync(userId, cart.ToByteArray());
             }
             catch (Exception ex)
             {
@@ -173,14 +86,10 @@ namespace cartservice.cartstore
 
             try
             {
-                EnsureRedisConnected();
-
-                var db = redis.GetDatabase();
-
                 // Access the cart from the cache
-                var value = await db.HashGetAsync(userId, CART_FIELD_NAME);
+                var value = await _cache.GetAsync(userId);
 
-                if (!value.IsNull)
+                if (value != null)
                 {
                     return Hipstershop.Cart.Parser.ParseFrom(value);
                 }
@@ -198,9 +107,7 @@ namespace cartservice.cartstore
         {
             try
             {
-                var cache = redis.GetDatabase();
-                var res = cache.Ping();
-                return res != TimeSpan.Zero;
+                return true;
             }
             catch (Exception)
             {
