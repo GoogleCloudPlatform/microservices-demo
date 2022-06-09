@@ -16,6 +16,7 @@
 FROM mcr.microsoft.com/dotnet/sdk:6.0.300 as builder
 WORKDIR /app
 COPY cartservice.csproj .
+ENV COMPlus_EnableDiagnostics=0
 RUN dotnet restore cartservice.csproj -r linux-musl-x64
 COPY . .
 RUN dotnet publish cartservice.csproj -p:PublishSingleFile=true -r linux-musl-x64 --self-contained true -p:PublishTrimmed=True -p:TrimMode=Link -c release -o /cartservice --no-restore
@@ -28,4 +29,5 @@ RUN GRPC_HEALTH_PROBE_VERSION=v0.4.11 && \
 WORKDIR /app
 COPY --from=builder /cartservice .
 ENV ASPNETCORE_URLS http://*:7070
+ENV COMPlus_EnableDiagnostics=0
 ENTRYPOINT ["/app/cartservice"]
