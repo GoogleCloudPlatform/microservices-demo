@@ -14,7 +14,7 @@
     "@google-cloud/trace-agent": "5.1.6",
     "@grpc/grpc-js": "1.4.4",
     "@grpc/proto-loader": "0.5.6",
-    "async": "3.2.3",
+    "async": "3.2.4",
     "google-protobuf": "3.13.0",
     "pino": "5.17.0",
     "request": "2.88.2",
