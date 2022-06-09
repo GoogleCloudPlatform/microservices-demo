@@ -10,7 +10,7 @@ require (
 	github.com/google/uuid v1.1.2
 	github.com/sirupsen/logrus v1.8.1
 	go.opencensus.io v0.23.0
-	golang.org/x/net v0.0.0-20220403103023-749bd193bc2b
+	golang.org/x/net v0.0.0-20220420153159-1850ba15e1be
 	google.golang.org/grpc v1.40.0
 )
 
