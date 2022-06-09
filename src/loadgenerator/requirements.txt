@@ -4,6 +4,8 @@
 #
 #    pip-compile requirements.in
 #
+brotli==1.0.9
+    # via geventhttpclient
 certifi==2020.12.5
     # via
     #   geventhttpclient
@@ -47,7 +49,7 @@ psutil==5.7.2
     # via locust
 pyzmq==19.0.2
     # via locust
-requests==2.27.1
+requests==2.28.0
     # via
     #   -r requirements.in
     #   locust
