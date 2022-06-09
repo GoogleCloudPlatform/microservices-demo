@@ -10,7 +10,7 @@ certifi==2020.12.5
     # via requests
 charset-normalizer==2.0.10
     # via requests
-google-api-core[grpc]==1.31.5
+google-api-core[grpc]==1.31.6
     # via
     #   -r requirements.in
     #   google-api-python-client
@@ -35,7 +35,7 @@ google-auth-httplib2==0.0.4
     #   google-api-python-client
     #   google-cloud-profiler
     #   google-python-cloud-debugger
-google-cloud-core==1.5.0
+google-cloud-core==1.7.2
     # via google-cloud-trace
 google-cloud-monitoring==2.9.1
     # via opencensus-ext-stackdriver
@@ -45,7 +45,7 @@ google-cloud-trace==0.24.1
     # via opencensus-ext-stackdriver
 google-python-cloud-debugger==2.18
     # via -r requirements.in
-googleapis-common-protos==1.52.0
+googleapis-common-protos==1.56.2
     # via google-api-core
 grpcio==1.44.0
     # via
@@ -74,7 +74,7 @@ opencensus-ext-stackdriver==0.8.0
     # via -r requirements.in
 packaging==21.3
     # via google-api-core
-proto-plus==1.20.3
+proto-plus==1.20.5
     # via google-cloud-monitoring
 protobuf==3.20.1
     # via
