@@ -49,15 +49,15 @@ spec:
             cpu: 300m
             memory: 300Mi
         readinessProbe:
+          grpc:
+            port: 9555
           initialDelaySeconds: 20
           periodSeconds: 15
-          exec:
-            command: ["/bin/grpc_health_probe", "-addr=:9555"]
         livenessProbe:
+          grpc:
+            port: 9555
           initialDelaySeconds: 20
           periodSeconds: 15
-          exec:
-            command: ["/bin/grpc_health_probe", "-addr=:9555"]
 ---
 apiVersion: v1
 kind: Service

@@ -33,13 +33,13 @@ spec:
         ports:
         - containerPort: 8080
         readinessProbe:
+          grpc:
+            port: 8080
           periodSeconds: 5
-          exec:
-            command: ["/bin/grpc_health_probe", "-addr=:8080"]
         livenessProbe:
+          grpc:
+            port: 8080
           periodSeconds: 5
-          exec:
-            command: ["/bin/grpc_health_probe", "-addr=:8080"]
         env:
         - name: PORT
           value: "8080"

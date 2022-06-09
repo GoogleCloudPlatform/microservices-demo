@@ -43,12 +43,12 @@ spec:
         # - name: JAEGER_SERVICE_ADDR
         #   value: "jaeger-collector:14268"
         readinessProbe:
+          grpc:
+            port: 50051
           periodSeconds: 5
-          exec:
-            command: ["/bin/grpc_health_probe", "-addr=:50051"]
         livenessProbe:
-          exec:
-            command: ["/bin/grpc_health_probe", "-addr=:50051"]
+          grpc:
+            port: 50051
         resources:
           requests:
             cpu: 100m
