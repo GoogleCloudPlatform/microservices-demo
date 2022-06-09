@@ -98,7 +98,7 @@ python-json-logger==0.1.11
     # via -r requirements.in
 pytz==2018.9
     # via google-api-core
-requests==2.27.1
+requests==2.28.0
     # via
     #   -r requirements.in
     #   google-api-core
