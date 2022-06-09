@@ -10,7 +10,7 @@ certifi==2020.12.5
     # via requests
 charset-normalizer==2.0.10
     # via requests
-google-api-core[grpc]==1.31.5
+google-api-core[grpc]==1.31.6
     # via
     #   -r requirements.in
     #   google-api-python-client
@@ -19,7 +19,7 @@ google-api-core[grpc]==1.31.5
     #   google-cloud-trace
     #   google-python-cloud-debugger
     #   opencensus
-google-api-python-client==1.12.8
+google-api-python-client==1.12.11
     # via
     #   google-cloud-profiler
     #   google-python-cloud-debugger
@@ -28,26 +28,27 @@ google-auth==1.35.0
     #   google-api-core
     #   google-api-python-client
     #   google-auth-httplib2
+    #   google-cloud-core
     #   google-cloud-profiler
     #   google-python-cloud-debugger
-google-auth-httplib2==0.0.4
+google-auth-httplib2==0.1.0
     # via
     #   google-api-python-client
     #   google-cloud-profiler
     #   google-python-cloud-debugger
-google-cloud-core==1.5.0
+google-cloud-core==1.7.2
     # via google-cloud-trace
-google-cloud-monitoring==0.36.0
+google-cloud-monitoring==2.9.1
     # via opencensus-ext-stackdriver
 google-cloud-profiler==3.0.7
     # via -r requirements.in
-google-cloud-trace==0.24.0
+google-cloud-trace==0.24.1
     # via opencensus-ext-stackdriver
 google-python-cloud-debugger==2.18
     # via -r requirements.in
-googleapis-common-protos==1.52.0
+googleapis-common-protos==1.56.2
     # via google-api-core
-grpcio==1.33.2
+grpcio==1.46.3
     # via
     #   -r requirements.in
     #   google-api-core
@@ -61,7 +62,7 @@ httplib2==0.19.0
     #   google-auth-httplib2
 idna==2.10
     # via requests
-opencensus==0.8.0
+opencensus==0.9.0
     # via
     #   -r requirements.in
     #   opencensus-ext-grpc
@@ -70,17 +71,20 @@ opencensus-context==0.1.2
     # via opencensus
 opencensus-ext-grpc==0.7.1
     # via -r requirements.in
-opencensus-ext-stackdriver==0.7.3
+opencensus-ext-stackdriver==0.8.0
     # via -r requirements.in
 packaging==21.3
     # via google-api-core
-protobuf==3.20.0
+proto-plus==1.20.5
+    # via google-cloud-monitoring
+protobuf==3.20.1
     # via
     #   -r requirements.in
     #   google-api-core
     #   google-cloud-profiler
     #   googleapis-common-protos
     #   grpcio-health-checking
+    #   proto-plus
 pyasn1==0.4.8
     # via
     #   pyasn1-modules
@@ -104,7 +108,7 @@ requests==2.27.1
     #   -r requirements.in
     #   google-api-core
     #   google-cloud-profiler
-rsa==4.7
+rsa==4.8
     # via
     #   -r requirements.in
     #   google-auth
