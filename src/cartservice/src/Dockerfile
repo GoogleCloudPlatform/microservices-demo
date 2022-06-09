@@ -28,4 +28,5 @@ RUN GRPC_HEALTH_PROBE_VERSION=v0.4.11 && \
 WORKDIR /app
 COPY --from=builder /cartservice .
 ENV ASPNETCORE_URLS http://*:7070
+ENV DOTNET_EnableDiagnostics=0
 ENTRYPOINT ["/app/cartservice"]

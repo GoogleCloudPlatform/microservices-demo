@@ -53,7 +53,7 @@ requests==2.28.0
     # via
     #   -r requirements.in
     #   locust
-six==1.15.0
+six==1.16.0
     # via
     #   flask-cors
     #   geventhttpclient
@@ -67,7 +67,7 @@ werkzeug==1.0.1
     #   locust
 zope-event==4.5.0
     # via gevent
-zope-interface==5.1.0
+zope-interface==5.4.0
     # via gevent
 
 # The following packages are considered to be unsafe in a requirements file:
