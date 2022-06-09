@@ -28,6 +28,7 @@ google-auth==1.35.0
     #   google-api-core
     #   google-api-python-client
     #   google-auth-httplib2
+    #   google-cloud-core
     #   google-cloud-profiler
     #   google-python-cloud-debugger
 google-auth-httplib2==0.1.0
@@ -47,7 +48,7 @@ google-python-cloud-debugger==2.18
     # via -r requirements.in
 googleapis-common-protos==1.56.2
     # via google-api-core
-grpcio==1.44.0
+grpcio==1.46.3
     # via
     #   -r requirements.in
     #   google-api-core
