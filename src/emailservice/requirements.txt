@@ -33,11 +33,11 @@ google-auth-httplib2==0.1.0
     #   google-cloud-profiler
 google-cloud-core==1.7.2
     # via google-cloud-trace
-google-cloud-monitoring==2.9.1
+google-cloud-monitoring==2.9.2
     # via opencensus-ext-stackdriver
 google-cloud-profiler==1.1.2
     # via -r requirements.in
-google-cloud-trace==0.24.1
+google-cloud-trace==0.24.2
     # via
     #   -r requirements.in
     #   opencensus-ext-stackdriver
@@ -51,7 +51,7 @@ grpcio==1.46.3
     #   opencensus-ext-grpc
 grpcio-health-checking==1.44.0
     # via -r requirements.in
-httplib2==0.19.0
+httplib2==0.20.4
     # via
     #   google-api-python-client
     #   google-auth-httplib2
@@ -81,6 +81,7 @@ protobuf==3.20.1
     #   -r requirements.in
     #   google-api-core
     #   google-cloud-profiler
+    #   google-cloud-trace
     #   googleapis-common-protos
     #   grpcio-health-checking
     #   proto-plus
@@ -98,14 +99,14 @@ python-json-logger==0.1.11
     # via -r requirements.in
 pytz==2018.9
     # via google-api-core
-requests==2.27.1
+requests==2.28.0
     # via
     #   -r requirements.in
     #   google-api-core
     #   google-cloud-profiler
 rsa==4.8
     # via google-auth
-six==1.15.0
+six==1.16.0
     # via
     #   google-api-core
     #   google-api-python-client
