@@ -4,6 +4,8 @@
 #
 #    pip-compile requirements.in
 #
+brotli==1.0.9
+    # via geventhttpclient
 certifi==2020.12.5
     # via
     #   geventhttpclient
@@ -47,11 +49,11 @@ psutil==5.9.1
     # via locust
 pyzmq==19.0.2
     # via locust
-requests==2.27.1
+requests==2.28.0
     # via
     #   -r requirements.in
     #   locust
-six==1.15.0
+six==1.16.0
     # via
     #   flask-cors
     #   geventhttpclient
@@ -65,7 +67,7 @@ werkzeug==1.0.1
     #   locust
 zope-event==4.5.0
     # via gevent
-zope-interface==5.1.0
+zope-interface==5.4.0
     # via gevent
 
 # The following packages are considered to be unsafe in a requirements file:
