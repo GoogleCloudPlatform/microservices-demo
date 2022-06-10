@@ -45,7 +45,7 @@ markupsafe==1.1.1
     # via jinja2
 msgpack==1.0.4
     # via locust
-psutil==5.7.2
+psutil==5.9.1
     # via locust
 pyzmq==19.0.2
     # via locust
