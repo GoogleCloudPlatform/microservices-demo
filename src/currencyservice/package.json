@@ -9,7 +9,7 @@
   },
   "license": "Apache-2.0",
   "dependencies": {
-    "@google-cloud/debug-agent": "5.1.3",
+    "@google-cloud/debug-agent": "5.2.9",
     "@google-cloud/profiler": "4.1.7",
     "@google-cloud/trace-agent": "5.1.6",
     "@grpc/grpc-js": "1.4.4",
