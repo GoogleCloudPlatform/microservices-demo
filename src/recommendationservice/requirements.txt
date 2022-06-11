@@ -54,7 +54,7 @@ grpcio==1.46.3
     #   google-api-core
     #   grpcio-health-checking
     #   opencensus-ext-grpc
-grpcio-health-checking==1.44.0
+grpcio-health-checking==1.46.3
     # via -r requirements.in
 httplib2==0.20.4
     # via
@@ -81,7 +81,9 @@ protobuf==3.20.1
     # via
     #   -r requirements.in
     #   google-api-core
+    #   google-cloud-monitoring
     #   google-cloud-profiler
+    #   google-cloud-trace
     #   googleapis-common-protos
     #   grpcio-health-checking
     #   proto-plus
