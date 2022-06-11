@@ -12,7 +12,7 @@
   "license": "ISC",
   "dependencies": {
     "@google-cloud/debug-agent": "5.2.9",
-    "@google-cloud/profiler": "4.1.7",
+    "@google-cloud/profiler": "4.2.0",
     "@google-cloud/trace-agent": "5.1.6",
     "@grpc/grpc-js": "1.4.4",
     "@grpc/proto-loader": "0.6.13",
