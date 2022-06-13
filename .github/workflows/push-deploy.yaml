@@ -22,7 +22,7 @@ jobs:
   push-deploy:
     runs-on: [self-hosted, is-enabled]
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
     - name: Push latest images to GCR
       timeout-minutes: 20
       run: |
