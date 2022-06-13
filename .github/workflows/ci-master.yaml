@@ -23,7 +23,7 @@ jobs:
   code-tests:
     runs-on: [self-hosted, is-enabled]
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
     - uses: actions/setup-dotnet@v2
       with:
         dotnet-version: '6.0.100'
@@ -51,7 +51,7 @@ jobs:
         profile: ["local-code"]
       fail-fast: true
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
     - name: Build + Deploy PR images to GKE
       timeout-minutes: 20
       run: |
