@@ -36,6 +36,7 @@ spec:
         ports:
         - containerPort: 8089
         image: loadgenerator
+        imagePullPolicy: Always
         env:
         - name: FRONTEND_ADDR
           value: "frontend:80"

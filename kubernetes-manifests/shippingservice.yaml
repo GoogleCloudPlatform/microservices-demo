@@ -30,6 +30,7 @@ spec:
       containers:
       - name: server
         image: shippingservice
+        imagePullPolicy: Always
         ports:
         - containerPort: 50051
         env:
@@ -39,7 +40,7 @@ spec:
           valueFrom:
             fieldRef:
               fieldPath: status.hostIP
-        - name: SIGNALFX_ENDPOINT_URL 
+        - name: SIGNALFX_ENDPOINT_URL
           value: "http://$(NODE_IP):9411/api/v2/spans"
           # value: "http://zipkin.default:9411/api/v2/spans"
         readinessProbe:
