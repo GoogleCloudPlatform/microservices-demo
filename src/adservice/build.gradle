@@ -1,5 +1,5 @@
 plugins {
-    id 'com.google.protobuf' version '0.8.11'
+    id 'com.google.protobuf' version '0.8.16'
     id 'com.github.sherter.google-java-format' version '0.8'
     id 'idea'
     id 'application'
