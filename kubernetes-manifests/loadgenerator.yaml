@@ -30,6 +30,11 @@ spec:
       serviceAccountName: default
       terminationGracePeriodSeconds: 5
       restartPolicy: Always
+      securityContext:
+        fsGroup: 1000
+        runAsGroup: 1000
+        runAsNonRoot: true
+        runAsUser: 1000
       initContainers:
       - command:
         - /bin/sh
@@ -48,6 +53,13 @@ spec:
           value: "frontend:80"
       containers:
       - name: main
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+              - all
+          privileged: false
+          readOnlyRootFilesystem: true
         image: loadgenerator
         env:
         - name: FRONTEND_ADDR
