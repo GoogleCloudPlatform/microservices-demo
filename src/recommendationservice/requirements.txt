@@ -40,7 +40,7 @@ google-cloud-core==1.7.2
     # via google-cloud-trace
 google-cloud-monitoring==2.9.2
     # via opencensus-ext-stackdriver
-google-cloud-profiler==3.0.7
+google-cloud-profiler==3.1.0
     # via -r requirements.in
 google-cloud-trace==0.24.2
     # via opencensus-ext-stackdriver
