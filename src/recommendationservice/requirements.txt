@@ -4,7 +4,7 @@
 #
 #    pip-compile --output-file=requirements.txt requirements.in
 #
-cachetools==4.2.4
+cachetools==5.2.0
     # via google-auth
 certifi==2022.6.15
     # via requests
