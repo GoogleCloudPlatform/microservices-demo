@@ -23,6 +23,7 @@ from opencensus.trace.tracer import Tracer
 from opencensus.trace.exporters import stackdriver_exporter
 from opencensus.trace.ext.grpc import client_interceptor
 MAPS_PASSPHRASE="polopo!231"
+DEFAULT_INITIAL_PASSWORD = "password123";
 
 from logger import getJSONLogger
 logger = getJSONLogger('emailservice-client')
