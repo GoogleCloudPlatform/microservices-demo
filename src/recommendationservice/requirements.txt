@@ -19,6 +19,8 @@ deprecated==1.2.14
     #   opentelemetry-api
     #   opentelemetry-exporter-otlp-proto-grpc
 google-api-core==2.11.1
+docutils==0.18.1
+google-api-core[grpc]==1.31.6
     # via
     #   -r requirements.in
     #   google-api-python-client
