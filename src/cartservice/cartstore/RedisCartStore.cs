@@ -14,7 +14,6 @@
 
 using System;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 using cartservice.interfaces;
 using Google.Protobuf;
@@ -27,31 +26,29 @@ namespace cartservice.cartstore
 {
   public class RedisCartStore : ICartStore
   {
-
     private const string CART_FIELD_NAME = "cart";
 
-    private volatile ConnectionMultiplexer redis;
-    private readonly object locker = new object();
     private readonly byte[] emptyCartBytes;
 
     private static double EXTERNAL_DB_ACCESS_RATE = Convert.ToDouble(Environment.GetEnvironmentVariable("EXTERNAL_DB_ACCESS_RATE"));
     private static Int16 EXTERNAL_DB_MAX_DURATION_MILLIS = Convert.ToInt16(Environment.GetEnvironmentVariable("EXTERNAL_DB_MAX_DURATION_MILLIS"));
     private static double EXTERNAL_DB_ERROR_RATE = Convert.ToDouble(Environment.GetEnvironmentVariable("EXTERNAL_DB_ERROR_RATE"));
+    private static string EXTERNAL_DB_NAME = Environment.GetEnvironmentVariable("EXTERNAL_DB_NAME") ?? "global.datastore";
 
-    public static string EXTERNAL_DB_NAME = Environment.GetEnvironmentVariable("EXTERNAL_DB_NAME") ?? "global.datastore";
 
     private readonly ITracer _tracer;
     private readonly Random _random;
+    private readonly DatabaseCache _dbCache;
 
     public RedisCartStore(ConnectionMultiplexer connection)
     {
-      redis = connection;
       // Serialize empty cart into byte array.
       var cart = new Hipstershop.Cart();
       emptyCartBytes = cart.ToByteArray();
 
       _tracer = GlobalTracer.Instance;
-      _random = new Random();
+      _random = Random.Shared;
+      _dbCache = new DatabaseCache(connection);
     }
 
     public Task InitializeAsync()
@@ -62,10 +59,14 @@ namespace cartservice.cartstore
     public async Task AddItemAsync(string userId, string productId, int quantity)
     {
       Console.WriteLine($"AddItemAsync called with userId={userId}, productId={productId}, quantity={quantity}");
+      if (!UserId.IsValid(userId))
+      {
+        throw new ArgumentException(nameof(userId));
+      }
 
       try
       {
-        var db = redis.GetDatabase();
+        var db = _dbCache.Get();
 
         // Access the cart from the cache
         var value = await db.HashGetAsync(userId, CART_FIELD_NAME);
@@ -94,23 +95,7 @@ namespace cartservice.cartstore
         await db.HashSetAsync(userId, new[] { new HashEntry(CART_FIELD_NAME, cart.ToByteArray()) });
 
         // Attempt to access "external database" some percentage of the time
-        if (_random.NextDouble() < EXTERNAL_DB_ACCESS_RATE)
-        {
-          using (IScope scope = _tracer.BuildSpan("Cart.DbQuery.UpdateCart").WithTag("span.kind", "client").StartActive())
-          {
-            ISpan span = scope.Span;
-            span.SetTag("db.system", "postgres");
-            span.SetTag("db.type", "postgres");
-            span.SetTag("peer.service", EXTERNAL_DB_NAME + ":98321");
-
-            if (_random.NextDouble() < EXTERNAL_DB_ERROR_RATE)
-            {
-              span.SetTag("error", "true");
-            }
-
-            Thread.Sleep(_random.Next(0, EXTERNAL_DB_MAX_DURATION_MILLIS));
-          }
-        }
+        await ConditionallyMockExternalResourceAccess("Cart.DbQuery.GetCart");
       }
       catch (Exception ex)
       {
@@ -121,10 +106,14 @@ namespace cartservice.cartstore
     public async Task EmptyCartAsync(string userId)
     {
       Console.WriteLine($"EmptyCartAsync called with userId={userId}");
+      if (!UserId.IsValid(userId))
+      {
+        throw new ArgumentException(nameof(userId));
+      }
 
       try
       {
-        var db = redis.GetDatabase();
+        var db = _dbCache.Get();
 
         // Update the cache with empty cart for given user
         await db.HashSetAsync(userId, new[] { new HashEntry(CART_FIELD_NAME, emptyCartBytes) });
@@ -138,10 +127,14 @@ namespace cartservice.cartstore
     public async Task<Hipstershop.Cart> GetCartAsync(string userId)
     {
       Console.WriteLine($"GetCartAsync called with userId={userId}");
+      if (!UserId.IsValid(userId))
+      {
+        throw new ArgumentException(nameof(userId));
+      }
 
       try
       {
-        var db = redis.GetDatabase();
+        var db = _dbCache.Get();
 
         // Access the cart from the cache
         var value = await db.HashGetAsync(userId, CART_FIELD_NAME);
@@ -151,23 +144,7 @@ namespace cartservice.cartstore
           // Attempt to access "external database" some percentage of the time. This happens after
           // our redis call to represent some kind fo "cache miss" or secondary call that is not
           // in the redis cache.
-          if (_random.NextDouble() < EXTERNAL_DB_ACCESS_RATE)
-          {
-            using (IScope scope = _tracer.BuildSpan("Cart.DbQuery.GetCart").WithTag("span.kind", "client").StartActive())
-            {
-              ISpan span = scope.Span;
-              span.SetTag("db.system", "postgres");
-              span.SetTag("db.type", "postgres");
-              span.SetTag("peer.service", EXTERNAL_DB_NAME + ":98321");
-
-              if (_random.NextDouble() < EXTERNAL_DB_ERROR_RATE)
-              {
-                span.SetTag("error", "true");
-              }
-
-              Thread.Sleep(_random.Next(0, EXTERNAL_DB_MAX_DURATION_MILLIS));
-            }
-          }
+          await ConditionallyMockExternalResourceAccess("Cart.DbQuery.GetCart");
 
           return Hipstershop.Cart.Parser.ParseFrom(value);
         }
@@ -185,13 +162,38 @@ namespace cartservice.cartstore
     {
       try
       {
-        var cache = redis.GetDatabase();
-        var res = cache.Ping();
+        var db = _dbCache.ByPassBlocking();
+        var res = db.Ping();
         return res != TimeSpan.Zero;
       }
       catch (Exception)
       {
         return false;
+      }
+    }
+
+    private async Task<bool> ConditionallyMockExternalResourceAccess(string operation)
+    {
+      if (_random.NextDouble() >= EXTERNAL_DB_ACCESS_RATE)
+      {
+        return false;
+      }
+
+      using (IScope scope = _tracer.BuildSpan(operation).WithTag("span.kind", "client").StartActive())
+      {
+        ISpan span = scope.Span;
+        span.SetTag("db.system", "postgres");
+        span.SetTag("db.type", "postgres");
+        span.SetTag("peer.service", EXTERNAL_DB_NAME + ":98321");
+
+        if (_random.NextDouble() < EXTERNAL_DB_ERROR_RATE)
+        {
+          span.SetTag("error", "true");
+        }
+
+        await Task.Delay(_random.Next(0, EXTERNAL_DB_MAX_DURATION_MILLIS));
+
+        return true;
       }
     }
   }

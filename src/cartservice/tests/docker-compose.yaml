@@ -12,6 +12,7 @@ services:
       - PORT=7070
       - SIGNALFX_ENDPOINT_URL=http://otel-collector:9411/api/v2/spans
       - SIGNALFX_METRICS_ENDPOINT_URL=http://otel-collector:9943/v2/datapoint
+      - SIGNALFX_PROFILER_CALL_STACK_INTERVAL=1000
       - SIGNALFX_PROFILER_ENABLED=true
       - SIGNALFX_PROFILER_LOGS_ENDPOINT=http://otel-collector:4318/v1/logs
       - SIGNALFX_RUNTIME_METRICS_ENABLED=true
@@ -20,6 +21,10 @@ services:
       - EXTERNAL_DB_ACCESS_RATE=0.75
       - EXTERNAL_DB_MAX_DURATION_MILLIS=750
       - EXTERNAL_DB_ERROR_RATE=0.1
+      - FIX_EXCESSIVE_ALLOCATION=false
+      - FIX_SLOW_LEAK=false
+      - OPTIMIZE_CPU=false
+      - OPTIMIZE_BLOCKING=false
     ports:
       - 7070:7070
     depends_on:
