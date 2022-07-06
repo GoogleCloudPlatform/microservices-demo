@@ -51,7 +51,7 @@ psutil==5.9.1
     # via locust
 pyzmq==22.3.0
     # via locust
-requests==2.28.0
+requests==2.28.1
     # via locust
 roundrobin==0.0.2
     # via locust
