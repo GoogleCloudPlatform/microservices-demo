@@ -122,7 +122,7 @@ six==1.16.0
     #   grpcio
 uritemplate==3.0.1
     # via google-api-python-client
-urllib3==1.26.9
+urllib3==1.26.10
     # via requests
 
 # The following packages are considered to be unsafe in a requirements file:
