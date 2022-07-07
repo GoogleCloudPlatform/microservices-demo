@@ -18,7 +18,7 @@ google-api-core[grpc]==2.8.2
     #   google-cloud-monitoring
     #   google-cloud-trace
     #   opencensus
-google-api-python-client==2.51.0
+google-api-python-client==2.52.0
     # via google-cloud-profiler
 google-auth==1.35.0
     # via
