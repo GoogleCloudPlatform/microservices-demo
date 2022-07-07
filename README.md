@@ -5,7 +5,8 @@
 
 ![Continuous Integration](https://github.com/GoogleCloudPlatform/microservices-demo/workflows/Continuous%20Integration%20-%20Main/Release/badge.svg)
 
-**Online Boutique** is a cloud-native microservices demo application.
+**Online Boutique** is a cloud-native microservices demo application based on Googles microservices demo to showcase kapp usecase in dagger.io.
+
 Online Boutique consists of a 11-tier microservices application. The application is a
 web-based e-commerce app where users can browse items,
 add them to the cart, and purchase them.
@@ -27,112 +28,46 @@ If you’re using this demo, please **★Star** this repository to show your int
 | ----------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
 | [![Screenshot of store homepage](./docs/img/online-boutique-frontend-1.png)](./docs/img/online-boutique-frontend-1.png) | [![Screenshot of checkout screen](./docs/img/online-boutique-frontend-2.png)](./docs/img/online-boutique-frontend-2.png) |
 
-## Quickstart (GKE)
 
-[![Open in Cloud Shell](https://gstatic.com/cloudssh/images/open-btn.svg)](https://ssh.cloud.google.com/cloudshell/editor?cloudshell_git_repo=https://github.com/GoogleCloudPlatform/microservices-demo&cloudshell_workspace=.&cloudshell_tutorial=docs/cloudshell-tutorial.md)
-
-1. **[Create a Google Cloud Platform project](https://cloud.google.com/resource-manager/docs/creating-managing-projects#creating_a_project)** or use an existing project. Set the `PROJECT_ID` environment variable and ensure the Google Kubernetes Engine and Cloud Operations APIs are enabled.
+1. **Clone this repository.**
 
 ```
-PROJECT_ID="<your-project-id>"
-gcloud services enable container.googleapis.com --project ${PROJECT_ID}
-gcloud services enable monitoring.googleapis.com \
-    cloudtrace.googleapis.com \
-    clouddebugger.googleapis.com \
-    cloudprofiler.googleapis.com \
-    --project ${PROJECT_ID}
-```
-
-2. **Clone this repository.**
-
-```
-git clone https://github.com/GoogleCloudPlatform/microservices-demo.git
+git clone https://github.com/renuy/microservices-demo.git
 cd microservices-demo
 ```
 
-3. **Create a GKE cluster.**
+2. **Create a kind cluster.**
 
-- GKE autopilot mode (see [Autopilot
-overview](https://cloud.google.com/kubernetes-engine/docs/concepts/autopilot-overview)
-to learn more):
+- Kind cluster:
 
 ```
-REGION=us-central1
-gcloud container clusters create-auto onlineboutique \
-    --project=${PROJECT_ID} --region=${REGION}
+kind create cluster
 ```
 
-- GKE Standard mode:
+3. **Deploy the app to the cluster.**
+
+Using dagger to locally deploy the application
 
 ```
-ZONE=us-central1-b
-gcloud container clusters create onlineboutique \
-    --project=${PROJECT_ID} --zone=${ZONE} \
-    --machine-type=e2-standard-2 --num-nodes=4
+dagger do test deploy
 ```
 
-4. **Deploy the sample app to the cluster.**
+
+4. **since this is local development and dont have a loadbalancer, use kubectl port forward.**
 
 ```
-kubectl apply -f ./release/kubernetes-manifests.yaml
+kubectl port-forward service/frontend-external 8081:80
 ```
 
-5. **Wait for the Pods to be ready.**
+5. **Access the web frontend in a browser** using the frontend's `localhost:8081`.
 
-```
-kubectl get pods
-```
 
-After a few minutes, you should see:
-
-```
-NAME                                     READY   STATUS    RESTARTS   AGE
-adservice-76bdd69666-ckc5j               1/1     Running   0          2m58s
-cartservice-66d497c6b7-dp5jr             1/1     Running   0          2m59s
-checkoutservice-666c784bd6-4jd22         1/1     Running   0          3m1s
-currencyservice-5d5d496984-4jmd7         1/1     Running   0          2m59s
-emailservice-667457d9d6-75jcq            1/1     Running   0          3m2s
-frontend-6b8d69b9fb-wjqdg                1/1     Running   0          3m1s
-loadgenerator-665b5cd444-gwqdq           1/1     Running   0          3m
-paymentservice-68596d6dd6-bf6bv          1/1     Running   0          3m
-productcatalogservice-557d474574-888kr   1/1     Running   0          3m
-recommendationservice-69c56b74d4-7z8r5   1/1     Running   0          3m1s
-redis-cart-5f59546cdd-5jnqf              1/1     Running   0          2m58s
-shippingservice-6ccc89f8fd-v686r         1/1     Running   0          2m58s
-```
-
-7. **Access the web frontend in a browser** using the frontend's `EXTERNAL_IP`.
-
-```
-kubectl get service frontend-external | awk '{print $4}'
-```
-
-*Example output - do not copy*
-
-```
-EXTERNAL-IP
-<your-ip>
-```
-
-**Note**- you may see `<pending>` while GCP provisions the load balancer. If this happens, wait a few minutes and re-run the command.
 
 8. [Optional] **Clean up**:
 
 ```
-gcloud container clusters delete onlineboutique \
-    --project=${PROJECT_ID} --zone=${ZONE}
+dagger do test delete
 ```
-
-## Other Deployment Options
-
-- **Google Cloud Operations** (Monitoring, Tracing, Debugger, Profiler): [See these instructions](docs/gcp-instrumentation.md).
-- **Workload Identity**: [See these instructions.](docs/workload-identity.md)
-- **Istio**: [See these instructions.](docs/service-mesh.md)
-- **Anthos Service Mesh**: ASM requires Workload Identity to be enabled in your GKE cluster. [See the workload identity instructions](docs/workload-identity.md) to configure and deploy the app. Then, use the [service mesh guide](/docs/service-mesh.md).
-- **non-GKE clusters (Minikube, Kind)**: see the [Development Guide](/docs/development-guide.md)
-- **Memorystore**: [See these instructions](/docs/memorystore.md) to replace the in-cluster `redis` database with hosted Google Cloud Memorystore (redis).
-- **Cymbal Shops Branding**: [See these instructions](/docs/cymbal-shops.md)
-- **NetworkPolicies**: [See these instructions](/docs/network-policies/README.md)
 
 
 ## Architecture
