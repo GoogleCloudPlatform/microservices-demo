@@ -38,7 +38,7 @@ google-auth-httplib2==0.1.0
     #   google-python-cloud-debugger
 google-cloud-core==2.3.1
     # via google-cloud-trace
-google-cloud-monitoring==2.9.2
+google-cloud-monitoring==2.10.0
     # via opencensus-ext-stackdriver
 google-cloud-profiler==4.0.0
     # via -r requirements.in
