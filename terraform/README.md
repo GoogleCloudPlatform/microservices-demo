@@ -32,4 +32,4 @@ Once you have ensured that all the pre-requisites are met, follow the steps belo
 Once you have finished working with the sample, you can tear down the sample application and the cluster. 
 
 Run `terraform destroy` from the `terraform` directory.
--Note: This does not delete the project where the GKE cluster was created.
+- Note: This does not delete the project where the GKE cluster was created.
