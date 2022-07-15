@@ -12,8 +12,6 @@ Once you have ensured that all the pre-requisites are met, follow the steps belo
 
 1. Clone the repo:
 `git clone https://github.com/GoogleCloudPlatform/microservices-demo.git`
-1. Set $TF_VAR_project enviornment variable to a project that has billing enabled:
-`export TF_VAR_project=<your project id>`
 1. Move into the terraform directory that has the installation scripts:
 `cd terraform`
 1. Enter the variables.tf file and set gcp_project_id variable to your project id
@@ -24,7 +22,10 @@ Once you have ensured that all the pre-requisites are met, follow the steps belo
     `terraform plan`
 1. Create the resources and deploy the sample:
     `terraform apply`
-    This may take a while, do not interrupt the process.
+    1. This may take a while, do not interrupt the process.
+1. Once the Terraform script has finished, locate the frontend's external IP address to access the sample application:
+    1. Option 1: `kubectl get service frontend-external | awk '{print $4}'`
+    2. Option 2: On Google Cloud Console, navigate to "Kubernetes Engine" and then "Services & Ingress" to locate the Endpoint associated with "frontend-external"
 
 ## Delete the sample and the cluster
 
