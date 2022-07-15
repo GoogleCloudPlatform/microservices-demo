@@ -8,7 +8,7 @@ Setting up the sample requires that you have a [Google Cloud Platform (GCP) proj
 
 ## Deploy the sample
 
-Once you have ensured that all the pre-requisites are met, follow the steps below to create a GKE cluster and deploy the sample application.
+Once you have ensured that all the pre-requisites are met, follow the steps below to create a GKE cluster and deploy the sample application:
 
 1. Clone the repo:
 `git clone https://github.com/GoogleCloudPlatform/microservices-demo.git`
@@ -32,5 +32,4 @@ Once you have ensured that all the pre-requisites are met, follow the steps belo
 Once you have finished working with the sample, you can tear down the sample application and the cluster. 
 
 Run `terraform destroy` from the `terraform` directory.
-
-1. Note: This does not delete the project where the GKE cluster was created.
+-Note: This does not delete the project where the GKE cluster was created.
