@@ -1,4 +1,4 @@
-# Enable APIs
+# Enable Google Cloud APIs
 module "enable_google_apis" {
   source                      = "terraform-google-modules/project-factory/google//modules/project_services"
   version                     = "~> 13.0"

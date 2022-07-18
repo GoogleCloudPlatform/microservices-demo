@@ -1,6 +1,6 @@
 # Deploy Online Boutique sample application on a GKE cluster
 
-This page walks you through the steps required to deploy the [Online Boutique](https://github.com/GoogleCloudPlatform/microservices-demo) sample application on a GKE cluster using Terraform.
+This page walks you through the steps required to deploy the [Online Boutique](https://github.com/GoogleCloudPlatform/microservices-demo) sample application on a GKE ([Google Kubernetes Engine](https://cloud.google.com/kubernetes-engine)) cluster using Terraform.
 
 ## Pre-requisites
 
@@ -13,8 +13,8 @@ Once you have ensured that all the pre-requisites are met, follow the steps belo
 1. Clone the repo:
 `git clone https://github.com/GoogleCloudPlatform/microservices-demo.git`
 1. Move into the Terraform directory that has the installation scripts:
-`cd terraform`
-1. Navigate into the variables.tf file and set the gcp_project_id variable to your project id
+`cd microservices-demo/terraform`
+1. Navigate into the variables.tf file and set the gcp_project_id variable to your Google Cloud project ID:
 `default = "<project_id_here>"`
 1. Initialize Terraform:
 `terraform init`
