@@ -11,4 +11,8 @@ pkg/
 .kubernetes-manifests-*/
 .project
 .eclipse.buildship.core.prefs
+.terraform
+.terraform.lock.hcl
 release/wi-kubernetes-manifests.yaml
+terraform.tfstate
+terraform.tfstate.backup
