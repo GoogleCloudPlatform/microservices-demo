@@ -1,7 +1,7 @@
 variable "gcp_project_id" {
   type        = string
   description = "The GCP project ID to apply this config to."
-  default     = "<gcp-project-id>"    # change this
+  default     = "<gcp-project-id>"    # Change this to your Google Cloud project ID
 }
 
 variable "apis" {
