@@ -14,7 +14,7 @@ Once you have ensured that all the pre-requisites are met, follow the steps belo
 `git clone https://github.com/GoogleCloudPlatform/microservices-demo.git`
 1. Move into the Terraform directory that has the installation scripts:
 `cd microservices-demo/terraform`
-1. Navigate into the variables.tf file and set the gcp_project_id variable to your project id
+1. Navigate into the variables.tf file and set the gcp_project_id variable to your Google Cloud project ID:
 `default = "<project_id_here>"`
 1. Initialize Terraform:
 `terraform init`
