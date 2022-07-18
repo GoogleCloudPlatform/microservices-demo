@@ -1,4 +1,4 @@
-# Deploy Bank of Anthos sample application on an Anthos cluster
+# Deploy Online Boutique sample application on a GKE cluster
 
 This page walks you through the steps required to deploy the [Online Boutique](https://github.com/GoogleCloudPlatform/microservices-demo) sample application on a GKE cluster using Terraform.
 
@@ -6,9 +6,9 @@ This page walks you through the steps required to deploy the [Online Boutique](h
 
 Setting up the sample requires that you have a [Google Cloud Platform (GCP) project](https://cloud.google.com/resource-manager/docs/creating-managing-projects#console), connected to your billing account.
 
-## Deploy the sample
+## Deploying the sample application
 
-Once you have ensured that all the pre-requisites are met, follow the steps below to create a GKE cluster and deploy the sample application:
+Once you have ensured that all the pre-requisites are met, follow the steps below to create a GKE cluster and deploy the Online Boutique sample application:
 
 1. Clone the repo:
 `git clone https://github.com/GoogleCloudPlatform/microservices-demo.git`
@@ -27,7 +27,7 @@ Once you have ensured that all the pre-requisites are met, follow the steps belo
     1. Option 1: `kubectl get service frontend-external | awk '{print $4}'`
     2. Option 2: On Google Cloud Console, navigate to "Kubernetes Engine" and then "Services & Ingress" to locate the Endpoint associated with "frontend-external"
 
-## Delete the sample and the cluster
+## Cleanup
 
 Once you have finished working with the sample, you can tear down the sample application and the cluster. 
 
