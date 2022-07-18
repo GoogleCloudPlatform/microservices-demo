@@ -1,6 +1,6 @@
 # Deploy Bank of Anthos sample application on an Anthos cluster
 
-This page walks you through the steps required to deploy the [Online Boutique](https://github.com/GoogleCloudPlatform/microservices-demo) sample application on a GKE cluster using Terraform.
+This page walks you through the steps required to deploy the [Online Boutique](https://github.com/GoogleCloudPlatform/microservices-demo) sample application on a GKE ([Google Kubernetes Engine](https://cloud.google.com/kubernetes-engine)) cluster using Terraform.
 
 ## Pre-requisites
 
