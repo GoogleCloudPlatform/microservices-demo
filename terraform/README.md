@@ -22,14 +22,16 @@ Once you have ensured that all the pre-requisites are met, follow the steps belo
     `terraform plan`
 1. Create the resources and deploy the sample:
     `terraform apply`
-    1. Note: This may take a while, do not interrupt the process.
+    1. There will be a confirmation prompt. Type `yes` and hit Enter/Return.
+    1. Note: This may take about 10 minutes. Do not interrupt the process.
 1. Once the Terraform script has finished, locate the frontend's external IP address to access the sample application:
     1. Option 1: `kubectl get service frontend-external | awk '{print $4}'`
-    2. Option 2: On Google Cloud Console, navigate to "Kubernetes Engine" and then "Services & Ingress" to locate the Endpoint associated with "frontend-external"
+    1. Option 2: On Google Cloud Console, navigate to "Kubernetes Engine" and then "Services & Ingress" to locate the Endpoint associated with "frontend-external"
 
 ## Cleanup
 
 Once you have finished working with the sample, you can tear down the sample application and the cluster. 
 
 Run `terraform destroy` from the `terraform` directory.
-- Note: This does not delete the project where the GKE cluster was created.
+1. There will be a confirmation prompt. Type `yes` and hit Enter/Return.
+1. Note: This does not delete the project where the GKE cluster was created.
