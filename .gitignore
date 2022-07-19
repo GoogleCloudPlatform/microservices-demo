@@ -3,6 +3,8 @@ pkg/
 .DS_Store
 *.pyc
 *.swp
+*.tfstate
+*.tfstate*
 *~
 .vscode/
 .vs/
@@ -14,5 +16,3 @@ pkg/
 .terraform
 .terraform.lock.hcl
 release/wi-kubernetes-manifests.yaml
-terraform.tfstate
-terraform.tfstate.backup
