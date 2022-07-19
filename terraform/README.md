@@ -11,19 +11,18 @@ Setting up the sample requires that you have a [Google Cloud Platform (GCP) proj
 Once you have ensured that all the pre-requisites are met, follow the steps below to create a GKE cluster and deploy the Online Boutique sample application:
 
 1. Clone the repo:
-```
-git clone https://github.com/GoogleCloudPlatform/microservices-demo.git
-```
+    ```
+    git clone https://github.com/GoogleCloudPlatform/microservices-demo.git
+    ```
 1. Move into the Terraform directory that has the installation scripts:
-```
-cd microservices-demo/terraform
-```
-1. Navigate into the *variables.tf* file and set the gcp_project_id variable to your Google Cloud project ID:
-`default = "<project_id_here>"`
+    ```
+    cd microservices-demo/terraform
+    ```
+1. Navigate into the *variables.tf* file and set the gcp_project_id variable to your Google Cloud project ID: `default = "<project_id_here>"`
 1. Initialize Terraform:
-```
-terraform init
-```
+    ```
+    terraform init
+    ```
 1. See what resources will be created:
     ```
     terraform plan
@@ -36,9 +35,9 @@ terraform init
     1. Note: This may take about 10 minutes. Do not interrupt the process.
 1. Once the Terraform script has finished, locate the frontend's external IP address to access the sample application:
     1. Option 1: 
-    ```
-    kubectl get service frontend-external | awk '{print $4}'
-    ```
+        ```
+        kubectl get service frontend-external | awk '{print $4}'
+        ```
     1. Option 2: On Google Cloud Console, navigate to "Kubernetes Engine" and then "Services & Ingress" to locate the Endpoint associated with "frontend-external"
 
 ## Cleanup
