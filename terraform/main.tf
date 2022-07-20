@@ -24,27 +24,15 @@ resource "google_container_cluster" "cluster" {
   ]
 }
 
-# Get Credentials for Cluster
-resource "null_resource" "get_credentials" {
-    provisioner "local-exec" {
-        interpreter = ["bash", "-exc"]
-        command     = "gcloud container clusters get-credentials ${var.name} --project=${var.gcp_project_id} --region=${var.region}"
-    }
-
-    depends_on = [
-      resource.google_container_cluster.cluster
-    ]
-}
-
-# Apply YAML kubernetes-manifest configurations
+# Get credentials for cluster & Apply YAML kubernetes-manifest configurations
 resource "null_resource" "apply_deployment" {
   provisioner "local-exec" {
     interpreter = ["bash", "-exc"]
-    command     = "kubectl apply -f ${var.filepath_manifest}"
+    command     = "gcloud container clusters get-credentials ${var.name} --project=${var.gcp_project_id} --region=${var.region}; kubectl apply -f ${var.filepath_manifest}"
   }
 
   depends_on = [
-      resource.null_resource.get_credentials
+      resource.google_container_cluster.cluster
   ]
 }
 
