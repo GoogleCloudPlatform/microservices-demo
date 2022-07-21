@@ -8,7 +8,7 @@ just a few small guidelines you need to follow.
 In the interest of keeping this repository clean and manageable, you should
 work from a fork. To create a fork, click the 'Fork' button at the top of the
 repository, then clone the fork locally using `git clone
-git@https://github.com/signalfx/microservices-demo`.
+git@https://github.com/<YOUR_GITHUB_HANDLE>/microservices-demo`.
 
 You should also add this repository as an "upstream" repo to your local copy,
 in order to keep it up to date. You can add this as a remote like so:
@@ -38,10 +38,10 @@ Checkout a new branch, make modifications, build locally, and push the branch to
 to open a new PR:
 
 ```shell
-$ git checkout -b feature
+$ git checkout -b myfeature
 # edit
-$ make
-$ make fmt
-$ git commit
-$ git push fork feature
+# verify that all applications are running well and emitting expected telemetry
+$ git add .
+$ git commit -m "My commit mesage"
+$ git push --set-upstream origin myfeature
 ```
