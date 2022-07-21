@@ -14,7 +14,7 @@ limitations under the License. -->
 
 # Deploy Online Boutique sample application on a GKE cluster
 
-This page walks you through the steps required to deploy the [Online Boutique](https://github.com/GoogleCloudPlatform/microservices-demo) sample application on a ([Google Kubernetes Engine (GKE)](https://cloud.google.com/kubernetes-engine)) cluster using Terraform.
+This page walks you through the steps required to deploy the [Online Boutique](https://github.com/GoogleCloudPlatform/microservices-demo) sample application on a [Google Kubernetes Engine (GKE)](https://cloud.google.com/kubernetes-engine) cluster using Terraform.
 
 ## Prerequisites
 
@@ -55,12 +55,12 @@ This page walks you through the steps required to deploy the [Online Boutique](h
 
 Once the Terraform script has finished, you can locate the frontend's external IP address to access the sample application.
 
-    * Option 1:
+    - Option 1:
         ```
         kubectl get service frontend-external | awk '{print $4}'
         ```
 
-    * Option 2: On Google Cloud Console, navigate to "Kubernetes Engine" and then "Services & Ingress" to locate the Endpoint associated with "frontend-external".
+    - Option 2: On Google Cloud Console, navigate to "Kubernetes Engine" and then "Services & Ingress" to locate the Endpoint associated with "frontend-external".
 
 ## Cleanup
 

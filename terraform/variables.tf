@@ -15,29 +15,29 @@
 variable "gcp_project_id" {
   type        = string
   description = "The GCP project ID to apply this config to"
-  default     = "jaspermai-main-project"    # Change this to your Google Cloud project ID
+  default     = "jaspermai-main-project" # Change this to your Google Cloud project ID
 }
 
 variable "name" {
-    type        = string
-    description = "Name given to the new GKE cluster"
-    default     = "online-boutique"
+  type        = string
+  description = "Name given to the new GKE cluster"
+  default     = "online-boutique"
 }
 
 variable "region" {
-    type        = string
-    description = "Region of the new GKE cluster"
-    default     = "us-central1"
+  type        = string
+  description = "Region of the new GKE cluster"
+  default     = "us-central1"
 }
 
 variable "namespace" {
-    type        = string
-    description = "Kubernetes Namespace in which the Online Boutique resources are to be deployed"
-    default     = "default"
+  type        = string
+  description = "Kubernetes Namespace in which the Online Boutique resources are to be deployed"
+  default     = "default"
 }
 
 variable "filepath_manifest" {
-    type        = string
-    description = "Path to the Kubernetes manifest that defines the Online Boutique resources"
-    default     = "../release/kubernetes-manifests.yaml"
+  type        = string
+  description = "Path to the Kubernetes manifest that defines the Online Boutique resources"
+  default     = "../release/kubernetes-manifests.yaml"
 }
