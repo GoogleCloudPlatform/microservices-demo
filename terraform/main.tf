@@ -22,9 +22,6 @@ locals {
   ]
 }
 
-# Retrieve an access token as the Terraform runner
-data "google_client_config" "provider" {}
-
 # Enable Google Cloud APIs
 module "enable_google_apis" {
   source  = "terraform-google-modules/project-factory/google//modules/project_services"
@@ -37,7 +34,7 @@ module "enable_google_apis" {
 }
 
 # Create GKE cluster
-resource "google_container_cluster" "cluster" {
+resource "google_container_cluster" "my_cluster" {
   name     = var.name
   location = var.region
 
@@ -62,7 +59,7 @@ module "gke_auth" {
   location     = var.region
 
   depends_on = [
-    google_container_cluster.cluster
+    google_container_cluster.my_cluster
   ]
 }
 

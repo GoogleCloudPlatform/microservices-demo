@@ -15,7 +15,6 @@
 variable "gcp_project_id" {
   type        = string
   description = "The GCP project ID to apply this config to"
-  default     = "jaspermai-main-project" # Change this to your Google Cloud project ID
 }
 
 variable "name" {
