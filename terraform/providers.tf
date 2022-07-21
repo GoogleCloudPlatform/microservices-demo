@@ -12,12 +12,24 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-output "cluster_location" {
-    description = "Location of the cluster"
-    value = resource.google_container_cluster.cluster.location
+terraform {
+  required_providers {
+    google = {
+      source  = "hashicorp/google"
+      version = "4.29.0"
+    }
+  }
 }
 
-output "cluster_name" {
-    description = "Name of the cluster"
-    value = resource.google_container_cluster.cluster.name
+provider "google" {
+  project = var.gcp_project_id
+  region  = var.region
+}
+
+provider "kubernetes" {
+  host  = "https://${data.google_container_cluster.my_cluster.endpoint}"
+  token = data.google_client_config.provider.access_token
+  cluster_ca_certificate = base64decode(
+    data.google_container_cluster.my_cluster.master_auth[0].cluster_ca_certificate,
+  )
 }
