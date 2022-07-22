@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# Definition of local variables
 locals {
   apis = [
     "container.googleapis.com",
@@ -20,6 +21,10 @@ locals {
     "clouddebugger.googleapis.com",
     "cloudprofiler.googleapis.com"
   ]
+
+  # Variables cluster_list and cluster_name are used for an implicit dependency between module "gcloud" and resource "google_container_cluster" 
+  cluster_list = split("/", google_container_cluster.my_cluster.id)
+  cluster_name = element(local.cluster_list, length(local.cluster_list) - 1)
 }
 
 # Enable Google Cloud APIs
@@ -50,17 +55,17 @@ resource "google_container_cluster" "my_cluster" {
   ]
 }
 
-# Authorization for the GKE cluster
-module "gke_auth" {
-  source = "terraform-google-modules/kubernetes-engine/google//modules/auth"
+# Get credentials for cluster
+module "gcloud" {
+  source  = "terraform-google-modules/gcloud/google"
+  version = "~> 2.0"
 
-  project_id   = var.gcp_project_id
-  cluster_name = var.name
-  location     = var.region
+  platform              = "linux"
+  additional_components = ["kubectl", "beta"]
 
-  depends_on = [
-    google_container_cluster.my_cluster
-  ]
+  create_cmd_entrypoint = "gcloud"
+  # Use local variable cluster_name for an implicit dependency on resource "google_container_cluster" 
+  create_cmd_body = "container clusters get-credentials ${local.cluster_name} --zone=${var.region}"
 }
 
 # Apply YAML kubernetes-manifest configurations
@@ -71,7 +76,8 @@ resource "null_resource" "apply_deployment" {
   }
 
   depends_on = [
-    module.gke_auth
+    # google_container_cluster.my_cluster
+    module.gcloud
   ]
 }
 
