@@ -1,21 +1,18 @@
-# Online Boutique
+# Online Boutique quickstart
 
-##
-
-This tutorial shows you how to deploy the cloud-native microservices demo application **[Online Boutique](https://github.com/GoogleCloudPlatform/microservices-demo)** to a Kubernetes cluster.
+This tutorial shows you how to deploy **[Online Boutique](https://github.com/GoogleCloudPlatform/microservices-demo)** to a Kubernetes cluster.
 
 You'll be able to run Online Boutique on:
-
-- a free [minikube](https://minikube.sigs.k8s.io/docs/) cluster, which comes built in to the Cloud Shell instance
-- a [Google Kubernetes Engine](https://cloud.google.com/kubernetes-engine) cluster using a new or existing [Google Cloud Platform project](https://cloud.google.com/resource-manager/docs/creating-managing-projects#creating_a_project)
+- a local **[minikube](https://minikube.sigs.k8s.io/docs/)** cluster, which comes built in to the Cloud Shell instance
+- a **[Google Kubernetes Engine](https://cloud.google.com/kubernetes-engine)** cluster using a new or existing [Google Cloud Platform project](https://cloud.google.com/resource-manager/docs/creating-managing-projects#creating_a_project)
 
 Let's get started!
+
 
 ## Kubernetes cluster setup
 
 Set up a Kubernetes cluster using the instructions below for either **minikube** or **GKE**.
 
----
 ### Minikube instructions
 
 Minikube creates a local Kubernetes cluster on Cloud Shell.
@@ -29,9 +26,6 @@ Minikube creates a local Kubernetes cluster on Cloud Shell.
 *It may take a few minutes for minikube to finish starting.*
 
 Once minikube has started, you're ready to move on to the next step. 
-
-
---- 
 
 ### GKE instructions
 
@@ -81,7 +75,7 @@ To stop running the app:
 
 1. Go to the <walkthrough-editor-spotlight spotlightId="activity-bar-debug">Debug view</walkthrough-editor-spotlight> 
 
-2. Click the 'Stop' icon. 🟥
+2. Click the **Stop** icon.
 
 3. Select **Yes** to clean up deployed resources. 
 
