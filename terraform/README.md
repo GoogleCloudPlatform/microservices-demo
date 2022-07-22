@@ -32,7 +32,7 @@ This page walks you through the steps required to deploy the [Online Boutique](h
     cd microservices-demo/terraform
     ```
 
-1. Open the `terraform.tfvars` file and replace `<project_id_here>`  with the [GCP Project ID](https://cloud.google.com/resource-manager/docs/creating-managing-projects?hl=en#identifying_projects) for the `gcp_project_id` variable.
+1. Open the `terraform.tfvars` file and replace `<project_id_here>` with the [GCP Project ID](https://cloud.google.com/resource-manager/docs/creating-managing-projects?hl=en#identifying_projects) for the `gcp_project_id` variable.
 
 1. Initialize Terraform.
     ```
