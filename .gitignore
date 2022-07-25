@@ -14,5 +14,7 @@ pkg/
 .project
 .eclipse.buildship.core.prefs
 .terraform
+.terraform/*
 .terraform.lock.hcl
+*.tfvars
 release/wi-kubernetes-manifests.yaml
