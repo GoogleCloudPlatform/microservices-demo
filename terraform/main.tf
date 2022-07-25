@@ -22,7 +22,8 @@ locals {
     "cloudprofiler.googleapis.com"
   ]
 
-  # Variables cluster_list and cluster_name are used for an implicit dependency between module "gcloud" and resource "google_container_cluster" 
+# Variables cluster_list and cluster_name are used for an implicit dependency
+# between module "gcloud" and resource "google_container_cluster" 
   cluster_list = split("/", google_container_cluster.my_cluster.id)
   cluster_name = element(local.cluster_list, length(local.cluster_list) - 1)
 }
