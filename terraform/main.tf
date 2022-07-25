@@ -23,8 +23,8 @@ locals {
   ]
 
   # Variables cluster_list and cluster_name are used for an implicit dependency between module "gcloud" and resource "google_container_cluster" 
-  cluster_list = split("/", google_container_cluster.my_cluster.id)
-  cluster_name = element(local.cluster_list, length(local.cluster_list) - 1)
+  cluster_id_parts = split("/", google_container_cluster.my_cluster.id)
+  cluster_name = element(local.cluster_id_parts, length(local.cluster_id_parts) - 1)
 }
 
 # Enable Google Cloud APIs
