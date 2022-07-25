@@ -55,16 +55,16 @@ This page walks you through the steps required to deploy the [Online Boutique](h
 
 Once the Terraform script has finished, you can locate the frontend's external IP address to access the sample application.
 
-    - Option 1:
-        ```
-        kubectl get service frontend-external | awk '{print $4}'
-        ```
+- Option 1:
+    ```
+    kubectl get service frontend-external | awk '{print $4}'
+    ```
 
-    - Option 2: On Google Cloud Console, navigate to "Kubernetes Engine" and then "Services & Ingress" to locate the Endpoint associated with "frontend-external".
+- Option 2: On Google Cloud Console, navigate to "Kubernetes Engine" and then "Services & Ingress" to locate the Endpoint associated with "frontend-external".
 
 ## Cleanup
 
-To avoid incurring charges to your Google Cloud account for the resources used in this sample application, either delete the project that containes the resources, or keep the project and delete the individual resources.
+To avoid incurring charges to your Google Cloud account for the resources used in this sample application, either delete the project that contains the resources, or keep the project and delete the individual resources.
 
 To remove the individual resources created for by Terraform without deleting the project:
 
