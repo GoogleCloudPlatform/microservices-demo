@@ -57,38 +57,6 @@ pipeline {
         DOCKER_IMAGE_NAME = "ehgur1104/cicdtest"
     }
     stages {
-        stage('Unit Test') {
-            when {
-                branch 'main'
-            }
-            steps {
-                container('golang') {
-                  sh """
-                    echo 'Running build automation'
-                    cd src/frontend
-                    ln -s `pwd` /go/src/sample-app
-                    cd /go/src/sample-app
-                    go get cloud.google.com/go/compute/metadata
-                  """
-                }
-            }
-        }
-        stage('Build') {
-            when {
-                branch 'main'
-            }
-            steps {
-                container('golang') {
-                  sh """
-                    echo 'Running build automation'
-                    cd src/frontend
-                    ln -s `pwd` /go/src/app
-                    cd /go/src/app
-                    go get cloud.google.com/go/compute/metadata                 
-                  """
-                }
-            }
-        }
         stage('Build Docker Image') {
             when {
                 branch 'main'
