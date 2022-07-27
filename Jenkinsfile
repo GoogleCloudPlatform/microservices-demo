@@ -65,7 +65,7 @@ pipeline {
                 container('topgun') {
                     sh ''
                     script {
-                        app = docker.build(DOCKER_IMAGE_NAME,"./src/frontend/")
+                        app = docker.build(DOCKER_IMAGE_NAME,"--network host ./src/frontend/")
                         app.inside {
                             sh 'echo Hello, World!123'
                         }
