@@ -13,9 +13,6 @@
 # limitations under the License.
 
 FROM golang:1.18.3-alpine as builder
-RUN apk add -X https://nl.alpinelinux.org/alpine/v3.16/main\
--X https://nl.alpinelinux.org/alpine/v3.16/community\
-git openssh
 RUN apk add --no-cache ca-certificates git
 RUN apk add build-base
 WORKDIR /src
