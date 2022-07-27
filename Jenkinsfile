@@ -69,7 +69,6 @@ pipeline {
                     ln -s `pwd` /go/src/sample-app
                     cd /go/src/sample-app
                     go get cloud.google.com/go/compute/metadata
-                    go test
                   """
                 }
             }
@@ -85,9 +84,7 @@ pipeline {
                     cd src/frontend
                     ln -s `pwd` /go/src/app
                     cd /go/src/app
-                    go get cloud.google.com/go/compute/metadata
-                    go build
-                    cp /go/src/app/app /home/jenkins/agent                    
+                    go get cloud.google.com/go/compute/metadata                 
                   """
                 }
             }
