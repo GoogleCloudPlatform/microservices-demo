@@ -95,9 +95,9 @@ pipeline {
             }
             steps {
                 container('topgun') {
-                    sh 'cd src/frontend/'
+                    sh ''
                     script {
-                        app = docker.build(DOCKER_IMAGE_NAME)
+                        app = docker.build("DOCKER_IMAGE_NAME","./src/frontend/")
                         app.inside {
                             sh 'echo Hello, World!123'
                         }
