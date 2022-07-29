@@ -59,7 +59,7 @@ pipeline {
     stages {
         stage('Build Docker Image') {
             when {
-                branch 'main'
+                branch 'canary'
             }
             steps {
                 container('topgun') {
@@ -76,7 +76,7 @@ pipeline {
         }
         stage('Push Docker Image') {
             when {
-                branch 'main'
+                branch 'canary'
             }
             steps {     
                 container('topgun') {
@@ -92,7 +92,7 @@ pipeline {
         }
         stage('Canary') {
             when {
-                branch 'main'
+                branch 'canary'
             }
            steps {
                 withKubeConfig([credentialsId: 'kubeconfig']) {
@@ -105,7 +105,6 @@ pipeline {
                            """
                     }
                 }
-                milestone(1)
            }          
         }
         stage('DeployToProduction') {
