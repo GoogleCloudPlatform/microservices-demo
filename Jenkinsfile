@@ -89,7 +89,25 @@ pipeline {
                     echo 'Running Push Docker Image'
                 }
             }
-        }     
+        }
+        stage('Canary') {
+            when {
+                branch 'main'
+            }
+           steps {
+                withKubeConfig([credentialsId: 'kubeconfig']) {
+                    container('topgun') {
+                        sh 'curl -LO "https://dl.k8s.io/release/v1.24.0/bin/linux/amd64/kubectl"'
+                        sh 'chmod u+x ./kubectl'
+                        sh """
+                           ./kubectl patch deployment frontend -n canary -p \
+                           '{"spec":{"template":{"spec":{"containers":[{"name":"server","image":"${DOCKER_IMAGE_NAME}:${env.BUILD_NUMBER}"}]}}}}'
+                           """
+                    }
+                }
+                milestone(1)
+           }          
+        }
         stage('DeployToProduction') {
             when {
                 branch 'main'
