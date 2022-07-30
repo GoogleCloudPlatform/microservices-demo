@@ -1,0 +1,385 @@
+import * as pulumi from "@pulumi/pulumi";
+import * as gcp from "@pulumi/gcp";
+import * as docker from "@pulumi/docker";
+
+const location = "us-central1";
+const domain_name = "example.com";
+const lb_subnet_cidr = "10.0.1.0/24";
+const proxy_subnet_cidr = "10.0.0.0/24";
+const serverless_connector_subnet_cidr = "10.128.0.0/28";
+const image_tag = "v1.0.0";
+const noauthIAMPolicy = gcp.organizations.getIAMPolicy({
+    bindings: [{
+        role: "roles/run.invoker",
+        members: ["allUsers"],
+    }],
+});
+
+// The services communicate within the same VPC
+// Internal services are private. They cannot be reached from the internet
+const internal_services = [
+    {
+        "name": "cartservice",
+        "dns": `cartservice.${domain_name}`,
+        "port": 7070,
+        "src_location": "../../src/cartservice/src",
+        "envs": [{ name: "REDIS_ADDR", value: `redis.${domain_name}:6379` }],
+    },
+    {
+        "name": "currencyservice",
+        "dns": `currencyservice.${domain_name}`,
+        "port": 7000,
+        "src_location": "../../src/currencyservice",
+        "envs": [
+            { name: "DISABLE_TRACING", value: "1" },
+            { name: "DISABLE_PROFILER", value: "1" },
+            { name: "DISABLE_DEBUGGER", value: "1" },
+        ],
+    },
+    {
+        "name": "productcatalogservice",
+        "dns": `productcatalogservice.${domain_name}`,
+        "port": 7070,
+        "src_location": "../../src/productcatalogservice",
+        "envs": [
+            { name: "DISABLE_TRACING", value: "1" },
+            { name: "DISABLE_PROFILER", value: "1" },
+            { name: "DISABLE_STATS", value: "1" },
+        ],
+    },
+    {
+        "name": "recommendationservice",
+        "dns": `recommendationservice.${domain_name}`,
+        "port": 8080,
+        "src_location": "../../src/recommendationservice",
+        "envs": [
+            { name: "DISABLE_TRACING", value: "1" },
+            { name: "DISABLE_PROFILER", value: "1" },
+            { name: "DISABLE_DEBUGGER", value: "1" },
+            { name: "PRODUCT_CATALOG_SERVICE_ADDR", value: "productcatalogservice.example.com:80" }
+        ],
+    },
+    {
+        "name": "shippingservice",
+        "dns": `shippingservice.${domain_name}`,
+        "port": 50051,
+        "src_location": "../../src/shippingservice",
+        "envs": [
+            { name: "DISABLE_TRACING", value: "1" },
+            { name: "DISABLE_PROFILER", value: "1" },
+            { name: "DISABLE_DEBUGGER", value: "1" },
+        ],
+    },
+    {
+        "name": "checkoutservice",
+        "dns": `checkoutservice.${domain_name}`,
+        "port": 5050,
+        "src_location": "../../src/checkoutservice",
+        "envs": [
+            { name: "PRODUCT_CATALOG_SERVICE_ADDR", value: "productcatalogservice.example.com:80" },
+            { name: "SHIPPING_SERVICE_ADDR", value: "shippingservice.example.com:80" },
+            { name: "PAYMENT_SERVICE_ADDR", value: "paymentservice.example.com:80" },
+            { name: "EMAIL_SERVICE_ADDR", value: "emailservice.example.com:80" },
+            { name: "CURRENCY_SERVICE_ADDR", value: "currencyservice.example.com:80" },
+            { name: "CART_SERVICE_ADDR", value: "cartservice.example.com:80" },
+            { name: "DISABLE_TRACING", value: "1" },
+            { name: "DISABLE_PROFILER", value: "1" },
+            { name: "DISABLE_STATS", value: "1" },
+        ],
+    },
+    {
+        "name": "adservice",
+        "dns": `adservice.${domain_name}`,
+        "port": 9555,
+        "src_location": "../../src/adservice",
+        "envs": [
+            { name: "DISABLE_TRACING", value: "1" },
+            { name: "DISABLE_STATS", value: "1" },
+        ],
+    },
+    {
+        "name": "emailservice",
+        "dns": `emailservice.${domain_name}`,
+        "port": 8080,
+        "src_location": "../../src/emailservice",
+        "envs": [
+            { name: "DISABLE_TRACING", value: "1" },
+            { name: "DISABLE_PROFILER", value: "1" },
+        ],
+    },
+    {
+        "name": "paymentservice",
+        "dns": `paymentservice.${domain_name}`,
+        "port": 50051,
+        "src_location": "../../src/paymentservice",
+        "envs": [
+            { name: "DISABLE_TRACING", value: "1" },
+            { name: "DISABLE_PROFILER", value: "1" },
+            { name: "DISABLE_DEBUGGER", value: "1" },
+        ],
+    },
+];
+
+// Enable services
+const enable_gce = new gcp.projects.Service("EnableGCE", {
+    service: "compute.googleapis.com",
+}, { retainOnDelete: true });
+
+const enable_gcr = new gcp.projects.Service("EnableGCR", {
+    service: "containerregistry.googleapis.com",
+}, { retainOnDelete: true });
+
+const enable_cloud_run = new gcp.projects.Service("EnableCloudRun", {
+    service: "run.googleapis.com",
+}, { retainOnDelete: true });
+
+const enable_dns = new gcp.projects.Service("EnableCloudDNS", {
+    service: "dns.googleapis.com"
+}, { retainOnDelete: true });
+
+const enable_vpcaccess = new gcp.projects.Service("EnableServerlessVPCAccess", {
+    service: "vpcaccess.googleapis.com"
+}, { retainOnDelete: true });
+
+const enable_redis = new gcp.projects.Service("EnableRedis", {
+    service: "redis.googleapis.com"
+}, { retainOnDelete: true });
+
+// Create a VPC
+const microservice_vpc = new gcp.compute.Network("microservice-vpc", {
+    autoCreateSubnetworks: false,
+}, { dependsOn: enable_gce });
+
+// Create a managed DNS private zone
+const private_zone = new gcp.dns.ManagedZone("private-zone", {
+    dnsName: `${domain_name}.`,
+    description: "Example private DNS zone",
+    visibility: "private",
+    privateVisibilityConfig: {
+        networks: [
+            {
+                networkUrl: microservice_vpc.id,
+            },
+        ],
+    },
+}, { dependsOn: enable_dns });
+
+// Create a subnet for internal LBs
+// Individual internal LB will have a reserved static private IP
+// from this subnet
+const lb_subnet = new gcp.compute.Subnetwork("lb-subnet", {
+    ipCidrRange: lb_subnet_cidr,
+    region: location,
+    network: microservice_vpc.id,
+});
+
+// Create a proxy-only subnet
+// https://cloud.google.com/load-balancing/docs/l7-internal#proxy-only_subnet
+new gcp.compute.Subnetwork("proxy-subnet", {
+    ipCidrRange: proxy_subnet_cidr,
+    region: location,
+    purpose: "REGIONAL_MANAGED_PROXY",
+    role: "ACTIVE",
+    network: microservice_vpc.id,
+});
+
+// Create a serverless connector and its subnet
+const connector = new gcp.vpcaccess.Connector("connector", {
+    ipCidrRange: serverless_connector_subnet_cidr,
+    network: microservice_vpc.id,
+    region: location,
+}, { dependsOn: enable_vpcaccess });
+
+// Create a Redis cache instance & add it to the private DNS zone
+const cache = new gcp.redis.Instance("cache", {
+    memorySizeGb: 1,
+    region: location,
+    authorizedNetwork: microservice_vpc.id,
+}, { dependsOn: enable_redis });
+
+export const cache_ip = cache.host
+
+new gcp.dns.RecordSet("redis-record-set", {
+    name: `redis.${domain_name}.`,
+    type: "A",
+    ttl: 300,
+    managedZone: private_zone.name,
+    rrdatas: [cache_ip],
+});
+
+// Build and deploy the internal services
+// Need to run 'gcloud auth configure-docker' if there is auth error
+for (let svc of internal_services) {
+    // Build the container image
+    let container_image = new docker.Image(`${svc.name}-image`, {
+        imageName: pulumi.interpolate`gcr.io/${gcp.config.project}/${svc.name}:${image_tag}`,
+        build: {
+            context: svc.src_location,
+        },
+    }, { dependsOn: enable_gcr });
+    // Deploy the Cloud Run service
+    const clourd_run_svc = new gcp.cloudrun.Service(svc.name, {
+        location,
+        metadata: {
+            annotations: {
+                // For valid annotation values and descriptions, see
+                // https://cloud.google.com/sdk/gcloud/reference/run/deploy#--ingress
+                "run.googleapis.com/ingress": "internal",
+            },
+        },
+        template: {
+            spec: {
+                containers: [
+                    {
+                        image: container_image.imageName,
+                        envs: svc.envs,
+                        // Use h2c to enable end-to-end HTTP/2
+                        ports: [{ name: "h2c", containerPort: svc.port }],
+                    },
+                ],
+            },
+            metadata: {
+                annotations: {
+                    // Use the VPC connector for internal traffic
+                    "run.googleapis.com/vpc-access-connector": connector.name,
+                    // Route all traffic through the VPC connector
+                    "run.googleapis.com/vpc-access-egress": "all-traffic",
+                },
+            },
+        },
+    }, { dependsOn: [enable_gcr, enable_cloud_run, connector] });
+
+    // Create a serverless NEG for each service
+    // URL mask doesn't work for gRPC services
+    const neg = new gcp.compute.RegionNetworkEndpointGroup(`${svc.name}-neg`, {
+        region: location,
+        networkEndpointType: "SERVERLESS",
+        cloudRun: {
+            service: clourd_run_svc.name,
+        }
+    });
+
+    // Create a backend service
+    const backend_svc = new gcp.compute.RegionBackendService(`${svc.name}-backend-svc`, {
+        region: location,
+        protocol: "HTTP2",
+        loadBalancingScheme: "INTERNAL_MANAGED",
+        backends: [{
+            group: neg.id,
+            balancingMode: "UTILIZATION",
+            capacityScaler: 1.0,
+        }],
+    });
+
+    // Create a URL map
+    const url_map = new gcp.compute.RegionUrlMap(`${svc.name}-url-map`, {
+        defaultService: backend_svc.id,
+        region: location,
+        hostRules: [{ hosts: [svc.dns], pathMatcher: `${svc.name}-allpaths` }],
+        pathMatchers: [{
+            name: `${svc.name}-allpaths`,
+            defaultService: backend_svc.id,
+            pathRules: [{
+                paths: ["/"],
+                service: backend_svc.id,
+            }]
+        }],
+    });
+
+    // Create a target proxy
+    const target_proxy = new gcp.compute.RegionTargetHttpProxy(`${svc.name}-target-proxy`, {
+        urlMap: url_map.id,
+        region: location,
+    });
+
+    // Reserve an internal IP for the LB
+    const internal_ip = new gcp.compute.Address(`${svc.name}-internal-lb-ip`, {
+        subnetwork: lb_subnet.id,
+        addressType: "INTERNAL",
+        region: location,
+    });
+
+    // Create a forwarding rule
+    // Unfortunately, host or path based routing doesn't work with the services using gRPC
+    // Therefore, each service will have its own LB. This probably is not ideal
+    new gcp.compute.ForwardingRule(`${svc.name}-foward-rule`, {
+        region: location,
+        ipProtocol: "TCP",
+        portRange: "80",
+        loadBalancingScheme: "INTERNAL_MANAGED",
+        network: microservice_vpc.name,
+        subnetwork: lb_subnet.id,
+        target: target_proxy.id,
+        ipAddress: internal_ip.address,
+    });
+
+    // Register the DNS record
+    new gcp.dns.RecordSet(`${svc.name}-record`, {
+        name: `${svc.name}.${domain_name}.`,
+        type: "A",
+        ttl: 300,
+        managedZone: private_zone.name,
+        rrdatas: [internal_ip.address],
+    });
+
+    // Allow unauthenticated invocations for internal services
+    new gcp.cloudrun.IamPolicy(`${svc.name}NoauthIamPolicy`, {
+        location: clourd_run_svc.location,
+        project: clourd_run_svc.project,
+        service: clourd_run_svc.name,
+        policyData: noauthIAMPolicy.then(noauthIAMPolicy => noauthIAMPolicy.policyData),
+    });
+}
+
+// Build the public facing frontend service
+const frontend_image = new docker.Image("frontend-image", {
+    imageName: pulumi.interpolate`gcr.io/${gcp.config.project}/frontend:${image_tag}`,
+    build: {
+        context: "../../src/frontend",
+    },
+}, { dependsOn: enable_gcr });
+
+const frontend_svc = new gcp.cloudrun.Service("frontend", {
+    location,
+    metadata: {
+        annotations: {
+            "run.googleapis.com/vpc-access-connector": connector.name,
+        },
+    },
+    template: {
+        spec: {
+            containers: [
+                {
+                    image: frontend_image.imageName,
+                    envs: [
+                        { name: "PRODUCT_CATALOG_SERVICE_ADDR", value: "productcatalogservice.example.com:80" },
+                        { name: "CURRENCY_SERVICE_ADDR", value: "currencyservice.example.com:80" },
+                        { name: "CART_SERVICE_ADDR", value: "cartservice.example.com:80" },
+                        { name: "RECOMMENDATION_SERVICE_ADDR", value: "recommendationservice.example.com:80" },
+                        { name: "SHIPPING_SERVICE_ADDR", value: "shippingservice.example.com:80" },
+                        { name: "CHECKOUT_SERVICE_ADDR", value: "checkoutservice.example.com:80" },
+                        { name: "AD_SERVICE_ADDR", value: "adservice.example.com:80" },
+                        { name: "DISABLE_TRACING", value: "1" },
+                        { name: "DISABLE_PROFILER", value: "1" },
+                        { name: "DISABLE_DEBUGGER", value: "1" },
+                    ],
+                    ports: [{ containerPort: 8080 }]
+                },
+            ],
+        },
+        metadata: {
+            annotations: {
+                "run.googleapis.com/vpc-access-connector": connector.name,
+            },
+        },
+    }
+}, { dependsOn: [enable_cloud_run, connector] });
+
+new gcp.cloudrun.IamPolicy("frontend-NoauthIamPolicy", {
+    location: frontend_svc.location,
+    project: frontend_svc.project,
+    service: frontend_svc.name,
+    policyData: noauthIAMPolicy.then(noauthIAMPolicy => noauthIAMPolicy.policyData),
+});
+
+export const frontend_url = pulumi.interpolate`${frontend_svc.statuses[0].url}`
