@@ -341,11 +341,6 @@ const frontend_image = new docker.Image("frontend-image", {
 
 const frontend_svc = new gcp.cloudrun.Service("frontend", {
     location,
-    metadata: {
-        annotations: {
-            "run.googleapis.com/vpc-access-connector": connector.name,
-        },
-    },
     template: {
         spec: {
             containers: [
