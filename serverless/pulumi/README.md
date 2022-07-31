@@ -10,7 +10,7 @@ __Note:__ The steps described in the doc will __NOT__ work in CloudShell since C
 ## Clone the repository
 
 ```
-git clone -b cloudrun-pulumi-direct https://github.com/shenxiang-demo/microservices-demo
+git clone -b pulumi-cloudrun-one-ilb https://github.com/shenxiang-demo/microservices-demo
 ```
 
 ## Install pulumi
@@ -37,12 +37,13 @@ gcloud auth configure-docker
 gsutil mb gs://pulumi-${PROJECT_ID}
 
 pulumi login gs://pulumi-${PROJECT_ID}
-pulumi config set gcp:project $PROJECT_ID
 ```
 
 ## Create a new dev stack
 ```
 pulumi stack init dev
+
+pulumi config set gcp:project $PROJECT_ID
 ```
 You can press `return` to skip the passphrase.
 
