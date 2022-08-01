@@ -3,7 +3,7 @@ This document describes building and deploying the microservices demo applicatio
 
 [Pulumi](https://www.pulumi.com/) is used to create the infrastructure, build and deploy the application.
 
-You can find the Pulumi code under this directory. Minor code changes have been made to allow gRPC with TLS since Cloud Run only supports HTTPS. You can see a code diff [here](https://github.com/GoogleCloudPlatform/microservices-demo/compare/main...shenxiang-demo:microservices-demo:cloudrun-pulumi-direct).
+You can find the Pulumi code under this directory.
 
 __Note:__ The steps described in the doc will __NOT__ work in CloudShell since CloudShell doesn't have sufficient disk space to build all the container images.
 
