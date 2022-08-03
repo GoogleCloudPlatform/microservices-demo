@@ -3,6 +3,8 @@ pkg/
 .DS_Store
 *.pyc
 *.swp
+*.tfstate
+*.tfstate*
 *~
 .vscode/
 .vs/
@@ -11,4 +13,8 @@ pkg/
 .kubernetes-manifests-*/
 .project
 .eclipse.buildship.core.prefs
+.terraform
+.terraform/*
+.terraform.lock.hcl
+*.tfvars
 release/wi-kubernetes-manifests.yaml
