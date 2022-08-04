@@ -40,7 +40,6 @@ spec:
             drop:
               - all
           privileged: false
-          readOnlyRootFilesystem: true
         image: gcr.io/google-samples/microservices-demo/cartservice:v0.3.8
         ports:
         - containerPort: 7070
