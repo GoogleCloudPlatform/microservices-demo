@@ -46,7 +46,7 @@ namespace cartservice.cartstore
         }
 
         tmpChars.Add(c);
-        const int idealSizeForBogoSort = 10; // Not to fast, not to slow.
+        const int idealSizeForBogoSort = 10; // Not too fast, not too slow.
         if (tmpChars.Count == idealSizeForBogoSort)
         {
           Bogo.Sort(tmpChars);

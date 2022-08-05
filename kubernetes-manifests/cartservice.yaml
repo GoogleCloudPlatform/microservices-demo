@@ -51,6 +51,8 @@ spec:
           value: "http://$(NODE_IP):9943/v2/datapoint"
         - name: SIGNALFX_PROFILER_ENABLED
           value: "true"
+        - name: SIGNALFX_PROFILER_CALL_STACK_INTERVAL
+          value: "1000"
         - name: SIGNALFX_PROFILER_LOGS_ENDPOINT
           value: "http://$(NODE_IP):4318/v1/logs"
         - name: SIGNALFX_RUNTIME_METRICS_ENABLED

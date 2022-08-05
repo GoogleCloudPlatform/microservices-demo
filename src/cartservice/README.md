@@ -25,7 +25,6 @@ All these environment variables are boolean.
 - `FIX_EXCESSIVE_ALLOCATION`: bool, controls if the excessive allocation per request should be happening or not
 - `FIX_SLOW_LEAK`: bool, controls if a slowly growing memory leak is going to be happening or not
 - `OPTIMIZE_CPU`: bool, controls if  the CPU is going to be efficiently used during input validation
-
 - `OPTIMIZE_BLOCKING`: bool, controls if the code is going to do some blocking to retrieve a handle to the Redis DB
 
 ## Building and Testing Locally

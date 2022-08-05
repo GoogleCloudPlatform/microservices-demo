@@ -7,11 +7,15 @@ namespace cartservice.cartstore
     public static bool GetBoolEnvVar(string envVarName, bool defaultValue)
     {
       var varValue = Environment.GetEnvironmentVariable(envVarName) ?? string.Empty;
-      return varValue.ToLowerInvariant() switch
+      var result = varValue.ToLowerInvariant() switch
       {
         "true" or "1" or "yes" =>  true,
+        "false" or "0" or "no" =>  false,
         _ => defaultValue
       };
+
+      Console.WriteLine($"{nameof(ConfigHelper)}: env var {envVarName} = {result}");
+      return result;
     }
   }
 }
