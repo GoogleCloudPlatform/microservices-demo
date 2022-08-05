@@ -18,7 +18,6 @@ kind: Kustomization
 resources:
   - base
 
-# This section represents the components that will be applied to kubernetes-manifests
 components:
   - components/cymbal-branding
   - components/google-cloud-operations
