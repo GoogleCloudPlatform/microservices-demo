@@ -43,4 +43,4 @@ COPY . .
 
 EXPOSE 7000
 
-ENTRYPOINT [ "node", "server.js" ]
+ENTRYPOINT [ "node", "--require", "./tracing.js", "server.js" ]

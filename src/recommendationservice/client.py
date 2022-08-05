@@ -20,7 +20,7 @@ import demo_pb2
 import demo_pb2_grpc
 
 from opencensus.trace.tracer import Tracer
-from opencensus.trace.exporters import stackdriver_exporter
+from opencensus.ext.jaeger.trace_exporter import JaegerExporter
 from opencensus.trace.ext.grpc import client_interceptor
 
 from logger import getJSONLogger
@@ -34,7 +34,11 @@ if __name__ == "__main__":
         port = "8080"
 
     try:
-        exporter = stackdriver_exporter.StackdriverExporter()
+        exporter = JaegerExporter(
+                          service_name="email",
+                          host_name=os.environ.get("JAEGER_HOST"),
+                          agent_port=os.environ.get("JAEGER_PORT"),
+                          endpoint="/api/traces")
         tracer = Tracer(exporter=exporter)
         tracer_interceptor = client_interceptor.OpenCensusClientInterceptor(tracer, host_port='localhost:'+port)
     except:

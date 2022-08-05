@@ -117,5 +117,6 @@ uritemplate==3.0.1
 urllib3==1.26.10
     # via requests
 
+opencensus-ext-jaeger==0.7.1
 # The following packages are considered to be unsafe in a requirements file:
 # setuptools

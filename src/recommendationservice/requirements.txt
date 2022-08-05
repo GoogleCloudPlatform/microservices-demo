@@ -38,14 +38,6 @@ google-auth-httplib2==0.1.0
     #   google-python-cloud-debugger
 google-cloud-core==2.3.2
     # via google-cloud-trace
-google-cloud-monitoring==2.10.1
-    # via opencensus-ext-stackdriver
-google-cloud-profiler==4.0.0
-    # via -r requirements.in
-google-cloud-trace==0.24.2
-    # via opencensus-ext-stackdriver
-google-python-cloud-debugger==2.18
-    # via -r requirements.in
 googleapis-common-protos==1.56.3
     # via
     #   google-api-core
@@ -125,5 +117,9 @@ uritemplate==3.0.1
 urllib3==1.26.10
     # via requests
 
+opentelemetry-api==1.11.1
+opentelemetry-sdk==1.11.1
+opentelemetry-instrumentation-grpc
+opentelemetry-exporter-jaeger
 # The following packages are considered to be unsafe in a requirements file:
 # setuptools
