@@ -15,7 +15,7 @@ Some objectives:
 ## Clone the repository
 
 ```
-git clone -b pulumi-cloudrun-one-ilb https://github.com/shenxiang-demo/microservices-demo
+git clone https://github.com/GoogleCloudPlatform/microservices-demo.git
 ```
 
 ## Install pulumi
@@ -65,4 +65,12 @@ If you want to build the container images from the source code, you can set the 
 pulumi config set build_image_from_src true
 ```
 
-__Note:__ The steps described in the doc will __NOT__ work in CloudShell since CloudShell doesn't have sufficient disk space to build all the container images.
+__Note:__ However, this step will __NOT__ work in CloudShell since CloudShell doesn't have sufficient disk space to build all the container images.
+
+## Clean up
+
+If you don't want to delete the whole project, run the following command to delete the resources:
+
+```
+pulumi destroy -y
+```
