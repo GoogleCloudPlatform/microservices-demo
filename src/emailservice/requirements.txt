@@ -98,7 +98,7 @@ pyasn1-modules==0.2.8
     # via google-auth
 pyparsing==2.4.7
     # via httplib2
-python-json-logger==2.0.2
+python-json-logger==2.0.4
     # via -r requirements.in
 requests==2.28.1
     # via
@@ -116,6 +116,3 @@ uritemplate==3.0.1
     # via google-api-python-client
 urllib3==1.26.10
     # via requests
-
-# The following packages are considered to be unsafe in a requirements file:
-# setuptools
