@@ -1,6 +1,8 @@
 import * as pulumi from "@pulumi/pulumi";
 import * as gcp from "@pulumi/gcp";
 import * as docker from "@pulumi/docker";
+import { loadAll } from "js-yaml";
+import { readFileSync } from "fs";
 
 const location = "us-central1";
 const domain_name = "example.com";
@@ -15,6 +17,24 @@ const noauthIAMPolicy = gcp.organizations.getIAMPolicy({
         members: ["allUsers"],
     }],
 });
+
+// Should we build container images from source?
+let config = new pulumi.Config();
+let build_image_from_src = config.getBoolean("build_image_from_src") || false;
+
+// Read the k8s manifest and get all the images if not building from source
+let svc_image = new Map<string, string>();
+if (!build_image_from_src) {
+    const microsvc_k8s_manifest =
+        loadAll(readFileSync("../../release/kubernetes-manifests.yaml", 'utf8')) as [any];
+    for (let item of microsvc_k8s_manifest) {
+        if (item.kind == "Deployment") {
+            let app_name = item.metadata.name as string;
+            let image_name = item.spec.template.spec.containers[0].image as string;
+            svc_image.set(app_name, image_name);
+        }
+    }
+}
 
 // The services communicate within the same VPC
 // Internal services are private. They cannot be reached from the internet
@@ -214,13 +234,17 @@ let path_rules: gcp.types.input.compute.RegionUrlMapPathMatcherPathRule[] = [];
 
 // Build and deploy the internal services
 for (let svc of internal_services) {
-    // Build the container image
-    let container_image = new docker.Image(`${svc.name}-image`, {
-        imageName: pulumi.interpolate`gcr.io/${gcp.config.project}/${svc.name}:${image_tag}`,
-        build: {
-            context: svc.src_location,
-        },
-    }, { dependsOn: enable_gcr });
+    let container_image_name: pulumi.Output<string> = pulumi.interpolate``;
+    if (build_image_from_src) {
+        // Build the container image
+        let container_image = new docker.Image(`${svc.name}-image`, {
+            imageName: pulumi.interpolate`gcr.io/${gcp.config.project}/${svc.name}:${image_tag}`,
+            build: {
+                context: svc.src_location,
+            },
+        }, { dependsOn: enable_gcr });
+        container_image_name = container_image.imageName;
+    }
     // Deploy the Cloud Run service
     const clourd_run_svc = new gcp.cloudrun.Service(svc.name, {
         location,
@@ -235,7 +259,7 @@ for (let svc of internal_services) {
             spec: {
                 containers: [
                     {
-                        image: container_image.imageName,
+                        image: svc_image.get(svc.name) || container_image_name,
                         envs: svc.envs,
                         // Use h2c to enable end-to-end HTTP/2
                         ports: [{ name: "h2c", containerPort: svc.port }],
@@ -292,20 +316,23 @@ for (let svc of internal_services) {
 }
 
 // Build the public facing frontend service
-const frontend_image = new docker.Image("frontend-image", {
-    imageName: pulumi.interpolate`gcr.io/${gcp.config.project}/frontend:${image_tag}`,
-    build: {
-        context: "../../src/frontend",
-    },
-}, { dependsOn: enable_gcr });
-
+let frontend_image_name: pulumi.Output<string> = pulumi.interpolate``;
+if (build_image_from_src) {
+    const frontend_image = new docker.Image("frontend-image", {
+        imageName: pulumi.interpolate`gcr.io/${gcp.config.project}/frontend:${image_tag}`,
+        build: {
+            context: "../../src/frontend",
+        },
+    }, { dependsOn: enable_gcr });
+    frontend_image_name = frontend_image.imageName;
+}
 const frontend_svc = new gcp.cloudrun.Service("frontend", {
     location,
     template: {
         spec: {
             containers: [
                 {
-                    image: frontend_image.imageName,
+                    image: svc_image.get("frontend") || frontend_image_name,
                     envs: [
                         { name: "PRODUCT_CATALOG_SERVICE_ADDR", value: svc_host_port },
                         { name: "CURRENCY_SERVICE_ADDR", value: svc_host_port },

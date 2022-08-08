@@ -6,6 +6,8 @@
     "dependencies": {
         "@pulumi/docker": "^3.2.0",
         "@pulumi/gcp": "^6.0.0",
-        "@pulumi/pulumi": "^3.0.0"
+        "@pulumi/pulumi": "^3.0.0",
+        "@types/js-yaml": "^4.0.5",
+        "fs": "^0.0.1-security"
     }
 }

@@ -1,11 +1,20 @@
 ## Overview
-This document describes building and deploying the microservices demo application(`Online Boutique`) to Cloud Run. 
+This document describes building and deploying the microservices demo application(`Online Boutique`) to Cloud Run.
 
-[Pulumi](https://www.pulumi.com/) is used to create the infrastructure, build and deploy the application.
+Some objectives:
 
+<<<<<<< HEAD
 You can find the Pulumi code under this directory.
+=======
+- Minimize code changes.
+- Ensure the internal microservices are private and keep the network traffic inside the Google network (serverless VPC connectors will be used).
+- Redis cache will be deployed to [Memorystore(Redis)](https://cloud.google.com/memorystore/docs/redis).
+- Use Infrastructure-as-code([Pulumi](https://www.pulumi.com/)) to deploy the solution.
+>>>>>>> 5b4cf8a (use k8s manifest for images)
 
-__Note:__ The steps described in the doc will __NOT__ work in CloudShell since CloudShell doesn't have sufficient disk space to build all the container images.
+## Architecture after deployment
+
+![Architecture](./microservices-cloudrun-arch.svg)
 
 ## Clone the repository
 
@@ -31,7 +40,7 @@ gcloud auth application-default login
 gcloud auth configure-docker
 ```
 
-## Create a bucket as a [backend](https://www.pulumi.com/docs/intro/concepts/state/#logging-into-the-google-cloud-storage-backend)
+## Create a bucket as a Pulumi [backend](https://www.pulumi.com/docs/intro/concepts/state/#logging-into-the-google-cloud-storage-backend)
 
 ```
 gsutil mb gs://pulumi-${PROJECT_ID}
@@ -51,3 +60,16 @@ You can press `return` to skip the passphrase.
 ```
 pulumi up -y
 ```
+<<<<<<< HEAD
+=======
+
+By default, the service deployments will use the container images listed in the [release/kubernetes-manifests.yaml](../../release/kubernetes-manifests.yaml) file.
+
+If you want to build the container images from the source code, you can set the flag `build_image_from_src` to true using the following command:
+
+```
+pulumi config set build_image_from_src true
+```
+
+__Note:__ The steps described in the doc will __NOT__ work in CloudShell since CloudShell doesn't have sufficient disk space to build all the container images.
+>>>>>>> 5b4cf8a (use k8s manifest for images)
