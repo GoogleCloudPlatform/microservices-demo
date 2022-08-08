@@ -3,14 +3,10 @@ This document describes building and deploying the microservices demo applicatio
 
 Some objectives:
 
-<<<<<<< HEAD
-You can find the Pulumi code under this directory.
-=======
 - Minimize code changes.
 - Ensure the internal microservices are private and keep the network traffic inside the Google network (serverless VPC connectors will be used).
 - Redis cache will be deployed to [Memorystore(Redis)](https://cloud.google.com/memorystore/docs/redis).
 - Use Infrastructure-as-code([Pulumi](https://www.pulumi.com/)) to deploy the solution.
->>>>>>> 5b4cf8a (use k8s manifest for images)
 
 ## Architecture after deployment
 
@@ -60,8 +56,6 @@ You can press `return` to skip the passphrase.
 ```
 pulumi up -y
 ```
-<<<<<<< HEAD
-=======
 
 By default, the service deployments will use the container images listed in the [release/kubernetes-manifests.yaml](../../release/kubernetes-manifests.yaml) file.
 
@@ -72,4 +66,3 @@ pulumi config set build_image_from_src true
 ```
 
 __Note:__ The steps described in the doc will __NOT__ work in CloudShell since CloudShell doesn't have sufficient disk space to build all the container images.
->>>>>>> 5b4cf8a (use k8s manifest for images)
