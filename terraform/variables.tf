@@ -29,6 +29,12 @@ variable "region" {
   default     = "us-central1"
 }
 
+variable "region_memorystore" {
+  type        = string
+  description = "Region of Memorystore redis"
+  default     = "us-central1"
+}
+
 variable "namespace" {
   type        = string
   description = "Kubernetes Namespace in which the Online Boutique resources are to be deployed"
@@ -39,4 +45,9 @@ variable "filepath_manifest" {
   type        = string
   description = "Path to the Kubernetes manifest that defines the Online Boutique resources"
   default     = "../release/kubernetes-manifests.yaml"
+}
+
+variable "memorystore" {
+  type        = bool
+  description = "Value associated with enabling the Memorystore (Redis) deployment variation of Online Boutique"
 }

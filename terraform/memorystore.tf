@@ -12,13 +12,20 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-apiVersion: kustomize.config.k8s.io/v1beta1
-kind: Kustomization
+# Create the Memorystore (redis) instance
+resource "google_redis_instance" "redis-cart" {
+  name           = "redis-cart"
+  memory_size_gb = 1
+  region         = var.region_memorystore
 
-resources:
-  - base
+  # count specifies the number of instances to create;
+  # if var.memorystore is true then the resource is enabled
+  count          = var.memorystore ? 1 : 0
 
-components:
-  # - components/cymbal-branding
-  # - components/google-cloud-operations
-  - components/memorystore
+  redis_version  = "REDIS_6_X"
+  project        = var.gcp_project_id
+
+  depends_on = [
+    module.enable_google_apis
+  ]
+}
