@@ -399,8 +399,6 @@ const internal_ip = new gcp.compute.Address("microservice-internal-lb-ip", {
 });
 
 // Create a forwarding rule
-// Unfortunately, host or path based routing doesn't work with the services using gRPC
-// Therefore, each service will have its own LB. This probably is not ideal
 new gcp.compute.ForwardingRule("microservice-foward-rule", {
     region: location,
     ipProtocol: "TCP",
