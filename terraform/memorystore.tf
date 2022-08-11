@@ -29,3 +29,15 @@ resource "google_redis_instance" "redis-cart" {
     module.enable_google_apis
   ]
 }
+
+# Edit contents of Memorystore kustomization.yaml file to target new Memorystore (redis) instance
+resource "null_resource" "kustomization-update" {
+  provisioner "local-exec" {
+    interpreter = ["bash", "-exc"]
+    command     = "sed -i \"s/REDIS_IP/${google_redis_instance.redis-cart[0].host}/g\" ../kustomize/components/memorystore/kustomization.yaml"
+  }
+
+  depends_on = [
+    resource.google_redis_instance.redis-cart
+  ]
+}

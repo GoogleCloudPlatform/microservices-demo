@@ -79,7 +79,6 @@ resource "null_resource" "apply_deployment" {
   }
 
   depends_on = [
-    # google_container_cluster.my_cluster
     module.gcloud
   ]
 }
