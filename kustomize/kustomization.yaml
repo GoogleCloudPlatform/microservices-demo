@@ -21,4 +21,4 @@ resources:
 components:
   # - components/cymbal-branding
   # - components/google-cloud-operations
-  - components/memorystore
+  # - components/memorystore
