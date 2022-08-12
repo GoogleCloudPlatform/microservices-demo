@@ -69,7 +69,7 @@ For this deployment, it is not required to have an already-running deployment of
     ```
     Note: It may take 2-3 minutes before the changes are reflected on the deployment.
 
-### Cleanup (Memorystore)
+### Cleanup
 After you have run the deployment variant on Online Boutique, you will want to reset the sample application back to its vanilla state.
 
 1. While still in the `kustomize/` directory, re-apply the original Kubernetes config to the Online Boutique deployment.
@@ -127,7 +127,7 @@ Have a running deployment of [Online Boutique](https://github.com/GoogleCloudPla
 
     Note: It may take 2-3 minutes before the changes are reflected on the deployment.
 
-### Cleanup (General)
+### Cleanup
 After you have run the deployment variant on Online Boutique, you will want to reset the sample application back to its vanilla state.
 
 1. While still in the `kustomize/` directory, re-apply the original Kubernetes config to the Online Boutique deployment.
