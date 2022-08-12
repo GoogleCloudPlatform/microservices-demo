@@ -11,10 +11,10 @@ Important notes:
 ## Memorystore Deployment
 Online Boutique supports a multi-step automated deployment process for the Memorystore (Redis) variation. The automated process uses Terraform for infrastructure changes and Kustomize for manifest configuration changes. Instructions for automated deployment can be found [here](https://github.com/GoogleCloudPlatform/microservices-demo/blob/readme/kustomize/README.md).
 
-Alternatively, to manually set up the correct infrastructure, follow the steps outlined in the **Manual Infrastructure Steps** section below .
+Alternatively, to manually set up the required infrastructure, follow the steps outlined in the **Manual Infrastructure Steps** section below .
 
 ### Manual Infrastructure Steps
-Note: This section is not a complete substitution for the entire Memorystore automated deployment process. Instead, this section takes you through the necessary infrastructure changes before **directing you back to the automated deployment process**.
+Note: This section is not a complete substitution for the entire Memorystore deployment process. Instead, this section takes you through the necessary infrastructure changes before **directing you back to the automated deployment process**.
 
 1. Create a GKE cluster with VPC-native/IP aliasing enabled.
     ```sh
@@ -65,7 +65,7 @@ Note: This section is not a complete substitution for the entire Memorystore aut
     cd ..
     ```
     
-At this point, you have properly created the infrastructure needed for the Memorystore deployment. Continue to the **[Deployment Instructions](https://github.com/GoogleCloudPlatform/microservices-demo/blob/readme/kustomize/README.md#deployment-instructions)** section for all Online Boutique deployment variants to complete setting up Memorystore.
+At this point, you have properly created the infrastructure needed for the Memorystore deployment. Continue to the **[Deployment Instructions](https://github.com/GoogleCloudPlatform/microservices-demo/blob/readme/kustomize/README.md#deployment-instructions)** section for Online Boutique deployment variants to complete the deployment.
 
 ## Resources
 
