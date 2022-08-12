@@ -11,49 +11,6 @@ Kustomize is a Kubernetes native configuration management tool that allows users
 | [Google Cloud Operations](https://github.com/GoogleCloudPlatform/microservices-demo/blob/main/docs/gcp-instrumentation.md) | Enables Monitoring (Stats), Tracing, Profiler, and Debugger for various services within Online Boutique. The code removes the existing environment variables (`DISABLE_STATS`, `DISABLE_TRACING`, `DISABLE_PROFILER`, `DISABLE_DEBUGGER`) from appropriate YAML config files.                  |
 | [Memorystore](https://github.com/GoogleCloudPlatform/microservices-demo/blob/main/docs/memorystore.md)                     | The vanilla Online Boutique deployment uses the default in-cluster `redis` database for storing the contents of its shopping cart. The Memorystore deployment variation overrides the default database with its own Memorystore (redis) database. These changes directly affect `cartservice`. |
 
-## Deployment Instructions (General)
-1. While in the `microservices-demo` directory, enter the `kustomize/` directory.
-    ```
-    cd kustomize
-    ```
-
-1. Edit the base level `kustomization.yaml` so that it is uses the intended components.
-    ```
-    vim kustomization.yaml
-    ```
-
-    The file should contain a similar snippet of code with only the component variants that you intend to deploy.
-    ```
-    components:
-      - components/cymbal-branding
-      - components/google-cloud-operations
-      # - components/memorystore
-     ```
-
-    Note: The example above will enable both the Cymbal Branding and Google Cloud Operations components in the new deployment.
-
-1. Check to see what changes will be made to the existing deployment config.
-    ```
-    kustomize build .
-    ```
-
-1. Apply the Kustomize deployment changes to the existing deployment.
-    ```
-    kubectl apply -k .
-    ```
-
-    Note: It may take 2-3 minutes before the changes are reflected on the deployment.
-
-### Cleanup (General)
-After you have run the deployment variant on Online Boutique, you will want to reset the sample application back to its vanilla state.
-
-1. While still in the `kustomize/` directory, re-apply the original Kubernetes config to the Online Boutique deployment.
-    ```
-    kubectl apply -f base
-    ```
-    
-    Note: It may take 2-3 minutes before the changes are reflected on the deployment.
-    
 ## Deployment Instructions (Memorystore)
 1. While in the `microservices-demo` directory, enter the `terraform/` directory.
     ```
@@ -124,3 +81,47 @@ After you have run the deployment variant on Online Boutique, you will want to r
     terraform destroy -target=google_redis_instance.redis-cart
     ```
     1. If there is a confirmation prompt, type `yes` and hit Enter/Return.
+
+## Deployment Instructions (General)
+1. While in the `microservices-demo` directory, enter the `kustomize/` directory.
+    ```
+    cd kustomize
+    ```
+
+1. Edit the base level `kustomization.yaml` so that it is uses the intended components.
+    ```
+    vim kustomization.yaml
+    ```
+
+    The file should contain a similar snippet of code with only the component variants that you intend to deploy.
+    ```
+    components:
+      - components/cymbal-branding
+      - components/google-cloud-operations
+      # - components/memorystore
+     ```
+
+    Note: The example above will enable both the Cymbal Branding and Google Cloud Operations components in the new deployment.
+
+1. Check to see what changes will be made to the existing deployment config.
+    ```
+    kustomize build .
+    ```
+
+1. Apply the Kustomize deployment changes to the existing deployment.
+    ```
+    kubectl apply -k .
+    ```
+
+    Note: It may take 2-3 minutes before the changes are reflected on the deployment.
+
+### Cleanup (General)
+After you have run the deployment variant on Online Boutique, you will want to reset the sample application back to its vanilla state.
+
+1. While still in the `kustomize/` directory, re-apply the original Kubernetes config to the Online Boutique deployment.
+    ```
+    kubectl apply -f base
+    ```
+    
+    Note: It may take 2-3 minutes before the changes are reflected on the deployment.
+    
