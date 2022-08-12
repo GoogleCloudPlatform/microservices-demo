@@ -12,6 +12,12 @@ Kustomize is a Kubernetes native configuration management tool that allows users
 | [Memorystore](https://github.com/GoogleCloudPlatform/microservices-demo/blob/main/docs/memorystore.md)                     | The vanilla Online Boutique deployment uses the default in-cluster `redis` database for storing the contents of its shopping cart. The Memorystore deployment variation overrides the default database with its own Memorystore (redis) database. These changes directly affect `cartservice`. |
 
 ## Deployment Instructions (Memorystore)
+### Prerequisites
+Make sure you are working on Google Cloud Platform (GCP) on either a [new or existing project](https://cloud.google.com/resource-manager/docs/creating-managing-projects#console). 
+
+For this deployment, it is not required to have an already-running deployment of Online Boutique, but it will speed up the process. It is recommended to use the [built-in Terraform setup with Online Boutique](https://github.com/GoogleCloudPlatform/microservices-demo/tree/main/terraform).
+
+### Run the deployment options
 1. While in the `microservices-demo` directory, enter the `terraform/` directory.
     ```
     cd terraform
@@ -83,6 +89,12 @@ After you have run the deployment variant on Online Boutique, you will want to r
     1. If there is a confirmation prompt, type `yes` and hit Enter/Return.
 
 ## Deployment Instructions (General)
+### Prerequisites
+Have a running deployment of [Online Boutique](https://github.com/GoogleCloudPlatform/microservices-demo) running on Google Cloud Platform (GCP) on either a [new or existing project](https://cloud.google.com/resource-manager/docs/creating-managing-projects#console).
+
+1. For simplicity, if you do not yet have a running deployment of Online Boutique, use the [built-in Terraform setup with Online Boutique](https://github.com/GoogleCloudPlatform/microservices-demo/tree/main/terraform).
+
+### Run the deployment options
 1. While in the `microservices-demo` directory, enter the `kustomize/` directory.
     ```
     cd kustomize
