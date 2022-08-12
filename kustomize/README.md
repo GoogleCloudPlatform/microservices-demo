@@ -20,7 +20,7 @@ Have a ongoing deployment of [Online Boutique](https://github.com/GoogleCloudPla
 1. For simplicity, if you do not yet have a running deployment of Online Boutique, use the [built-in Terraform setup with Online Boutique](https://github.com/GoogleCloudPlatform/microservices-demo/tree/main/terraform).
 
 ### NOTE: Memorystore
-If you are enabling the **Memorystore** deployment variation, first complete the steps in the **[Additional Deployment Instructions (Memorystore)](https://github.com/GoogleCloudPlatform/microservices-demo/edit/readme/kustomize/README.md#additional-deployment-instructions-memorystore)** section below to make the appropriate infrastructure changes before continuing. Alternatively, if you have completed the manual infrastructure steps outlined in the [Memorystore docs](https://github.com/GoogleCloudPlatform/microservices-demo/edit/readme/docs/memorystore.md), proceed to the normal deployment steps.
+If you are enabling the **Memorystore** deployment variation, first complete the steps in the **[Additional Deployment Instructions (Memorystore)](https://github.com/GoogleCloudPlatform/microservices-demo/edit/readme/kustomize/README.md#additional-deployment-instructions-memorystore)** section below to make the appropriate infrastructure changes before continuing. Alternatively, if you have completed the manual infrastructure steps outlined in the [Memorystore docs](https://github.com/GoogleCloudPlatform/microservices-demo/edit/readme/docs/memorystore.md), proceed with the normal deployment steps.
 
 ### Run the deployment options
 1. While in the `microservices-demo` directory, enter the `kustomize/` directory.
