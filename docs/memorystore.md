@@ -24,13 +24,13 @@ gcloud container clusters create onlineboutique \
     --enable-ip-alias
 ```
 
-2. Enable the Memorystore (redis) service on your project.
+1. Enable the Memorystore (redis) service on your project.
 
 ```sh
 gcloud services enable redis.googleapis.com --project=${PROJECT_ID}
 ```
 
-3. Create the Memorystore (redis) instance. 
+1. Create the Memorystore (redis) instance. 
 
 ```sh
 gcloud redis instances create redis-cart --size=1 --region=${REGION} --zone=${ZONE} --redis-version=redis_6_x --project=${PROJECT_ID}
@@ -42,23 +42,40 @@ After a few minutes, you will see the `STATUS` as `READY` when your Memorystore 
 gcloud redis instances list --region ${REGION}
 ```
 
-4. Update current manifests to target this Memorystore (redis) instance.
+1. From the `microservices-demo/` directory, enter the `kustomize` directory.
+```sh
+cd kustomize
+```
+
+1. Update current Kustomize manifest to target this Memorystore (redis) instance.
 
 ```sh
-cp ./release/kubernetes-manifests.yaml ./release/updated-manifests.yaml
 REDIS_IP=$(gcloud redis instances describe redis-cart --region=${REGION} --format='get(host)')
-sed -i "s/value: \"redis-cart:6379\"/value: \"${REDIS_IP}\"/g" ./release/updated-manifests.yaml
+sed -i "s/REDIS_IP/${REDIS_IP}/g" components/memorystore/kustomization.yaml
 ```
 
-In addition, in the `./release/updated-manifests.yaml` file you need also to manually remove the `Deployment` and `Service` sections of the `redis-cart` which are not needed anymore.
+1. Edit the base level `kustomization.yaml` so that it is using the Memorystore component.
+    ```
+    vim kustomization.yaml
+    ```
+    The code file should contain the following snippet of code.
+    ```
+    components:
+      - components/memorystore
+    ```
 
-5. Apply all the updated manifests. 
+1. Check to see what changes will be made to the existing deployment config.
+    ```
+    kustomize build .
+    ```
 
-```sh
-kubectl apply -f ./release/updated-manifests.yaml
-```
+1. Apply the Kustomize deployment changes to the existing deployment.
+    ```
+    kubectl apply -k .
+    ```
+    Note: It may take 2-3 minutes before the changes are reflected on the deployment.
 
-6. **Wait for the Pods to be ready.**
+1. **Wait for the Pods to be ready.**
 
 ```
 kubectl get pods
@@ -81,7 +98,7 @@ recommendationservice-69c56b74d4-7z8r5   1/1     Running   0          3m1s
 shippingservice-6ccc89f8fd-v686r         1/1     Running   0          2m58s
 ```
 
-7. **Access the web frontend in a browser** using the frontend's `EXTERNAL_IP`.
+1. **Access the web frontend in a browser** using the frontend's `EXTERNAL_IP`.
 
 ```
 kubectl get service frontend-external | awk '{print $4}'
