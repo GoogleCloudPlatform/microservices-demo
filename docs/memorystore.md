@@ -8,7 +8,14 @@ Important notes:
 
 ![Architecture diagram with Memorystore](./img/memorystore.png)
 
-## Manual Deployment Steps
+## Memorystore Deployment
+Online Boutique supports a multi-step automated deployment process for the Memorystore (Redis) variation. The automated process uses Terraform for infrastructure changes and Kustomize for manifest configuration changes. Instructions for automated deployment can be found [here](https://github.com/GoogleCloudPlatform/microservices-demo/blob/readme/kustomize/README.md).
+
+Alternatively, to manually set up the correct infrastructure, follow the steps outlined in the **Manual Infrastructure Steps** section below .
+
+## Manual Infrastructure Steps
+Note: This section is not a complete substitution for the entire Memorystore automated deployment process. Instead, this section takes you through the necessary infrastructure changes before **directing you back to the automated deployment process**.
+
 1. Create a GKE cluster with VPC-native/IP aliasing enabled.
     ```sh
     PROJECT_ID="<your-project-id>"
@@ -52,66 +59,13 @@ Important notes:
     REDIS_IP=$(gcloud redis instances describe redis-cart --region=${REGION} --format='get(host)')
     sed -i "s/REDIS_IP/${REDIS_IP}/g" components/memorystore/kustomization.yaml
     ```
+1. While in the `kustomize/` directory, return back to the `microservices-demo/` directory.
 
-1. Edit the base level `kustomization.yaml` so that it is using the Memorystore component.
-  
     ```sh
-    vim kustomization.yaml
+    cd ..
     ```
-
-    The code file should contain the following snippet of code.
-    ```sh
-    components:
-      - components/memorystore
-    ```
-
-1. Check to see what changes will be made to the existing deployment config.
-  
-    ```sh
-    kustomize build .
-    ```
-
-1. Apply the Kustomize deployment changes to the existing deployment.
-  
-    ```sh
-    kubectl apply -k .
-    ```
-
-    Note: It may take 2-3 minutes before the changes are reflected on the deployment.
-
-1. **Wait for the Pods to be ready.**
-
-    ```
-    kubectl get pods
-    ```
-
-    After a few minutes, you should see:
-
-    ```
-    NAME                                     READY   STATUS    RESTARTS   AGE
-    adservice-76bdd69666-ckc5j               1/1     Running   0          2m58s
-    cartservice-66d497c6b7-dp5jr             1/1     Running   0          2m59s
-    checkoutservice-666c784bd6-4jd22         1/1     Running   0          3m1s
-    currencyservice-5d5d496984-4jmd7         1/1     Running   0          2m59s
-    emailservice-667457d9d6-75jcq            1/1     Running   0          3m2s
-    frontend-6b8d69b9fb-wjqdg                1/1     Running   0          3m1s
-    loadgenerator-665b5cd444-gwqdq           1/1     Running   0          3m
-    paymentservice-68596d6dd6-bf6bv          1/1     Running   0          3m
-    productcatalogservice-557d474574-888kr   1/1     Running   0          3m
-    recommendationservice-69c56b74d4-7z8r5   1/1     Running   0          3m1s
-    shippingservice-6ccc89f8fd-v686r         1/1     Running   0          2m58s
-    ```
-
-1. **Access the web frontend in a browser** using the frontend's `EXTERNAL_IP`.
-
-    ```
-    kubectl get service frontend-external | awk '{print $4}'
-    ```
-
-    **Note**- you may see `<pending>` while GCP provisions the load balancer. If this happens, wait a few minutes and re-run the command.
-
-## Automated Deployment
-Automated deployment for Memorystore is now supported with Terraform and Kustimze. Deployment instructions can be found [here](https://github.com/GoogleCloudPlatform/microservices-demo/blob/readme/kustomize/README.md#deployment-instructions-memorystore).
+    
+At this point, you have properly created the infrastructure needed for the Memorystore deployment. Continue to the **[Deployment Instructions](https://github.com/GoogleCloudPlatform/microservices-demo/blob/readme/kustomize/README.md#deployment-instructions)** section for all Online Boutique deployment variants to complete setting up Memorystore.
 
 ## Resources
 
