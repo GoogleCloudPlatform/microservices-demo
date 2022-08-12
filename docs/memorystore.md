@@ -13,7 +13,7 @@ Online Boutique supports a multi-step automated deployment process for the Memor
 
 Alternatively, to manually set up the correct infrastructure, follow the steps outlined in the **Manual Infrastructure Steps** section below .
 
-## Manual Infrastructure Steps
+### Manual Infrastructure Steps
 Note: This section is not a complete substitution for the entire Memorystore automated deployment process. Instead, this section takes you through the necessary infrastructure changes before **directing you back to the automated deployment process**.
 
 1. Create a GKE cluster with VPC-native/IP aliasing enabled.
