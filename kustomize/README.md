@@ -43,3 +43,84 @@ Kustomize is a Kubernetes native configuration management tool that allows users
     ```
 
     Note: It may take 2-3 minutes before the changes are reflected on the deployment.
+
+### Cleanup (General)
+After you have run the deployment variant on Online Boutique, you will want to reset the sample application back to its vanilla state.
+
+1. While still in the `kustomize/` directory, re-apply the original Kubernetes config to the Online Boutique deployment.
+    ```
+    kubectl apply -f base
+    ```
+    
+    Note: It may take 2-3 minutes before the changes are reflected on the deployment.
+    
+## Deployment Instructions (Memorystore)
+1. While in the `microservices-demo` directory, enter the `terraform/` directory.
+    ```
+    cd terraform
+    ```
+
+1. Open the `terraform.tfvars` file. Replace `<project_id_here>` with the [GCP Project ID](https://cloud.google.com/resource-manager/docs/creating-managing-projects?hl=en#identifying_projects) for the `gcp_project_id` variable. Change the value of `memorystore = false` to `memorystore = true`.
+
+1. Initialize Terraform.
+    ```
+    terraform init
+    ```
+
+1. See what resources will be created.
+    ```
+    terraform plan
+    ```
+
+1. Create the resources and deploy the updated infrastructure.
+    ```
+    terraform apply
+    ```
+    1. If there is a confirmation prompt, type `yes` and hit Enter/Return.
+    
+    Note: Following completion, there may be an error saying that the cluster already exists-- this is okay.
+
+1. While in the `terraform/` directory, enter the `kustomize/` directory.
+    ```
+    cd ../kustomize
+    ```
+
+1. Edit the base level `kustomization.yaml` so that it is using the Memorystore component.
+    ```
+    vim kustomization.yaml
+    ```
+    The code file should contain the following snippet of code.
+    ```
+    components:
+      - components/memorystore
+    ```
+
+1. Check to see what changes will be made to the existing deployment config.
+    ```
+    kustomize build .
+    ```
+
+1. Apply the Kustomize deployment changes to the existing deployment.
+    ```
+    kubectl apply -k .
+    ```
+    Note: It may take 2-3 minutes before the changes are reflected on the deployment.
+
+### Cleanup (Memorystore)
+After you have run the deployment variant on Online Boutique, you will want to reset the sample application back to its vanilla state.
+
+1. While still in the `kustomize/` directory, re-apply the original Kubernetes config to the Online Boutique deployment.
+    ```
+    kubectl apply -f base
+    ```
+
+1. Enter the `terraform/` directory.
+    ```
+    cd ../terraform
+    ```
+
+1. Undo the additional Terraform infrastructure by targeting the Memorystore instance.
+    ```
+    terraform destroy -target=google_redis_instance.redis-cart
+    ```
+    1. If there is a confirmation prompt, type `yes` and hit Enter/Return.
