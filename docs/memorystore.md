@@ -9,9 +9,9 @@ Important notes:
 ![Architecture diagram with Memorystore](./img/memorystore.png)
 
 ## Memorystore Deployment
-Online Boutique supports a multi-step automated deployment process for the Memorystore (Redis) variation. The automated process uses Terraform for infrastructure changes and Kustomize for manifest configuration changes. Instructions for automated deployment can be found [here](https://github.com/GoogleCloudPlatform/microservices-demo/blob/readme/kustomize/README.md).
+Online Boutique supports a multi-step automated deployment process for the Memorystore (Redis) variation. This process uses Terraform for infrastructure changes and Kustomize for manifest-configuration changes. Instructions for the entire automated deployment can be found [here](https://github.com/GoogleCloudPlatform/microservices-demo/blob/readme/kustomize/README.md).
 
-Alternatively, to manually set up the required infrastructure, follow the steps outlined in the **Manual Infrastructure Steps** section below .
+Alternatively, to manually set up the required infrastructure yourself, follow the steps outlined in the **Manual Infrastructure Steps** section below.
 
 ### Manual Infrastructure Steps
 Note: This section is not a complete substitution for the entire Memorystore deployment process. Instead, this section takes you through the necessary infrastructure changes before **directing you back to the automated deployment process**.
@@ -59,6 +59,7 @@ Note: This section is not a complete substitution for the entire Memorystore dep
     REDIS_IP=$(gcloud redis instances describe redis-cart --region=${REGION} --format='get(host)')
     sed -i "s/REDIS_IP/${REDIS_IP}/g" components/memorystore/kustomization.yaml
     ```
+
 1. While in the `kustomize/` directory, return back to the `microservices-demo/` directory.
 
     ```sh

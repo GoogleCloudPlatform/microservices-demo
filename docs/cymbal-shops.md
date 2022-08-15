@@ -26,4 +26,4 @@ spec:
 
 ## Automated Deployment
 
-Automated deployment for Cymbal Branding is now supported with Kustomize. Deployment instructions can be found [here](https://github.com/GoogleCloudPlatform/microservices-demo/blob/readme/kustomize/README.md#deployment-instructions-general).
+Automated deployment for the Cymbal Branding variation is now supported with Kustomize. Deployment instructions can be found [here](https://github.com/GoogleCloudPlatform/microservices-demo/blob/readme/kustomize/README.md#deployment-instructions-general).
