@@ -40,3 +40,8 @@ variable "filepath_manifest" {
   description = "Path to the Kubernetes manifest that defines the Online Boutique resources"
   default     = "../release/kubernetes-manifests.yaml"
 }
+
+variable "memorystore" {
+  type        = bool
+  description = "If true, Online Boutique's in-cluster Redis cache will be replaced with a Google Cloud Memorystore Redis cache"
+}

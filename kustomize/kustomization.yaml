@@ -19,5 +19,6 @@ resources:
   - base
 
 components:
-  - components/cymbal-branding
-  - components/google-cloud-operations
+  # - components/cymbal-branding
+  # - components/google-cloud-operations
+  # - components/memorystore
