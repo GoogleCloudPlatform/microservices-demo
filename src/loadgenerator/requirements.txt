@@ -53,7 +53,7 @@ pyzmq==22.3.0
     # via locust
 requests==2.28.1
     # via locust
-roundrobin==0.0.2
+roundrobin==0.0.4
     # via locust
 six==1.16.0
     # via
