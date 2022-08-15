@@ -37,7 +37,7 @@ module "enable_google_apis" {
   project_id                  = var.gcp_project_id
   disable_services_on_destroy = false
 
-  # activate_apis is defined as base_apis and memorystore_apis if memorystore is enabled
+  # activate_apis is the set of base_apis and the APIs required by user-configured deployment options
   activate_apis = concat(local.base_apis, var.memorystore ? local.memorystore_apis : [])
 }
 

@@ -16,7 +16,7 @@
 resource "google_redis_instance" "redis-cart" {
   name           = "redis-cart"
   memory_size_gb = 1
-  region         = var.region_memorystore
+  region         = var.region
 
   # count specifies the number of instances to create;
   # if var.memorystore is true then the resource is enabled

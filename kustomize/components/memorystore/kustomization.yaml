@@ -44,4 +44,3 @@ patchesStrategicMerge:
       metadata:
         name: redis-cart
       $patch: delete
- 
