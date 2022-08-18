@@ -61,13 +61,13 @@ six==1.16.0
     #   geventhttpclient
 typing-extensions==4.2.0
     # via locust
-urllib3==1.26.10
+urllib3==1.26.11
     # via requests
 werkzeug==2.1.2
     # via
     #   flask
     #   locust
-zipp==3.8.0
+zipp==3.8.1
     # via importlib-metadata
 zope-event==4.5.0
     # via gevent
