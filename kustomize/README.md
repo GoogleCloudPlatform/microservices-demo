@@ -1,18 +1,18 @@
 # Use Kustomize to deploy Online Boutique with variants
 
-This page walks you through the deployment options for the [Online Boutique](https://github.com/GoogleCloudPlatform/microservices-demo) sample application on a [Google Kubernetes Engine (GKE)](https://cloud.google.com/kubernetes-engine) cluster using Kustomize. Deployment variants are designed as **components**, meaning that multiple variant components can be enabled at once.
+This page walks you through the deployment options for the [Online Boutique](https://github.com/GoogleCloudPlatform/microservices-demo) sample application on a [Google Kubernetes Engine (GKE)](https://cloud.google.com/kubernetes-engine) cluster using Kustomize. Each deployment variant is designed as a [**Kustomize Component**](https://github.com/kubernetes-sigs/kustomize/blob/master/examples/components.md), so you can enable multiple variants at once.
 
 ## What is Kustomize?
 
-Kustomize is a Kubernetes native configuration management tool that allows users to customize their manifest configurations without having to copy entire files multiple times. Its commands are built into `kubectl` as `apply -k`. This repo uses Kustomize to enable Online Boutique deployment variants; a complete list of variants can be found [here](https://github.com/GoogleCloudPlatform/microservices-demo#other-deployment-options). More information on Kustomize can be found on the [official Kustomize website](https://kustomize.io/).
+Kustomize is a Kubernetes configuration management tool that allows users to customize their manifest configurations without duplication. Its commands are built into `kubectl` as `apply -k`. This repo uses Kustomize to enable Online Boutique deployment variants; a complete list of variants can be found at [/README.md](https://github.com/GoogleCloudPlatform/microservices-demo#other-deployment-options). More information on Kustomize can be found on the [official Kustomize website](https://kustomize.io/).
 
 ## Supported Deployment Variations
 
 | **Variation Name**                                                                                                         | **Description**                                                                                                                                                                                                                                                                                |
 |----------------------------------------------------------------------------------------------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| [Cymbal Branding](https://github.com/GoogleCloudPlatform/microservices-demo/blob/main/docs/cymbal-shops.md)                | Changes all Online Boutique-related branding to Google Cloud's fictitious company--Cymbal Shops. The code adds/enables an environment variable `CYMBAL_BRANDING` in the `frontend` deployment.                                                                                                 |
+| [Cymbal Branding](https://github.com/GoogleCloudPlatform/microservices-demo/blob/main/docs/cymbal-shops.md)                | Changes all Online Boutique-related branding to Google Cloud's fictitious company — Cymbal Shops. The code adds/enables an environment variable `CYMBAL_BRANDING` in the `frontend` service.                                                                                                 |
 | [Google Cloud Operations](https://github.com/GoogleCloudPlatform/microservices-demo/blob/main/docs/gcp-instrumentation.md) | Enables Monitoring (Stats), Tracing, Profiler, and Debugger for various services within Online Boutique. The code removes the existing environment variables (`DISABLE_STATS`, `DISABLE_TRACING`, `DISABLE_PROFILER`, `DISABLE_DEBUGGER`) from appropriate YAML config files.                  |
-| [Memorystore](https://github.com/GoogleCloudPlatform/microservices-demo/blob/main/docs/memorystore.md)                     | The vanilla Online Boutique deployment uses the default in-cluster `redis` database for storing the contents of its shopping cart. The Memorystore deployment variation overrides the default database with its own Memorystore (redis) database. These changes directly affect `cartservice`. |
+| [Memorystore](https://github.com/GoogleCloudPlatform/microservices-demo/blob/main/docs/memorystore.md)                     | The default Online Boutique deployment uses the default in-cluster `redis` database for storing the contents of its shopping cart. The Memorystore deployment variation overrides the default database with its own Memorystore (Redis) database. These changes directly affect `cartservice`. |
 
 ## Deployment Instructions
 
@@ -20,11 +20,13 @@ This section outlines the steps to deploy any of the supported variations of Onl
 
 ### Prerequisites
 
-Have a ongoing deployment of [Online Boutique](https://github.com/GoogleCloudPlatform/microservices-demo) running on Google Cloud Platform (GCP) on either a [new or existing project](https://cloud.google.com/resource-manager/docs/creating-managing-projects#console).
+Before proceeding, you will need:
+1. a Kubernetes cluster, such as a [GKE (Google Kubernetes Engine)](https://cloud.google.com/kubernetes-engine) cluster or a [minikube](https://minikube.sigs.k8s.io/docs/) cluster.
+1. to set your `kubectl` context to the Kuberneter cluster.
 
-1. For simplicity, if you do not yet have a running deployment of Online Boutique, use the [built-in Terraform setup with Online Boutique](https://github.com/GoogleCloudPlatform/microservices-demo/tree/main/terraform).
+Alternatively, if you would like to quickly provision a GKE cluster and any other Google Cloud Platform (GCP) resources required for the variants that you choose to run (e.g., a Memorystore Redis cart), you can use the [Online Boutique's Terraform setup at /terraform](https://github.com/GoogleCloudPlatform/microservices-demo/tree/main/terraform).
 
-### NOTE: Memorystore
+### Using Memorystore
 
 If you are enabling the **Memorystore** deployment variation, first complete the steps in the **[Additional Deployment Instructions (Memorystore)](https://github.com/GoogleCloudPlatform/microservices-demo/edit/readme/kustomize/README.md#additional-deployment-instructions-memorystore)** section below to make the appropriate infrastructure changes before continuing. Alternatively, if you have completed the manual infrastructure steps outlined in the [Memorystore docs](https://github.com/GoogleCloudPlatform/microservices-demo/edit/readme/docs/memorystore.md), proceed with the normal deployment steps.
 
@@ -36,10 +38,10 @@ If you are enabling the **Memorystore** deployment variation, first complete the
     cd kustomize
     ```
 
-1. Edit the base level `kustomization.yaml` so that it is uses the intended components.
+1. Edit the base level `kustomization.yaml` so that it uses the components you wish to use.
 
     ```
-    vim kustomization.yaml
+    nano kustomization.yaml
     ```
 
     The file should contain a similar snippet of code with only the component variants that you intend to deploy left uncommented.
@@ -52,6 +54,8 @@ If you are enabling the **Memorystore** deployment variation, first complete the
      ```
 
     Note: The example above will enable both the Cymbal Branding and Google Cloud Operations components in the new deployment.
+
+    Note: To close `nano`, press `Ctrl`/`control` + `x`. To save changes, press `y`, then press `Enter`/`return`.
 
 1. Check to see what changes will be made to the existing deployment config.
 

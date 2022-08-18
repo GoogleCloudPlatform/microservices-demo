@@ -32,4 +32,4 @@ value: "0"
 
 ## Automated Deployment
 
-Automated deployment for the Google Cloud Operations variation is now supported with Kustomize. Deployment instructions can be found [here](https://github.com/GoogleCloudPlatform/microservices-demo/blob/readme/kustomize/README.md#deployment-instructions-general).
+Automated deployment for the Google Cloud Operations variation is now supported with Kustomize. Deployment instructions can be found at [/kustomize/README.md](https://github.com/GoogleCloudPlatform/microservices-demo/blob/main/kustomize/README.md#deployment-instructions-general).
