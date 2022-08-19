@@ -9,7 +9,7 @@ Important notes:
 ![Architecture diagram with Memorystore](./img/memorystore.png)
 
 ## Memorystore Deployment
-Online Boutique supports a multi-step automated deployment process for the Memorystore (Redis) variation. This process uses Terraform for infrastructure changes and Kustomize for manifest-configuration changes. Instructions for the entire automated deployment can be found [here](https://github.com/GoogleCloudPlatform/microservices-demo/blob/readme/kustomize/README.md).
+Online Boutique supports a multi-step automated deployment process for the Memorystore (Redis) variation. This process uses Terraform for infrastructure changes and Kustomize for manifest-configuration changes. Instructions for the entire automated deployment can be found at [`/kustomize/README.md`](https://github.com/GoogleCloudPlatform/microservices-demo/blob/main/kustomize/README.md).
 
 Alternatively, to manually set up the required infrastructure yourself, follow the steps outlined in the **Manual Infrastructure Steps** section below.
 
@@ -66,7 +66,7 @@ Note: This section is not a complete substitution for the entire Memorystore dep
     cd ..
     ```
     
-At this point, you have properly created the infrastructure needed for the Memorystore deployment. Continue to the **[Deployment Instructions](https://github.com/GoogleCloudPlatform/microservices-demo/blob/readme/kustomize/README.md#deployment-instructions)** section for Online Boutique deployment variants to complete the deployment.
+At this point, you have properly created the infrastructure needed for the Memorystore deployment. To complete the deployment, perform the steps from the **[Run the deployment options](https://github.com/GoogleCloudPlatform/microservices-demo/blob/main/kustomize/README.md#run-the-deployment-options)** section of `/kustomize/README.md`.
 
 ## Resources
 

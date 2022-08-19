@@ -114,7 +114,7 @@ After you have run the deployment variant on Online Boutique, you will want to r
     
     Note: It may take 2-3 minutes before the changes are reflected on the deployment.
 
-### NOTE: Memorystore
+### Clean up Memorystore
 
 If you have enabled the **Memorystore** deployment variation, complete the additional cleanup steps in the **[Additional Deployment Instructions (Memorystore)](https://github.com/GoogleCloudPlatform/microservices-demo/edit/readme/kustomize/README.md#additional-deployment-instructions-memorystore)** section below to properly undo the Terraform changes.
 
