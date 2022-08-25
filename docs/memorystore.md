@@ -9,11 +9,11 @@ Important notes:
 ![Architecture diagram with Memorystore](./img/memorystore.png)
 
 ## Memorystore Deployment
+
 Online Boutique supports a multi-step automated deployment process for the Memorystore (Redis) variation. This process uses Terraform for infrastructure changes and Kustomize for manifest-configuration changes. Instructions for the entire automated deployment can be found at [`/kustomize/README.md`](https://github.com/GoogleCloudPlatform/microservices-demo/blob/main/kustomize/README.md).
 
-Alternatively, to manually set up the required infrastructure yourself, follow the steps outlined in the **Manual Infrastructure Steps** section below.
+## Manual Deployment
 
-### Manual Infrastructure Steps
 Note: This section is not a complete substitution for the entire Memorystore deployment process. Instead, this section takes you through the necessary infrastructure changes before **directing you back to the automated deployment process**.
 
 1. Create a GKE cluster with VPC-native/IP aliasing enabled.
@@ -29,13 +29,13 @@ Note: This section is not a complete substitution for the entire Memorystore dep
         --enable-ip-alias
     ```
 
-1. Enable the Memorystore (redis) service on your project.
+1. Enable the Memorystore (Redis) service in your project.
 
     ```sh
     gcloud services enable redis.googleapis.com --project=${PROJECT_ID}
     ```
 
-1. Create the Memorystore (redis) instance. 
+1. Create the Memorystore (Redis) instance. 
 
     ```sh
     gcloud redis instances create redis-cart --size=1 --region=${REGION} --zone=${ZONE} --redis-version=redis_6_x --project=${PROJECT_ID}
@@ -47,13 +47,13 @@ Note: This section is not a complete substitution for the entire Memorystore dep
     gcloud redis instances list --region ${REGION}
     ```
 
-1. From the `microservices-demo/` directory, enter the `kustomize` directory.
+1. From the `microservices-demo/` directory, navigate to the `kustomize/` directory.
   
     ```sh
     cd kustomize
     ```
 
-1. Update current Kustomize manifest to target this Memorystore (redis) instance.
+1. Update current Kustomize manifest to target this Memorystore (Redis) instance.
   
     ```sh
     REDIS_IP=$(gcloud redis instances describe redis-cart --region=${REGION} --format='get(host)')
