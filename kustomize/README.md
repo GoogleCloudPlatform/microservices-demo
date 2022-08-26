@@ -4,7 +4,7 @@ This page contains instructions on deploying variants of the [Online Boutique](h
 
 ## What is Kustomize?
 
-Kustomize is a Kubernetes configuration management tool that allows users to customize their manifest configurations without duplication. Its commands are built into `kubectl` as `apply -k`. This repo uses Kustomize to enable Online Boutique deployment variants; a complete list of variants can be found at [/README.md](https://github.com/GoogleCloudPlatform/microservices-demo#other-deployment-options). More information on Kustomize can be found on the [official Kustomize website](https://kustomize.io/).
+Kustomize is a Kubernetes configuration management tool that allows users to customize their manifest configurations without duplication. Its commands are built into `kubectl` as `apply -k`. More information on Kustomize can be found on the [official Kustomize website](https://kustomize.io/).
 
 ## Deployment variations supported by Kustomize
 
@@ -18,15 +18,48 @@ Kustomize is a Kubernetes configuration management tool that allows users to cus
 
 ### Prerequisites
 
-Before proceeding, you will need:
-1. A Kubernetes cluster, such as a [GKE (Google Kubernetes Engine)](https://cloud.google.com/kubernetes-engine) cluster or a [minikube](https://minikube.sigs.k8s.io/docs/) cluster.
-1. To set your `kubectl` context to the Kuberneter cluster.
+1. Have a Kubernetes cluster, such as a [GKE (Google Kubernetes Engine)](https://cloud.google.com/kubernetes-engine) cluster or a [minikube](https://minikube.sigs.k8s.io/docs/) cluster.
+1. Set your `kubectl` context to the Kubernetes cluster.
 
-Alternatively, if you would like to quickly provision a GKE cluster and any other Google Cloud Platform (GCP) resources required for the variants that you choose to run (e.g., a Memorystore Redis cart), you can use the [Online Boutique's Terraform setup at /terraform](https://github.com/GoogleCloudPlatform/microservices-demo/tree/main/terraform).
+Alternatively, if you would like to quickly provision a GKE cluster, you can use the [Online Boutique's Terraform setup at /terraform](https://github.com/GoogleCloudPlatform/microservices-demo/tree/main/terraform).
 
-### Using Memorystore
+### [OPTIONAL] Deploying infrastructure for the Memorystore variation
 
-If you are enabling the **Memorystore** deployment variation, first complete the steps in the **[Additional Deployment Instructions (Memorystore)](https://github.com/GoogleCloudPlatform/microservices-demo/edit/readme/kustomize/README.md#additional-deployment-instructions-memorystore)** section below to make the appropriate infrastructure changes before continuing. Alternatively, if you have completed the manual infrastructure steps outlined in the [Memorystore docs](https://github.com/GoogleCloudPlatform/microservices-demo/edit/readme/docs/memorystore.md), proceed with the normal deployment steps.
+1. While in the `microservices-demo` directory, enter the `terraform/` directory.
+
+    ```
+    cd terraform
+    ```
+
+1. Open the `terraform.tfvars` file. Replace `<project_id_here>` with the [GCP Project ID](https://cloud.google.com/resource-manager/docs/creating-managing-projects?hl=en#identifying_projects) for the `gcp_project_id` variable. Change the value of `memorystore = false` to `memorystore = true`.
+
+1. Initialize Terraform.
+
+    ```
+    terraform init
+    ```
+
+1. See what resources will be created.
+
+    ```
+    terraform plan
+    ```
+
+1. Create the resources and deploy the updated infrastructure.
+
+    ```
+    terraform apply
+    ```
+    
+    1. If there is a confirmation prompt, type `yes` and hit Enter/Return.
+    
+    Note: Following completion, there may be an error saying that the cluster already exists-- this is okay.
+
+1. While in the `terraform/` directory, return back to the `microservices-demo/` directory.
+
+    ```
+    cd ..
+    ```
 
 ### Run the deployment options
 
@@ -102,7 +135,7 @@ If you are enabling the **Memorystore** deployment variation, first complete the
 
 ### Cleanup
 
-After you have run the deployment variant on Online Boutique, you will want to reset the sample application back to its vanilla state.
+After you have run the deployment variant on Online Boutique, you will want to reset the sample application back to its default state.
 
 1. While still in the `kustomize/` directory, re-apply the original Kubernetes config to the Online Boutique deployment.
     
@@ -112,53 +145,7 @@ After you have run the deployment variant on Online Boutique, you will want to r
     
     Note: It may take 2-3 minutes before the changes are reflected on the deployment.
 
-### Clean up Memorystore
-
-If you have enabled the **Memorystore** deployment variation, complete the additional cleanup steps in the **[Additional Deployment Instructions (Memorystore)](https://github.com/GoogleCloudPlatform/microservices-demo/edit/readme/kustomize/README.md#additional-deployment-instructions-memorystore)** section below to properly undo the Terraform changes.
-
-## Additional Deployment Instructions (Memorystore)
-
-### Run the infrastructure changes with Terraform
-
-1. While in the `microservices-demo` directory, enter the `terraform/` directory.
-
-    ```
-    cd terraform
-    ```
-
-1. Open the `terraform.tfvars` file. Replace `<project_id_here>` with the [GCP Project ID](https://cloud.google.com/resource-manager/docs/creating-managing-projects?hl=en#identifying_projects) for the `gcp_project_id` variable. Change the value of `memorystore = false` to `memorystore = true`.
-
-1. Initialize Terraform.
-
-    ```
-    terraform init
-    ```
-
-1. See what resources will be created.
-
-    ```
-    terraform plan
-    ```
-
-1. Create the resources and deploy the updated infrastructure.
-
-    ```
-    terraform apply
-    ```
-    
-    1. If there is a confirmation prompt, type `yes` and hit Enter/Return.
-    
-    Note: Following completion, there may be an error saying that the cluster already exists-- this is okay.
-
-1. While in the `terraform/` directory, return back to the `microservices-demo/` directory.
-
-    ```
-    cd ..
-    ```
-
-At this point, you may return back to the **Deployment Instructions** section above.
-
-### Additional Cleanup
+### [OPTIONAL] Cleaning up infrastructure for the Memorystore variation
 
 1. Enter the `terraform/` directory.
 
