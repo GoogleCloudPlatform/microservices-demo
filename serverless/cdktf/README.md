@@ -10,7 +10,7 @@ Some objectives:
 
 ## Architecture after deployment
 
-![Architecture](./microservices-cloudrun-arch.svg)
+![Architecture](../pulumi/microservices-cloudrun-arch.svg)
 
 ## Clone the repository
 
