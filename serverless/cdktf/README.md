@@ -14,23 +14,27 @@ Some objectives:
 
 ## Clone the repository
 
-```
-git clone -b pulumi-cloudrun-one-ilb git@github.com:shenxiang-demo/microservices-demo.git
+```bash
+git clone -b pulumi-cloudrun-one-ilb https://github.com/shenxiang-demo/microservices-demo.git
 ```
 
 ## Install CDKTF and libraries
 
-```
+```bash
 cd microservices-demo/serverless/cdktf
 npm install --global cdktf-cli@latest
 npm install
 ```
 
+If you have an old version of node.js, you may have to upgrade it. You can use the following command:
+```bash
+nvm install node
+```
 Please read [CDKTF doc](https://learn.hashicorp.com/tutorials/terraform/cdktf-install) for more details.
 
 ## Config project
 
-```
+```bash
 export PROJECT_ID=<YOUR GCP PROJECT ID>
 gcloud config set project $PROJECT_ID
 gcloud auth application-default login
@@ -51,6 +55,6 @@ __Note:__ However, this step will __NOT__ work in CloudShell since CloudShell do
 
 If you don't want to delete the whole project, run the following command to delete the resources:
 
-```
+```bash
 cdktf destroy --auto-approve
 ```

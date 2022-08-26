@@ -15,7 +15,7 @@ Some objectives:
 ## Clone the repository
 
 ```
-git clone -b pulumi-cloudrun-one-ilb git@github.com:shenxiang-demo/microservices-demo.git
+git clone -b pulumi-cloudrun-one-ilb https://github.com/shenxiang-demo/microservices-demo.git
 ```
 
 ## Install pulumi
