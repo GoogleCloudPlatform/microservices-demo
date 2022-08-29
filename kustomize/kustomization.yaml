@@ -12,6 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-gcp_project_id = "<project_id_here>"
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
 
-memorystore = false
+resources:
+  - base
+
+components:
+  # - components/cymbal-branding
+  # - components/google-cloud-operations
+  # - components/memorystore

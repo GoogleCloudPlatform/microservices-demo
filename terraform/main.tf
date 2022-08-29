@@ -14,14 +14,15 @@
 
 # Definition of local variables
 locals {
-  apis = [
+  base_apis = [
     "container.googleapis.com",
     "monitoring.googleapis.com",
     "cloudtrace.googleapis.com",
     "clouddebugger.googleapis.com",
     "cloudprofiler.googleapis.com"
   ]
-
+  memorystore_apis = ["redis.googleapis.com"]
+  
   # Variables cluster_list and cluster_name are used for an implicit dependency
   # between module "gcloud" and resource "google_container_cluster" 
   cluster_id_parts = split("/", google_container_cluster.my_cluster.id)
@@ -36,7 +37,8 @@ module "enable_google_apis" {
   project_id                  = var.gcp_project_id
   disable_services_on_destroy = false
 
-  activate_apis = local.apis
+  # activate_apis is the set of base_apis and the APIs required by user-configured deployment options
+  activate_apis = concat(local.base_apis, var.memorystore ? local.memorystore_apis : [])
 }
 
 # Create GKE cluster
@@ -77,7 +79,6 @@ resource "null_resource" "apply_deployment" {
   }
 
   depends_on = [
-    # google_container_cluster.my_cluster
     module.gcloud
   ]
 }

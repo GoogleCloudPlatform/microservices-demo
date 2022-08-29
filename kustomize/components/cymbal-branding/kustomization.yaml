@@ -12,6 +12,21 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-gcp_project_id = "<project_id_here>"
+apiVersion: kustomize.config.k8s.io/v1alpha1
+kind: Component
 
-memorystore = false
+patchesStrategicMerge:
+  # frontend - enable CYMBAL_BRANDING
+  - |-
+    apiVersion: apps/v1
+    kind: Deployment
+    metadata:
+      name: frontend
+    spec:
+      template:
+        spec:
+          containers:
+            - name: server
+              env:
+              - name: CYMBAL_BRANDING
+                value: "true"
