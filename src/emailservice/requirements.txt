@@ -114,5 +114,5 @@ six==1.16.0
     #   grpcio
 uritemplate==3.0.1
     # via google-api-python-client
-urllib3==1.26.11
+urllib3==1.26.12
     # via requests
