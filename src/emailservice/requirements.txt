@@ -73,7 +73,7 @@ opencensus==0.9.0
     #   opencensus-ext-stackdriver
 opencensus-context==0.1.3
     # via opencensus
-opencensus-ext-grpc==0.7.1
+opencensus-ext-grpc==0.7.2
     # via -r requirements.in
 opencensus-ext-stackdriver==0.8.0
     # via -r requirements.in
