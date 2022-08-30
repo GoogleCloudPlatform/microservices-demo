@@ -44,7 +44,7 @@ google-cloud-profiler==4.0.0
     # via -r requirements.in
 google-cloud-trace==0.24.2
     # via opencensus-ext-stackdriver
-google-python-cloud-debugger==2.18
+google-python-cloud-debugger==2.19
     # via -r requirements.in
 googleapis-common-protos==1.56.4
     # via
@@ -118,7 +118,6 @@ six==1.16.0
     # via
     #   google-auth
     #   google-auth-httplib2
-    #   google-python-cloud-debugger
     #   grpcio
 uritemplate==3.0.1
     # via google-api-python-client
