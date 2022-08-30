@@ -8,7 +8,7 @@ cachetools==5.2.0
     # via google-auth
 certifi==2022.6.15
     # via requests
-charset-normalizer==2.0.10
+charset-normalizer==2.1.1
     # via requests
 google-api-core[grpc]==2.8.2
     # via
@@ -18,9 +18,9 @@ google-api-core[grpc]==2.8.2
     #   google-cloud-monitoring
     #   google-cloud-trace
     #   opencensus
-google-api-python-client==2.51.0
+google-api-python-client==2.52.0
     # via google-cloud-profiler
-google-auth==1.35.0
+google-auth==2.11.0
     # via
     #   google-api-core
     #   google-api-python-client
@@ -31,9 +31,9 @@ google-auth-httplib2==0.1.0
     # via
     #   google-api-python-client
     #   google-cloud-profiler
-google-cloud-core==2.3.1
+google-cloud-core==2.3.2
     # via google-cloud-trace
-google-cloud-monitoring==2.9.2
+google-cloud-monitoring==2.10.1
     # via opencensus-ext-stackdriver
 google-cloud-profiler==4.0.0
     # via -r requirements.in
@@ -41,7 +41,7 @@ google-cloud-trace==0.24.2
     # via
     #   -r requirements.in
     #   opencensus-ext-stackdriver
-googleapis-common-protos==1.56.3
+googleapis-common-protos==1.56.4
     # via
     #   google-api-core
     #   grpcio-status
@@ -71,13 +71,13 @@ opencensus==0.9.0
     #   -r requirements.in
     #   opencensus-ext-grpc
     #   opencensus-ext-stackdriver
-opencensus-context==0.1.2
+opencensus-context==0.1.3
     # via opencensus
-opencensus-ext-grpc==0.7.1
+opencensus-ext-grpc==0.7.2
     # via -r requirements.in
 opencensus-ext-stackdriver==0.8.0
     # via -r requirements.in
-proto-plus==1.20.6
+proto-plus==1.22.1
     # via google-cloud-monitoring
 protobuf==3.20.1
     # via
@@ -98,9 +98,9 @@ pyasn1-modules==0.2.8
     # via google-auth
 pyparsing==2.4.7
     # via httplib2
-python-json-logger==2.0.2
+python-json-logger==2.0.4
     # via -r requirements.in
-requests==2.28.0
+requests==2.28.1
     # via
     #   -r requirements.in
     #   google-api-core
@@ -109,14 +109,10 @@ rsa==4.8
     # via google-auth
 six==1.16.0
     # via
-    #   google-api-python-client
     #   google-auth
     #   google-auth-httplib2
     #   grpcio
 uritemplate==3.0.1
     # via google-api-python-client
-urllib3==1.26.9
+urllib3==1.26.12
     # via requests
-
-# The following packages are considered to be unsafe in a requirements file:
-# setuptools

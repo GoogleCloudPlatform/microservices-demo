@@ -1,5 +1,5 @@
 plugins {
-    id 'com.google.protobuf' version '0.8.18'
+    id 'com.google.protobuf' version '0.8.19'
     id 'com.github.sherter.google-java-format' version '0.9'
     id 'idea'
     id 'application'
@@ -17,7 +17,7 @@ version = "0.1.0-SNAPSHOT"
 def opencensusVersion = "0.31.1"
 def grpcVersion = "1.32.1"
 def jacksonVersion = "2.13.3"
-def protocVersion = "3.21.2"
+def protocVersion = "3.21.5"
 
 tasks.withType(JavaCompile) {
     sourceCompatibility = JavaVersion.VERSION_1_8
@@ -33,7 +33,7 @@ dependencies {
     if (speed) {
         implementation fileTree(dir: offlineCompile, include: '*.jar')
     } else {
-        implementation "com.google.api.grpc:proto-google-common-protos:2.9.0",
+        implementation "com.google.api.grpc:proto-google-common-protos:2.9.2",
                 "io.opencensus:opencensus-api:${opencensusVersion}",
                 "io.opencensus:opencensus-contrib-grpc-metrics:${opencensusVersion}",
                 "io.opencensus:opencensus-contrib-grpc-util:${opencensusVersion}",
@@ -52,7 +52,7 @@ dependencies {
                 "com.fasterxml.jackson.core:jackson-databind:${jacksonVersion}",
                 "io.opencensus:opencensus-contrib-log-correlation-log4j2:${opencensusVersion}",
                 "io.opencensus:opencensus-impl:${opencensusVersion}",
-                "io.netty:netty-tcnative-boringssl-static:2.0.53.Final"
+                "io.netty:netty-tcnative-boringssl-static:2.0.54.Final"
     }
 }
 

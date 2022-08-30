@@ -1,0 +1,174 @@
+# Copyright 2022 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+apiVersion: kustomize.config.k8s.io/v1alpha1
+kind: Component
+
+patchesStrategicMerge:
+  # adservice - stats, tracing
+    - |-
+      apiVersion: apps/v1
+      kind: Deployment
+      metadata:
+        name: adservice
+      spec:
+        template:
+          spec:
+            containers:
+              - name: server
+                env:
+                - name: DISABLE_STATS
+                  $patch: delete
+                - name: DISABLE_TRACING
+                  $patch: delete
+  # checkoutservice - stats, tracing, profiler
+    - |-
+      apiVersion: apps/v1
+      kind: Deployment
+      metadata:
+        name: checkoutservice
+      spec:
+        template:
+          spec:
+            containers:
+              - name: server
+                env:
+                - name: DISABLE_STATS
+                  $patch: delete
+                - name: DISABLE_TRACING
+                  $patch: delete
+                - name: DISABLE_PROFILER
+                  $patch: delete
+  # currencyservice - tracing, profiler, debugger
+    - |-
+      apiVersion: apps/v1
+      kind: Deployment
+      metadata:
+        name: currencyservice
+      spec:
+        template:
+          spec:
+            containers:
+              - name: server
+                env:
+                - name: DISABLE_TRACING
+                  $patch: delete
+                - name: DISABLE_PROFILER
+                  $patch: delete
+                - name: DISABLE_DEBUGGER
+                  $patch: delete
+  # emailservice - tracing, profiler
+    - |-
+      apiVersion: apps/v1
+      kind: Deployment
+      metadata:
+        name: emailservice
+      spec:
+        template:
+          spec:
+            containers:
+              - name: server
+                env:
+                - name: DISABLE_TRACING
+                  $patch: delete
+                - name: DISABLE_PROFILER
+                  $patch: delete
+  # frontend - tracing, profiler
+    - |-
+      apiVersion: apps/v1
+      kind: Deployment
+      metadata:
+        name: frontend
+      spec:
+        template:
+          spec:
+            containers:
+              - name: server
+                env:
+                - name: DISABLE_TRACING
+                  $patch: delete
+                - name: DISABLE_PROFILER
+                  $patch: delete
+  # paymentservice - tracing, profiler, debugger
+    - |-
+      apiVersion: apps/v1
+      kind: Deployment
+      metadata:
+        name: paymentservice
+      spec:
+        template:
+          spec:
+            containers:
+              - name: server
+                env:
+                - name: DISABLE_TRACING
+                  $patch: delete
+                - name: DISABLE_PROFILER
+                  $patch: delete
+                - name: DISABLE_DEBUGGER
+                  $patch: delete
+  # productcatalogservice - stats, tracing, profiler
+    - |-
+      apiVersion: apps/v1
+      kind: Deployment
+      metadata:
+        name: productcatalogservice
+      spec:
+        template:
+          spec:
+            containers:
+              - name: server
+                env:
+                - name: DISABLE_STATS
+                  $patch: delete
+                - name: DISABLE_TRACING
+                  $patch: delete
+                - name: DISABLE_PROFILER
+                  $patch: delete
+  # recommendationservice - tracing, profiler, debugger
+    - |-
+      apiVersion: apps/v1
+      kind: Deployment
+      metadata:
+        name: recommendationservice
+      spec:
+        template:
+          spec:
+            containers:
+              - name: server
+                env:
+                - name: DISABLE_TRACING
+                  $patch: delete
+                - name: DISABLE_PROFILER
+                  $patch: delete
+                - name: DISABLE_DEBUGGER
+                  $patch: delete
+  # shippingservice - stats, tracing, profiler
+    - |-
+      apiVersion: apps/v1
+      kind: Deployment
+      metadata:
+        name: shippingservice
+      spec:
+        template:
+          spec:
+            containers:
+              - name: server
+                env:
+                - name: DISABLE_STATS
+                  $patch: delete
+                - name: DISABLE_TRACING
+                  $patch: delete
+                - name: DISABLE_PROFILER
+                  $patch: delete

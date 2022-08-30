@@ -17,6 +17,7 @@ on:
   pull_request:
     branches:
       - main
+
 jobs:
   code-tests:
     runs-on: [self-hosted, is-enabled]
