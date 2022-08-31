@@ -53,7 +53,7 @@ msgpack==1.0.4
     # via locust
 psutil==5.9.1
     # via locust
-pyzmq==22.3.0
+pyzmq==23.2.1
     # via locust
 requests==2.28.1
     # via locust
