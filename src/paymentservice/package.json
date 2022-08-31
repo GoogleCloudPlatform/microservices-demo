@@ -16,7 +16,7 @@
     "@google-cloud/trace-agent": "5.1.6",
     "@grpc/grpc-js": "1.6.11",
     "@grpc/proto-loader": "0.7.2",
-    "pino": "5.17.0",
+    "pino": "8.4.2",
     "simple-card-validator": "^1.1.0",
     "uuid": "^3.2.1"
   },

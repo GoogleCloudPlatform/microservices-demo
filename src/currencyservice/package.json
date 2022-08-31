@@ -16,7 +16,7 @@
     "@grpc/proto-loader": "0.7.2",
     "async": "3.2.4",
     "google-protobuf": "3.21.0",
-    "pino": "5.17.0",
+    "pino": "8.4.2",
     "request": "2.88.2",
     "xml2js": "0.4.23"
   },
