@@ -52,7 +52,7 @@ google-cloud-core==2.3.2
     #   google-cloud-trace
 google-cloud-firestore==2.6.1
     # via firebase-admin
-google-cloud-monitoring==2.10.1
+google-cloud-monitoring==2.11.1
     # via opencensus-ext-stackdriver
 google-cloud-profiler==4.0.0
     # via -r requirements.in
