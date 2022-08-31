@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-FROM python:3.7-slim
+FROM python:3.10-slim
 RUN apt-get update -qqy && \
 	apt-get -qqy install wget g++ && \
 	rm -rf /var/lib/apt/lists/*
