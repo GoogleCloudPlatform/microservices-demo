@@ -105,7 +105,7 @@ requests==2.28.1
     #   -r requirements.in
     #   google-api-core
     #   google-cloud-profiler
-rsa==4.8
+rsa==4.9
     # via google-auth
 six==1.16.0
     # via
