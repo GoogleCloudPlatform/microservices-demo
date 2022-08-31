@@ -18,7 +18,7 @@
     "@grpc/proto-loader": "0.7.2",
     "pino": "8.4.2",
     "simple-card-validator": "^1.1.0",
-    "uuid": "^3.2.1"
+    "uuid": "^8.0.0"
   },
   "devDependencies": {
     "semistandard": "16.0.1"
