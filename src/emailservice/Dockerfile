@@ -43,7 +43,7 @@ RUN GRPC_HEALTH_PROBE_VERSION=v0.4.11 && \
 WORKDIR /email_server
 
 # Grab packages from builder
-COPY --from=builder /usr/local/lib/python3.10/ /usr/local/lib/python3.10/
+COPY --from=builder /usr/local/lib/python3.9/ /usr/local/lib/python3.9/
 
 # Add the application
 COPY . .
