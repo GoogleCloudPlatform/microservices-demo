@@ -93,9 +93,9 @@ startScripts.enabled = false
 // This to cache dependencies during Docker image building. First build will take time.
 // Subsequent build will be incremental.
 task downloadRepos(type: Copy) {
-    from configurations.compile
+    from configurations.compileClasspath
     into offlineCompile
-    from configurations.runtime
+    from configurations.compileClasspath
     into offlineCompile
 }
 
