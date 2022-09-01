@@ -11,7 +11,7 @@ require (
 	github.com/sirupsen/logrus v1.9.0
 	go.opencensus.io v0.23.0
 	golang.org/x/net v0.0.0-20220826154423-83b083e8dc8b
-	google.golang.org/grpc v1.48.0
+	google.golang.org/grpc v1.49.0
 )
 
 require (
