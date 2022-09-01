@@ -4,7 +4,7 @@ go 1.18
 
 require (
 	cloud.google.com/go v0.104.0
-	cloud.google.com/go/compute v1.7.0
+	cloud.google.com/go/compute v1.9.0
 	cloud.google.com/go/profiler v0.3.0
 	contrib.go.opencensus.io/exporter/jaeger v0.2.1
 	contrib.go.opencensus.io/exporter/stackdriver v0.13.12
