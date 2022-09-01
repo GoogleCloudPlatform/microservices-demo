@@ -10,7 +10,7 @@
     }
   },
   "constraints": {
-    "python": "~=3.7.0"
+    "python": "~=3.9.0"
   },
   "prConcurrentLimit":8,
   "stabilityDays":7,
@@ -20,6 +20,9 @@
      ],
      "stabilityDays":0
   },
+  "postUpdateOptions": [
+    "gomodTidy"
+  ],
   "labels": ["dependencies"],
   "python":{
     "addLabels": ["lang: python"]
