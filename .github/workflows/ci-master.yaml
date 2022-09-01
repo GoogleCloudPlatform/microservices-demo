@@ -27,6 +27,7 @@ jobs:
     - uses: actions/setup-dotnet@v2
       with:
         dotnet-version: '7.0'
+        include-prerelease: true
     - uses: actions/setup-go@v3
       with:
         go-version: '1.17.5'
