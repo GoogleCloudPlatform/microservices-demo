@@ -85,7 +85,7 @@ httplib2==0.20.4
     # via
     #   google-api-python-client
     #   google-auth-httplib2
-idna==2.10
+idna==3.3
     # via requests
 msgpack==1.0.4
     # via cachecontrol
