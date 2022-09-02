@@ -79,7 +79,7 @@ grpcio==1.48.1
     #   opencensus-ext-grpc
 grpcio-health-checking==1.47.0
     # via -r requirements.in
-grpcio-status==1.47.0
+grpcio-status==1.48.1
     # via google-api-core
 httplib2==0.20.4
     # via
