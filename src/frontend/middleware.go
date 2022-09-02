@@ -87,7 +87,7 @@ func ensureSessionID(next http.Handler) http.HandlerFunc {
 		var sessionID string
 		c, err := r.Cookie(cookieSessionID)
 		if err == http.ErrNoCookie {
-			if os.Getenv("ENABLE_UNIQUE_USER_ID_ACROSS_SESSIONS") == "true" {
+			if os.Getenv("ENABLE_SINGLE_SHARED_SESSION") == "true" {
 				// Hard coded user id, shared across sessions
 				sessionID = "12345678-1234-1234-1234-123456789123"
 			} else {
