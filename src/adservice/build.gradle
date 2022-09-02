@@ -100,7 +100,7 @@ task downloadRepos(type: Copy) {
 }
 
 task adService(type: CreateStartScripts) {
-    mainClassName = 'hipstershop.AdService'
+    mainClass.set('hipstershop.AdService')
     applicationName = 'AdService'
     outputDir = new File(project.buildDir, 'tmp')
     classpath = startScripts.classpath
@@ -110,7 +110,7 @@ task adService(type: CreateStartScripts) {
 }
 
 task adServiceClient(type: CreateStartScripts) {
-    mainClassName = 'hipstershop.AdServiceClient'
+    mainClass.set('hipstershop.AdServiceClient')
     applicationName = 'AdServiceClient'
     outputDir = new File(project.buildDir, 'tmp')
     classpath = startScripts.classpath
