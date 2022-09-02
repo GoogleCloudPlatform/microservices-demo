@@ -45,7 +45,7 @@ googleapis-common-protos==1.56.4
     # via
     #   google-api-core
     #   grpcio-status
-grpcio==1.47.0
+grpcio==1.48.1
     # via
     #   -r requirements.in
     #   google-api-core
