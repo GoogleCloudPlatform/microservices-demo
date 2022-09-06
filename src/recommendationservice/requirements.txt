@@ -26,7 +26,7 @@ google-api-core[grpc]==2.10.0
     #   google-cloud-trace
     #   google-python-cloud-debugger
     #   opencensus
-google-api-python-client==2.58.0
+google-api-python-client==2.60.0
     # via
     #   firebase-admin
     #   google-cloud-profiler
