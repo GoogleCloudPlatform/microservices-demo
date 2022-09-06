@@ -49,7 +49,7 @@ markupsafe==2.1.1
     #   werkzeug
 msgpack==1.0.4
     # via locust
-psutil==5.9.1
+psutil==5.9.2
     # via locust
 pyzmq==22.3.0
     # via locust
