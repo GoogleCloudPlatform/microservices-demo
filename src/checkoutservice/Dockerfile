@@ -27,7 +27,7 @@ COPY . .
 
 RUN go mod download
 
-RUN go build -tags=${GOROOK_OS_TAG},rookout_static -gcflags='all=-N -l' -o /checkoutservice .
+RUN go build -tags=${GOROOK_OS_TAG},rookout_static -gcflags="all=-dwarflocationlists=true" -o /checkoutservice .
 
 FROM builder as release
 RUN apk add --update --no-cache ca-certificates

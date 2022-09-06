@@ -24,7 +24,7 @@ ENV GOROOK_OS_TAG=alpine314
 WORKDIR /src
 COPY . .
 RUN go mod download
-RUN go build -tags=${GOROOK_OS_TAG},rookout_static -gcflags='all=-N -l' -o /go/bin/productcatalogservice .
+RUN go build -tags=${GOROOK_OS_TAG},rookout_static -gcflags="all=-dwarflocationlists=true" -o /go/bin/productcatalogservice .
 
 FROM builder AS release
 RUN apk add --update --no-cache ca-certificates
