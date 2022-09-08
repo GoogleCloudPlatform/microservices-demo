@@ -20,6 +20,9 @@
      ],
      "stabilityDays":0
   },
+  "postUpdateOptions": [
+    "gomodTidy"
+  ],
   "labels": ["dependencies"],
   "python":{
     "addLabels": ["lang: python"]

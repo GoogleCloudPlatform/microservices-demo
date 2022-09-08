@@ -16,12 +16,12 @@ version = "0.1.0-SNAPSHOT"
 
 def opencensusVersion = "0.31.1"
 def grpcVersion = "1.32.1"
-def jacksonVersion = "2.13.3"
+def jacksonVersion = "2.13.4"
 def protocVersion = "3.21.5"
 
 tasks.withType(JavaCompile) {
-    sourceCompatibility = JavaVersion.VERSION_1_8
-    targetCompatibility = JavaVersion.VERSION_1_8
+    sourceCompatibility = JavaVersion.VERSION_18
+    targetCompatibility = JavaVersion.VERSION_18
 }
 
 ext {
@@ -93,14 +93,14 @@ startScripts.enabled = false
 // This to cache dependencies during Docker image building. First build will take time.
 // Subsequent build will be incremental.
 task downloadRepos(type: Copy) {
-    from configurations.compile
+    from configurations.compileClasspath
     into offlineCompile
-    from configurations.runtime
+    from configurations.compileClasspath
     into offlineCompile
 }
 
 task adService(type: CreateStartScripts) {
-    mainClassName = 'hipstershop.AdService'
+    mainClass.set('hipstershop.AdService')
     applicationName = 'AdService'
     outputDir = new File(project.buildDir, 'tmp')
     classpath = startScripts.classpath
@@ -110,7 +110,7 @@ task adService(type: CreateStartScripts) {
 }
 
 task adServiceClient(type: CreateStartScripts) {
-    mainClassName = 'hipstershop.AdServiceClient'
+    mainClass.set('hipstershop.AdServiceClient')
     applicationName = 'AdServiceClient'
     outputDir = new File(project.buildDir, 'tmp')
     classpath = startScripts.classpath

@@ -18,6 +18,7 @@ import (
 	"context"
 	"net/http"
 	"time"
+	"os"
 
 	"github.com/google/uuid"
 	"github.com/sirupsen/logrus"
@@ -86,8 +87,13 @@ func ensureSessionID(next http.Handler) http.HandlerFunc {
 		var sessionID string
 		c, err := r.Cookie(cookieSessionID)
 		if err == http.ErrNoCookie {
-			u, _ := uuid.NewRandom()
-			sessionID = u.String()
+			if os.Getenv("ENABLE_SINGLE_SHARED_SESSION") == "true" {
+				// Hard coded user id, shared across sessions
+				sessionID = "12345678-1234-1234-1234-123456789123"
+			} else {
+				u, _ := uuid.NewRandom()
+				sessionID = u.String()
+			}
 			http.SetCookie(w, &http.Cookie{
 				Name:   cookieSessionID,
 				Value:  sessionID,
