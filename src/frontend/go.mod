@@ -3,7 +3,6 @@ module github.com/GoogleCloudPlatform/microservices-demo/src/frontend
 go 1.19
 
 require (
-	cloud.google.com/go v0.104.0
 	cloud.google.com/go/compute v1.9.0
 	cloud.google.com/go/profiler v0.3.0
 	contrib.go.opencensus.io/exporter/jaeger v0.2.1
@@ -14,11 +13,12 @@ require (
 	github.com/pkg/errors v0.9.1
 	github.com/sirupsen/logrus v1.9.0
 	go.opencensus.io v0.23.0
-	golang.org/x/net v0.0.0-20220826154423-83b083e8dc8b
+	golang.org/x/net v0.0.0-20220907135653-1e95f45603a7
 	google.golang.org/grpc v1.49.0
 )
 
 require (
+	cloud.google.com/go v0.104.0 // indirect
 	cloud.google.com/go/monitoring v1.1.0 // indirect
 	cloud.google.com/go/trace v1.0.0 // indirect
 	github.com/aws/aws-sdk-go v1.43.31 // indirect
