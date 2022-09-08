@@ -27,6 +27,8 @@ RUN GRPC_HEALTH_PROBE_VERSION=v0.4.12 && \
     chmod +x /bin/grpc_health_probe
 WORKDIR /app
 COPY --from=builder /cartservice .
-ENV ASPNETCORE_URLS http://*:7070
-ENV DOTNET_EnableDiagnostics=0
+EXPOSE 7070
+ENV DOTNET_EnableDiagnostics=0 \
+    ASPNETCORE_URLS=http://*:7070
+USER 1000
 ENTRYPOINT ["/app/cartservice"]
