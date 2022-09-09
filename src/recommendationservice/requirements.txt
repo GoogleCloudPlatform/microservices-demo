@@ -8,7 +8,7 @@ cachecontrol==0.12.11
     # via firebase-admin
 cachetools==5.2.0
     # via google-auth
-certifi==2022.6.15
+certifi==2022.6.15.1
     # via requests
 charset-normalizer==2.1.1
     # via requests
