@@ -12,7 +12,7 @@
     "@google-cloud/debug-agent": "7.1.0",
     "@google-cloud/profiler": "5.0.2",
     "@google-cloud/trace-agent": "7.1.1",
-    "@grpc/grpc-js": "1.6.12",
+    "@grpc/grpc-js": "1.7.0",
     "@grpc/proto-loader": "0.7.2",
     "async": "3.2.4",
     "google-protobuf": "3.21.0",
