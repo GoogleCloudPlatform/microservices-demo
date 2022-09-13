@@ -4,7 +4,7 @@
 #
 #    pip-compile --output-file=requirements.txt requirements.in
 #
-cachecontrol==0.12.11
+cachecontrol==0.12.12
     # via firebase-admin
 cachetools==5.2.0
     # via google-auth
