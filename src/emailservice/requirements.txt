@@ -4,7 +4,7 @@ grpcio==1.33.2
 jinja2==2.11.3
 python-json-logger==0.1.11
 requests==2.24.0
-rook>=0.1.179
+rook>=0.1.180
 opentracing==2.4.0
 jaeger-client==4.5.0
 markupsafe<=2.0.1

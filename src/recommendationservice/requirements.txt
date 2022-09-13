@@ -3,7 +3,7 @@ grpcio-health-checking==1.33.2
 grpcio==1.33.2
 python-json-logger==0.1.11
 requests==2.24.0
-rook>=0.1.179
+rook>=0.1.180
 opentracing==2.4.0
 jaeger-client==4.5.0
 protobuf==3.20.1
