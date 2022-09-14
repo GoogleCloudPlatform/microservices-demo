@@ -41,6 +41,7 @@ import (
 	"go.opencensus.io/stats/view"
 	"go.opencensus.io/trace"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
@@ -55,6 +56,24 @@ var (
 
 	reloadCatalog bool
 )
+
+const (
+	SERVICENAME = "productcatalogservice"
+)
+
+// NOTE: logLevel must be a GELF valid severity value (WARN or ERROR), INFO if not specified
+func emitLog(event string, logLevel string) {
+	logMessage := time.Now().Format(time.RFC3339) + " - " + logLevel + " - " + SERVICENAME + " - " + event
+
+	switch logLevel {
+	case "ERROR":
+		log.Error(logMessage)
+	case "WARN":
+		log.Warn(logMessage)
+	default:
+		log.Info(logMessage)
+	}
+}
 
 func init() {
 	log = logrus.New()
@@ -266,12 +285,46 @@ func (p *productCatalog) Watch(req *healthpb.HealthCheckRequest, ws healthpb.Hea
 	return status.Errorf(codes.Unimplemented, "health check via Watch not implemented")
 }
 
-func (p *productCatalog) ListProducts(context.Context, *pb.Empty) (*pb.ListProductsResponse, error) {
+func (p *productCatalog) ListProducts(ctx context.Context, req *pb.Empty) (*pb.ListProductsResponse, error) {
+	md, _ := metadata.FromIncomingContext(ctx)
+	values := md.Get("requestid")
+	invService := md.Get("servicename")
+	var RequestID, ServiceName string
+
+	if len(values) > 0 && len(invService) > 0 {
+		RequestID = values[0]
+		ServiceName = invService[0]
+
+		event := "Received request from " + ServiceName + " (request_id: " + RequestID + ")"
+		emitLog(event, "INFO")
+	} else {
+		emitLog(SERVICENAME+": An error occurred while retrieving the RequestID", "ERROR")
+	}
+	
 	time.Sleep(extraLatency)
+
+	event := "Answered to request from " + ServiceName + " (request_id: " + RequestID + ")"
+	emitLog(event, "INFO")
+
 	return &pb.ListProductsResponse{Products: parseCatalog()}, nil
 }
 
 func (p *productCatalog) GetProduct(ctx context.Context, req *pb.GetProductRequest) (*pb.Product, error) {
+	md, _ := metadata.FromIncomingContext(ctx)
+	values := md.Get("requestid")
+	invService := md.Get("servicename")
+	var RequestID, ServiceName string
+
+	if len(values) > 0 && len(invService) > 0 {
+		RequestID = values[0]
+		ServiceName = invService[0]
+
+		event := "Received request from " + ServiceName + " (request_id: " + RequestID + ")"
+		emitLog(event, "INFO")
+	} else {
+		emitLog(SERVICENAME+": An error occurred while retrieving the RequestID", "ERROR")
+	}
+	
 	time.Sleep(extraLatency)
 	var found *pb.Product
 	for i := 0; i < len(parseCatalog()); i++ {
@@ -280,12 +333,32 @@ func (p *productCatalog) GetProduct(ctx context.Context, req *pb.GetProductReque
 		}
 	}
 	if found == nil {
+		emitLog(SERVICENAME+": no product with ID " + req.Id, "ERROR")
 		return nil, status.Errorf(codes.NotFound, "no product with ID %s", req.Id)
 	}
+
+	event := "Answered to request from " + ServiceName + " (request_id: " + RequestID + ")"
+	emitLog(event, "INFO")
+
 	return found, nil
 }
 
 func (p *productCatalog) SearchProducts(ctx context.Context, req *pb.SearchProductsRequest) (*pb.SearchProductsResponse, error) {
+	md, _ := metadata.FromIncomingContext(ctx)
+	values := md.Get("requestid")
+	invService := md.Get("servicename")
+	var RequestID, ServiceName string
+
+	if len(values) > 0 && len(invService) > 0 {
+		RequestID = values[0]
+		ServiceName = invService[0]
+
+		event := "Received request from " + ServiceName + " (request_id: " + RequestID + ")"
+		emitLog(event, "INFO")
+	} else {
+		emitLog(SERVICENAME+": An error occurred while retrieving the RequestID", "ERROR")
+	}
+
 	time.Sleep(extraLatency)
 	// Intepret query as a substring match in name or description.
 	var ps []*pb.Product
@@ -295,5 +368,9 @@ func (p *productCatalog) SearchProducts(ctx context.Context, req *pb.SearchProdu
 			ps = append(ps, p)
 		}
 	}
+
+	event := "Answered to request from " + ServiceName + " (request_id: " + RequestID + ")"
+	emitLog(event, "INFO")
+
 	return &pb.SearchProductsResponse{Results: ps}, nil
 }

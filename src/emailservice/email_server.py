@@ -19,6 +19,7 @@ import argparse
 import os
 import sys
 import time
+import datetime
 import grpc
 import traceback
 from jinja2 import Environment, FileSystemLoader, select_autoescape, TemplateError
@@ -41,6 +42,8 @@ import googlecloudprofiler
 from logger import getJSONLogger
 logger = getJSONLogger('emailservice-server')
 
+SERVICENAME = "emailservice"
+
 # try:
 #     googleclouddebugger.enable(
 #         module='emailserver',
@@ -55,6 +58,18 @@ env = Environment(
     autoescape=select_autoescape(['html', 'xml'])
 )
 template = env.get_template('confirmation.html')
+
+# NOTE: logLevel must be a GELF valid severity value (WARN or ERROR), INFO if not specified
+def emitLog(event, logLevel):
+  ct = datetime.datetime.now().isoformat()
+  logMessage = str(ct) + " - " + logLevel + " - " + SERVICENAME + " - " + event
+  
+  if logLevel == "ERROR":
+    logger.error(logMessage)
+  elif logLevel == "WARN":
+    logger.warn(logMessage)
+  else:
+    logger.info(logMessage)
 
 class BaseEmailService(demo_pb2_grpc.EmailServiceServicer):
   def Check(self, request, context):
@@ -94,9 +109,17 @@ class EmailService(BaseEmailService):
     email = request.email
     order = request.order
 
+    metadict = dict(context.invocation_metadata())
+    request_id = metadict['requestid']
+    service_name = metadict['servicename']
+
+    event = "Received request from " + service_name + " (request_id: " + request_id + ")"
+    emitLog(event, "INFO")
+
     try:
       confirmation = template.render(order = order)
     except TemplateError as err:
+      emitLog(SERVICENAME + ": An error occurred when preparing the confirmation mail.", "ERROR")
       context.set_details("An error occurred when preparing the confirmation mail.")
       logger.error(err.message)
       context.set_code(grpc.StatusCode.INTERNAL)
@@ -105,16 +128,31 @@ class EmailService(BaseEmailService):
     try:
       EmailService.send_email(self.client, email, confirmation)
     except GoogleAPICallError as err:
+      emitLog(SERVICENAME+": An error occurred when sending the email.", "ERROR")
       context.set_details("An error occurred when sending the email.")
       print(err.message)
       context.set_code(grpc.StatusCode.INTERNAL)
       return demo_pb2.Empty()
 
+    event = "Answered to request from " + service_name + " (request_id: " + request_id + ")"
+    emitLog(event, "INFO")
+
     return demo_pb2.Empty()
 
 class DummyEmailService(BaseEmailService):
   def SendOrderConfirmation(self, request, context):
+    metadict = dict(context.invocation_metadata())
+    request_id = metadict['requestid']
+    service_name = metadict['servicename']
+
+    event = "Received request from " + service_name + " (request_id: " + request_id + ")"
+    emitLog(event, "INFO")
+
     logger.info('A request to send order confirmation email to {} has been received.'.format(request.email))
+
+    event = "Received request from " + service_name + " (request_id: " + request_id + ")"
+    emitLog(event, "INFO")
+
     return demo_pb2.Empty()
 
 class HealthCheck():

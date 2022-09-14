@@ -90,7 +90,7 @@ func main() {
 			logrus.FieldKeyLevel: "severity",
 			logrus.FieldKeyMsg:   "message",
 		},
-		TimestampFormat: time.RFC3339Nano,
+		TimestampFormat: time.RFC3339,
 	}
 	log.Out = os.Stdout
 

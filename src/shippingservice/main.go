@@ -29,6 +29,7 @@ import (
 	"go.opencensus.io/trace"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/reflection"
 	"google.golang.org/grpc/status"
@@ -39,6 +40,7 @@ import (
 
 const (
 	defaultPort = "50051"
+	SERVICENAME = "shippingservice"
 )
 
 var log *logrus.Logger
@@ -115,13 +117,46 @@ func (s *server) Watch(req *healthpb.HealthCheckRequest, ws healthpb.Health_Watc
 	return status.Errorf(codes.Unimplemented, "health check via Watch not implemented")
 }
 
+// NOTE: logLevel must be a GELF valid severity value (WARN or ERROR), INFO if not specified
+func emitLog(event string, logLevel string) {
+	logMessage := time.Now().Format(time.RFC3339) + " - " + logLevel + " - " + SERVICENAME + " - " + event
+
+	switch logLevel {
+	case "ERROR":
+		log.Error(logMessage)
+	case "WARN":
+		log.Warn(logMessage)
+	default:
+		log.Info(logMessage)
+	}
+}
+
 // GetQuote produces a shipping quote (cost) in USD.
 func (s *server) GetQuote(ctx context.Context, in *pb.GetQuoteRequest) (*pb.GetQuoteResponse, error) {
+	md, _ := metadata.FromIncomingContext(ctx)
+	values := md.Get("requestid")
+	invService := md.Get("servicename")
+	var event, RequestID, ServiceName string
+
 	log.Info("[GetQuote] received request")
 	defer log.Info("[GetQuote] completed request")
 
+	if len(values) > 0 && len(invService) > 0 {
+		RequestID = values[0]
+		ServiceName = invService[0]
+
+		event = "Received request from " + ServiceName + " (request_id: " + RequestID + ")"
+		emitLog(event, "INFO")
+	} else {
+		event = SERVICENAME+": An error occurred while retrieving the RequestID"
+		emitLog(event, "ERROR")
+	}
+
 	// 1. Generate a quote based on the total number of items to be shipped.
 	quote := CreateQuoteFromCount(0)
+
+	event = "Answered to request from " + ServiceName + " (request_id: " + RequestID + ")"
+	emitLog(event, "INFO")
 
 	// 2. Generate a response.
 	return &pb.GetQuoteResponse{
@@ -136,11 +171,31 @@ func (s *server) GetQuote(ctx context.Context, in *pb.GetQuoteRequest) (*pb.GetQ
 // ShipOrder mocks that the requested items will be shipped.
 // It supplies a tracking ID for notional lookup of shipment delivery status.
 func (s *server) ShipOrder(ctx context.Context, in *pb.ShipOrderRequest) (*pb.ShipOrderResponse, error) {
+	md, _ := metadata.FromIncomingContext(ctx)
+	values := md.Get("requestid")
+	invService := md.Get("servicename")
+	var event, RequestID, ServiceName string
+
 	log.Info("[ShipOrder] received request")
 	defer log.Info("[ShipOrder] completed request")
+
+	if len(values) > 0 && len(invService) > 0 {
+		RequestID = values[0]
+		ServiceName = invService[0]
+
+		event = "Received request from " + ServiceName + " (request_id: " + RequestID + ")"
+		emitLog(event, "INFO")
+	} else {
+		event = SERVICENAME+": An error occurred while retrieving the RequestID"
+		emitLog(event, "ERROR")
+	}
+
 	// 1. Create a Tracking ID
 	baseAddress := fmt.Sprintf("%s, %s, %s", in.Address.StreetAddress, in.Address.City, in.Address.State)
 	id := CreateTrackingId(baseAddress)
+
+	event = "Answered to request from " + ServiceName + " (request_id: " + RequestID + ")"
+	emitLog(event, "INFO")
 
 	// 2. Generate a response.
 	return &pb.ShipOrderResponse{

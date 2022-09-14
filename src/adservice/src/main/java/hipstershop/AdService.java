@@ -23,7 +23,9 @@ import hipstershop.Demo.Ad;
 import hipstershop.Demo.AdRequest;
 import hipstershop.Demo.AdResponse;
 import io.grpc.Server;
+import io.grpc.*;
 import io.grpc.ServerBuilder;
+import io.grpc.ServerCall.Listener;
 import io.grpc.StatusRuntimeException;
 import io.grpc.health.v1.HealthCheckResponse.ServingStatus;
 import io.grpc.services.*;
@@ -41,6 +43,8 @@ import io.opencensus.trace.Span;
 import io.opencensus.trace.Tracer;
 import io.opencensus.trace.Tracing;
 import java.io.IOException;
+import java.sql.Timestamp;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -63,22 +67,45 @@ public final class AdService {
 
   private static final AdService service = new AdService();
 
+  public static class MetadataInterceptor implements ServerInterceptor {
+    public static Context.Key<Object> REQUEST_ID = Context.key("RequestID");
+    public static Context.Key<Object> SERVICE_NAME = Context.key("ServiceName");
+
+    @Override
+    public <ReqT, RespT> Listener<ReqT> interceptCall(ServerCall<ReqT, RespT> call, Metadata headers,
+        ServerCallHandler<ReqT, RespT> next) {
+
+      Object RequestID = headers.get(Metadata.Key.of("requestid", Metadata.ASCII_STRING_MARSHALLER));
+      Object ServiceName = headers.get(Metadata.Key.of("servicename", Metadata.ASCII_STRING_MARSHALLER));
+
+      if (RequestID == null && ServiceName == null) {
+        AdService.emitLog(SERVICENAME + ": SessionID not found in header.", "ERROR");
+        return new ServerCall.Listener() {
+        };
+      }
+
+      Context context = Context.current().withValues(REQUEST_ID, RequestID, SERVICE_NAME, ServiceName);
+
+      return Contexts.interceptCall(context, call, headers, next);
+    }
+  }
+
   private void start() throws IOException {
     int port = Integer.parseInt(System.getenv().getOrDefault("PORT", "9555"));
     healthMgr = new HealthStatusManager();
 
-    server =
-        ServerBuilder.forPort(port)
-            .addService(new AdServiceImpl())
-            .addService(healthMgr.getHealthService())
-            .build()
-            .start();
+    server = ServerBuilder.forPort(port)
+        .addService(ServerInterceptors.intercept(new AdServiceImpl(), new MetadataInterceptor()))
+        .addService(healthMgr.getHealthService())
+        .build()
+        .start();
     logger.info("Ad Service started, listening on " + port);
     Runtime.getRuntime()
         .addShutdownHook(
             new Thread(
                 () -> {
-                  // Use stderr here since the logger may have been reset by its JVM shutdown hook.
+                  // Use stderr here since the logger may have been reset by its JVM shutdown
+                  // hook.
                   System.err.println(
                       "*** shutting down gRPC ads server since JVM is shutting down");
                   AdService.this.stop();
@@ -94,20 +121,51 @@ public final class AdService {
     }
   }
 
+  public static String SERVICENAME = "adservice";
+
+  // NOTE: logLevel must be a GELF valid severity value (WARN or ERROR), INFO if not specified
+  public static void emitLog(String event, String logLevel) {
+    Timestamp instant = Timestamp.from(Instant.now());
+    String logMessage = instant.toInstant().toString() + " - " + logLevel + " - " + SERVICENAME + " - " + event;
+
+    switch (logLevel) {
+      case "ERROR":
+        logger.log(Level.ERROR, logMessage);
+        break;
+
+      case "WARN":
+        logger.log(Level.WARN, logMessage);
+        break;
+
+      default:
+        logger.log(Level.INFO, logMessage);
+        break;
+    }
+  }
+
   private static class AdServiceImpl extends hipstershop.AdServiceGrpc.AdServiceImplBase {
 
     /**
      * Retrieves ads based on context provided in the request {@code AdRequest}.
      *
-     * @param req the request containing context.
-     * @param responseObserver the stream observer which gets notified with the value of {@code
+     * @param req              the request containing context.
+     * @param responseObserver the stream observer which gets notified with the
+     *                         value of {@code
      *     AdResponse}
      */
     @Override
     public void getAds(AdRequest req, StreamObserver<AdResponse> responseObserver) {
       AdService service = AdService.getInstance();
       Span span = tracer.getCurrentSpan();
+
       try {
+        Object RequestID = MetadataInterceptor.REQUEST_ID.get();
+        Object ServiceName = MetadataInterceptor.SERVICE_NAME.get();
+
+        String event = "Received request from " + ServiceName.toString() + " (request_id: " + RequestID.toString()
+            + ")";
+        AdService.emitLog(event, "INFO");
+
         span.putAttribute("method", AttributeValue.stringAttributeValue("getAds"));
         List<Ad> allAds = new ArrayList<>();
         logger.info("received ad request (context_words=" + req.getContextKeysList() + ")");
@@ -132,10 +190,16 @@ public final class AdService {
           span.addAnnotation("No Ads found based on context. Constructing random Ads.");
           allAds = service.getRandomAds();
         }
+
+        event = "Answered to request from " + ServiceName.toString() + " (request_id: " + RequestID.toString() + ")";
+        AdService.emitLog(event, "INFO");
+
         AdResponse reply = AdResponse.newBuilder().addAllAds(allAds).build();
         responseObserver.onNext(reply);
         responseObserver.onCompleted();
+
       } catch (StatusRuntimeException e) {
+        AdService.emitLog("GetAds Failed with status" + e.getStatus(), "ERROR");
         logger.log(Level.WARN, "GetAds Failed with status {}", e.getStatus());
         responseObserver.onError(e);
       }
@@ -163,7 +227,10 @@ public final class AdService {
     return service;
   }
 
-  /** Await termination on the main thread since the grpc library uses daemon threads. */
+  /**
+   * Await termination on the main thread since the grpc library uses daemon
+   * threads.
+   */
   private void blockUntilShutdown() throws InterruptedException {
     if (server != null) {
       server.awaitTermination();
@@ -171,41 +238,34 @@ public final class AdService {
   }
 
   private static ImmutableListMultimap<String, Ad> createAdsMap() {
-    Ad hairdryer =
-        Ad.newBuilder()
-            .setRedirectUrl("/product/2ZYFJ3GM2N")
-            .setText("Hairdryer for sale. 50% off.")
-            .build();
-    Ad tankTop =
-        Ad.newBuilder()
-            .setRedirectUrl("/product/66VCHSJNUP")
-            .setText("Tank top for sale. 20% off.")
-            .build();
-    Ad candleHolder =
-        Ad.newBuilder()
-            .setRedirectUrl("/product/0PUK6V6EV0")
-            .setText("Candle holder for sale. 30% off.")
-            .build();
-    Ad bambooGlassJar =
-        Ad.newBuilder()
-            .setRedirectUrl("/product/9SIQT8TOJO")
-            .setText("Bamboo glass jar for sale. 10% off.")
-            .build();
-    Ad watch =
-        Ad.newBuilder()
-            .setRedirectUrl("/product/1YMWWN1N4O")
-            .setText("Watch for sale. Buy one, get second kit for free")
-            .build();
-    Ad mug =
-        Ad.newBuilder()
-            .setRedirectUrl("/product/6E92ZMYYFZ")
-            .setText("Mug for sale. Buy two, get third one for free")
-            .build();
-    Ad loafers =
-        Ad.newBuilder()
-            .setRedirectUrl("/product/L9ECAV7KIM")
-            .setText("Loafers for sale. Buy one, get second one for free")
-            .build();
+    Ad hairdryer = Ad.newBuilder()
+        .setRedirectUrl("/product/2ZYFJ3GM2N")
+        .setText("Hairdryer for sale. 50% off.")
+        .build();
+    Ad tankTop = Ad.newBuilder()
+        .setRedirectUrl("/product/66VCHSJNUP")
+        .setText("Tank top for sale. 20% off.")
+        .build();
+    Ad candleHolder = Ad.newBuilder()
+        .setRedirectUrl("/product/0PUK6V6EV0")
+        .setText("Candle holder for sale. 30% off.")
+        .build();
+    Ad bambooGlassJar = Ad.newBuilder()
+        .setRedirectUrl("/product/9SIQT8TOJO")
+        .setText("Bamboo glass jar for sale. 10% off.")
+        .build();
+    Ad watch = Ad.newBuilder()
+        .setRedirectUrl("/product/1YMWWN1N4O")
+        .setText("Watch for sale. Buy one, get second kit for free")
+        .build();
+    Ad mug = Ad.newBuilder()
+        .setRedirectUrl("/product/6E92ZMYYFZ")
+        .setText("Mug for sale. Buy two, get third one for free")
+        .build();
+    Ad loafers = Ad.newBuilder()
+        .setRedirectUrl("/product/L9ECAV7KIM")
+        .setText("Loafers for sale. Buy one, get second one for free")
+        .build();
     return ImmutableListMultimap.<String, Ad>builder()
         .putAll("clothing", tankTop)
         .putAll("accessories", watch)
@@ -293,9 +353,6 @@ public final class AdService {
     logger.info("Tracing enabled - Stackdriver exporter initialized.");
   }
 
-
-
-
   private static void initJaeger() {
     String jaegerAddr = System.getenv("JAEGER_SERVICE_ADDR");
     if (jaegerAddr != null && !jaegerAddr.isEmpty()) {
@@ -318,10 +375,10 @@ public final class AdService {
     RpcViews.registerAllGrpcViews();
 
     new Thread(
-            () -> {
-              initStats();
-              initTracing();
-            })
+        () -> {
+          initStats();
+          initTracing();
+        })
         .start();
 
     // Register Jaeger

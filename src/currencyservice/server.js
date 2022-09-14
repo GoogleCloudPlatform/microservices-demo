@@ -27,7 +27,6 @@ else {
   });
 }
 
-
 if(process.env.DISABLE_TRACING) {
   console.log("Tracing disabled.")
 }
@@ -106,14 +105,44 @@ function _carry (amount) {
   return amount;
 }
 
+const SERVICENAME = "currencyservice";
+
+// NOTE: logLevel must be a GELF valid severity value (WARN or ERROR), INFO if not specified
+function emitLog(event, logLevel) {
+  var logMessage = new Date().toISOString() + " - " + logLevel + " - " + SERVICENAME + " - " + event;
+
+  switch (logLevel) {
+    case "ERROR":
+      logger.error(logMessage);
+      break;
+
+    case "WARN":
+      logger.warn(logMessage);
+      break;
+
+    default:
+      logger.info(logMessage);
+      break;
+  }
+}
+
 /**
  * Lists the supported currencies
  */
 function getSupportedCurrencies (call, callback) {
+  var SessionID = call.metadata.get("requestid");
+  var ServiceName = call.metadata.get("servicename");
+
+  var event = "Received request from " + ServiceName + " (request_id: " + SessionID[0] + ")";
+  emitLog(event, "INFO");
   logger.info('Getting supported currencies...');
+
   _getCurrencyData((data) => {
     callback(null, {currency_codes: Object.keys(data)});
   });
+
+  event = "Answered to request from " + ServiceName + " (request_id: " + SessionID[0] + ")";
+  emitLog(event, "INFO");
 }
 
 /**
@@ -121,6 +150,12 @@ function getSupportedCurrencies (call, callback) {
  */
 function convert (call, callback) {
   try {
+    var SessionID = call.metadata.get("requestid");
+    var ServiceName = call.metadata.get("servicename");
+
+    var event = "Received request from " + ServiceName + " (request_id: " + SessionID[0] + ")";
+    emitLog(event, "INFO");
+
     _getCurrencyData((data) => {
       const request = call.request;
 
@@ -143,10 +178,14 @@ function convert (call, callback) {
       result.nanos = Math.floor(result.nanos);
       result.currency_code = request.to_code;
 
+      event = "Answered to request from " + ServiceName + " (request_id: " + SessionID[0] + ")";
+      emitLog(event, "INFO");
       logger.info(`conversion request successful`);
+
       callback(null, result);
     });
   } catch (err) {
+    emitLog(`conversion request failed: ${err}`, "ERROR");
     logger.error(`conversion request failed: ${err}`);
     callback(err.message);
   }

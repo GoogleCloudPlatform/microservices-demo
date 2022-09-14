@@ -17,6 +17,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"google.golang.org/grpc/metadata"
 	"net"
 	"os"
 	"time"
@@ -41,7 +42,22 @@ import (
 const (
 	listenPort  = "5050"
 	usdCurrency = "USD"
+	SERVICENAME = "checkoutservice"
 )
+
+// NOTE: logLevel must be a GELF valid severity value (WARN or ERROR), INFO if not specified
+func emitLog(event string, logLevel string) {
+	logMessage := time.Now().Format(time.RFC3339) + " - " + logLevel + " - " + SERVICENAME + " - " + event
+
+	switch logLevel {
+	case "ERROR":
+		log.Error(logMessage)
+	case "WARN":
+		log.Warn(logMessage)
+	default:
+		log.Info(logMessage)
+	}
+}
 
 var log *logrus.Logger
 
@@ -216,15 +232,31 @@ func (cs *checkoutService) Watch(req *healthpb.HealthCheckRequest, ws healthpb.H
 }
 
 func (cs *checkoutService) PlaceOrder(ctx context.Context, req *pb.PlaceOrderRequest) (*pb.PlaceOrderResponse, error) {
+	md, _ := metadata.FromIncomingContext(ctx)
+	reqId := md.Get("requestid")
+	invService := md.Get("servicename")
+	var RequestID, ServiceName string
+
+	if len(reqId) > 0 && len(invService) > 0 {
+		RequestID = reqId[0]
+		ServiceName = invService[0]
+		emitLog("Received request from "+ServiceName+" (request_id: "+RequestID+")", "INFO")
+
+	} else {
+		emitLog(SERVICENAME+": An error occurred while retrieving the RequestID", "ERROR")
+	}
+
 	log.Infof("[PlaceOrder] user_id=%q user_currency=%q", req.UserId, req.UserCurrency)
 
 	orderID, err := uuid.NewUUID()
 	if err != nil {
+		emitLog(SERVICENAME+": failed to generate order uuid", "ERROR")
 		return nil, status.Errorf(codes.Internal, "failed to generate order uuid")
 	}
 
 	prep, err := cs.prepareOrderItemsAndShippingQuoteFromCart(ctx, req.UserId, req.UserCurrency, req.Address)
 	if err != nil {
+		emitLog(SERVICENAME+": "+err.Error(), "ERROR")
 		return nil, status.Errorf(codes.Internal, err.Error())
 	}
 
@@ -239,12 +271,14 @@ func (cs *checkoutService) PlaceOrder(ctx context.Context, req *pb.PlaceOrderReq
 
 	txID, err := cs.chargeCard(ctx, &total, req.CreditCard)
 	if err != nil {
+		emitLog(SERVICENAME+": failed to charge card: "+err.Error(), "ERROR")
 		return nil, status.Errorf(codes.Internal, "failed to charge card: %+v", err)
 	}
 	log.Infof("payment went through (transaction_id: %s)", txID)
 
 	shippingTrackingID, err := cs.shipOrder(ctx, req.Address, prep.cartItems)
 	if err != nil {
+		emitLog(SERVICENAME+": shipping error "+err.Error(), "ERROR")
 		return nil, status.Errorf(codes.Unavailable, "shipping error: %+v", err)
 	}
 
@@ -259,11 +293,16 @@ func (cs *checkoutService) PlaceOrder(ctx context.Context, req *pb.PlaceOrderReq
 	}
 
 	if err := cs.sendOrderConfirmation(ctx, req.Email, orderResult); err != nil {
+		emitLog(SERVICENAME+": failed to send order confirmation to "+req.Email+": "+err.Error(), "WARN")
 		log.Warnf("failed to send order confirmation to %q: %+v", req.Email, err)
 	} else {
 		log.Infof("order confirmation email sent to %q", req.Email)
 	}
 	resp := &pb.PlaceOrderResponse{Order: orderResult}
+
+	event := "Answered to request from " + ServiceName + " (request_id: " + RequestID + ")"
+	emitLog(event, "INFO")
+
 	return resp, nil
 }
 
@@ -277,18 +316,22 @@ func (cs *checkoutService) prepareOrderItemsAndShippingQuoteFromCart(ctx context
 	var out orderPrep
 	cartItems, err := cs.getUserCart(ctx, userID)
 	if err != nil {
+		emitLog(SERVICENAME+": cart failure: "+err.Error(), "ERROR")
 		return out, fmt.Errorf("cart failure: %+v", err)
 	}
 	orderItems, err := cs.prepOrderItems(ctx, cartItems, userCurrency)
 	if err != nil {
+		emitLog(SERVICENAME+": failed to prepare order: "+err.Error(), "ERROR")
 		return out, fmt.Errorf("failed to prepare order: %+v", err)
 	}
 	shippingUSD, err := cs.quoteShipping(ctx, address, cartItems)
 	if err != nil {
+		emitLog(SERVICENAME+": shipping quote failure: "+err.Error(), "ERROR")
 		return out, fmt.Errorf("shipping quote failure: %+v", err)
 	}
 	shippingPrice, err := cs.convertCurrency(ctx, shippingUSD, userCurrency)
 	if err != nil {
+		emitLog(SERVICENAME+": failed to convert shipping cost to currency: "+err.Error(), "ERROR")
 		return out, fmt.Errorf("failed to convert shipping cost to currency: %+v", err)
 	}
 
@@ -303,44 +346,131 @@ func (cs *checkoutService) quoteShipping(ctx context.Context, address *pb.Addres
 		grpc.WithInsecure(),
 		grpc.WithStatsHandler(&ocgrpc.ClientHandler{}))
 	if err != nil {
+		emitLog("could not connect shipping service: "+err.Error(), "ERROR")
 		return nil, fmt.Errorf("could not connect shipping service: %+v", err)
 	}
 	defer conn.Close()
 
+	RequestID, err := uuid.NewRandom()
+	if err != nil {
+		emitLog(SERVICENAME+": An error occurred while generating the RequestID", "ERROR")
+	}
+
+	header := metadata.Pairs("requestid", RequestID.String(), "servicename", SERVICENAME)
+	metadataCtx := metadata.NewOutgoingContext(ctx, header)
+
+	newCtx, cancel := context.WithTimeout(metadataCtx, 2*time.Second)
+	defer cancel()
+
+	event := "Sending message to SHIPPINGSERVICE (request_id: " + RequestID.String() + ")"
+	emitLog(event, "INFO")
+
 	shippingQuote, err := pb.NewShippingServiceClient(conn).
-		GetQuote(ctx, &pb.GetQuoteRequest{
+		GetQuote(newCtx, &pb.GetQuoteRequest{
 			Address: address,
 			Items:   items})
-	if err != nil {
+
+	receivedCode := status.Code(err)
+
+	if receivedCode == codes.DeadlineExceeded {
+		event = "Failing to contact SHIPPINGSERVICE (request_id: " + RequestID.String() + "). Root cause: (" + newCtx.Err().Error() + ")"
+		emitLog(event, "ERROR")
+
+	} else if err != nil {
+		event = "Error response received from SHIPPINGSERVICE (request_id: " + RequestID.String() + ")"
+		emitLog(event, "ERROR")
 		return nil, fmt.Errorf("failed to get shipping quote: %+v", err)
+
+	} else {
+		event = "Receiving answer from SHIPPINGSERVICE (request_id: " + RequestID.String() + ")"
+		emitLog(event, "INFO")
 	}
+
 	return shippingQuote.GetCostUsd(), nil
 }
 
 func (cs *checkoutService) getUserCart(ctx context.Context, userID string) ([]*pb.CartItem, error) {
 	conn, err := grpc.DialContext(ctx, cs.cartSvcAddr, grpc.WithInsecure(), grpc.WithStatsHandler(&ocgrpc.ClientHandler{}))
 	if err != nil {
+		emitLog("could not connect cart service: "+err.Error(), "ERROR")
 		return nil, fmt.Errorf("could not connect cart service: %+v", err)
 	}
 	defer conn.Close()
 
-	cart, err := pb.NewCartServiceClient(conn).GetCart(ctx, &pb.GetCartRequest{UserId: userID})
+	RequestID, err := uuid.NewRandom()
 	if err != nil {
-		return nil, fmt.Errorf("failed to get user cart during checkout: %+v", err)
+		emitLog(SERVICENAME+": An error occurred while generating the RequestID", "ERROR")
 	}
+
+	header := metadata.Pairs("requestid", RequestID.String(), "servicename", SERVICENAME)
+	metadataCtx := metadata.NewOutgoingContext(ctx, header)
+
+	newCtx, cancel := context.WithTimeout(metadataCtx, 2*time.Second)
+	defer cancel()
+
+	event := "Sending message to CARTSERVICE (request_id: " + RequestID.String() + ")"
+	emitLog(event, "INFO")
+
+	cart, err := pb.NewCartServiceClient(conn).GetCart(newCtx, &pb.GetCartRequest{UserId: userID})
+
+	receivedCode := status.Code(err)
+
+	if receivedCode == codes.DeadlineExceeded {
+		event = "Failing to contact SHIPPINGSERVICE (request_id: " + RequestID.String() + "). Root cause: (" + newCtx.Err().Error() + ")"
+		emitLog(event, "ERROR")
+
+	} else if err != nil {
+		event = "Error response received from SHIPPINGSERVICE (request_id: " + RequestID.String() + ")"
+		emitLog(event, "ERROR")
+		return nil, fmt.Errorf("failed to get user cart during checkout: %+v", err)
+
+	} else {
+		event = "Receiving answer from SHIPPINGSERVICE (request_id: " + RequestID.String() + ")"
+		emitLog(event, "INFO")
+	}
+
 	return cart.GetItems(), nil
 }
 
 func (cs *checkoutService) emptyUserCart(ctx context.Context, userID string) error {
 	conn, err := grpc.DialContext(ctx, cs.cartSvcAddr, grpc.WithInsecure(), grpc.WithStatsHandler(&ocgrpc.ClientHandler{}))
 	if err != nil {
+		emitLog(SERVICENAME+"could not connect cart service: "+err.Error(), "ERROR")
 		return fmt.Errorf("could not connect cart service: %+v", err)
 	}
 	defer conn.Close()
 
-	if _, err = pb.NewCartServiceClient(conn).EmptyCart(ctx, &pb.EmptyCartRequest{UserId: userID}); err != nil {
-		return fmt.Errorf("failed to empty user cart during checkout: %+v", err)
+	RequestID, err := uuid.NewRandom()
+	if err != nil {
+		emitLog(SERVICENAME+": An error occurred while generating the RequestID", "ERROR")
 	}
+
+	event := "Sending message to CARTSERVICE (request_id: " + RequestID.String() + ")"
+	emitLog(event, "INFO")
+
+	header := metadata.Pairs("requestid", RequestID.String(), "servicename", SERVICENAME)
+	metadataCtx := metadata.NewOutgoingContext(ctx, header)
+
+	newCtx, cancel := context.WithTimeout(metadataCtx, 2*time.Second)
+	defer cancel()
+
+	_, err = pb.NewCartServiceClient(conn).EmptyCart(newCtx, &pb.EmptyCartRequest{UserId: userID})
+	receivedCode := status.Code(err)
+
+	if receivedCode == codes.DeadlineExceeded {
+		event = "Failing to contact CARTSERVICE (request_id: " + RequestID.String() + "). Root cause: (" + newCtx.Err().Error() + ")"
+		emitLog(event, "ERROR")
+
+	} else if err != nil {
+		event = "Error response received from CARTSERVICE (request_id: " + RequestID.String() + ")"
+		emitLog(event, "ERROR")
+		return fmt.Errorf("failed to empty user cart during checkout: %+v", err)
+
+	} else {
+		event = "Receiving answer from CARTSERVICE (request_id: " + RequestID.String() + ")"
+		emitLog(event, "INFO")
+	}
+
 	return nil
 }
 
@@ -349,18 +479,48 @@ func (cs *checkoutService) prepOrderItems(ctx context.Context, items []*pb.CartI
 
 	conn, err := grpc.DialContext(ctx, cs.productCatalogSvcAddr, grpc.WithInsecure(), grpc.WithStatsHandler(&ocgrpc.ClientHandler{}))
 	if err != nil {
+		emitLog(SERVICENAME+"could not connect product catalog service: "+err.Error(), "ERROR")
 		return nil, fmt.Errorf("could not connect product catalog service: %+v", err)
 	}
 	defer conn.Close()
 	cl := pb.NewProductCatalogServiceClient(conn)
 
 	for i, item := range items {
-		product, err := cl.GetProduct(ctx, &pb.GetProductRequest{Id: item.GetProductId()})
+		RequestID, err := uuid.NewRandom()
 		if err != nil {
-			return nil, fmt.Errorf("failed to get product #%q", item.GetProductId())
+			emitLog(SERVICENAME+": An error occurred while generating the RequestID", "ERROR")
 		}
+
+		header := metadata.Pairs("requestid", RequestID.String(), "servicename", SERVICENAME)
+		metadataCtx := metadata.NewOutgoingContext(ctx, header)
+
+		newCtx, cancel := context.WithTimeout(metadataCtx, 2*time.Second)
+		defer cancel()
+
+		event := "Sending message to PRODUCTCATALOG (request_id: " + RequestID.String() + ")"
+		emitLog(event, "INFO")
+
+		product, err := cl.GetProduct(newCtx, &pb.GetProductRequest{Id: item.GetProductId()})
+
+		receivedCode := status.Code(err)
+
+		if receivedCode == codes.DeadlineExceeded {
+			event = "Failing to contact PRODUCTCATALOG (request_id: " + RequestID.String() + "). Root cause: (" + newCtx.Err().Error() + ")"
+			emitLog(event, "ERROR")
+
+		} else if err != nil {
+			event = "Error response received from PRODUCTCATALOG (request_id: " + RequestID.String() + ")"
+			emitLog(event, "ERROR")
+			return nil, fmt.Errorf("failed to get product #%q", item.GetProductId())
+
+		} else {
+			event = "Receiving answer from PRODUCTCATALOG (request_id: " + RequestID.String() + ")"
+			emitLog(event, "INFO")
+		}
+
 		price, err := cs.convertCurrency(ctx, product.GetPriceUsd(), userCurrency)
 		if err != nil {
+			emitLog(SERVICENAME+": failed to convert price of "+item.GetProductId()+" to "+userCurrency, "ERROR")
 			return nil, fmt.Errorf("failed to convert price of %q to %s", item.GetProductId(), userCurrency)
 		}
 		out[i] = &pb.OrderItem{
@@ -373,58 +533,175 @@ func (cs *checkoutService) prepOrderItems(ctx context.Context, items []*pb.CartI
 func (cs *checkoutService) convertCurrency(ctx context.Context, from *pb.Money, toCurrency string) (*pb.Money, error) {
 	conn, err := grpc.DialContext(ctx, cs.currencySvcAddr, grpc.WithInsecure(), grpc.WithStatsHandler(&ocgrpc.ClientHandler{}))
 	if err != nil {
+		emitLog(SERVICENAME+"could not connect currency service: "+err.Error(), "ERROR")
 		return nil, fmt.Errorf("could not connect currency service: %+v", err)
 	}
 	defer conn.Close()
-	result, err := pb.NewCurrencyServiceClient(conn).Convert(context.TODO(), &pb.CurrencyConversionRequest{
+
+	RequestID, err := uuid.NewRandom()
+	if err != nil {
+		emitLog(SERVICENAME+": An error occurred while generating the RequestID", "ERROR")
+	}
+
+	header := metadata.Pairs("requestid", RequestID.String(), "servicename", SERVICENAME)
+	metadataCtx := metadata.NewOutgoingContext(ctx, header)
+
+	newCtx, cancel := context.WithTimeout(metadataCtx, 2*time.Second)
+	defer cancel()
+
+	event := "Sending message to CURRENCYSERVICE (request_id: " + RequestID.String() + ")"
+	emitLog(event, "INFO")
+
+	result, err := pb.NewCurrencyServiceClient(conn).Convert(newCtx, &pb.CurrencyConversionRequest{
 		From:   from,
 		ToCode: toCurrency})
-	if err != nil {
+
+	receivedCode := status.Code(err)
+
+	if receivedCode == codes.DeadlineExceeded {
+		event = "Failing to contact CURRENCYSERVICE (request_id: " + RequestID.String() + "). Root cause: (" + newCtx.Err().Error() + ")"
+		emitLog(event, "ERROR")
+	} else if err != nil {
+		event = "Error response received from CURRENCYSERVICE (request_id: " + RequestID.String() + ")"
+		emitLog(event, "ERROR")
 		return nil, fmt.Errorf("failed to convert currency: %+v", err)
+	} else {
+		event = "Receiving answer from CURRENCYSERVICE (request_id: " + RequestID.String() + ")"
+		emitLog(event, "INFO")
 	}
+
 	return result, err
 }
 
 func (cs *checkoutService) chargeCard(ctx context.Context, amount *pb.Money, paymentInfo *pb.CreditCardInfo) (string, error) {
 	conn, err := grpc.DialContext(ctx, cs.paymentSvcAddr, grpc.WithInsecure(), grpc.WithStatsHandler(&ocgrpc.ClientHandler{}))
 	if err != nil {
+		emitLog(SERVICENAME+"failed to connect payment service: "+err.Error(), "ERROR")
 		return "", fmt.Errorf("failed to connect payment service: %+v", err)
 	}
 	defer conn.Close()
 
-	paymentResp, err := pb.NewPaymentServiceClient(conn).Charge(ctx, &pb.ChargeRequest{
+	RequestID, err := uuid.NewRandom()
+	if err != nil {
+		emitLog(SERVICENAME+": An error occurred while generating the RequestID", "ERROR")
+	}
+
+	header := metadata.Pairs("requestid", RequestID.String(), "servicename", SERVICENAME)
+	metadataCtx := metadata.NewOutgoingContext(ctx, header)
+
+	newCtx, cancel := context.WithTimeout(metadataCtx, 2*time.Second)
+	defer cancel()
+
+	event := "Sending message to PAYMENTSERVICE (request_id: " + RequestID.String() + ")"
+	emitLog(event, "INFO")
+
+	paymentResp, err := pb.NewPaymentServiceClient(conn).Charge(newCtx, &pb.ChargeRequest{
 		Amount:     amount,
 		CreditCard: paymentInfo})
-	if err != nil {
+
+	receivedCode := status.Code(err)
+
+	if receivedCode == codes.DeadlineExceeded {
+		event = "Failing to contact PAYMENTSERVICE (request_id: " + RequestID.String() + "). Root cause: (" + newCtx.Err().Error() + ")"
+		emitLog(event, "ERROR")
+
+	} else if err != nil {
+		event = "Error response received from PAYMENTSERVICE (request_id: " + RequestID.String() + ")"
+		emitLog(event, "ERROR")
 		return "", fmt.Errorf("could not charge the card: %+v", err)
+
+	} else {
+		event = "Receiving answer from PAYMENTSERVICE (request_id: " + RequestID.String() + ")"
+		emitLog(event, "INFO")
 	}
+
 	return paymentResp.GetTransactionId(), nil
 }
 
 func (cs *checkoutService) sendOrderConfirmation(ctx context.Context, email string, order *pb.OrderResult) error {
 	conn, err := grpc.DialContext(ctx, cs.emailSvcAddr, grpc.WithInsecure(), grpc.WithStatsHandler(&ocgrpc.ClientHandler{}))
 	if err != nil {
+		emitLog(SERVICENAME+"failed to connect email service: "+err.Error(), "ERROR")
 		return fmt.Errorf("failed to connect email service: %+v", err)
 	}
 	defer conn.Close()
-	_, err = pb.NewEmailServiceClient(conn).SendOrderConfirmation(ctx, &pb.SendOrderConfirmationRequest{
+
+	RequestID, err := uuid.NewRandom()
+	if err != nil {
+		emitLog(SERVICENAME+": An error occurred while generating the RequestID", "ERROR")
+	}
+
+	header := metadata.Pairs("requestid", RequestID.String(), "servicename", SERVICENAME)
+	metadataCtx := metadata.NewOutgoingContext(ctx, header)
+
+	newCtx, cancel := context.WithTimeout(metadataCtx, 2*time.Second)
+	defer cancel()
+
+	event := "Sending message to EMAILSERVICE (request_id: " + RequestID.String() + ")"
+	emitLog(event, "INFO")
+
+	_, err = pb.NewEmailServiceClient(conn).SendOrderConfirmation(newCtx, &pb.SendOrderConfirmationRequest{
 		Email: email,
 		Order: order})
+
+	receivedCode := status.Code(err)
+
+	if receivedCode == codes.DeadlineExceeded {
+		event = "Failing to contact EMAILSERVICE (request_id: " + RequestID.String() + "). Root cause: (" + newCtx.Err().Error() + ")"
+		emitLog(event, "ERROR")
+
+	} else if err != nil {
+		event = "Error response received from EMAILSERVICE (request_id: " + RequestID.String() + ")"
+		emitLog(event, "ERROR")
+
+	} else {
+		event = "Receiving answer from EMAILSERVICE (request_id: " + RequestID.String() + ")"
+		emitLog(event, "INFO")
+	}
+
 	return err
 }
 
 func (cs *checkoutService) shipOrder(ctx context.Context, address *pb.Address, items []*pb.CartItem) (string, error) {
 	conn, err := grpc.DialContext(ctx, cs.shippingSvcAddr, grpc.WithInsecure(), grpc.WithStatsHandler(&ocgrpc.ClientHandler{}))
 	if err != nil {
+		emitLog(SERVICENAME+"failed to connect email service: "+err.Error(), "ERROR")
 		return "", fmt.Errorf("failed to connect email service: %+v", err)
 	}
 	defer conn.Close()
-	resp, err := pb.NewShippingServiceClient(conn).ShipOrder(ctx, &pb.ShipOrderRequest{
-		Address: address,
-		Items:   items})
+
+	RequestID, err := uuid.NewRandom()
 	if err != nil {
-		return "", fmt.Errorf("shipment failed: %+v", err)
+		emitLog(SERVICENAME+": An error occurred while generating the RequestID", "ERROR")
 	}
+
+	header := metadata.Pairs("requestid", RequestID.String(), "servicename", SERVICENAME)
+	metadataCtx := metadata.NewOutgoingContext(ctx, header)
+
+	newCtx, cancel := context.WithTimeout(metadataCtx, 2*time.Second)
+	defer cancel()
+
+	event := "Sending message to SHIPPINGSERVICE (request_id: " + RequestID.String() + ")"
+	emitLog(event, "INFO")
+
+	resp, err := pb.NewShippingServiceClient(conn).ShipOrder(newCtx, &pb.ShipOrderRequest{Address: address, Items: items})
+
+	receivedCode := status.Code(err)
+
+	if receivedCode == codes.DeadlineExceeded {
+		event = "Failing to contact SHIPPINGSERVICE (request_id: " + RequestID.String() + "). Root cause: (" + newCtx.Err().Error() + ")"
+		emitLog(event, "ERROR")
+
+	} else if err != nil {
+		event = "Error response received from SHIPPINGSERVICE (request_id: " + RequestID.String() + ")"
+		emitLog(event, "ERROR")
+		return "", fmt.Errorf("shipment failed: %+v", err)
+
+	} else {
+		event = "Receiving answer from SHIPPINGSERVICE (request_id: " + RequestID.String() + ")"
+		emitLog(event, "INFO")
+	}
+
 	return resp.GetTrackingId(), nil
 }
 

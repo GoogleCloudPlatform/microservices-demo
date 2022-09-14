@@ -14,10 +14,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from cmath import inf
 import os
 import random
 import time
+import datetime
 import traceback
+import uuid
 from concurrent import futures
 
 import googleclouddebugger
@@ -36,6 +39,8 @@ from grpc_health.v1 import health_pb2_grpc
 
 from logger import getJSONLogger
 logger = getJSONLogger('recommendationservice-server')
+
+SERVICENAME = "recommendationservice"
 
 def initStackdriverProfiling():
   project_id = None
@@ -62,24 +67,69 @@ def initStackdriverProfiling():
         logger.warning("Could not initialize Stackdriver Profiler after retrying, giving up")
   return
 
+# NOTE: logLevel must be a GELF valid severity value (WARN or ERROR), INFO if not specified
+def emitLog(event, logLevel):
+  ct = datetime.datetime.now().isoformat()
+  logMessage = str(ct) + " - " + logLevel + " - " + SERVICENAME + " - " + event
+  
+  if logLevel == "ERROR":
+    logger.error(logMessage)
+  elif logLevel == "WARN":
+    logger.warn(logMessage)
+  else:
+    logger.info(logMessage)
+
+
 class RecommendationService(demo_pb2_grpc.RecommendationServiceServicer):
     def ListRecommendations(self, request, context):
-        max_responses = 5
-        # fetch list of products from product catalog stub
-        cat_response = product_catalog_stub.ListProducts(demo_pb2.Empty())
-        product_ids = [x.id for x in cat_response.products]
-        filtered_products = list(set(product_ids)-set(request.product_ids))
-        num_products = len(filtered_products)
-        num_return = min(max_responses, num_products)
-        # sample list of indicies to return
-        indices = random.sample(range(num_products), num_return)
-        # fetch product ids from indices
-        prod_list = [filtered_products[i] for i in indices]
-        logger.info("[Recv ListRecommendations] product_ids={}".format(prod_list))
-        # build and return response
-        response = demo_pb2.ListRecommendationsResponse()
-        response.product_ids.extend(prod_list)
-        return response
+        metadict = dict(context.invocation_metadata())
+        request_id = metadict['requestid']
+        service_name = metadict['servicename']
+
+        event = "Received request from " + service_name + " (request_id: " + request_id + ")"
+        emitLog(event, "INFO")
+
+        # adding metadata for gRPC towards ProductCatalogService
+        newRequestid = '{0}'.format(uuid.uuid4())
+        metadata = (('requestid', newRequestid), ('servicename', SERVICENAME))
+
+        event = 'Sending message to PRODUCTCATALOG (request_id: ' + newRequestid + ')'
+        emitLog(event, "INFO")
+
+        try:
+          max_responses = 5
+          # fetch list of products from product catalog stub
+          cat_response = product_catalog_stub.ListProducts(demo_pb2.Empty(), timeout=2, metadata=metadata)
+          
+          event = 'Receiving answer from PRODUCTCATALOG (request_id: ' + newRequestid + ')'
+          emitLog(event, "INFO")
+
+          product_ids = [x.id for x in cat_response.products]
+          filtered_products = list(set(product_ids)-set(request.product_ids))
+          num_products = len(filtered_products)
+          num_return = min(max_responses, num_products)
+          # sample list of indicies to return
+          indices = random.sample(range(num_products), num_return)
+          # fetch product ids from indices
+          prod_list = [filtered_products[i] for i in indices]
+          logger.info("[Recv ListRecommendations] product_ids={}".format(prod_list))
+          # build and return response
+          response = demo_pb2.ListRecommendationsResponse()
+          response.product_ids.extend(prod_list)
+          event = "Answered to request from " + service_name + " (request_id: " + request_id + ")"
+          emitLog(event, "INFO")
+
+          return response
+        except grpc.RpcError as e:
+          status_code = e.code()
+          
+          if status_code == grpc.StatusCode.DeadlineExceeded:
+            event = "Failing to contact PRODUCTCATALOG (request_id: " + newRequestid + "). Root cause: (" + e.details() + ")"
+            emitLog(event, "ERROR")
+          else:
+            event = "Error response received from PRODUCTCATALOG (request_id: " + newRequestid + ")"
+            emitLog(event, "ERROR")
+          return None
 
     def Check(self, request, context):
         return health_pb2.HealthCheckResponse(
