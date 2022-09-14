@@ -30,7 +30,7 @@ sudo chown root:root /etc/apt/sources.list.d/microsoft-prod.list
 
 sudo apt-get install -y apt-transport-https && \
 sudo apt-get update && \
-sudo apt-get install -y dotnet-sdk-6.0
+sudo apt-get install -y dotnet-sdk-7.0
 echo "✅ dotnet installed"
 
 # install kubectl
@@ -38,8 +38,8 @@ sudo apt-get install -yqq kubectl git
 echo "✅ kubectl installed"
 
 # install go
-wget https://golang.org/dl/go1.18.linux-amd64.tar.gz
-sudo tar -C /usr/local -xzf go1.18.linux-amd64.tar.gz
+wget https://golang.org/dl/go1.19.linux-amd64.tar.gz
+sudo tar -C /usr/local -xzf go1.19.linux-amd64.tar.gz
 echo 'export GOPATH=$HOME/go' >> ~/.profile
 echo 'export PATH=$PATH:/usr/local/go/bin:$GOPATH/bin' >> ~/.profile
 source ~/.profile

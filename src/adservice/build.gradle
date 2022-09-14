@@ -16,12 +16,12 @@ version = "0.1.0-SNAPSHOT"
 
 def opencensusVersion = "0.31.1"
 def grpcVersion = "1.32.1"
-def jacksonVersion = "2.13.3"
-def protocVersion = "3.21.4"
+def jacksonVersion = "2.13.4"
+def protocVersion = "3.21.5"
 
 tasks.withType(JavaCompile) {
-    sourceCompatibility = JavaVersion.VERSION_1_8
-    targetCompatibility = JavaVersion.VERSION_1_8
+    sourceCompatibility = JavaVersion.VERSION_18
+    targetCompatibility = JavaVersion.VERSION_18
 }
 
 ext {
@@ -46,13 +46,13 @@ dependencies {
                 "io.grpc:grpc-netty:${grpcVersion}",
                 "io.grpc:grpc-services:${grpcVersion}",
                 "io.grpc:grpc-census:${grpcVersion}",
-                "org.apache.logging.log4j:log4j-core:2.17.2"
+                "org.apache.logging.log4j:log4j-core:2.18.0"
 
         runtimeOnly "com.fasterxml.jackson.core:jackson-core:${jacksonVersion}",
                 "com.fasterxml.jackson.core:jackson-databind:${jacksonVersion}",
                 "io.opencensus:opencensus-contrib-log-correlation-log4j2:${opencensusVersion}",
                 "io.opencensus:opencensus-impl:${opencensusVersion}",
-                "io.netty:netty-tcnative-boringssl-static:2.0.53.Final"
+                "io.netty:netty-tcnative-boringssl-static:2.0.54.Final"
     }
 }
 
@@ -93,14 +93,14 @@ startScripts.enabled = false
 // This to cache dependencies during Docker image building. First build will take time.
 // Subsequent build will be incremental.
 task downloadRepos(type: Copy) {
-    from configurations.compile
+    from configurations.compileClasspath
     into offlineCompile
-    from configurations.runtime
+    from configurations.compileClasspath
     into offlineCompile
 }
 
 task adService(type: CreateStartScripts) {
-    mainClassName = 'hipstershop.AdService'
+    mainClass.set('hipstershop.AdService')
     applicationName = 'AdService'
     outputDir = new File(project.buildDir, 'tmp')
     classpath = startScripts.classpath
@@ -110,7 +110,7 @@ task adService(type: CreateStartScripts) {
 }
 
 task adServiceClient(type: CreateStartScripts) {
-    mainClassName = 'hipstershop.AdServiceClient'
+    mainClass.set('hipstershop.AdServiceClient')
     applicationName = 'AdServiceClient'
     outputDir = new File(project.buildDir, 'tmp')
     classpath = startScripts.classpath
