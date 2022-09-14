@@ -79,7 +79,7 @@ opencensus-ext-stackdriver==0.8.0
     # via -r requirements.in
 proto-plus==1.22.1
     # via google-cloud-monitoring
-protobuf==3.20.1
+protobuf==3.20.2
     # via
     #   -r requirements.in
     #   google-api-core

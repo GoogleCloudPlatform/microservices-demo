@@ -104,7 +104,7 @@ proto-plus==1.22.1
     # via
     #   google-cloud-firestore
     #   google-cloud-monitoring
-protobuf==3.20.1
+protobuf==3.20.2
     # via
     #   -r requirements.in
     #   google-api-core
