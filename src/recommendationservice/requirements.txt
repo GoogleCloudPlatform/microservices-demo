@@ -14,7 +14,7 @@ charset-normalizer==2.1.1
     # via requests
 firebase-admin==5.2.0
     # via google-python-cloud-debugger
-google-api-core[grpc]==2.10.0
+google-api-core[grpc]==2.10.1
     # via
     #   -r requirements.in
     #   firebase-admin
