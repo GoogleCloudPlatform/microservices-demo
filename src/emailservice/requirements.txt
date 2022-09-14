@@ -60,7 +60,7 @@ httplib2==0.20.4
     # via
     #   google-api-python-client
     #   google-auth-httplib2
-idna==3.3
+idna==3.4
     # via requests
 jinja2==3.1.2
     # via -r requirements.in

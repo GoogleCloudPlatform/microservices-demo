@@ -33,7 +33,7 @@ geventhttpclient==2.0.2
     # via locust
 greenlet==1.1.3
     # via gevent
-idna==3.3
+idna==3.4
     # via requests
 importlib-metadata==4.12.0
     # via flask
