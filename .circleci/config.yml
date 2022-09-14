@@ -47,6 +47,13 @@ references:
   docker_login: &docker_login
     run: docker login -u $DOCKER_USER -p $DOCKER_PASSWORD
 
+  install_deps: &install_deps
+    run:
+      command: |
+        apt-get update
+        apt-get install wget git -y
+        wget https://github.com/mikefarah/yq/releases/download/v4.27.5/yq_linux_amd64 -O /usr/bin/yq &&\
+        chmod +x /usr/bin/yq
 
 jobs:
   checkout_code_upver:
@@ -83,6 +90,39 @@ jobs:
       - *docker_login
       - run: apt install make -y
       - run: make build-and-upload
+
+  deploy_demo_argo:
+    docker:
+      - image: ubuntu:focal
+    working_directory: ~/demo
+    steps:
+      - add_ssh_keys
+      - *disable_strict_git
+      - *load_cache
+      - *setup_workspace
+      - *load_version
+      - *install_deps
+      - run: git config --global user.email "sonario@rookout.com"
+      - run: git clone -b staging git@github.com:Rookout/gitops-demo.git
+      - run:
+          command: |
+          PUBLISH_VERSION=$(echo $NEW_VERSION | sed 's/inner-999/1/g') \
+          yq -i '.microserviceDemo.email.image.tag = strenv(PUBLISH_VERSION) |
+          .microserviceDemo.checkout.image.tag = strenv(PUBLISH_VERSION) |
+          .microserviceDemo.recommendation.image.tag = strenv(PUBLISH_VERSION) |
+          .microserviceDemo.productcatalog.image.tag = strenv(PUBLISH_VERSION) |
+          .microserviceDemo.frontend.image.tag = strenv(PUBLISH_VERSION) |
+          .microserviceDemo.payment.image.tag = strenv(PUBLISH_VERSION) |
+          .microserviceDemo.cart.image.tag = strenv(PUBLISH_VERSION) |
+          .microserviceDemo.currency.image.tag = strenv(PUBLISH_VERSION) |
+          .microserviceDemo.shipping.image.tag = strenv(PUBLISH_VERSION) |
+          .microserviceDemo.ad.image.tag = strenv(PUBLISH_VERSION) |
+          .sandboxNodejs.image.tag = strenv(PUBLISH_VERSION)'
+          gitops-demo/argocd/apps/values.yaml
+      - RUN: yq  '.. | select(.name == "microservices-*") '  argocd/apps/values.yaml
+#      - run: cd gitops-demo && git add argocd/apps/values.yaml
+#      - run: cd gitops-demo && git commit -m "update tutorial-ruby $NEW_VERSION"
+#      - run: cd gitops-demo && git push --set-upstream origin staging
 
   deploy_demo:
     docker:
@@ -137,6 +177,7 @@ workflows:
           requires:
             - checkout_code_upver
           <<: *filter_master
+      - deploy_demo_argo
       - deploy_demo:
           requires:
             - build_and_push_demo_image
