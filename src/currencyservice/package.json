@@ -14,7 +14,7 @@
     "google-protobuf": "3.13.0",
     "grpc": "1.24.10",
     "request": "2.88.2",
-    "rookout": "^0.84.0",
+    "rookout": "^0.85.0",
     "winston": "^3.3.3",
     "xml2js": "0.4.23"
   },

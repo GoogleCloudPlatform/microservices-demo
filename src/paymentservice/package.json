@@ -13,7 +13,7 @@
   "dependencies": {
     "@grpc/proto-loader": "0.5.6",
     "grpc": "1.24.9",
-    "rookout": "^0.84.0",
+    "rookout": "^0.85.0",
     "simple-card-validator": "^1.1.0",
     "uuid": "^3.2.1",
     "winston": "^3.3.3"
