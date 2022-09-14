@@ -7,10 +7,10 @@ require (
 	contrib.go.opencensus.io/exporter/jaeger v0.2.1
 	contrib.go.opencensus.io/exporter/stackdriver v0.13.12
 	github.com/golang/protobuf v1.5.2
-	github.com/google/go-cmp v0.5.8
+	github.com/google/go-cmp v0.5.9
 	github.com/sirupsen/logrus v1.9.0
 	go.opencensus.io v0.23.0
-	golang.org/x/net v0.0.0-20220907135653-1e95f45603a7
+	golang.org/x/net v0.0.0-20220909164309-bea034e7d591
 	google.golang.org/grpc v1.49.0
 )
 

@@ -8,7 +8,7 @@ cachecontrol==0.12.11
     # via firebase-admin
 cachetools==5.2.0
     # via google-auth
-certifi==2022.6.15
+certifi==2022.6.15.2
     # via requests
 charset-normalizer==2.1.1
     # via requests
@@ -26,7 +26,7 @@ google-api-core[grpc]==2.10.0
     #   google-cloud-trace
     #   google-python-cloud-debugger
     #   opencensus
-google-api-python-client==2.58.0
+google-api-python-client==2.61.0
     # via
     #   firebase-admin
     #   google-cloud-profiler
@@ -85,7 +85,7 @@ httplib2==0.20.4
     # via
     #   google-api-python-client
     #   google-auth-httplib2
-idna==3.3
+idna==3.4
     # via requests
 msgpack==1.0.4
     # via cachecontrol
