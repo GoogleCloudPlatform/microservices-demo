@@ -20,7 +20,4 @@
     "simple-card-validator": "^1.1.0",
     "uuid": "^3.2.1"
   },
-  "devDependencies": {
-    "semistandard": "16.0.1"
-  }
 }
