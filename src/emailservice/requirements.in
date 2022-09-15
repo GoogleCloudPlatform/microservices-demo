@@ -9,4 +9,4 @@ python-json-logger==2.0.4
 google-cloud-profiler==4.0.0
 google-cloud-trace==0.24.2
 requests==2.28.1
-protobuf==3.20.1 # transitive dependency, move when google-api is bumped safely
+protobuf==3.20.2 # transitive dependency, move when google-api is bumped safely
