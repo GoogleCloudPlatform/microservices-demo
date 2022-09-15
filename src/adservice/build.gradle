@@ -17,7 +17,7 @@ version = "0.1.0-SNAPSHOT"
 def opencensusVersion = "0.31.1"
 def grpcVersion = "1.32.1"
 def jacksonVersion = "2.13.4"
-def protocVersion = "3.21.5"
+def protocVersion = "3.21.6"
 
 tasks.withType(JavaCompile) {
     sourceCompatibility = JavaVersion.VERSION_18
