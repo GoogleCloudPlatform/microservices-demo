@@ -3,7 +3,7 @@ module github.com/GoogleCloudPlatform/microservices-demo/src/frontend
 go 1.19
 
 require (
-	cloud.google.com/go/compute v1.9.0
+	cloud.google.com/go/compute v1.10.0
 	cloud.google.com/go/profiler v0.3.0
 	contrib.go.opencensus.io/exporter/jaeger v0.2.1
 	contrib.go.opencensus.io/exporter/stackdriver v0.13.12
@@ -31,12 +31,12 @@ require (
 	github.com/jmespath/go-jmespath v0.4.0 // indirect
 	github.com/prometheus/prometheus v2.5.0+incompatible // indirect
 	github.com/uber/jaeger-client-go v2.25.0+incompatible // indirect
-	golang.org/x/oauth2 v0.0.0-20220622183110-fd043fe589d2 // indirect
+	golang.org/x/oauth2 v0.0.0-20220909003341-f21342109be1 // indirect
 	golang.org/x/sync v0.0.0-20220601150217-0de741cfad7f // indirect
 	golang.org/x/sys v0.0.0-20220728004956-3c1f35247d10 // indirect
 	golang.org/x/text v0.3.7 // indirect
-	google.golang.org/api v0.93.0 // indirect
+	google.golang.org/api v0.96.0 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
-	google.golang.org/genproto v0.0.0-20220822174746-9e6da59bd2fc // indirect
+	google.golang.org/genproto v0.0.0-20220915135415-7fd63a7952de // indirect
 	google.golang.org/protobuf v1.28.1 // indirect
 )
