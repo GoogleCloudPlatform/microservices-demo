@@ -13,7 +13,7 @@
 // limitations under the License.
 
 const cardValidator = require('simple-card-validator');
-const uuid = require('uuid/v4');
+const uuid = require('uuid');
 const pino = require('pino');
 
 const logger = pino({
@@ -53,7 +53,7 @@ class ExpiredCreditCard extends CreditCardError {
  * Verifies the credit card number and (pretend) charges the card.
  *
  * @param {*} request
- * @return transaction_id - a random uuid v4.
+ * @return transaction_id - a random uuid.
  */
 module.exports = function charge (request) {
   const { amount, credit_card: creditCard } = request;
