@@ -8,13 +8,13 @@ cachecontrol==0.12.11
     # via firebase-admin
 cachetools==5.2.0
     # via google-auth
-certifi==2022.6.15.2
+certifi==2022.9.14
     # via requests
 charset-normalizer==2.1.1
     # via requests
 firebase-admin==5.2.0
     # via google-python-cloud-debugger
-google-api-core[grpc]==2.10.0
+google-api-core[grpc]==2.10.1
     # via
     #   -r requirements.in
     #   firebase-admin
@@ -104,7 +104,7 @@ proto-plus==1.22.1
     # via
     #   google-cloud-firestore
     #   google-cloud-monitoring
-protobuf==3.20.1
+protobuf==3.20.2
     # via
     #   -r requirements.in
     #   google-api-core
