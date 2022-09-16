@@ -5,8 +5,7 @@
   "repository": "https://github.com/GoogleCloudPlatform/microservices-demo",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "lint": "semistandard *.js"
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Jonathan Lui",
   "license": "ISC",
@@ -19,8 +18,5 @@
     "pino": "8.5.0",
     "simple-card-validator": "^1.1.0",
     "uuid": "^3.2.1"
-  },
-  "devDependencies": {
-    "semistandard": "16.0.1"
   }
 }
