@@ -5,7 +5,7 @@ go 1.19
 require (
 	cloud.google.com/go/profiler v0.3.0
 	contrib.go.opencensus.io/exporter/jaeger v0.2.1
-	contrib.go.opencensus.io/exporter/stackdriver v0.13.12
+	contrib.go.opencensus.io/exporter/stackdriver v0.13.14
 	github.com/golang/protobuf v1.5.2
 	github.com/google/go-cmp v0.5.9
 	github.com/sirupsen/logrus v1.9.0
