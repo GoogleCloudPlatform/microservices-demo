@@ -123,6 +123,10 @@ gcloud container clusters delete onlineboutique \
     --project=${PROJECT_ID} --zone=${ZONE}
 ```
 
+## Automated Deployment
+
+Automated deployment for the Online Boutique sample application is supported in this repository. Instructions for using Terraform to replicate the [**Quickstart (GKE)**](https://github.com/GoogleCloudPlatform/microservices-demo/tree/main/README.md#quickstart-gke) steps can be found inside [/terraform/README.md](https://github.com/GoogleCloudPlatform/microservices-demo/tree/main/terraform).
+
 ## Other Deployment Options
 
 - **Google Cloud Operations** (Monitoring, Tracing, Debugger, Profiler): [See these instructions](docs/gcp-instrumentation.md).
