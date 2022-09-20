@@ -10,7 +10,9 @@ Important notes:
 
 ## Memorystore Deployment
 
-Online Boutique supports a multi-step automated deployment process for the Memorystore (Redis) variation. This process uses Terraform for infrastructure changes and Kustomize for manifest-configuration changes. Instructions for the entire automated deployment can be found at [`/kustomize/README.md`](https://github.com/GoogleCloudPlatform/microservices-demo/blob/main/kustomize/README.md).
+## Automated Deployment
+
+Automated deployment for the Memorystore (Redis) variation is supported with [Terraform](https://www.terraform.io/) for infrastructure management and [Kustomize](https://kustomize.io/) for configuration management. Deployment instructions can be found at [`/kustomize/README.md`](https://github.com/GoogleCloudPlatform/microservices-demo/blob/main/kustomize/README.md).
 
 ## Manual Deployment
 
@@ -19,8 +21,8 @@ Note: This section is not a complete substitution for the entire Memorystore dep
 1. Create a GKE cluster with VPC-native/IP aliasing enabled.
     ```sh
     PROJECT_ID="<your-project-id>"
-    ZONE="<your-GCP-zone>"
     REGION="<your-GCP-region>"
+    ZONE="<your-GCP-zone>"
 
     gcloud container clusters create onlineboutique \
         --project=${PROJECT_ID} \
@@ -28,6 +30,13 @@ Note: This section is not a complete substitution for the entire Memorystore dep
         --machine-type=e2-standard-2 \
         --enable-ip-alias
     ```
+
+   Replace the following:
+
+   * `<your-project-id>`: your GCP [project ID](https://cloud.google.com/resource-manager/docs/creating-managing-projects#identifying_projects).
+   * `<your-GCP-region>`: the [Compute Engine region](https://cloud.google.com/compute/docs/regions-zones#available).
+   * `<your-GCP-zone>`: the [Compute Engine zone](https://cloud.google.com/compute/docs/regions-zones#available).
+
 
 1. Enable the Memorystore (Redis) service in your project.
 
@@ -60,12 +69,6 @@ Note: This section is not a complete substitution for the entire Memorystore dep
     sed -i "s/REDIS_IP/${REDIS_IP}/g" components/memorystore/kustomization.yaml
     ```
 
-1. While in the `kustomize/` directory, return back to the `microservices-demo/` directory.
-
-    ```sh
-    cd ..
-    ```
-    
 At this point, you have properly created the infrastructure needed for the Memorystore deployment. To complete the deployment, perform the steps from the **[Run the deployment options](https://github.com/GoogleCloudPlatform/microservices-demo/blob/main/kustomize/README.md#run-the-deployment-options)** section of `/kustomize/README.md`.
 
 ## Resources
