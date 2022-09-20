@@ -17,7 +17,7 @@ version = "0.1.0-SNAPSHOT"
 def opencensusVersion = "0.31.1"
 def grpcVersion = "1.32.1"
 def jacksonVersion = "2.13.4"
-def protocVersion = "3.21.5"
+def protocVersion = "3.21.6"
 
 tasks.withType(JavaCompile) {
     sourceCompatibility = JavaVersion.VERSION_18
@@ -46,7 +46,7 @@ dependencies {
                 "io.grpc:grpc-netty:${grpcVersion}",
                 "io.grpc:grpc-services:${grpcVersion}",
                 "io.grpc:grpc-census:${grpcVersion}",
-                "org.apache.logging.log4j:log4j-core:2.18.0"
+                "org.apache.logging.log4j:log4j-core:2.19.0"
 
         runtimeOnly "com.fasterxml.jackson.core:jackson-core:${jacksonVersion}",
                 "com.fasterxml.jackson.core:jackson-databind:${jacksonVersion}",

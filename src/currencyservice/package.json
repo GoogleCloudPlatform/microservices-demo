@@ -4,8 +4,7 @@
   "description": "A gRPC currency conversion microservice",
   "repository": "https://github.com/GoogleCloudPlatform/microservices-demo",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "lint": "semistandard *.js"
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
   "license": "Apache-2.0",
   "dependencies": {
@@ -19,8 +18,5 @@
     "pino": "8.5.0",
     "request": "2.88.2",
     "xml2js": "0.4.23"
-  },
-  "devDependencies": {
-    "semistandard": "16.0.1"
   }
 }
