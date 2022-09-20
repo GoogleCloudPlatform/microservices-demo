@@ -132,30 +132,3 @@ Alternatively, if you would like to quickly provision a GKE cluster, you can use
     ```
 
     Note: you may see `<pending>` while GCP provisions the load balancer. If this happens, wait a few minutes and re-run the command.
-
-### Cleanup
-
-After you have run the deployment variant on Online Boutique, you will want to reset the sample application back to its default state.
-
-1. While still in the `kustomize/` directory, re-apply the original Kubernetes config to the Online Boutique deployment.
-    
-    ```
-    kubectl apply -f base
-    ```
-    
-    Note: It may take 2-3 minutes before the changes are reflected on the deployment.
-
-### [OPTIONAL] Cleaning up infrastructure for the Memorystore variation
-
-1. Enter the `terraform/` directory.
-
-    ```
-    cd ../terraform
-    ```
-
-1. Undo the additional Terraform infrastructure by targeting the Memorystore instance.
-
-    ```
-    terraform destroy -target=google_redis_instance.redis-cart
-    ```
-    1. If there is a confirmation prompt, type `yes` and hit Enter/Return.
