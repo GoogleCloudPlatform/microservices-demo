@@ -52,6 +52,7 @@ func init() {
 		},
 		TimestampFormat: time.RFC3339Nano,
 	}
+	
 	log.Out = os.Stdout
 }
 

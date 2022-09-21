@@ -33,7 +33,7 @@ while IFS= read -d $'\0' -r dir; do
     then
         builddir="${dir}/src"
     fi
-    image="${REPO_PREFIX}/$svcname:$TAG"
+    image="${REPO_PREFIX}/demo-$svcname:$TAG"
     (
         cd "${builddir}"
         log "Building: ${image}"
