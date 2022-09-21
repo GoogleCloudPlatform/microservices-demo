@@ -63,6 +63,7 @@ func (lh *logHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	log := lh.log.WithFields(logrus.Fields{
 		"http.req.path":   r.URL.Path,
 		"http.req.method": r.Method,
+		"foo": ctx.Value("TraceId"),
 		"http.req.id":     requestID.String(),
 	})
 	if v, ok := r.Context().Value(ctxKeySessionID{}).(string); ok {

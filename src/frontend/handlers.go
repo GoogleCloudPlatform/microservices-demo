@@ -49,7 +49,7 @@ var (
 	plat platformDetails
 )
 
-var validEnvs = []string{"local", "gcp", "azure", "aws", "onprem", "alibaba"}
+var validEnvs = []string{"local", "gcp", "azure", "aws", "onprem", "alibaba", "nomad"}
 
 func (fe *frontendServer) homeHandler(w http.ResponseWriter, r *http.Request) {
 	log := r.Context().Value(ctxKeyLog{}).(logrus.FieldLogger)
@@ -125,10 +125,13 @@ func (plat *platformDetails) setPlatformDetails(env string) {
 	if env == "aws" {
 		plat.provider = "AWS"
 		plat.css = "aws-platform"
+	} else if env == "nomad" {
+		plat.provider = "Nomad"
+		plat.css = "nomad-platform"
 	} else if env == "onprem" {
 		plat.provider = "On-Premises"
 		plat.css = "onprem-platform"
-	} else if env == "azure" {
+	}else if env == "azure" {
 		plat.provider = "Azure"
 		plat.css = "azure-platform"
 	} else if env == "gcp" {

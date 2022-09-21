@@ -34,6 +34,8 @@ from opencensus.ext.stackdriver import trace_exporter as stackdriver_exporter
 from opencensus.ext.grpc import server_interceptor
 from opencensus.common.transports.async_ import AsyncTransport
 from opencensus.trace import samplers
+from opencensus.ext.jaeger.trace_exporter import JaegerExporter
+from opencensus.trace.tracer import Tracer
 
 # import googleclouddebugger
 import googlecloudprofiler
@@ -189,10 +191,12 @@ if __name__ == '__main__':
       raise KeyError()
     else:
       logger.info("Tracing enabled.")
+      exporter = JaegerExporter(
+              service_name="email",
+              host_name=os.environ.get("JAEGER_HOST"),
+              agent_port=os.environ.get("JAEGER_PORT"),
+              endpoint="/api/traces")
       sampler = samplers.AlwaysOnSampler()
-      exporter = stackdriver_exporter.StackdriverExporter(
-        project_id=os.environ.get('GCP_PROJECT_ID'),
-        transport=AsyncTransport)
       tracer_interceptor = server_interceptor.OpenCensusServerInterceptor(sampler, exporter)
   except (KeyError, DefaultCredentialsError):
       logger.info("Tracing disabled.")

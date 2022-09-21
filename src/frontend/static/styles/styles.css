@@ -467,6 +467,7 @@ similar to that of the hot-products-row.
 .onprem-platform,
 .azure-platform,
 .alibaba-platform,
+.nomad-platform,
 .gcp-platform {
   position: fixed;
   top: 0;
@@ -483,6 +484,10 @@ similar to that of the hot-products-row.
   background-color: #ff9900;
 }
 
+.nomad-platform,
+.nomad-platform .platform-flag {
+  background-color: #369168;
+}
 .onprem-platform,
 .onprem-platform .platform-flag {
   background-color: #34A853;

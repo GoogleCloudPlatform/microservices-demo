@@ -21,6 +21,6 @@
 # requires gRPC tools:
 #   pip install -r requirements.txt
 
-python -m grpc_tools.protoc -I../../pb --python_out=. --grpc_python_out=. ../../pb/demo.proto
+/usr/local/opt/python@3.7/bin/python3 -m grpc_tools.protoc -I../../pb --python_out=. --grpc_python_out=. ../../pb/demo.proto
 
 # [END gke_recommendationservice_genproto]
