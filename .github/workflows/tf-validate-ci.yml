@@ -34,4 +34,3 @@ jobs:
           cd terraform/
           terraform init -backend=false
           terraform validate
-          terraform plan -refresh=false
