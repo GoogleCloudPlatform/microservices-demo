@@ -38,3 +38,13 @@ jobs:
           cd kustomize/
           kustomize edit add component components/cymbal-branding
           kustomize build .
+      - name: kustomize build google-cloud-operations
+        run: |
+          cd kustomize/
+          kustomize edit add component components/google-cloud-operations
+          kustomize build .
+      - name: kustomize build memorystore
+        run: |
+          cd kustomize/
+          kustomize edit add component components/memorystore
+          kustomize build .
