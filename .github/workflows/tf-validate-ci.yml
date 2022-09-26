@@ -1,0 +1,20 @@
+name: tf-validate-ci
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'terraform/**'
+  pull_request:
+    paths:
+      - 'terraform/**'
+jobs:
+  job:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v3
+      - name: terraform init & validate
+        run: |
+          cd terraform/
+          terraform init -backend=false
+          terraform validate
