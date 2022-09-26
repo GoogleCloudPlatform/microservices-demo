@@ -29,7 +29,11 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v3
-      - name: kustomize build
+      - name: kustomize build base
         run: |
           cd kustomize/
+          kustomize build .
+      - name: kustomize build cymbal-branding
+        run: |
+          kustomize edit add component components/cymbal-branding
           kustomize build .
