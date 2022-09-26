@@ -35,5 +35,6 @@ jobs:
           kustomize build .
       - name: kustomize build cymbal-branding
         run: |
+          cd kustomize/
           kustomize edit add component components/cymbal-branding
           kustomize build .
