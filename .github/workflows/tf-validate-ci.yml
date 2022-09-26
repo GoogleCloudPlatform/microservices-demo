@@ -5,9 +5,11 @@ on:
       - main
     paths:
       - 'terraform/**'
+      - '.github/workflows/tf-validate-ci.yml'
   pull_request:
     paths:
       - 'terraform/**'
+      - '.github/workflows/tf-validate-ci.yml'
 jobs:
   job:
     runs-on: ubuntu-22.04
