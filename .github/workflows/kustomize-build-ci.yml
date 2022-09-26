@@ -1,0 +1,21 @@
+name: kustomize-build-ci
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'kustomize/**'
+      - '.github/workflows/kustomize-build-ci.yml'
+  pull_request:
+    paths:
+      - 'kustomize/**'
+      - '.github/workflows/kustomize-build-ci.yml'
+jobs:
+  job:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v3
+      - name: kustomize build
+        run: |
+          cd kustomize/
+          kustomize build .
