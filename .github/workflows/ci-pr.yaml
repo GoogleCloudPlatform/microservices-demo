@@ -17,6 +17,10 @@ on:
   pull_request:
     branches:
       - main
+    paths-ignore:
+      - '**/README.md'
+      - 'terraform/**'
+      - '.github/workflows/tf-validate-ci.yml'
 
 jobs:
   code-tests:
