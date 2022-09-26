@@ -10,7 +10,7 @@ require (
 	github.com/google/go-cmp v0.5.9
 	github.com/sirupsen/logrus v1.9.0
 	go.opencensus.io v0.23.0
-	golang.org/x/net v0.0.0-20220920203100-d0c6ba3f52d9
+	golang.org/x/net v0.0.0-20220921203646-d300de134e69
 	google.golang.org/grpc v1.49.0
 )
 
