@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-FROM openjdk:18-slim as builder
+FROM openjdk:20-slim as builder
 
 WORKDIR /app
 
