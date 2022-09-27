@@ -91,7 +91,7 @@ Alternatively, if you would like to quickly provision a GKE cluster, you can use
 1. Verify the changes that will be made to the existing deployment config.
 
     ```
-    kustomize build .
+    kubectl kustomize .
     ```
 
 1. Apply the Kustomize deployment changes to the existing deployment.
