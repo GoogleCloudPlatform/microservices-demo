@@ -48,3 +48,8 @@ jobs:
           cd kustomize/
           kustomize edit add component components/memorystore
           kubectl kustomize .
+      - name: kustomize build network-policy
+        run: |
+          cd kustomize/
+          kustomize edit add component components/network-policy
+          kubectl kustomize .
