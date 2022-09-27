@@ -66,7 +66,8 @@ Note: This section is not a complete substitution for the entire Memorystore dep
   
     ```sh
     REDIS_IP=$(gcloud redis instances describe redis-cart --region=${REGION} --format='get(host)')
-    sed -i "s/REDIS_IP/${REDIS_IP}/g" components/memorystore/kustomization.yaml
+    REDIS_PORT=$(gcloud redis instances describe redis-cart --region=${REGION} --format='get(port)')
+    sed -i "s/{{REDIS_ADDR}}/${REDIS_IP}:${REDIS_PORT}/g" components/memorystore/kustomization.yaml
     ```
 
 At this point, you have properly created the infrastructure needed for the Memorystore deployment. To complete the deployment, perform the steps from the **[Run the deployment options](https://github.com/GoogleCloudPlatform/microservices-demo/blob/main/kustomize/README.md#run-the-deployment-options)** section of `/kustomize/README.md`.
@@ -74,3 +75,4 @@ At this point, you have properly created the infrastructure needed for the Memor
 ## Resources
 
 - [Connecting to a Redis instance from a Google Kubernetes Engine cluster](https://cloud.google.com/memorystore/docs/redis/connect-redis-instance-gke)
+- [Seamlessly encrypt traffic from any apps in your Mesh to Memorystore (redis)](https://medium.com/google-cloud/64b71969318d)
