@@ -32,19 +32,19 @@ jobs:
       - name: kustomize build base
         run: |
           cd kustomize/
-          kustomize build .
+          kubectl kustomize .
       - name: kustomize build cymbal-branding
         run: |
           cd kustomize/
           kustomize edit add component components/cymbal-branding
-          kustomize build .
+          kubectl kustomize .
       - name: kustomize build google-cloud-operations
         run: |
           cd kustomize/
           kustomize edit add component components/google-cloud-operations
-          kustomize build .
+          kubectl kustomize .
       - name: kustomize build memorystore
         run: |
           cd kustomize/
           kustomize edit add component components/memorystore
-          kustomize build .
+          kubectl kustomize .
