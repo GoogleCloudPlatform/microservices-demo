@@ -12,18 +12,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-name: tf-validate-ci
+name: terraform-validate-ci
 on:
   push:
     branches:
       - main
     paths:
       - 'terraform/**'
-      - '.github/workflows/tf-validate-ci.yml'
+      - '.github/workflows/terraform-validate-ci.yml'
   pull_request:
     paths:
       - 'terraform/**'
-      - '.github/workflows/tf-validate-ci.yml'
+      - '.github/workflows/terraform-validate-ci.yml'
 jobs:
   job:
     runs-on: ubuntu-22.04
