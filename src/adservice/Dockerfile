@@ -25,14 +25,13 @@ COPY . .
 RUN chmod +x gradlew
 RUN ./gradlew installDist
 
-FROM openjdk:18-slim
+FROM openjdk:18-alpine
+
+RUN apk add --no-cache ca-certificates
 
 # Download Stackdriver Profiler Java agent
-RUN apt-get -y update && apt-get install -qqy \
-    wget \
-    && rm -rf /var/lib/apt/lists/*
 RUN mkdir -p /opt/cprof && \
-    wget -q -O- https://storage.googleapis.com/cloud-profiler/java/latest/profiler_java_agent.tar.gz \
+    wget -q -O- https://storage.googleapis.com/cloud-profiler/java/latest/profiler_java_agent_alpine.tar.gz \
     | tar xzv -C /opt/cprof && \
     rm -rf profiler_java_agent.tar.gz
 
