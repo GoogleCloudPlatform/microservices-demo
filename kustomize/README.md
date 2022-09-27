@@ -1,6 +1,6 @@
 # Deploying Online Boutique variations with Kustomize
 
-This page contains instructions on deploying variations of the [Online Boutique](https://github.com/GoogleCloudPlatform/microservices-demo) sample application using [Kustomize](https://kustomize.io/). Each variations is designed as a [**Kustomize Component**](https://github.com/kubernetes-sigs/kustomize/blob/master/examples/components.md), so multiple variations can be composed together in the deployment.
+This page contains instructions on deploying variations of the [Online Boutique](https://github.com/GoogleCloudPlatform/microservices-demo) sample application using [Kustomize](https://kustomize.io/). Each variations is designed as a [**Kustomize component**](https://github.com/kubernetes-sigs/kustomize/blob/master/examples/components.md), so multiple variations can be composed together in the deployment.
 
 ## What is Kustomize?
 
@@ -8,10 +8,7 @@ Kustomize is a Kubernetes configuration management tool that allows users to cus
 
 ## Prerequisites
 
-1. Have a Kubernetes cluster, such as a [GKE (Google Kubernetes Engine)](https://cloud.google.com/kubernetes-engine) cluster or a [minikube](https://minikube.sigs.k8s.io/docs/) cluster.
-1. Set your `kubectl` context to the Kubernetes cluster.
-
-Alternatively, if you would like to quickly provision a GKE cluster, you can use the [Online Boutique's Terraform setup at /terraform](https://github.com/GoogleCloudPlatform/microservices-demo/tree/main/terraform).
+You need to have a Kubernetes cluster where you will deploy the Online Boutique's Kubernetes manifests into, you can follow the instruction [here](https://github.com/GoogleCloudPlatform/microservices-demo).
 
 ## Deploy Online Boutique with Kustomize
 
