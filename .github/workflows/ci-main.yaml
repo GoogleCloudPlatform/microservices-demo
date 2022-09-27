@@ -19,6 +19,10 @@ on:
     branches:
       - main
       - release/*
+    paths-ignore:
+      - '**/README.md'
+      - 'terraform/**'
+      - '.github/workflows/terraform-validate-ci.yaml'
 jobs:
   code-tests:
     runs-on: [self-hosted, is-enabled]
