@@ -13,7 +13,7 @@ require (
 	github.com/pkg/errors v0.9.1
 	github.com/sirupsen/logrus v1.9.0
 	go.opencensus.io v0.23.0
-	golang.org/x/net v0.0.0-20220921203646-d300de134e69
+	golang.org/x/net v0.0.0-20220926192436-02166a98028e
 	google.golang.org/grpc v1.49.0
 )
 
