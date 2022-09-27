@@ -43,6 +43,7 @@ fi
 # create git release / push to new branch
 git checkout -b "release/${TAG}"
 git add "${SCRIPTDIR}/../release/"
+git add "${SCRIPTDIR}/../kustomize/"
 git commit --allow-empty -m "Release $TAG"
 log "Pushing k8s manifests to release/${TAG}..."
 git tag "$TAG"
