@@ -20,7 +20,7 @@ on:
     paths-ignore:
       - '**/README.md'
       - 'terraform/**'
-      - '.github/workflows/tf-validate-ci.yml'
+      - '.github/workflows/terraform-validate-ci.yml'
 
 jobs:
   code-tests:
