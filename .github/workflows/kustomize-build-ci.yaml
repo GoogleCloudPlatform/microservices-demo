@@ -33,23 +33,26 @@ jobs:
         run: |
           cd kustomize/
           kubectl kustomize .
-      - name: kustomize build cymbal-branding
+      - name: kustomize build each component
         run: |
           cd kustomize/
-          kustomize edit add component components/cymbal-branding
-          kubectl kustomize .
-      - name: kustomize build google-cloud-operations
+          COMPONENTS=$(ls components/)
+          for c in $COMPONENTS;
+          do
+              echo "## kustomize build for " + $c
+              rm kustomization.yaml
+              kustomize create --resources base
+              kustomize edit add component components/$c
+              kustomize build .
+          done
+      - name: kustomize build all components
         run: |
           cd kustomize/
-          kustomize edit add component components/google-cloud-operations
-          kubectl kustomize .
-      - name: kustomize build memorystore
-        run: |
-          cd kustomize/
-          kustomize edit add component components/memorystore
-          kubectl kustomize .
-      - name: kustomize build network-policy
-        run: |
-          cd kustomize/
-          kustomize edit add component components/network-policy
-          kubectl kustomize .
+          rm kustomization.yaml
+          kustomize create --resources base
+          COMPONENTS=$(ls components/)
+          for c in $COMPONENTS;
+          do
+              kustomize edit add component components/$c
+          done
+          kustomize build .
