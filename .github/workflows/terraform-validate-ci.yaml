@@ -19,11 +19,11 @@ on:
       - main
     paths:
       - 'terraform/**'
-      - '.github/workflows/terraform-validate-ci.yml'
+      - '.github/workflows/terraform-validate-ci.yaml'
   pull_request:
     paths:
       - 'terraform/**'
-      - '.github/workflows/terraform-validate-ci.yml'
+      - '.github/workflows/terraform-validate-ci.yaml'
 jobs:
   job:
     runs-on: ubuntu-22.04
