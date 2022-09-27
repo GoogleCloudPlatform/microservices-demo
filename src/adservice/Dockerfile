@@ -25,7 +25,7 @@ COPY . .
 RUN chmod +x gradlew
 RUN ./gradlew installDist
 
-FROM openjdk:18-alpine
+FROM openjdk:19-alpine
 
 RUN apk add --no-cache ca-certificates
 
