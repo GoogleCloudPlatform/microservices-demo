@@ -36,7 +36,7 @@ jobs:
         run: |
             echo "testing ${{ matrix.service }}..."
             cd src/${{ matrix.service }}
-            //go test
+            #go test
   build-images:
     runs-on: [ubuntu-latest]
     needs: code-tests
