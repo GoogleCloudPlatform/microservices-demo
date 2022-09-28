@@ -78,11 +78,11 @@ Here is the list of the variations available as Kustomize components that you co
 - [**Create Kubernetes Service Accounts**](components/service-accounts)
   - Deploy fine granular `ServiceAccounts` for Online Boutique.
 
-## Select variations
+### Select variations
 
 To customize Online Boutique with its variations, you need to update the default `kustomize/kustomization.yaml` file. You could do that manually, use `sed`, or use the `kustomize edit` command like illustrated below.
 
-### Use `kustomize edit` to select variations
+#### Use `kustomize edit` to select variations
 
 Here is an example with the [**Cymbal Shops Branding**](components/cymbal-branding) variation, from the `kustomize/` folder, run the command below:
 ```
@@ -94,7 +94,7 @@ You could now combine it with other variations, like for example with the [**Goo
 kustomize edit add component components/google-cloud-operations
 ```
 
-## Deploy selected variations
+### Deploy selected variations
 
 Like explained earlier, you can locally render these manifests by running `kubectl kustomize .` as well as deploying them by running `kubectl apply -k .`.
 
@@ -108,6 +108,8 @@ components:
 - components/cymbal-branding
 - components/google-cloud-operations
 ```
+
+### Use remote Kustomize targets
 
 Kustomize allows you to reference public remote resources so the `kustomization.yaml` could look like:
 ```
