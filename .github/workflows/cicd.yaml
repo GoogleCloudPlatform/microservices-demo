@@ -54,13 +54,29 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       -
+        name: Docker meta
+        id: meta
+        uses: docker/metadata-action@v4
+        with:
+          # list of Docker images to use as base name for tags
+          images: |
+            raquio/${{ matrix.service }}
+          # generate Docker tags based on the following events/attributes
+          tags: |
+            type=ref,event=branch
+            type=ref,event=pr
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=semver,pattern={{major}}
+            type=sha
+      -
         uses: docker/build-push-action@v3
         name: Build
         timeout-minutes: 20
         with:
           push: true
           context: src/${{ matrix.service }}
-          tags: raquio/demo-${{ matrix.service }}:${{ env.GITHUB_SHA }}
+          tags: ${{ steps.meta.outputs.tags }}
 #      - name: Wait For Allocations
 #        timeout-minutes: 20
 #        run: |
