@@ -20,36 +20,37 @@ on:
     branches:
       - main
 jobs:
-  code-tests:
-    runs-on: [ubuntu-latest]
-    strategy:
-      matrix:
-        service: [ "productcatalogservice", "shippingservice" ]
-      fail-fast: true
-    steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-go@v3
-        with:
-          go-version: '1.17.5'
-      - name: Go Unit Tests
-        timeout-minutes: 10
-        run: |
-            echo "testing ${{ matrix.service }}..."
-            cd src/${{ matrix.service }}
-            go test
-#  build-images:
+#  code-tests:
 #    runs-on: [ubuntu-latest]
-#    needs: code-tests
 #    strategy:
 #      matrix:
-#        service: ["adservice", "cartservice", "checkoutservice", "currencyservice", "emailservice", "frontend", "paymentservice", "productcatalogservice", "recommendationservice", "shippingservice"]
+#        service: [ "productcatalogservice", "shippingservice" ]
 #      fail-fast: true
 #    steps:
-#      - uses: docker/login-action@v2
+#      - uses: actions/checkout@v3
+#      - uses: actions/setup-go@v3
 #        with:
-#          username: ${{ secrets.DOCKERHUB_USERNAME }}
-#          password: ${{ secrets.DOCKERHUB_TOKEN }}
-#      - name: Login to DockerHub
+#          go-version: '1.17.5'
+#      - name: Go Unit Tests
+#        timeout-minutes: 10
+#        run: |
+#            echo "testing ${{ matrix.service }}..."
+#            cd src/${{ matrix.service }}
+#            go test
+  build-images:
+    runs-on: [ubuntu-latest]
+#    needs: code-tests
+    strategy:
+      matrix:
+        service: ["adservice", "cartservice", "checkoutservice", "currencyservice", "emailservice", "frontend", "paymentservice", "productcatalogservice", "recommendationservice", "shippingservice"]
+      fail-fast: true
+    steps:
+      -
+        name: Login to DockerHub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
 #
 #      - uses: actions/checkout@v3
 #      - uses: docker/build-push-action@v3
