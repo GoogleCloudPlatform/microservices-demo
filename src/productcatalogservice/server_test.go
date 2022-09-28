@@ -30,8 +30,8 @@ func TestServer(t *testing.T) {
 	ctx := context.Background()
 	addr := run(port)
 	conn, err := grpc.DialContext(ctx, addr,
-		grpc.WithInsecure(),
-		grpc.WithStatsHandler()
+		grpc.WithInsecure())
+
 	if err != nil {
 		t.Fatal(err)
 	}
