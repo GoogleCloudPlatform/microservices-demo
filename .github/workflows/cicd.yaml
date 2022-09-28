@@ -22,8 +22,9 @@ on:
 jobs:
   code-tests:
     runs-on: [ubuntu-latest]
-    matrix:
-      service: [ "productcatalogservice", "shippingservice" ]
+    strategy:
+      matrix:
+        service: [ "productcatalogservice", "shippingservice" ]
       fail-fast: true
     steps:
       - uses: actions/checkout@v3
