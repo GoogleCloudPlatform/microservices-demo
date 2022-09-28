@@ -19,11 +19,11 @@ on:
       - main
     paths:
       - 'kustomize/**'
-      - '.github/workflows/kustomize-build-ci.yml'
+      - '.github/workflows/kustomize-build-ci.yaml'
   pull_request:
     paths:
       - 'kustomize/**'
-      - '.github/workflows/kustomize-build-ci.yml'
+      - '.github/workflows/kustomize-build-ci.yaml'
 jobs:
   job:
     runs-on: ubuntu-22.04
