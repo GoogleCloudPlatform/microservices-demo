@@ -8,7 +8,7 @@ Kustomize is a Kubernetes configuration management tool that allows users to cus
 
 ## Prerequisites
 
-You need to have a Kubernetes cluster where you will deploy the Online Boutique's Kubernetes manifests into, you can follow the instruction [here](/).
+You need to have a Kubernetes cluster where you will deploy the Online Boutique's Kubernetes manifests. To set up a GKE (Google Kubernetes Engine) cluster, you can follow the instruction in the [root `/README.md`](/).
 
 ## Deploy Online Boutique with Kustomize
 
@@ -67,18 +67,22 @@ You need to have a Kubernetes cluster where you will deploy the Online Boutique'
 
 Here is the list of the variations available as Kustomize components that you could leverage:
 
-- [**Changing to the Cymbal Shops Branding**](components/cymbal-branding)
+- [**Change to the Cymbal Shops Branding**](components/cymbal-branding)
   - Changes all Online Boutique-related branding to Google Cloud's fictitious company — Cymbal Shops. The code adds/enables an environment variable `CYMBAL_BRANDING` in the `frontend` service.
-- [**Integrating with Google Cloud Operations**](components/google-cloud-operations)
+- [**Integrate with Google Cloud Operations**](components/google-cloud-operations)
   - Enables Monitoring (Stats), Tracing, Profiler, and Debugger for various services within Online Boutique. The code removes the existing environment variables (`DISABLE_STATS`, `DISABLE_TRACING`, `DISABLE_PROFILER`, `DISABLE_DEBUGGER`) from appropriate YAML config files.
-- [**Integrating with Memorystore (redis)**](components/memorystore)
+- [**Integrate with Memorystore (redis)**](components/memorystore)
   - The default Online Boutique deployment uses the in-cluster `redis` database for storing the contents of its shopping cart. The Memorystore deployment variation overrides the default database with its own Memorystore (redis) database. These changes directly affect `cartservice`.
-- [**Securing with Network Policies**](components/network-policies)
+- [**Secure with Network Policies**](components/network-policies)
   - Deploy fine granular `NetworkPolicies` for Online Boutique.
-- [**Creating Kubernetes Service Accounts**](components/service-accounts)
+- [**Create Kubernetes Service Accounts**](components/service-accounts)
   - Deploy fine granular `ServiceAccounts` for Online Boutique.
 
-To customize Online Boutique with its variations, you need to update the default `kustomize/kustomization.yaml` file. You could do that manually, use `sed` or use the `kustomize edit` command like illustrated below.
+## Select variations
+
+To customize Online Boutique with its variations, you need to update the default `kustomize/kustomization.yaml` file. You could do that manually, use `sed`, or use the `kustomize edit` command like illustrated below.
+
+### Use `kustomize edit` to select variations
 
 Here is an example with the [**Cymbal Shops Branding**](components/cymbal-branding) variation, from the `kustomize/` folder, run the command below:
 ```
@@ -90,9 +94,11 @@ You could now combine it with other variations, like for example with the [**Goo
 kustomize edit add component components/google-cloud-operations
 ```
 
+## Deploy selected variations
+
 Like explained earlier, you can locally render these manifests by running `kubectl kustomize .` as well as deploying them by running `kubectl apply -k .`.
 
-So for example, the associated `kustomization.file` could look like:
+So for example, the associated `kustomization.yaml` could look like:
 ```
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
@@ -103,7 +109,7 @@ components:
 - components/google-cloud-operations
 ```
 
-Kustomize allows public remote resources so you can have this file in this form too:
+Kustomize allows you to reference public remote resources so the `kustomization.yaml` could look like:
 ```
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
@@ -113,3 +119,4 @@ components:
 - github.com/GoogleCloudPlatform/microservices-demo/kustomize/components/cymbal-branding
 - github.com/GoogleCloudPlatform/microservices-demo/kustomize/components/google-cloud-operations
 ```
+Learn more about [Kustomize remote targets](https://github.com/kubernetes-sigs/kustomize/blob/master/examples/remoteBuild.md).
