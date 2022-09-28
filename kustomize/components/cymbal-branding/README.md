@@ -1,4 +1,4 @@
-# Changing the Online Boutique theme to the Cymbal Shops Branding
+# Change the Online Boutique theme to the Cymbal Shops Branding
 
 By default, when you deploy this sample app, the "Online Boutique" branding (logo and wording) will be used.
 But you may want to use Google Cloud's fictitious company, _Cymbal Shops_, instead.

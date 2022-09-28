@@ -1,4 +1,4 @@
-# Deploying Online Boutique variations with Kustomize
+# Deploy Online Boutique variations with Kustomize
 
 This page contains instructions on deploying variations of the [Online Boutique](https://github.com/GoogleCloudPlatform/microservices-demo) sample application using [Kustomize](https://kustomize.io/). Each variations is designed as a [**Kustomize component**](https://github.com/kubernetes-sigs/kustomize/blob/master/examples/components.md), so multiple variations can be composed together in the deployment.
 

@@ -1,4 +1,4 @@
-# Securing Online Boutique with Network Policies
+# Secure Online Boutique with Network Policies
 
 You can use [Network Policies](https://kubernetes.io/docs/concepts/services-networking/network-policies/) enforcement to control the communication between your cluster's Pods and Services.
 

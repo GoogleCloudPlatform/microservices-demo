@@ -1,4 +1,4 @@
-# Integrating Online Boutique with Google Cloud Operations
+# Integrate Online Boutique with Google Cloud Operations
 
 By default, [Google Cloud Operations](https://cloud.google.com/products/operations) instrumentation is **turned off** for Online Boutique deployments. This includes Monitoring (Stats), Tracing, Profiler, and Debugger. This means that even if you're running this app on [GKE](https://cloud.google.com/kubernetes-engine), traces (for example) will not be exported to [Google Cloud Trace](https://cloud.google.com/trace).
 

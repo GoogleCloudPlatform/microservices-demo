@@ -1,4 +1,4 @@
-# Creating Kubernetes Service Accounts for Online Boutique
+# Create Kubernetes Service Accounts for Online Boutique
 
 Creating a `ServiceAccount` per `Deployment` could be helpful if you need to define a fine granular identity for each `Deployment` in your Kubernetes clusters. This could help if for example you want to give specific Google Cloud IAM role binding by leveraging [Workload Identity with GKE](/docs/workload-identity.md). Another scenario could be if you want to define fine granular [`AuthorizationPolicies` with Istio/ASM](https://cloud.google.com/service-mesh/docs/by-example/authz).
 
