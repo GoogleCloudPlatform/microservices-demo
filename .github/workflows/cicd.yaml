@@ -76,6 +76,7 @@ jobs:
         with:
           push: true
           context: src/${{ matrix.service }}
+          file: src/${{ matrix.service }}/Dockerfile
           tags: ${{ steps.meta.outputs.tags }}
 #      - name: Wait For Allocations
 #        timeout-minutes: 20
