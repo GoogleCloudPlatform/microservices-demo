@@ -41,15 +41,16 @@ jobs:
     runs-on: [ubuntu-latest]
 #    needs: code-tests
     strategy:
-      matrix:
-        service: ["adservice", "cartservice", "checkoutservice", "currencyservice", "emailservice", "frontend", "paymentservice", "productcatalogservice", "recommendationservice", "shippingservice"]
+#      matrix:
+#        service: ["adservice", "cartservice", "checkoutservice", "currencyservice", "emailservice", "frontend", "paymentservice", "productcatalogservice", "recommendationservice", "shippingservice"]
       fail-fast: true
     steps:
       -
         name: Login to DockerHub
         uses: docker/login-action@v2
         with:
-          username: ${{ secrets.DOCKERHUB_TOKEN }}
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
 #
 #      - uses: actions/checkout@v3
 #      - uses: docker/build-push-action@v3
