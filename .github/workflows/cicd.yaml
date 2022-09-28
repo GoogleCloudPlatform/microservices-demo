@@ -18,10 +18,13 @@ on:
   push:
     # run on pushes to main or release/*
     branches:
-      - *
+      - main
 jobs:
   code-tests:
     runs-on: [ubuntu-latest]
+    matrix:
+      service: [ "productcatalogservice", "shippingservice" ]
+      fail-fast: true
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-go@v3
@@ -30,12 +33,9 @@ jobs:
       - name: Go Unit Tests
         timeout-minutes: 10
         run: |
-          for SERVICE in "shippingservice" "productcatalogservice"; do
-            echo "testing $SERVICE..."
-            pushd src/$SERVICE
+            echo "testing ${{ matrix.service }}..."
+            cd src/${{ matrix.service }}
             go test
-            popd
-          done
   build-images:
     runs-on: [ubuntu-latest]
     needs: code-tests
