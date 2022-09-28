@@ -19,6 +19,8 @@ on:
       - main
     paths-ignore:
       - '**/README.md'
+      - 'kustomize/**'
+      - '.github/workflows/kustomize-build-ci.yaml'
       - 'terraform/**'
       - '.github/workflows/terraform-validate-ci.yaml'
 
