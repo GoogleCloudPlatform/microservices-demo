@@ -72,7 +72,7 @@ jobs:
         timeout-minutes: 20
         with:
           push: true
-          context: {{defaultContext}}:src/${{ matrix.service }}
+          context: "{{defaultContext}}:src/${{ matrix.service }}"
           tags: ${{ steps.meta.outputs.tags }}
 #      - name: Wait For Allocations
 #        timeout-minutes: 20
