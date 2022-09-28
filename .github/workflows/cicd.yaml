@@ -20,26 +20,27 @@ on:
     branches:
       - main
 jobs:
-#  code-tests:
-#    runs-on: [ubuntu-latest]
-#    strategy:
-#      matrix:
-#        service: [ "productcatalogservice", "shippingservice" ]
-#      fail-fast: true
-#    steps:
-#      - uses: actions/checkout@v3
-#      - uses: actions/setup-go@v3
-#        with:
-#          go-version: '1.17.5'
-#      - name: Go Unit Tests
-#        timeout-minutes: 10
-#        run: |
-#            echo "testing ${{ matrix.service }}..."
-#            cd src/${{ matrix.service }}
-#            go test
+  code-tests:
+    runs-on: [ubuntu-latest]
+    strategy:
+      matrix:
+        service: [ "productcatalogservice", "shippingservice" ]
+      fail-fast: true
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-go@v3
+        with:
+          go-version: '1.17.5'
+      - name: Go Unit Tests
+        timeout-minutes: 10
+        run: |
+            echo "testing ${{ matrix.service }}..."
+            env
+            cd src/${{ matrix.service }}
+            go test
   build-images:
     runs-on: [ubuntu-latest]
-#    needs: code-tests
+    needs: code-tests
     strategy:
       matrix:
         service: ["adservice", "cartservice", "checkoutservice", "currencyservice", "emailservice", "frontend", "paymentservice", "productcatalogservice", "recommendationservice", "shippingservice"]
@@ -51,7 +52,7 @@ jobs:
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
-#
+
       -
         uses: docker/build-push-action@v3
         name: Build
