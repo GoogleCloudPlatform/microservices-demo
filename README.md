@@ -123,11 +123,11 @@ gcloud container clusters delete onlineboutique \
     --project=${PROJECT_ID} --zone=${ZONE}
 ```
 
-## Provision the GKE cluster and deploy the Online Boutique apps with Terraform
+## Use Terraform to provision a GKE cluster and deploy Online Boutique
 
-Instructions for using Terraform to replicate the [**Quickstart (GKE)**](#quickstart-gke) steps can be found [here](terraform).
+The [`/terraform` folder](terraform) contains instructions for using [Terraform](https://www.terraform.io/intro) to replicate the steps from [**Quickstart (GKE)**](#quickstart-gke) above.
 
-## Other provisioning Options
+## Other deployment variations
 
 - **Workload Identity**: [See these instructions.](docs/workload-identity.md)
 - **Istio**: [See these instructions.](docs/service-mesh.md)
@@ -136,7 +136,10 @@ Instructions for using Terraform to replicate the [**Quickstart (GKE)**](#quicks
 
 ## Deploy Online Boutique variations with Kustomize
 
-Instructions for customizing the deployments of the Online Boutique apps with different variations like integrating with the Google Cloud Operations or Memorystore (redis) can be found [here](kustomize).
+The [`/kustomize` folder](kustomize) contains instructions for customizing the deployment of Online Boutique with different variations such as:
+* integrating with [Google Cloud Operations](https://cloud.google.com/products/operations)
+* replacing the in-cluster Redis cache with [Google Cloud Memorystore (Redis)](https://cloud.google.com/memorystore)
+* etc.
 
 ## Architecture
 
