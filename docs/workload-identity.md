@@ -4,8 +4,6 @@ If you have enabled [Workload Identity](https://cloud.google.com/kubernetes-engi
 
 *Note* - These instructions have only been validated in GKE on GCP clusters. [Workload Identity is not yet supported](https://cloud.google.com/kubernetes-engine/docs/how-to/workload-identity#creating_a_relationship_between_ksas_and_gsas) in Anthos GKE on Prem. 
 
-
-
 1. **Set up Workload Identity** on your GKE cluster [using the instructions here](https://cloud.google.com/kubernetes-engine/docs/how-to/workload-identity#enable_on_new_cluster). These instructions create the Kubernetes Service Account (KSA) and Google Service Account (GSA) that the OnlineBoutique pods will use to authenticate to GCP. Take note of what Kubernetes `namespace` you use during setup.
 
 2. **Add IAM Roles** to your GSA. These roles allow workload identity-enabled OnlineBoutique pods to send traces and metrics to GCP. 

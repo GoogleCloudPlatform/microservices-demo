@@ -1,0 +1,61 @@
+# Copyright 2020 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+name: kustomize-build-ci
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'kustomize/**'
+      - '.github/workflows/kustomize-build-ci.yaml'
+  pull_request:
+    paths:
+      - 'kustomize/**'
+      - '.github/workflows/kustomize-build-ci.yaml'
+jobs:
+  job:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v3
+      - name: kustomize build base
+        run: |
+          cd kustomize/
+          kubectl kustomize .
+      - name: kustomize build each component
+        run: |
+          cd kustomize/
+          COMPONENTS=$(ls components/)
+          for c in $COMPONENTS;
+          do
+              echo "## kustomize build for " + $c
+              rm kustomization.yaml
+              kustomize create --resources base
+              kustomize edit add component components/$c
+              kustomize build .
+          done
+      - name: kustomize build multiple components
+        run: |
+          cd kustomize/
+          rm kustomization.yaml
+          kustomize create --resources base
+          kustomize edit add component components/cymbal-branding
+          kustomize edit add component components/google-cloud-operations
+          kustomize edit add component components/memorystore
+          kustomize edit add component components/network-policies
+          kustomize edit add component components/service-accounts
+          cd components/network-policies
+          kustomize edit remove resource network-policy-redis.yaml
+          cd ../..
+          kustomize build .

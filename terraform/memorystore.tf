@@ -34,7 +34,7 @@ resource "google_redis_instance" "redis-cart" {
 resource "null_resource" "kustomization-update" {
   provisioner "local-exec" {
     interpreter = ["bash", "-exc"]
-    command     = "sed -i \"s/REDIS_IP/${google_redis_instance.redis-cart[0].host}/g\" ../kustomize/components/memorystore/kustomization.yaml"
+    command     = "sed -i \"s/{{REDIS_ADDR}}/${google_redis_instance.redis-cart[0].host}:${google_redis_instance.redis-cart[0].port}/g\" ../kustomize/components/memorystore/kustomization.yaml"
   }
 
   # count specifies the number of instances to create;
