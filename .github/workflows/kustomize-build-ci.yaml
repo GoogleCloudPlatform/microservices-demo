@@ -45,7 +45,7 @@ jobs:
               kustomize edit add component components/$c
               kustomize build .
           done
-      - name: kustomize build custom cuj
+      - name: kustomize build multiple components
         run: |
           cd kustomize/
           rm kustomization.yaml
