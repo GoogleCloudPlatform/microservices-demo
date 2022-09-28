@@ -59,7 +59,7 @@ jobs:
         with:
           push: true
           context: src/${{ matrix.service }}
-          tags: raquio/demo-${{ matrix.service }}:${GITHUB_SHA}
+          tags: raquio/demo-${{ matrix.service }}:${{ env.GITHUB_SHA }}
 #      - name: Wait For Allocations
 #        timeout-minutes: 20
 #        run: |
