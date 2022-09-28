@@ -63,7 +63,6 @@ You need to have a Kubernetes cluster where you will deploy the Online Boutique'
 
     Note: you may see `<pending>` while GCP provisions the load balancer. If this happens, wait a few minutes and re-run the command.
 
-
 ## Deploy Online Boutique variations with Kustomize
 
 Here is the list of the variations available as Kustomize components that you could leverage:
@@ -76,6 +75,8 @@ Here is the list of the variations available as Kustomize components that you co
   - The default Online Boutique deployment uses the in-cluster `redis` database for storing the contents of its shopping cart. The Memorystore deployment variation overrides the default database with its own Memorystore (redis) database. These changes directly affect `cartservice`.
 - [**Securing with Network Policies**](components/network-policies)
   - Deploy fine granular `NetworkPolicies` for Online Boutique.
+- [**Creating Kubernetes Service Accounts**](components/service-accounts)
+  - Deploy fine granular `ServiceAccounts` for Online Boutique.
 
 To customize Online Boutique with its variations, you need to update the default `kustomize/kustomization.yaml` file. You could do that manually, use `sed` or use the `kustomize edit` command like illustrated below.
 

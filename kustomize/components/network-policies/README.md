@@ -6,7 +6,7 @@ To use `NetworkPolicies` in Google Kubernetes Engine (GKE), you will need a GKE 
 
 ## Deploy Online Boutique with `NetworkPolicies` via Kustomize
 
-To automate the deployment of Online Boutique integrated with with fine granular `NetworkPolicies`, you can leverage the following variation with [Kustomize](../..).
+To automate the deployment of Online Boutique integrated with fine granular `NetworkPolicies` (one per `Deployment`), you can leverage the following variation with [Kustomize](../..).
 
 From the `kustomize/` folder at the root level of this repository, execute this command:
 ```
@@ -25,9 +25,7 @@ components:
 
 You can locally render these manifests by running `kubectl kustomize .` as well as deploying them by running `kubectl apply -k .`.
 
-Once deployed, you can verify that the `NetworkPolicies` are successfully deployed.
-
-If you run:
+Once deployed, you can verify that the `NetworkPolicies` are successfully deployed:
 ```bash
 kubectl get networkpolicy
 ```
@@ -46,6 +44,7 @@ loadgenerator           app=loadgenerator           2m58s
 paymentservice          app=paymentservice          2m58s
 productcatalogservice   app=productcatalogservice   2m58s
 recommendationservice   app=recommendationservice   2m58s
+redis-cart              app=redis-cart              2m58s
 shippingservice         app=shippingservice         2m58s
 ```
 
