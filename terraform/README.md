@@ -34,6 +34,8 @@ This page walks you through the steps required to deploy the [Online Boutique](h
 
 1. Open the `terraform.tfvars` file and replace `<project_id_here>` with the [GCP Project ID](https://cloud.google.com/resource-manager/docs/creating-managing-projects?hl=en#identifying_projects) for the `gcp_project_id` variable.
 
+1. (Optional) If you want to provision a Memorystore (redis) instance, you can also change the value of `memorystore = false` to `memorystore = true` in this `terraform.tfvars` file.
+
 1. Initialize Terraform.
     ```
     terraform init

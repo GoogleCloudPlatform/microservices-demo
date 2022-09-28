@@ -68,13 +68,13 @@ You need to have a Kubernetes cluster where you will deploy the Online Boutique'
 
 Here is the list of the variations available as Kustomize components that you could leverage:
 
-- [**Cymbal Shops Branding**](components/cymbal-branding)
+- [**Changing to the Cymbal Shops Branding**](components/cymbal-branding)
   - Changes all Online Boutique-related branding to Google Cloud's fictitious company — Cymbal Shops. The code adds/enables an environment variable `CYMBAL_BRANDING` in the `frontend` service.
-- [**Google Cloud Operations**](components/google-cloud-operations)
+- [**Integrating with Google Cloud Operations**](components/google-cloud-operations)
   - Enables Monitoring (Stats), Tracing, Profiler, and Debugger for various services within Online Boutique. The code removes the existing environment variables (`DISABLE_STATS`, `DISABLE_TRACING`, `DISABLE_PROFILER`, `DISABLE_DEBUGGER`) from appropriate YAML config files.
-- [**Memorystore (redis)**](components/memorystore)
+- [**Integrating with Memorystore (redis)**](components/memorystore)
   - The default Online Boutique deployment uses the in-cluster `redis` database for storing the contents of its shopping cart. The Memorystore deployment variation overrides the default database with its own Memorystore (redis) database. These changes directly affect `cartservice`.
-- [**Network Policies**](components/network-policies)
+- [**Securing with Network Policies**](components/network-policies)
   - Deploy fine granular `NetworkPolicies` for Online Boutique.
 
 To customize Online Boutique with its variations, you need to update the default `kustomize/kustomization.yaml` file. You could do that manually, use `sed` or use the `kustomize edit` command like illustrated below.
@@ -90,3 +90,25 @@ kustomize edit add component components/google-cloud-operations
 ```
 
 Like explained earlier, you can locally render these manifests by running `kubectl kustomize .` as well as deploying them by running `kubectl apply -k .`.
+
+So for example, the associated `kustomization.file` could look like:
+```
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+- base
+components:
+- components/cymbal-branding
+- components/google-cloud-operations
+```
+
+Kustomize allows public remote resources so you can have this file in this form too:
+```
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+- github.com/GoogleCloudPlatform/microservices-demo/kustomize/base
+components:
+- github.com/GoogleCloudPlatform/microservices-demo/kustomize/components/cymbal-branding
+- github.com/GoogleCloudPlatform/microservices-demo/kustomize/components/google-cloud-operations
+```

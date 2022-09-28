@@ -123,21 +123,20 @@ gcloud container clusters delete onlineboutique \
     --project=${PROJECT_ID} --zone=${ZONE}
 ```
 
-## Automated Deployment
+## Provision the GKE cluster and deploy the Online Boutique apps with Terraform
 
-Automated deployment for the Online Boutique sample application is supported in this repository. Instructions for using Terraform to replicate the [**Quickstart (GKE)**](https://github.com/GoogleCloudPlatform/microservices-demo/tree/main/README.md#quickstart-gke) steps can be found inside [/terraform/README.md](https://github.com/GoogleCloudPlatform/microservices-demo/tree/main/terraform).
+Instructions for using Terraform to replicate the [**Quickstart (GKE)**](#quickstart-gke) steps can be found [here](terraform).
 
-## Other Deployment Options
+## Other provisioning Options
 
-- **Google Cloud Operations** (Monitoring, Tracing, Debugger, Profiler): [See these instructions](docs/gcp-instrumentation.md).
 - **Workload Identity**: [See these instructions.](docs/workload-identity.md)
 - **Istio**: [See these instructions.](docs/service-mesh.md)
 - **Anthos Service Mesh**: ASM requires Workload Identity to be enabled in your GKE cluster. [See the workload identity instructions](docs/workload-identity.md) to configure and deploy the app. Then, use the [service mesh guide](/docs/service-mesh.md).
 - **non-GKE clusters (Minikube, Kind)**: see the [Development Guide](/docs/development-guide.md)
-- **Memorystore**: [See these instructions](/docs/memorystore.md) to replace the in-cluster `redis` database with hosted Google Cloud Memorystore (redis).
-- **Cymbal Shops Branding**: [See these instructions](/docs/cymbal-shops.md)
-- **NetworkPolicies**: [See these instructions](/docs/network-policies/README.md)
 
+## Deploy Online Boutique variations with Kustomize
+
+Instructions for customizing the deployments of the Online Boutique apps with different variations like integrating with the Google Cloud Operations or Memorystore (redis) can be found [here](kustomize).
 
 ## Architecture
 
