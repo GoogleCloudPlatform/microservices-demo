@@ -22,3 +22,6 @@ components:
 # - components/memorystore
 # - components/network-policies
 # - components/service-accounts
+# - components/container-images-tag
+# - components/container-images-tag-suffix
+- components/container-images-registry
