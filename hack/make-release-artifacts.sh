@@ -97,6 +97,8 @@ main() {
     mk_kubernetes_manifests > "${k8s_manifests_file}"
     log "Written ${k8s_manifests_file}"
 
+    cp ${k8s_manifests_file} ../kustomize/base
+
     istio_manifests_file="${OUT_DIR}/istio-manifests.yaml"
     mk_istio_manifests > "${istio_manifests_file}"
     log "Written ${istio_manifests_file}"

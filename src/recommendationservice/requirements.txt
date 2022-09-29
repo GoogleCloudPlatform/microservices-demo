@@ -8,13 +8,13 @@ cachecontrol==0.12.11
     # via firebase-admin
 cachetools==5.2.0
     # via google-auth
-certifi==2022.6.15.1
+certifi==2022.9.24
     # via requests
 charset-normalizer==2.1.1
     # via requests
 firebase-admin==5.2.0
     # via google-python-cloud-debugger
-google-api-core[grpc]==2.10.0
+google-api-core[grpc]==2.10.1
     # via
     #   -r requirements.in
     #   firebase-admin
@@ -26,12 +26,12 @@ google-api-core[grpc]==2.10.0
     #   google-cloud-trace
     #   google-python-cloud-debugger
     #   opencensus
-google-api-python-client==2.61.0
+google-api-python-client==2.63.0
     # via
     #   firebase-admin
     #   google-cloud-profiler
     #   google-python-cloud-debugger
-google-auth==2.11.0
+google-auth==2.12.0
     # via
     #   google-api-core
     #   google-api-python-client
@@ -50,7 +50,7 @@ google-cloud-core==2.3.2
     #   google-cloud-firestore
     #   google-cloud-storage
     #   google-cloud-trace
-google-cloud-firestore==2.6.1
+google-cloud-firestore==2.7.0
     # via firebase-admin
 google-cloud-monitoring==2.11.1
     # via opencensus-ext-stackdriver
@@ -70,7 +70,7 @@ googleapis-common-protos==1.56.4
     # via
     #   google-api-core
     #   grpcio-status
-grpcio==1.48.1
+grpcio==1.49.1
     # via
     #   -r requirements.in
     #   google-api-core
@@ -85,7 +85,7 @@ httplib2==0.20.4
     # via
     #   google-api-python-client
     #   google-auth-httplib2
-idna==3.3
+idna==3.4
     # via requests
 msgpack==1.0.4
     # via cachecontrol
@@ -104,7 +104,7 @@ proto-plus==1.22.1
     # via
     #   google-cloud-firestore
     #   google-cloud-monitoring
-protobuf==3.20.1
+protobuf==3.20.2
     # via
     #   -r requirements.in
     #   google-api-core
