@@ -103,6 +103,7 @@ if __name__ == "__main__":
         raise KeyError()
       else:
         logger.info("Tracing enabled, but temporarily unavailable")
+        logger.info("See https://github.com/GoogleCloudPlatform/microservices-demo/issues/422 for more info.")
     except (KeyError, DefaultCredentialsError):
         logger.info("Tracing disabled.")
     except Exception as e:

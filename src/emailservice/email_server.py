@@ -182,7 +182,8 @@ if __name__ == '__main__':
     if "DISABLE_TRACING" in os.environ:
       raise KeyError()
     else:
-      logger.info("Tracing enabled, but not currently available")
+      logger.info("Tracing enabled, but not currently available.")
+      logger.info("See https://github.com/GoogleCloudPlatform/microservices-demo/issues/422 for more info.")
   except (KeyError, DefaultCredentialsError):
       logger.info("Tracing disabled.")
   except Exception as e:

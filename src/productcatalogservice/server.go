@@ -70,7 +70,8 @@ func init() {
 
 func main() {
 	if os.Getenv("DISABLE_TRACING") == "" {
-		log.Info("Tracing enabled.")
+		log.Info("Tracing enabled but temporarily unavailable.")
+		log.Info("See https://github.com/GoogleCloudPlatform/microservices-demo/issues/422 for more info.")
 		go initTracing()
 	} else {
 		log.Info("Tracing disabled.")

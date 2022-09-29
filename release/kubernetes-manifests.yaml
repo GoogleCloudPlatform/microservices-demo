@@ -144,6 +144,8 @@ spec:
             value: "1"
           - name: DISABLE_PROFILER
             value: "1"
+          # - name: JAEGER_SERVICE_ADDR
+          #   value: "jaeger-collector:14268"
           resources:
             requests:
               cpu: 100m
@@ -311,6 +313,8 @@ spec:
             value: "1"
           - name: DISABLE_PROFILER
             value: "1"
+          # - name: JAEGER_SERVICE_ADDR
+          #   value: "jaeger-collector:14268"
           # - name: CYMBAL_BRANDING
           #   value: "true"
           resources:
@@ -456,6 +460,8 @@ spec:
           value: "1"
         - name: DISABLE_PROFILER
           value: "1"
+        # - name: JAEGER_SERVICE_ADDR
+        #   value: "jaeger-collector:14268"
         readinessProbe:
           exec:
             command: ["/bin/grpc_health_probe", "-addr=:3550"]
@@ -720,6 +726,8 @@ spec:
           value: "1"
         - name: DISABLE_PROFILER
           value: "1"
+        # - name: JAEGER_SERVICE_ADDR
+        #   value: "jaeger-collector:14268"
         readinessProbe:
           periodSeconds: 5
           exec:
@@ -852,6 +860,8 @@ spec:
           value: "1"
         - name: DISABLE_TRACING
           value: "1"
+        # - name: JAEGER_SERVICE_ADDR
+        #   value: "jaeger-collector:14268"
         resources:
           requests:
             cpu: 200m
