@@ -27,20 +27,28 @@ namespace cartservice
         public void ConfigureServices(IServiceCollection services)
         {
             string redisAddress = Configuration["REDIS_ADDR"];
+            string spannerProjectId = Configuration["SPANNER_PROJECT"];
+
             if (!string.IsNullOrEmpty(redisAddress))
             {
                 services.AddStackExchangeRedisCache(options =>
                 {
                     options.Configuration = redisAddress;
                 });
+                services.AddSingleton<ICartStore, RedisCartStore>();
+            }
+            else if (!string.IsNullOrEmpty(spannerProjectId))
+            {
+                Console.WriteLine($"Spanner database specified: project {spannerProjectId}, instance hipstershop");
+                services.AddSingleton<ICartStore, SpannerCartStore>();
             }
             else
             {
                 Console.WriteLine("Redis cache host(hostname+port) was not specified. Starting a cart service using in memory store");
                 services.AddDistributedMemoryCache();
+                services.AddSingleton<ICartStore, RedisCartStore>();
             }
 
-            services.AddSingleton<ICartStore, RedisCartStore>();
 
             services.AddGrpc();
         }
