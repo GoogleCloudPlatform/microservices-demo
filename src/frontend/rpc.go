@@ -16,32 +16,56 @@ package main
 
 import (
 	"context"
+	"time"
+
 	pb "github.com/GoogleCloudPlatform/microservices-demo/src/frontend/genproto"
 	"github.com/google/uuid"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
-	"time"
 
 	"github.com/pkg/errors"
 )
 
 const (
 	avoidNoopCurrencyConversionRPC = false
-	SERVICENAME                    = "frontend"
+	FRONTEND                       = "frontend"
+	ADSERVICE                      = "adservice"
+	CARTSERVICE                    = "cartservice"
+	CHECKOUTSERVICE                = "checkoutservice"
+	CURRENCYSERVICE                = "currencyservice"
+	EMAILSERVICE                   = "emailservice"
+	PAYMENTSERVICE                 = "paymentservice"
+	PRODUCTCATALOGSERVICE          = "productcatalogservice"
+	RECOMMENDATIONSERVICE          = "recommendationservice"
+	SHIPPINGSERVICE                = "shippingservice"
 )
 
 // NOTE: logLevel must be a GELF valid severity value (WARN or ERROR), INFO if not specified
 func emitLog(event string, logLevel string) {
-	logMessage := time.Now().Format(time.RFC3339) + " - " + logLevel + " - " + SERVICENAME + " - " + event
+	timestamp := time.Now().Format(time.RFC3339)
 
 	switch logLevel {
 	case "ERROR":
-		log.Error(logMessage)
+		log.Error(timestamp + " - ERROR - " + FRONTEND + " - " + event)
 	case "WARN":
-		log.Warn(logMessage)
+		log.Warn(timestamp + " - WARN - " + FRONTEND + " - " + event)
 	default:
-		log.Info(logMessage)
+		log.Info(timestamp + " - INFO - " + FRONTEND + " - " + event)
+	}
+}
+
+// Verify gRPC response code and log the corresponding event
+func checkResponse(responseCode codes.Code, serviceName string, reqId string, err error) {
+	if responseCode == codes.Unavailable {
+		event := "Failing to contact " + serviceName + " (request_id: " + reqId + "). Root cause: (" + err.Error() + ")"
+		emitLog(event, "ERROR")
+	} else if responseCode == codes.OK {
+		event := "Receiving answer from " + serviceName + " (request_id: " + reqId + ")"
+		emitLog(event, "INFO")
+	} else {
+		event := "Error response received from " + serviceName + " (request_id: " + reqId + ")"
+		emitLog(event, "ERROR")
 	}
 }
 
@@ -49,37 +73,25 @@ func (fe *frontendServer) getCurrencies(ctx context.Context) ([]string, error) {
 	RequestID, err := uuid.NewRandom()
 
 	if err != nil {
-		emitLog(SERVICENAME+": An error occurred while generating the RequestID", "ERROR")
+		emitLog(FRONTEND+": An error occurred while generating the RequestID", "ERROR")
 	}
 
 	// Add metadata to gRPC
-	header := metadata.Pairs("requestid", RequestID.String(), "servicename", SERVICENAME)
+	header := metadata.Pairs("requestid", RequestID.String(), "servicename", FRONTEND)
 	metadataCtx := metadata.NewOutgoingContext(ctx, header)
 
 	// Add gRPC timeout
-	newCtx, cancel := context.WithTimeout(metadataCtx, 2*time.Second)
+	newCtx, cancel := context.WithTimeout(metadataCtx, time.Second)
 	defer cancel()
 
-	event := "Sending message to CURRENCYSERVICE (RequestID: " + RequestID.String() + ")"
+	event := "Sending message to " + CURRENCYSERVICE + " (RequestID: " + RequestID.String() + ")"
 	emitLog(event, "INFO")
 
 	currs, err := pb.NewCurrencyServiceClient(fe.currencySvcConn).
 		GetSupportedCurrencies(newCtx, &pb.Empty{})
 
-	receivedCode := status.Code(err)
-
-	// Check gRPC response code
-	if receivedCode == codes.DeadlineExceeded {
-		event = "Failing to contact CURRENCYSERVICE (request_id: " + RequestID.String() + "). Root cause: (" + newCtx.Err().Error() + ")"
-		emitLog(event, "ERROR")
-	} else if err != nil {
-		event = "Error response received from CURRENCYSERVICE (request_id: " + RequestID.String() + ")"
-		emitLog(event, "ERROR")
-	} else {
-		event = "Receiving answer from CURRENCYSERVICE (RequestID: " + RequestID.String() + ")"
-		emitLog(event, "INFO")
-	}
-
+	// Check gRPC reply
+	checkResponse(status.Code(err), CURRENCYSERVICE, RequestID.String(), err)
 
 	var out []string
 	for _, c := range currs.CurrencyCodes {
@@ -94,37 +106,26 @@ func (fe *frontendServer) getProducts(ctx context.Context) ([]*pb.Product, error
 	RequestID, err := uuid.NewRandom()
 
 	if err != nil {
-		emitLog(SERVICENAME+": An error occurred while generating the RequestID", "ERROR")
+		emitLog(FRONTEND+": An error occurred while generating the RequestID", "ERROR")
 	}
 
 	// Add metadata to gRPC
-	header := metadata.Pairs("requestid", RequestID.String(), "servicename", SERVICENAME)
+	header := metadata.Pairs("requestid", RequestID.String(), "servicename", FRONTEND)
 	metadataCtx := metadata.NewOutgoingContext(ctx, header)
 
 	// Add gRPC timeout
-	newCtx, cancel := context.WithTimeout(metadataCtx, 2*time.Second)
+	newCtx, cancel := context.WithTimeout(metadataCtx, time.Second)
 	defer cancel()
 
-	event := "Sending message to PRODUCTCATALOG (request_id: " + RequestID.String() + ")"
+	// Log sending gRPC
+	event := "Sending message to " + PRODUCTCATALOGSERVICE + " (request_id: " + RequestID.String() + ")"
 	emitLog(event, "INFO")
 
 	resp, err := pb.NewProductCatalogServiceClient(fe.productCatalogSvcConn).
 		ListProducts(newCtx, &pb.Empty{})
 
-	receivedCode := status.Code(err)
-
-	if receivedCode == codes.DeadlineExceeded {
-		event = "Failing to contact PRODUCTCATALOG (request_id: " + RequestID.String() + "). Root cause: (" + newCtx.Err().Error() + ")"
-		emitLog(event, "ERROR")
-
-	} else if err != nil {
-		event = "Error response received from PRODUCTCATALOG (request_id: " + RequestID.String() + ")"
-		emitLog(event, "ERROR")
-
-	} else {
-		event = "Receiving answer from PRODUCTCATALOG (request_id: " + RequestID.String() + ")"
-		emitLog(event, "INFO")
-	}
+	// Check gRPC reply
+	checkResponse(status.Code(err), PRODUCTCATALOGSERVICE, RequestID.String(), err)
 
 	return resp.GetProducts(), err
 }
@@ -133,37 +134,26 @@ func (fe *frontendServer) getProduct(ctx context.Context, id string) (*pb.Produc
 	RequestID, err := uuid.NewRandom()
 
 	if err != nil {
-		emitLog(SERVICENAME+": An error occurred while generating the RequestID", "ERROR")
+		emitLog(FRONTEND+": An error occurred while generating the RequestID", "ERROR")
 	}
 
 	// Add metadata to gRPC
-	header := metadata.Pairs("requestid", RequestID.String(), "servicename", SERVICENAME)
+	header := metadata.Pairs("requestid", RequestID.String(), "servicename", FRONTEND)
 	metadataCtx := metadata.NewOutgoingContext(ctx, header)
 
 	// Add gRPC timeout
-	newCtx, cancel := context.WithTimeout(metadataCtx, 2*time.Second)
+	newCtx, cancel := context.WithTimeout(metadataCtx, time.Second)
 	defer cancel()
 
-	event := "Sending message to PRODUCTCATALOG (request_id: " + RequestID.String() + ")"
+	// Log sending gRPC
+	event := "Sending message to " + PRODUCTCATALOGSERVICE + " (request_id: " + RequestID.String() + ")"
 	emitLog(event, "INFO")
 
 	resp, err := pb.NewProductCatalogServiceClient(fe.productCatalogSvcConn).
 		GetProduct(newCtx, &pb.GetProductRequest{Id: id})
 
-	receivedCode := status.Code(err)
-
-	if receivedCode == codes.DeadlineExceeded {
-		event = "Failing to contact PRODUCTCATALOG (request_id: " + RequestID.String() + "). Root cause: (" + newCtx.Err().Error() + ")"
-		emitLog(event, "ERROR")
-
-	} else if err != nil {
-		event = "Error response received from PRODUCTCATALOG (request_id: " + RequestID.String() + ")"
-		emitLog(event, "ERROR")
-
-	} else {
-		event = "Receiving answer from PRODUCTCATALOG (request_id: " + RequestID.String() + ")"
-		emitLog(event, "INFO")
-	}
+	// Check gRPC reply
+	checkResponse(status.Code(err), PRODUCTCATALOGSERVICE, RequestID.String(), err)
 
 	return resp, err
 }
@@ -172,36 +162,25 @@ func (fe *frontendServer) getCart(ctx context.Context, userID string) ([]*pb.Car
 	RequestID, err := uuid.NewRandom()
 
 	if err != nil {
-		emitLog(SERVICENAME+": An error occurred while generating the RequestID", "ERROR")
+		emitLog(FRONTEND+": An error occurred while generating the RequestID", "ERROR")
 	}
 
 	// Add metadata to gRPC
-	header := metadata.Pairs("requestid", RequestID.String(), "servicename", SERVICENAME)
+	header := metadata.Pairs("requestid", RequestID.String(), "servicename", FRONTEND)
 	metadataCtx := metadata.NewOutgoingContext(ctx, header)
 
 	// Add gRPC timeout
-	newCtx, cancel := context.WithTimeout(metadataCtx, 2*time.Second)
+	newCtx, cancel := context.WithTimeout(metadataCtx, time.Second)
 	defer cancel()
 
-	event := "Sending message to CARTSERVICE (request_id: " + RequestID.String() + ")"
+	// Log sending gRPC
+	event := "Sending message to " + CARTSERVICE + " (request_id: " + RequestID.String() + ")"
 	emitLog(event, "INFO")
 
 	resp, err := pb.NewCartServiceClient(fe.cartSvcConn).GetCart(newCtx, &pb.GetCartRequest{UserId: userID})
 
-	receivedCode := status.Code(err)
-
-	if receivedCode == codes.DeadlineExceeded {
-		event = "Failing to contact CARTSERVICE (request_id: " + RequestID.String() + "). Root cause: (" + newCtx.Err().Error() + ")"
-		emitLog(event, "ERROR")
-
-	} else if err != nil {
-		event = "Error response received from CARTSERVICE (request_id: " + RequestID.String() + ")"
-		emitLog(event, "ERROR")
-
-	} else {
-		event = "Receiving answer from CARTSERVICE (request_id: " + RequestID.String() + ")"
-		emitLog(event, "INFO")
-	}
+	// Check gRPC reply
+	checkResponse(status.Code(err), CARTSERVICE, RequestID.String(), err)
 
 	return resp.GetItems(), err
 }
@@ -210,36 +189,25 @@ func (fe *frontendServer) emptyCart(ctx context.Context, userID string) error {
 	RequestID, err := uuid.NewRandom()
 
 	if err != nil {
-		emitLog(SERVICENAME+": An error occurred while generating the RequestID", "ERROR")
+		emitLog(FRONTEND+": An error occurred while generating the RequestID", "ERROR")
 	}
 
 	// Add metadata to gRPC
-	header := metadata.Pairs("requestid", RequestID.String(), "servicename", SERVICENAME)
+	header := metadata.Pairs("requestid", RequestID.String(), "servicename", FRONTEND)
 	metadataCtx := metadata.NewOutgoingContext(ctx, header)
 
 	// Add gRPC timeout
-	newCtx, cancel := context.WithTimeout(metadataCtx, 2*time.Second)
+	newCtx, cancel := context.WithTimeout(metadataCtx, time.Second)
 	defer cancel()
 
-	event := "Sending message to CARTSERVICE (request_id: " + RequestID.String() + ")"
+	// Log sending gRPC
+	event := "Sending message to " + CARTSERVICE + " (request_id: " + RequestID.String() + ")"
 	emitLog(event, "INFO")
 
 	_, err = pb.NewCartServiceClient(fe.cartSvcConn).EmptyCart(newCtx, &pb.EmptyCartRequest{UserId: userID})
 
-	receivedCode := status.Code(err)
-
-	if receivedCode == codes.DeadlineExceeded {
-		event = "Failing to contact CARTSERVICE (request_id: " + RequestID.String() + "). Root cause: (" + newCtx.Err().Error() + ")"
-		emitLog(event, "ERROR")
-
-	} else if err != nil {
-		event = "Error response received from CARTSERVICE (request_id: " + RequestID.String() + ")"
-		emitLog(event, "ERROR")
-
-	} else {
-		event = "Receiving answer from CARTSERVICE (request_id: " + RequestID.String() + ")"
-		emitLog(event, "INFO")
-	}
+	// Check gRPC reply
+	checkResponse(status.Code(err), CARTSERVICE, RequestID.String(), err)
 
 	return err
 }
@@ -248,18 +216,19 @@ func (fe *frontendServer) insertCart(ctx context.Context, userID, productID stri
 	RequestID, err := uuid.NewRandom()
 
 	if err != nil {
-		emitLog(SERVICENAME+": An error occurred while generating the RequestID", "ERROR")
+		emitLog(FRONTEND+": An error occurred while generating the RequestID", "ERROR")
 	}
 
 	// Add metadata to gRPC
-	header := metadata.Pairs("requestid", RequestID.String(), "servicename", SERVICENAME)
+	header := metadata.Pairs("requestid", RequestID.String(), "servicename", FRONTEND)
 	metadataCtx := metadata.NewOutgoingContext(ctx, header)
 
 	// Add gRPC timeout
-	newCtx, cancel := context.WithTimeout(metadataCtx, 2*time.Second)
+	newCtx, cancel := context.WithTimeout(metadataCtx, time.Second)
 	defer cancel()
 
-	event := "Sending message to CARTSERVICE (request_id: " + RequestID.String() + ")"
+	// Log sending gRPC
+	event := "Sending message to " + CARTSERVICE + " (request_id: " + RequestID.String() + ")"
 	emitLog(event, "INFO")
 
 	_, err = pb.NewCartServiceClient(fe.cartSvcConn).AddItem(newCtx, &pb.AddItemRequest{
@@ -269,20 +238,8 @@ func (fe *frontendServer) insertCart(ctx context.Context, userID, productID stri
 			Quantity:  quantity},
 	})
 
-	receivedCode := status.Code(err)
-
-	if receivedCode == codes.DeadlineExceeded {
-		event = "Failing to contact CARTSERVICE (request_id: " + RequestID.String() + "). Root cause: (" + newCtx.Err().Error() + ")"
-		emitLog(event, "ERROR")
-
-	} else if err != nil {
-		event = "Error response received from CARTSERVICE (request_id: " + RequestID.String() + ")"
-		emitLog(event, "ERROR")
-
-	} else {
-		event = "Receiving answer from CARTSERVICE (request_id: " + RequestID.String() + ")"
-		emitLog(event, "INFO")
-	}
+	// Check gRPC reply
+	checkResponse(status.Code(err), CARTSERVICE, RequestID.String(), err)
 
 	return err
 }
@@ -290,42 +247,31 @@ func (fe *frontendServer) insertCart(ctx context.Context, userID, productID stri
 func (fe *frontendServer) convertCurrency(ctx context.Context, money *pb.Money, currency string) (*pb.Money, error) {
 	RequestID, err := uuid.NewRandom()
 	if err != nil {
-		emitLog(SERVICENAME+": An error occurred while generating the RequestID", "ERROR")
+		emitLog(FRONTEND+": An error occurred while generating the RequestID", "ERROR")
 	}
 
 	// Add metadata to gRPC
-	header := metadata.Pairs("requestid", RequestID.String(), "servicename", SERVICENAME)
+	header := metadata.Pairs("requestid", RequestID.String(), "servicename", FRONTEND)
 	metadataCtx := metadata.NewOutgoingContext(ctx, header)
 
 	// Add gRPC timeout
-	newCtx, cancel := context.WithTimeout(metadataCtx, 2*time.Second)
+	newCtx, cancel := context.WithTimeout(metadataCtx, time.Second)
 	defer cancel()
 
 	if avoidNoopCurrencyConversionRPC && money.GetCurrencyCode() == currency {
 		return money, nil
 	}
 
-	event := "Sending message to CURRENCYSERVICE (request_id: " + RequestID.String() + ")"
+	// Log sending gRPC
+	event := "Sending message to " + CURRENCYSERVICE + " (request_id: " + RequestID.String() + ")"
 	emitLog(event, "INFO")
 
 	res, err := pb.NewCurrencyServiceClient(fe.currencySvcConn).Convert(newCtx, &pb.CurrencyConversionRequest{
 		From:   money,
 		ToCode: currency})
 
-	receivedCode := status.Code(err)
-
-	if receivedCode == codes.DeadlineExceeded {
-		event = "Failing to contact CURRENCYSERVICE (request_id: " + RequestID.String() + "). Root cause: (" + newCtx.Err().Error() + ")"
-		emitLog(event, "ERROR")
-
-	} else if err != nil {
-		event = "Error response received from CURRENCYSERVICE (request_id: " + RequestID.String() + ")"
-		emitLog(event, "ERROR")
-
-	} else {
-		event = "Receiving answer from CURRENCYSERVICE (request_id: " + RequestID.String() + ")"
-		emitLog(event, "INFO")
-	}
+	// Check gRPC reply
+	checkResponse(status.Code(err), CURRENCYSERVICE, RequestID.String(), err)
 
 	return res, nil
 }
@@ -333,18 +279,19 @@ func (fe *frontendServer) convertCurrency(ctx context.Context, money *pb.Money, 
 func (fe *frontendServer) getShippingQuote(ctx context.Context, items []*pb.CartItem, currency string) (*pb.Money, error) {
 	RequestID, err := uuid.NewRandom()
 	if err != nil {
-		emitLog(SERVICENAME+": An error occurred while generating the RequestID", "ERROR")
+		emitLog(FRONTEND+": An error occurred while generating the RequestID", "ERROR")
 	}
 
 	// Add metadata to gRPC
-	header := metadata.Pairs("requestid", RequestID.String(), "servicename", SERVICENAME)
+	header := metadata.Pairs("requestid", RequestID.String(), "servicename", FRONTEND)
 	metadataCtx := metadata.NewOutgoingContext(ctx, header)
 
 	// Add gRPC timeout
-	newCtx, cancel := context.WithTimeout(metadataCtx, 2*time.Second)
+	newCtx, cancel := context.WithTimeout(metadataCtx, time.Second)
 	defer cancel()
 
-	event := "Sending message to SHIPPINGSERVICE (request_id: " + RequestID.String() + ")"
+	// Log sending gRPC
+	event := "Sending message to " + SHIPPINGSERVICE + " (request_id: " + RequestID.String() + ")"
 	emitLog(event, "INFO")
 
 	quote, err := pb.NewShippingServiceClient(fe.shippingSvcConn).GetQuote(newCtx,
@@ -352,27 +299,13 @@ func (fe *frontendServer) getShippingQuote(ctx context.Context, items []*pb.Cart
 			Address: nil,
 			Items:   items})
 
-	receivedCode := status.Code(err)
-
-	if receivedCode == codes.DeadlineExceeded {
-		event = "Failing to contact SHIPPINGSERVICE (request_id: " + RequestID.String() + "). Root cause: (" + newCtx.Err().Error() + ")"
-		emitLog(event, "ERROR")
-
-	} else if err != nil {
-		event = "Error response received from SHIPPINGSERVICE (request_id: " + RequestID.String() + ")"
-		emitLog(event, "ERROR")
-		return nil, err
-
-	} else {
-		event = "Receiving answer from SHIPPINGSERVICE (request_id: " + RequestID.String() + ")"
-		emitLog(event, "INFO")
-	}
+	// Check gRPC reply
+	checkResponse(status.Code(err), SHIPPINGSERVICE, RequestID.String(), err)
 
 	localized, err := fe.convertCurrency(ctx, quote.GetCostUsd(), currency)
 
 	if err != nil {
-		event = "failed to convert currency for shipping cost"
-		emitLog(event, "ERROR")
+		emitLog("failed to convert currency for shipping cost", "ERROR")
 	}
 
 	return localized, errors.Wrap(err, "failed to convert currency for shipping cost")
@@ -381,37 +314,26 @@ func (fe *frontendServer) getShippingQuote(ctx context.Context, items []*pb.Cart
 func (fe *frontendServer) getRecommendations(ctx context.Context, userID string, productIDs []string) ([]*pb.Product, error) {
 	RequestID, err := uuid.NewRandom()
 	if err != nil {
-		emitLog(SERVICENAME+": An error occurred while generating the RequestID", "ERROR")
+		emitLog(FRONTEND+": An error occurred while generating the RequestID", "ERROR")
 	}
 
 	// Add metadata to gRPC
-	header := metadata.Pairs("requestid", RequestID.String(), "servicename", SERVICENAME)
+	header := metadata.Pairs("requestid", RequestID.String(), "servicename", FRONTEND)
 	metadataCtx := metadata.NewOutgoingContext(ctx, header)
 
 	// Add gRPC timeout
-	newCtx, cancel := context.WithTimeout(metadataCtx, 2*time.Second)
+	newCtx, cancel := context.WithTimeout(metadataCtx, time.Second)
 	defer cancel()
 
-	event := "Sending message to RECOMMENDATIONSERVICE (request_id: " + RequestID.String() + ")"
+	// Log sending gRPC
+	event := "Sending message to " + RECOMMENDATIONSERVICE + " (request_id: " + RequestID.String() + ")"
 	emitLog(event, "INFO")
 
 	resp, err := pb.NewRecommendationServiceClient(fe.recommendationSvcConn).ListRecommendations(newCtx,
 		&pb.ListRecommendationsRequest{UserId: userID, ProductIds: productIDs})
 
-	receivedCode := status.Code(err)
-
-	if receivedCode == codes.DeadlineExceeded {
-		event = "Failing to contact RECOMMENDATIONSERVICE (request_id: " + RequestID.String() + "). Root cause: (" + newCtx.Err().Error() + ")"
-		emitLog(event, "ERROR")
-
-	} else if err != nil {
-		event = "Error response received from RECOMMENDATIONSERVICE (request_id: " + RequestID.String() + ")"
-		emitLog(event, "ERROR")
-
-	} else {
-		event = "Receiving answer from RECOMMENDATIONSERVICE (request_id: " + RequestID.String() + ")"
-		emitLog(event, "INFO")
-	}
+	// Check gRPC reply
+	checkResponse(status.Code(err), RECOMMENDATIONSERVICE, RequestID.String(), err)
 
 	out := make([]*pb.Product, len(resp.GetProductIds()))
 
@@ -434,38 +356,27 @@ func (fe *frontendServer) getRecommendations(ctx context.Context, userID string,
 func (fe *frontendServer) getAd(ctx context.Context, ctxKeys []string) ([]*pb.Ad, error) {
 	RequestID, err := uuid.NewRandom()
 	if err != nil {
-		emitLog(SERVICENAME+": An error occurred while generating the RequestID", "ERROR")
+		emitLog(FRONTEND+": An error occurred while generating the RequestID", "ERROR")
 	}
 
 	// Add metadata to gRPC
-	header := metadata.Pairs("requestid", RequestID.String(), "servicename", SERVICENAME)
+	header := metadata.Pairs("requestid", RequestID.String(), "servicename", FRONTEND)
 	metadataCtx := metadata.NewOutgoingContext(ctx, header)
 
 	// Add gRPC timeout
-	newCtx, cancel := context.WithTimeout(metadataCtx, 2*time.Second)
+	newCtx, cancel := context.WithTimeout(metadataCtx, time.Second)
 	defer cancel()
 
-	event := "Sending message to ADSERVICE (request_id: " + RequestID.String() + ")"
+	// Log sending gRPC
+	event := "Sending message to " + ADSERVICE + " (request_id: " + RequestID.String() + ")"
 	emitLog(event, "INFO")
 
 	resp, err := pb.NewAdServiceClient(fe.adSvcConn).GetAds(newCtx, &pb.AdRequest{
 		ContextKeys: ctxKeys,
 	})
 
-	receivedCode := status.Code(err)
-
-	if receivedCode == codes.DeadlineExceeded {
-		event = "Failing to contact ADSERVICE (request_id: " + RequestID.String() + "). Root cause: (" + newCtx.Err().Error() + ")"
-		emitLog(event, "ERROR")
-
-	} else if err != nil {
-		event = "Error response received from ADSERVICE (request_id: " + RequestID.String() + ")"
-		emitLog(event, "ERROR")
-
-	} else {
-		event = "Receiving answer from ADSERVICE (request_id: " + RequestID.String() + ")"
-		emitLog(event, "INFO")
-	}
+	// Check gRPC reply
+	checkResponse(status.Code(err), ADSERVICE, RequestID.String(), err)
 
 	return resp.GetAds(), errors.Wrap(err, "failed to get ads")
 }

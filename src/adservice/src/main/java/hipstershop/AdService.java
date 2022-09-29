@@ -45,6 +45,7 @@ import io.opencensus.trace.Tracing;
 import java.io.IOException;
 import java.sql.Timestamp;
 import java.time.Instant;
+import java.lang.Thread;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -79,7 +80,7 @@ public final class AdService {
       Object ServiceName = headers.get(Metadata.Key.of("servicename", Metadata.ASCII_STRING_MARSHALLER));
 
       if (RequestID == null && ServiceName == null) {
-        AdService.emitLog(SERVICENAME + ": SessionID not found in header.", "ERROR");
+        AdService.emitLog(ADSERVICE + ": SessionID not found in header.", "ERROR");
         return new ServerCall.Listener() {
         };
       }
@@ -121,24 +122,25 @@ public final class AdService {
     }
   }
 
-  public static String SERVICENAME = "adservice";
+  public static String ADSERVICE = "adservice";
 
-  // NOTE: logLevel must be a GELF valid severity value (WARN or ERROR), INFO if not specified
+  // NOTE: logLevel must be a GELF valid severity value (WARN or ERROR), INFO if
+  // not specified
   public static void emitLog(String event, String logLevel) {
     Timestamp instant = Timestamp.from(Instant.now());
-    String logMessage = instant.toInstant().toString() + " - " + logLevel + " - " + SERVICENAME + " - " + event;
+    String timestamp = instant.toInstant().toString();
 
     switch (logLevel) {
       case "ERROR":
-        logger.log(Level.ERROR, logMessage);
+        logger.log(Level.ERROR, timestamp + " - ERROR - " + ADSERVICE + " - " + event);
         break;
 
       case "WARN":
-        logger.log(Level.WARN, logMessage);
+        logger.log(Level.WARN, timestamp + " - WARN - " + ADSERVICE + " - " + event);
         break;
 
       default:
-        logger.log(Level.INFO, logMessage);
+        logger.log(Level.INFO, timestamp + " - INFO - " + ADSERVICE + " - " + event);
         break;
     }
   }
@@ -191,7 +193,7 @@ public final class AdService {
           allAds = service.getRandomAds();
         }
 
-        event = "Answered to request from " + ServiceName.toString() + " (request_id: " + RequestID.toString() + ")";
+        event = "Answered request from " + ServiceName.toString() + " (request_id: " + RequestID.toString() + ")";
         AdService.emitLog(event, "INFO");
 
         AdResponse reply = AdResponse.newBuilder().addAllAds(allAds).build();

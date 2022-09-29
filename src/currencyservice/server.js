@@ -105,23 +105,23 @@ function _carry (amount) {
   return amount;
 }
 
-const SERVICENAME = "currencyservice";
+const CURRENCYSERVICE = "currencyservice";
 
 // NOTE: logLevel must be a GELF valid severity value (WARN or ERROR), INFO if not specified
 function emitLog(event, logLevel) {
-  var logMessage = new Date().toISOString() + " - " + logLevel + " - " + SERVICENAME + " - " + event;
+  var timestamp = new Date().toISOString();
 
   switch (logLevel) {
     case "ERROR":
-      logger.error(logMessage);
+      logger.error(timestamp + " - ERROR - " + CURRENCYSERVICE + " - " + event);
       break;
 
     case "WARN":
-      logger.warn(logMessage);
+      logger.warn(timestamp + " - WARN - " + CURRENCYSERVICE + " - " + event);
       break;
 
     default:
-      logger.info(logMessage);
+      logger.info(timestamp + " - INFO - " + CURRENCYSERVICE + " - " + event);
       break;
   }
 }
@@ -138,11 +138,11 @@ function getSupportedCurrencies (call, callback) {
   logger.info('Getting supported currencies...');
 
   _getCurrencyData((data) => {
+    event = "Answered request from " + ServiceName + " (request_id: " + SessionID[0] + ")";
+    emitLog(event, "INFO");
+
     callback(null, {currency_codes: Object.keys(data)});
   });
-
-  event = "Answered to request from " + ServiceName + " (request_id: " + SessionID[0] + ")";
-  emitLog(event, "INFO");
 }
 
 /**
@@ -178,7 +178,7 @@ function convert (call, callback) {
       result.nanos = Math.floor(result.nanos);
       result.currency_code = request.to_code;
 
-      event = "Answered to request from " + ServiceName + " (request_id: " + SessionID[0] + ")";
+      event = "Answered request from " + ServiceName + " (request_id: " + SessionID[0] + ")";
       emitLog(event, "INFO");
       logger.info(`conversion request successful`);
 

@@ -42,7 +42,7 @@ import googlecloudprofiler
 from logger import getJSONLogger
 logger = getJSONLogger('emailservice-server')
 
-SERVICENAME = "emailservice"
+EMAILSERVICE = "emailservice"
 
 # try:
 #     googleclouddebugger.enable(
@@ -61,15 +61,14 @@ template = env.get_template('confirmation.html')
 
 # NOTE: logLevel must be a GELF valid severity value (WARN or ERROR), INFO if not specified
 def emitLog(event, logLevel):
-  ct = datetime.datetime.now().isoformat()
-  logMessage = str(ct) + " - " + logLevel + " - " + SERVICENAME + " - " + event
+  timestamp = str(datetime.datetime.now().isoformat())
   
   if logLevel == "ERROR":
-    logger.error(logMessage)
+    logger.error(timestamp + " - ERROR - " + EMAILSERVICE + " - " + event)
   elif logLevel == "WARN":
-    logger.warn(logMessage)
+    logger.warn(timestamp + " - WARN - " + EMAILSERVICE + " - " + event)
   else:
-    logger.info(logMessage)
+    logger.info(timestamp + " - INFO - " + EMAILSERVICE + " - " + event)
 
 class BaseEmailService(demo_pb2_grpc.EmailServiceServicer):
   def Check(self, request, context):
@@ -134,7 +133,7 @@ class EmailService(BaseEmailService):
       context.set_code(grpc.StatusCode.INTERNAL)
       return demo_pb2.Empty()
 
-    event = "Answered to request from " + service_name + " (request_id: " + request_id + ")"
+    event = "Answered request from " + service_name + " (request_id: " + request_id + ")"
     emitLog(event, "INFO")
 
     return demo_pb2.Empty()

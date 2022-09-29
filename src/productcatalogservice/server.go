@@ -36,13 +36,14 @@ import (
 	"contrib.go.opencensus.io/exporter/stackdriver"
 	"github.com/golang/protobuf/jsonpb"
 	"github.com/sirupsen/logrus"
+
 	//  "go.opencensus.io/exporter/jaeger"
 	"go.opencensus.io/plugin/ocgrpc"
 	"go.opencensus.io/stats/view"
 	"go.opencensus.io/trace"
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
 )
 
@@ -58,20 +59,20 @@ var (
 )
 
 const (
-	SERVICENAME = "productcatalogservice"
+	PRODUCTCATALOGSERVICE = "productcatalogservice"
 )
 
 // NOTE: logLevel must be a GELF valid severity value (WARN or ERROR), INFO if not specified
 func emitLog(event string, logLevel string) {
-	logMessage := time.Now().Format(time.RFC3339) + " - " + logLevel + " - " + SERVICENAME + " - " + event
+	timestamp := time.Now().Format(time.RFC3339)
 
 	switch logLevel {
 	case "ERROR":
-		log.Error(logMessage)
+		log.Error(timestamp + " - ERROR - " + PRODUCTCATALOGSERVICE + " - " + event)
 	case "WARN":
-		log.Warn(logMessage)
+		log.Warn(timestamp + " - WARN - " + PRODUCTCATALOGSERVICE + " - " + event)
 	default:
-		log.Info(logMessage)
+		log.Info(timestamp + " - INFO - " + PRODUCTCATALOGSERVICE + " - " + event)
 	}
 }
 
@@ -298,12 +299,12 @@ func (p *productCatalog) ListProducts(ctx context.Context, req *pb.Empty) (*pb.L
 		event := "Received request from " + ServiceName + " (request_id: " + RequestID + ")"
 		emitLog(event, "INFO")
 	} else {
-		emitLog(SERVICENAME+": An error occurred while retrieving the RequestID", "ERROR")
+		emitLog(PRODUCTCATALOGSERVICE+": An error occurred while retrieving the RequestID", "ERROR")
 	}
-	
+
 	time.Sleep(extraLatency)
 
-	event := "Answered to request from " + ServiceName + " (request_id: " + RequestID + ")"
+	event := "Answered request from " + ServiceName + " (request_id: " + RequestID + ")"
 	emitLog(event, "INFO")
 
 	return &pb.ListProductsResponse{Products: parseCatalog()}, nil
@@ -322,9 +323,9 @@ func (p *productCatalog) GetProduct(ctx context.Context, req *pb.GetProductReque
 		event := "Received request from " + ServiceName + " (request_id: " + RequestID + ")"
 		emitLog(event, "INFO")
 	} else {
-		emitLog(SERVICENAME+": An error occurred while retrieving the RequestID", "ERROR")
+		emitLog(PRODUCTCATALOGSERVICE+": An error occurred while retrieving the RequestID", "ERROR")
 	}
-	
+
 	time.Sleep(extraLatency)
 	var found *pb.Product
 	for i := 0; i < len(parseCatalog()); i++ {
@@ -333,11 +334,11 @@ func (p *productCatalog) GetProduct(ctx context.Context, req *pb.GetProductReque
 		}
 	}
 	if found == nil {
-		emitLog(SERVICENAME+": no product with ID " + req.Id, "ERROR")
+		emitLog(PRODUCTCATALOGSERVICE+": no product with ID "+req.Id, "ERROR")
 		return nil, status.Errorf(codes.NotFound, "no product with ID %s", req.Id)
 	}
 
-	event := "Answered to request from " + ServiceName + " (request_id: " + RequestID + ")"
+	event := "Answered request from " + ServiceName + " (request_id: " + RequestID + ")"
 	emitLog(event, "INFO")
 
 	return found, nil
@@ -356,7 +357,7 @@ func (p *productCatalog) SearchProducts(ctx context.Context, req *pb.SearchProdu
 		event := "Received request from " + ServiceName + " (request_id: " + RequestID + ")"
 		emitLog(event, "INFO")
 	} else {
-		emitLog(SERVICENAME+": An error occurred while retrieving the RequestID", "ERROR")
+		emitLog(PRODUCTCATALOGSERVICE+": An error occurred while retrieving the RequestID", "ERROR")
 	}
 
 	time.Sleep(extraLatency)
@@ -369,7 +370,7 @@ func (p *productCatalog) SearchProducts(ctx context.Context, req *pb.SearchProdu
 		}
 	}
 
-	event := "Answered to request from " + ServiceName + " (request_id: " + RequestID + ")"
+	event := "Answered request from " + ServiceName + " (request_id: " + RequestID + ")"
 	emitLog(event, "INFO")
 
 	return &pb.SearchProductsResponse{Results: ps}, nil

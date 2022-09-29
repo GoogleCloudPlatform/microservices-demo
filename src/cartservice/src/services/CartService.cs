@@ -26,28 +26,29 @@ namespace cartservice.services
     {
         private readonly static Empty Empty = new Empty();
         private readonly ICartStore _cartStore;
-        public readonly static string SERVICENAME = "cartservice";
+        public readonly static string CARTSERVICE = "cartservice";
 
         // NOTE: logLevel must be a GELF valid severity value (WARN or ERROR), INFO if not specified
         public void emitLog(string messageEvent, string logLevel)
         {
             DateTime now = DateTime.UtcNow;
+            string timestamp = now.ToString("yyyy-MM-ddTHH:mm:ssZ", CultureInfo.InvariantCulture);
             string logMessage = "";
 
             switch (logLevel)
             {
                 case "ERROR":
-                    logMessage = now.ToString("yyyy-MM-ddTHH:mm:ssZ", CultureInfo.InvariantCulture) + " - ERROR - " + SERVICENAME + " - " + messageEvent;
+                    logMessage = timestamp + " - " + logLevel + " - " + CARTSERVICE + " - " + messageEvent;
                     Console.WriteLine(logMessage);
                     break;
 
                 case "WARN":
-                    logMessage = now.ToString("yyyy-MM-ddTHH:mm:ssZ", CultureInfo.InvariantCulture) + " - WARN - " + SERVICENAME + " - " + messageEvent;
+                    logMessage = timestamp + " - " + logLevel + " - " + CARTSERVICE + " - " + messageEvent;
                     Console.WriteLine(logMessage);
                     break;
 
                 default:
-                    logMessage = now.ToString("yyyy-MM-ddTHH:mm:ssZ", CultureInfo.InvariantCulture) + " - INFO - " + SERVICENAME + " - " + messageEvent;
+                    logMessage = timestamp + " - " + logLevel + " - " + CARTSERVICE + " - " + messageEvent;
                     Console.WriteLine(logMessage);
                     break;
             }
@@ -65,7 +66,7 @@ namespace cartservice.services
 
             if (RequestID == null && ServiceName == null) 
             {
-                emitLog(ServiceName + ": An error occurred while retrieving the RequestID", "ERROR");
+                emitLog(CARTSERVICE + ": An error occurred while retrieving the RequestID", "ERROR");
                 return null;
             }
 
@@ -74,7 +75,7 @@ namespace cartservice.services
 
             await _cartStore.AddItemAsync(request.UserId, request.Item.ProductId, request.Item.Quantity);
 
-            messageEvent = "Answered to request from " + ServiceName.ToString() + " (request_id: " + RequestID.ToString() + ")";
+            messageEvent = "Answered request from " + ServiceName.ToString() + " (request_id: " + RequestID.ToString() + ")";
             emitLog(messageEvent, "INFO");
 
             return Empty;
@@ -87,13 +88,14 @@ namespace cartservice.services
 
             if (RequestID == null && ServiceName == null) 
             {
-                emitLog(ServiceName + ": An error occurred while retrieving the RequestID", "ERROR");
+                emitLog(CARTSERVICE + ": An error occurred while retrieving the RequestID", "ERROR");
                 return null;
             }
 
             string messageEvent = "Received request from " + ServiceName.ToString() + " (request_id: " + RequestID.ToString() + ")";
             emitLog(messageEvent, "INFO");
-            messageEvent = "Answered to request from " + ServiceName.ToString() + " (request_id: " + RequestID.ToString() + ")";
+
+            messageEvent = "Answered request from " + ServiceName.ToString() + " (request_id: " + RequestID.ToString() + ")";
             emitLog(messageEvent, "INFO");
 
             return _cartStore.GetCartAsync(request.UserId);
@@ -106,7 +108,7 @@ namespace cartservice.services
 
             if (RequestID == null && ServiceName == null) 
             {
-                emitLog(ServiceName + ": An error occurred while retrieving the RequestID", "ERROR");
+                emitLog(CARTSERVICE + ": An error occurred while retrieving the RequestID", "ERROR");
                 return null;
             }
 
@@ -115,7 +117,7 @@ namespace cartservice.services
 
             await _cartStore.EmptyCartAsync(request.UserId);
 
-            messageEvent = "Answered to request from " + ServiceName.ToString() + " (request_id: " + RequestID.ToString() + ")";
+            messageEvent = "Answered request from " + ServiceName.ToString() + " (request_id: " + RequestID.ToString() + ")";
             emitLog(messageEvent, "INFO");
             
             return Empty;

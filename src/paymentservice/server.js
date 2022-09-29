@@ -26,23 +26,23 @@ const logger = pino({
   useLevelLabels: true
 });
 
-const SERVICENAME = "paymentservice";
+const PAYMENTSERVICE = "paymentservice";
 
 // NOTE: logLevel must be a GELF valid severity value (WARN or ERROR), INFO if not specified
 function emitLog(event, logLevel) {
-  var logMessage = new Date().toISOString() + " - " + logLevel + " - " + SERVICENAME + " - " + event;
+  var timestamp = new Date().toISOString();
 
   switch (logLevel) {
     case "ERROR":
-      logger.error(logMessage);
+      logger.error(timestamp + " - ERROR - " + PAYMENTSERVICE + " - " + event);
       break;
 
     case "WARN":
-      logger.warn(logMessage);
+      logger.warn(timestamp + " - WARN - " + PAYMENTSERVICE + " - " + event);
       break;
   
     default:
-      logger.info(logMessage);
+      logger.info(timestamp + " - INFO - " + PAYMENTSERVICE + " - " + event);
       break;
   }
 }
@@ -78,7 +78,7 @@ class HipsterShopServer {
       const response = charge(call.request);
       callback(null, response);
 
-      event = "Answered to request from " + ServiceName + " (request_id: " + SessionID[0] + ")";
+      event = "Answered request from " + ServiceName + " (request_id: " + SessionID[0] + ")";
       emitLog(event, "INFO");
 
     } catch (err) {

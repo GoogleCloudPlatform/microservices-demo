@@ -40,7 +40,8 @@ from grpc_health.v1 import health_pb2_grpc
 from logger import getJSONLogger
 logger = getJSONLogger('recommendationservice-server')
 
-SERVICENAME = "recommendationservice"
+RECOMMENDATIONSERVICE = "recommendationservice"
+PRODUCTCATALOGSERVICE = "productcatalogservice"
 
 def initStackdriverProfiling():
   project_id = None
@@ -69,15 +70,14 @@ def initStackdriverProfiling():
 
 # NOTE: logLevel must be a GELF valid severity value (WARN or ERROR), INFO if not specified
 def emitLog(event, logLevel):
-  ct = datetime.datetime.now().isoformat()
-  logMessage = str(ct) + " - " + logLevel + " - " + SERVICENAME + " - " + event
+  timestamp = str(datetime.datetime.now().isoformat())
   
   if logLevel == "ERROR":
-    logger.error(logMessage)
+    logger.error(timestamp + " - ERROR - " + RECOMMENDATIONSERVICE + " - " + event)
   elif logLevel == "WARN":
-    logger.warn(logMessage)
+    logger.warn(timestamp + " - WARN - " + RECOMMENDATIONSERVICE + " - " + event)
   else:
-    logger.info(logMessage)
+    logger.info(timestamp + " - INFO - " + RECOMMENDATIONSERVICE + " - " + event)
 
 
 class RecommendationService(demo_pb2_grpc.RecommendationServiceServicer):
@@ -91,17 +91,17 @@ class RecommendationService(demo_pb2_grpc.RecommendationServiceServicer):
 
         # adding metadata for gRPC towards ProductCatalogService
         newRequestid = '{0}'.format(uuid.uuid4())
-        metadata = (('requestid', newRequestid), ('servicename', SERVICENAME))
+        metadata = (('requestid', newRequestid), ('servicename', RECOMMENDATIONSERVICE))
 
-        event = 'Sending message to PRODUCTCATALOG (request_id: ' + newRequestid + ')'
+        event = 'Sending message to ' + PRODUCTCATALOGSERVICE + ' (request_id: ' + newRequestid + ')'
         emitLog(event, "INFO")
 
         try:
           max_responses = 5
           # fetch list of products from product catalog stub
-          cat_response = product_catalog_stub.ListProducts(demo_pb2.Empty(), timeout=2, metadata=metadata)
+          cat_response = product_catalog_stub.ListProducts(demo_pb2.Empty(), timeout=1, metadata=metadata)
           
-          event = 'Receiving answer from PRODUCTCATALOG (request_id: ' + newRequestid + ')'
+          event = 'Receiving answer from ' + PRODUCTCATALOGSERVICE + ' (request_id: ' + newRequestid + ')'
           emitLog(event, "INFO")
 
           product_ids = [x.id for x in cat_response.products]
@@ -116,18 +116,18 @@ class RecommendationService(demo_pb2_grpc.RecommendationServiceServicer):
           # build and return response
           response = demo_pb2.ListRecommendationsResponse()
           response.product_ids.extend(prod_list)
-          event = "Answered to request from " + service_name + " (request_id: " + request_id + ")"
+          event = "Answered request from " + service_name + " (request_id: " + request_id + ")"
           emitLog(event, "INFO")
 
           return response
         except grpc.RpcError as e:
           status_code = e.code()
           
-          if status_code == grpc.StatusCode.DeadlineExceeded:
-            event = "Failing to contact PRODUCTCATALOG (request_id: " + newRequestid + "). Root cause: (" + e.details() + ")"
+          if status_code == grpc.StatusCode.Unavailable:
+            event = "Failing to contact " + PRODUCTCATALOGSERVICE + " (request_id: " + newRequestid + "). Root cause: (" + e.details() + ")"
             emitLog(event, "ERROR")
           else:
-            event = "Error response received from PRODUCTCATALOG (request_id: " + newRequestid + ")"
+            event = "Error response received from " + PRODUCTCATALOGSERVICE + " (request_id: " + newRequestid + ")"
             emitLog(event, "ERROR")
           return None
 

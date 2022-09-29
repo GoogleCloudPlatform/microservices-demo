@@ -29,8 +29,8 @@ import (
 	"go.opencensus.io/trace"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/reflection"
 	"google.golang.org/grpc/status"
 
@@ -39,8 +39,8 @@ import (
 )
 
 const (
-	defaultPort = "50051"
-	SERVICENAME = "shippingservice"
+	defaultPort     = "50051"
+	SHIPPINGSERVICE = "shippingservice"
 )
 
 var log *logrus.Logger
@@ -119,15 +119,15 @@ func (s *server) Watch(req *healthpb.HealthCheckRequest, ws healthpb.Health_Watc
 
 // NOTE: logLevel must be a GELF valid severity value (WARN or ERROR), INFO if not specified
 func emitLog(event string, logLevel string) {
-	logMessage := time.Now().Format(time.RFC3339) + " - " + logLevel + " - " + SERVICENAME + " - " + event
+	timestamp := time.Now().Format(time.RFC3339)
 
 	switch logLevel {
 	case "ERROR":
-		log.Error(logMessage)
+		log.Error(timestamp + " - ERROR - " + SHIPPINGSERVICE + " - " + event)
 	case "WARN":
-		log.Warn(logMessage)
+		log.Warn(timestamp + " - WARN - " + SHIPPINGSERVICE + " - " + event)
 	default:
-		log.Info(logMessage)
+		log.Info(timestamp + " - INFO - " + SHIPPINGSERVICE + " - " + event)
 	}
 }
 
@@ -148,14 +148,14 @@ func (s *server) GetQuote(ctx context.Context, in *pb.GetQuoteRequest) (*pb.GetQ
 		event = "Received request from " + ServiceName + " (request_id: " + RequestID + ")"
 		emitLog(event, "INFO")
 	} else {
-		event = SERVICENAME+": An error occurred while retrieving the RequestID"
+		event = SHIPPINGSERVICE + ": An error occurred while retrieving the RequestID"
 		emitLog(event, "ERROR")
 	}
 
 	// 1. Generate a quote based on the total number of items to be shipped.
 	quote := CreateQuoteFromCount(0)
 
-	event = "Answered to request from " + ServiceName + " (request_id: " + RequestID + ")"
+	event = "Answered request from " + ServiceName + " (request_id: " + RequestID + ")"
 	emitLog(event, "INFO")
 
 	// 2. Generate a response.
@@ -186,7 +186,7 @@ func (s *server) ShipOrder(ctx context.Context, in *pb.ShipOrderRequest) (*pb.Sh
 		event = "Received request from " + ServiceName + " (request_id: " + RequestID + ")"
 		emitLog(event, "INFO")
 	} else {
-		event = SERVICENAME+": An error occurred while retrieving the RequestID"
+		event = SHIPPINGSERVICE + ": An error occurred while retrieving the RequestID"
 		emitLog(event, "ERROR")
 	}
 
@@ -194,7 +194,7 @@ func (s *server) ShipOrder(ctx context.Context, in *pb.ShipOrderRequest) (*pb.Sh
 	baseAddress := fmt.Sprintf("%s, %s, %s", in.Address.StreetAddress, in.Address.City, in.Address.State)
 	id := CreateTrackingId(baseAddress)
 
-	event = "Answered to request from " + ServiceName + " (request_id: " + RequestID + ")"
+	event = "Answered request from " + ServiceName + " (request_id: " + RequestID + ")"
 	emitLog(event, "INFO")
 
 	// 2. Generate a response.
