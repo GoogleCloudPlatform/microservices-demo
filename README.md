@@ -123,21 +123,23 @@ gcloud container clusters delete onlineboutique \
     --project=${PROJECT_ID} --zone=${ZONE}
 ```
 
-## Automated Deployment
+## Use Terraform to provision a GKE cluster and deploy Online Boutique
 
-Automated deployment for the Online Boutique sample application is supported in this repository. Instructions for using Terraform to replicate the [**Quickstart (GKE)**](https://github.com/GoogleCloudPlatform/microservices-demo/tree/main/README.md#quickstart-gke) steps can be found inside [/terraform/README.md](https://github.com/GoogleCloudPlatform/microservices-demo/tree/main/terraform).
+The [`/terraform` folder](terraform) contains instructions for using [Terraform](https://www.terraform.io/intro) to replicate the steps from [**Quickstart (GKE)**](#quickstart-gke) above.
 
-## Other Deployment Options
+## Other deployment variations
 
-- **Google Cloud Operations** (Monitoring, Tracing, Debugger, Profiler): [See these instructions](docs/gcp-instrumentation.md).
 - **Workload Identity**: [See these instructions.](docs/workload-identity.md)
 - **Istio**: [See these instructions.](docs/service-mesh.md)
 - **Anthos Service Mesh**: ASM requires Workload Identity to be enabled in your GKE cluster. [See the workload identity instructions](docs/workload-identity.md) to configure and deploy the app. Then, use the [service mesh guide](/docs/service-mesh.md).
 - **non-GKE clusters (Minikube, Kind)**: see the [Development Guide](/docs/development-guide.md)
-- **Memorystore**: [See these instructions](/docs/memorystore.md) to replace the in-cluster `redis` database with hosted Google Cloud Memorystore (redis).
-- **Cymbal Shops Branding**: [See these instructions](/docs/cymbal-shops.md)
-- **NetworkPolicies**: [See these instructions](/docs/network-policies/README.md)
 
+## Deploy Online Boutique variations with Kustomize
+
+The [`/kustomize` folder](kustomize) contains instructions for customizing the deployment of Online Boutique with different variations such as:
+* integrating with [Google Cloud Operations](https://cloud.google.com/products/operations)
+* replacing the in-cluster Redis cache with [Google Cloud Memorystore (Redis)](https://cloud.google.com/memorystore)
+* etc.
 
 ## Architecture
 
@@ -190,6 +192,7 @@ If you would like to contribute features or fixes to this app, see the [Developm
 
 ## Demos featuring Online Boutique
 
+- [Seamlessly encrypt traffic from any apps in your Mesh to Memorystore (redis)](https://medium.com/google-cloud/64b71969318d)
 - [From edge to mesh: Exposing service mesh applications through GKE Ingress](https://cloud.google.com/architecture/exposing-service-mesh-apps-through-gke-ingress)
 - [Take the first step toward SRE with Cloud Operations Sandbox](https://cloud.google.com/blog/products/operations/on-the-road-to-sre-with-cloud-operations-sandbox)
 - [Deploying the Online Boutique sample application on Anthos Service Mesh](https://cloud.google.com/service-mesh/docs/onlineboutique-install-kpt)

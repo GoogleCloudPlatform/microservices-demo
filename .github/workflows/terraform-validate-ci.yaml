@@ -1,4 +1,4 @@
-# Copyright 2022 Google LLC
+# Copyright 2020 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,7 +12,25 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-apiVersion: kustomize.config.k8s.io/v1beta1
-kind: Kustomization
-resources:
-- kubernetes-manifests.yaml
+name: terraform-validate-ci
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'terraform/**'
+      - '.github/workflows/terraform-validate-ci.yaml'
+  pull_request:
+    paths:
+      - 'terraform/**'
+      - '.github/workflows/terraform-validate-ci.yaml'
+jobs:
+  job:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v3
+      - name: terraform init & validate
+        run: |
+          cd terraform/
+          terraform init -backend=false
+          terraform validate
