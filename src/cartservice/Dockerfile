@@ -15,9 +15,9 @@
 # https://mcr.microsoft.com/v2/dotnet/sdk/tags/list
 FROM mcr.microsoft.com/dotnet/sdk:6.0.302 as builder
 WORKDIR /app
-COPY cartservice.csproj .
+COPY src/cartservice.csproj .
 RUN dotnet restore cartservice.csproj -r linux-musl-x64
-COPY . .
+COPY src/* .
 RUN dotnet publish cartservice.csproj -p:PublishSingleFile=true -r linux-musl-x64 --self-contained true -p:PublishTrimmed=True -p:TrimMode=Link -c release -o /cartservice --no-restore
 
 # https://mcr.microsoft.com/v2/dotnet/runtime-deps/tags/list
