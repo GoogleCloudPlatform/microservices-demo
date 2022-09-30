@@ -1,18 +1,19 @@
-# Integrate Online Boutique with native gRPC Healthcheck probes
+# Integrate Online Boutique with native gRPC probes
 
-FIXME
+The current container images of the Online Boutique apps contains the [grpc-health-probe](https://github.com/grpc-ecosystem/grpc-health-probe) binary in order to have their `liveness` and `readiness` probes working on Kubernetes. But, since [Kubernetes 1.24, gRPC container probes feature is in beta](https://kubernetes.io/blog/2022/05/13/grpc-probes-now-in-beta/), and this binary could be removed from the container images and the associated `Deployment` manifests can directly use the new gRPC probes (`liveness` and `readiness`).
 
-Kubernetes 1.24+
+## Deploy Online Boutique integrated with native gRPC probes
 
-## Deploy Online Boutique connected to a Memorystore (Redis) instance
-
-To automate the deployment of Online Boutique integrated with Memorystore (Redis) you can leverage the following variation with [Kustomize](../..).
+To automate the deployment of Online Boutique integrated with native gRPC probes you can leverage the following variation with [Kustomize](../..).
 
 From the `kustomize/` folder at the root level of this repository, execute this command:
 ```
+SUFFIX=-native-grpc-probes
+sed -i "s/CONTAINER_IMAGES_TAG_SUFFIX/$SUFFIX/g" components/container-images-tag-suffix/kustomization.yaml
 kustomize edit add components/container-images-tag-suffix
+kustomize edit add components/native-grpc-health-check
 ```
-_Note: this Kustomize component will also remove the `redis-cart` `Deployment` and `Service` not used anymore._
+_Note: we are applying the `-native-grpc-probes` tag suffix to all the container images, it's a prebuilt image without the [grpc-health-probe](https://github.com/grpc-ecosystem/grpc-health-probe) binary since the version 0.3.10 of Online Boutique._
 
 This will update the `kustomize/kustomization.yaml` file which could be similar to:
 ```
@@ -22,15 +23,14 @@ resources:
 - base
 components:
 - components/container-images-tag-suffix
+- components/native-grpc-health-check
 ```
 
-Update current Kustomize manifest to target the new container images tag (same tag as default tag but with the suffix `-native-grpc`).
-```sh
-sed -i "s/$(CONTAINER_IMAGES_TAG_SUFFIX)/-native-grpc/g" components/container-images-tag-suffix/kustomization.yaml
-```
+You can locally render these manifests by running `kubectl kustomize . | sed "s/$SUFFIX$SUFFIX/$SUFFIX/g"` as well as deploying them by running `kubectl kustomize . | sed "s/$SUFFIX$SUFFIX/$SUFFIX/g" | kubectl apply -f`.
 
-You can locally render these manifests by running `kubectl kustomize .` as well as deploying them by running `kubectl apply -k .`.
+_Note: for this variation, `kubectl apply -k .` won't work because there is a [known issue currently in Kustomize](https://github.com/kubernetes-sigs/kustomize/issues/4814) where the `tagSuffix` is duplicated. The command lines above are a temporary workaround._
 
 ## Resources
 
-- FIXME
+- [Kubernetes 1.24: gRPC container probes in beta](https://kubernetes.io/blog/2022/05/13/grpc-probes-now-in-beta/)
+- [Define a gRPC liveness probe](https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/#define-a-grpc-liveness-probe)
