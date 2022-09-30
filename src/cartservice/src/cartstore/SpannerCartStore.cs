@@ -44,7 +44,7 @@ namespace cartservice.cartstore
                 {
                     int currentQuantity = 0;
                     var quantityLookup = spannerConnection.CreateSelectCommand(
-                        @"SELECT * FROM CartItems WHERE userId = @userId AND productId = @productId",
+                        $"SELECT * FROM {TableName} WHERE userId = @userId AND productId = @productId",
                         new SpannerParameterCollection
                         {
                             { "userId", SpannerDbType.String },
@@ -93,7 +93,7 @@ namespace cartservice.cartstore
             {
                 using SpannerConnection spannerConnection = new(databaseString);
                 var cmd = spannerConnection.CreateSelectCommand(
-                    "SELECT * FROM CartItems WHERE userId = @userId",
+                    $"SELECT * FROM {TableName} WHERE userId = @userId",
                     new SpannerParameterCollection {
                         { "userId", SpannerDbType.String }
                     }
@@ -134,7 +134,8 @@ namespace cartservice.cartstore
                 using SpannerConnection spannerConnection = new(databaseString);
                 await Task.Run(() =>
                 {
-                    var cmd = spannerConnection.CreateDmlCommand("DELETE FROM CartItems WHERE userId = @userId",
+                    var cmd = spannerConnection.CreateDmlCommand(
+                        $"DELETE FROM {TableName} WHERE userId = @userId",
                     new SpannerParameterCollection
                     {
                         { "userId", SpannerDbType.String }
