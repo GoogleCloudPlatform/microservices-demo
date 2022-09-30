@@ -14,7 +14,6 @@ google-api-core[grpc]==2.10.1
     # via
     #   -r requirements.in
     #   google-api-python-client
-    #   google-cloud-core
     #   google-cloud-trace
 google-api-python-client==2.63.0
     # via google-cloud-profiler
@@ -23,17 +22,14 @@ google-auth==2.12.0
     #   google-api-core
     #   google-api-python-client
     #   google-auth-httplib2
-    #   google-cloud-core
     #   google-cloud-profiler
 google-auth-httplib2==0.1.0
     # via
     #   google-api-python-client
     #   google-cloud-profiler
-google-cloud-core==2.3.2
-    # via google-cloud-trace
 google-cloud-profiler==4.0.0
     # via -r requirements.in
-google-cloud-trace==0.24.2
+google-cloud-trace==1.7.1
     # via -r requirements.in
 googleapis-common-protos==1.56.4
     # via
@@ -59,6 +55,8 @@ jinja2==3.1.2
     # via -r requirements.in
 markupsafe==2.1.1
     # via jinja2
+proto-plus==1.22.1
+    # via google-cloud-trace
 protobuf==3.20.3
     # via
     #   -r requirements.in
@@ -68,6 +66,7 @@ protobuf==3.20.3
     #   googleapis-common-protos
     #   grpcio-health-checking
     #   grpcio-status
+    #   proto-plus
 pyasn1==0.4.8
     # via
     #   pyasn1-modules
