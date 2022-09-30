@@ -56,7 +56,7 @@ google-crc32c==1.5.0
     # via google-resumable-media
 google-python-cloud-debugger==3.1
     # via -r requirements.in
-google-resumable-media==2.3.3
+google-resumable-media==2.4.0
     # via google-cloud-storage
 googleapis-common-protos==1.56.4
     # via
