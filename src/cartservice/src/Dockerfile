@@ -12,24 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# based on https://github.com/grpc/grpc/issues/21446#issuecomment-807990690
-# and https://groups.google.com/a/google.com/g/veneer-firehose/c/gHfckcGZR9U/m/JD1Kz4lvCwAJ
-#
-# need to build the libgr-pc_csharp_ext explicitly, copy it into /lib on target
-FROM alpine:3.14 AS grpc-build
-WORKDIR /opt
-RUN apk add --update alpine-sdk autoconf libtool linux-headers cmake git && \ 
-    git clone -b v1.43.0 https://github.com/grpc/grpc --depth 1 --shallow-submodules && \
-    cd grpc && git submodule update --init --depth 1 && \
-    mkdir -p cmake/build && cd cmake/build && \
-    cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo \
-      -DgRPC_BACKWARDS_COMPATIBILITY_MODE=ON \
-      -DgRPC_BUILD_TESTS=OFF \
-      ../.. && \
-    make grpc_csharp_ext -j4 && \
-    mkdir -p /out && cp libgrpc_csharp_ext.* /out
-
-
 # https://mcr.microsoft.com/v2/dotnet/sdk/tags/list
 FROM mcr.microsoft.com/dotnet/sdk:7.0.100-rc.1 as builder
 WORKDIR /app
@@ -44,7 +26,6 @@ RUN GRPC_HEALTH_PROBE_VERSION=v0.4.12 && \
     wget -qO/bin/grpc_health_probe https://github.com/grpc-ecosystem/grpc-health-probe/releases/download/${GRPC_HEALTH_PROBE_VERSION}/grpc_health_probe-linux-amd64 && \
     chmod +x /bin/grpc_health_probe
 WORKDIR /app
-COPY --from=grpc-build /out/libgrpc_csharp_ext.so /lib/libgrpc_csharp_ext.x64.so
 COPY --from=builder /cartservice .
 EXPOSE 7070
 ENV DOTNET_EnableDiagnostics=0 \
