@@ -71,26 +71,33 @@ gcloud spanner databases create carts \
 
 ### 4. Grant the default GCE/GKE service account read/write permission to Spanner
 
+The following works for configuring the default GCE/GKE and Kubernetes Service Accounts.
+It can be modified to use other service accounts by changing the values of the first three 
+variables.
+
 ```sh
 # grant the default GKE service account databaseUser in Spanner
-SVCACCT=$(gcloud iam service-accounts list --filter 'Compute Engine default' --format 'value(email)')
+GCP_SERVICE_ACCOUNT=$(gcloud iam service-accounts list --filter 'Compute Engine default' --format 'value(email)')
+K8S_NAMESPACE=default
+K8S_SERVICE_ACCOUNT=default
+
 gcloud projects add-iam-policy-binding $PROJECT_ID \
-    --member "serviceAccount:${SVCACCT}" \
+    --member "serviceAccount:${GCP_SERVICE_ACCOUNT}" \
     --role="roles/spanner.databaseUser"
 
 # annotate the kubectl serviceAccountName with the gcloud svcaccount
 kubectl annotate serviceaccount default \
-    iam.gke.io/gcp-service-account=${SVCACCT}
+    iam.gke.io/gcp-service-account=${GCP_SERVICE_ACCOUNT}
 
 # tell gcloud that the kubectl account maps to the gcloud one
 gcloud iam service-accounts add-iam-policy-binding \
-    "${SVCACCT}" --role roles/iam.workloadIdentityUser \
-    --member "serviceAccount:${PROJECT_ID}.svc.id.goog[default/default]"
+    "${GCP_SERVICE_ACCOUNT}" --role roles/iam.workloadIdentityUser \
+    --member "serviceAccount:${PROJECT_ID}.svc.id.goog[${K8S_NAMESPACE}/${K8S_SERVICE_ACCOUNT}]"
 ```
 
 
 
-### 5. Congigure the Kubernetes manifest to use Spanner for the `cartservice`.
+### 5. Configure the Kubernetes manifest to use Spanner for the `cartservice`.
 
 ```sh
 cp ./release/kubernetes-manifests.yaml ./release/updated-manifests.yaml
