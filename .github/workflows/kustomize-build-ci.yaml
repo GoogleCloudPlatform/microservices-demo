@@ -52,10 +52,18 @@ jobs:
           kustomize create --resources base
           kustomize edit add component components/cymbal-branding
           kustomize edit add component components/google-cloud-operations
+          sed -i "s/@(REDIS_ADDR)/0.0.0.0:6379/g" components/memorystore/kustomization.yaml
           kustomize edit add component components/memorystore
           kustomize edit add component components/network-policies
           kustomize edit add component components/service-accounts
           cd components/network-policies
           kustomize edit remove resource network-policy-redis.yaml
           cd ../..
+          sed -i "s/@(CONTAINER_IMAGES_TAG)/v1.0.0/g" components/container-images-tag/kustomization.yaml
+          kustomize edit add component components/container-images-tag 
+          sed -i "s/@(CONTAINER_IMAGES_TAG_SUFFIX)/-test/g" components/container-images-tag-suffix/kustomization.yaml
+          kustomize edit add component components/container-images-tag-suffix
+          sed -i "s/@(CONTAINER_IMAGES_REGISTRY)/my-registry/g" components/container-images-registry/kustomization.yaml
+          kustomize edit add component components/container-images-registry
+          kustomize edit add component components/native-grpc-health-check
           kustomize build .
