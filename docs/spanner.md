@@ -76,24 +76,24 @@ It can be modified to use other service accounts by changing the values of the f
 
 ```sh
 # Identify the service accounts, both on GCP and in Kubernetes
-GCP_SERVICE_ACCOUNT=$(gcloud iam service-accounts list --filter 'Compute Engine default' --format 'value(email)')
-K8S_NAMESPACE=default
-K8S_SERVICE_ACCOUNT=default
+GSA_NAME=$(gcloud iam service-accounts list --filter 'Compute Engine default' --format 'value(email)')
+NAMESPACE=default
+KSA_NAME=default
 
 # grant the GCP service account databaseUser in Spanner
 gcloud projects add-iam-policy-binding $PROJECT_ID \
-    --member "serviceAccount:${GCP_SERVICE_ACCOUNT}" \
+    --member "serviceAccount:${GSA_NAME}" \
     --role="roles/spanner.databaseUser"
 
-# annotate the kubectl serviceAccountName with the gcloud svcaccount
-kubectl annotate serviceaccount ${K8S_SERVICE_ACCOUNT} \
-    --namespace=${K8S_NAMESPACE} \
-    iam.gke.io/gcp-service-account=${GCP_SERVICE_ACCOUNT}
+# annotate the kubectl serviceAccountName with the GCP Service Account
+kubectl annotate serviceaccount ${KSA_NAME} \
+    --namespace=${NAMESPACE} \
+    iam.gke.io/gcp-service-account=${GSA_NAME}
 
-# tell gcloud that the kubectl account maps to the gcloud one
+# tell gcloud that the kubectl account maps to the GCP one
 gcloud iam service-accounts add-iam-policy-binding \
-    "${GCP_SERVICE_ACCOUNT}" --role roles/iam.workloadIdentityUser \
-    --member "serviceAccount:${PROJECT_ID}.svc.id.goog[${K8S_NAMESPACE}/${K8S_SERVICE_ACCOUNT}]"
+    "${GSA_NAME}" --role roles/iam.workloadIdentityUser \
+    --member "serviceAccount:${PROJECT_ID}.svc.id.goog[${NAMESPACE}/${KSA_NAME}]"
 ```
 
 
