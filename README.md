@@ -11,7 +11,7 @@ web-based e-commerce app where users can browse items,
 add them to the cart, and purchase them.
 
 **Google uses this application to demonstrate use of technologies like
-Kubernetes/GKE, Istio, Stackdriver, gRPC and OpenCensus**. This application
+Kubernetes/GKE, Istio, Stackdriver, and gRPC**. This application
 works on any Kubernetes cluster, as well as Google
 Kubernetes Engine. It’s **easy to deploy with little to no configuration**.
 
@@ -173,8 +173,6 @@ Find **Protocol Buffers Descriptions** at the [`./pb` directory](./pb).
 - **[gRPC](https://grpc.io):** Microservices use a high volume of gRPC calls to
   communicate to each other.
 - **[Istio](https://istio.io):** Application works on Istio service mesh.
-- **[OpenCensus](https://opencensus.io/) Tracing:** Most services are
-  instrumented using OpenCensus trace interceptors for gRPC/HTTP.
 - **[Cloud Operations (Stackdriver)](https://cloud.google.com/products/operations):** Many services
   are instrumented with **Profiling**, **Tracing** and **Debugging**. In
   addition to these, using Istio enables features like Request/Response

@@ -24,10 +24,6 @@ import googleclouddebugger
 import googlecloudprofiler
 from google.auth.exceptions import DefaultCredentialsError
 import grpc
-from opencensus.ext.stackdriver import trace_exporter as stackdriver_exporter
-from opencensus.ext.grpc import server_interceptor
-from opencensus.trace import samplers
-from opencensus.common.transports.async_ import AsyncTransport
 
 import demo_pb2
 import demo_pb2_grpc
@@ -106,18 +102,12 @@ if __name__ == "__main__":
       if "DISABLE_TRACING" in os.environ:
         raise KeyError()
       else:
-        logger.info("Tracing enabled.")
-        sampler = samplers.AlwaysOnSampler()
-        exporter = stackdriver_exporter.StackdriverExporter(
-          project_id=os.environ.get('GCP_PROJECT_ID'),
-          transport=AsyncTransport)
-        tracer_interceptor = server_interceptor.OpenCensusServerInterceptor(sampler, exporter)
+        logger.info("Tracing enabled, but temporarily unavailable")
+        logger.info("See https://github.com/GoogleCloudPlatform/microservices-demo/issues/422 for more info.")
     except (KeyError, DefaultCredentialsError):
         logger.info("Tracing disabled.")
-        tracer_interceptor = server_interceptor.OpenCensusServerInterceptor()
     except Exception as e:
         logger.warn(f"Exception on Cloud Trace setup: {traceback.format_exc()}, tracing disabled.") 
-        tracer_interceptor = server_interceptor.OpenCensusServerInterceptor()
    
     try:
       if "DISABLE_DEBUGGER" in os.environ:
@@ -145,8 +135,7 @@ if __name__ == "__main__":
     product_catalog_stub = demo_pb2_grpc.ProductCatalogServiceStub(channel)
 
     # create gRPC server
-    server = grpc.server(futures.ThreadPoolExecutor(max_workers=10),
-                      interceptors=(tracer_interceptor,))
+    server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
 
     # add class to gRPC server
     service = RecommendationService()

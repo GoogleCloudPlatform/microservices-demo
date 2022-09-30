@@ -3,10 +3,7 @@ google-python-cloud-debugger==3.1
 google-cloud-profiler==4.0.0
 grpcio-health-checking==1.48.1
 grpcio==1.49.1
-opencensus==0.11.0
-opencensus-ext-stackdriver==0.8.0
-opencensus-ext-grpc==0.7.2
 python-json-logger==2.0.4
 requests==2.28.1
 rsa==4.9
-protobuf==3.20.2 # transitive dependency, move when google-api is bumped safely
+protobuf==3.20.3 # transitive dependency, move when google-api is bumped safely
