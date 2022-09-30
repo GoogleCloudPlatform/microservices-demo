@@ -28,6 +28,7 @@ namespace cartservice
         {
             string redisAddress = Configuration["REDIS_ADDR"];
             string spannerProjectId = Configuration["SPANNER_PROJECT"];
+            string spannerInstanceId = Configuration["SPANNER_INSTANCE"];
 
             if (!string.IsNullOrEmpty(redisAddress))
             {
@@ -39,7 +40,9 @@ namespace cartservice
             }
             else if (!string.IsNullOrEmpty(spannerProjectId))
             {
-                Console.WriteLine($"Spanner database specified: project {spannerProjectId}, instance hipstershop");
+                if (string.IsNullOrEmpty(spannerInstanceId))
+                    spannerInstanceId = "onlineboutique";
+                Console.WriteLine($"Spanner database specified: project {spannerProjectId}, instance {spannerInstanceId}");
                 services.AddSingleton<ICartStore, SpannerCartStore>();
             }
             else

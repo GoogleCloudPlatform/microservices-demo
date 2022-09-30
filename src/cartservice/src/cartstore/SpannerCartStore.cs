@@ -23,13 +23,17 @@ namespace cartservice.cartstore
     public class SpannerCartStore : ICartStore
     {
         private static readonly string TableName = "CartItems";
+        private static readonly string DefaultInstanceName = "onlineboutique";
         private readonly string databaseString;
 
         public SpannerCartStore(IConfiguration configuration)
         {
             string spannerProjectId = configuration["SPANNER_PROJECT"];
+            string spannerInstanceId = configuration["SPANNER_INSTANCE"];
+            if (string.IsNullOrEmpty(spannerInstanceId))
+                spannerInstanceId = DefaultInstanceName;
             SpannerConnectionStringBuilder builder = new();
-            builder.DataSource = $"projects/{spannerProjectId}/instances/hipstershop/databases/carts";
+            builder.DataSource = $"projects/{spannerProjectId}/instances/{spannerInstanceId}/databases/carts";
             databaseString = builder.ToString();
         }
 

@@ -56,15 +56,16 @@ Note: See the documentation to list [available Spanner configuration names](http
 ```sh
 SPANNER_REGION_CONFIG="<your-spanner-region-config-name>"
 # e.g. "regional-us-central1"
+SPANNER_INSTANCE_NAME=onlineboutique
 
-gcloud spanner instances create hipstershop \
+gcloud spanner instances create ${SPANNER_INSTANCE_NAME} \
     --description="online boutique backend" \
     --config="${SPANNER_REGION_CONFIG}" \
     --instance-type=free-instance
 
 gcloud spanner databases create carts \
     --project=${PROJECT_ID} \
-    --instance="hipstershop" \
+    --instance="${SPANNER_INSTANCE_NAME}" \
     --database-dialect=GOOGLE_STANDARD_SQL \
     --ddl-file=./src/cartservice/ddl/CartItems.ddl
 ```
@@ -172,5 +173,5 @@ gcloud container clusters delete onlineboutique --region=${REGION}
 To delete the Spanner instance:
 
 ```sh
-gcloud spanner instances delete hipstershop
+gcloud spanner instances delete onlineboutique
 ```
