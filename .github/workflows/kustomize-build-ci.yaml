@@ -52,7 +52,7 @@ jobs:
           kustomize create --resources base
           kustomize edit add component components/cymbal-branding
           kustomize edit add component components/google-cloud-operations
-          sed -i "s/@(REDIS_ADDR)/0.0.0.0:6379/g" components/memorystore/kustomization.yaml
+          sed -i "s/\"REDIS_ADDR\"/0.0.0.0:6379/g" components/memorystore/kustomization.yaml
           kustomize edit add component components/memorystore
           kustomize edit add component components/network-policies
           kustomize edit add component components/service-accounts
