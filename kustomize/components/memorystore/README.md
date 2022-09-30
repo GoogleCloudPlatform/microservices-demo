@@ -39,7 +39,7 @@ Update current Kustomize manifest to target this Memorystore (Redis) instance.
 MEMORYSTORE_REGION=replace-with-the-region-of-your-memorystore-instance
 REDIS_IP=$(gcloud redis instances describe redis-cart --region=${MEMORYSTORE_REGION} --format='get(host)')
 REDIS_PORT=$(gcloud redis instances describe redis-cart --region=${MEMORYSTORE_REGION} --format='get(port)')
-sed -i "s/$(REDIS_ADDR)/${REDIS_IP}:${REDIS_PORT}/g" components/memorystore/kustomization.yaml
+sed -i "s/@(REDIS_ADDR)/${REDIS_IP}:${REDIS_PORT}/g" components/memorystore/kustomization.yaml
 ```
 
 You can locally render these manifests by running `kubectl kustomize .` as well as deploying them by running `kubectl apply -k .`.

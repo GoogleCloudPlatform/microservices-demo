@@ -16,24 +16,24 @@ apiVersion: kustomize.config.k8s.io/v1alpha1
 kind: Component
 images:
 - name: gcr.io/google-samples/microservices-demo/adservice
-  newTag: $(CONTAINER_IMAGES_TAG)
+  newTag: @(CONTAINER_IMAGES_TAG)
 - name: gcr.io/google-samples/microservices-demo/cartservice
-  newTag: $(CONTAINER_IMAGES_TAG)
+  newTag: @(CONTAINER_IMAGES_TAG)
 - name: gcr.io/google-samples/microservices-demo/checkoutservice
-  newTag: $(CONTAINER_IMAGES_TAG)
+  newTag: @(CONTAINER_IMAGES_TAG)
 - name: gcr.io/google-samples/microservices-demo/currencyservice
-  newTag: $(CONTAINER_IMAGES_TAG)
+  newTag: @(CONTAINER_IMAGES_TAG)
 - name: gcr.io/google-samples/microservices-demo/emailservice
-  newTag: $(CONTAINER_IMAGES_TAG)
+  newTag: @(CONTAINER_IMAGES_TAG)
 - name: gcr.io/google-samples/microservices-demo/frontend
-  newTag: $(CONTAINER_IMAGES_TAG)
+  newTag: @(CONTAINER_IMAGES_TAG)
 - name: gcr.io/google-samples/microservices-demo/loadgenerator
-  newTag: $(CONTAINER_IMAGES_TAG)
+  newTag: @(CONTAINER_IMAGES_TAG)
 - name: gcr.io/google-samples/microservices-demo/paymentservice
-  newTag: $(CONTAINER_IMAGES_TAG)
+  newTag: @(CONTAINER_IMAGES_TAG)
 - name: gcr.io/google-samples/microservices-demo/productcatalogservice
-  newTag: $(CONTAINER_IMAGES_TAG)
+  newTag: @(CONTAINER_IMAGES_TAG)
 - name: gcr.io/google-samples/microservices-demo/recommendationservice
-  newTag: $(CONTAINER_IMAGES_TAG)
+  newTag: @(CONTAINER_IMAGES_TAG)
 - name: gcr.io/google-samples/microservices-demo/shippingservice
-  newTag: $(CONTAINER_IMAGES_TAG)
+  newTag: @(CONTAINER_IMAGES_TAG)

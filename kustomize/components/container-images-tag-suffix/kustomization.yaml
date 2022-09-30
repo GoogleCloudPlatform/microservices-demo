@@ -16,24 +16,24 @@ apiVersion: kustomize.config.k8s.io/v1alpha1
 kind: Component
 images:
 - name: gcr.io/google-samples/microservices-demo/adservice
-  tagSuffix: $(CONTAINER_IMAGES_TAG_SUFFIX)
+  tagSuffix: @(CONTAINER_IMAGES_TAG_SUFFIX)
 - name: gcr.io/google-samples/microservices-demo/cartservice
-  tagSuffix: $(CONTAINER_IMAGES_TAG_SUFFIX)
+  tagSuffix: @(CONTAINER_IMAGES_TAG_SUFFIX)
 - name: gcr.io/google-samples/microservices-demo/checkoutservice
-  tagSuffix: $(CONTAINER_IMAGES_TAG_SUFFIX)
+  tagSuffix: @(CONTAINER_IMAGES_TAG_SUFFIX)
 - name: gcr.io/google-samples/microservices-demo/currencyservice
-  tagSuffix: $(CONTAINER_IMAGES_TAG_SUFFIX)
+  tagSuffix: @(CONTAINER_IMAGES_TAG_SUFFIX)
 - name: gcr.io/google-samples/microservices-demo/emailservice
-  tagSuffix: $(CONTAINER_IMAGES_TAG_SUFFIX)
+  tagSuffix: @(CONTAINER_IMAGES_TAG_SUFFIX)
 - name: gcr.io/google-samples/microservices-demo/frontend
-  tagSuffix: $(CONTAINER_IMAGES_TAG_SUFFIX)
+  tagSuffix: @(CONTAINER_IMAGES_TAG_SUFFIX)
 - name: gcr.io/google-samples/microservices-demo/loadgenerator
-  tagSuffix: $(CONTAINER_IMAGES_TAG_SUFFIX)
+  tagSuffix: @(CONTAINER_IMAGES_TAG_SUFFIX)
 - name: gcr.io/google-samples/microservices-demo/paymentservice
-  tagSuffix: $(CONTAINER_IMAGES_TAG_SUFFIX)
+  tagSuffix: @(CONTAINER_IMAGES_TAG_SUFFIX)
 - name: gcr.io/google-samples/microservices-demo/productcatalogservice
-  tagSuffix: $(CONTAINER_IMAGES_TAG_SUFFIX)
+  tagSuffix: @(CONTAINER_IMAGES_TAG_SUFFIX)
 - name: gcr.io/google-samples/microservices-demo/recommendationservice
-  tagSuffix: $(CONTAINER_IMAGES_TAG_SUFFIX)
+  tagSuffix: @(CONTAINER_IMAGES_TAG_SUFFIX)
 - name: gcr.io/google-samples/microservices-demo/shippingservice
-  tagSuffix: $(CONTAINER_IMAGES_TAG_SUFFIX)
+  tagSuffix: @(CONTAINER_IMAGES_TAG_SUFFIX)
