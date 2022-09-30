@@ -23,7 +23,6 @@ google-api-core[grpc]==2.10.1
     #   google-cloud-firestore
     #   google-cloud-storage
     #   google-python-cloud-debugger
-    #   opencensus
 google-api-python-client==2.63.0
     # via
     #   firebase-admin
@@ -83,7 +82,7 @@ msgpack==1.0.4
     # via cachecontrol
 proto-plus==1.22.1
     # via google-cloud-firestore
-protobuf==3.20.2
+protobuf==3.20.3
     # via
     #   -r requirements.in
     #   google-api-core
