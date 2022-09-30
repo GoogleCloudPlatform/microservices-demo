@@ -10,7 +10,7 @@ To automate the deployment of Online Boutique integrated with fine granular `Net
 
 From the `kustomize/` folder at the root level of this repository, execute this command:
 ```
-kustomize edit add components/network-policies
+kustomize edit add component components/network-policies
 ```
 
 This will update the `kustomize/kustomization.yaml` file which could be similar to:

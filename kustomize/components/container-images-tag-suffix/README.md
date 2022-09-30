@@ -10,7 +10,7 @@ From the `kustomize/` folder at the root level of this repository, execute this 
 ```
 SUFFIX=-test
 sed -i "s/CONTAINER_IMAGES_TAG_SUFFIX/$SUFFIX/g" components/container-images-tag-suffix/kustomization.yaml
-kustomize edit add components/container-images-tag-suffix
+kustomize edit add component components/container-images-tag-suffix
 ```
 _Note: this Kustomize component will add a suffix to the container image tag of the `image:` field in all `Deployments`._
 

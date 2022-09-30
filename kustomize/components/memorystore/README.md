@@ -20,7 +20,7 @@ To automate the deployment of Online Boutique integrated with Memorystore (Redis
 
 From the `kustomize/` folder at the root level of this repository, execute this command:
 ```
-kustomize edit add components/memorystore
+kustomize edit add component components/memorystore
 ```
 _Note: this Kustomize component will also remove the `redis-cart` `Deployment` and `Service` not used anymore._
 

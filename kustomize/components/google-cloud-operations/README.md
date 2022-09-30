@@ -47,7 +47,7 @@ To automate the deployment of Online Boutique integrated with Google Cloud Opera
 
 From the `kustomize/` folder at the root level of this repository, execute this command:
 ```
-kustomize edit add components/google-cloud-operations
+kustomize edit add component components/google-cloud-operations
 ```
 
 This will update the `kustomize/kustomization.yaml` file which could be similar to:

@@ -8,7 +8,7 @@ To automate the deployment of Online Boutique integrated with fine granular `Ser
 
 From the `kustomize/` folder at the root level of this repository, execute this command:
 ```
-kustomize edit add components/service-accounts
+kustomize edit add component components/service-accounts
 ```
 _Note: this Kustomize component will also update the `serviceAccountName` field in all `Deployments`._
 

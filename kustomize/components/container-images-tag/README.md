@@ -10,7 +10,7 @@ From the `kustomize/` folder at the root level of this repository, execute this 
 ```
 TAG=v1.0.0
 sed -i "s/CONTAINER_IMAGES_TAG/$TAG/g" components/container-images-tag/kustomization.yaml
-kustomize edit add components/container-images-tag
+kustomize edit add component components/container-images-tag
 ```
 _Note: this Kustomize component will update the container image tag of the `image:` field in all `Deployments`._
 
