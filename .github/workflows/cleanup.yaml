@@ -19,6 +19,12 @@ on:
     branches:
       - main
     types: closed
+    paths-ignore:
+      - '**/README.md'
+      - 'kustomize/**'
+      - '.github/workflows/kustomize-build-ci.yaml'
+      - 'terraform/**'
+      - '.github/workflows/terraform-validate-ci.yaml'
 jobs:
   cleanup-namespace:
     runs-on: [self-hosted, is-enabled]
