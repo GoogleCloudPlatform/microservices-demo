@@ -7,7 +7,7 @@ require (
 	github.com/golang/protobuf v1.5.2
 	github.com/google/uuid v1.3.0
 	github.com/sirupsen/logrus v1.9.0
-	golang.org/x/net v0.0.0-20220927171203-f486391704dc
+	golang.org/x/net v0.0.0-20220930213112-107f3e3c3b0b
 	google.golang.org/grpc v1.49.0
 )
 
