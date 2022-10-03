@@ -28,7 +28,6 @@ RUN go build -gcflags="${SKAFFOLD_GO_GCFLAGS}" -o /productcatalogservice .
 
 FROM alpine AS without-grpc-health-probe-bin
 RUN apk add --no-cache ca-certificates
-
 WORKDIR /src
 COPY --from=builder /productcatalogservice ./server
 COPY products.json .
@@ -42,6 +41,6 @@ EXPOSE 3550
 ENTRYPOINT ["/src/server"]
 
 FROM without-grpc-health-probe-bin
-RUN GRPC_HEALTH_PROBE_VERSION=v0.4.12 && \
+RUN GRPC_HEALTH_PROBE_VERSION=v0.4.13 && \
     wget -qO/bin/grpc_health_probe https://github.com/grpc-ecosystem/grpc-health-probe/releases/download/${GRPC_HEALTH_PROBE_VERSION}/grpc_health_probe-linux-amd64 && \
     chmod +x /bin/grpc_health_probe
