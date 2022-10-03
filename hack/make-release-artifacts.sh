@@ -97,6 +97,12 @@ mk_kustomize_base() {
     service_name="$(basename "${file_to_copy}" .yaml)"
     image="$REPO_PREFIX/$service_name:$TAG"
 
+    # Inside redis.yaml, we use the official `redis:alpine` Docker image.
+    # We don't use an image from `gcr.io/google-samples/microservices-demo`.
+    if [[ $service_name == "redis" ]]; then
+      continue
+    fi
+
     pattern="^(\s*)image:\s.*${service_name}(.*)(\s*)"
     replace="\1image: ${image}\3"
     gsed --in-place --regexp-extended "s|${pattern}|${replace}|g" ./kustomize/base/${service_name}.yaml
