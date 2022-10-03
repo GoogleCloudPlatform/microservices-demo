@@ -17,8 +17,8 @@ kind: Kustomization
 resources:
 - base
 components:
-# - components/cymbal-branding
-# - components/google-cloud-operations
-# - components/memorystore
-# - components/network-policies
-# - components/service-accounts
+ - components/cymbal-branding
+ - components/google-cloud-operations
+ - components/memorystore
+ - components/network-policies
+ - components/service-accounts
