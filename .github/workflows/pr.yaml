@@ -70,7 +70,7 @@ jobs:
             raquio/${{ matrix.service }}
           # generate Docker tags based on the following events/attributes
           tags: |
-            type=ref,event=pr
+            type=sha
       -
         uses: docker/build-push-action@v3
         name: Build
@@ -83,7 +83,7 @@ jobs:
   deploy:
     runs-on: [ubuntu-latest]
     container:
-      image: raquio/deployer:v0.0.10
+      image: raquio/deployer:v0.0.11
       options: --user root
     needs: build-images
     strategy:
@@ -99,13 +99,18 @@ jobs:
         with:
           ssh-private-key: ${{ secrets.PACK_REGISTRY_DEPLOY_KEY }}
       -
+        name: Set outputs
+          id: vars
+          run: echo "::set-output name=sha_short::$(git rev-parse --short HEAD)"
+      -
         name: deploy
         timeout-minutes: 10
         run: |
             deployer --conf src/${{ matrix.service }}/deploy/prod.hcl \
                      --nomad-addr ${{ secrets.NOMAD_ADDR }} \
                      --consul-addr ${{ secrets.CONSUL_HTTP_ADDR }} \
-                     --consul-token ${{ secrets.CONSUL_HTTP_TOKEN }}
+                     --consul-token ${{ secrets.CONSUL_HTTP_TOKEN }} \
+                     --extra-vars --var=service_version=${{ steps.vars.outputs.sha_short }}
 
   #      - name: Wait For Allocations
   #        timeout-minutes: 20

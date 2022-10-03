@@ -1,7 +1,6 @@
 service_name    = "checkout"
 service_port    = 5050
-service_repo    = "raquio/demo-checkoutservice"
-service_version = "v0.0.2"
+service_repo    = "raquio/checkoutservice"
 service_count   = 1
 
 resources = {

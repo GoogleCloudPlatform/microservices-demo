@@ -1,8 +1,7 @@
 service_name      = "frontend"
 service_protocol  = "http"
 service_port      = 8080
-service_repo      = "raquio/demo-frontend"
-service_version   = "v0.0.2"
+service_repo      = "raquio/frontend"
 service_count     = 1
 service_is_public = true
 
