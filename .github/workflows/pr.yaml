@@ -86,7 +86,7 @@ jobs:
     container:
       image: raquio/deployer:v0.0.1
       options: --user root
-    needs: build-images
+    #needs: build-images
     strategy:
       matrix:
         service: ["adservice"]
