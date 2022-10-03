@@ -84,7 +84,7 @@ jobs:
   deploy:
     runs-on: [ubuntu-latest]
     container:
-      image: raquio/deployer:v0.0.7
+      image: raquio/deployer:v0.0.9
       options: --user root
     #needs: build-images
     strategy:
@@ -104,7 +104,7 @@ jobs:
         name: deploy
         timeout-minutes: 10
         run: |
-            deployer --conf src/${{ matrix.service }}/deploy/prod.hcl
+            deployer --conf src/${{ matrix.service }}/deploy/prod.hcl 
 
   #      - name: Wait For Allocations
   #        timeout-minutes: 20
