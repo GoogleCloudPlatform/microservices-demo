@@ -1,4 +1,4 @@
-## `hack/` 
+## `hack/`
 
 This directory contains the scripts for creating a new `microservices-demo` release.
 
@@ -14,8 +14,8 @@ This directory contains the scripts for creating a new `microservices-demo` rele
 #### 4. Set the following environment variables:
 
 - `TAG` - This is the new version (e.g., `v0.3.5`).
-- `REPO_PREFIX` - This is the Docker repository. 
-##### Example: 
+- `REPO_PREFIX` - This is the Docker repository.
+##### Example:
 ```
 export TAG=v0.3.5
 export REPO_PREFIX=gcr.io/google-samples/microservices-demo
@@ -23,10 +23,10 @@ export REPO_PREFIX=gcr.io/google-samples/microservices-demo
 
 #### 5. Run `./hack/make-release.sh`.
 
-- Make sure you run `./hack/make-release.sh` from this project's root folder — **not** from inside the `hack/` folder. 
+- Make sure you run `./hack/make-release.sh` from this project's root folder — **not** from inside the `hack/` folder.
 - This script:
   1. uses `make-docker-images.sh` to build and push a Docker image for each microservice to the previously specified repository.
-  1. uses `make-release-artifacts.sh` to regenerates (and update the image $TAGS) YAML file at `./release/kubernetes-manifests.yaml`. 
+  1. uses `make-release-artifacts.sh` to regenerates (and update the image $TAGS) YAML file at `./release/kubernetes-manifests.yaml` and `./kustomize/base/`.
   1. runs `git tag` and pushes a new branch (e.g., `release/v0.3.5`) with the changes to `release/kubernetes-manifests.yaml`.
 
 #### 6. Make sure the new Docker images were created and pushed.
