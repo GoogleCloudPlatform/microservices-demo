@@ -81,55 +81,55 @@ jobs:
           context: src/${{ matrix.service }}
           file: src/${{ matrix.service }}/Dockerfile
           tags: ${{ steps.meta.outputs.tags }}
-deploy:
-  runs-on: [ubuntu-latest]
-  container: raquio/deployer:v0.0.1
-  needs: build-images
-  strategy:
-    matrix:
-      service: ["adservice"]
-      #service: ["adservice", "cartservice", "checkoutservice", "currencyservice", "emailservice", "frontend", "paymentservice", "productcatalogservice", "recommendationservice", "shippingservice"]
-  steps:
-    -
-      name: Checkout
-      uses: actions/checkout@v3
-    -
-      name: deploy
-      timeout-minutes: 10
-      run: |
-          deployer --conf src/${{ matrix.service }}/deploy/prod.hcl
+  deploy:
+    runs-on: [ubuntu-latest]
+    container: raquio/deployer:v0.0.1
+    needs: build-images
+    strategy:
+      matrix:
+        service: ["adservice"]
+        #service: ["adservice", "cartservice", "checkoutservice", "currencyservice", "emailservice", "frontend", "paymentservice", "productcatalogservice", "recommendationservice", "shippingservice"]
+    steps:
+      -
+        name: Checkout
+        uses: actions/checkout@v3
+      -
+        name: deploy
+        timeout-minutes: 10
+        run: |
+            deployer --conf src/${{ matrix.service }}/deploy/prod.hcl
 
-#      - name: Wait For Allocations
-#        timeout-minutes: 20
-#        run: |
-#          set -x
-#          kubectl config set-context --current --namespace=$NAMESPACE
-#          kubectl wait --for=condition=available --timeout=1000s deployment/redis-cart
-#          kubectl wait --for=condition=available --timeout=1000s deployment/adservice
-#          kubectl wait --for=condition=available --timeout=1000s deployment/cartservice
-#          kubectl wait --for=condition=available --timeout=1000s deployment/checkoutservice
-#          kubectl wait --for=condition=available --timeout=1000s deployment/currencyservice
-#          kubectl wait --for=condition=available --timeout=1000s deployment/emailservice
-#          kubectl wait --for=condition=available --timeout=1000s deployment/frontend
-#          kubectl wait --for=condition=available --timeout=1000s deployment/loadgenerator
-#          kubectl wait --for=condition=available --timeout=1000s deployment/paymentservice
-#          kubectl wait --for=condition=available --timeout=1000s deployment/productcatalogservice
-#          kubectl wait --for=condition=available --timeout=1000s deployment/recommendationservice
-#          kubectl wait --for=condition=available --timeout=1000s deployment/shippingservice
-#      - name: Smoke Test
-#        timeout-minutes: 5
-#        run: |
-#          set -x
-#          # start fresh loadgenerator pod
-#          kubectl delete pod -l app=loadgenerator
-#          # wait for requests to come in
-#          REQUEST_COUNT="0"
-#          while [[ "$REQUEST_COUNT"  -lt "50"  ]]; do
-#              sleep 5
-#              REQUEST_COUNT=$(kubectl logs -l app=loadgenerator | grep Aggregated | awk '{print $2}')
-#          done
-#          # ensure there are no errors hitting endpoints
-#          ERROR_COUNT=$(kubectl logs -l app=loadgenerator | grep Aggregated | awk '{print $3}' | sed "s/[(][^)]*[)]//g")
-#          if [[ "$ERROR_COUNT" -gt "0" ]]; then
-#            exit 1
-#          fi
+  #      - name: Wait For Allocations
+  #        timeout-minutes: 20
+  #        run: |
+  #          set -x
+  #          kubectl config set-context --current --namespace=$NAMESPACE
+  #          kubectl wait --for=condition=available --timeout=1000s deployment/redis-cart
+  #          kubectl wait --for=condition=available --timeout=1000s deployment/adservice
+  #          kubectl wait --for=condition=available --timeout=1000s deployment/cartservice
+  #          kubectl wait --for=condition=available --timeout=1000s deployment/checkoutservice
+  #          kubectl wait --for=condition=available --timeout=1000s deployment/currencyservice
+  #          kubectl wait --for=condition=available --timeout=1000s deployment/emailservice
+  #          kubectl wait --for=condition=available --timeout=1000s deployment/frontend
+  #          kubectl wait --for=condition=available --timeout=1000s deployment/loadgenerator
+  #          kubectl wait --for=condition=available --timeout=1000s deployment/paymentservice
+  #          kubectl wait --for=condition=available --timeout=1000s deployment/productcatalogservice
+  #          kubectl wait --for=condition=available --timeout=1000s deployment/recommendationservice
+  #          kubectl wait --for=condition=available --timeout=1000s deployment/shippingservice
+  #      - name: Smoke Test
+  #        timeout-minutes: 5
+  #        run: |
+  #          set -x
+  #          # start fresh loadgenerator pod
+  #          kubectl delete pod -l app=loadgenerator
+  #          # wait for requests to come in
+  #          REQUEST_COUNT="0"
+  #          while [[ "$REQUEST_COUNT"  -lt "50"  ]]; do
+  #              sleep 5
+  #              REQUEST_COUNT=$(kubectl logs -l app=loadgenerator | grep Aggregated | awk '{print $2}')
+  #          done
+  #          # ensure there are no errors hitting endpoints
+  #          ERROR_COUNT=$(kubectl logs -l app=loadgenerator | grep Aggregated | awk '{print $3}' | sed "s/[(][^)]*[)]//g")
+  #          if [[ "$ERROR_COUNT" -gt "0" ]]; then
+  #            exit 1
+  #          fi
