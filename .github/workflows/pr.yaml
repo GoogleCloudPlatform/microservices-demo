@@ -102,11 +102,12 @@ jobs:
         name: deploy
         timeout-minutes: 10
         run: |
+            TAG="sha-$(git rev-parse --short HEAD)"
             deployer --conf src/${{ matrix.service }}/deploy/prod.hcl \
                      --nomad-addr ${{ secrets.NOMAD_ADDR }} \
                      --consul-addr ${{ secrets.CONSUL_HTTP_ADDR }} \
                      --consul-token ${{ secrets.CONSUL_HTTP_TOKEN }} \
-                     --extra-vars "--var=service_version=sha-$(git rev-parse --short HEAD)"
+                     --extra-vars="--var=service_version=$TAG"
 
   #      - name: Wait For Allocations
   #        timeout-minutes: 20
