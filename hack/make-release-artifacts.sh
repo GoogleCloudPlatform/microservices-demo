@@ -52,7 +52,7 @@ read_manifests() {
 
     while IFS= read -d $'\0' -r file; do
         echo "---"
-        
+
         # strip license headers (pattern "^# ")
         awk '
         /^[^# ]/ { found = 1 }
@@ -89,6 +89,20 @@ mk_istio_manifests() {
     echo '# [END servicemesh_release_istio_manifests_microservices_demo]'
 }
 
+mk_kustomize_base() {
+  for file_to_copy in ./kubernetes-manifests/*.yaml
+  do
+    cp ${file_to_copy} ./kustomize/base/
+
+    service_name="$(basename "${file_to_copy}" .yaml)"
+    image="$REPO_PREFIX/$service_name:$TAG"
+
+    pattern="^(\s*)image:\s.*${service_name}(.*)(\s*)"
+    replace="\1image: ${image}\3"
+    gsed --in-place --regexp-extended "s|${pattern}|${replace}|g" ./kustomize/base/${service_name}.yaml
+  done
+}
+
 main() {
     mkdir -p "${OUT_DIR}"
     local k8s_manifests_file istio_manifests_file
@@ -102,6 +116,9 @@ main() {
     istio_manifests_file="${OUT_DIR}/istio-manifests.yaml"
     mk_istio_manifests > "${istio_manifests_file}"
     log "Written ${istio_manifests_file}"
+
+    mk_kustomize_base
+    log "Written Kustomize base"
 }
 
 main
