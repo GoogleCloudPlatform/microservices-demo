@@ -13,7 +13,7 @@
 # limitations under the License.
 
 
-name: "Continuous Integration - Main/Release"
+name: "Main - Continuous Release"
 on:
   push:
     # run on pushes to main or release/*

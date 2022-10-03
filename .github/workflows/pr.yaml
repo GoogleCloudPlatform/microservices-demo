@@ -13,7 +13,7 @@
 # limitations under the License.
 
 
-name: "Continuous Integration - Main/Release"
+name: "Pull Request - Continuous Release"
 on: pull_request
 jobs:
   code-tests:
@@ -83,7 +83,7 @@ jobs:
   deploy:
     runs-on: [ubuntu-latest]
     container:
-      image: raquio/deployer:v0.0.12
+      image: raquio/deployer:v0.0.13
       options: --user root
     needs: build-images
     strategy:
