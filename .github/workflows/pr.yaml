@@ -100,8 +100,8 @@ jobs:
           ssh-private-key: ${{ secrets.PACK_REGISTRY_DEPLOY_KEY }}
       -
         name: Set outputs
-          id: vars
-          run: echo "::set-output name=sha_short::$(git rev-parse --short HEAD)"
+        id: vars
+        run: echo "::set-output name=sha_short::$(git rev-parse --short HEAD)"
       -
         name: deploy
         timeout-minutes: 10
