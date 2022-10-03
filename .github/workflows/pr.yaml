@@ -99,10 +99,6 @@ jobs:
         with:
           ssh-private-key: ${{ secrets.PACK_REGISTRY_DEPLOY_KEY }}
       -
-        name: Set outputs
-        id: vars
-        run: echo "::set-output name=sha_short::$(git rev-parse --short HEAD)"
-      -
         name: deploy
         timeout-minutes: 10
         run: |
@@ -110,7 +106,7 @@ jobs:
                      --nomad-addr ${{ secrets.NOMAD_ADDR }} \
                      --consul-addr ${{ secrets.CONSUL_HTTP_ADDR }} \
                      --consul-token ${{ secrets.CONSUL_HTTP_TOKEN }} \
-                     --extra-vars --var=service_version=sha-${{ steps.vars.outputs.sha_short }}
+                     --extra-vars "--var=service_version=sha-$(git rev-parse --short HEAD)"
 
   #      - name: Wait For Allocations
   #        timeout-minutes: 20
