@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-FROM eclipse-temurin:18 as builder
+FROM eclipse-temurin:19 as builder
 
 WORKDIR /app
 
@@ -25,7 +25,7 @@ COPY . .
 RUN chmod +x gradlew
 RUN ./gradlew installDist
 
-FROM eclipse-temurin:18-jre-alpine
+FROM eclipse-temurin:19-jre-alpine
 
 RUN apk add --no-cache ca-certificates
 
