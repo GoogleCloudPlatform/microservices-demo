@@ -84,7 +84,7 @@ jobs:
   deploy:
     runs-on: [ubuntu-latest]
     container:
-      image: raquio/deployer:v0.0.6
+      image: raquio/deployer:v0.0.7
       options: --user root
     #needs: build-images
     strategy:
@@ -95,6 +95,11 @@ jobs:
       -
         name: Checkout
         uses: actions/checkout@v3
+      -
+        name: Setup SSH
+        uses: webfactory/ssh-agent@0.5.4
+        with:
+          ssh-priate-key: ${{ secrets.PACK_REGISTRY_DEPLOY_KEY }}
       -
         name: deploy
         timeout-minutes: 10
