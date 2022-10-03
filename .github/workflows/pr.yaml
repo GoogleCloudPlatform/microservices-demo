@@ -84,7 +84,7 @@ jobs:
   deploy:
     runs-on: [ubuntu-latest]
     container:
-      image: raquio/deployer:v0.0.8
+      image: raquio/deployer:v0.0.9
       options: --user root
     #needs: build-images
     strategy:
@@ -104,7 +104,10 @@ jobs:
         name: deploy
         timeout-minutes: 10
         run: |
-            deployer --conf src/${{ matrix.service }}/deploy/prod.hcl
+            deployer --conf src/${{ matrix.service }}/deploy/prod.hcl \
+                     --nomad-addr ${{ secrets.NOMAD_ADDR }} \
+                     --consul-addr ${{ secrets.CONSUL_HTTP_ADDR }} \
+                     --consul-token ${{ secrets.CONSUL_HTTP_TOKEN }}
 
   #      - name: Wait For Allocations
   #        timeout-minutes: 20
