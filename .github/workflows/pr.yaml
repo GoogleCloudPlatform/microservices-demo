@@ -99,7 +99,7 @@ jobs:
         name: Setup SSH
         uses: webfactory/ssh-agent@v0.5.4
         with:
-          ssh-priate-key: ${{ secrets.PACK_REGISTRY_DEPLOY_KEY }}
+          ssh-private-key: ${{ secrets.PACK_REGISTRY_DEPLOY_KEY }}
       -
         name: deploy
         timeout-minutes: 10
