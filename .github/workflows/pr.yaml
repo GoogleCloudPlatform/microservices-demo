@@ -84,7 +84,7 @@ jobs:
   deploy:
     runs-on: [ubuntu-latest]
     container:
-      image: raquio/deployer:v0.0.9
+      image: raquio/deployer:v0.0.10
       options: --user root
     #needs: build-images
     strategy:
