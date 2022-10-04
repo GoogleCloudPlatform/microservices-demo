@@ -24,17 +24,25 @@ namespace cartservice.cartstore
     {
         private static readonly string TableName = "CartItems";
         private static readonly string DefaultInstanceName = "onlineboutique";
+        private static readonly string DefaultDatabaseName = "carts";
         private readonly string databaseString;
 
         public SpannerCartStore(IConfiguration configuration)
         {
             string spannerProjectId = configuration["SPANNER_PROJECT"];
             string spannerInstanceId = configuration["SPANNER_INSTANCE"];
+            string spannerDatabaseId = configuration["SPANNER_DATABASE"];
+            string spannerConnectionString = configuration["SPANNER_CONNECTION_STRING"];
+            if (!string.IsNullOrEmpty(spannerConnectionString)) {
+                databaseString = spannerConnectionString;
+                return;
+            }
             if (string.IsNullOrEmpty(spannerInstanceId))
                 spannerInstanceId = DefaultInstanceName;
-            SpannerConnectionStringBuilder builder = new();
-            builder.DataSource = $"projects/{spannerProjectId}/instances/{spannerInstanceId}/databases/carts";
-            databaseString = builder.ToString();
+            if (string.IsNullOrEmpty(spannerDatabaseId))
+                spannerDatabaseId = DefaultDatabaseName;
+            databaseString =
+                $"projects/{spannerProjectId}/instances/{spannerInstanceId}/databases/{spannerDatabaseId}";
         }
 
 

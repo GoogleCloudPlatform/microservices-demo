@@ -57,13 +57,14 @@ Note: See the documentation to list [available Spanner configuration names](http
 SPANNER_REGION_CONFIG="<your-spanner-region-config-name>"
 # e.g. "regional-us-central1"
 SPANNER_INSTANCE_NAME=onlineboutique
+SPANNER_DATABASE_NAME=carts
 
 gcloud spanner instances create ${SPANNER_INSTANCE_NAME} \
     --description="online boutique backend" \
     --config="${SPANNER_REGION_CONFIG}" \
     --instance-type=free-instance
 
-gcloud spanner databases create carts \
+gcloud spanner databases create ${SPANNER_DATABASE_NAME} \
     --project=${PROJECT_ID} \
     --instance="${SPANNER_INSTANCE_NAME}" \
     --database-dialect=GOOGLE_STANDARD_SQL \
@@ -106,6 +107,16 @@ cp ./release/kubernetes-manifests.yaml ./release/updated-manifests.yaml
 sed -i "s/name: REDIS_ADDR/name: SPANNER_PROJECT/g" ./release/updated-manifests.yaml
 sed -i "s/value: \"redis-cart:6379\"/value: \"${PROJECT_ID}\"/g" ./release/updated-manifests.yaml
 ```
+
+#### *Note on Spanner connection environmental variables*
+
+You can add also manually edit the `updated-manifests.yaml`
+`cartservice` section, and add environmental variables to specify a Spanner instance, database, or an explicit connection string.
+The following environmental variables will be used by the `cartservice`, if present:
+
+- `SPANNER_INSTANCE`: defaults to `onlineboutique`, unless specified.
+- `SPANNER_DATABASE`: defaults to `carts`, unless specified.
+- `SPANNER_CONNECTION_STRING`: defaults to `projects/${SPANNER_PROJECT}/instances/${SPANNER_INSTANCE}/databases/${SPANNER_DATABASE}`. If this variable is defined explicitly, all other environmental variables will be ignored.
 
 ### 6. Apply the updated manifest
 
