@@ -46,7 +46,7 @@ google-cloud-core==2.3.2
     # via
     #   google-cloud-firestore
     #   google-cloud-storage
-google-cloud-firestore==2.7.0
+google-cloud-firestore==2.7.1
     # via firebase-admin
 google-cloud-profiler==4.0.0
     # via -r requirements.in
