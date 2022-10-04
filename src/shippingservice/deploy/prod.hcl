@@ -1,7 +1,6 @@
 service_name    = "shipping"
 service_port    = 5050
-service_repo    = "raquio/demo-shippingservice"
-service_version = "v1.0.0"
+service_repo    = "raquio/shippingservice"
 service_count   = 1
 
 resources = {

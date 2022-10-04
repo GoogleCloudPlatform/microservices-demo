@@ -13,7 +13,7 @@
 # limitations under the License.
 
 
-name: "Continuous Integration - Main/Release"
+name: "Main - Continuous Release"
 on:
   push:
     # run on pushes to main or release/*
@@ -87,6 +87,23 @@ jobs:
           context: src/${{ matrix.service }}
           file: src/${{ matrix.service }}/Dockerfile
           tags: ${{ steps.meta.outputs.tags }}
+deploy:
+  runs-on: [ubuntu-latest]
+  container: raquio/deployer:v0.0.1
+  needs: build-images
+  strategy:
+    matrix:
+      service: ["adservice", "cartservice", "checkoutservice", "currencyservice", "emailservice", "frontend", "paymentservice", "productcatalogservice", "recommendationservice", "shippingservice"]
+  steps:
+    -
+      name: Checkout
+      uses: actions/checkout@v3
+    -
+      name: deploy
+      timeout-minutes: 10
+      run: |
+          env | sort
+
 #      - name: Wait For Allocations
 #        timeout-minutes: 20
 #        run: |
