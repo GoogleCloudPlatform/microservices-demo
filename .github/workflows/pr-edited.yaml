@@ -16,7 +16,7 @@
 name: "Pull Request Updated - Continuous Release"
 on:
   pull_request:
-    types: [synchronized]
+    types: [synchronize]
 jobs:
   generate-matrix:
     name: Generate job matrices
