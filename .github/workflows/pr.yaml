@@ -38,7 +38,8 @@ jobs:
     needs: code-tests
     strategy:
       matrix:
-        service: ["adservice", "cartservice", "checkoutservice", "currencyservice", "emailservice", "frontend", "paymentservice", "productcatalogservice", "recommendationservice", "shippingservice"]
+        #service: ["adservice", "cartservice", "checkoutservice", "currencyservice", "emailservice", "frontend", "paymentservice", "productcatalogservice", "recommendationservice", "shippingservice"]
+        service: ["adservice"]
       fail-fast: true
     steps:
       -
@@ -88,7 +89,8 @@ jobs:
     needs: build-images
     strategy:
       matrix:
-        service: ["adservice", "cartservice", "checkoutservice", "currencyservice", "emailservice", "frontend", "paymentservice", "productcatalogservice", "recommendationservice", "shippingservice"]
+        #service: ["adservice", "cartservice", "checkoutservice", "currencyservice", "emailservice", "frontend", "paymentservice", "productcatalogservice", "recommendationservice", "shippingservice"]
+        service: ["adservice"]
     steps:
       -
         name: Checkout
@@ -102,6 +104,7 @@ jobs:
         name: deploy
         timeout-minutes: 10
         run: |
+            git config --global --add safe.directory /__w/boutique-demo/boutique-demo
             TAG="sha-$(git rev-parse --short HEAD)"
             deployer --conf src/${{ matrix.service }}/deploy/prod.hcl \
                      --nomad-addr ${{ secrets.NOMAD_ADDR }} \
