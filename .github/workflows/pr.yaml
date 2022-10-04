@@ -32,7 +32,7 @@ jobs:
         run: |
             echo "testing ${{ matrix.service }}..."
             cd src/${{ matrix.service }}
-            #go test
+            go test
   build-images:
     runs-on: [ubuntu-latest]
     needs: code-tests
@@ -81,12 +81,13 @@ jobs:
           context: src/${{ matrix.service }}
           file: src/${{ matrix.service }}/Dockerfile
           tags: ${{ steps.meta.outputs.tags }}
-  deploy:
+  deploy_all:
     runs-on: [ubuntu-latest]
     container:
       image: raquio/deployer:v0.0.15
       options: --user root
     needs: build-images
+    if: ${{ github.event.action == 'opened' }}
     strategy:
       matrix:
         #service: ["adservice", "cartservice", "checkoutservice", "currencyservice", "emailservice", "frontend", "paymentservice", "productcatalogservice", "recommendationservice", "shippingservice"]
@@ -111,6 +112,49 @@ jobs:
                      --consul-addr ${{ secrets.CONSUL_HTTP_ADDR }} \
                      --consul-token ${{ secrets.CONSUL_HTTP_TOKEN }} \
                      --extra-vars="--var=service_version=$TAG"
+
+            if [ "${{ matrix.service }}" == "cartservice" ]; then
+              deployer --conf src/${{ matrix.service }}/deploy/redis.hcl \
+                               --nomad-addr ${{ secrets.NOMAD_ADDR }} \
+                               --consul-addr ${{ secrets.CONSUL_HTTP_ADDR }} \
+                               --consul-token ${{ secrets.CONSUL_HTTP_TOKEN }}
+            fi
+
+    deploy_changed:
+      runs-on: [ ubuntu-latest ]
+      container:
+        image: raquio/deployer:v0.0.15
+        options: --user root
+      needs: build-images
+      if: ${{ github.event.action == 'edited' }}
+      strategy:
+        matrix:
+          #service: ["adservice", "cartservice", "checkoutservice", "currencyservice", "emailservice", "frontend", "paymentservice", "productcatalogservice", "recommendationservice", "shippingservice"]
+          service: [ "adservice" ]
+      steps:
+        - name: Checkout
+          uses: actions/checkout@v3
+        - name: Setup SSH
+          uses: webfactory/ssh-agent@v0.5.4
+          with:
+            ssh-private-key: ${{ secrets.PACK_REGISTRY_DEPLOY_KEY }}
+        - name: deploy
+          timeout-minutes: 10
+          run: |
+            git config --global --add safe.directory /__w/boutique-demo/boutique-demo
+            TAG="sha-$(git rev-parse --short HEAD)"
+            deployer --conf src/${{ matrix.service }}/deploy/prod.hcl \
+                     --nomad-addr ${{ secrets.NOMAD_ADDR }} \
+                     --consul-addr ${{ secrets.CONSUL_HTTP_ADDR }} \
+                     --consul-token ${{ secrets.CONSUL_HTTP_TOKEN }} \
+                     --extra-vars="--var=service_version=$TAG"
+
+            if [ "${{ matrix.service }}" == "cartservice" ]; then
+              deployer --conf src/${{ matrix.service }}/deploy/redis.hcl \
+                               --nomad-addr ${{ secrets.NOMAD_ADDR }} \
+                               --consul-addr ${{ secrets.CONSUL_HTTP_ADDR }} \
+                               --consul-token ${{ secrets.CONSUL_HTTP_TOKEN }}
+            fi
 
   #      - name: Wait For Allocations
   #        timeout-minutes: 20
