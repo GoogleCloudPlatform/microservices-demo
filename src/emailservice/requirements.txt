@@ -29,7 +29,7 @@ google-auth-httplib2==0.1.0
     #   google-cloud-profiler
 google-cloud-profiler==4.0.0
     # via -r requirements.in
-google-cloud-trace==1.7.1
+google-cloud-trace==1.7.2
     # via -r requirements.in
 googleapis-common-protos==1.56.4
     # via
