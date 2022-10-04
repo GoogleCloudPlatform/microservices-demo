@@ -35,6 +35,7 @@ namespace cartservice.cartstore
             string spannerConnectionString = configuration["SPANNER_CONNECTION_STRING"];
             if (!string.IsNullOrEmpty(spannerConnectionString)) {
                 databaseString = spannerConnectionString;
+                Console.WriteLine($"Spanner connection string: ${databaseString}");
                 return;
             }
             if (string.IsNullOrEmpty(spannerInstanceId))
@@ -43,6 +44,7 @@ namespace cartservice.cartstore
                 spannerDatabaseId = DefaultDatabaseName;
             databaseString =
                 $"projects/{spannerProjectId}/instances/{spannerInstanceId}/databases/{spannerDatabaseId}";
+            Console.WriteLine($"Built Spanner connection string: ${databaseString}");
         }
 
 
