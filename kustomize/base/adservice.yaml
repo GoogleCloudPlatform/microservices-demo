@@ -15,15 +15,15 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: productcatalogservice
+  name: adservice
 spec:
   selector:
     matchLabels:
-      app: productcatalogservice
+      app: adservice
   template:
     metadata:
       labels:
-        app: productcatalogservice
+        app: adservice
     spec:
       serviceAccountName: default
       terminationGracePeriodSeconds: 5
@@ -41,41 +41,43 @@ spec:
               - all
           privileged: false
           readOnlyRootFilesystem: true
-        image: productcatalogservice
+        image: gcr.io/google-samples/microservices-demo/adservice:v0.4.0
         ports:
-        - containerPort: 3550
+        - containerPort: 9555
         env:
         - name: PORT
-          value: "3550"
+          value: "9555"
         - name: DISABLE_STATS
           value: "1"
         - name: DISABLE_TRACING
           value: "1"
-        - name: DISABLE_PROFILER
-          value: "1"
-        readinessProbe:
-          exec:
-            command: ["/bin/grpc_health_probe", "-addr=:3550"]
-        livenessProbe:
-          exec:
-            command: ["/bin/grpc_health_probe", "-addr=:3550"]
         resources:
           requests:
-            cpu: 100m
-            memory: 64Mi
-          limits:
             cpu: 200m
-            memory: 128Mi
+            memory: 180Mi
+          limits:
+            cpu: 300m
+            memory: 300Mi
+        readinessProbe:
+          initialDelaySeconds: 20
+          periodSeconds: 15
+          exec:
+            command: ["/bin/grpc_health_probe", "-addr=:9555"]
+        livenessProbe:
+          initialDelaySeconds: 20
+          periodSeconds: 15
+          exec:
+            command: ["/bin/grpc_health_probe", "-addr=:9555"]
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: productcatalogservice
+  name: adservice
 spec:
   type: ClusterIP
   selector:
-    app: productcatalogservice
+    app: adservice
   ports:
   - name: grpc
-    port: 3550
-    targetPort: 3550
+    port: 9555
+    targetPort: 9555

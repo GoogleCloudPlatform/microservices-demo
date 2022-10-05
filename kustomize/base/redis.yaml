@@ -15,25 +15,23 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: productcatalogservice
+  name: redis-cart
 spec:
   selector:
     matchLabels:
-      app: productcatalogservice
+      app: redis-cart
   template:
     metadata:
       labels:
-        app: productcatalogservice
+        app: redis-cart
     spec:
-      serviceAccountName: default
-      terminationGracePeriodSeconds: 5
       securityContext:
         fsGroup: 1000
         runAsGroup: 1000
         runAsNonRoot: true
         runAsUser: 1000
       containers:
-      - name: server
+      - name: redis
         securityContext:
           allowPrivilegeEscalation: false
           capabilities:
@@ -41,41 +39,40 @@ spec:
               - all
           privileged: false
           readOnlyRootFilesystem: true
-        image: productcatalogservice
+        image: redis:alpine
         ports:
-        - containerPort: 3550
-        env:
-        - name: PORT
-          value: "3550"
-        - name: DISABLE_STATS
-          value: "1"
-        - name: DISABLE_TRACING
-          value: "1"
-        - name: DISABLE_PROFILER
-          value: "1"
+        - containerPort: 6379
         readinessProbe:
-          exec:
-            command: ["/bin/grpc_health_probe", "-addr=:3550"]
+          periodSeconds: 5
+          tcpSocket:
+            port: 6379
         livenessProbe:
-          exec:
-            command: ["/bin/grpc_health_probe", "-addr=:3550"]
+          periodSeconds: 5
+          tcpSocket:
+            port: 6379
+        volumeMounts:
+        - mountPath: /data
+          name: redis-data
         resources:
-          requests:
-            cpu: 100m
-            memory: 64Mi
           limits:
-            cpu: 200m
-            memory: 128Mi
+            memory: 256Mi
+            cpu: 125m
+          requests:
+            cpu: 70m
+            memory: 200Mi
+      volumes:
+      - name: redis-data
+        emptyDir: {}
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: productcatalogservice
+  name: redis-cart
 spec:
   type: ClusterIP
   selector:
-    app: productcatalogservice
+    app: redis-cart
   ports:
-  - name: grpc
-    port: 3550
-    targetPort: 3550
+  - name: tls-redis
+    port: 6379
+    targetPort: 6379
