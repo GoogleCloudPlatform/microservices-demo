@@ -41,7 +41,7 @@ spec:
               - all
           privileged: false
           readOnlyRootFilesystem: true
-        image: gcr.io/google-samples/microservices-demo/adservice:v0.3.8
+        image: gcr.io/google-samples/microservices-demo/adservice:v0.4.0
         ports:
         - containerPort: 9555
         env:
@@ -51,8 +51,6 @@ spec:
           value: "1"
         - name: DISABLE_TRACING
           value: "1"
-        # - name: JAEGER_SERVICE_ADDR
-        #   value: "jaeger-collector:14268"
         resources:
           requests:
             cpu: 200m
