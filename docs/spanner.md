@@ -84,23 +84,21 @@ GSA_NAME=$(gcloud iam service-accounts list --filter 'Compute Engine default' --
 NAMESPACE=default
 KSA_NAME=default
 
-# grant the GCP service account databaseUser in Spanner
+# Grant the GCP service account databaseUser in Spanner
 gcloud projects add-iam-policy-binding $PROJECT_ID \
     --member "serviceAccount:${GSA_NAME}" \
     --role="roles/spanner.databaseUser"
 
-# annotate the kubectl serviceAccountName with the GCP Service Account
+# Annotate the kubectl serviceAccountName with the GCP Service Account
 kubectl annotate serviceaccount ${KSA_NAME} \
     --namespace=${NAMESPACE} \
     iam.gke.io/gcp-service-account=${GSA_NAME}
 
-# tell gcloud that the kubectl account maps to the GCP one
+# Tell gcloud that the kubectl account maps to the GCP one
 gcloud iam service-accounts add-iam-policy-binding \
     "${GSA_NAME}" --role roles/iam.workloadIdentityUser \
     --member "serviceAccount:${PROJECT_ID}.svc.id.goog[${NAMESPACE}/${KSA_NAME}]"
 ```
-
-
 
 ### 5. Configure the Kubernetes manifest to use Spanner for the `cartservice`.
 
@@ -108,6 +106,7 @@ gcloud iam service-accounts add-iam-policy-binding \
 cp ./release/kubernetes-manifests.yaml ./release/updated-manifests.yaml
 sed -i "s/name: REDIS_ADDR/name: SPANNER_PROJECT/g" ./release/updated-manifests.yaml
 sed -i "s/value: \"redis-cart:6379\"/value: \"${PROJECT_ID}\"/g" ./release/updated-manifests.yaml
+sed -i "s/cartservice:v0.4.0/cartservice:v0.4.0-spanner/g" ./release/updated-manifests.yaml
 ```
 
 #### *Note on Spanner connection environmental variables*
