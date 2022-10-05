@@ -162,28 +162,28 @@ kubectl get service frontend-external | awk '{print $4}'
 
 **Note**- you may see `<pending>` while GCP provisions the load balancer. If this happens, wait a few minutes and re-run the command.
 
-### 9. Teardown
+### 9. Clean up
 
-To stop the GKE cluster:
+Take down the deployment of Online Boutique:
 
 ```sh
 kubectl delete -f ./release/updated-manifests.yaml
 ```
 
-To delete the GKE cluster, either:
+Delete the GKE cluster, either:
 
 ```sh
-gcloud container clusters delete onlineboutique --zone=${ZONE}
+gcloud container clusters delete onlineboutique --zone=${ZONE} --project=${PROJECT_ID}
 ```
 
 or
 
 ```sh
-gcloud container clusters delete onlineboutique --region=${REGION}
+gcloud container clusters delete onlineboutique --region=${REGION} --project=${PROJECT_ID}
 ```
 
 To delete the Spanner instance:
 
 ```sh
-gcloud spanner instances delete onlineboutique
+gcloud spanner instances delete onlineboutique --project=${PROJECT_ID}
 ```
