@@ -54,12 +54,12 @@ gcloud services enable spanner.googleapis.com --project=${PROJECT_ID}
 Note: See the documentation to list [available Spanner configuration names](https://cloud.google.com/spanner/docs/getting-started/set-up#run_the_gcloud_tool), or run `gcloud spanner instance-configs list --project=$PROJECT_ID`
 
 ```sh
-SPANNER_REGION_CONFIG="<your-spanner-region-config-name>"
-# e.g. "regional-us-central1"
+SPANNER_REGION_CONFIG="<your-spanner-region-config-name>" # e.g. "regional-us-east5"
 SPANNER_INSTANCE_NAME=onlineboutique
 SPANNER_DATABASE_NAME=carts
 
 gcloud spanner instances create ${SPANNER_INSTANCE_NAME} \
+    --project=${PROJECT_ID} \
     --description="online boutique backend" \
     --config="${SPANNER_REGION_CONFIG}" \
     --instance-type=free-instance
@@ -70,6 +70,8 @@ gcloud spanner databases create ${SPANNER_DATABASE_NAME} \
     --database-dialect=GOOGLE_STANDARD_SQL \
     --ddl-file=./src/cartservice/ddl/CartItems.ddl
 ```
+
+Note: If you see an error related to the `--instance-type` flag being `unrecognized`, run `gcloud components update`.
 
 ### 4. Grant the default GCE/GKE service account read/write permission to Spanner
 
