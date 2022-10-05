@@ -18,7 +18,7 @@ services. The experience of running the application locally or on GCP should
 be close.
 
 For example:
-- OpenCensus prints the traces to stdout when it cannot connect to GCP.
+- The tracing library prints the traces to stdout when it cannot connect to GCP.
 - Stackdriver Debugging tries connecting to GCP multiple times, eventually gives
   up.
 

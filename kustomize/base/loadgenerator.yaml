@@ -47,6 +47,13 @@ spec:
               exit 1
           fi
         name: frontend-check
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+              - all
+          privileged: false
+          readOnlyRootFilesystem: true
         image: busybox:latest
         env:
         - name: FRONTEND_ADDR
@@ -60,7 +67,7 @@ spec:
               - all
           privileged: false
           readOnlyRootFilesystem: true
-        image: gcr.io/google-samples/microservices-demo/loadgenerator:v0.3.8
+        image: gcr.io/google-samples/microservices-demo/loadgenerator:v0.4.0
         env:
         - name: FRONTEND_ADDR
           value: "frontend:80"

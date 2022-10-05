@@ -47,7 +47,7 @@ spec:
               - all
           privileged: false
           readOnlyRootFilesystem: true
-        image: gcr.io/google-samples/microservices-demo/emailservice:v0.3.9
+        image: gcr.io/google-samples/microservices-demo/emailservice:v0.4.0
         ports:
         - containerPort: 8080
         env:
@@ -114,7 +114,7 @@ spec:
                 - all
             privileged: false
             readOnlyRootFilesystem: true
-          image: gcr.io/google-samples/microservices-demo/checkoutservice:v0.3.9
+          image: gcr.io/google-samples/microservices-demo/checkoutservice:v0.4.0
           ports:
           - containerPort: 5050
           readinessProbe:
@@ -144,8 +144,6 @@ spec:
             value: "1"
           - name: DISABLE_PROFILER
             value: "1"
-          # - name: JAEGER_SERVICE_ADDR
-          #   value: "jaeger-collector:14268"
           resources:
             requests:
               cpu: 100m
@@ -196,7 +194,7 @@ spec:
               - all
           privileged: false
           readOnlyRootFilesystem: true
-        image: gcr.io/google-samples/microservices-demo/recommendationservice:v0.3.9
+        image: gcr.io/google-samples/microservices-demo/recommendationservice:v0.4.0
         ports:
         - containerPort: 8080
         readinessProbe:
@@ -269,7 +267,7 @@ spec:
                 - all
             privileged: false
             readOnlyRootFilesystem: true
-          image: gcr.io/google-samples/microservices-demo/frontend:v0.3.9
+          image: gcr.io/google-samples/microservices-demo/frontend:v0.4.0
           ports:
           - containerPort: 8080
           readinessProbe:
@@ -313,8 +311,6 @@ spec:
             value: "1"
           - name: DISABLE_PROFILER
             value: "1"
-          # - name: JAEGER_SERVICE_ADDR
-          #   value: "jaeger-collector:14268"
           # - name: CYMBAL_BRANDING
           #   value: "true"
           resources:
@@ -380,7 +376,7 @@ spec:
               - all
           privileged: false
           readOnlyRootFilesystem: true
-        image: gcr.io/google-samples/microservices-demo/paymentservice:v0.3.9
+        image: gcr.io/google-samples/microservices-demo/paymentservice:v0.4.0
         ports:
         - containerPort: 50051
         env:
@@ -448,7 +444,7 @@ spec:
               - all
           privileged: false
           readOnlyRootFilesystem: true
-        image: gcr.io/google-samples/microservices-demo/productcatalogservice:v0.3.9
+        image: gcr.io/google-samples/microservices-demo/productcatalogservice:v0.4.0
         ports:
         - containerPort: 3550
         env:
@@ -460,8 +456,6 @@ spec:
           value: "1"
         - name: DISABLE_PROFILER
           value: "1"
-        # - name: JAEGER_SERVICE_ADDR
-        #   value: "jaeger-collector:14268"
         readinessProbe:
           exec:
             command: ["/bin/grpc_health_probe", "-addr=:3550"]
@@ -518,7 +512,7 @@ spec:
               - all
           privileged: false
           readOnlyRootFilesystem: true
-        image: gcr.io/google-samples/microservices-demo/cartservice:v0.3.9
+        image: gcr.io/google-samples/microservices-demo/cartservice:v0.4.0
         ports:
         - containerPort: 7070
         env:
@@ -590,6 +584,13 @@ spec:
               exit 1
           fi
         name: frontend-check
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+              - all
+          privileged: false
+          readOnlyRootFilesystem: true
         image: busybox:latest
         env:
         - name: FRONTEND_ADDR
@@ -603,7 +604,7 @@ spec:
               - all
           privileged: false
           readOnlyRootFilesystem: true
-        image: gcr.io/google-samples/microservices-demo/loadgenerator:v0.3.9
+        image: gcr.io/google-samples/microservices-demo/loadgenerator:v0.4.0
         env:
         - name: FRONTEND_ADDR
           value: "frontend:80"
@@ -646,7 +647,7 @@ spec:
               - all
           privileged: false
           readOnlyRootFilesystem: true
-        image: gcr.io/google-samples/microservices-demo/currencyservice:v0.3.9
+        image: gcr.io/google-samples/microservices-demo/currencyservice:v0.4.0
         ports:
         - name: grpc
           containerPort: 7000
@@ -714,7 +715,7 @@ spec:
               - all
           privileged: false
           readOnlyRootFilesystem: true
-        image: gcr.io/google-samples/microservices-demo/shippingservice:v0.3.9
+        image: gcr.io/google-samples/microservices-demo/shippingservice:v0.4.0
         ports:
         - containerPort: 50051
         env:
@@ -726,8 +727,6 @@ spec:
           value: "1"
         - name: DISABLE_PROFILER
           value: "1"
-        # - name: JAEGER_SERVICE_ADDR
-        #   value: "jaeger-collector:14268"
         readinessProbe:
           periodSeconds: 5
           exec:
@@ -850,7 +849,7 @@ spec:
               - all
           privileged: false
           readOnlyRootFilesystem: true
-        image: gcr.io/google-samples/microservices-demo/adservice:v0.3.9
+        image: gcr.io/google-samples/microservices-demo/adservice:v0.4.0
         ports:
         - containerPort: 9555
         env:
@@ -860,8 +859,6 @@ spec:
           value: "1"
         - name: DISABLE_TRACING
           value: "1"
-        # - name: JAEGER_SERVICE_ADDR
-        #   value: "jaeger-collector:14268"
         resources:
           requests:
             cpu: 200m
