@@ -166,11 +166,15 @@ Note: You may see `<pending>` while GCP provisions the load balancer. If this ha
 
 ### 9. Clean up
 
+#### Online Boutique
+
 Take down the deployment of Online Boutique:
 
 ```sh
 kubectl delete -f ./release/updated-manifests.yaml
 ```
+
+#### GKE Cluster
 
 Delete the GKE cluster, either:
 
@@ -184,7 +188,9 @@ or
 gcloud container clusters delete onlineboutique --region=${REGION} --project=${PROJECT_ID}
 ```
 
-To delete the Spanner instance:
+#### Spanner
+
+Delete the Spanner instance:
 
 ```sh
 gcloud spanner instances delete onlineboutique --project=${PROJECT_ID}
