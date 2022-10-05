@@ -51,7 +51,7 @@ gcloud services enable spanner.googleapis.com --project=${PROJECT_ID}
 
 ### 3. Create a Cloud Spanner instance, database, and table
 
-Note: See the documentation to list [available Spanner configuration names](https://cloud.google.com/spanner/docs/getting-started/set-up#run_the_gcloud_tool), or run `gcloud spanner instance-configs list`
+Note: See the documentation to list [available Spanner configuration names](https://cloud.google.com/spanner/docs/getting-started/set-up#run_the_gcloud_tool), or run `gcloud spanner instance-configs list --project=$PROJECT_ID`
 
 ```sh
 SPANNER_REGION_CONFIG="<your-spanner-region-config-name>"
