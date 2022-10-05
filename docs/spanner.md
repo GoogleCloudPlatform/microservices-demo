@@ -80,7 +80,7 @@ It can be modified to use other service accounts by changing the values of the f
 
 ```sh
 # Identify the service accounts, both on GCP and in Kubernetes
-GSA_NAME=$(gcloud iam service-accounts list --filter 'Compute Engine default' --format 'value(email)')
+GSA_NAME=$(gcloud iam service-accounts list --filter 'Compute Engine default' --format 'value(email)' --project=${PROJECT_ID})
 NAMESPACE=default
 KSA_NAME=default
 
@@ -91,11 +91,13 @@ gcloud projects add-iam-policy-binding $PROJECT_ID \
 
 # Annotate the kubectl serviceAccountName with the GCP Service Account
 kubectl annotate serviceaccount ${KSA_NAME} \
+    --overwrite \
     --namespace=${NAMESPACE} \
     iam.gke.io/gcp-service-account=${GSA_NAME}
 
 # Tell gcloud that the kubectl account maps to the GCP one
 gcloud iam service-accounts add-iam-policy-binding \
+    --project=${PROJECT_ID} \
     "${GSA_NAME}" --role roles/iam.workloadIdentityUser \
     --member "serviceAccount:${PROJECT_ID}.svc.id.goog[${NAMESPACE}/${KSA_NAME}]"
 ```
@@ -160,7 +162,7 @@ shippingservice-6ccc89f8fd-v686r         1/1     Running   0          2m58s
 kubectl get service frontend-external | awk '{print $4}'
 ```
 
-**Note**- you may see `<pending>` while GCP provisions the load balancer. If this happens, wait a few minutes and re-run the command.
+Note: You may see `<pending>` while GCP provisions the load balancer. If this happens, wait a few minutes and re-run the command.
 
 ### 9. Clean up
 
