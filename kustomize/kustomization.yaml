@@ -20,6 +20,7 @@ components:
 # - components/cymbal-branding
 # - components/google-cloud-operations
 # - components/memorystore
+# - components/redis-enterprise
 # - components/network-policies
 # - components/service-accounts
 # - components/spanner
@@ -27,3 +28,4 @@ components:
 # - components/container-images-tag-suffix
 # - components/container-images-registry
 # - components/native-grpc-health-check
+

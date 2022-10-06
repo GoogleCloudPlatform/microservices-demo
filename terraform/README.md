@@ -34,7 +34,10 @@ This page walks you through the steps required to deploy the [Online Boutique](h
 
 1. Open the `terraform.tfvars` file and replace `<project_id_here>` with the [GCP Project ID](https://cloud.google.com/resource-manager/docs/creating-managing-projects?hl=en#identifying_projects) for the `gcp_project_id` variable.
 
-1. (Optional) If you want to provision a [Google Cloud Memorystore (Redis)](https://cloud.google.com/memorystore) instance, you can change the value of `memorystore = false` to `memorystore = true` in this `terraform.tfvars` file.
+1. (Optional) If you want to replace the inbuilt OSS Redis with a [Google Cloud Memorystore (Redis)](https://cloud.google.com/memorystore) instance or a fully managed [Redis Enterprise database instance via Google Cloud Marketplace](https://console.cloud.google.com/marketplace/product/redis-marketplace-isaas/redis-enterprise-cloud-flexible-plan) : 
+   * Google Cloud MemoryStore (Redis): you can change the value of `memorystore = false` to `memorystore = true` in this `terraform.tfvars` file.
+   * Redis Enterprise database instance via Google Cloud Marketplace: you can change the value of `redis-enterprise = false` to `redis-enterprise = true` in this `terraform.tfvars` file.
+     * You are also required to collect the [Redis Cloud Access Key](https://docs.redis.com/latest/rc/api/get-started/enable-the-api/) and [Redis Cloud Secret Key](https://docs.redis.com/latest/rc/api/get-started/manage-api-keys/#secret) and save them in your environment variables namely `REDISCLOUD_ACCESS_KEY` and `REDISCLOUD_SECRET_KEY`. They will be used by Redis Enterprise Cloud Terraform provider.
 
 1. Initialize Terraform.
     ```

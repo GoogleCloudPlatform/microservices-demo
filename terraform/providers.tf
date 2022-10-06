@@ -18,6 +18,10 @@ terraform {
       source  = "hashicorp/google"
       version = "4.41.0"
     }
+    rediscloud = {
+      source = "RedisLabs/rediscloud"
+     version = "1.0.1"
+    }
   }
 }
 

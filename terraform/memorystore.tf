@@ -42,6 +42,6 @@ resource "null_resource" "kustomization-update" {
   count          = var.memorystore ? 1 : 0
 
   depends_on = [
-    resource.google_redis_instance.redis-cart
+    google_redis_instance.redis-cart
   ]
 }

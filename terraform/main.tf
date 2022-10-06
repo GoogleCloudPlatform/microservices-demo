@@ -91,6 +91,6 @@ resource "null_resource" "wait_conditions" {
   }
 
   depends_on = [
-    resource.null_resource.apply_deployment
+    null_resource.apply_deployment
   ]
 }

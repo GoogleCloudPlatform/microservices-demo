@@ -45,3 +45,8 @@ variable "memorystore" {
   type        = bool
   description = "If true, Online Boutique's in-cluster Redis cache will be replaced with a Google Cloud Memorystore Redis cache"
 }
+
+variable "redis-enterprise" {
+  type        = bool
+  description = "If true, Online Boutique's in-cluster Redis cache will be replaced with a fully managed Redis Enterprise database"
+}
