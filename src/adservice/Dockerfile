@@ -16,7 +16,7 @@ RUN ./gradlew installDist
 RUN apk --update add curl
 
 WORKDIR /tmp
-RUN curl -L https://github.com/signalfx/splunk-otel-java/releases/download/v1.7.2/splunk-otel-javaagent-all.jar -o splunk-otel-javaagent-all.jar
+RUN curl -L https://github.com/signalfx/splunk-otel-java/releases/download/v1.16.0/splunk-otel-javaagent-all.jar -o splunk-otel-javaagent-all.jar
 
 FROM base
 
