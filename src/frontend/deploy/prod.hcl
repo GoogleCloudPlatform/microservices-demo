@@ -21,5 +21,5 @@ upstreams = {
 }
 
 env_vars = {
-    "ENV_PLATFORM" = "Nomad"
+    "ENV_PLATFORM" = "nomad"
 }
