@@ -10,7 +10,7 @@ certifi==2022.9.24
     # via requests
 charset-normalizer==2.1.1
     # via requests
-google-api-core[grpc]==2.10.1
+google-api-core[grpc]==2.10.2
     # via
     #   -r requirements.in
     #   google-api-python-client
