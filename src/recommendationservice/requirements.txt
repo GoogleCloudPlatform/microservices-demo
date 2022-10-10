@@ -23,8 +23,7 @@ google-api-core[grpc]==2.10.1
     #   google-cloud-firestore
     #   google-cloud-storage
     #   google-python-cloud-debugger
-    #   opencensus
-google-api-python-client==2.63.0
+google-api-python-client==2.64.0
     # via
     #   firebase-admin
     #   google-cloud-profiler
@@ -47,7 +46,7 @@ google-cloud-core==2.3.2
     # via
     #   google-cloud-firestore
     #   google-cloud-storage
-google-cloud-firestore==2.7.0
+google-cloud-firestore==2.7.1
     # via firebase-admin
 google-cloud-profiler==4.0.0
     # via -r requirements.in
@@ -57,7 +56,7 @@ google-crc32c==1.5.0
     # via google-resumable-media
 google-python-cloud-debugger==3.1
     # via -r requirements.in
-google-resumable-media==2.3.3
+google-resumable-media==2.4.0
     # via google-cloud-storage
 googleapis-common-protos==1.56.4
     # via
@@ -83,7 +82,7 @@ msgpack==1.0.4
     # via cachecontrol
 proto-plus==1.22.1
     # via google-cloud-firestore
-protobuf==3.20.2
+protobuf==3.20.3
     # via
     #   -r requirements.in
     #   google-api-core

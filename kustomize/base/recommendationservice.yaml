@@ -15,23 +15,25 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: redis-cart
+  name: recommendationservice
 spec:
   selector:
     matchLabels:
-      app: redis-cart
+      app: recommendationservice
   template:
     metadata:
       labels:
-        app: redis-cart
+        app: recommendationservice
     spec:
+      serviceAccountName: default
+      terminationGracePeriodSeconds: 5
       securityContext:
         fsGroup: 1000
         runAsGroup: 1000
         runAsNonRoot: true
         runAsUser: 1000
       containers:
-      - name: redis
+      - name: server
         securityContext:
           allowPrivilegeEscalation: false
           capabilities:
@@ -39,40 +41,45 @@ spec:
               - all
           privileged: false
           readOnlyRootFilesystem: true
-        image: redis:alpine
+        image: gcr.io/google-samples/microservices-demo/recommendationservice:v0.4.0
         ports:
-        - containerPort: 6379
+        - containerPort: 8080
         readinessProbe:
           periodSeconds: 5
-          tcpSocket:
-            port: 6379
+          exec:
+            command: ["/bin/grpc_health_probe", "-addr=:8080"]
         livenessProbe:
           periodSeconds: 5
-          tcpSocket:
-            port: 6379
-        volumeMounts:
-        - mountPath: /data
-          name: redis-data
+          exec:
+            command: ["/bin/grpc_health_probe", "-addr=:8080"]
+        env:
+        - name: PORT
+          value: "8080"
+        - name: PRODUCT_CATALOG_SERVICE_ADDR
+          value: "productcatalogservice:3550"
+        - name: DISABLE_TRACING
+          value: "1"
+        - name: DISABLE_PROFILER
+          value: "1"
+        - name: DISABLE_DEBUGGER
+          value: "1"
         resources:
-          limits:
-            memory: 256Mi
-            cpu: 125m
           requests:
-            cpu: 70m
-            memory: 200Mi
-      volumes:
-      - name: redis-data
-        emptyDir: {}
+            cpu: 100m
+            memory: 220Mi
+          limits:
+            cpu: 200m
+            memory: 450Mi
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: redis-cart
+  name: recommendationservice
 spec:
   type: ClusterIP
   selector:
-    app: redis-cart
+    app: recommendationservice
   ports:
-  - name: tcp-redis
-    port: 6379
-    targetPort: 6379
+  - name: grpc
+    port: 8080
+    targetPort: 8080

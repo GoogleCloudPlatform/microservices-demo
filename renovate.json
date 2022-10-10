@@ -21,7 +21,8 @@
      "stabilityDays":0
   },
   "postUpdateOptions": [
-    "gomodTidy"
+    "gomodTidy",
+    "npmDedupe"
   ],
   "labels": ["dependencies"],
   "python":{
@@ -35,5 +36,8 @@
   },
   "nuget":{
     "addLabels": ["lang: dotnet"]
+  },
+  "npm":{
+    "addLabels": ["lang: nodejs"]
   }
 }

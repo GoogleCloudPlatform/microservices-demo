@@ -10,8 +10,8 @@ require (
 	github.com/gorilla/mux v1.8.0
 	github.com/pkg/errors v0.9.1
 	github.com/sirupsen/logrus v1.9.0
-	golang.org/x/net v0.0.0-20220927171203-f486391704dc
-	google.golang.org/grpc v1.49.0
+	golang.org/x/net v0.0.0-20221004154528-8021a29435af
+	google.golang.org/grpc v1.50.0
 )
 
 require (

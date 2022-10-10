@@ -15,23 +15,25 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: redis-cart
+  name: cartservice
 spec:
   selector:
     matchLabels:
-      app: redis-cart
+      app: cartservice
   template:
     metadata:
       labels:
-        app: redis-cart
+        app: cartservice
     spec:
+      serviceAccountName: default
+      terminationGracePeriodSeconds: 5
       securityContext:
         fsGroup: 1000
         runAsGroup: 1000
         runAsNonRoot: true
         runAsUser: 1000
       containers:
-      - name: redis
+      - name: server
         securityContext:
           allowPrivilegeEscalation: false
           capabilities:
@@ -39,40 +41,38 @@ spec:
               - all
           privileged: false
           readOnlyRootFilesystem: true
-        image: redis:alpine
+        image: gcr.io/google-samples/microservices-demo/cartservice:v0.4.0
         ports:
-        - containerPort: 6379
-        readinessProbe:
-          periodSeconds: 5
-          tcpSocket:
-            port: 6379
-        livenessProbe:
-          periodSeconds: 5
-          tcpSocket:
-            port: 6379
-        volumeMounts:
-        - mountPath: /data
-          name: redis-data
+        - containerPort: 7070
+        env:
+        - name: REDIS_ADDR
+          value: "redis-cart:6379"
         resources:
-          limits:
-            memory: 256Mi
-            cpu: 125m
           requests:
-            cpu: 70m
-            memory: 200Mi
-      volumes:
-      - name: redis-data
-        emptyDir: {}
+            cpu: 200m
+            memory: 64Mi
+          limits:
+            cpu: 300m
+            memory: 128Mi
+        readinessProbe:
+          initialDelaySeconds: 15
+          exec:
+            command: ["/bin/grpc_health_probe", "-addr=:7070", "-rpc-timeout=5s"]
+        livenessProbe:
+          initialDelaySeconds: 15
+          periodSeconds: 10
+          exec:
+            command: ["/bin/grpc_health_probe", "-addr=:7070", "-rpc-timeout=5s"]
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: redis-cart
+  name: cartservice
 spec:
   type: ClusterIP
   selector:
-    app: redis-cart
+    app: cartservice
   ports:
-  - name: tcp-redis
-    port: 6379
-    targetPort: 6379
+  - name: grpc
+    port: 7070
+    targetPort: 7070
