@@ -44,6 +44,8 @@ import io.opencensus.trace.Tracer;
 import io.opencensus.trace.Tracing;
 import java.io.IOException;
 import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.time.Instant;
 import java.lang.Thread;
 import java.util.ArrayList;
@@ -127,22 +129,25 @@ public final class AdService {
   // NOTE: logLevel must be a GELF valid severity value (WARN or ERROR), INFO if
   // not specified
   public static void emitLog(String event, String logLevel) {
-    Timestamp instant = Timestamp.from(Instant.now());
-    String timestamp = instant.toInstant().toString();
+    try {
+	Date date = new Date(System.currentTimeMillis());
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
+        String timestamp = sdf.format(date);
 
-    switch (logLevel) {
-      case "ERROR":
-        logger.log(Level.ERROR, timestamp + " - ERROR - " + ADSERVICE + " - " + event);
+	switch (logLevel) {
+      	case "ERROR":
+        	logger.log(Level.ERROR, timestamp + " - ERROR - " + ADSERVICE + " - " + event);
         break;
 
-      case "WARN":
-        logger.log(Level.WARN, timestamp + " - WARN - " + ADSERVICE + " - " + event);
+      	case "WARN":
+        	logger.log(Level.WARN, timestamp + " - WARN - " + ADSERVICE + " - " + event);
         break;
 
-      default:
-        logger.log(Level.INFO, timestamp + " - INFO - " + ADSERVICE + " - " + event);
+      	default:
+        	logger.log(Level.INFO, timestamp + " - INFO - " + ADSERVICE + " - " + event);
         break;
-    }
+	}
+    } catch(Exception err) { logger.log(Level.ERROR, "adservice: Impossible to parse current timestamp."); }
   }
 
   private static class AdServiceImpl extends hipstershop.AdServiceGrpc.AdServiceImplBase {

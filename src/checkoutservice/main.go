@@ -57,7 +57,7 @@ const (
 
 // NOTE: logLevel must be a GELF valid severity value (WARN or ERROR), INFO if not specified
 func emitLog(event string, logLevel string) {
-	timestamp := time.Now().Format(time.RFC3339)
+	timestamp := time.Now().Format("2006-01-02T15:04:05.000Z")
 
 	switch logLevel {
 	case "ERROR":
@@ -71,7 +71,9 @@ func emitLog(event string, logLevel string) {
 
 // Verify gRPC response code and log the corresponding event
 func checkResponse(responseCode codes.Code, serviceName string, reqId string, err error) {
-	if responseCode == codes.Unavailable {
+	fmt.Println("received code: " + responseCode.String())
+
+	if responseCode == codes.Unavailable || responseCode == codes.DeadlineExceeded {
 		event := "Failing to contact " + serviceName + " (request_id: " + reqId + "). Root cause: (" + err.Error() + ")"
 		emitLog(event, "ERROR")
 	} else if responseCode == codes.OK {
@@ -274,13 +276,11 @@ func (cs *checkoutService) PlaceOrder(ctx context.Context, req *pb.PlaceOrderReq
 
 	orderID, err := uuid.NewUUID()
 	if err != nil {
-		emitLog(CHECKOUTSERVICE+": failed to generate order uuid", "ERROR")
 		return nil, status.Errorf(codes.Internal, "failed to generate order uuid")
 	}
 
 	prep, err := cs.prepareOrderItemsAndShippingQuoteFromCart(ctx, req.UserId, req.UserCurrency, req.Address)
 	if err != nil {
-		emitLog(CHECKOUTSERVICE+": "+err.Error(), "ERROR")
 		return nil, status.Errorf(codes.Internal, err.Error())
 	}
 
@@ -295,14 +295,12 @@ func (cs *checkoutService) PlaceOrder(ctx context.Context, req *pb.PlaceOrderReq
 
 	txID, err := cs.chargeCard(ctx, &total, req.CreditCard)
 	if err != nil {
-		emitLog(CHECKOUTSERVICE+": failed to charge card: "+err.Error(), "ERROR")
 		return nil, status.Errorf(codes.Internal, "failed to charge card: %+v", err)
 	}
 	log.Infof("payment went through (transaction_id: %s)", txID)
 
 	shippingTrackingID, err := cs.shipOrder(ctx, req.Address, prep.cartItems)
 	if err != nil {
-		emitLog(CHECKOUTSERVICE+": shipping error "+err.Error(), "ERROR")
 		return nil, status.Errorf(codes.Unavailable, "shipping error: %+v", err)
 	}
 
@@ -317,7 +315,6 @@ func (cs *checkoutService) PlaceOrder(ctx context.Context, req *pb.PlaceOrderReq
 	}
 
 	if err := cs.sendOrderConfirmation(ctx, req.Email, orderResult); err != nil {
-		emitLog(CHECKOUTSERVICE+": failed to send order confirmation to "+req.Email+": "+err.Error(), "WARN")
 		log.Warnf("failed to send order confirmation to %q: %+v", req.Email, err)
 	} else {
 		log.Infof("order confirmation email sent to %q", req.Email)
@@ -340,22 +337,18 @@ func (cs *checkoutService) prepareOrderItemsAndShippingQuoteFromCart(ctx context
 	var out orderPrep
 	cartItems, err := cs.getUserCart(ctx, userID)
 	if err != nil {
-		emitLog(CHECKOUTSERVICE+": cart failure: "+err.Error(), "ERROR")
 		return out, fmt.Errorf("cart failure: %+v", err)
 	}
 	orderItems, err := cs.prepOrderItems(ctx, cartItems, userCurrency)
 	if err != nil {
-		emitLog(CHECKOUTSERVICE+": failed to prepare order: "+err.Error(), "ERROR")
 		return out, fmt.Errorf("failed to prepare order: %+v", err)
 	}
 	shippingUSD, err := cs.quoteShipping(ctx, address, cartItems)
 	if err != nil {
-		emitLog(CHECKOUTSERVICE+": shipping quote failure: "+err.Error(), "ERROR")
 		return out, fmt.Errorf("shipping quote failure: %+v", err)
 	}
 	shippingPrice, err := cs.convertCurrency(ctx, shippingUSD, userCurrency)
 	if err != nil {
-		emitLog(CHECKOUTSERVICE+": failed to convert shipping cost to currency: "+err.Error(), "ERROR")
 		return out, fmt.Errorf("failed to convert shipping cost to currency: %+v", err)
 	}
 
@@ -505,7 +498,6 @@ func (cs *checkoutService) prepOrderItems(ctx context.Context, items []*pb.CartI
 
 		price, err := cs.convertCurrency(ctx, product.GetPriceUsd(), userCurrency)
 		if err != nil {
-			emitLog(CHECKOUTSERVICE+": failed to convert price of "+item.GetProductId()+" to "+userCurrency, "ERROR")
 			return nil, fmt.Errorf("failed to convert price of %q to %s", item.GetProductId(), userCurrency)
 		}
 		out[i] = &pb.OrderItem{
@@ -518,7 +510,6 @@ func (cs *checkoutService) prepOrderItems(ctx context.Context, items []*pb.CartI
 func (cs *checkoutService) convertCurrency(ctx context.Context, from *pb.Money, toCurrency string) (*pb.Money, error) {
 	conn, err := grpc.DialContext(ctx, cs.currencySvcAddr, grpc.WithInsecure(), grpc.WithStatsHandler(&ocgrpc.ClientHandler{}))
 	if err != nil {
-		emitLog(CHECKOUTSERVICE+"could not connect currency service: "+err.Error(), "ERROR")
 		return nil, fmt.Errorf("could not connect currency service: %+v", err)
 	}
 	defer conn.Close()
@@ -553,7 +544,6 @@ func (cs *checkoutService) convertCurrency(ctx context.Context, from *pb.Money, 
 func (cs *checkoutService) chargeCard(ctx context.Context, amount *pb.Money, paymentInfo *pb.CreditCardInfo) (string, error) {
 	conn, err := grpc.DialContext(ctx, cs.paymentSvcAddr, grpc.WithInsecure(), grpc.WithStatsHandler(&ocgrpc.ClientHandler{}))
 	if err != nil {
-		emitLog(CHECKOUTSERVICE+"failed to connect payment service: "+err.Error(), "ERROR")
 		return "", fmt.Errorf("failed to connect payment service: %+v", err)
 	}
 	defer conn.Close()
@@ -582,13 +572,13 @@ func (cs *checkoutService) chargeCard(ctx context.Context, amount *pb.Money, pay
 	// Check gRPC reply
 	checkResponse(status.Code(err), PAYMENTSERVICE, RequestID.String(), err)
 
-	return paymentResp.GetTransactionId(), nil
+	// Replaced nil with err (TESTING)
+	return paymentResp.GetTransactionId(), err
 }
 
 func (cs *checkoutService) sendOrderConfirmation(ctx context.Context, email string, order *pb.OrderResult) error {
 	conn, err := grpc.DialContext(ctx, cs.emailSvcAddr, grpc.WithInsecure(), grpc.WithStatsHandler(&ocgrpc.ClientHandler{}))
 	if err != nil {
-		emitLog(CHECKOUTSERVICE+": failed to connect email service: "+err.Error(), "ERROR")
 		return fmt.Errorf("failed to connect email service: %+v", err)
 	}
 	defer conn.Close()
@@ -623,7 +613,6 @@ func (cs *checkoutService) sendOrderConfirmation(ctx context.Context, email stri
 func (cs *checkoutService) shipOrder(ctx context.Context, address *pb.Address, items []*pb.CartItem) (string, error) {
 	conn, err := grpc.DialContext(ctx, cs.shippingSvcAddr, grpc.WithInsecure(), grpc.WithStatsHandler(&ocgrpc.ClientHandler{}))
 	if err != nil {
-		emitLog(CHECKOUTSERVICE+": failed to connect email service: "+err.Error(), "ERROR")
 		return "", fmt.Errorf("failed to connect email service: %+v", err)
 	}
 	defer conn.Close()

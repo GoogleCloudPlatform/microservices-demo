@@ -93,11 +93,12 @@ class RecommendationService(demo_pb2_grpc.RecommendationServiceServicer):
         newRequestid = '{0}'.format(uuid.uuid4())
         metadata = (('requestid', newRequestid), ('servicename', RECOMMENDATIONSERVICE))
 
-        event = 'Sending message to ' + PRODUCTCATALOGSERVICE + ' (request_id: ' + newRequestid + ')'
-        emitLog(event, "INFO")
-
         try:
           max_responses = 5
+
+          event = 'Sending message to ' + PRODUCTCATALOGSERVICE + ' (request_id: ' + newRequestid + ')'
+          emitLog(event, "INFO")
+
           # fetch list of products from product catalog stub
           cat_response = product_catalog_stub.ListProducts(demo_pb2.Empty(), timeout=1, metadata=metadata)
           
@@ -121,9 +122,8 @@ class RecommendationService(demo_pb2_grpc.RecommendationServiceServicer):
 
           return response
         except grpc.RpcError as e:
-          status_code = e.code()
           
-          if status_code == grpc.StatusCode.Unavailable:
+          if e.code() == grpc.StatusCode.UNAVAILABLE or e.code() == grpc.StatusCode.DEADLINE_EXCEEDED:
             event = "Failing to contact " + PRODUCTCATALOGSERVICE + " (request_id: " + newRequestid + "). Root cause: (" + e.details() + ")"
             emitLog(event, "ERROR")
           else:

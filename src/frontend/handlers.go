@@ -26,13 +26,58 @@ import (
 	"strings"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/gorilla/mux"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/metadata"
+	"google.golang.org/grpc/status"
 
 	pb "github.com/GoogleCloudPlatform/microservices-demo/src/frontend/genproto"
 	"github.com/GoogleCloudPlatform/microservices-demo/src/frontend/money"
 )
+
+const (
+	FRONTEND              = "frontend"
+	ADSERVICE             = "adservice"
+	CARTSERVICE           = "cartservice"
+	CHECKOUTSERVICE       = "checkoutservice"
+	CURRENCYSERVICE       = "currencyservice"
+	EMAILSERVICE          = "emailservice"
+	PAYMENTSERVICE        = "paymentservice"
+	PRODUCTCATALOGSERVICE = "productcatalogservice"
+	RECOMMENDATIONSERVICE = "recommendationservice"
+	SHIPPINGSERVICE       = "shippingservice"
+)
+
+// NOTE: logLevel must be a GELF valid severity value (WARN or ERROR), INFO if not specified
+func emitLog(event string, logLevel string) {
+	timestamp := time.Now().Format("2006-01-02T15:04:05.000Z")
+
+	switch logLevel {
+	case "ERROR":
+		log.Error(timestamp + " - ERROR - " + FRONTEND + " - " + event)
+	case "WARN":
+		log.Warn(timestamp + " - WARN - " + FRONTEND + " - " + event)
+	default:
+		log.Info(timestamp + " - INFO - " + FRONTEND + " - " + event)
+	}
+}
+
+// Verify gRPC response code and log the corresponding event
+func checkResponse(responseCode codes.Code, serviceName string, reqId string, err error) {
+	if responseCode == codes.Unavailable || responseCode == codes.DeadlineExceeded {
+		event := "Failing to contact " + serviceName + " (request_id: " + reqId + "). Root cause: (" + err.Error() + ")"
+		emitLog(event, "ERROR")
+	} else if responseCode == codes.OK {
+		event := "Receiving answer from " + serviceName + " (request_id: " + reqId + ")"
+		emitLog(event, "INFO")
+	} else {
+		event := "Error response received from " + serviceName + " (request_id: " + reqId + ")"
+		emitLog(event, "ERROR")
+	}
+}
 
 type platformDetails struct {
 	css      string
@@ -154,10 +199,11 @@ func (fe *frontendServer) productHandler(w http.ResponseWriter, r *http.Request)
 		Debug("serving product page")
 
 	p, err := fe.getProduct(r.Context(), id)
-	if err != nil {
-		renderHTTPError(log, r, w, errors.Wrap(err, "could not retrieve product"), http.StatusInternalServerError)
-		return
-	}
+        if err != nil {
+                renderHTTPError(log, r, w, errors.Wrap(err, "could not retrieve product"), http.StatusInternalServerError)
+                return
+        }
+
 	currencies, err := fe.getCurrencies(r.Context())
 	if err != nil {
 		renderHTTPError(log, r, w, errors.Wrap(err, "could not retrieve currencies"), http.StatusInternalServerError)
@@ -171,10 +217,10 @@ func (fe *frontendServer) productHandler(w http.ResponseWriter, r *http.Request)
 	}
 
 	price, err := fe.convertCurrency(r.Context(), p.GetPriceUsd(), currentCurrency(r))
-	if err != nil {
-		renderHTTPError(log, r, w, errors.Wrap(err, "failed to convert currency"), http.StatusInternalServerError)
-		return
-	}
+        if err != nil {
+                renderHTTPError(log, r, w, errors.Wrap(err, "failed to convert currency"), http.StatusInternalServerError)
+                return
+        }
 
 	recommendations, err := fe.getRecommendations(r.Context(), sessionID(r), []string{id})
 	if err != nil {
@@ -335,8 +381,25 @@ func (fe *frontendServer) placeOrderHandler(w http.ResponseWriter, r *http.Reque
 		ccCVV, _      = strconv.ParseInt(r.FormValue("credit_card_cvv"), 10, 32)
 	)
 
+	// New RequestID
+	RequestID, err := uuid.NewRandom()
+	if err != nil {
+		emitLog(FRONTEND+": An error occurred while generating the RequestID", "ERROR")
+	}
+
+	// Add metadata to gRPC
+	header := metadata.Pairs("requestid", RequestID.String(), "servicename", FRONTEND)
+	metadataCtx := metadata.NewOutgoingContext(r.Context(), header)
+
+	// Add gRPC timeout
+	newCtx, cancel := context.WithTimeout(metadataCtx, time.Second)
+	defer cancel()
+
+	event := "Sending message to " + CHECKOUTSERVICE + " (request_id: " + RequestID.String() + ")"
+	emitLog(event, "INFO")
+
 	order, err := pb.NewCheckoutServiceClient(fe.checkoutSvcConn).
-		PlaceOrder(r.Context(), &pb.PlaceOrderRequest{
+		PlaceOrder(newCtx, &pb.PlaceOrderRequest{
 			Email: email,
 			CreditCard: &pb.CreditCardInfo{
 				CreditCardNumber:          ccNumber,
@@ -352,6 +415,10 @@ func (fe *frontendServer) placeOrderHandler(w http.ResponseWriter, r *http.Reque
 				ZipCode:       int32(zipCode),
 				Country:       country},
 		})
+
+	// Check gRPC reply
+	checkResponse(status.Code(err), CHECKOUTSERVICE, RequestID.String(), err)
+
 	if err != nil {
 		renderHTTPError(log, r, w, errors.Wrap(err, "failed to complete the order"), http.StatusInternalServerError)
 		return

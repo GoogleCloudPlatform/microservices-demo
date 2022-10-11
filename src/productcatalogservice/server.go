@@ -64,7 +64,7 @@ const (
 
 // NOTE: logLevel must be a GELF valid severity value (WARN or ERROR), INFO if not specified
 func emitLog(event string, logLevel string) {
-	timestamp := time.Now().Format(time.RFC3339)
+	timestamp := time.Now().Format("2006-01-02T15:04:05.000Z")
 
 	switch logLevel {
 	case "ERROR":

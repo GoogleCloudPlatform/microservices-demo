@@ -20,7 +20,6 @@ import (
 
 	pb "github.com/GoogleCloudPlatform/microservices-demo/src/frontend/genproto"
 	"github.com/google/uuid"
-	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
 
@@ -29,45 +28,7 @@ import (
 
 const (
 	avoidNoopCurrencyConversionRPC = false
-	FRONTEND                       = "frontend"
-	ADSERVICE                      = "adservice"
-	CARTSERVICE                    = "cartservice"
-	CHECKOUTSERVICE                = "checkoutservice"
-	CURRENCYSERVICE                = "currencyservice"
-	EMAILSERVICE                   = "emailservice"
-	PAYMENTSERVICE                 = "paymentservice"
-	PRODUCTCATALOGSERVICE          = "productcatalogservice"
-	RECOMMENDATIONSERVICE          = "recommendationservice"
-	SHIPPINGSERVICE                = "shippingservice"
 )
-
-// NOTE: logLevel must be a GELF valid severity value (WARN or ERROR), INFO if not specified
-func emitLog(event string, logLevel string) {
-	timestamp := time.Now().Format(time.RFC3339)
-
-	switch logLevel {
-	case "ERROR":
-		log.Error(timestamp + " - ERROR - " + FRONTEND + " - " + event)
-	case "WARN":
-		log.Warn(timestamp + " - WARN - " + FRONTEND + " - " + event)
-	default:
-		log.Info(timestamp + " - INFO - " + FRONTEND + " - " + event)
-	}
-}
-
-// Verify gRPC response code and log the corresponding event
-func checkResponse(responseCode codes.Code, serviceName string, reqId string, err error) {
-	if responseCode == codes.Unavailable {
-		event := "Failing to contact " + serviceName + " (request_id: " + reqId + "). Root cause: (" + err.Error() + ")"
-		emitLog(event, "ERROR")
-	} else if responseCode == codes.OK {
-		event := "Receiving answer from " + serviceName + " (request_id: " + reqId + ")"
-		emitLog(event, "INFO")
-	} else {
-		event := "Error response received from " + serviceName + " (request_id: " + reqId + ")"
-		emitLog(event, "ERROR")
-	}
-}
 
 func (fe *frontendServer) getCurrencies(ctx context.Context) ([]string, error) {
 	RequestID, err := uuid.NewRandom()
@@ -84,7 +45,7 @@ func (fe *frontendServer) getCurrencies(ctx context.Context) ([]string, error) {
 	newCtx, cancel := context.WithTimeout(metadataCtx, time.Second)
 	defer cancel()
 
-	event := "Sending message to " + CURRENCYSERVICE + " (RequestID: " + RequestID.String() + ")"
+	event := "Sending message to " + CURRENCYSERVICE + " (request_id: " + RequestID.String() + ")"
 	emitLog(event, "INFO")
 
 	currs, err := pb.NewCurrencyServiceClient(fe.currencySvcConn).
