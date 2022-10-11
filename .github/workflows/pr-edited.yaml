@@ -74,7 +74,7 @@ jobs:
           context: src/${{ matrix.service }}
           file: src/${{ matrix.service }}/Dockerfile
           tags: ${{ steps.meta.outputs.tags }}
-  deploy_all:
+  deploy:
     needs: [generate-matrix, build-images]
     runs-on: [ubuntu-latest]
     container:
