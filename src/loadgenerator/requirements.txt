@@ -31,7 +31,7 @@ gevent==21.12.0
     #   locust
 geventhttpclient==2.0.2
     # via locust
-greenlet==1.1.3
+greenlet==1.1.3.post0
     # via gevent
 idna==3.4
     # via requests
