@@ -1,3 +1,20 @@
+# Copyright 2021 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# DEPLOYSTACK - this file is a cleaning script, it undoes any 
+# infrastructure that would have been created by this project
+
 # DON'T REMOVE FROM test script.
 CYAN='\033[0;36m'
 BCYAN='\033[1;36m'
@@ -32,31 +49,6 @@ function section_close() {
     printf "\n\n"
 }
 
-function evalTest() {
-    local command=$1
-    local expected=$2
-
-    local ERR=""
-    got=$(eval $command 2>errFile)
-    ERR=$(<errFile)
-
-    if [ ${#ERR} -gt 0 ]; then
-        if [ "$expected" = "EXPECTERROR" ]; then
-            printf "ok \n"
-            return
-        fi
-
-        printf "expecting no error, got error='$ERR'   \n"
-        exit 1
-    fi
-
-    if [ "$got" != "$expected" ]; then
-        printf "expecting: '$expected' got: '$got'  \n"
-        exit 1
-    fi
-
-    printf "$expected is ok\n"
-}
 # END DON'T REMOVE FROM test script.
 DIR="terraform"
 get_project_id PROJECT
@@ -67,17 +59,11 @@ NAMESPACE="default"
 FILEPATH_MANIFEST="../release/kubernetes-manifests.yaml"
 MEMORYSTORE="false"
 
-
-
 gcloud config set project ${PROJECT}
 
-
-
-section_open "Makign sure Container Engine Cluster does not exist"
+section_open "Making sure Container Engine Cluster does not exist"
     gcloud container clusters delete  online-boutique --region $REGION -q 
 section_close
-
-
 
 printf "$DIVIDER"
 printf "CONGRATS!!!!!!! \n"
