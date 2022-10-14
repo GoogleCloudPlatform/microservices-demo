@@ -75,7 +75,7 @@ module "gcloud" {
 resource "null_resource" "apply_deployment" {
   provisioner "local-exec" {
     interpreter = ["bash", "-exc"]
-    command     = "kubectl apply -f ${var.filepath_manifest}"
+    command     = "kubectl apply -k ${var.filepath_manifest}"
   }
 
   depends_on = [
