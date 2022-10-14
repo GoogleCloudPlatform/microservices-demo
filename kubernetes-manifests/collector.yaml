@@ -32,7 +32,7 @@ spec:
       # https://cloud.google.com/compute/docs/storing-retrieving-metadata
       initContainers:
       - name: otel-gateway-init
-        image: gcr.io/google.com/cloudsdktool/cloud-sdk:326.0.0-alpine
+        image: gcr.io/google.com/cloudsdktool/cloud-sdk:405.0.0-alpine
         command:
         - '/bin/bash'
         - '-c'
@@ -44,7 +44,7 @@ spec:
         - name: collector-gateway-config
           mountPath: /conf
       containers:
-      # This gateway container will receive traces and metrics from each microservices
+      # This gateway container will receive traces and metrics from each microservice
       # and forward it to GCP
       - name: otel-gateway
         args:
