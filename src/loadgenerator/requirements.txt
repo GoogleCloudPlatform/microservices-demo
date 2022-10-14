@@ -69,7 +69,7 @@ werkzeug==2.2.2
     # via
     #   flask
     #   locust
-zipp==3.8.1
+zipp==3.9.0
     # via importlib-metadata
 zope-event==4.5.0
     # via gevent
