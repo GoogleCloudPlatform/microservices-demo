@@ -33,10 +33,15 @@ import (
 
 	"cloud.google.com/go/profiler"
 	"github.com/golang/protobuf/jsonpb"
+	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+
+	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
+	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc"
+	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 )
 
 var (
@@ -69,9 +74,7 @@ func init() {
 }
 
 func main() {
-	if os.Getenv("DISABLE_TRACING") == "" {
-		log.Info("Tracing enabled but temporarily unavailable.")
-		log.Info("See https://github.com/GoogleCloudPlatform/microservices-demo/issues/422 for more info.")
+	if os.Getenv("ENABLE_TRACING") == "1" {
 		go initTracing()
 	} else {
 		log.Info("Tracing disabled.")
@@ -128,11 +131,11 @@ func run(port string) string {
 		log.Fatal(err)
 	}
 	var srv *grpc.Server
-	if os.Getenv("DISABLE_STATS") == "" {
-		log.Info("Stats enabled (temporarily unavailable).")
-		srv = grpc.NewServer()
+	if os.Getenv("ENABLE_TRACING") == "1" {
+		srv = grpc.NewServer(
+			grpc.UnaryInterceptor(otelgrpc.UnaryServerInterceptor()),
+			grpc.StreamInterceptor(otelgrpc.StreamServerInterceptor()))
 	} else {
-		log.Info("Stats disabled.")
 		srv = grpc.NewServer()
 	}
 
@@ -148,8 +151,27 @@ func initStats() {
 	// TODO(drewbr) Implement OpenTelemetry stats
 }
 
-func initTracing() {
-	// TODO(drewbr) Implement OpenTelemetry tracing
+func initTracing() (*sdktrace.TracerProvider, error) {
+	var (
+		collectorAddr string
+		collectorConn *grpc.ClientConn
+	)
+
+	ctx := context.Background()
+
+	mustMapEnv(&collectorAddr, "COLLECTOR_SERVICE_ADDR")
+	mustConnGRPC(ctx, &collectorConn, collectorAddr)
+
+	exporter, err := otlptracegrpc.New(
+		ctx,
+		otlptracegrpc.WithGRPCConn(collectorConn))
+	if err != nil {
+		log.Warnf("warn: Failed to create trace exporter: %v", err)
+	}
+	tp := sdktrace.NewTracerProvider(
+		sdktrace.WithBatcher(exporter),
+		sdktrace.WithSampler(sdktrace.AlwaysSample()))
+	return tp, err
 }
 
 func initProfiling(service, version string) {
@@ -240,4 +262,30 @@ func (p *productCatalog) SearchProducts(ctx context.Context, req *pb.SearchProdu
 		}
 	}
 	return &pb.SearchProductsResponse{Results: ps}, nil
+}
+
+func mustMapEnv(target *string, envKey string) {
+	v := os.Getenv(envKey)
+	if v == "" {
+		panic(fmt.Sprintf("environment variable %q not set", envKey))
+	}
+	*target = v
+}
+
+func mustConnGRPC(ctx context.Context, conn **grpc.ClientConn, addr string) {
+	var err error
+	ctx, cancel := context.WithTimeout(ctx, time.Second*3)
+	defer cancel()
+	if os.Getenv("ENABLE_TRACING") == "1" {
+		*conn, err = grpc.DialContext(ctx, addr,
+			grpc.WithInsecure(),
+			grpc.WithUnaryInterceptor(otelgrpc.UnaryClientInterceptor()),
+			grpc.WithStreamInterceptor(otelgrpc.StreamClientInterceptor()))
+	} else {
+		*conn, err = grpc.DialContext(ctx, addr,
+			grpc.WithInsecure())
+	}
+	if err != nil {
+		panic(errors.Wrapf(err, "grpc: failed to connect %s", addr))
+	}
 }
