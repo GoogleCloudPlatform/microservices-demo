@@ -64,7 +64,7 @@ MEMORYSTORE="false"
 
 gcloud config set project ${PROJECT}
 
-section_open "Making sure Container Engine Cluster does not exist"
+section_open "Making sure Kubernetes Engine Cluster does not exist"
     gcloud container clusters delete online-boutique --region $REGION -q
 section_close
 
