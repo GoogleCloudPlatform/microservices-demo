@@ -32,14 +32,35 @@ value: "0"
 
 You will also need to make sure that you have the associated Google APIs enabled in your Google Cloud project:
 ```
-gcloud services enable monitoring.googleapis.com \
+gcloud services enable \
+    monitoring.googleapis.com \
     cloudtrace.googleapis.com \
     clouddebugger.googleapis.com \
     cloudprofiler.googleapis.com \
     --project ${PROJECT_ID}
 ```
 
-In addition to that, if you are using Workload Identity with your GKE cluster, you will need to define custom IAM roles associated to the Google Cloud Operations services, see more information [here](/docs/workload-identity.md).
+In addition to that, you will need to grant the following IAM roles associated to your Google Service Account (GSA):
+```bash
+PROJECT_ID=<your-gcp-project-id>
+GSA_NAME=<your-gsa>
+
+gcloud projects add-iam-policy-binding ${PROJECT_ID} \
+  --member "serviceAccount:${GSA_NAME}@${PROJECT_ID}.iam.gserviceaccount.com" \
+  --role roles/cloudtrace.agent
+
+gcloud projects add-iam-policy-binding ${PROJECT_ID} \
+  --member "serviceAccount:${GSA_NAME}@${PROJECT_ID}.iam.gserviceaccount.com" \
+  --role roles/monitoring.metricWriter
+  
+gcloud projects add-iam-policy-binding ${PROJECT_ID} \
+  --member "serviceAccount:${GSA_NAME}@${PROJECT_ID}.iam.gserviceaccount.com" \
+  --role roles/cloudprofiler.agent
+  
+gcloud projects add-iam-policy-binding ${PROJECT_ID} \
+  --member "serviceAccount:${GSA_NAME}@${PROJECT_ID}.iam.gserviceaccount.com" \
+  --role roles/clouddebugger.agent
+```
 
 ## Deploy Online Boutique integrated with Google Cloud Operations via Kustomize
 

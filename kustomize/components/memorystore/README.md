@@ -4,28 +4,40 @@ By default the `cartservice` app is serializing the data in an in-cluster Redis 
 
 ![Architecture diagram with Memorystore](/docs/img/memorystore.png)
 
-To use Memorystore (Redis), the `cartservice`'s environment variable `REDIS_ADDR` needs to be updated to point to the Memorystore (Redis) instance.
-
-To provision a Memorystore (Redis) instance you can follow the instructions [here](https://cloud.google.com/memorystore/docs/redis/creating-managing-instances).
-
-You can also find in this repository the Terraform script to provision the Memorystore (Redis) instance alongside the GKE cluster, more information [here](/terraform).
+## Provision a Memorystore (Redis) instance
 
 Important notes:
 - You can connect to a Memorystore (Redis) instance from GKE clusters that are in the same region and use the same network as your instance.
 - You cannot connect to a Memorystore (Redis) instance from a GKE cluster without VPC-native/IP aliasing enabled.
+
+To provision a Memorystore (Redis) instance you can follow the following instructions:
+```bash
+ZONE="<your-GCP-zone>"
+REGION="<your-GCP-region>"
+
+gcloud services enable redis.googleapis.com
+
+gcloud redis instances create redis-cart \
+    --size=1 \
+    --region=${REGION} \
+    --zone=${ZONE} \
+    --redis-version=redis_6_x
+```
+
+_Note: You can also find in this repository the Terraform script to provision the Memorystore (Redis) instance alongside the GKE cluster, more information [here](/terraform)._
 
 ## Deploy Online Boutique connected to a Memorystore (Redis) instance
 
 To automate the deployment of Online Boutique integrated with Memorystore (Redis) you can leverage the following variation with [Kustomize](../..).
 
 From the `kustomize/` folder at the root level of this repository, execute this command:
-```
+```bash
 kustomize edit add components/memorystore
 ```
 _Note: this Kustomize component will also remove the `redis-cart` `Deployment` and `Service` not used anymore._
 
 This will update the `kustomize/kustomization.yaml` file which could be similar to:
-```
+```yaml
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
@@ -35,10 +47,9 @@ components:
 ```
 
 Update current Kustomize manifest to target this Memorystore (Redis) instance.
-```sh
-MEMORYSTORE_REGION=replace-with-the-region-of-your-memorystore-instance
-REDIS_IP=$(gcloud redis instances describe redis-cart --region=${MEMORYSTORE_REGION} --format='get(host)')
-REDIS_PORT=$(gcloud redis instances describe redis-cart --region=${MEMORYSTORE_REGION} --format='get(port)')
+```bash
+REDIS_IP=$(gcloud redis instances describe redis-cart --region=${REGION} --format='get(host)')
+REDIS_PORT=$(gcloud redis instances describe redis-cart --region=${REGION} --format='get(port)')
 sed -i "s/{{REDIS_ADDR}}/${REDIS_IP}:${REDIS_PORT}/g" components/memorystore/kustomization.yaml
 ```
 
