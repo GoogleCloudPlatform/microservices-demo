@@ -13,10 +13,11 @@
 # limitations under the License.
 
 # DEPLOYSTACK - this file is a test script that is used by DeployStack's
-# testing rig to make sure that the terraform script installs and uninstalls
+# testing rig to make sure that the Terraform script installs and uninstalls
 # cleanly
 
 # DON'T REMOVE FROM test script.
+
 CYAN='\033[0;36m'
 BCYAN='\033[1;36m'
 NC='\033[0m' # No Color
@@ -37,6 +38,7 @@ function get_project_number() {
 }
 
 # DISPLAY HELPERS
+
 function section_open() {
     section_description=$1
     printf "$DIVIDER"
@@ -75,7 +77,9 @@ function evalTest() {
 
     printf "$expected is ok\n"
 }
+
 # END DON'T REMOVE FROM test script.
+
 DIR="terraform"
 get_project_id PROJECT
 gcloud services enable cloudresourcemanager.googleapis.com --project=$PROJECT
@@ -85,19 +89,16 @@ NAMESPACE="default"
 FILEPATH_MANIFEST="../kustomize/"
 MEMORYSTORE="false"
 
-
-
 gcloud config set project ${PROJECT}
 
 terraform -chdir="$DIR" init
 terraform -chdir="$DIR" apply -auto-approve -var gcp_project_id="${PROJECT}" -var name="${NAME}" -var region="${REGION}" -var namespace="${NAMESPACE}"  -var filepath_manifest="${FILEPATH_MANIFEST}" -var memorystore="${MEMORYSTORE}"
 
-
-section_open "Testing Container Engine Cluster exists"
+section_open "Testing Google Kubernetes Engine cluster exists"
     evalTest 'gcloud container clusters describe online-boutique --format="value(name)" --region $REGION' "online-boutique"
 section_close
 
-section_open "Testing Container Services are running"
+section_open "Testing Online Boutique's services are running"
     evalTest "kubectl get deployment adservice --no-headers -o=name 2> /dev/null"  "deployment.apps/adservice"
     evalTest "kubectl get deployment cartservice --no-headers -o=name 2> /dev/null"  "deployment.apps/cartservice"
     evalTest "kubectl get deployment checkoutservice --no-headers -o=name 2> /dev/null"  "deployment.apps/checkoutservice"
@@ -115,22 +116,15 @@ sleep 60
 
 ENDPOINT=$( kubectl get service frontend-external --no-headers 2> /dev/null | awk '{print $4}')
 
-
-section_open "Testing Endpoint is working"
+section_open "Testing Online Boutique's front-end is working"
     evalTest 'curl -s -o /dev/null -w "%{http_code}" $ENDPOINT' "200"
 section_close
 
-
-
-
 terraform -chdir="$DIR" destroy --auto-approve -var gcp_project_id="${PROJECT}" -var name="${NAME}" -var region="${REGION}" -var namespace="${NAMESPACE}"  -var filepath_manifest="${FILEPATH_MANIFEST}" -var memorystore="${MEMORYSTORE}"
 
-
-section_open "Testing Container Engine Cluster does not exist"
+section_open "Testing Google Kubernetes Engine cluster does NOT exist"
     evalTest 'gcloud container clusters describe online-boutique --format="value(name)" --region $REGION' "EXPECTERROR"
 section_close
-
-
 
 printf "$DIVIDER"
 printf "CONGRATS!!!!!!! \n"
