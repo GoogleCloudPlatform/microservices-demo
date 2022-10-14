@@ -37,8 +37,8 @@ jobs:
       - name: kustomize build tests
         run: |
           cd kustomize/tests
-          TESTS=$(ls .)
-          for test in $TESTS;
+          KUSTOMIZE_TESTS_SUBFOLDERS=$(ls -d */)
+          for test in $KUSTOMIZE_TESTS_SUBFOLDERS;
           do
               echo "## kustomize build for " + $test
               kustomize build $test
