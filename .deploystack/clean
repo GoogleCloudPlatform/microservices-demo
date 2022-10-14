@@ -16,6 +16,7 @@
 # infrastructure that would have been created by this project
 
 # DON'T REMOVE FROM test script.
+
 CYAN='\033[0;36m'
 BCYAN='\033[1;36m'
 NC='\033[0m' # No Color
@@ -36,6 +37,7 @@ function get_project_number() {
 }
 
 # DISPLAY HELPERS
+
 function section_open() {
     section_description=$1
     printf "$DIVIDER"
@@ -50,6 +52,7 @@ function section_close() {
 }
 
 # END DON'T REMOVE FROM test script.
+
 DIR="terraform"
 get_project_id PROJECT
 gcloud services enable cloudresourcemanager.googleapis.com --project=$PROJECT
@@ -62,7 +65,7 @@ MEMORYSTORE="false"
 gcloud config set project ${PROJECT}
 
 section_open "Making sure Container Engine Cluster does not exist"
-    gcloud container clusters delete  online-boutique --region $REGION -q 
+    gcloud container clusters delete online-boutique --region $REGION -q
 section_close
 
 printf "$DIVIDER"
