@@ -1,6 +1,7 @@
 # Integrate Online Boutique with Spanner
 
-By default the `cartservice` app is serializing the data in an in-cluster Redis database. Using a database outside your GKE cluster could bring more resiliency and more security with a managed service like Google Cloud Spanner.
+By default the `cartservice` stores its data in an in-cluster Redis database. 
+Using a fully managed database service outside your GKE cluster (such as [Google Cloud Spanner](https://cloud.google.com/spanner)) could bring more resiliency and more security.
 
 ## Provision a Spanner database
 
@@ -20,12 +21,11 @@ gcloud spanner databases create ${SPANNER_DATABASE_NAME} \
     --database-dialect GOOGLE_STANDARD_SQL \
     --ddl-file ./src/cartservice/ddl/CartItems.ddl
 ```
-_Note: with latest version of `gcloud` you can create a free Spanner instance by leveraging the `--instance-type free-instance` parameter._
+_Note: With latest version of `gcloud` you can create a free Spanner instance by leveraging the `--instance-type free-instance` parameter._
 
 ## Grant the `cartservice`'s service account access to the Spanner database
 
-Important note:
-- Your GKE cluster should have [Workload Identity enabled](https://cloud.google.com/kubernetes-engine/docs/how-to/workload-identity#enable).
+**Important note:** Your GKE cluster should have [Workload Identity enabled](https://cloud.google.com/kubernetes-engine/docs/how-to/workload-identity#enable).
 
 As a good practice, let's create a dedicated least privilege Google Service Account to allow the `cartservice` to communicate with the Spanner database:
 ```bash
@@ -77,7 +77,6 @@ sed -i "s/SPANNER_DB_USER_GSA_ID/${SPANNER_DB_USER_GSA_ID}/g" components/spanner
 ```
 
 You can locally render these manifests by running `kubectl kustomize .` as well as deploying them by running `kubectl apply -k .`.
-
 
 ## Note on Spanner connection environmental variables
 
