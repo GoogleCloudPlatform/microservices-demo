@@ -82,7 +82,7 @@ gcloud services enable cloudresourcemanager.googleapis.com --project=$PROJECT
 REGION="us-central1"
 NAME="online-boutique"
 NAMESPACE="default"
-FILEPATH_MANIFEST="../release/kubernetes-manifests.yaml"
+FILEPATH_MANIFEST="../kustomize/"
 MEMORYSTORE="false"
 
 
