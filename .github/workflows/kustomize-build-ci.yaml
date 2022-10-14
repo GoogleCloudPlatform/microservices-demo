@@ -33,12 +33,13 @@ jobs:
         run: |
           cd kustomize/
           kubectl kustomize .
+      # Build the different combinations of Kustomize components found in kustomize/tests.
       - name: kustomize build tests
         run: |
           cd kustomize/tests
           TESTS=$(ls .)
-          for t in $TESTS;
+          for test in $TESTS;
           do
-              echo "## kustomize build for " + $t
-              kustomize build $t
+              echo "## kustomize build for " + $test
+              kustomize build $test
           done
