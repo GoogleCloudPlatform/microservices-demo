@@ -97,6 +97,7 @@ func main() {
 	svc := new(frontendServer)
 
 	if os.Getenv("ENABLE_TRACING") == "1" {
+		log.Info("Tracing enabled.")
 		tp, err := initTracing(log, ctx, svc)
 		if err != nil {
 			log.Warnf("warn: failed to start tracer: %+v", err)
