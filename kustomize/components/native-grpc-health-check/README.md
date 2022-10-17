@@ -13,7 +13,7 @@ sed -i "s/CONTAINER_IMAGES_TAG_SUFFIX/$SUFFIX/g" components/container-images-tag
 kustomize edit add component components/container-images-tag-suffix
 kustomize edit add component components/native-grpc-health-check
 ```
-_Note: we are applying the `-native-grpc-probes` tag suffix to all the container images, it's a prebuilt image without the [grpc-health-probe](https://github.com/grpc-ecosystem/grpc-health-probe) binary since the version 0.3.10 of Online Boutique._
+_Note: we are applying the `-native-grpc-probes` tag suffix to all the container images, it's a prebuilt image without the [grpc-health-probe](https://github.com/grpc-ecosystem/grpc-health-probe) binary since the version 0.4.0 of Online Boutique._
 
 This will update the `kustomize/kustomization.yaml` file which could be similar to:
 ```
