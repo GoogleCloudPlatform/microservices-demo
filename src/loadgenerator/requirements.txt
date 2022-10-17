@@ -29,7 +29,7 @@ gevent==22.8.0
     # via
     #   geventhttpclient
     #   locust
-geventhttpclient==2.0.2
+geventhttpclient==2.0.8
     # via locust
 greenlet==1.1.3.post0
     # via gevent
