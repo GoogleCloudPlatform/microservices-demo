@@ -12,15 +12,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-apiVersion: kustomize.config.k8s.io/v1beta1
-kind: Kustomization
-resources:
-- base
-components:
-# - components/cymbal-branding
-# - components/google-cloud-operations
-# - components/memorystore
-# - components/network-policies
-# - components/service-accounts
-# - components/spanner
-# - components/local-images
+apiVersion: kustomize.config.k8s.io/v1alpha1
+kind: Component
+patchesStrategicMerge:
+# frontend
+- |-
+  apiVersion: apps/v1
+  kind: Deployment
+  metadata:
+    name: frontend
+  spec:
+    template:
+      spec:
+        containers:
+          - name: server
+            image: frontend
