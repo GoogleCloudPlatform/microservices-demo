@@ -26,7 +26,7 @@ COPY . .
 ARG SKAFFOLD_GO_GCFLAGS
 RUN go build -gcflags="${SKAFFOLD_GO_GCFLAGS}" -o /go/bin/shippingservice .
 
-FROM alpine as without-grpc-health-probe-bin
+FROM alpine:3.16.2 as without-grpc-health-probe-bin
 RUN apk add --no-cache ca-certificates
 WORKDIR /src
 COPY --from=builder /go/bin/shippingservice /src/shippingservice
