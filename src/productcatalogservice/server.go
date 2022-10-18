@@ -40,7 +40,9 @@ import (
 	"google.golang.org/grpc/status"
 
 	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
+	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc"
+	"go.opentelemetry.io/otel/propagation"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 )
 
@@ -75,7 +77,10 @@ func init() {
 
 func main() {
 	if os.Getenv("ENABLE_TRACING") == "1" {
-		go initTracing()
+		err := initTracing()
+		if err != nil {
+			log.Warnf("warn: failed to start tracer: %+v", err)
+		}
 	} else {
 		log.Info("Tracing disabled.")
 	}
@@ -151,7 +156,7 @@ func initStats() {
 	// TODO(drewbr) Implement OpenTelemetry stats
 }
 
-func initTracing() (*sdktrace.TracerProvider, error) {
+func initTracing() error {
 	var (
 		collectorAddr string
 		collectorConn *grpc.ClientConn
@@ -171,7 +176,11 @@ func initTracing() (*sdktrace.TracerProvider, error) {
 	tp := sdktrace.NewTracerProvider(
 		sdktrace.WithBatcher(exporter),
 		sdktrace.WithSampler(sdktrace.AlwaysSample()))
-	return tp, err
+	otel.SetTracerProvider(tp)
+	otel.SetTextMapPropagator(
+		propagation.NewCompositeTextMapPropagator(
+			propagation.TraceContext{}, propagation.Baggage{}))
+	return err
 }
 
 func initProfiling(service, version string) {

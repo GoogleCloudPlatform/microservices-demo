@@ -29,6 +29,7 @@ import (
 	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc"
+	"go.opentelemetry.io/otel/propagation"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 	"google.golang.org/grpc"
 )
@@ -99,12 +100,8 @@ func main() {
 
 	if os.Getenv("ENABLE_TRACING") == "1" {
 		log.Info("Tracing enabled.")
-		tp, err := initTracing(log, ctx, svc)
-		if err != nil {
-			log.Warnf("warn: failed to start tracer: %+v", err)
-		} else {
-			otel.SetTracerProvider(tp)
-		}
+		initTracing(log, ctx, svc)
+
 	} else {
 		log.Info("Tracing disabled.")
 	}
@@ -176,6 +173,10 @@ func initTracing(log logrus.FieldLogger, ctx context.Context, svc *frontendServe
 	tp := sdktrace.NewTracerProvider(
 		sdktrace.WithBatcher(exporter),
 		sdktrace.WithSampler(sdktrace.AlwaysSample()))
+	otel.SetTracerProvider(tp)
+	otel.SetTextMapPropagator(
+		propagation.NewCompositeTextMapPropagator(
+			propagation.TraceContext{}, propagation.Baggage{}))
 	return tp, err
 }
 
