@@ -23,7 +23,7 @@ google-api-core[grpc]==2.10.2
     #   google-cloud-firestore
     #   google-cloud-storage
     #   google-python-cloud-debugger
-google-api-python-client==2.64.0
+google-api-python-client==2.65.0
     # via
     #   firebase-admin
     #   google-cloud-profiler
