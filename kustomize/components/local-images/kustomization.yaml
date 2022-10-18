@@ -15,6 +15,54 @@
 apiVersion: kustomize.config.k8s.io/v1alpha1
 kind: Component
 patchesStrategicMerge:
+# adservice
+- |-
+  apiVersion: apps/v1
+  kind: Deployment
+  metadata:
+    name: adservice
+  spec:
+    template:
+      spec:
+        containers:
+          - name: server
+            image: adservice
+# checkoutservice
+- |-
+  apiVersion: apps/v1
+  kind: Deployment
+  metadata:
+    name: checkoutservice
+  spec:
+    template:
+      spec:
+        containers:
+          - name: server
+            image: checkoutservice
+# currencyservice
+- |-
+  apiVersion: apps/v1
+  kind: Deployment
+  metadata:
+    name: currencyservice
+  spec:
+    template:
+      spec:
+        containers:
+          - name: server
+            image: currencyservice
+# emailservice
+- |-
+  apiVersion: apps/v1
+  kind: Deployment
+  metadata:
+    name: emailservice
+  spec:
+    template:
+      spec:
+        containers:
+          - name: server
+            image: emailservice
 # frontend
 - |-
   apiVersion: apps/v1
@@ -27,3 +75,51 @@ patchesStrategicMerge:
         containers:
           - name: server
             image: frontend
+# paymentservice
+- |-
+  apiVersion: apps/v1
+  kind: Deployment
+  metadata:
+    name: paymentservice
+  spec:
+    template:
+      spec:
+        containers:
+          - name: server
+            image: paymentservice
+# productcatalogservice
+- |-
+  apiVersion: apps/v1
+  kind: Deployment
+  metadata:
+    name: productcatalogservice
+  spec:
+    template:
+      spec:
+        containers:
+          - name: server
+            image: productcatalogservice
+# recommendationservice
+- |-
+  apiVersion: apps/v1
+  kind: Deployment
+  metadata:
+    name: recommendationservice
+  spec:
+    template:
+      spec:
+        containers:
+          - name: server
+            image: recommendationservice
+# shippingservice
+- |-
+  apiVersion: apps/v1
+  kind: Deployment
+  metadata:
+    name: shippingservice
+  spec:
+    template:
+      spec:
+        containers:
+          - name: server
+            image: shippingservice
