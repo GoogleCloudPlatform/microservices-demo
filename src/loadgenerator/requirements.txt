@@ -25,7 +25,7 @@ flask-basicauth==0.2.0
     # via locust
 flask-cors==3.0.10
     # via locust
-gevent==22.8.0
+gevent==22.10.1
     # via
     #   geventhttpclient
     #   locust
@@ -41,7 +41,7 @@ itsdangerous==2.1.2
     # via flask
 jinja2==3.1.2
     # via flask
-locust==2.12.1
+locust==2.12.2
     # via -r requirements.in
 markupsafe==2.1.1
     # via
