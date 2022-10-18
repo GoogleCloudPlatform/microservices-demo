@@ -10,8 +10,8 @@ require (
 	github.com/gorilla/mux v1.8.0
 	github.com/pkg/errors v0.9.1
 	github.com/sirupsen/logrus v1.9.0
-	golang.org/x/net v0.0.0-20221012135044-0b7e1fb9d458
-	google.golang.org/grpc v1.50.0
+	golang.org/x/net v0.0.0-20221017152216-f25eb7ecb193
+	google.golang.org/grpc v1.50.1
 )
 
 require (
@@ -37,7 +37,7 @@ require (
 	go.opentelemetry.io/otel/trace v1.11.0 // indirect
 	go.opentelemetry.io/proto/otlp v0.19.0 // indirect
 	golang.org/x/oauth2 v0.0.0-20220909003341-f21342109be1 // indirect
-	golang.org/x/sys v0.0.0-20220919091848-fb04ddd9f9c8 // indirect
+	golang.org/x/sys v0.0.0-20221010170243-090e33056c14 // indirect
 	golang.org/x/text v0.3.7 // indirect
 	google.golang.org/api v0.96.0 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
