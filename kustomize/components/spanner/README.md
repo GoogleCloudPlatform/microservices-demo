@@ -5,25 +5,29 @@ Using a fully managed database service outside your GKE cluster (such as [Google
 
 ## Provision a Spanner database
 
-To provision a Spanner database you can follow the following instructions:
+To provision a Spanner instance you can follow the following instructions:
 ```bash
 gcloud services enable spanner.googleapis.com
 
 SPANNER_REGION_CONFIG="<your-spanner-region-config-name>" # e.g. "regional-us-east5"
 SPANNER_INSTANCE_NAME=onlineboutique
-SPANNER_DATABASE_NAME=carts
 
 gcloud spanner instances create ${SPANNER_INSTANCE_NAME} \
     --description="online boutique shopping cart" \
     --config ${SPANNER_REGION_CONFIG} \
     --instance-type free-instance
+```
+_Note: With latest version of `gcloud` we are creating a free Spanner instance._
+
+To provision a Spanner database you can follow the following instructions:
+```bash
+SPANNER_DATABASE_NAME=carts
 
 gcloud spanner databases create ${SPANNER_DATABASE_NAME} \
     --instance ${SPANNER_INSTANCE_NAME} \
     --database-dialect GOOGLE_STANDARD_SQL \
     --ddl "CREATE TABLE CartItems (userId STRING(1024), productId STRING(1024), quantity INT64) PRIMARY KEY (userId, productId); CREATE INDEX CartItemsByUserId ON CartItems(userId);"
 ```
-_Note: With latest version of `gcloud` we are creating a free Spanner instance._
 
 ## Grant the `cartservice`'s service account access to the Spanner database
 
