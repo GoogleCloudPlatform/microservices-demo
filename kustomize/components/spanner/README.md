@@ -86,3 +86,7 @@ The following environment variables will be used by the `cartservice`, if presen
 - `SPANNER_INSTANCE`: defaults to `onlineboutique`, unless specified.
 - `SPANNER_DATABASE`: defaults to `carts`, unless specified.
 - `SPANNER_CONNECTION_STRING`: defaults to `projects/${SPANNER_PROJECT}/instances/${SPANNER_INSTANCE}/databases/${SPANNER_DATABASE}`. If this variable is defined explicitly, all other environment variables will be ignored.
+
+## Resources
+
+- [Use Google Cloud Spanner with the Online Boutique sample apps](https://medium.com/google-cloud/f7248e077339)
