@@ -29,9 +29,10 @@ You can locally render these manifests by running `kubectl kustomize . | sed "s/
 
 _Note: for this variation, `kubectl apply -k .` alone won't work because there is a [known issue currently in Kustomize](https://github.com/kubernetes-sigs/kustomize/issues/4814) where the `tagSuffix` is duplicated. The `sed "s/$SUFFIX$SUFFIX/$SUFFIX/g"` commands above are a temporary workaround._
 
-**Important notes:** if combining with the other variations, here are some considerations:
-- should be placed before `components/container-images-registry`
-- should be placed after `components/container-images-tag`
+## Combine with other Kustomize Components
+If you're combining this Kustomize Component with other variations, here are some considerations:
+- `components/container-images-tag-suffix` should be placed before `components/container-images-registry`
+- `components/container-images-tag-suffix` should be placed after `components/container-images-tag`
 
 So for example here is the order respected:
 ```
