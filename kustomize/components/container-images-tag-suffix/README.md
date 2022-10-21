@@ -1,6 +1,7 @@
-# Add a suffix the container image tag of the Online Boutique apps
+# Add a suffix to the image tag of the Online Boutique container images
 
-You may need to add a suffix to the Online Boutique container image tag to target a specific version, this Kustomize variation will help you setting this up.
+You may want to add a suffix to the Online Boutique container image tag to target a specific version.
+The Kustomize Component inside this folder can help.
 
 ## Add a suffix to the container image tag via Kustomize
 
@@ -8,7 +9,7 @@ To automate the deployment of the Online Boutique apps with a suffix added to th
 
 From the `kustomize/` folder at the root level of this repository, execute this command:
 ```
-SUFFIX=-test
+SUFFIX=-my-suffix
 sed -i "s/CONTAINER_IMAGES_TAG_SUFFIX/$SUFFIX/g" components/container-images-tag-suffix/kustomization.yaml
 kustomize edit add component components/container-images-tag-suffix
 ```
@@ -26,7 +27,7 @@ components:
 
 You can locally render these manifests by running `kubectl kustomize . | sed "s/$SUFFIX$SUFFIX/$SUFFIX/g"` as well as deploying them by running `kubectl kustomize . | sed "s/$SUFFIX$SUFFIX/$SUFFIX/g" | kubectl apply -f`.
 
-_Note: for this variation, `kubectl apply -k .` won't work because there is a [known issue currently in Kustomize](https://github.com/kubernetes-sigs/kustomize/issues/4814) where the `tagSuffix` is duplicated. The command lines above are a temporary workaround._
+_Note: for this variation, `kubectl apply -k .` alone won't work because there is a [known issue currently in Kustomize](https://github.com/kubernetes-sigs/kustomize/issues/4814) where the `tagSuffix` is duplicated. The `sed "s/$SUFFIX$SUFFIX/$SUFFIX/g"` commands above are a temporary workaround._
 
 **Important notes:** if combining with the other variations, here are some considerations:
 - should be placed before `components/container-images-registry`
