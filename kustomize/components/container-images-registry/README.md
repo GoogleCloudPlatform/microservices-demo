@@ -24,5 +24,5 @@ components:
 - components/container-images-registry
 ```
 
-You can locally render these manifests by running `kubectl kustomize .`.
+You can (optionally) locally render these manifests by running `kubectl kustomize .`.
 You can deploy them by running `kubectl apply -k .`.
