@@ -10,14 +10,14 @@ certifi==2022.9.24
     # via requests
 charset-normalizer==2.1.1
     # via requests
-google-api-core[grpc]==2.10.1
+google-api-core[grpc]==2.10.2
     # via
     #   -r requirements.in
     #   google-api-python-client
     #   google-cloud-trace
-google-api-python-client==2.64.0
+google-api-python-client==2.65.0
     # via google-cloud-profiler
-google-auth==2.12.0
+google-auth==2.13.0
     # via
     #   google-api-core
     #   google-api-python-client
@@ -29,13 +29,13 @@ google-auth-httplib2==0.1.0
     #   google-cloud-profiler
 google-cloud-profiler==4.0.0
     # via -r requirements.in
-google-cloud-trace==1.7.2
+google-cloud-trace==1.7.3
     # via -r requirements.in
 googleapis-common-protos==1.56.4
     # via
     #   google-api-core
     #   grpcio-status
-grpcio==1.49.1
+grpcio==1.50.0
     # via
     #   -r requirements.in
     #   google-api-core
