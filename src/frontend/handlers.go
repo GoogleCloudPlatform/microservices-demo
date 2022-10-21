@@ -447,6 +447,7 @@ func renderHTTPError(log logrus.FieldLogger, r *http.Request, w http.ResponseWri
 		"error":             errMsg,
 		"status_code":       code,
 		"status":            http.StatusText(code),
+		"is_cymbal_brand":   isCymbalBrand,
 		"deploymentDetails": deploymentDetailsMap,
 	}); templateErr != nil {
 		log.Println(templateErr)
