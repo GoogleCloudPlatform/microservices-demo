@@ -26,9 +26,10 @@ components:
 - components/native-grpc-health-check
 ```
 
-You can locally render these manifests by running `kubectl kustomize . | sed "s/$SUFFIX$SUFFIX/$SUFFIX/g"` as well as deploying them by running `kubectl kustomize . | sed "s/$SUFFIX$SUFFIX/$SUFFIX/g" | kubectl apply -f`.
+You can (optionally) locally render these manifests by running `kubectl kustomize . | sed "s/$SUFFIX$SUFFIX/$SUFFIX/g"`.
+You can deploy them by running `kubectl kustomize . | sed "s/$SUFFIX$SUFFIX/$SUFFIX/g" | kubectl apply -f`.
 
-_Note: for this variation, `kubectl apply -k .` won't work because there is a [known issue currently in Kustomize](https://github.com/kubernetes-sigs/kustomize/issues/4814) where the `tagSuffix` is duplicated. The command lines above are a temporary workaround._
+_Note: for this variation, `kubectl apply -k .` alone won't work because there is a [known issue currently in Kustomize](https://github.com/kubernetes-sigs/kustomize/issues/4814) where the `tagSuffix` is duplicated. The `sed "s/$SUFFIX$SUFFIX/$SUFFIX/g"` commands above are a temporary workaround._
 
 ## Resources
 
