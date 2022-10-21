@@ -7,13 +7,13 @@ Creating a `ServiceAccount` per `Deployment` could be helpful if you need to def
 To automate the deployment of Online Boutique integrated with fine granular `ServiceAccounts` (one per `Deployment`), you can leverage the following variation with [Kustomize](../..).
 
 From the `kustomize/` folder at the root level of this repository, execute this command:
-```
-kustomize edit add components/service-accounts
+```bash
+kustomize edit add component components/service-accounts
 ```
 _Note: this Kustomize component will also update the `serviceAccountName` field in all `Deployments`._
 
 This will update the `kustomize/kustomization.yaml` file which could be similar to:
-```
+```yaml
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
@@ -30,7 +30,7 @@ kubectl get serviceaccount
 ```
 
 The output could be similar to:
-```
+```output
 NAME                    SECRETS     AGE
 default                 1           2m58s
 adservice               1           2m58s

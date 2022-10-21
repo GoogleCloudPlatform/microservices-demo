@@ -9,12 +9,12 @@ To use `NetworkPolicies` in Google Kubernetes Engine (GKE), you will need a GKE 
 To automate the deployment of Online Boutique integrated with fine granular `NetworkPolicies` (one per `Deployment`), you can leverage the following variation with [Kustomize](../..).
 
 From the `kustomize/` folder at the root level of this repository, execute this command:
-```
-kustomize edit add components/network-policies
+```bash
+kustomize edit add component components/network-policies
 ```
 
 This will update the `kustomize/kustomization.yaml` file which could be similar to:
-```
+```yaml
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
@@ -31,7 +31,7 @@ kubectl get networkpolicy
 ```
 
 The output could be similar to:
-```
+```output
 NAME                    POD-SELECTOR                AGE
 adservice               app=adservice               2m58s
 cartservice             app=cartservice             2m58s

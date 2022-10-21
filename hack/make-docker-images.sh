@@ -38,9 +38,11 @@ while IFS= read -d $'\0' -r dir; do
         cd "${builddir}"
         log "Building: ${image}"
         docker build -t "${image}" .
+        docker build -t "${image}-native-grpc-probes" . --target without-grpc-health-probe-bin
 
         log "Pushing: ${image}"
         docker push "${image}"
+        docker push "${image}-native-grpc-probes"
     )
 done < <(find "${SCRIPTDIR}/../src" -mindepth 1 -maxdepth 1 -type d -print0)
 

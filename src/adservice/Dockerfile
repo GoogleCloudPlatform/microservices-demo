@@ -25,7 +25,7 @@ COPY . .
 RUN chmod +x gradlew
 RUN ./gradlew installDist
 
-FROM eclipse-temurin:18-jre-alpine
+FROM eclipse-temurin:18-jre-alpine as without-grpc-health-probe-bin
 
 RUN apk add --no-cache ca-certificates
 
@@ -35,12 +35,14 @@ RUN mkdir -p /opt/cprof && \
     | tar xzv -C /opt/cprof && \
     rm -rf profiler_java_agent.tar.gz
 
-RUN GRPC_HEALTH_PROBE_VERSION=v0.4.14 && \
-    wget -qO/bin/grpc_health_probe https://github.com/grpc-ecosystem/grpc-health-probe/releases/download/${GRPC_HEALTH_PROBE_VERSION}/grpc_health_probe-linux-amd64 && \
-    chmod +x /bin/grpc_health_probe
-
 WORKDIR /app
 COPY --from=builder /app .
 
 EXPOSE 9555
 ENTRYPOINT ["/app/build/install/hipstershop/bin/AdService"]
+
+FROM without-grpc-health-probe-bin
+
+RUN GRPC_HEALTH_PROBE_VERSION=v0.4.14 && \
+    wget -qO/bin/grpc_health_probe https://github.com/grpc-ecosystem/grpc-health-probe/releases/download/${GRPC_HEALTH_PROBE_VERSION}/grpc_health_probe-linux-amd64 && \
+    chmod +x /bin/grpc_health_probe

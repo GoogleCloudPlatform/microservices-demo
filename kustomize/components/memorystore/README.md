@@ -31,8 +31,8 @@ _Note: You can also find in this repository the Terraform script to provision th
 To automate the deployment of Online Boutique integrated with Memorystore (Redis) you can leverage the following variation with [Kustomize](../..).
 
 From the `kustomize/` folder at the root level of this repository, execute this command:
-```bash
-kustomize edit add components/memorystore
+```
+kustomize edit add component components/memorystore
 ```
 _Note: this Kustomize component will also remove the `redis-cart` `Deployment` and `Service` not used anymore._
 
@@ -50,7 +50,7 @@ Update current Kustomize manifest to target this Memorystore (Redis) instance.
 ```bash
 REDIS_IP=$(gcloud redis instances describe redis-cart --region=${REGION} --format='get(host)')
 REDIS_PORT=$(gcloud redis instances describe redis-cart --region=${REGION} --format='get(port)')
-sed -i "s/{{REDIS_ADDR}}/${REDIS_IP}:${REDIS_PORT}/g" components/memorystore/kustomization.yaml
+sed -i "s/\"REDIS_ADDR\"/${REDIS_IP}:${REDIS_PORT}/g" components/memorystore/kustomization.yaml
 ```
 
 You can locally render these manifests by running `kubectl kustomize .` as well as deploying them by running `kubectl apply -k .`.

@@ -5,7 +5,7 @@ But you may want to use Google Cloud's fictitious company, _Cymbal Shops_, inste
 
 To use "Cymbal Shops" branding, set the `CYMBAL_BRANDING` environment variable to `"true"` in the the Kubernetes manifest (`.yaml`) for the `frontend` Deployment.
 
-```
+```yaml
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -29,12 +29,12 @@ spec:
 To automate the deployment of Online Boutique with the Cymbal Shops branding you can leverage the following variation with [Kustomize](../..).
 
 From the `kustomize/` folder at the root level of this repository, execute this command:
-```
-kustomize edit add components/cymbal-branding
+```bash
+kustomize edit add component components/cymbal-branding
 ```
 
 This will update the `kustomize/kustomization.yaml` file which could be similar to:
-```
+```yaml
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:

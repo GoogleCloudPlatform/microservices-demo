@@ -4,7 +4,7 @@ By default, [Google Cloud Operations](https://cloud.google.com/products/operatio
 
 You can see the instrumentation status in your deployment by opening one of the `Deployment` YAML files and seeing:
 
-```YAML
+```yaml
 - name: DISABLE_STATS
 value: "1"
 - name: DISABLE_TRACING
@@ -31,7 +31,7 @@ value: "0"
 </del>
 
 You will also need to make sure that you have the associated Google APIs enabled in your Google Cloud project:
-```
+```bash
 gcloud services enable \
     monitoring.googleapis.com \
     cloudtrace.googleapis.com \
@@ -67,12 +67,12 @@ gcloud projects add-iam-policy-binding ${PROJECT_ID} \
 To automate the deployment of Online Boutique integrated with Google Cloud Operations you can leverage the following variation with [Kustomize](../..).
 
 From the `kustomize/` folder at the root level of this repository, execute this command:
-```
-kustomize edit add components/google-cloud-operations
+```bash
+kustomize edit add component components/google-cloud-operations
 ```
 
 This will update the `kustomize/kustomization.yaml` file which could be similar to:
-```
+```yaml
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
