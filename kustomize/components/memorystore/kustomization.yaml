@@ -28,7 +28,7 @@ patchesStrategicMerge:
           - name: server
             env:
             - name: REDIS_ADDR
-              value: "REDIS_ADDR"
+              value: "REDIS_CONNECTION_STRING"
 # redis - remove the redis-cart Deployment
 - |-
   apiVersion: apps/v1
