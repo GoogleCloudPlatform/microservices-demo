@@ -37,3 +37,5 @@ images:
   newName: CONTAINER_IMAGES_REGISTRY/recommendationservice
 - name: gcr.io/google-samples/microservices-demo/shippingservice
   newName: CONTAINER_IMAGES_REGISTRY/shippingservice
+- name: redis
+  newName: CONTAINER_IMAGES_REGISTRY/redis
