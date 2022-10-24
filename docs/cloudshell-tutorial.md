@@ -101,9 +101,7 @@ Congratulations! You've successfully deployed Online Boutique using Cloud Shell.
 ##### What's next?
 
 Try other deployment options for Online Boutique:
-- **Workload Identity**: <walkthrough-editor-open-file filePath="./docs/workload-identity.md">See these instructions</walkthrough-editor-open-file>.
 - **Istio**: <walkthrough-editor-open-file filePath="./docs/service-mesh.md">See these instructions</walkthrough-editor-open-file>.
-- **Anthos Service Mesh**: ASM requires Workload Identity to be enabled in your GKE cluster. <walkthrough-editor-open-file filePath="./docs/workload-identity.md">See these instructions</walkthrough-editor-open-file> to configure and deploy the app. Then, use the <walkthrough-editor-open-file filePath="./docs/service-mesh.md">service mesh guide</walkthrough-editor-open-file>.
-- **Memorystore**: <walkthrough-editor-open-file filePath="./docs/memorystore.md">See these instructions</walkthrough-editor-open-file> to replace the in-cluster `redis` database with hosted Google Cloud Memorystore (redis).
+- **Anthos Service Mesh**: <walkthrough-editor-open-file filePath="./docs/service-mesh.md">See these instructions</walkthrough-editor-open-file>.
 
 Learn more about the [Cloud Shell](https://cloud.google.com/shell) IDE environment and the [Cloud Code](https://cloud.google.com/code) extension.

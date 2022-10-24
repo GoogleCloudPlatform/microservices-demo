@@ -8,9 +8,8 @@ To automate the deployment of Online Boutique integrated with native gRPC probes
 
 From the `kustomize/` folder at the root level of this repository, execute this command:
 ```bash
-SUFFIX=-native-grpc-probes
-sed -i "s/CONTAINER_IMAGES_TAG_SUFFIX/$SUFFIX/g" components/container-images-tag-suffix/kustomization.yaml
-kustomize edit add component components/container-images-tag-suffix
+ONLINE_BOUTIQUE_VERSION=$(curl -s https://api.github.com/repos/GoogleCloudPlatform/microservices-demo/releases | jq -r '[.[]] | .[0].tag_name')
+sed -i "s/CONTAINER_IMAGES_TAG/$ONLINE_BOUTIQUE_VERSION-native-grpc-probes/g" components/native-grpc-health-check/kustomization.yaml
 kustomize edit add component components/native-grpc-health-check
 ```
 _Note: we are applying the `-native-grpc-probes` tag suffix to all the container images, it's a prebuilt image without the [grpc-health-probe](https://github.com/grpc-ecosystem/grpc-health-probe) binary since the version 0.4.0 of Online Boutique._
@@ -22,14 +21,10 @@ kind: Kustomization
 resources:
 - base
 components:
-- components/container-images-tag-suffix
 - components/native-grpc-health-check
 ```
 
-You can (optionally) locally render these manifests by running `kubectl kustomize . | sed "s/$SUFFIX$SUFFIX/$SUFFIX/g"`.
-You can deploy them by running `kubectl kustomize . | sed "s/$SUFFIX$SUFFIX/$SUFFIX/g" | kubectl apply -f`.
-
-_Note: for this variation, `kubectl apply -k .` alone won't work because there is a [known issue currently in Kustomize](https://github.com/kubernetes-sigs/kustomize/issues/4814) where the `tagSuffix` is duplicated. The `sed "s/$SUFFIX$SUFFIX/$SUFFIX/g"` commands above are a temporary workaround._
+You can locally render these manifests by running `kubectl kustomize .` as well as deploying them by running `kubectl apply -k .`.
 
 ## Resources
 
