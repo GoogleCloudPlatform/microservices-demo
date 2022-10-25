@@ -9,7 +9,7 @@ To automate the deployment of Online Boutique integrated with native gRPC probes
 From the `kustomize/` folder at the root level of this repository, execute this command:
 ```bash
 ONLINE_BOUTIQUE_VERSION=$(curl -s https://api.github.com/repos/GoogleCloudPlatform/microservices-demo/releases | jq -r '[.[]] | .[0].tag_name')
-sed -i "s/CONTAINER_IMAGES_TAG/$ONLINE_BOUTIQUE_VERSION-native-grpc-probes/g" components/native-grpc-health-check/kustomization.yaml
+sed -i "s/ONLINE_BOUTIQUE_VERSION/$ONLINE_BOUTIQUE_VERSION/g" components/native-grpc-health-check/kustomization.yaml
 kustomize edit add component components/native-grpc-health-check
 ```
 _Note: we are applying the `-native-grpc-probes` tag suffix to all the container images, it's a prebuilt image without the [grpc-health-probe](https://github.com/grpc-ecosystem/grpc-health-probe) binary since the version 0.4.0 of Online Boutique._
