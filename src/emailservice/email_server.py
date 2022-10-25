@@ -109,11 +109,7 @@ class EmailService(BaseEmailService):
     order = request.order
 
     metadict = dict(context.invocation_metadata())
-    request_id = metadict['requestid']
-    service_name = metadict['servicename']
-
-    event = "Received request from " + service_name + " (request_id: " + request_id + ")"
-    emitLog(event, "INFO")
+    emitLog("Received request from " + metadict['servicename'] + " (request_id: " + metadict['requestid'] + ")", "INFO")
 
     try:
       confirmation = template.render(order = order)
@@ -133,8 +129,7 @@ class EmailService(BaseEmailService):
       context.set_code(grpc.StatusCode.INTERNAL)
       return demo_pb2.Empty()
 
-    event = "Answered request from " + service_name + " (request_id: " + request_id + ")"
-    emitLog(event, "INFO")
+    emitLog("Answered request from " + metadict['servicename'] + " (request_id: " + metadict['requestid'] + ")", "INFO")
 
     return demo_pb2.Empty()
 
@@ -144,13 +139,11 @@ class DummyEmailService(BaseEmailService):
     request_id = metadict['requestid']
     service_name = metadict['servicename']
 
-    event = "Received request from " + service_name + " (request_id: " + request_id + ")"
-    emitLog(event, "INFO")
+    emitLog("Received request from " + metadict['servicename'] + " (request_id: " + metadict['requestid'] + ")", "INFO")
 
     logger.info('A request to send order confirmation email to {} has been received.'.format(request.email))
 
-    event = "Received request from " + service_name + " (request_id: " + request_id + ")"
-    emitLog(event, "INFO")
+    emitLog("Received request from " + metadict['servicename'] + " (request_id: " + metadict['requestid'] + ")", "INFO")
 
     return demo_pb2.Empty()
 

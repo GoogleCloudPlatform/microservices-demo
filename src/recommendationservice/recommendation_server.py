@@ -83,11 +83,7 @@ def emitLog(event, logLevel):
 class RecommendationService(demo_pb2_grpc.RecommendationServiceServicer):
     def ListRecommendations(self, request, context):
         metadict = dict(context.invocation_metadata())
-        request_id = metadict['requestid']
-        service_name = metadict['servicename']
-
-        event = "Received request from " + service_name + " (request_id: " + request_id + ")"
-        emitLog(event, "INFO")
+        emitLog("Received request from " + metadict['servicename'] + " (request_id: " + metadict['requestid'] + ")", "INFO")
 
         # adding metadata for gRPC towards ProductCatalogService
         newRequestid = '{0}'.format(uuid.uuid4())
@@ -95,15 +91,12 @@ class RecommendationService(demo_pb2_grpc.RecommendationServiceServicer):
 
         try:
           max_responses = 5
-
-          event = 'Sending message to ' + PRODUCTCATALOGSERVICE + ' (request_id: ' + newRequestid + ')'
-          emitLog(event, "INFO")
+          emitLog("Sending message to " + PRODUCTCATALOGSERVICE + " (request_id: " + newRequestid + ")", "INFO")
 
           # fetch list of products from product catalog stub
           cat_response = product_catalog_stub.ListProducts(demo_pb2.Empty(), timeout=1, metadata=metadata)
           
-          event = 'Receiving answer from ' + PRODUCTCATALOGSERVICE + ' (request_id: ' + newRequestid + ')'
-          emitLog(event, "INFO")
+          emitLog("Receiving answer from " + PRODUCTCATALOGSERVICE + " (request_id: " + newRequestid + ")", "INFO")
 
           product_ids = [x.id for x in cat_response.products]
           filtered_products = list(set(product_ids)-set(request.product_ids))
@@ -117,7 +110,7 @@ class RecommendationService(demo_pb2_grpc.RecommendationServiceServicer):
           # build and return response
           response = demo_pb2.ListRecommendationsResponse()
           response.product_ids.extend(prod_list)
-          event = "Answered request from " + service_name + " (request_id: " + request_id + ")"
+          event = "Answered request from " + metadict['servicename'] + " (request_id: " + metadict['requestid'] + ")"
           emitLog(event, "INFO")
 
           return response

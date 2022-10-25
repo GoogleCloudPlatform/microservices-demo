@@ -79,6 +79,25 @@ func checkResponse(responseCode codes.Code, serviceName string, reqId string, er
 	}
 }
 
+type ctxKey struct{}
+
+func setMetadata(ctx context.Context, invokingService string, invokedService string) (context.Context, string) {
+	RequestID, err := uuid.NewRandom()
+	if err != nil {
+		emitLog(invokingService+": An error occurred while generating the RequestID", "ERROR")
+	}
+
+	// Add metadata to gRPC
+	header := metadata.Pairs("requestid", RequestID.String(), "servicename", FRONTEND)
+	metadataCtx := metadata.NewOutgoingContext(ctx, header)
+
+	// Log sending gRPC
+	event := "Sending message to " + invokedService + " (request_id: " + RequestID.String() + ")"
+	emitLog(event, "INFO")
+
+	return metadataCtx, RequestID.String()
+}
+
 type platformDetails struct {
 	css      string
 	provider string
@@ -199,10 +218,10 @@ func (fe *frontendServer) productHandler(w http.ResponseWriter, r *http.Request)
 		Debug("serving product page")
 
 	p, err := fe.getProduct(r.Context(), id)
-        if err != nil {
-                renderHTTPError(log, r, w, errors.Wrap(err, "could not retrieve product"), http.StatusInternalServerError)
-                return
-        }
+	if err != nil {
+		renderHTTPError(log, r, w, errors.Wrap(err, "could not retrieve product"), http.StatusInternalServerError)
+		return
+	}
 
 	currencies, err := fe.getCurrencies(r.Context())
 	if err != nil {
@@ -217,10 +236,10 @@ func (fe *frontendServer) productHandler(w http.ResponseWriter, r *http.Request)
 	}
 
 	price, err := fe.convertCurrency(r.Context(), p.GetPriceUsd(), currentCurrency(r))
-        if err != nil {
-                renderHTTPError(log, r, w, errors.Wrap(err, "failed to convert currency"), http.StatusInternalServerError)
-                return
-        }
+	if err != nil {
+		renderHTTPError(log, r, w, errors.Wrap(err, "failed to convert currency"), http.StatusInternalServerError)
+		return
+	}
 
 	recommendations, err := fe.getRecommendations(r.Context(), sessionID(r), []string{id})
 	if err != nil {
@@ -381,22 +400,10 @@ func (fe *frontendServer) placeOrderHandler(w http.ResponseWriter, r *http.Reque
 		ccCVV, _      = strconv.ParseInt(r.FormValue("credit_card_cvv"), 10, 32)
 	)
 
-	// New RequestID
-	RequestID, err := uuid.NewRandom()
-	if err != nil {
-		emitLog(FRONTEND+": An error occurred while generating the RequestID", "ERROR")
-	}
-
-	// Add metadata to gRPC
-	header := metadata.Pairs("requestid", RequestID.String(), "servicename", FRONTEND)
-	metadataCtx := metadata.NewOutgoingContext(r.Context(), header)
-
-	// Add gRPC timeout
+	// Prepare metadata and set timeout
+	metadataCtx, RequestID := setMetadata(r.Context(), FRONTEND, CHECKOUTSERVICE)
 	newCtx, cancel := context.WithTimeout(metadataCtx, time.Second)
 	defer cancel()
-
-	event := "Sending message to " + CHECKOUTSERVICE + " (request_id: " + RequestID.String() + ")"
-	emitLog(event, "INFO")
 
 	order, err := pb.NewCheckoutServiceClient(fe.checkoutSvcConn).
 		PlaceOrder(newCtx, &pb.PlaceOrderRequest{
@@ -417,7 +424,7 @@ func (fe *frontendServer) placeOrderHandler(w http.ResponseWriter, r *http.Reque
 		})
 
 	// Check gRPC reply
-	checkResponse(status.Code(err), CHECKOUTSERVICE, RequestID.String(), err)
+	checkResponse(status.Code(err), CHECKOUTSERVICE, RequestID, err)
 
 	if err != nil {
 		renderHTTPError(log, r, w, errors.Wrap(err, "failed to complete the order"), http.StatusInternalServerError)

@@ -70,16 +70,14 @@ class HipsterShopServer {
       var SessionID = call.metadata.get("requestid");
       var ServiceName = call.metadata.get("servicename");
       
-      var event = "Received request from " + ServiceName + " (request_id: " + SessionID[0] + ")";
-      emitLog(event, "INFO");
+      emitLog("Received request from " + ServiceName + " (request_id: " + SessionID[0] + ")", "INFO");
       
       // logger.info(`PaymentService#Charge invoked with request ${JSON.stringify(call.request)}`);
       
       const response = charge(call.request);
       callback(null, response);
 
-      event = "Answered request from " + ServiceName + " (request_id: " + SessionID[0] + ")";
-      emitLog(event, "INFO");
+      emitLog("Answered request from " + ServiceName + " (request_id: " + SessionID[0] + ")", "INFO");
 
     } catch (err) {
       console.warn(err);

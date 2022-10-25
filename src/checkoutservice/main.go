@@ -85,6 +85,41 @@ func checkResponse(responseCode codes.Code, serviceName string, reqId string, er
 	}
 }
 
+func readMetadata(ctx context.Context) (string, string) {
+	md, _ := metadata.FromIncomingContext(ctx)
+	reqId := md.Get("requestid")
+	invService := md.Get("servicename")
+	var RequestID, ServiceName string
+
+	if len(reqId) > 0 && len(invService) > 0 {
+		RequestID = reqId[0]
+		ServiceName = invService[0]
+		emitLog("Received request from "+ServiceName+" (request_id: "+RequestID+")", "INFO")
+
+	} else {
+		emitLog(CHECKOUTSERVICE+": An error occurred while retrieving the RequestID", "ERROR")
+	}
+
+	return RequestID, ServiceName
+}
+
+func setMetadata(ctx context.Context, invokingService string, invokedService string) (context.Context, string) {
+	RequestID, err := uuid.NewRandom()
+	if err != nil {
+		emitLog(invokingService+": An error occurred while generating the RequestID", "ERROR")
+	}
+
+	// Add metadata to gRPC
+	header := metadata.Pairs("requestid", RequestID.String(), "servicename", CHECKOUTSERVICE)
+	metadataCtx := metadata.NewOutgoingContext(ctx, header)
+
+	// Log sending gRPC
+	event := "Sending message to " + invokedService + " (request_id: " + RequestID.String() + ")"
+	emitLog(event, "INFO")
+
+	return metadataCtx, RequestID.String()
+}
+
 var log *logrus.Logger
 
 func init() {
@@ -258,19 +293,7 @@ func (cs *checkoutService) Watch(req *healthpb.HealthCheckRequest, ws healthpb.H
 }
 
 func (cs *checkoutService) PlaceOrder(ctx context.Context, req *pb.PlaceOrderRequest) (*pb.PlaceOrderResponse, error) {
-	md, _ := metadata.FromIncomingContext(ctx)
-	reqId := md.Get("requestid")
-	invService := md.Get("servicename")
-	var RequestID, ServiceName string
-
-	if len(reqId) > 0 && len(invService) > 0 {
-		RequestID = reqId[0]
-		ServiceName = invService[0]
-		emitLog("Received request from "+ServiceName+" (request_id: "+RequestID+")", "INFO")
-
-	} else {
-		emitLog(CHECKOUTSERVICE+": An error occurred while retrieving the RequestID", "ERROR")
-	}
+	RequestID, ServiceName := readMetadata(ctx)
 
 	log.Infof("[PlaceOrder] user_id=%q user_currency=%q", req.UserId, req.UserCurrency)
 
@@ -321,8 +344,7 @@ func (cs *checkoutService) PlaceOrder(ctx context.Context, req *pb.PlaceOrderReq
 	}
 	resp := &pb.PlaceOrderResponse{Order: orderResult}
 
-	event := "Answered request from " + ServiceName + " (request_id: " + RequestID + ")"
-	emitLog(event, "INFO")
+	emitLog("Answered request from "+ServiceName+" (request_id: "+RequestID+")", "INFO")
 
 	return resp, nil
 }
@@ -368,22 +390,10 @@ func (cs *checkoutService) quoteShipping(ctx context.Context, address *pb.Addres
 	}
 	defer conn.Close()
 
-	RequestID, err := uuid.NewRandom()
-	if err != nil {
-		emitLog(CHECKOUTSERVICE+": An error occurred while generating the RequestID", "ERROR")
-	}
-
-	// Add metadata to gRPC
-	header := metadata.Pairs("requestid", RequestID.String(), "servicename", CHECKOUTSERVICE)
-	metadataCtx := metadata.NewOutgoingContext(ctx, header)
-
-	// Add gRPC timeout
+	// Prepare gRPC metadata and timeout
+	metadataCtx, RequestID := setMetadata(ctx, CHECKOUTSERVICE, SHIPPINGSERVICE)
 	newCtx, cancel := context.WithTimeout(metadataCtx, time.Second)
 	defer cancel()
-
-	// Log sending gRPC
-	event := "Sending message to " + SHIPPINGSERVICE + " (request_id: " + RequestID.String() + ")"
-	emitLog(event, "INFO")
 
 	shippingQuote, err := pb.NewShippingServiceClient(conn).
 		GetQuote(newCtx, &pb.GetQuoteRequest{
@@ -391,7 +401,7 @@ func (cs *checkoutService) quoteShipping(ctx context.Context, address *pb.Addres
 			Items:   items})
 
 	// Check gRPC reply
-	checkResponse(status.Code(err), SHIPPINGSERVICE, RequestID.String(), err)
+	checkResponse(status.Code(err), SHIPPINGSERVICE, RequestID, err)
 
 	return shippingQuote.GetCostUsd(), nil
 }
@@ -404,27 +414,15 @@ func (cs *checkoutService) getUserCart(ctx context.Context, userID string) ([]*p
 	}
 	defer conn.Close()
 
-	RequestID, err := uuid.NewRandom()
-	if err != nil {
-		emitLog(CHECKOUTSERVICE+": An error occurred while generating the RequestID", "ERROR")
-	}
-
-	// Add metadata to gRPC
-	header := metadata.Pairs("requestid", RequestID.String(), "servicename", CHECKOUTSERVICE)
-	metadataCtx := metadata.NewOutgoingContext(ctx, header)
-
-	// Add gRPC timeout
+	// Prepare gRPC metadata and timeout
+	metadataCtx, RequestID := setMetadata(ctx, CHECKOUTSERVICE, CARTSERVICE)
 	newCtx, cancel := context.WithTimeout(metadataCtx, time.Second)
 	defer cancel()
-
-	// Log sending gRPC
-	event := "Sending message to " + CARTSERVICE + " (request_id: " + RequestID.String() + ")"
-	emitLog(event, "INFO")
 
 	cart, err := pb.NewCartServiceClient(conn).GetCart(newCtx, &pb.GetCartRequest{UserId: userID})
 
 	// Check gRPC reply
-	checkResponse(status.Code(err), CARTSERVICE, RequestID.String(), err)
+	checkResponse(status.Code(err), CARTSERVICE, RequestID, err)
 
 	return cart.GetItems(), nil
 }
@@ -437,27 +435,15 @@ func (cs *checkoutService) emptyUserCart(ctx context.Context, userID string) err
 	}
 	defer conn.Close()
 
-	RequestID, err := uuid.NewRandom()
-	if err != nil {
-		emitLog(CHECKOUTSERVICE+": An error occurred while generating the RequestID", "ERROR")
-	}
-
-	// Add metadata to gRPC
-	header := metadata.Pairs("requestid", RequestID.String(), "servicename", CHECKOUTSERVICE)
-	metadataCtx := metadata.NewOutgoingContext(ctx, header)
-
-	// Add gRPC timeout
+	// Prepare gRPC metadata and timeout
+	metadataCtx, RequestID := setMetadata(ctx, CHECKOUTSERVICE, CARTSERVICE)
 	newCtx, cancel := context.WithTimeout(metadataCtx, time.Second)
 	defer cancel()
-
-	// Log sending gRPC
-	event := "Sending message to " + CARTSERVICE + " (request_id: " + RequestID.String() + ")"
-	emitLog(event, "INFO")
 
 	_, err = pb.NewCartServiceClient(conn).EmptyCart(newCtx, &pb.EmptyCartRequest{UserId: userID})
 
 	// Check gRPC reply
-	checkResponse(status.Code(err), CARTSERVICE, RequestID.String(), err)
+	checkResponse(status.Code(err), CARTSERVICE, RequestID, err)
 
 	return nil
 }
@@ -474,27 +460,15 @@ func (cs *checkoutService) prepOrderItems(ctx context.Context, items []*pb.CartI
 	cl := pb.NewProductCatalogServiceClient(conn)
 
 	for i, item := range items {
-		RequestID, err := uuid.NewRandom()
-		if err != nil {
-			emitLog(CHECKOUTSERVICE+": An error occurred while generating the RequestID", "ERROR")
-		}
-
-		// Add metadata to gRPC
-		header := metadata.Pairs("requestid", RequestID.String(), "servicename", CHECKOUTSERVICE)
-		metadataCtx := metadata.NewOutgoingContext(ctx, header)
-
-		// Add gRPC timeout
+		// Prepare gRPC metadata and timeout
+		metadataCtx, RequestID := setMetadata(ctx, CHECKOUTSERVICE, PRODUCTCATALOGSERVICE)
 		newCtx, cancel := context.WithTimeout(metadataCtx, time.Second)
 		defer cancel()
-
-		// Log sending gRPC
-		event := "Sending message to " + PRODUCTCATALOGSERVICE + " (request_id: " + RequestID.String() + ")"
-		emitLog(event, "INFO")
 
 		product, err := cl.GetProduct(newCtx, &pb.GetProductRequest{Id: item.GetProductId()})
 
 		// Check gRPC reply
-		checkResponse(status.Code(err), PRODUCTCATALOGSERVICE, RequestID.String(), err)
+		checkResponse(status.Code(err), PRODUCTCATALOGSERVICE, RequestID, err)
 
 		price, err := cs.convertCurrency(ctx, product.GetPriceUsd(), userCurrency)
 		if err != nil {
@@ -514,29 +488,17 @@ func (cs *checkoutService) convertCurrency(ctx context.Context, from *pb.Money, 
 	}
 	defer conn.Close()
 
-	RequestID, err := uuid.NewRandom()
-	if err != nil {
-		emitLog(CHECKOUTSERVICE+": An error occurred while generating the RequestID", "ERROR")
-	}
-
-	// Add metadata to gRPC
-	header := metadata.Pairs("requestid", RequestID.String(), "servicename", CHECKOUTSERVICE)
-	metadataCtx := metadata.NewOutgoingContext(ctx, header)
-
-	// Add gRPC timeout
+	// Prepare gRPC metadata and timeout
+	metadataCtx, RequestID := setMetadata(ctx, CHECKOUTSERVICE, CURRENCYSERVICE)
 	newCtx, cancel := context.WithTimeout(metadataCtx, time.Second)
 	defer cancel()
-
-	// Log sending gRPC
-	event := "Sending message to " + CURRENCYSERVICE + " (request_id: " + RequestID.String() + ")"
-	emitLog(event, "INFO")
 
 	result, err := pb.NewCurrencyServiceClient(conn).Convert(newCtx, &pb.CurrencyConversionRequest{
 		From:   from,
 		ToCode: toCurrency})
 
 	// Check gRPC reply
-	checkResponse(status.Code(err), CURRENCYSERVICE, RequestID.String(), err)
+	checkResponse(status.Code(err), CURRENCYSERVICE, RequestID, err)
 
 	return result, err
 }
@@ -548,29 +510,17 @@ func (cs *checkoutService) chargeCard(ctx context.Context, amount *pb.Money, pay
 	}
 	defer conn.Close()
 
-	RequestID, err := uuid.NewRandom()
-	if err != nil {
-		emitLog(CHECKOUTSERVICE+": An error occurred while generating the RequestID", "ERROR")
-	}
-
-	// Add metadata to gRPC
-	header := metadata.Pairs("requestid", RequestID.String(), "servicename", CHECKOUTSERVICE)
-	metadataCtx := metadata.NewOutgoingContext(ctx, header)
-
-	// Add gRPC timeout
+	// Prepare gRPC metadata and timeout
+	metadataCtx, RequestID := setMetadata(ctx, CHECKOUTSERVICE, PAYMENTSERVICE)
 	newCtx, cancel := context.WithTimeout(metadataCtx, time.Second)
 	defer cancel()
-
-	// Log sending gRPC
-	event := "Sending message to " + PAYMENTSERVICE + " (request_id: " + RequestID.String() + ")"
-	emitLog(event, "INFO")
 
 	paymentResp, err := pb.NewPaymentServiceClient(conn).Charge(newCtx, &pb.ChargeRequest{
 		Amount:     amount,
 		CreditCard: paymentInfo})
 
 	// Check gRPC reply
-	checkResponse(status.Code(err), PAYMENTSERVICE, RequestID.String(), err)
+	checkResponse(status.Code(err), PAYMENTSERVICE, RequestID, err)
 
 	// Replaced nil with err (TESTING)
 	return paymentResp.GetTransactionId(), err
@@ -583,29 +533,17 @@ func (cs *checkoutService) sendOrderConfirmation(ctx context.Context, email stri
 	}
 	defer conn.Close()
 
-	RequestID, err := uuid.NewRandom()
-	if err != nil {
-		emitLog(CHECKOUTSERVICE+": An error occurred while generating the RequestID", "ERROR")
-	}
-
-	// Add metadata to gRPC
-	header := metadata.Pairs("requestid", RequestID.String(), "servicename", CHECKOUTSERVICE)
-	metadataCtx := metadata.NewOutgoingContext(ctx, header)
-
-	// Add gRPC timeout
+	// Prepare gRPC metadata and timeout
+	metadataCtx, RequestID := setMetadata(ctx, CHECKOUTSERVICE, EMAILSERVICE)
 	newCtx, cancel := context.WithTimeout(metadataCtx, time.Second)
 	defer cancel()
-
-	// Log sending gRPC
-	event := "Sending message to " + EMAILSERVICE + " (request_id: " + RequestID.String() + ")"
-	emitLog(event, "INFO")
 
 	_, err = pb.NewEmailServiceClient(conn).SendOrderConfirmation(newCtx, &pb.SendOrderConfirmationRequest{
 		Email: email,
 		Order: order})
 
 	// Check gRPC reply
-	checkResponse(status.Code(err), EMAILSERVICE, RequestID.String(), err)
+	checkResponse(status.Code(err), EMAILSERVICE, RequestID, err)
 
 	return err
 }
@@ -617,27 +555,15 @@ func (cs *checkoutService) shipOrder(ctx context.Context, address *pb.Address, i
 	}
 	defer conn.Close()
 
-	RequestID, err := uuid.NewRandom()
-	if err != nil {
-		emitLog(CHECKOUTSERVICE+": An error occurred while generating the RequestID", "ERROR")
-	}
-
-	// Add metadata to gRPC
-	header := metadata.Pairs("requestid", RequestID.String(), "servicename", CHECKOUTSERVICE)
-	metadataCtx := metadata.NewOutgoingContext(ctx, header)
-
-	// Add gRPC timeout
+	// Prepare gRPC metadata and timeout
+	metadataCtx, RequestID := setMetadata(ctx, CHECKOUTSERVICE, SHIPPINGSERVICE)
 	newCtx, cancel := context.WithTimeout(metadataCtx, time.Second)
 	defer cancel()
-
-	// Log sending gRPC
-	event := "Sending message to " + SHIPPINGSERVICE + " (request_id: " + RequestID.String() + ")"
-	emitLog(event, "INFO")
 
 	resp, err := pb.NewShippingServiceClient(conn).ShipOrder(newCtx, &pb.ShipOrderRequest{Address: address, Items: items})
 
 	// Check gRPC reply
-	checkResponse(status.Code(err), SHIPPINGSERVICE, RequestID.String(), err)
+	checkResponse(status.Code(err), SHIPPINGSERVICE, RequestID, err)
 
 	return resp.GetTrackingId(), nil
 }

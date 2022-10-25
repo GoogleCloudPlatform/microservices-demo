@@ -152,9 +152,7 @@ function convert (call, callback) {
   try {
     var SessionID = call.metadata.get("requestid");
     var ServiceName = call.metadata.get("servicename");
-
-    var event = "Received request from " + ServiceName + " (request_id: " + SessionID[0] + ")";
-    emitLog(event, "INFO");
+    emitLog("Received request from " + ServiceName + " (request_id: " + SessionID[0] + ")", "INFO");
 
     _getCurrencyData((data) => {
       const request = call.request;
@@ -178,8 +176,7 @@ function convert (call, callback) {
       result.nanos = Math.floor(result.nanos);
       result.currency_code = request.to_code;
 
-      event = "Answered request from " + ServiceName + " (request_id: " + SessionID[0] + ")";
-      emitLog(event, "INFO");
+      emitLog("Answered request from " + ServiceName + " (request_id: " + SessionID[0] + ")", "INFO");
       logger.info(`conversion request successful`);
 
       callback(null, result);

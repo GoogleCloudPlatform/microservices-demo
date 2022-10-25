@@ -131,32 +131,35 @@ func emitLog(event string, logLevel string) {
 	}
 }
 
+func readMetadata(ctx context.Context) (string, string) {
+	md, _ := metadata.FromIncomingContext(ctx)
+	reqId := md.Get("requestid")
+	invService := md.Get("servicename")
+	var RequestID, ServiceName string
+
+	if len(reqId) > 0 && len(invService) > 0 {
+		RequestID = reqId[0]
+		ServiceName = invService[0]
+		emitLog("Received request from "+ServiceName+" (request_id: "+RequestID+")", "INFO")
+
+	} else {
+		emitLog(SHIPPINGSERVICE+": An error occurred while retrieving the RequestID", "ERROR")
+	}
+
+	return RequestID, ServiceName
+}
+
 // GetQuote produces a shipping quote (cost) in USD.
 func (s *server) GetQuote(ctx context.Context, in *pb.GetQuoteRequest) (*pb.GetQuoteResponse, error) {
-	md, _ := metadata.FromIncomingContext(ctx)
-	values := md.Get("requestid")
-	invService := md.Get("servicename")
-	var event, RequestID, ServiceName string
+	RequestID, ServiceName := readMetadata(ctx)
 
 	log.Info("[GetQuote] received request")
 	defer log.Info("[GetQuote] completed request")
 
-	if len(values) > 0 && len(invService) > 0 {
-		RequestID = values[0]
-		ServiceName = invService[0]
-
-		event = "Received request from " + ServiceName + " (request_id: " + RequestID + ")"
-		emitLog(event, "INFO")
-	} else {
-		event = SHIPPINGSERVICE + ": An error occurred while retrieving the RequestID"
-		emitLog(event, "ERROR")
-	}
-
 	// 1. Generate a quote based on the total number of items to be shipped.
 	quote := CreateQuoteFromCount(0)
 
-	event = "Answered request from " + ServiceName + " (request_id: " + RequestID + ")"
-	emitLog(event, "INFO")
+	emitLog("Answered request from "+ServiceName+" (request_id: "+RequestID+")", "INFO")
 
 	// 2. Generate a response.
 	return &pb.GetQuoteResponse{
@@ -171,31 +174,16 @@ func (s *server) GetQuote(ctx context.Context, in *pb.GetQuoteRequest) (*pb.GetQ
 // ShipOrder mocks that the requested items will be shipped.
 // It supplies a tracking ID for notional lookup of shipment delivery status.
 func (s *server) ShipOrder(ctx context.Context, in *pb.ShipOrderRequest) (*pb.ShipOrderResponse, error) {
-	md, _ := metadata.FromIncomingContext(ctx)
-	values := md.Get("requestid")
-	invService := md.Get("servicename")
-	var event, RequestID, ServiceName string
+	RequestID, ServiceName := readMetadata(ctx)
 
 	log.Info("[ShipOrder] received request")
 	defer log.Info("[ShipOrder] completed request")
-
-	if len(values) > 0 && len(invService) > 0 {
-		RequestID = values[0]
-		ServiceName = invService[0]
-
-		event = "Received request from " + ServiceName + " (request_id: " + RequestID + ")"
-		emitLog(event, "INFO")
-	} else {
-		event = SHIPPINGSERVICE + ": An error occurred while retrieving the RequestID"
-		emitLog(event, "ERROR")
-	}
 
 	// 1. Create a Tracking ID
 	baseAddress := fmt.Sprintf("%s, %s, %s", in.Address.StreetAddress, in.Address.City, in.Address.State)
 	id := CreateTrackingId(baseAddress)
 
-	event = "Answered request from " + ServiceName + " (request_id: " + RequestID + ")"
-	emitLog(event, "INFO")
+	emitLog("Answered request from "+ServiceName+" (request_id: "+RequestID+")", "INFO")
 
 	// 2. Generate a response.
 	return &pb.ShipOrderResponse{

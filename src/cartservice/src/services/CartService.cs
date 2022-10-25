@@ -54,6 +54,21 @@ namespace cartservice.services
             }
         }
 
+        // Reads gRPC metadata and logs the received requests
+        public Tuple<string, string> initMetadata(ServerCallContext context) {
+            var RequestID = context.RequestHeaders.Get("requestid").Value;
+            var ServiceName = context.RequestHeaders.Get("servicename").Value;
+            Tuple<string, string> header = new Tuple<string, string>(RequestID.ToString(), ServiceName.ToString());
+
+            if (RequestID == null && ServiceName == null) {
+                emitLog(CARTSERVICE + ": An error occurred while retrieving the RequestID", "ERROR");
+                return null;
+            }
+            emitLog("Received request from " + ServiceName.ToString() + " (request_id: " + RequestID.ToString() + ")", "INFO");
+            
+            return header;
+        }
+
         public CartService(ICartStore cartStore)
         {
             _cartStore = cartStore;
@@ -61,64 +76,31 @@ namespace cartservice.services
 
         public async override Task<Empty> AddItem(AddItemRequest request, ServerCallContext context)
         {
-            var RequestID = context.RequestHeaders.Get("requestid").Value;
-            var ServiceName = context.RequestHeaders.Get("servicename").Value;
-
-            if (RequestID == null && ServiceName == null) 
-            {
-                emitLog(CARTSERVICE + ": An error occurred while retrieving the RequestID", "ERROR");
-                return null;
-            }
-
-            string messageEvent = "Received request from " + ServiceName.ToString() + " (request_id: " + RequestID.ToString() + ")";
-            emitLog(messageEvent, "INFO");
+            Tuple<string, string> header = initMetadata(context);
 
             await _cartStore.AddItemAsync(request.UserId, request.Item.ProductId, request.Item.Quantity);
 
-            messageEvent = "Answered request from " + ServiceName.ToString() + " (request_id: " + RequestID.ToString() + ")";
-            emitLog(messageEvent, "INFO");
+            emitLog("Answered request from " + header.Item1 + " (request_id: " + header.Item2 + ")", "INFO");
 
             return Empty;
         }
 
         public override Task<Cart> GetCart(GetCartRequest request, ServerCallContext context)
         {
-            var RequestID = context.RequestHeaders.Get("requestid").Value;
-            var ServiceName = context.RequestHeaders.Get("servicename").Value;
+            Tuple<string, string> header = initMetadata(context);
 
-            if (RequestID == null && ServiceName == null) 
-            {
-                emitLog(CARTSERVICE + ": An error occurred while retrieving the RequestID", "ERROR");
-                return null;
-            }
-
-            string messageEvent = "Received request from " + ServiceName.ToString() + " (request_id: " + RequestID.ToString() + ")";
-            emitLog(messageEvent, "INFO");
-
-            messageEvent = "Answered request from " + ServiceName.ToString() + " (request_id: " + RequestID.ToString() + ")";
-            emitLog(messageEvent, "INFO");
+            emitLog("Answered request from " + header.Item1 + " (request_id: " + header.Item2 + ")", "INFO");
 
             return _cartStore.GetCartAsync(request.UserId);
         }
 
         public async override Task<Empty> EmptyCart(EmptyCartRequest request, ServerCallContext context)
         {
-            var RequestID = context.RequestHeaders.Get("requestid").Value;
-            var ServiceName = context.RequestHeaders.Get("servicename").Value;
-
-            if (RequestID == null && ServiceName == null) 
-            {
-                emitLog(CARTSERVICE + ": An error occurred while retrieving the RequestID", "ERROR");
-                return null;
-            }
-
-            string messageEvent = "Received request from " + ServiceName.ToString() + " (request_id: " + RequestID.ToString() + ")";
-            emitLog(messageEvent, "INFO");
+            Tuple<string, string> header = initMetadata(context);
 
             await _cartStore.EmptyCartAsync(request.UserId);
 
-            messageEvent = "Answered request from " + ServiceName.ToString() + " (request_id: " + RequestID.ToString() + ")";
-            emitLog(messageEvent, "INFO");
+            emitLog("Answered request from " + header.Item1 + " (request_id: " + header.Item2 + ")", "INFO");
             
             return Empty;
         }

@@ -76,6 +76,24 @@ func emitLog(event string, logLevel string) {
 	}
 }
 
+func readMetadata(ctx context.Context) (string, string) {
+	md, _ := metadata.FromIncomingContext(ctx)
+	reqId := md.Get("requestid")
+	invService := md.Get("servicename")
+	var RequestID, ServiceName string
+
+	if len(reqId) > 0 && len(invService) > 0 {
+		RequestID = reqId[0]
+		ServiceName = invService[0]
+		emitLog("Received request from "+ServiceName+" (request_id: "+RequestID+")", "INFO")
+
+	} else {
+		emitLog(PRODUCTCATALOGSERVICE+": An error occurred while retrieving the RequestID", "ERROR")
+	}
+
+	return RequestID, ServiceName
+}
+
 func init() {
 	log = logrus.New()
 	log.Formatter = &logrus.JSONFormatter{
@@ -287,44 +305,17 @@ func (p *productCatalog) Watch(req *healthpb.HealthCheckRequest, ws healthpb.Hea
 }
 
 func (p *productCatalog) ListProducts(ctx context.Context, req *pb.Empty) (*pb.ListProductsResponse, error) {
-	md, _ := metadata.FromIncomingContext(ctx)
-	values := md.Get("requestid")
-	invService := md.Get("servicename")
-	var RequestID, ServiceName string
-
-	if len(values) > 0 && len(invService) > 0 {
-		RequestID = values[0]
-		ServiceName = invService[0]
-
-		event := "Received request from " + ServiceName + " (request_id: " + RequestID + ")"
-		emitLog(event, "INFO")
-	} else {
-		emitLog(PRODUCTCATALOGSERVICE+": An error occurred while retrieving the RequestID", "ERROR")
-	}
+	RequestID, ServiceName := readMetadata(ctx)
 
 	time.Sleep(extraLatency)
 
-	event := "Answered request from " + ServiceName + " (request_id: " + RequestID + ")"
-	emitLog(event, "INFO")
+	emitLog("Answered request from "+ServiceName+" (request_id: "+RequestID+")", "INFO")
 
 	return &pb.ListProductsResponse{Products: parseCatalog()}, nil
 }
 
 func (p *productCatalog) GetProduct(ctx context.Context, req *pb.GetProductRequest) (*pb.Product, error) {
-	md, _ := metadata.FromIncomingContext(ctx)
-	values := md.Get("requestid")
-	invService := md.Get("servicename")
-	var RequestID, ServiceName string
-
-	if len(values) > 0 && len(invService) > 0 {
-		RequestID = values[0]
-		ServiceName = invService[0]
-
-		event := "Received request from " + ServiceName + " (request_id: " + RequestID + ")"
-		emitLog(event, "INFO")
-	} else {
-		emitLog(PRODUCTCATALOGSERVICE+": An error occurred while retrieving the RequestID", "ERROR")
-	}
+	RequestID, ServiceName := readMetadata(ctx)
 
 	time.Sleep(extraLatency)
 	var found *pb.Product
@@ -338,27 +329,13 @@ func (p *productCatalog) GetProduct(ctx context.Context, req *pb.GetProductReque
 		return nil, status.Errorf(codes.NotFound, "no product with ID %s", req.Id)
 	}
 
-	event := "Answered request from " + ServiceName + " (request_id: " + RequestID + ")"
-	emitLog(event, "INFO")
+	emitLog("Answered request from "+ServiceName+" (request_id: "+RequestID+")", "INFO")
 
 	return found, nil
 }
 
 func (p *productCatalog) SearchProducts(ctx context.Context, req *pb.SearchProductsRequest) (*pb.SearchProductsResponse, error) {
-	md, _ := metadata.FromIncomingContext(ctx)
-	values := md.Get("requestid")
-	invService := md.Get("servicename")
-	var RequestID, ServiceName string
-
-	if len(values) > 0 && len(invService) > 0 {
-		RequestID = values[0]
-		ServiceName = invService[0]
-
-		event := "Received request from " + ServiceName + " (request_id: " + RequestID + ")"
-		emitLog(event, "INFO")
-	} else {
-		emitLog(PRODUCTCATALOGSERVICE+": An error occurred while retrieving the RequestID", "ERROR")
-	}
+	RequestID, ServiceName := readMetadata(ctx)
 
 	time.Sleep(extraLatency)
 	// Intepret query as a substring match in name or description.
@@ -370,8 +347,7 @@ func (p *productCatalog) SearchProducts(ctx context.Context, req *pb.SearchProdu
 		}
 	}
 
-	event := "Answered request from " + ServiceName + " (request_id: " + RequestID + ")"
-	emitLog(event, "INFO")
+	emitLog("Answered request from "+ServiceName+" (request_id: "+RequestID+")", "INFO")
 
 	return &pb.SearchProductsResponse{Results: ps}, nil
 }
