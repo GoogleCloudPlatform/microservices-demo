@@ -24,3 +24,7 @@ components:
 # - components/service-accounts
 # - components/spanner
 # - components/local-images
+# - components/container-images-tag
+# - components/container-images-tag-suffix
+# - components/container-images-registry
+# - components/native-grpc-health-check

@@ -49,7 +49,7 @@ markupsafe==2.1.1
     #   werkzeug
 msgpack==1.0.4
     # via locust
-psutil==5.9.2
+psutil==5.9.3
     # via locust
 pyzmq==24.0.1
     # via locust
@@ -69,7 +69,7 @@ werkzeug==2.2.2
     # via
     #   flask
     #   locust
-zipp==3.9.0
+zipp==3.10.0
     # via importlib-metadata
 zope-event==4.5.0
     # via gevent
