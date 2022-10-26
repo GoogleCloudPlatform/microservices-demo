@@ -13,7 +13,7 @@
     "@google-cloud/debug-agent": "7.1.0",
     "@google-cloud/profiler": "5.0.3",
     "@google-cloud/trace-agent": "7.1.2",
-    "@grpc/grpc-js": "1.7.2",
+    "@grpc/grpc-js": "1.7.3",
     "@grpc/proto-loader": "0.7.3",
     "pino": "8.7.0",
     "simple-card-validator": "^1.1.0",

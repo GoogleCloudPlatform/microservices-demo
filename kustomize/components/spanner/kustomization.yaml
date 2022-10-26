@@ -14,9 +14,6 @@
 
 apiVersion: kustomize.config.k8s.io/v1alpha1
 kind: Component
-images:
-- name: gcr.io/google-samples/microservices-demo/cartservice
-  newTag: v0.4.0-spanner
 patchesStrategicMerge:
 # cartservice - replace REDIS_ADDR by SPANNER_CONNECTION_STRING for the cartservice Deployment
 - |-
