@@ -46,7 +46,6 @@ if(process.env.ENABLE_TRACING == "1") {
   provider.addSpanProcessor(new SimpleSpanProcessor(new OTLPTraceExporter({url: collectorUrl})));
   provider.register();
 
-
   registerInstrumentations({
     instrumentations: [new GrpcInstrumentation()]
   });
