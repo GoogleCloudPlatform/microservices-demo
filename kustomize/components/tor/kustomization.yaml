@@ -1,0 +1,74 @@
+# Copyright 2022 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+apiVersion: kustomize.config.k8s.io/v1alpha1
+kind: Component
+patchesStrategicMerge:
+# frontend - enable TOR
+- |-
+  apiVersion: apps/v1
+  kind: Deployment
+  metadata:
+    name: frontend
+  spec:
+    template:
+      spec:
+        securityContext:
+          runAsNonRoot: false
+          fsGroup: 1000
+          runAsUser: 1000
+        containers:
+          - name: server
+            image: frontend-local-tor
+            imagePullPolicy: IfNotPresent
+            securityContext:
+              readOnlyRootFilesystem: false
+              # privileged: true
+              # allowPrivilegeEscalation: true
+              capabilities:
+                drop: []
+                add:
+                  - SYS_ADMIN
+                  - NET_ADMIN
+            volumeMounts:
+            - mountPath: /home/arti/.local/share/arti
+              name: arti-data
+
+        initContainers:
+          - name: take-arti-dir-ownership
+            image: frontend-local-tor
+            imagePullPolicy: IfNotPresent
+            # Give `arti` user (id 1000) permissions a mounted volume
+            securityContext:
+              runAsUser: 0
+              readOnlyRootFilesystem: false
+              privileged: true
+            command:
+            - chown
+            - arti:arti
+            - /home/arti/.local/share/arti
+            volumeMounts:
+            - name: arti-data
+              mountPath: /home/arti/.local/share/arti
+
+        volumes:
+        - name: arti-data
+          emptyDir: {}
+
+- |-
+  apiVersion: apps/v1
+  kind: Deployment
+  metadata:
+    name: loadgenerator
+  $patch: delete

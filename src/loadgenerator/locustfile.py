@@ -65,7 +65,6 @@ def checkout(l):
     })
 
 class UserBehavior(TaskSet):
-
     def on_start(self):
         index(self)
 

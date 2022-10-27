@@ -35,6 +35,7 @@ spec:
         runAsUser: 1000
       containers:
         - name: server
+          # this line is added to allow minikube to discover local docker images
           securityContext:
             allowPrivilegeEscalation: false
             capabilities:
@@ -79,8 +80,8 @@ spec:
           - name: AD_SERVICE_ADDR
             value: "adservice:9555"
           # # ENV_PLATFORM: One of: local, gcp, aws, azure, onprem, alibaba
-          # # When not set, defaults to "local" unless running in GKE, otherwies auto-sets to gcp 
-          # - name: ENV_PLATFORM 
+          # # When not set, defaults to "local" unless running in GKE, otherwies auto-sets to gcp
+          # - name: ENV_PLATFORM
           #   value: "aws"
           - name: ENABLE_PROFILER
             value: "0"

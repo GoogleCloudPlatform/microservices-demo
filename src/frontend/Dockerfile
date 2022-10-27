@@ -12,7 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# "tor" or "no_tor"
+ARG BUILD_ENV
+
 FROM golang:1.19.4-alpine@sha256:f33331e12ca70192c0dbab2d0a74a52e1dd344221507d88aaea605b0219a212f as builder
+
 RUN apk add --no-cache ca-certificates git
 RUN apk add build-base
 WORKDIR /src
@@ -26,18 +30,55 @@ COPY . .
 ARG SKAFFOLD_GO_GCFLAGS
 RUN go build -gcflags="${SKAFFOLD_GO_GCFLAGS}" -o /go/bin/frontend .
 
-FROM alpine:3.17.0@sha256:8914eb54f968791faf6a8638949e480fef81e697984fba772b3976835194c6d4 as release
+FROM alpine:3.16.2 as torbuilder_tor
+WORKDIR /arti
+RUN apk add --upgrade git curl openssl libressl-dev alpine-sdk
+
+## Rust
+RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs > install_rust
+RUN chmod +x install_rust
+RUN ./install_rust -y
+
+## Arti
+RUN git clone -b hack/metric-logging --single-branch https://gitlab.torproject.org/breezykermo/arti.git
+WORKDIR /arti/arti
+# NOTE: see https://gitlab.torproject.org/tpo/core/arti/-/issues/571 for
+# rationale behind the next command
+RUN apk update && \
+  apk add alpine-sdk sqlite-dev openssl-dev perl && \
+  ~/.cargo/bin/cargo install --features static arti
+
+FROM alpine:3.16.2 as torbuilder_no_tor
+RUN mkdir -p /root/.cargo/bin
+RUN touch /root/.cargo/bin/arti
+
+FROM torbuilder_${BUILD_ENV} as torbuilder
+
+FROM alpine:3.16.2 as release
+ARG BUILD_ENV
+
+
 RUN apk add --no-cache ca-certificates \
     busybox-extras net-tools bind-tools
 WORKDIR /src
 COPY --from=builder /go/bin/frontend /src/server
+COPY --from=builder /src/run_arti.sh /src/run_arti
 COPY ./templates ./templates
 COPY ./static ./static
+
+# Our arti binary, or an empty file.
+COPY --from=torbuilder /root/.cargo/bin/arti /usr/bin/arti
 
 # Definition of this variable is used by 'skaffold debug' to identify a golang binary.
 # Default behavior - a failure prints a stack trace for the current goroutine.
 # See https://golang.org/pkg/runtime/
 ENV GOTRACEBACK=single
+
+RUN adduser -D -g 1000 arti
+RUN mkdir -p /home/arti/.local/share/arti
+RUN chown arti: /home/arti/.local/share/arti
+
+ENV TRACING_BUILD_ENV ${BUILD_ENV}
 
 EXPOSE 8080
 ENTRYPOINT ["/src/server"]

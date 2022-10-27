@@ -24,11 +24,13 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"io/ioutil"
 	"time"
 
 	"github.com/gorilla/mux"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
+
 
 	pb "github.com/GoogleCloudPlatform/microservices-demo/src/frontend/genproto"
 	"github.com/GoogleCloudPlatform/microservices-demo/src/frontend/money"
@@ -50,6 +52,16 @@ var (
 )
 
 var validEnvs = []string{"local", "gcp", "azure", "aws", "onprem", "alibaba"}
+
+func writeTemplate(w http.ResponseWriter, name string, t map[string]interface{}) {
+	if err := templates.ExecuteTemplate(w, name, t); err != nil {
+		log.Error(err)
+	}
+}
+
+func writeHeader(w http.ResponseWriter, code int) {
+	w.WriteHeader(code)
+}
 
 func (fe *frontendServer) homeHandler(w http.ResponseWriter, r *http.Request) {
 	log := r.Context().Value(ctxKeyLog{}).(logrus.FieldLogger)
@@ -102,7 +114,7 @@ func (fe *frontendServer) homeHandler(w http.ResponseWriter, r *http.Request) {
 	plat = platformDetails{}
 	plat.setPlatformDetails(strings.ToLower(env))
 
-	if err := templates.ExecuteTemplate(w, "home", map[string]interface{}{
+	writeTemplate(w, "home", map[string]interface{}{
 		"session_id":        sessionID(r),
 		"request_id":        r.Context().Value(ctxKeyRequestID{}),
 		"user_currency":     currentCurrency(r),
@@ -116,9 +128,7 @@ func (fe *frontendServer) homeHandler(w http.ResponseWriter, r *http.Request) {
 		"platform_name":     plat.provider,
 		"is_cymbal_brand":   isCymbalBrand,
 		"deploymentDetails": deploymentDetailsMap,
-	}); err != nil {
-		log.Error(err)
-	}
+	})
 }
 
 func (plat *platformDetails) setPlatformDetails(env string) {
@@ -187,7 +197,7 @@ func (fe *frontendServer) productHandler(w http.ResponseWriter, r *http.Request)
 		Price *pb.Money
 	}{p, price}
 
-	if err := templates.ExecuteTemplate(w, "product", map[string]interface{}{
+	writeTemplate(w, "product", map[string]interface{}{
 		"session_id":        sessionID(r),
 		"request_id":        r.Context().Value(ctxKeyRequestID{}),
 		"ad":                fe.chooseAd(r.Context(), p.Categories, log),
@@ -201,9 +211,7 @@ func (fe *frontendServer) productHandler(w http.ResponseWriter, r *http.Request)
 		"platform_name":     plat.provider,
 		"is_cymbal_brand":   isCymbalBrand,
 		"deploymentDetails": deploymentDetailsMap,
-	}); err != nil {
-		log.Println(err)
-	}
+	})
 }
 
 func (fe *frontendServer) addToCartHandler(w http.ResponseWriter, r *http.Request) {
@@ -227,7 +235,7 @@ func (fe *frontendServer) addToCartHandler(w http.ResponseWriter, r *http.Reques
 		return
 	}
 	w.Header().Set("location", "/cart")
-	w.WriteHeader(http.StatusFound)
+	writeHeader(w, http.StatusFound)
 }
 
 func (fe *frontendServer) emptyCartHandler(w http.ResponseWriter, r *http.Request) {
@@ -239,7 +247,7 @@ func (fe *frontendServer) emptyCartHandler(w http.ResponseWriter, r *http.Reques
 		return
 	}
 	w.Header().Set("location", "/")
-	w.WriteHeader(http.StatusFound)
+	writeHeader(w, http.StatusFound)
 }
 
 func (fe *frontendServer) viewCartHandler(w http.ResponseWriter, r *http.Request) {
@@ -297,7 +305,7 @@ func (fe *frontendServer) viewCartHandler(w http.ResponseWriter, r *http.Request
 	totalPrice = money.Must(money.Sum(totalPrice, *shippingCost))
 	year := time.Now().Year()
 
-	if err := templates.ExecuteTemplate(w, "cart", map[string]interface{}{
+	writeTemplate(w, "cart", map[string]interface{}{
 		"session_id":        sessionID(r),
 		"request_id":        r.Context().Value(ctxKeyRequestID{}),
 		"user_currency":     currentCurrency(r),
@@ -313,9 +321,7 @@ func (fe *frontendServer) viewCartHandler(w http.ResponseWriter, r *http.Request
 		"platform_name":     plat.provider,
 		"is_cymbal_brand":   isCymbalBrand,
 		"deploymentDetails": deploymentDetailsMap,
-	}); err != nil {
-		log.Println(err)
-	}
+	})
 }
 
 func (fe *frontendServer) placeOrderHandler(w http.ResponseWriter, r *http.Request) {
@@ -373,7 +379,7 @@ func (fe *frontendServer) placeOrderHandler(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
-	if err := templates.ExecuteTemplate(w, "order", map[string]interface{}{
+	writeTemplate(w, "order", map[string]interface{}{
 		"session_id":        sessionID(r),
 		"request_id":        r.Context().Value(ctxKeyRequestID{}),
 		"user_currency":     currentCurrency(r),
@@ -386,9 +392,7 @@ func (fe *frontendServer) placeOrderHandler(w http.ResponseWriter, r *http.Reque
 		"platform_name":     plat.provider,
 		"is_cymbal_brand":   isCymbalBrand,
 		"deploymentDetails": deploymentDetailsMap,
-	}); err != nil {
-		log.Println(err)
-	}
+	})
 }
 
 func (fe *frontendServer) logoutHandler(w http.ResponseWriter, r *http.Request) {
@@ -400,7 +404,42 @@ func (fe *frontendServer) logoutHandler(w http.ResponseWriter, r *http.Request) 
 		http.SetCookie(w, c)
 	}
 	w.Header().Set("Location", "/")
-	w.WriteHeader(http.StatusFound)
+	writeHeader(w, http.StatusFound)
+}
+
+func (fe *frontendServer) calloutHandler(w http.ResponseWriter, r *http.Request) {
+	log := r.Context().Value(ctxKeyLog{}).(logrus.FieldLogger)
+	now := time.Now();
+	log.Debug("calling out to external service")
+
+	requestURL := fmt.Sprintf("http://www.example.com")
+
+	// create a request
+	req, err := http.NewRequest("GET", requestURL, nil)
+	if err != nil {
+		log.Warn("can't create request:", err)
+		return
+	}
+
+	resp, err := fe.calloutClient.Do(req)
+	if err != nil {
+		fmt.Fprintln(os.Stderr, "cannot make get request: ", err)
+		return
+	}
+
+	defer resp.Body.Close()
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		log.Warn("cannot read response body: ", err)
+	}
+	elapsed := time.Since(now);
+	fmt.Println("received response -> ", body)
+
+	if os.Getenv("TRACING_BUILD_ENV") == "no_tor" {
+		fmt.Println("METRIC(lox):", elapsed);
+	}
+
+	writeHeader(w, http.StatusFound)
 }
 
 func (fe *frontendServer) setCurrencyHandler(w http.ResponseWriter, r *http.Request) {
@@ -421,7 +460,7 @@ func (fe *frontendServer) setCurrencyHandler(w http.ResponseWriter, r *http.Requ
 		referer = "/"
 	}
 	w.Header().Set("Location", referer)
-	w.WriteHeader(http.StatusFound)
+	writeHeader(w, http.StatusFound)
 }
 
 // chooseAd queries for advertisements available and randomly chooses one, if
@@ -441,7 +480,7 @@ func renderHTTPError(log logrus.FieldLogger, r *http.Request, w http.ResponseWri
 
 	w.WriteHeader(code)
 
-	if templateErr := templates.ExecuteTemplate(w, "error", map[string]interface{}{
+	writeTemplate(w, "error", map[string]interface{}{
 		"session_id":        sessionID(r),
 		"request_id":        r.Context().Value(ctxKeyRequestID{}),
 		"error":             errMsg,
@@ -449,9 +488,7 @@ func renderHTTPError(log logrus.FieldLogger, r *http.Request, w http.ResponseWri
 		"status":            http.StatusText(code),
 		"is_cymbal_brand":   isCymbalBrand,
 		"deploymentDetails": deploymentDetailsMap,
-	}); templateErr != nil {
-		log.Println(templateErr)
-	}
+	})
 }
 
 func currentCurrency(r *http.Request) string {

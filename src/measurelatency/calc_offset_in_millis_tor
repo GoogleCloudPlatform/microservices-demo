@@ -1,0 +1,47 @@
+#!/usr/bin/env fish
+: '
+Parses the logs from the "frontend" container, picking out the lines that begin
+with "METRIC(lox)", and then aggregates those numbers.
+
+This is orchestrated (in the k8s application logs) to amount to the "offset",
+i.e. the total time in milliseconds spent waiting for the external request to
+resolve in the server.
+'
+# NB: to get a shell in the frontend pod for debugging:
+#   kubectl exec -it $FRONTEND_POD -c server -- /bin/sh
+
+argparse 'u/url=' -- $argv
+
+if set --query _flag_u
+  set SERVER_URL $_flag_u
+else
+  set SERVER_URL http://192.168.49.2:31385
+end
+echo $SERVER_URL
+
+# make the request and time it
+set START_TIME (date +%s%N)
+# curl http://192.168.49.2:31906/callout
+# curl http://172.17.255.255:32070/callout
+curl $SERVER_URL/callout
+set END_TIME (date +%s%N)
+
+set REQ_TOTAL_TIME_NANOS (math $END_TIME - $START_TIME)
+
+set FRONTEND_POD (kubectl get pods --no-headers -o custom-columns=":metadata.name" | grep "frontend" | tr -d '\n')
+
+# NB: take only the latest METRIC(lox) log, as this will correspond to the `curl` request above.
+set METRIC_LOGS (kubectl exec $FRONTEND_POD -c server -- cat /home/arti/.local/share/arti/arti_logs.txt)
+echo $METRIC_LOGS
+# set METRICS_AS_STR (string replace "METRIC(lox): " "" $METRIC_LOGS)
+# set METRICS (string split ' ' $METRICS_AS_STR)
+#
+# set REQ_WAIT_TIME_MILLIS 0
+# for metric in $METRICS
+#   set REQ_WAIT_TIME_MILLIS (math $REQ_WAIT_TIME_MILLIS + (string replace "ms" "" $metric))
+# end
+#
+# set REQ_TIME_MILLIS (math $REQ_TOTAL_TIME_NANOS / 1000000)
+# echo "took:" $REQ_TIME_MILLIS", waited:" $REQ_WAIT_TIME_MILLIS
+#
+# echo "machinery time: " (math $REQ_TIME_MILLIS - $REQ_WAIT_TIME_MILLIS) "ms"

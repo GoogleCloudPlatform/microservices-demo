@@ -17,14 +17,19 @@ package main
 import (
 	"context"
 	"fmt"
+	"net"
 	"net/http"
 	"os"
+	"os/exec"
 	"time"
 
 	"cloud.google.com/go/profiler"
 	"github.com/gorilla/mux"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
+
+	"golang.org/x/net/proxy"
+
 	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
 	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 	"go.opentelemetry.io/otel"
@@ -80,6 +85,9 @@ type frontendServer struct {
 
 	collectorAddr string
 	collectorConn *grpc.ClientConn
+
+	calloutProxyAddr string
+	calloutClient *http.Client
 }
 
 func main() {
@@ -124,6 +132,7 @@ func main() {
 	mustMapEnv(&svc.checkoutSvcAddr, "CHECKOUT_SERVICE_ADDR")
 	mustMapEnv(&svc.shippingSvcAddr, "SHIPPING_SERVICE_ADDR")
 	mustMapEnv(&svc.adSvcAddr, "AD_SERVICE_ADDR")
+	svc.calloutProxyAddr = "0.0.0.0:9150"
 
 	mustConnGRPC(ctx, &svc.currencySvcConn, svc.currencySvcAddr)
 	mustConnGRPC(ctx, &svc.productCatalogSvcConn, svc.productCatalogSvcAddr)
@@ -132,6 +141,35 @@ func main() {
 	mustConnGRPC(ctx, &svc.shippingSvcConn, svc.shippingSvcAddr)
 	mustConnGRPC(ctx, &svc.checkoutSvcConn, svc.checkoutSvcAddr)
 	mustConnGRPC(ctx, &svc.adSvcConn, svc.adSvcAddr)
+
+	fmt.Println("ENV: ", os.Getenv("TRACING_BUILD_ENV"))
+	if os.Getenv("TRACING_BUILD_ENV") == "tor" {
+		dialer, err := proxy.SOCKS5("tcp", svc.calloutProxyAddr, nil, proxy.Direct)
+		if err != nil {
+			fmt.Fprintln(os.Stderr, "can't connect to the proxy:", err)
+			os.Exit(1)
+		}
+		fmt.Println("Configured to use Tor proxy.")
+		fmt.Println(dialer)
+
+		dialContext := func(ctx context.Context, network, address string) (net.Conn, error) {
+			// do anything with ctx
+			fmt.Println("context: ", ctx)
+			fmt.Println("network: ", network)
+			fmt.Println("address: ", address)
+
+			return dialer.Dial(network, address)
+		}
+
+		// setup a http client
+		httpTransport := &http.Transport{
+			DialContext: dialContext,
+		}
+		svc.calloutClient = &http.Client{Transport: httpTransport}
+	} else {
+		svc.calloutClient = &http.Client{}
+	}
+
 
 	r := mux.NewRouter()
 	r.HandleFunc("/", svc.homeHandler).Methods(http.MethodGet, http.MethodHead)
@@ -145,12 +183,27 @@ func main() {
 	r.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir("./static/"))))
 	r.HandleFunc("/robots.txt", func(w http.ResponseWriter, _ *http.Request) { fmt.Fprint(w, "User-agent: *\nDisallow: /") })
 	r.HandleFunc("/_healthz", func(w http.ResponseWriter, _ *http.Request) { fmt.Fprint(w, "ok") })
+	r.HandleFunc("/callout", svc.calloutHandler).Methods(http.MethodGet)
 
 	var handler http.Handler = r
 	handler = &logHandler{log: log, next: handler} // add logging
 	handler = ensureSessionID(handler)             // add session ID
 	if os.Getenv("ENABLE_TRACING") == "1" {
 		handler = otelhttp.NewHandler(handler, "frontend") // add OTel tracing
+	}
+
+	if os.Getenv("TRACING_BUILD_ENV") == "tor" {
+		arti_cmd := exec.Command("./run_arti")
+		go func() {
+			outfile, err := os.Create("/home/arti/.local/share/arti/arti_logs.txt")
+			if err != nil {
+				panic(err)
+			}
+			defer outfile.Close()
+			arti_cmd.Stdout = outfile
+			arti_cmd.Run()
+		}()
+		log.Infof("arti process running.")
 	}
 
 	log.Infof("starting server on " + addr + ":" + srvPort)
