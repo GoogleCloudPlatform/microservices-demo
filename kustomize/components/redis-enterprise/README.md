@@ -3,9 +3,7 @@
 By default the `cartservice` app is serializing the data in an in-cluster Redis database. Using a database outside your GKE cluster could bring more resiliency and more security with a managed service like Redis Enterprise in Google Cloud Marketplace.
 
 ![Architecture diagram with Redis Enterprise](/docs/img/redis-enterprise/redis-enterprise.png)
-
-To use a fully managed Redis Enterprise database instance, the `cartservice`'s environment variable `REDIS_ADDR` needs to be updated to point to the Memorystore (Redis) instance.
-
+  
 To provision a fully managed Redis Enterprise database instance you can follow the instructions [here](./redis-enterprise.md).  
 
 You can also find in this repository the Terraform script to provision the fully managed Redis Enterprise database instance alongside the GKE cluster, more information [here](/terraform). To use Terraform, you are required to collect the [Redis Cloud Access Key](https://docs.redis.com/latest/rc/api/get-started/enable-the-api/) and [Redis Cloud Secret Key](https://docs.redis.com/latest/rc/api/get-started/manage-api-keys/#secret) and save them in your environment variables namely `REDISCLOUD_ACCESS_KEY` and `REDISCLOUD_SECRET_KEY`.
@@ -42,7 +40,7 @@ For example,
 REDIS_IP="redis-15219.internal.c21247.us-central1-mz.gcp.cloud.rlrcp.com:15219,user=default,password=VJKeYjdXQgaPnqpU5Ypktx1qhzNYeEOI"
 ```
 ```
-sed -i .bak "s/{{REDIS_ADDR}}/${REDIS_IP}/g" components/redis-enterprise/kustomization.yaml
+sed -i .bak "s/REDIS_CONNECTION_STRING/${REDIS_IP}/g" components/redis-enterprise/kustomization.yaml
 ```
    
 You can locally render these manifests by running `kubectl kustomize .` as well as deploying them by running `kubectl apply -k .`.
