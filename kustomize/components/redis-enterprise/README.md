@@ -4,7 +4,7 @@ By default the `cartservice` app is serializing the data in an in-cluster Redis 
 
 ![Architecture diagram with Redis Enterprise](/docs/img/redis-enterprise/redis-enterprise.png)
   
-To provision a fully managed Redis Enterprise database instance you can follow the instructions [here](./redis-enterprise.md).  
+To provision a fully managed Redis Enterprise database instance you can follow the instructions [here](https://github.com/Redislabs-Solution-Architects/redis-enterprise-cloud-gcp/blob/main/marketplace/gcp/redis-enterprise.md).  
 
 You can also find in this repository the Terraform script to provision the fully managed Redis Enterprise database instance alongside the GKE cluster, more information [here](/terraform). To use Terraform, you are required to collect the [Redis Cloud Access Key](https://docs.redis.com/latest/rc/api/get-started/enable-the-api/) and [Redis Cloud Secret Key](https://docs.redis.com/latest/rc/api/get-started/manage-api-keys/#secret) and save them in your environment variables namely `REDISCLOUD_ACCESS_KEY` and `REDISCLOUD_SECRET_KEY`.
 
