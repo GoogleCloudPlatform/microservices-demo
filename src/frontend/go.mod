@@ -3,7 +3,7 @@ module github.com/GoogleCloudPlatform/microservices-demo/src/frontend
 go 1.19
 
 require (
-	cloud.google.com/go/compute v1.11.0
+	cloud.google.com/go/compute/metadata v0.2.1
 	cloud.google.com/go/profiler v0.3.0
 	github.com/golang/protobuf v1.5.2
 	github.com/google/uuid v1.3.0
@@ -24,6 +24,7 @@ require (
 	github.com/felixge/httpsnoop v1.0.3 // indirect
 	github.com/go-logr/logr v1.2.3 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
+	cloud.google.com/go/compute v1.12.1 // indirect
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
 	github.com/google/go-cmp v0.5.9 // indirect
 	github.com/google/pprof v0.0.0-20220412212628-83db2b799d1f // indirect
