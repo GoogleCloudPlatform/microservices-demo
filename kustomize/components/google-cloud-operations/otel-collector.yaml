@@ -32,9 +32,9 @@ spec:
       # https://cloud.google.com/compute/docs/storing-retrieving-metadata
       initContainers:
       - name: otel-gateway-init
-        image: gcr.io/google.com/cloudsdktool/cloud-sdk:405.0.0-alpine
+        image: busybox:latest
         command:
-        - '/bin/bash'
+        - '/bin/sh'
         - '-c'
         - |
            sed "s/{{PROJECT_ID}}/$(curl -H 'Metadata-Flavor: Google' http://metadata.google.internal/computeMetadata/v1/project/project-id)/" /template/collector-gateway-config-template.yaml >> /conf/collector-gateway-config.yaml
