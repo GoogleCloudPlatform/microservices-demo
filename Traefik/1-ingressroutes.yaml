@@ -1,0 +1,16 @@
+
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: frontend
+  namespace: boutique-shop
+spec:
+  entryPoints:
+    - web
+  routes:
+    - match: Host(`frontend.example.com`)
+      kind: Rule
+      services:
+        - name: frontend
+          port: 80
