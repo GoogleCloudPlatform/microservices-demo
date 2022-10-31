@@ -45,7 +45,7 @@ grpcio-health-checking==1.48.1
     # via -r requirements.in
 grpcio-status==1.48.1
     # via google-api-core
-httplib2==0.20.4
+httplib2==0.21.0
     # via
     #   google-api-python-client
     #   google-auth-httplib2
