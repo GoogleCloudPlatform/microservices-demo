@@ -37,6 +37,13 @@ spec:
       # https://cloud.google.com/compute/docs/storing-retrieving-metadata
       initContainers:
       - name: otel-gateway-init
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+              - all
+          privileged: false
+          readOnlyRootFilesystem: true
         image: busybox:latest
         command:
         - '/bin/sh'
