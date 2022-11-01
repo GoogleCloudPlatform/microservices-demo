@@ -13,9 +13,12 @@ PROJECT_ID="<your-project-id>"
 ZONE="<your-GCP-zone>"
 
 gcloud container clusters create onlineboutique \
-    --project=${PROJECT_ID} --zone=${ZONE} \
-    --machine-type=e2-standard-4 --num-nodes=4
+    --project=${PROJECT_ID} \
+    --zone=${ZONE} \
+    --machine-type=e2-standard-4 \
+    --num-nodes=4
 ```
+_Note: Anthos Service Mesh (ASM) requires [Workload Identity to be enabled in your GKE cluster](https://cloud.google.com/kubernetes-engine/docs/how-to/workload-identity#enable)._
 
 2. [Install Istio](https://istio.io/latest/docs/setup/getting-started/) on your cluster. 
 

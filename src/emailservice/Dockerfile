@@ -30,7 +30,7 @@ RUN GRPC_HEALTH_PROBE_VERSION=v0.4.14 && \
 COPY requirements.txt .
 RUN pip install -r requirements.txt
 
-FROM base as final
+FROM base as without-grpc-health-probe-bin
 # Enable unbuffered logging
 ENV PYTHONUNBUFFERED=1
 # Enable Profiler
@@ -40,10 +40,13 @@ WORKDIR /email_server
 
 # Grab packages from builder
 COPY --from=builder /usr/local/lib/python3.9/ /usr/local/lib/python3.9/
-COPY --from=builder /bin/grpc_health_probe /bin/grpc_health_probe
 
 # Add the application
 COPY . .
 
 EXPOSE 8080
 ENTRYPOINT [ "python", "email_server.py" ]
+
+FROM without-grpc-health-probe-bin
+
+COPY --from=builder /bin/grpc_health_probe /bin/grpc_health_probe
