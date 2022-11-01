@@ -28,7 +28,7 @@ google-api-python-client==2.65.0
     #   firebase-admin
     #   google-cloud-profiler
     #   google-python-cloud-debugger
-google-auth==2.13.0
+google-auth==2.14.0
     # via
     #   google-api-core
     #   google-api-python-client
