@@ -28,5 +28,6 @@ You can locally render these manifests by running `kubectl kustomize .` as well 
 
 ## Resources
 
+- [gRPC health probes with Kubernetes 1.24+ with Online Boutique](https://medium.com/google-cloud/b5bd26253a4c)
 - [Kubernetes 1.24: gRPC container probes in beta](https://kubernetes.io/blog/2022/05/13/grpc-probes-now-in-beta/)
 - [Define a gRPC liveness probe](https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/#define-a-grpc-liveness-probe)
