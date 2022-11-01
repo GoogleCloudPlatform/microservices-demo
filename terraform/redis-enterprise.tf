@@ -90,7 +90,7 @@ resource "null_resource" "kustomization-update-redis-enterprise" {
   provisioner "local-exec" {
     interpreter = ["bash", "-exc"]
     command     = <<EOT
-                  sed -i .bak "s/{{REDIS_ADDR}}/${rediscloud_subscription_database.mc-example[0].private_endpoint},user=default,password=${rediscloud_subscription_database.mc-example[0].password}/g" ../kustomize/components/redis-enterprise/kustomization.yaml
+                  sed -i .bak "s/REDIS_CONNECTION_STRING/${rediscloud_subscription_database.mc-example[0].private_endpoint},user=default,password=${rediscloud_subscription_database.mc-example[0].password}/g" ../kustomize/components/redis-enterprise/kustomization.yaml
                   kubectl apply -k ../kustomize
     EOT
   }
