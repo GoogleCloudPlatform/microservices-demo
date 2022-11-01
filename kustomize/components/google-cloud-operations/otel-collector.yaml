@@ -27,11 +27,23 @@ spec:
       labels:
         app: opentelemetrycollector
     spec:
+      securityContext:
+        fsGroup: 1000
+        runAsGroup: 1000
+        runAsNonRoot: true
+        runAsUser: 1000
       # Init container retrieves the current cloud project id from the metadata server
       # and inserts it into the collector config template
       # https://cloud.google.com/compute/docs/storing-retrieving-metadata
       initContainers:
       - name: otel-gateway-init
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+              - all
+          privileged: false
+          readOnlyRootFilesystem: true
         image: busybox:latest
         command:
         - '/bin/sh'
@@ -47,6 +59,13 @@ spec:
       # This gateway container will receive traces and metrics from each microservice
       # and forward it to GCP
       - name: otel-gateway
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+              - all
+          privileged: false
+          readOnlyRootFilesystem: true
         args:
         - --config=/conf/collector-gateway-config.yaml
         image: otel/opentelemetry-collector-contrib:0.62.0

@@ -27,12 +27,12 @@ google-api-core[grpc]==2.10.2
     #   google-cloud-firestore
     #   google-cloud-storage
     #   google-python-cloud-debugger
-google-api-python-client==2.64.0
+google-api-python-client==2.65.0
     # via
     #   firebase-admin
     #   google-cloud-profiler
     #   google-python-cloud-debugger
-google-auth==2.12.0
+google-auth==2.14.0
     # via
     #   google-api-core
     #   google-api-python-client
@@ -67,7 +67,7 @@ googleapis-common-protos==1.56.4
     #   google-api-core
     #   grpcio-status
     #   opentelemetry-exporter-otlp-proto-grpc
-grpcio==1.49.1
+grpcio==1.50.0
     # via
     #   -r requirements.in
     #   google-api-core
@@ -78,7 +78,7 @@ grpcio-health-checking==1.48.1
     # via -r requirements.in
 grpcio-status==1.48.1
     # via google-api-core
-httplib2==0.20.4
+httplib2==0.21.0
     # via
     #   google-api-python-client
     #   google-auth-httplib2
