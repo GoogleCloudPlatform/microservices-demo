@@ -18,6 +18,10 @@ metadata:
   name: app
 build:
   artifacts:
+  # image tags are relative; to specify an image repo (e.g. GCR), you
+  # must provide a "default repo" using one of the methods described
+  # here:
+  # https://skaffold.dev/docs/concepts/#image-repository-handling
   - image: emailservice
     context: src/emailservice
   - image: productcatalogservice
@@ -59,6 +63,14 @@ manifests:
   - ./kubernetes-manifests/shippingservice.yaml
 deploy:
   kubectl: {}
+# "gcb" profile allows building and pushing the images
+# on Google Container Builder without requiring docker
+# installed on the developer machine. However, note that
+# since GCB does not cache the builds, each build will
+# start from scratch and therefore take a long time.
+#
+# This is not used by default. To use it, run:
+#     skaffold run -p gcb
 profiles:
 - name: gcb
   build:
@@ -66,6 +78,10 @@ profiles:
       diskSizeGb: 300
       machineType: N1_HIGHCPU_32
       timeout: 4000s
+# "debug" profile replaces the default Dockerfile in cartservice with Dockerfile.debug, 
+# which enables debugging via skaffold.
+#
+# This profile is used by default when running skaffold debug.
 - name: debug
   activation:
   - command: debug
