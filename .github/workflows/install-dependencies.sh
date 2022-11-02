@@ -56,7 +56,7 @@ sudo ln -s $HOME/go/bin/addlicense /bin
 sudo apt install -y build-essential
 
 # install skaffold
-curl -Lo skaffold https://storage.googleapis.com/skaffold/releases/v2.0.0/skaffold-linux-amd64 && \
+curl -Lo skaffold https://storage.googleapis.com/skaffold/releases/latest/skaffold-linux-amd64 && \
 chmod +x skaffold && \
 sudo mv skaffold /usr/local/bin
 echo "✅ skaffold installed"
