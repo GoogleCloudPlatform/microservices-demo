@@ -40,7 +40,7 @@ For example,
 REDIS_IP="redis-15219.internal.c21247.us-central1-mz.gcp.cloud.rlrcp.com:15219,user=default,password=VJKeYjdXQgaPnqpU5Ypktx1qhzNYeEOI"
 ```
 ```
-sed -i .bak "s/REDIS_CONNECTION_STRING/${REDIS_IP}/g" components/redis-enterprise/kustomization.yaml
+sed -i "s/REDIS_CONNECTION_STRING/${REDIS_IP}/g" components/redis-enterprise/kustomization.yaml
 ```
    
 You can locally render these manifests by running `kubectl kustomize .` as well as deploying them by running `kubectl apply -k .`.
