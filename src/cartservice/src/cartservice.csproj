@@ -8,7 +8,7 @@
     <PackageReference Include="Grpc.AspNetCore" Version="2.49.0" />
     <PackageReference Include="Grpc.HealthCheck" Version="2.49.0" />
     <PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="7.0.0-rc.2.22476.2" />
-    <PackageReference Include="Google.Cloud.Spanner.Data" Version="4.1.0" />
+    <PackageReference Include="Google.Cloud.Spanner.Data" Version="4.2.0" />
   </ItemGroup>
 
   <ItemGroup>
