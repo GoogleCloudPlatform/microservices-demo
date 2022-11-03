@@ -101,7 +101,6 @@ func main() {
 	if os.Getenv("ENABLE_TRACING") == "1" {
 		log.Info("Tracing enabled.")
 		initTracing(log, ctx, svc)
-
 	} else {
 		log.Info("Tracing disabled.")
 	}

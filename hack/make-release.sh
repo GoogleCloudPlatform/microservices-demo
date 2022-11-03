@@ -34,6 +34,16 @@ if [[ "$TAG" != v* ]]; then
     fail "\$TAG must start with 'v', e.g. v0.1.0 (got: $TAG)"
 fi
 
+# ensure there are no uncommitted changes
+if [[ $(git status -s | wc -l) -gt 0 ]]; then
+    echo "error: can't have uncommitted changes"
+    exit 1
+fi
+
+# make sure local source is up to date
+git checkout main
+git pull
+
 # build and push images
 "${SCRIPTDIR}"/make-docker-images.sh
 
