@@ -89,6 +89,18 @@ profiles:
   - op: replace
     path: /build/artifacts/7/docker/dockerfile
     value: Dockerfile.debug
+# "networkpolicy" profile adds network policies. By design, the default minikube cni flannel does not
+# support networkpolicys. Use an alternative CNI like calco
+# 'minikube start --cni=calico'
+
+# This is not used by default. You can use it in isolation or in combination with other profiles:
+#     skaffold run -p networkpolicy, debug
+- name: networkpolicy
+  manifests:
+    kustomize:
+      paths:
+        - kustomize/components/network-policies
+
 ---
 apiVersion: skaffold/v3
 kind: Config

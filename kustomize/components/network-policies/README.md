@@ -4,6 +4,9 @@ You can use [Network Policies](https://kubernetes.io/docs/concepts/services-netw
 
 To use `NetworkPolicies` in Google Kubernetes Engine (GKE), you will need a GKE cluster with network policy enforcement enabled, the recommended approach is to use [GKE Dataplane V2](https://cloud.google.com/kubernetes-engine/docs/how-to/dataplane-v2).
 
+To use `NetworkPolicies` on a local cluster such as minikube, you will need to use an alternative CNI that supports network policy like calico. To run a cluster with calico, run `minikube start --cni=calico`. By design, the minikube default cni flannel does not support it.  
+
+
 ## Deploy Online Boutique with `NetworkPolicies` via Kustomize
 
 To automate the deployment of Online Boutique integrated with fine granular `NetworkPolicies` (one per `Deployment`), you can leverage the following variation with [Kustomize](../..).
