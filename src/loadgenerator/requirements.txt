@@ -31,7 +31,7 @@ gevent==22.10.2
     #   locust
 geventhttpclient==2.0.8
     # via locust
-greenlet==2.0.0
+greenlet==2.0.0.post0
     # via gevent
 idna==3.4
     # via requests
@@ -73,7 +73,7 @@ zipp==3.10.0
     # via importlib-metadata
 zope-event==4.5.0
     # via gevent
-zope-interface==5.5.0
+zope-interface==5.5.1
     # via gevent
 
 # The following packages are considered to be unsafe in a requirements file:
