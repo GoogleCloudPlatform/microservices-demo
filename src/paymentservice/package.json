@@ -12,9 +12,13 @@
   "dependencies": {
     "@google-cloud/debug-agent": "7.1.0",
     "@google-cloud/profiler": "5.0.3",
-    "@google-cloud/trace-agent": "7.1.2",
-    "@grpc/grpc-js": "1.7.3",
+    "@grpc/grpc-js": "1.7.1",
     "@grpc/proto-loader": "0.7.3",
+    "@opentelemetry/api": "1.2.0",
+    "@opentelemetry/exporter-otlp-grpc": "0.26.0",
+    "@opentelemetry/instrumentation-grpc": "0.33.0",
+    "@opentelemetry/sdk-trace-base": "1.7.0",
+    "@opentelemetry/sdk-node": "0.33.0",
     "pino": "8.7.0",
     "simple-card-validator": "^1.1.0",
     "uuid": "^9.0.0"
