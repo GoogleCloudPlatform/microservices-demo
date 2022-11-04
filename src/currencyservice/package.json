@@ -15,6 +15,11 @@
     "@grpc/proto-loader": "0.7.3",
     "async": "3.2.4",
     "google-protobuf": "3.21.2",
+    "@opentelemetry/api": "1.2.0",
+    "@opentelemetry/exporter-otlp-grpc": "0.26.0",
+    "@opentelemetry/instrumentation-grpc": "0.33.0",
+    "@opentelemetry/sdk-trace-base": "1.7.0",
+    "@opentelemetry/sdk-node": "0.33.0",
     "pino": "8.7.0",
     "request": "2.88.2",
     "xml2js": "0.4.23"

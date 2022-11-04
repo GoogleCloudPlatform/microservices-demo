@@ -7,3 +7,6 @@ google-cloud-profiler==4.0.0
 google-cloud-trace==1.7.3
 requests==2.28.1
 protobuf==3.20.3 # transitive dependency, move when google-api is bumped safely
+opentelemetry-distro==0.34b0
+opentelemetry-instrumentation-grpc==0.34b0
+opentelemetry-exporter-otlp-proto-grpc==1.13.0
