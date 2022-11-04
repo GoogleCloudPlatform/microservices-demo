@@ -80,6 +80,14 @@ profiles:
   - op: replace
     path: /build/artifacts/7/docker/dockerfile
     value: Dockerfile.debug
+# The "network-policies" profile is not used by default.
+# You can use it in isolation or in combination with other profiles:
+#     skaffold run -p network-policies, debug
+- name: network-policies
+  manifests:
+    kustomize:
+      paths:
+        - kustomize/components/network-policies
 ---
 apiVersion: skaffold/v3
 kind: Config
