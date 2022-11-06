@@ -11,25 +11,25 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
   name: recommendationservice
+  namespace: YOUR_NAMESPACE
 spec:
   podSelector:
     matchLabels:
       app: recommendationservice
   policyTypes:
-  - Ingress
-  - Egress
+    - Ingress
+    - Egress
   ingress:
-  - from:
-    - podSelector:
-        matchLabels:
-          app: frontend
-    ports:
-     - port: 8080
-       protocol: TCP
+    - from:
+        - podSelector:
+            matchLabels:
+              app: frontend
+      ports:
+        - port: 8080
+          protocol: TCP
   egress:
-  - {}
+    - {}

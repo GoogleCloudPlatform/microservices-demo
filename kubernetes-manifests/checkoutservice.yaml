@@ -11,11 +11,11 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: checkoutservice
+  namespace: YOUR_NAMESPACE
 spec:
   selector:
     matchLabels:
@@ -36,13 +36,14 @@ spec:
           securityContext:
             allowPrivilegeEscalation: false
             capabilities:
-              drop:
-                - all
+              drop: NET_RAW
             privileged: false
             readOnlyRootFilesystem: true
+            seccompProfile:
+              type: RuntimeDefault
           image: checkoutservice
           ports:
-          - containerPort: 5050
+            - containerPort: 5050
           readinessProbe:
             exec:
               command: ["/bin/grpc_health_probe", "-addr=:5050"]
@@ -50,22 +51,22 @@ spec:
             exec:
               command: ["/bin/grpc_health_probe", "-addr=:5050"]
           env:
-          - name: PORT
-            value: "5050"
-          - name: PRODUCT_CATALOG_SERVICE_ADDR
-            value: "productcatalogservice:3550"
-          - name: SHIPPING_SERVICE_ADDR
-            value: "shippingservice:50051"
-          - name: PAYMENT_SERVICE_ADDR
-            value: "paymentservice:50051"
-          - name: EMAIL_SERVICE_ADDR
-            value: "emailservice:5000"
-          - name: CURRENCY_SERVICE_ADDR
-            value: "currencyservice:7000"
-          - name: CART_SERVICE_ADDR
-            value: "cartservice:7070"
-          - name: DISABLE_PROFILER
-            value: "1"
+            - name: PORT
+              value: "5050"
+            - name: PRODUCT_CATALOG_SERVICE_ADDR
+              value: "productcatalogservice:3550"
+            - name: SHIPPING_SERVICE_ADDR
+              value: "shippingservice:50051"
+            - name: PAYMENT_SERVICE_ADDR
+              value: "paymentservice:50051"
+            - name: EMAIL_SERVICE_ADDR
+              value: "emailservice:5000"
+            - name: CURRENCY_SERVICE_ADDR
+              value: "currencyservice:7000"
+            - name: CART_SERVICE_ADDR
+              value: "cartservice:7070"
+            - name: DISABLE_PROFILER
+              value: "1"
           resources:
             requests:
               cpu: 100m
@@ -78,11 +79,12 @@ apiVersion: v1
 kind: Service
 metadata:
   name: checkoutservice
+  namespace: YOUR_NAMESPACE
 spec:
   type: ClusterIP
   selector:
     app: checkoutservice
   ports:
-  - name: grpc
-    port: 5050
-    targetPort: 5050
+    - name: grpc
+      port: 5050
+      targetPort: 5050

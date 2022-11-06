@@ -5,11 +5,12 @@ metadata:
   annotations:
     cloud.google.com/neg: '{"ingress": true}'
     cloud.google.com/backend-config: '{"default": "frontend-backend-config"}'
+  namespace: YOUR_NAMESPACE
 spec:
   type: ClusterIP
   selector:
     app: frontend
   ports:
-  - name: http
-    port: 80
-    targetPort: 8080
+    - name: http
+      port: 80
+      targetPort: 8080
