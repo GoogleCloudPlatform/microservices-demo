@@ -84,10 +84,10 @@ profiles:
 # You can use it in isolation or in combination with other profiles:
 #     skaffold run -p network-policies, debug
 - name: network-policies
-  manifests:
-    kustomize:
-      paths:
-        - kustomize/components/network-policies
+  patches:
+  - op: add
+    path: /manifests/kustomize/paths/1
+    value: kustomize/components/network-policies
 ---
 apiVersion: skaffold/v3
 kind: Config
