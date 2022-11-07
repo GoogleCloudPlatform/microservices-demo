@@ -103,7 +103,7 @@ opentelemetry-instrumentation==0.34b0
     #   opentelemetry-instrumentation-grpc
 opentelemetry-instrumentation-grpc==0.34b0
     # via -r requirements.in
-opentelemetry-proto==1.13.0
+opentelemetry-proto==1.14.0
     # via opentelemetry-exporter-otlp-proto-grpc
 opentelemetry-sdk==1.13.0
     # via
