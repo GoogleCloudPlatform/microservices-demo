@@ -32,7 +32,7 @@ google-api-python-client==2.65.0
     #   firebase-admin
     #   google-cloud-profiler
     #   google-python-cloud-debugger
-google-auth==2.14.0
+google-auth==2.14.1
     # via
     #   google-api-core
     #   google-api-python-client
@@ -54,7 +54,7 @@ google-cloud-firestore==2.7.2
     # via firebase-admin
 google-cloud-profiler==4.0.0
     # via -r requirements.in
-google-cloud-storage==2.5.0
+google-cloud-storage==2.6.0
     # via firebase-admin
 google-crc32c==1.5.0
     # via google-resumable-media
