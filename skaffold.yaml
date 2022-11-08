@@ -105,3 +105,15 @@ manifests:
   - ./kubernetes-manifests/loadgenerator.yaml
 deploy:
   kubectl: {}
+---
+apiVersion: skaffold/v3
+kind: Config
+metadata:
+  name: istio
+# The "istio" profile references a secondary skaffold file.
+requires:
+- path: ./istio
+  activeProfiles:
+  - name: istio
+    activatedBy:
+    - istio

@@ -37,6 +37,7 @@ jobs:
               --zone $ZONE --project $PROJECT_ID
           NAMESPACE="pr${PR_NUMBER}"
           kubectl delete namespace $NAMESPACE
+          skaffold delete -p istio
         env:
           PROJECT_ID: "online-boutique-ci"
           PR_CLUSTER: "online-boutique-prs"

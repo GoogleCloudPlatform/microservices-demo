@@ -1,6 +1,6 @@
 # Deploying to an Istio-enabled cluster 
 
-This repository provides an [`istio-manifests`](/istio-manifests) directory containing ingress resources (an Istio `Gateway` and `VirtualService`) needed to expose the app frontend running inside a Kubernetes cluster.
+This repository provides an [`istio-manifests`](/istio-manifests) directory containing helm charts, ingress resources (an Istio `Gateway` and `VirtualService`) needed to expose the app frontend running inside a Kubernetes cluster.
 
 You can apply these resources to your cluster in addition to the `kubernetes-manifests`, then use the Istio IngressGateway's external IP to view the app frontend. See the following instructions for Istio steps.   
 
@@ -20,7 +20,11 @@ gcloud container clusters create onlineboutique \
 ```
 _Note: Anthos Service Mesh (ASM) requires [Workload Identity to be enabled in your GKE cluster](https://cloud.google.com/kubernetes-engine/docs/how-to/workload-identity#enable)._
 
-2. [Install Istio](https://istio.io/latest/docs/setup/getting-started/) on your cluster. 
+2. [Install Istio](https://istio.io/latest/docs/setup/getting-started/) on your cluster using skaffold. 
+
+   ```bash
+   skaffold run -p istio
+   ```
 
 3. Enable Istio sidecar proxy injection in the `default` Kubernetes namespace. 
 

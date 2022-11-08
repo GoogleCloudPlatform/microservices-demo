@@ -76,6 +76,7 @@ jobs:
         kind: Namespace
         metadata:
           name: $NAMESPACE
+          istio-injection: enabled
         EOF
         echo Deploying application
         skaffold config set --global local-cluster false
