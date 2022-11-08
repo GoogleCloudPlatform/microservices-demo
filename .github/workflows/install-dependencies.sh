@@ -61,6 +61,9 @@ chmod +x skaffold && \
 sudo mv skaffold /usr/local/bin
 echo "✅ skaffold installed"
 
+# install helm
+sudo apt install -y helm
+
 # install docker
 sudo apt install -yqq apt-transport-https ca-certificates curl gnupg2 software-properties-common && \
 curl -fsSL https://download.docker.com/linux/debian/gpg | sudo apt-key add - && \
