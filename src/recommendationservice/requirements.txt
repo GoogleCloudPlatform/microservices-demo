@@ -54,7 +54,7 @@ google-cloud-firestore==2.7.2
     # via firebase-admin
 google-cloud-profiler==4.0.0
     # via -r requirements.in
-google-cloud-storage==2.5.0
+google-cloud-storage==2.6.0
     # via firebase-admin
 google-crc32c==1.5.0
     # via google-resumable-media
