@@ -112,7 +112,7 @@ metadata:
   name: istio
 # The "istio" profile references a secondary skaffold file.
 requires:
-- path: ./istio
+- path: ./istio-manifests
   activeProfiles:
   - name: istio
     activatedBy:
