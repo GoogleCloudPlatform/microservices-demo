@@ -133,8 +133,8 @@ The [`/terraform` folder](terraform) contains instructions for using [Terraform]
 The [`/kustomize` folder](kustomize) contains instructions for customizing the deployment of Online Boutique with different variations such as:
 * integrating with [Google Cloud Operations](https://cloud.google.com/products/operations)
 * replacing the in-cluster Redis cache with [Google Cloud Memorystore (Redis)](https://cloud.google.com/memorystore)
-* replcaing the in-cluster Redis cache with [Google Cloud Marketplace's Redis Enterprise](https://console.cloud.google.com/marketplace/product/redis-marketplace-isaas/redis-enterprise-cloud-flexible-plan)
-* replcaing the in-cluster Redis cache with [Google Cloud Spanner](kustomize/components/spanner)
+* replacing the in-cluster Redis cache with [Google Cloud Marketplace's Redis Enterprise](https://console.cloud.google.com/marketplace/product/redis-marketplace-isaas/redis-enterprise-cloud-flexible-plan)
+* replacing the in-cluster Redis cache with [Google Cloud Spanner](kustomize/components/spanner)
 * etc.
 
 ## Architecture
