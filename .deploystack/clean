@@ -1,0 +1,74 @@
+# Copyright 2021 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# DEPLOYSTACK - this file is a cleaning script, it undoes any 
+# infrastructure that would have been created by this project
+
+# DON'T REMOVE FROM test script.
+
+CYAN='\033[0;36m'
+BCYAN='\033[1;36m'
+NC='\033[0m' # No Color
+DIVIDER=$(printf %"$(tput cols)"s | tr " " "*")
+DIVIDER+="\n"
+
+function get_project_id() {
+    local __resultvar=$1
+    VALUE=$(gcloud config get-value project | xargs)
+    eval $__resultvar="'$VALUE'"
+}
+
+function get_project_number() {
+    local __resultvar=$1
+    local PRO=$2
+    VALUE=$(gcloud projects list --filter="project_id=$PRO" --format="value(PROJECT_NUMBER)" | xargs)
+    eval $__resultvar="'$VALUE'"
+}
+
+# DISPLAY HELPERS
+
+function section_open() {
+    section_description=$1
+    printf "$DIVIDER"
+    printf "${CYAN}$section_description${NC} \n"
+    printf "$DIVIDER"
+}
+
+function section_close() {
+    printf "$DIVIDER"
+    printf "${CYAN}$section_description ${BCYAN}- done${NC}\n"
+    printf "\n\n"
+}
+
+# END DON'T REMOVE FROM test script.
+
+DIR="terraform"
+get_project_id PROJECT
+gcloud services enable cloudresourcemanager.googleapis.com --project=$PROJECT
+REGION="us-central1"
+NAME="online-boutique"
+NAMESPACE="default"
+FILEPATH_MANIFEST="../release/kubernetes-manifests.yaml"
+MEMORYSTORE="false"
+
+gcloud config set project ${PROJECT}
+
+section_open "Making sure Kubernetes Engine Cluster does not exist"
+    gcloud container clusters delete online-boutique --region $REGION -q
+section_close
+
+printf "$DIVIDER"
+printf "CONGRATS!!!!!!! \n"
+printf "You got the end the of your test with everything working. \n"
+printf "$DIVIDER"

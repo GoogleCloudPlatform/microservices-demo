@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-apiVersion: skaffold/v2beta18
+apiVersion: skaffold/v3
 kind: Config
 metadata:
   name: app
@@ -48,21 +48,12 @@ build:
     gitCommit: {}
   local:
     useBuildkit: false
+manifests:
+  kustomize:
+    paths:
+    - kubernetes-manifests
 deploy:
-  kubectl:
-    manifests:
-    - ./kubernetes-manifests/adservice.yaml
-    - ./kubernetes-manifests/cartservice.yaml
-    - ./kubernetes-manifests/checkoutservice.yaml
-    - ./kubernetes-manifests/currencyservice.yaml
-    - ./kubernetes-manifests/emailservice.yaml
-    - ./kubernetes-manifests/frontend.yaml
-    - ./kubernetes-manifests/paymentservice.yaml
-    - ./kubernetes-manifests/productcatalogservice.yaml
-    - ./kubernetes-manifests/recommendationservice.yaml
-    - ./kubernetes-manifests/redis.yaml
-    - ./kubernetes-manifests/shippingservice.yaml
-profiles:
+  kubectl: {}
 # "gcb" profile allows building and pushing the images
 # on Google Container Builder without requiring docker
 # installed on the developer machine. However, note that
@@ -71,6 +62,7 @@ profiles:
 #
 # This is not used by default. To use it, run:
 #     skaffold run -p gcb
+profiles:
 - name: gcb
   build:
     googleCloudBuild:
@@ -83,25 +75,33 @@ profiles:
 # This profile is used by default when running skaffold debug.
 - name: debug
   activation:
-    - command: debug
+  - command: debug
   patches:
-    - op: replace
-      path: /build/artifacts/7/docker/dockerfile
-      value: Dockerfile.debug
-
+  - op: replace
+    path: /build/artifacts/7/docker/dockerfile
+    value: Dockerfile.debug
+# The "network-policies" profile is not used by default.
+# You can use it in isolation or in combination with other profiles:
+#     skaffold run -p network-policies, debug
+- name: network-policies
+  patches:
+  - op: add
+    path: /manifests/kustomize/paths/1
+    value: kustomize/components/network-policies
 ---
-
-apiVersion: skaffold/v2beta18
+apiVersion: skaffold/v3
 kind: Config
 metadata:
   name: loadgenerator
 requires:
-  - configs: [app]
+- configs:
+  - app
 build:
   artifacts:
   - image: loadgenerator
     context: src/loadgenerator
+manifests:
+  rawYaml:
+  - ./kubernetes-manifests/loadgenerator.yaml
 deploy:
-  kubectl:
-    manifests:
-    - ./kubernetes-manifests/loadgenerator.yaml
+  kubectl: {}

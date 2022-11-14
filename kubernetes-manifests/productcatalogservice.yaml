@@ -45,12 +45,10 @@ spec:
         ports:
         - containerPort: 3550
         env:
+        - name: COLLECTOR_SERVICE_ADDR
+          value: "opentelemetrycollector:4317"
         - name: PORT
           value: "3550"
-        - name: DISABLE_STATS
-          value: "1"
-        - name: DISABLE_TRACING
-          value: "1"
         - name: DISABLE_PROFILER
           value: "1"
         readinessProbe:
