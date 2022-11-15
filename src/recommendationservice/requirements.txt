@@ -62,7 +62,7 @@ google-python-cloud-debugger==3.1
     # via -r requirements.in
 google-resumable-media==2.4.0
     # via google-cloud-storage
-googleapis-common-protos==1.56.4
+googleapis-common-protos==1.57.0
     # via
     #   google-api-core
     #   grpcio-status
