@@ -106,9 +106,9 @@ gcloud services enable monitoring.googleapis.com \
 
 4. Run `kubectl get pods` to verify the Pods are ready and running.
 
-5. Run `kubectl port-forward deployment/frontend 8080:8080` to forward a port to the frontend service.
+5. Run `kubectl get service frontend-external` to confirm ingress is mapped correctly.
 
-6. Navigate to `localhost:8080` to access the web frontend.
+6. Navigate to `localhost:80` to access the web frontend.
 
 
 ## Cleanup
