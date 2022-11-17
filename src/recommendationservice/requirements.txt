@@ -16,7 +16,7 @@ charset-normalizer==2.1.1
     # via requests
 deprecated==1.2.13
     # via opentelemetry-api
-firebase-admin==5.2.0
+firebase-admin==6.0.1
     # via google-python-cloud-debugger
 google-api-core[grpc]==2.10.2
     # via
