@@ -43,7 +43,8 @@ CARTSERVICE_KSA_NAME=cartservice
 
 gcloud iam service-accounts create ${SPANNER_DB_USER_GSA_NAME} \
     --display-name=${SPANNER_DB_USER_GSA_NAME}
-gcloud spanner instances add-iam-policy-binding ${SPANNER_INSTANCE_NAME} \
+
+gcloud spanner databases add-iam-policy-binding ${SPANNER_DATABASE_NAME} \
     --member "serviceAccount:${SPANNER_DB_USER_GSA_ID}" \
     --role roles/spanner.databaseUser
 

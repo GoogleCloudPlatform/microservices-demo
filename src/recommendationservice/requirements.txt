@@ -27,7 +27,7 @@ google-api-core[grpc]==2.10.2
     #   google-cloud-firestore
     #   google-cloud-storage
     #   google-python-cloud-debugger
-google-api-python-client==2.65.0
+google-api-python-client==2.66.0
     # via
     #   firebase-admin
     #   google-cloud-profiler
@@ -62,7 +62,7 @@ google-python-cloud-debugger==3.1
     # via -r requirements.in
 google-resumable-media==2.4.0
     # via google-cloud-storage
-googleapis-common-protos==1.56.4
+googleapis-common-protos==1.57.0
     # via
     #   google-api-core
     #   grpcio-status
