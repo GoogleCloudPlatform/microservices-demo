@@ -1,0 +1,6 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: koala-demo
+  labels:
+    name: koala-demo
