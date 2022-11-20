@@ -73,9 +73,13 @@ module "gcloud" {
 
 # Apply YAML kubernetes-manifest configurations
 resource "null_resource" "apply_deployment" {
+  triggers = {
+    always_run = "${timestamp()}"
+  }
+
   provisioner "local-exec" {
     interpreter = ["bash", "-exc"]
-    command     = "kubectl apply -k ${var.filepath_manifest}"
+    command     = "kubectl apply -f ${var.filepath_namespace}; kubectl apply -f ${var.filepath_manifest} -n ${var.namespace}"
   }
 
   depends_on = [

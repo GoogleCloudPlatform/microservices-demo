@@ -20,7 +20,7 @@ variable "gcp_project_id" {
 variable "name" {
   type        = string
   description = "Name given to the new GKE cluster"
-  default     = "online-boutique"
+  default     = "gcp-demo-online-boutique"
 }
 
 variable "region" {
@@ -44,4 +44,9 @@ variable "filepath_manifest" {
 variable "memorystore" {
   type        = bool
   description = "If true, Online Boutique's in-cluster Redis cache will be replaced with a Google Cloud Memorystore Redis cache"
+}
+
+variable "filepath_namespace" {
+  type        = string
+  description = "Path to namespace yaml file to apply via kubectl"
 }

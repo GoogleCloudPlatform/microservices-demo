@@ -12,6 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-gcp_project_id = "<project_id_here>"
-
+gcp_project_id = "koala-ops-demo"
+namespace = "koala-demo"
+region = "me-west1"
 memorystore = false
+filepath_manifest = "../release/kubernetes-manifests.yaml"
+filepath_namespace = "../release/koala-demo-ns.yaml"
