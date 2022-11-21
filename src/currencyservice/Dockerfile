@@ -12,7 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+
 FROM node:19.0.0-alpine as base
+
 
 FROM base as builder
 

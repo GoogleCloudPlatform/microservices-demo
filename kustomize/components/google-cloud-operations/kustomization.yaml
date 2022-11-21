@@ -14,6 +14,8 @@
 
 apiVersion: kustomize.config.k8s.io/v1alpha1
 kind: Component
+resources:
+  - otel-collector.yaml
 patchesStrategicMerge:
 # adservice - stats, tracing
 - |-
@@ -27,10 +29,10 @@ patchesStrategicMerge:
         containers:
           - name: server
             env:
-            - name: DISABLE_STATS
-              $patch: delete
-            - name: DISABLE_TRACING
-              $patch: delete
+            - name: ENABLE_STATS
+              value: "1"
+            - name: ENABLE_TRACING
+              value: "1"
 # checkoutservice - stats, tracing, profiler
 - |-
   apiVersion: apps/v1
@@ -43,10 +45,12 @@ patchesStrategicMerge:
         containers:
           - name: server
             env:
-            - name: DISABLE_STATS
-              $patch: delete
-            - name: DISABLE_TRACING
-              $patch: delete
+            - name: COLLECTOR_SERVICE_ADDR
+              value: "opentelemetrycollector:4317"
+            - name: ENABLE_STATS
+              value: "1"
+            - name: ENABLE_TRACING
+              value: "1"
             - name: DISABLE_PROFILER
               $patch: delete
 # currencyservice - tracing, profiler, debugger
@@ -61,8 +65,10 @@ patchesStrategicMerge:
         containers:
           - name: server
             env:
-            - name: DISABLE_TRACING
-              $patch: delete
+            - name: COLLECTOR_SERVICE_ADDR
+              value: "opentelemetrycollector:4317"
+            - name: ENABLE_TRACING
+              value: "1"
             - name: DISABLE_PROFILER
               $patch: delete
             - name: DISABLE_DEBUGGER
@@ -79,8 +85,10 @@ patchesStrategicMerge:
         containers:
           - name: server
             env:
-            - name: DISABLE_TRACING
-              $patch: delete
+            - name: COLLECTOR_SERVICE_ADDR
+              value: "opentelemetrycollector:4317"
+            - name: ENABLE_TRACING
+              value: "1"
             - name: DISABLE_PROFILER
               $patch: delete
 # frontend - tracing, profiler
@@ -95,8 +103,10 @@ patchesStrategicMerge:
         containers:
           - name: server
             env:
-            - name: DISABLE_TRACING
-              $patch: delete
+            - name: ENABLE_TRACING
+              value: "1"
+            - name: COLLECTOR_SERVICE_ADDR
+              value: "opentelemetrycollector:4317"
             - name: DISABLE_PROFILER
               $patch: delete
 # paymentservice - tracing, profiler, debugger
@@ -111,8 +121,10 @@ patchesStrategicMerge:
         containers:
           - name: server
             env:
-            - name: DISABLE_TRACING
-              $patch: delete
+            - name: COLLECTOR_SERVICE_ADDR
+              value: "opentelemetrycollector:4317"
+            - name: ENABLE_TRACING
+              value: "1"
             - name: DISABLE_PROFILER
               $patch: delete
             - name: DISABLE_DEBUGGER
@@ -129,11 +141,13 @@ patchesStrategicMerge:
         containers:
           - name: server
             env:
-            - name: DISABLE_STATS
-              $patch: delete
-            - name: DISABLE_TRACING
-              $patch: delete
-            - name: DISABLE_PROFILER
+            - name: COLLECTOR_SERVICE_ADDR
+              value: "opentelemetrycollector:4317"
+            - name: ENABLE_STATS
+              value: "1"
+            - name: ENABLE_TRACING
+              value: "1"
+            - name: ENABLE_PROFILER
               $patch: delete
 # recommendationservice - tracing, profiler, debugger
 - |-
@@ -147,8 +161,10 @@ patchesStrategicMerge:
         containers:
           - name: server
             env:
-            - name: DISABLE_TRACING
-              $patch: delete
+            - name: COLLECTOR_SERVICE_ADDR
+              value: "opentelemetrycollector:4317"
+            - name: ENABLE_TRACING
+              value: "1"
             - name: DISABLE_PROFILER
               $patch: delete
             - name: DISABLE_DEBUGGER
@@ -165,9 +181,9 @@ patchesStrategicMerge:
         containers:
           - name: server
             env:
-            - name: DISABLE_STATS
-              $patch: delete
-            - name: DISABLE_TRACING
-              $patch: delete
+            - name: ENABLE_STATS
+              value: "1"
+            - name: ENABLE_TRACING
+              value: "1"
             - name: DISABLE_PROFILER
               $patch: delete

@@ -79,7 +79,7 @@ jobs:
         EOF
         echo Deploying application
         skaffold config set --global local-cluster false
-        skaffold run --default-repo=gcr.io/$PROJECT_ID/refs/pull/$PR_NUMBER --tag=$PR_NUMBER --namespace=$NAMESPACE
+        skaffold run --default-repo=gcr.io/$PROJECT_ID/refs/pull/$PR_NUMBER --tag=$PR_NUMBER --namespace=$NAMESPACE -p network-policies
       env:
         ACTIONS_ALLOW_UNSECURE_COMMANDS: true
         PR_NUMBER: ${{ github.event.pull_request.number }}

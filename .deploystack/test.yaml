@@ -1,4 +1,4 @@
-# Copyright 2022 Google LLC
+# Copyright 2021 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,16 +12,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-terraform {
-  required_providers {
-    google = {
-      source  = "hashicorp/google"
-      version = "4.43.1"
-    }
-  }
-}
+# DEPLOYSTACK - this file is the cloudbuild for running testing automatically
+# in the testing rig
 
-provider "google" {
-  project = var.gcp_project_id
-  region  = var.region
-}
+steps:
+   - name: 'gcr.io/cloudshell-images/cloudshell:latest'
+     entrypoint: bash
+     args: [ '.deploystack/clean' ]
+   - name: 'gcr.io/cloudshell-images/cloudshell:latest'
+     entrypoint: bash
+     args: [ '.deploystack/test' ]
+timeout: 4200s
+options:
+  machineType: 'E2_HIGHCPU_8'
