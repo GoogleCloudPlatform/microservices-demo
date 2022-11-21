@@ -10,7 +10,7 @@
   "author": "Jonathan Lui",
   "license": "ISC",
   "dependencies": {
-    "@google-cloud/debug-agent": "7.1.0",
+    "@google-cloud/debug-agent": "7.1.1",
     "@google-cloud/profiler": "5.0.3",
     "@grpc/grpc-js": "1.7.1",
     "@grpc/proto-loader": "0.7.3",
