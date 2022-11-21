@@ -1,5 +1,5 @@
 plugins {
-    id 'com.google.protobuf' version '0.8.19'
+    id 'com.google.protobuf' version '0.9.1'
     id 'com.github.sherter.google-java-format' version '0.9'
     id 'idea'
     id 'application'
@@ -14,9 +14,10 @@ description = 'Ad Service'
 group = "adservice"
 version = "0.1.0-SNAPSHOT"
 
-def grpcVersion = "1.49.2"
-def jacksonVersion = "2.13.4"
-def protocVersion = "3.21.6"
+def grpcVersion = "1.51.0"
+def jacksonCoreVersion = "2.14.0"
+def jacksonDatabindVersion = "2.14.0"
+def protocVersion = "3.21.9"
 
 tasks.withType(JavaCompile) {
     sourceCompatibility = JavaVersion.VERSION_19
@@ -32,7 +33,7 @@ dependencies {
     if (speed) {
         implementation fileTree(dir: offlineCompile, include: '*.jar')
     } else {
-        implementation "com.google.api.grpc:proto-google-common-protos:2.9.6",
+        implementation "com.google.api.grpc:proto-google-common-protos:2.10.0",
                 "javax.annotation:javax.annotation-api:1.3.2",
                 "io.grpc:grpc-protobuf:${grpcVersion}",
                 "io.grpc:grpc-stub:${grpcVersion}",
@@ -41,8 +42,8 @@ dependencies {
                 "io.grpc:grpc-census:${grpcVersion}",
                 "org.apache.logging.log4j:log4j-core:2.19.0"
 
-        runtimeOnly "com.fasterxml.jackson.core:jackson-core:${jacksonVersion}",
-                "com.fasterxml.jackson.core:jackson-databind:${jacksonVersion}",
+        runtimeOnly "com.fasterxml.jackson.core:jackson-core:${jacksonCoreVersion}",
+                "com.fasterxml.jackson.core:jackson-databind:${jacksonDatabindVersion}",
                 "io.netty:netty-tcnative-boringssl-static:2.0.54.Final"
     }
 }

@@ -75,7 +75,7 @@ module "gcloud" {
 resource "null_resource" "apply_deployment" {
   provisioner "local-exec" {
     interpreter = ["bash", "-exc"]
-    command     = "kubectl apply -f ${var.filepath_manifest}"
+    command     = "kubectl apply -k ${var.filepath_manifest}"
   }
 
   depends_on = [
@@ -87,7 +87,7 @@ resource "null_resource" "apply_deployment" {
 resource "null_resource" "wait_conditions" {
   provisioner "local-exec" {
     interpreter = ["bash", "-exc"]
-    command     = "kubectl wait --for=condition=ready pods --all -n ${var.namespace} --timeout=-1s"
+    command     = "kubectl wait --for=condition=ready pods --all -n ${var.namespace} --timeout=-1s 2> /dev/null"
   }
 
   depends_on = [

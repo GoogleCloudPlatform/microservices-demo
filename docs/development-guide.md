@@ -6,7 +6,7 @@ This doc explains how to build and run the OnlineBoutique source code locally us
 
 - [Docker for Desktop](https://www.docker.com/products/docker-desktop).
 - kubectl (can be installed via `gcloud components install kubectl`)
-- [skaffold **1.27+**](https://skaffold.dev/docs/install/) (latest version recommended), a tool that builds and deploys Docker images in bulk. 
+- [skaffold **2.0+**](https://skaffold.dev/docs/install/) (latest version recommended), a tool that builds and deploys Docker images in bulk. 
 - A Google Cloud Project with Google Container Registry enabled. 
 - Enable GCP APIs for Cloud Monitoring, Tracing, Debugger, Profiler:
 ```
@@ -22,7 +22,7 @@ gcloud services enable monitoring.googleapis.com \
 
 > 💡 Recommended if you're using Google Cloud Platform and want to try it on
 > a realistic cluster. **Note**: If your cluster has Workload Identity enabled, 
-> [see these instructions](/docs/workload-identity.md)
+> [see these instructions](https://cloud.google.com/kubernetes-engine/docs/how-to/workload-identity#enable)
 
 1.  Create a Google Kubernetes Engine cluster and make sure `kubectl` is pointing
     to the cluster.
