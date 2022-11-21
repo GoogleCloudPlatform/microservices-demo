@@ -168,7 +168,7 @@ Find **Protocol Buffers Descriptions** at the [`./pb` directory](./pb).
   communicate to each other.
 - **[Istio](https://istio.io):** Application works on Istio service mesh.
 - **[Cloud Operations (Stackdriver)](https://cloud.google.com/products/operations):** Many services
-  are instrumented with **Profiling**, **Tracing** and **Debugging**. In
+  are instrumented with **Profiling** and **Tracing**. In
   addition to these, using Istio enables features like Request/Response
   **Metrics** and **Context Graph** out of the box. When it is running out of
   Google Cloud, this code path remains inactive.

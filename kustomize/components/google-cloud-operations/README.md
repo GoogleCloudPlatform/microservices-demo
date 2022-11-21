@@ -1,6 +1,6 @@
 # Integrate Online Boutique with Google Cloud Operations
 
-By default, [Google Cloud Operations](https://cloud.google.com/products/operations) instrumentation is **turned off** for Online Boutique deployments. This includes Monitoring (Stats), Tracing, Profiler, and Debugger. This means that even if you're running this app on [GKE](https://cloud.google.com/kubernetes-engine), traces (for example) will not be exported to [Google Cloud Trace](https://cloud.google.com/trace).
+By default, [Google Cloud Operations](https://cloud.google.com/products/operations) instrumentation is **turned off** for Online Boutique deployments. This includes Monitoring (Stats), Tracing, and Profiler. This means that even if you're running this app on [GKE](https://cloud.google.com/kubernetes-engine), traces (for example) will not be exported to [Google Cloud Trace](https://cloud.google.com/trace).
 
 If you want to re-enable Google Cloud Operations instrumentation, the easiest way is to enable the included kustomize module, which enables traces, metrics, and adds a deployment of the [Open Telemetry Collector](https://opentelemetry.io/docs/collector/) to gather the traces and metrics and forward them to the appropriate Google Cloud backend.
 
@@ -27,7 +27,6 @@ PROJECT_ID=<your-gcp-project-id>
 gcloud services enable \
     monitoring.googleapis.com \
     cloudtrace.googleapis.com \
-    clouddebugger.googleapis.com \
     cloudprofiler.googleapis.com \
     --project ${PROJECT_ID}
 ```
@@ -48,10 +47,6 @@ gcloud projects add-iam-policy-binding ${PROJECT_ID} \
 gcloud projects add-iam-policy-binding ${PROJECT_ID} \
   --member "serviceAccount:${GSA_NAME}@${PROJECT_ID}.iam.gserviceaccount.com" \
   --role roles/cloudprofiler.agent
-  
-gcloud projects add-iam-policy-binding ${PROJECT_ID} \
-  --member "serviceAccount:${GSA_NAME}@${PROJECT_ID}.iam.gserviceaccount.com" \
-  --role roles/clouddebugger.agent
 ```
 
 **Note**
