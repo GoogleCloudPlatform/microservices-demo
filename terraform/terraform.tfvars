@@ -16,4 +16,4 @@ gcp_project_id = "<project_id_here>"
 
 memorystore = false
 
-redis-enterprise = false
+redis_enterprise = false
