@@ -67,7 +67,7 @@ googleapis-common-protos==1.57.0
     #   google-api-core
     #   grpcio-status
     #   opentelemetry-exporter-otlp-proto-grpc
-grpcio==1.50.0
+grpcio==1.51.0
     # via
     #   -r requirements.in
     #   google-api-core
@@ -154,7 +154,6 @@ six==1.16.0
     # via
     #   google-auth
     #   google-auth-httplib2
-    #   grpcio
 typing-extensions==4.4.0
     # via opentelemetry-sdk
 uritemplate==4.1.1
