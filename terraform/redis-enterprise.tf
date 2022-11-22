@@ -10,8 +10,8 @@
 resource "rediscloud_subscription" "mc-example" {
 
   # count specifies the number of instances to create;
-  # if var.redis-enterprise is true then the resource is enabled
-  count = var.redis-enterprise ? 1 : 0
+  # if var.redis_enterprise is true then the resource is enabled
+  count = var.redis_enterprise ? 1 : 0
 
   name           = "online-boutique-sub"
   memory_storage = "ram"
@@ -42,8 +42,8 @@ resource "rediscloud_subscription" "mc-example" {
 resource "rediscloud_subscription_database" "mc-example" {
 
   # count specifies the number of instances to create;
-  # if var.redis-enterprise is true then the resource is enabled
-  count = var.redis-enterprise ? 1 : 0
+  # if var.redis_enterprise is true then the resource is enabled
+  count = var.redis_enterprise ? 1 : 0
 
   subscription_id              = rediscloud_subscription.mc-example[0].id
   name                         = "online-boutique-cart"
@@ -65,8 +65,8 @@ data "google_compute_network" "network" {
 resource "rediscloud_subscription_peering" "mc-example-peering" {
 
   # count specifies the number of instances to create;
-  # if var.redis-enterprise is true then the resource is enabled
-  count = var.redis-enterprise ? 1 : 0
+  # if var.redis_enterprise is true then the resource is enabled
+  count = var.redis_enterprise ? 1 : 0
 
   subscription_id  = rediscloud_subscription.mc-example[0].id
   provider_name    = "GCP"
@@ -77,8 +77,8 @@ resource "rediscloud_subscription_peering" "mc-example-peering" {
 resource "google_compute_network_peering" "mc-example-peering" {
 
   # count specifies the number of instances to create;
-  # if var.redis-enterprise is true then the resource is enabled
-  count = var.redis-enterprise ? 1 : 0
+  # if var.redis_enterprise is true then the resource is enabled
+  count = var.redis_enterprise ? 1 : 0
 
   name         = format("online-boutique-%s", rediscloud_subscription.mc-example[0].name)
   network      = data.google_compute_network.network.self_link
@@ -96,8 +96,8 @@ resource "null_resource" "kustomization-update-redis-enterprise" {
   }
 
   # count specifies the number of instances to create;
-  # if var.redis-enterprise is true then the resource is enabled
-  count = var.redis-enterprise ? 1 : 0
+  # if var.redis_enterprise is true then the resource is enabled
+  count = var.redis_enterprise ? 1 : 0
 
   depends_on = [
     google_compute_network_peering.mc-example-peering
