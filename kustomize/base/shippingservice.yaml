@@ -40,16 +40,12 @@ spec:
               - all
           privileged: false
           readOnlyRootFilesystem: true
-        image: gcr.io/google-samples/microservices-demo/shippingservice:v0.4.1
+        image: gcr.io/google-samples/microservices-demo/shippingservice:v0.4.2
         ports:
         - containerPort: 50051
         env:
         - name: PORT
           value: "50051"
-        - name: DISABLE_STATS
-          value: "1"
-        - name: DISABLE_TRACING
-          value: "1"
         - name: DISABLE_PROFILER
           value: "1"
         readinessProbe:
