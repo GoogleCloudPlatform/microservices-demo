@@ -13,7 +13,7 @@ Important notes:
     
 ## Deploy Online Boutique connected to a fully managed Redis Enterprise database instance
 
-To automate the deployment of Online Boutique integrated with a fully managed Redis Enterprise database instance you can leverage the following variation with [Kustomize](../..).
+To automate the deployment of Online Boutique integrated with a fully managed Redis Enterprise database instance you can leverage the following variation with [Kustomize](/kustomize).
 
 From the `kustomize/` folder at the root level of this repository, execute this command:
 ```
