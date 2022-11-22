@@ -1,6 +1,6 @@
 # Integrate Online Boutique with Redis Enterprise in Google Cloud Marketplace
 
-By default the `cartservice` app is serializing the data in an in-cluster Redis database. Using a database outside your Google Kubernetes Engine (GKE) cluster, such as a managed service like [Redis Enterprise](https://redis.io/docs/about/redis-enterprise/) in Google Cloud Marketplace, could bring more resiliency and more security.
+By default the `cartservice` app serialized its data in an in-cluster Redis database. Using a database outside your Google Kubernetes Engine (GKE) cluster, such as a managed service like [Redis Enterprise](https://redis.io/docs/about/redis-enterprise/) in Google Cloud Marketplace, could bring more resiliency and more security.
 
 ![Architecture diagram with Redis Enterprise](/docs/img/redis-enterprise/redis-enterprise.png)
   
