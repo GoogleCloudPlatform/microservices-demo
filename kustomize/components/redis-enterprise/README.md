@@ -3,7 +3,9 @@
 By default, the `cartservice` serializes its data in an in-cluster Redis database. Using a database outside your Google Kubernetes Engine (GKE) cluster, such as a managed service like [Redis Enterprise](https://redis.io/docs/about/redis-enterprise/) in Google Cloud Marketplace, could bring more resiliency and more security.
 
 ![Architecture diagram with Redis Enterprise](/docs/img/redis-enterprise/redis-enterprise.png)
-  
+
+This deployment variation assumes that you already have a [Redis Cloud account](https://app.redislabs.com/). Upon account creation, you may be asked to create a _free_ Redis Enterprise Database.
+
 To provision a fully managed Redis Enterprise database instance you can follow the instructions [here](https://github.com/Redislabs-Solution-Architects/redis-enterprise-cloud-gcp/blob/main/marketplace/gcp/redis-enterprise.md).  
 
 The [`/terraform`](/terraform) folder of this repository contains Terraform scripts for provisioning a fully managed Redis Enterprise database instance alongside a GKE cluster. To use Terraform, you are required to collect the [Redis Cloud Access Key](https://docs.redis.com/latest/rc/api/get-started/enable-the-api/) and [Redis Cloud Secret Key](https://docs.redis.com/latest/rc/api/get-started/manage-api-keys/#secret) and save them in your environment variables namely `REDISCLOUD_ACCESS_KEY` and `REDISCLOUD_SECRET_KEY`.
