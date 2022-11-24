@@ -2,7 +2,7 @@
 
 This document contains a list of requirements that every change made to this repository should meet.
 Every change must:
-1. Preserve the golden user journey taken by Kubernetes beginners
+1. Preserve the golden user journey taken by Kubernetes beginners.
 1. Preserve the simplicity of demos.
 1. Preserve the simplicity of the GKE quickstart.
 
