@@ -2,9 +2,9 @@
 
 Thank you so much for your interest in contributing to Online Boutique.
 Before contributing, you must:
-1. sign the [Contributor License Agreement (CLA)](#contributor-license-agreement).
-2. follow [Google's Open Source Community Guidelines](https://opensource.google.com/conduct/).
-3. follow the [Contribution Process](#contribution-process).
+* Sign the [Contributor License Agreement (CLA)](#contributor-license-agreement).
+* Follow the [Google Open Source Community Guidelines](https://opensource.google.com/conduct/).
+* Follow the [Contribution Process](#contribution-process).
 
 ## Contributor License Agreement
 
