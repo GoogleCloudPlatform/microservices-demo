@@ -34,3 +34,5 @@ For instance, a new change should:
 * avoid adding an extra step to the GKE quickstart.
 * avoid requiring the installation of an additional tool in the GKE quickstart.
 * etc.
+
+Ideally, extensions to Online Boutique's default functionality (such as a new microservice or a new cloud service integration) should be added as a [Kustomize Component](https://github.com/GoogleCloudPlatform/microservices-demo/tree/main/kustomize/components) which users can optionally opt into.
