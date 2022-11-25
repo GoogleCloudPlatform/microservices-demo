@@ -10,7 +10,7 @@ Every change must:
 
 The following statement about Online Boutique should always be true:
 
-> A user outside of Googler can deploy Online Boutique's default configuration on a [_kind_ Kubernetes cluster](https://kind.sigs.k8s.io/).
+> A user outside of Google can deploy Online Boutique's default configuration on a [_kind_ Kubernetes cluster](https://kind.sigs.k8s.io/).
 
 This statement describes the golden user journey that we expect new Kubernetes users to take while onboarding to Online Boutique.
 
