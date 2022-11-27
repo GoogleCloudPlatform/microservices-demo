@@ -40,7 +40,7 @@ timeout: '3600s'
 options:
   #pool: 
     #name: 'projects/auverk-cert/locations/us-central1/workerPools/cb-wp-1'
-  machineType: 'N1_HIGHCPU_8'
+  machineType: 'N1_HIGHCPU_16'
   
 # [END cloudbuild_microservice_demo_cloudbuild]
 
