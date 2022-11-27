@@ -43,3 +43,5 @@ options:
   machineType: 'N1_HIGHCPU_8'
   
 # [END cloudbuild_microservice_demo_cloudbuild]
+
+#Added unnecesary comments to see how the cloud build trigger works
