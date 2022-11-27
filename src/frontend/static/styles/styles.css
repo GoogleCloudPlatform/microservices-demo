@@ -587,9 +587,32 @@ the rules below could be extracted.
   color: white;
 }
 
+.cymbal-button-primary:active,
+.cymbal-button-primary:focus,
+.cymbal-button-primary:hover {
+  border: solid 1px #7b031d;
+  background-color: #7b031d;
+  box-shadow: 0px 2px 2px 0px rgb(0 0 0 / 30%);
+}
+
+.cymbal-button-primary:active {
+  box-shadow: 0px 3px 6px 0px rgb(0 0 0 / 30%);
+}
+
 .cymbal-button-secondary {
   background: none;
   color: #CE0631;
+}
+
+.cymbal-button-secondary:active,
+.cymbal-button-secondary:focus,
+.cymbal-button-secondary:hover {
+  color: #7b031d;
+  border: solid 1px #7b031d;
+}
+
+.cymbal-button-secondary:active {
+  background-color: #f5ccd5;
 }
 
 .cymbal-form-field {
