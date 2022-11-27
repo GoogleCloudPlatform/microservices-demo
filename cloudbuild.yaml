@@ -44,4 +44,4 @@ options:
   
 # [END cloudbuild_microservice_demo_cloudbuild]
 
-#Added unnecesary comments to see how the cloud build trigger works
+#Added unnecesary comments to see how the cloud build trigger works with ASM 
