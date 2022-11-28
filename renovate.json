@@ -39,5 +39,8 @@
   },
   "npm":{
     "addLabels": ["lang: nodejs"]
+  },
+  "kubernetes": {
+    "fileMatch”: [“(^|/)[^/]*\\.yaml$”] }
   }
 }
