@@ -41,6 +41,6 @@
     "addLabels": ["lang: nodejs"]
   },
   "kubernetes": {
-    "fileMatch”: [“(^|/)[^/]*\\.yaml$”] }
+    "fileMatch": ["\\.yaml$"]
   }
 }
