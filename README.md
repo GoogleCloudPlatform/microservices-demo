@@ -138,7 +138,7 @@ The [`/kustomize` folder](kustomize) contains instructions for customizing the d
 ## Architecture
 
 **Online Boutique** is composed of 11 microservices written in different
-languages that talk to each other over gRPC. See the [Development Principles](/docs/development-principles.md) doc for more information.
+languages that talk to each other over gRPC.
 
 [![Architecture of
 microservices](./docs/img/architecture-diagram.png)](./docs/img/architecture-diagram.png)
