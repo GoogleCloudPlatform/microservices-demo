@@ -9,7 +9,6 @@ Every change must:
 Changes that will violate any of these rules should not be built into the default deployment of Online Boutique.
 Such changes should be opt-in only — ideally, as a [Kustomize Component](https://github.com/GoogleCloudPlatform/microservices-demo/tree/main/kustomize).
 
-
 ### 1. Preserve the golden user journey taken by Kubernetes beginners
 
 The following statement about Online Boutique should always be true:
