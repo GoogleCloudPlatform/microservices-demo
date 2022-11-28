@@ -8,7 +8,7 @@ Every change must:
 
 These requirements are about the default deployment (default configuration) of Online Boutique.
 Changes that will violate any of these rules should not be built into the default configuration of Online Boutique.
-Such changes should be opt-in only — ideally, as a [Kustomize Component](https://github.com/GoogleCloudPlatform/microservices-demo/tree/main/kustomize).
+Such changes should be opt-in only — ideally, as a [Kustomize Component](https://github.com/GoogleCloudPlatform/microservices-demo/tree/main/kustomize) if they align with the [purpose of Online Boutique](/docs/purpose.md).
 
 ### 1. Preserve the golden user journey taken by Kubernetes beginners
 
