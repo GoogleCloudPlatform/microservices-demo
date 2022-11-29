@@ -40,6 +40,9 @@
   "npm":{
     "addLabels": ["lang: nodejs"]
   },
+  "docker": {
+    "pinDigests": true
+  },
   "kubernetes": {
     "fileMatch": ["\\.yaml$"],
     "ignorePaths": [
