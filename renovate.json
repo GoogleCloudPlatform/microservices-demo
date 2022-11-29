@@ -10,7 +10,7 @@
     }
   },
   "constraints": {
-    "python": "~=3.9.0"
+    "python": "~=3.10.0"
   },
   "prConcurrentLimit":8,
   "stabilityDays":7,
@@ -39,6 +39,9 @@
   },
   "npm":{
     "addLabels": ["lang: nodejs"]
+  },
+  "docker": {
+    "pinDigests": true
   },
   "kubernetes": {
     "fileMatch": ["\\.yaml$"],
