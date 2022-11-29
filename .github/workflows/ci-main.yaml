@@ -31,6 +31,8 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     - uses: actions/setup-dotnet@v3
+      env:
+        DOTNET_INSTALL_DIR: "./.dotnet"
       with:
         dotnet-version: '7.0'
     - uses: actions/setup-go@v3
