@@ -39,5 +39,12 @@
   },
   "npm":{
     "addLabels": ["lang: nodejs"]
+  },
+  "kubernetes": {
+    "fileMatch": ["\\.yaml$"],
+    "ignorePaths": [
+      "^release/**",
+      "^kustomize/base/**"
+    ]
   }
 }
