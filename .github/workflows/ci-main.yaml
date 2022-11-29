@@ -30,10 +30,11 @@ jobs:
     runs-on: [self-hosted, is-enabled]
     steps:
     - uses: actions/checkout@v3
-    - uses: actions/setup-dotnet@v2
+    - uses: actions/setup-dotnet@v3
+      env:
+        DOTNET_INSTALL_DIR: "./.dotnet"
       with:
         dotnet-version: '7.0'
-        include-prerelease: true
     - uses: actions/setup-go@v3
       with:
         go-version: '1.19'
