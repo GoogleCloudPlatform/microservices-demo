@@ -18,7 +18,6 @@ locals {
     "container.googleapis.com",
     "monitoring.googleapis.com",
     "cloudtrace.googleapis.com",
-    "clouddebugger.googleapis.com",
     "cloudprofiler.googleapis.com"
   ]
   memorystore_apis = ["redis.googleapis.com"]
