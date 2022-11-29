@@ -25,7 +25,7 @@ COPY . .
 RUN chmod +x gradlew
 RUN ./gradlew installDist
 
-FROM eclipse-temurin:19.0.1_10-jre-alpine@sha256:8240b06d9877b5d51446518cb554e669a6e5e0df9e15222df4dbe122f9f93204 as without-grpc-health-probe-bin
+FROM eclipse-temurin:19.0.1_10-jre-alpine@sha256:1aa167ab4f1498130e04bed5d6a83fed23c1fd8e3df8589723bc876770dd6a3a as without-grpc-health-probe-bin
 
 RUN apk add --no-cache ca-certificates
 
