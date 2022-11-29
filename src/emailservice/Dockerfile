@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-FROM python:3.10.8-slim@sha256:ac482ce5c90d9cbb5afd90d801f66a56d7d92c5f761b7e025fd0d7a702c1368e as base
+FROM python:3.11.0-slim@sha256:b59417e37f49eaf8f60a68193f1b27ea4f4c996394e88535b45509c8322a0f8a as base
 
 FROM base as builder
 
@@ -40,7 +40,7 @@ ENV ENABLE_PROFILER=1
 WORKDIR /email_server
 
 # Grab packages from builder
-COPY --from=builder /usr/local/lib/python3.10/ /usr/local/lib/python3.10/
+COPY --from=builder /usr/local/lib/python3.11/ /usr/local/lib/python3.11/
 
 # Add the application
 COPY . .
