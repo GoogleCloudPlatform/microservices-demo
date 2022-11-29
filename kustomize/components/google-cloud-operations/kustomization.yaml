@@ -53,7 +53,7 @@ patchesStrategicMerge:
               value: "1"
             - name: DISABLE_PROFILER
               $patch: delete
-# currencyservice - tracing, profiler, debugger
+# currencyservice - tracing, profiler
 - |-
   apiVersion: apps/v1
   kind: Deployment
@@ -70,8 +70,6 @@ patchesStrategicMerge:
             - name: ENABLE_TRACING
               value: "1"
             - name: DISABLE_PROFILER
-              $patch: delete
-            - name: DISABLE_DEBUGGER
               $patch: delete
 # emailservice - tracing, profiler
 - |-
@@ -109,7 +107,7 @@ patchesStrategicMerge:
               value: "opentelemetrycollector:4317"
             - name: DISABLE_PROFILER
               $patch: delete
-# paymentservice - tracing, profiler, debugger
+# paymentservice - tracing, profiler
 - |-
   apiVersion: apps/v1
   kind: Deployment
@@ -126,8 +124,6 @@ patchesStrategicMerge:
             - name: ENABLE_TRACING
               value: "1"
             - name: DISABLE_PROFILER
-              $patch: delete
-            - name: DISABLE_DEBUGGER
               $patch: delete
 # productcatalogservice - stats, tracing, profiler
 - |-
@@ -149,7 +145,7 @@ patchesStrategicMerge:
               value: "1"
             - name: ENABLE_PROFILER
               $patch: delete
-# recommendationservice - tracing, profiler, debugger
+# recommendationservice - tracing, profiler
 - |-
   apiVersion: apps/v1
   kind: Deployment
@@ -166,8 +162,6 @@ patchesStrategicMerge:
             - name: ENABLE_TRACING
               value: "1"
             - name: DISABLE_PROFILER
-              $patch: delete
-            - name: DISABLE_DEBUGGER
               $patch: delete
 # shippingservice - stats, tracing, profiler
 - |-

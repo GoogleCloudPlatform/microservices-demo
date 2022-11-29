@@ -37,7 +37,7 @@ while IFS= read -d $'\0' -r dir; do
     (
         cd "${builddir}"
         log "Building: ${image}"
-        docker build -t "${image}" .
+        docker build --pull -t "${image}" .
 
         log "Pushing: ${image}"
         docker push "${image}"
@@ -45,7 +45,7 @@ while IFS= read -d $'\0' -r dir; do
         if [ $svcname != "frontend" ] && [ $svcname != "loadgenerator" ]
         then
             log "Building: ${image}-native-grpc-probes"
-            docker build -t "${image}-native-grpc-probes" . --target without-grpc-health-probe-bin
+            docker build --pull -t "${image}-native-grpc-probes" . --target without-grpc-health-probe-bin
             log "Pushing: ${image}-native-grpc-probes"
             docker push "${image}-native-grpc-probes"
         fi
