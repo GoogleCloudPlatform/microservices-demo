@@ -41,7 +41,12 @@
     "addLabels": ["lang: nodejs"]
   },
   "docker": {
-    "pinDigests": true
+    "pinDigests": true,
+    "ignorePaths": [
+      "release/**",
+      "kustomize/**",
+      "kubernetes-manifests/**"
+    ]
   },
   "kubernetes": {
     "fileMatch": ["\\.yaml$"],
