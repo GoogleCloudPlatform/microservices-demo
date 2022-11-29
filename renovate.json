@@ -42,5 +42,12 @@
   },
   "docker": {
     "pinDigests": true
+  },
+  "kubernetes": {
+    "fileMatch": ["\\.yaml$"],
+    "ignorePaths": [
+      "^release/**",
+      "^kustomize/base/**"
+    ]
   }
 }
