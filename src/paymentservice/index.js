@@ -54,19 +54,6 @@ else {
   console.log("Tracing disabled.")
 }
 
-if(process.env.DISABLE_DEBUGGER) {
-  console.log("Debugger disabled.")
-}
-else {
-  console.log("Debugger enabled.")
-  require('@google-cloud/debug-agent').start({
-    serviceContext: {
-      service: 'paymentservice',
-      version: 'VERSION'
-    }
-  });
-}
-
 
 const path = require('path');
 const HipsterShopServer = require('./server');

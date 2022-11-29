@@ -8,11 +8,10 @@ This doc explains how to build and run the OnlineBoutique source code locally us
 - kubectl (can be installed via `gcloud components install kubectl`)
 - [skaffold **2.0+**](https://skaffold.dev/docs/install/) (latest version recommended), a tool that builds and deploys Docker images in bulk. 
 - A Google Cloud Project with Google Container Registry enabled. 
-- Enable GCP APIs for Cloud Monitoring, Tracing, Debugger, Profiler:
+- Enable GCP APIs for Cloud Monitoring, Tracing, Profiler:
 ```
 gcloud services enable monitoring.googleapis.com \
     cloudtrace.googleapis.com \
-    clouddebugger.googleapis.com \
     cloudprofiler.googleapis.com
 ```
 - [Minikube](https://minikube.sigs.k8s.io/docs/start/) (optional - see Local Cluster)
