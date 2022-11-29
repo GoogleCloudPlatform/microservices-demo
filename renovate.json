@@ -46,8 +46,8 @@
   "kubernetes": {
     "fileMatch": ["\\.yaml$"],
     "ignorePaths": [
-      "^release/**",
-      "^kustomize/base/**"
+      "release/**",
+      "kustomize/base/**"
     ]
   },
   "regexManagers": [
