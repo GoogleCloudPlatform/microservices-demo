@@ -53,7 +53,6 @@
   "regexManagers": [
     {
       "fileMatch": [
-        "(^|/|\\.)Dockerfile$",
         "(^|/)Dockerfile[^/]*$"
       ],
       "matchStrings": [
