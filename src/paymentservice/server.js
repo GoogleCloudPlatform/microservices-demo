@@ -22,8 +22,11 @@ const charge = require('./charge');
 const logger = pino({
   name: 'paymentservice-server',
   messageKey: 'message',
-  changeLevelName: 'severity',
-  useLevelLabels: true
+  formatters: {
+    level (logLevelString, logLevelNum) {
+      return { severity: logLevelString }
+    }
+  }
 });
 
 class HipsterShopServer {
