@@ -3,9 +3,9 @@
 By default, when you deploy this sample app, the Online Boutique's `frontend-external` is deployed as a public (`LoadBalancer`) `Service.
 But you may want to not expose this sample app publicly.
 
-## Deploy Online Boutique with the Cymbal Shops branding via Kustomize
+## Deploy Online Boutique without the default public endpoint
 
-To automate the deployment of Online Boutique with the Cymbal Shops branding you can leverage the following variation with [Kustomize](../..).
+To automate the deployment of Online Boutique without the default public endpoint you can leverage the following variation with [Kustomize](../..).
 
 From the `kustomize/` folder at the root level of this repository, execute this command:
 ```bash
