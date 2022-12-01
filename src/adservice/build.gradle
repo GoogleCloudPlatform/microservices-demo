@@ -17,11 +17,11 @@ version = "0.1.0-SNAPSHOT"
 def grpcVersion = "1.51.0"
 def jacksonCoreVersion = "2.14.1"
 def jacksonDatabindVersion = "2.14.1"
-def protocVersion = "3.21.9"
+def protocVersion = "3.21.10"
 
 tasks.withType(JavaCompile) {
-    sourceCompatibility = JavaVersion.VERSION_18
-    targetCompatibility = JavaVersion.VERSION_18
+    sourceCompatibility = JavaVersion.VERSION_19
+    targetCompatibility = JavaVersion.VERSION_19
 }
 
 ext {
@@ -33,7 +33,7 @@ dependencies {
     if (speed) {
         implementation fileTree(dir: offlineCompile, include: '*.jar')
     } else {
-        implementation "com.google.api.grpc:proto-google-common-protos:2.10.0",
+        implementation "com.google.api.grpc:proto-google-common-protos:2.11.0",
                 "javax.annotation:javax.annotation-api:1.3.2",
                 "io.grpc:grpc-protobuf:${grpcVersion}",
                 "io.grpc:grpc-stub:${grpcVersion}",
