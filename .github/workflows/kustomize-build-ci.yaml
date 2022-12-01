@@ -25,7 +25,7 @@ on:
       - 'kustomize/**'
       - '.github/workflows/kustomize-build-ci.yaml'
 jobs:
-  job:
+  kustomize-build-ci:
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v3
