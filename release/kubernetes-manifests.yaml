@@ -47,7 +47,7 @@ spec:
               - all
           privileged: false
           readOnlyRootFilesystem: true
-        image: gcr.io/google-samples/microservices-demo/emailservice:v0.4.2
+        image: gcr.io/online-boutique-ci/refs/pull/1340/emailservice:1340
         ports:
         - containerPort: 8080
         env:
@@ -393,7 +393,7 @@ spec:
               - all
           privileged: false
           readOnlyRootFilesystem: true
-        image: gcr.io/google-samples/microservices-demo/paymentservice:v0.4.2
+        image: gcr.io/online-boutique-ci/refs/pull/1340/paymentservice:1340
         ports:
         - containerPort: 50051
         env:
@@ -660,7 +660,7 @@ spec:
               - all
           privileged: false
           readOnlyRootFilesystem: true
-        image: gcr.io/google-samples/microservices-demo/currencyservice:v0.4.2
+        image: gcr.io/online-boutique-ci/refs/pull/1340/currencyservice:1340
         ports:
         - name: grpc
           containerPort: 7000
