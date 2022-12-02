@@ -1,0 +1,54 @@
+# Default values for onlineboutique.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+image:
+  repository: gcr.io/google-samples/microservices-demo
+  # Overrides the image tag whose default is the chart appVersion.
+  tag: ""
+
+serviceAccount:
+  # Specifies whether service accounts should be created
+  create: true
+  # Annotations to add to the service accounts
+  annotations: {}
+  # The name of the service account to use.
+  # If not set and create is true, each app will have its own name
+  name: ""
+
+adservice:
+  create: true
+  name: adservice
+
+cartservie:
+  create: true
+  name: cartservice
+
+checkoutservice:
+  create: true
+  name: checkoutservice
+
+currencyservice:
+  create: true
+  name: currencyservice
+
+emailservice:
+  create: true
+  name: emailservice
+
+frontend:
+  create: true
+  name: frontend
+  type: LoadBalancer
+
+loadgenerator:
+  create: true
+  name: loadgenerator
+
+paymentservice:
+  create: true
+  name: paymentservice
+
+productcatalogservice:
+  create: true
+  name: productcatalogservice
