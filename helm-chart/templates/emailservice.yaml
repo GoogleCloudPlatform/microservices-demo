@@ -12,18 +12,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+{{- if .Values.emailservice.create -}}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: emailservice
+  name: {{ .Values.emailservice.name }}
 spec:
   selector:
     matchLabels:
-      app: emailservice
+      app: {{ .Values.emailservice.name }}
   template:
     metadata:
       labels:
-        app: emailservice
+        app: {{ .Values.emailservice.name }}
     spec:
       serviceAccountName: default
       terminationGracePeriodSeconds: 5
@@ -41,7 +42,7 @@ spec:
               - all
           privileged: false
           readOnlyRootFilesystem: true
-        image: emailservice
+        image: {{ .Values.image.repository }}/{{ .Values.emailservice.name }}:{{ .Values.image.tag | default .Chart.AppVersion }}
         ports:
         - containerPort: 8080
         env:
@@ -68,12 +69,13 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: emailservice
+  name: {{ .Values.emailservice.name }}
 spec:
   type: ClusterIP
   selector:
-    app: emailservice
+    app: {{ .Values.emailservice.name }}
   ports:
   - name: grpc
     port: 5000
     targetPort: 8080
+{{- end }}

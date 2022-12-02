@@ -12,18 +12,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+{{- if .Values.currencyservice.create -}}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: currencyservice
+  name: {{ .Values.currencyservice.name }}
 spec:
   selector:
     matchLabels:
-      app: currencyservice
+      app: {{ .Values.currencyservice.name }}
   template:
     metadata:
       labels:
-        app: currencyservice
+        app: {{ .Values.currencyservice.name }}
     spec:
       serviceAccountName: default
       terminationGracePeriodSeconds: 5
@@ -41,7 +42,7 @@ spec:
               - all
           privileged: false
           readOnlyRootFilesystem: true
-        image: currencyservice
+        image: {{ .Values.image.repository }}/{{ .Values.currencyservice.name }}:{{ .Values.image.tag | default .Chart.AppVersion }}
         ports:
         - name: grpc
           containerPort: 7000
@@ -67,12 +68,13 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: currencyservice
+  name: {{ .Values.currencyservice.name }}
 spec:
   type: ClusterIP
   selector:
-    app: currencyservice
+    app: {{ .Values.currencyservice.name }}
   ports:
   - name: grpc
     port: 7000
     targetPort: 7000
+{{- end }}
