@@ -19,8 +19,11 @@ const pino = require('pino');
 const logger = pino({
   name: 'paymentservice-charge',
   messageKey: 'message',
-  changeLevelName: 'severity',
-  useLevelLabels: true
+  formatters: {
+    level (logLevelString, logLevelNum) {
+      return { severity: logLevelString }
+    }
+  }
 });
 
 
