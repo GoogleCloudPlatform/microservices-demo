@@ -3,7 +3,7 @@ module github.com/GoogleCloudPlatform/microservices-demo/src/frontend
 go 1.19
 
 require (
-	cloud.google.com/go/compute/metadata v0.2.1
+	cloud.google.com/go/compute/metadata v0.2.2
 	cloud.google.com/go/profiler v0.3.0
 	github.com/golang/protobuf v1.5.2
 	github.com/google/uuid v1.3.0
