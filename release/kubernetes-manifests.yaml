@@ -633,7 +633,7 @@ spec:
               - all
           privileged: false
           readOnlyRootFilesystem: true
-        image: gcr.io/online-boutique-ci/refs/pull/1340/currencyservice:1340
+        image: gcr.io/google-samples/microservices-demo/currencyservice:v0.4.2
         ports:
         - name: grpc
           containerPort: 7000
