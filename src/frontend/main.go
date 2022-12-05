@@ -98,7 +98,6 @@ func main() {
 
 	svc := new(frontendServer)
 
-	log.Info("Context Propagation Set")
 	otel.SetTextMapPropagator(
 		propagation.NewCompositeTextMapPropagator(
 			propagation.TraceContext{}, propagation.Baggage{}))
