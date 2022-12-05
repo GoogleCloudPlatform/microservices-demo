@@ -37,6 +37,7 @@ jobs:
         run: |
           cd helm-chart/
           helm template . > helm-template.yaml
+          cat helm-template.yaml 
       - name: kustomize build default
         run: |
           cd helm-chart/
@@ -60,6 +61,7 @@ jobs:
             --set serviceAccounts.annotationsOnlyForCartservice=true \
             -n onlineboutique \
             > helm-template.yaml
+          cat helm-template.yaml
       - name: kustomize build advanced
         run: |
           cd helm-chart/
