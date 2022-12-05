@@ -175,7 +175,7 @@ function main () {
   server.addService(healthProto.Health.service, {check});
 
   server.bindAsync(
-    `0.0.0.0:${PORT}`,
+    `[::]:${PORT}`,
     grpc.ServerCredentials.createInsecure(),
     function() {
       logger.info(`CurrencyService gRPC server started on port ${PORT}`);
