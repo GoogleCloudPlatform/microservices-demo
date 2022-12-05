@@ -12,11 +12,26 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-{{- if .Values.adservice.create -}}
+{{- if .Values.adservice.create }}
+{{- if .Values.serviceAccounts.create }}
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: {{ .Values.adservice.name }}
+  namespace: {{.Release.Namespace}}
+  {{- if not .Values.serviceAccounts.annotationsOnlyForCartservice }}
+  {{- with .Values.serviceAccounts.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  {{- end }}
+---
+{{- end }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ .Values.adservice.name }}
+  namespace: {{ .Release.Namespace }}
 spec:
   selector:
     matchLabels:
@@ -26,7 +41,11 @@ spec:
       labels:
         app: {{ .Values.adservice.name }}
     spec:
+      {{- if .Values.serviceAccounts.create }}
+      serviceAccountName: {{ .Values.adservice.name }}
+      {{- else }}
       serviceAccountName: default
+      {{- end }}
       terminationGracePeriodSeconds: 5
       securityContext:
         fsGroup: 1000
@@ -42,7 +61,7 @@ spec:
               - all
           privileged: false
           readOnlyRootFilesystem: true
-        image: {{ .Values.image.repository }}/{{ .Values.adservice.name }}:{{ .Values.image.tag | default .Chart.AppVersion }}
+        image: {{ .Values.images.repository }}/{{ .Values.adservice.name }}:{{ .Values.images.tag | default .Chart.AppVersion }}{{ .Values.images.tagSuffix }}
         ports:
         - containerPort: 9555
         env:
@@ -58,18 +77,29 @@ spec:
         readinessProbe:
           initialDelaySeconds: 20
           periodSeconds: 15
+          {{- if .Values.nativeGrpcHealthCheck }}
+          grpc:
+            port: 9555
+          {{- else }}
           exec:
             command: ["/bin/grpc_health_probe", "-addr=:9555"]
+          {{- end }}
         livenessProbe:
           initialDelaySeconds: 20
           periodSeconds: 15
+          {{- if .Values.nativeGrpcHealthCheck }}
+          grpc:
+            port: 9555
+          {{- else }}
           exec:
             command: ["/bin/grpc_health_probe", "-addr=:9555"]
+          {{- end }}
 ---
 apiVersion: v1
 kind: Service
 metadata:
   name: {{ .Values.adservice.name }}
+  namespace: {{ .Release.Namespace }}
 spec:
   type: ClusterIP
   selector:
@@ -78,4 +108,73 @@ spec:
   - name: grpc
     port: 9555
     targetPort: 9555
+{{- if .Values.networkPolicies.create }}
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ .Values.adservice.name }}
+  namespace: {{ .Release.Namespace }}
+spec:
+  podSelector:
+    matchLabels:
+      app: {{ .Values.adservice.name }}
+  policyTypes:
+  - Ingress
+  - Egress
+  ingress:
+  - from:
+    - podSelector:
+        matchLabels:
+          app: {{ .Values.frontend.name }}
+    ports:
+     - port: 9555
+       protocol: TCP
+  egress:
+  - {}
+{{- end }}
+{{- if .Values.sidecars.create }}
+---
+apiVersion: networking.istio.io/v1beta1
+kind: Sidecar
+metadata:
+  name: {{ .Values.adservice.name }}
+  namespace: {{ .Release.Namespace }}
+spec:
+  workloadSelector:
+    labels:
+      app: {{ .Values.adservice.name }}
+  egress:
+  - hosts:
+    - istio-system/*
+{{- end }}
+{{- if .Values.authorizationPolicies.create }}
+---
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+  name: {{ .Values.adservice.name }}
+  namespace: {{ .Release.Namespace }}
+spec:
+  selector:
+    matchLabels:
+      app: {{ .Values.adservice.name }}
+  rules:
+  - from:
+    - source:
+        principals:
+        {{- if .Values.serviceAccounts.create }}
+        - cluster.local/ns/{{ .Release.Namespace }}/sa/{{ .Values.frontend.name }}
+        {{- else }}
+        - cluster.local/ns/{{ .Release.Namespace }}/sa/default
+        {{- end }}
+    to:
+    - operation:
+        paths:
+        - /hipstershop.AdService/GetAds
+        methods:
+        - POST
+        ports:
+        - "9555"
+{{- end }}
 {{- end }}
