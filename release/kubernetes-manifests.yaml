@@ -229,33 +229,6 @@ spec:
     port: 8080
     targetPort: 8080
 ---
-apiVersion: kustomize.config.k8s.io/v1beta1
-kind: Kustomization
-resources:
- - adservice.yaml
- - cartservice.yaml
- - checkoutservice.yaml
- - currencyservice.yaml
- - emailservice.yaml
- - frontend.yaml
-# - loadgenerator.yaml # During development, the loadgenerator module inside skaffold.yaml will be used.
- - paymentservice.yaml
- - productcatalogservice.yaml
- - recommendationservice.yaml
- - redis.yaml
- - shippingservice.yaml
-components:
-# - ../kustomize/components/cymbal-branding
-# - ../kustomize/components/google-cloud-operations
-# - ../kustomize/components/memorystore
-# - ../kustomize/components/network-policies
-# - ../kustomize/components/service-accounts
-# - ../kustomize/components/spanner
-# - ../kustomize/components/container-images-tag
-# - ../kustomize/components/container-images-tag-suffix
-# - ../kustomize/components/container-images-registry
-# - ../kustomize/components/native-grpc-health-check
----
 apiVersion: apps/v1
 kind: Deployment
 metadata:

@@ -23,7 +23,7 @@ from logger import getJSONLogger
 logger = getJSONLogger('emailservice-client')
 
 def send_confirmation_email(email, order):
-  channel = grpc.insecure_channel('0.0.0.0:8080')
+  channel = grpc.insecure_channel('[::]:8080')
   stub = demo_pb2_grpc.EmailServiceStub(channel)
   try:
     response = stub.SendOrderConfirmation(demo_pb2.SendOrderConfirmationRequest(

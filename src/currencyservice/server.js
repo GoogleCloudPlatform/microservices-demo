@@ -67,8 +67,11 @@ const healthProto = _loadProto(HEALTH_PROTO_PATH).grpc.health.v1;
 const logger = pino({
   name: 'currencyservice-server',
   messageKey: 'message',
-  changeLevelName: 'severity',
-  useLevelLabels: true
+  formatters: {
+    level (logLevelString, logLevelNum) {
+      return { severity: logLevelString }
+    }
+  }
 });
 
 /**
@@ -172,7 +175,7 @@ function main () {
   server.addService(healthProto.Health.service, {check});
 
   server.bindAsync(
-    `0.0.0.0:${PORT}`,
+    `[::]:${PORT}`,
     grpc.ServerCredentials.createInsecure(),
     function() {
       logger.info(`CurrencyService gRPC server started on port ${PORT}`);
