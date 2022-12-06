@@ -26,3 +26,5 @@ helm install onlineboutique oci://us-docker.pkg.dev/online-boutique-ci/charts/on
     --set serviceAccounts.annotationsOnlyForCartservice=true \
     -n onlineboutique
 ```
+
+For the full list of configurations, see [values.yaml](./values.yaml).
