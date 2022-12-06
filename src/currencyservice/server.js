@@ -27,13 +27,19 @@ else {
   });
 }
 
+// Register GRPC OTel Instrumentation for trace propagation
+// regardless of whether tracing is emitted.
+const { GrpcInstrumentation } = require('@opentelemetry/instrumentation-grpc');
+const { registerInstrumentations } = require('@opentelemetry/instrumentation');
+
+registerInstrumentations({
+  instrumentations: [new GrpcInstrumentation()]
+});
 
 if(process.env.ENABLE_TRACING == "1") {
   console.log("Tracing enabled.")
   const { NodeTracerProvider } = require('@opentelemetry/sdk-trace-node');
   const { SimpleSpanProcessor } = require('@opentelemetry/sdk-trace-base');
-  const { GrpcInstrumentation } = require('@opentelemetry/instrumentation-grpc');
-  const { registerInstrumentations } = require('@opentelemetry/instrumentation');
   const { OTLPTraceExporter } = require("@opentelemetry/exporter-otlp-grpc");
 
   const provider = new NodeTracerProvider();
@@ -42,10 +48,6 @@ if(process.env.ENABLE_TRACING == "1") {
 
   provider.addSpanProcessor(new SimpleSpanProcessor(new OTLPTraceExporter({url: collectorUrl})));
   provider.register();
-
-  registerInstrumentations({
-    instrumentations: [new GrpcInstrumentation()]
-  });
 }
 else {
   console.log("Tracing disabled.")
