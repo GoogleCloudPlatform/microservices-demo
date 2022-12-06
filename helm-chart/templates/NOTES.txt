@@ -1,4 +1,4 @@
-{{- if and .Values.frontend.enabled .Values.frontend.externalService }}
+{{- if and .Values.frontend.create .Values.frontend.externalService }}
 Get the application URL by running these commands:
      NOTE: It may take a few minutes for the LoadBalancer IP to be available.
            You can watch the status of by running 'kubectl get --namespace {{ .Release.Namespace }} svc -w {{ .Values.frontend.name }}-external'

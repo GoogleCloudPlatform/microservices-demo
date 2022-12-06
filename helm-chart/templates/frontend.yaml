@@ -113,7 +113,7 @@ spec:
             value: "1"
           {{- end }}
           - name: CYMBAL_BRANDING
-            value: {{ .Values.frontend.cymbalBranding }}
+            value: {{ .Values.frontend.cymbalBranding | quote }}
           - name: ENABLE_SINGLE_SHARED_SESSION
             value: {{ .Values.frontend.singleSharedSession | quote }}
           resources:
