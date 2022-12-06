@@ -2,6 +2,8 @@
 
 If you'd like to deploy Online Boutique via its Helm chart, you could leverage the following instructions.
 
+**Warning:** Online Boutique's Helm chart is currently experimental. If you have feedback or run into issues, let us know inside [GitHub Issue #1319](https://github.com/GoogleCloudPlatform/microservices-demo/issues/1319) or by creating a [new GitHub Issue](https://github.com/GoogleCloudPlatform/microservices-demo/issues/new/choose).
+
 Deploy the default setup of Online Boutique:
 ```sh
 helm install onlineboutique oci://us-docker.pkg.dev/online-boutique-ci/charts/onlineboutique
