@@ -115,7 +115,7 @@ spec:
           - name: CYMBAL_BRANDING
             value: {{ .Values.frontend.cymbalBranding }}
           - name: ENABLE_SINGLE_SHARED_SESSION
-            value: {{ .Values.frontend.singleSharedSession }}
+            value: {{ .Values.frontend.singleSharedSession | quote }}
           resources:
             requests:
               cpu: 100m
