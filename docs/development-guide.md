@@ -103,11 +103,19 @@ gcloud services enable monitoring.googleapis.com \
    This will build and deploy the application. If you need to rebuild the images
    automatically as you refactor the code, run `skaffold dev` command.
 
+   or
+
+   Run `tilt up` (https://tilt.dev/) (first time will be slow, it can take ~20 minutes).
+   This will build and deploy the application. You no need to rebuild the images
+   automatically as you refactor the code.
+
+    [![Tilt dashboard](./docs/img/tilt.png)](./docs/img/tilt.png)
+    [![Kubernetes dashboard - services](./docs/img/k8s-services.png)](./docs/img/k8s-services.png)
+    [![Online boutique frontend - local](./docs/img/online-boutique-frontend-local.png)](./docs/img/online-boutique-frontend-local.png)
+
 4. Run `kubectl get pods` to verify the Pods are ready and running.
 
-5. Run `kubectl port-forward deployment/frontend 8080:8080` to forward a port to the frontend service.
-
-6. Navigate to `localhost:8080` to access the web frontend.
+5. Navigate to `localhost` to access the web frontend.
 
 
 ## Cleanup
