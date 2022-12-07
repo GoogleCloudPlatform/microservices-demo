@@ -12,12 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-{{- if .Values.emailservice.create }}
+{{- if .Values.emailService.create }}
 {{- if .Values.serviceAccounts.create }}
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: {{ .Values.emailservice.name }}
+  name: {{ .Values.emailService.name }}
   namespace: {{.Release.Namespace}}
   {{- if not .Values.serviceAccounts.annotationsOnlyForCartservice }}
   {{- with .Values.serviceAccounts.annotations }}
@@ -30,19 +30,19 @@ metadata:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ .Values.emailservice.name }}
+  name: {{ .Values.emailService.name }}
   namespace: {{ .Release.Namespace }}
 spec:
   selector:
     matchLabels:
-      app: {{ .Values.emailservice.name }}
+      app: {{ .Values.emailService.name }}
   template:
     metadata:
       labels:
-        app: {{ .Values.emailservice.name }}
+        app: {{ .Values.emailService.name }}
     spec:
       {{- if .Values.serviceAccounts.create }}
-      serviceAccountName: {{ .Values.emailservice.name }}
+      serviceAccountName: {{ .Values.emailService.name }}
       {{- else }}
       serviceAccountName: default
       {{- end }}
@@ -61,7 +61,7 @@ spec:
               - all
           privileged: false
           readOnlyRootFilesystem: true
-        image: {{ .Values.images.repository }}/{{ .Values.emailservice.name }}:{{ .Values.images.tag | default .Chart.AppVersion }}{{ .Values.images.tagSuffix }}
+        image: {{ .Values.images.repository }}/{{ .Values.emailService.name }}:{{ .Values.images.tag | default .Chart.AppVersion }}{{ .Values.images.tagSuffix }}
         ports:
         - containerPort: 8080
         env:
@@ -108,12 +108,12 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ .Values.emailservice.name }}
+  name: {{ .Values.emailService.name }}
   namespace: {{ .Release.Namespace }}
 spec:
   type: ClusterIP
   selector:
-    app: {{ .Values.emailservice.name }}
+    app: {{ .Values.emailService.name }}
   ports:
   - name: grpc
     port: 5000
@@ -123,12 +123,12 @@ spec:
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
-  name: {{ .Values.emailservice.name }}
+  name: {{ .Values.emailService.name }}
   namespace: {{ .Release.Namespace }}
 spec:
   podSelector:
     matchLabels:
-      app: {{ .Values.emailservice.name }}
+      app: {{ .Values.emailService.name }}
   policyTypes:
   - Ingress
   - Egress
@@ -136,7 +136,7 @@ spec:
   - from:
     - podSelector:
         matchLabels:
-          app: {{ .Values.checkoutservice.name }}
+          app: {{ .Values.checkoutService.name }}
     ports:
      - port: 8080
        protocol: TCP
@@ -148,12 +148,12 @@ spec:
 apiVersion: networking.istio.io/v1beta1
 kind: Sidecar
 metadata:
-  name: {{ .Values.emailservice.name }}
+  name: {{ .Values.emailService.name }}
   namespace: {{ .Release.Namespace }}
 spec:
   workloadSelector:
     labels:
-      app: {{ .Values.emailservice.name }}
+      app: {{ .Values.emailService.name }}
   egress:
   - hosts:
     - istio-system/*
@@ -163,18 +163,18 @@ spec:
 apiVersion: security.istio.io/v1beta1
 kind: AuthorizationPolicy
 metadata:
-  name: {{ .Values.emailservice.name }}
+  name: {{ .Values.emailService.name }}
   namespace: {{ .Release.Namespace }}
 spec:
   selector:
     matchLabels:
-      app: {{ .Values.emailservice.name }}
+      app: {{ .Values.emailService.name }}
   rules:
   - from:
     - source:
         principals:
         {{- if .Values.serviceAccounts.create }}
-        - cluster.local/ns/{{ .Release.Namespace }}/sa/{{ .Values.checkoutservice.name }}
+        - cluster.local/ns/{{ .Release.Namespace }}/sa/{{ .Values.checkoutService.name }}
         {{- else }}
         - cluster.local/ns/{{ .Release.Namespace }}/sa/default
         {{- end }}

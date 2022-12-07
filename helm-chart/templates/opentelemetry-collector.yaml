@@ -166,37 +166,37 @@ spec:
   - from:
     - podSelector:
         matchLabels:
-          app: {{ .Values.adservice.name }}
+          app: {{ .Values.adService.name }}
     - podSelector:
         matchLabels:
-          app: {{ .Values.cartservice.name }}
+          app: {{ .Values.cartService.name }}
     - podSelector:
         matchLabels:
-          app: {{ .Values.checkoutservice.name }}
+          app: {{ .Values.checkoutService.name }}
     - podSelector:
         matchLabels:
-          app: {{ .Values.currencyservice.name }}
+          app: {{ .Values.currencyService.name }}
     - podSelector:
         matchLabels:
-          app: {{ .Values.emailservice.name }}
+          app: {{ .Values.emailService.name }}
     - podSelector:
         matchLabels:
           app: {{ .Values.frontend.name }}
     - podSelector:
         matchLabels:
-          app: {{ .Values.loadgenerator.name }}
+          app: {{ .Values.loadGenerator.name }}
     - podSelector:
         matchLabels:
-          app: {{ .Values.paymentservice.name }}
+          app: {{ .Values.paymentService.name }}
     - podSelector:
         matchLabels:
-          app: {{ .Values.productcatalogservice.name }}
+          app: {{ .Values.productCatalogService.name }}
     - podSelector:
         matchLabels:
-          app: {{ .Values.recommendationservice.name }}
+          app: {{ .Values.recommendationService.name }}
     - podSelector:
         matchLabels:
-          app: {{ .Values.shippingservice.name }}
+          app: {{ .Values.shippingService.name }}
     ports:
      - port: 4317
        protocol: TCP
@@ -234,17 +234,17 @@ spec:
     - source:
         principals:
         {{- if .Values.serviceAccounts.create }}
-        - cluster.local/ns/{{ .Release.Namespace }}/sa/{{ .Values.adservice.name }}
-        - cluster.local/ns/{{ .Release.Namespace }}/sa/{{ .Values.cartservice.name }}
-        - cluster.local/ns/{{ .Release.Namespace }}/sa/{{ .Values.checkoutservice.name }}
-        - cluster.local/ns/{{ .Release.Namespace }}/sa/{{ .Values.currencyservice.name }}
-        - cluster.local/ns/{{ .Release.Namespace }}/sa/{{ .Values.emailservice.name }}
+        - cluster.local/ns/{{ .Release.Namespace }}/sa/{{ .Values.adService.name }}
+        - cluster.local/ns/{{ .Release.Namespace }}/sa/{{ .Values.cartService.name }}
+        - cluster.local/ns/{{ .Release.Namespace }}/sa/{{ .Values.checkoutService.name }}
+        - cluster.local/ns/{{ .Release.Namespace }}/sa/{{ .Values.currencyService.name }}
+        - cluster.local/ns/{{ .Release.Namespace }}/sa/{{ .Values.emailService.name }}
         - cluster.local/ns/{{ .Release.Namespace }}/sa/{{ .Values.frontend.name }}
-        - cluster.local/ns/{{ .Release.Namespace }}/sa/{{ .Values.loadgenerator.name }}
-        - cluster.local/ns/{{ .Release.Namespace }}/sa/{{ .Values.paymentservice.name }}
-        - cluster.local/ns/{{ .Release.Namespace }}/sa/{{ .Values.productcatalogservice.name }}
-        - cluster.local/ns/{{ .Release.Namespace }}/sa/{{ .Values.recommendationservice.name }}
-        - cluster.local/ns/{{ .Release.Namespace }}/sa/{{ .Values.shippingservice.name }}
+        - cluster.local/ns/{{ .Release.Namespace }}/sa/{{ .Values.loadGenerator.name }}
+        - cluster.local/ns/{{ .Release.Namespace }}/sa/{{ .Values.paymentService.name }}
+        - cluster.local/ns/{{ .Release.Namespace }}/sa/{{ .Values.productCatalogService.name }}
+        - cluster.local/ns/{{ .Release.Namespace }}/sa/{{ .Values.recommendationService.name }}
+        - cluster.local/ns/{{ .Release.Namespace }}/sa/{{ .Values.shippingService.name }}
         {{- else }}
         - cluster.local/ns/{{ .Release.Namespace }}/sa/default
         {{- end }}

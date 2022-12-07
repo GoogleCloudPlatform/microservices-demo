@@ -43,28 +43,23 @@ googleCloudOperations:
   tracing: false
   metrics: false
 
-adservice:
+adService:
   create: true
   name: adservice
-  port: 9555
 
-cartservice:
+cartService:
   create: true
   name: cartservice
-  database:
-    # Specifies the type of the cartservice's database, could be either redis or spanner.
-    type: redis
-    connectionString: "redis-cart:6379"
 
-checkoutservice:
+checkoutService:
   create: true
   name: checkoutservice
 
-currencyservice:
+currencyService:
   create: true
   name: currencyservice
 
-emailservice:
+emailService:
   create: true
   name: emailservice
 
@@ -84,31 +79,40 @@ frontend:
       name: asm-ingressgateway
       namespace: asm-ingress
 
-loadgenerator:
+loadGenerator:
   create: true
   name: loadgenerator
   checkFrontendInitContainer: true
 
-paymentservice:
+paymentService:
   create: true
   name: paymentservice
 
-productcatalogservice:
+productCatalogService:
   create: true
   name: productcatalogservice
   # Specifies an extra latency to any request on productcatalogservice, by default no extra latency.
   extraLatency: ""
 
-recommendationservice:
+recommendationService:
   create: true
   name: recommendationservice
 
-redis:
-  create: true
-  name: redis-cart
-  # Uses the public redis image from Docker Hub, otherwise will use the images.repository.
-  publicRepository: true
-
-shippingservice:
+shippingService:
   create: true
   name: shippingservice
+
+cartDatabase:
+  # Specifies the type of the cartservice's database, could be either redis or spanner.
+  type: redis
+  connectionString: "redis-cart:6379"
+  inClusterRedis:
+    name: redis-cart
+    # Uses the public redis image from Docker Hub, otherwise will use the images.repository.
+    publicRepository: true
+  externalRedisTlsOrigination:
+    enable: false
+    name: exernal-redis-tls-origination
+    endpointAddress: ""
+    endpointPort: ""
+    certificate: ""

@@ -85,19 +85,19 @@ spec:
           - name: PORT
             value: "8080"
           - name: PRODUCT_CATALOG_SERVICE_ADDR
-            value: "{{ .Values.productcatalogservice.name }}:3550"
+            value: "{{ .Values.productCatalogService.name }}:3550"
           - name: CURRENCY_SERVICE_ADDR
-            value: "{{ .Values.currencyservice.name }}:7000"
+            value: "{{ .Values.currencyService.name }}:7000"
           - name: CART_SERVICE_ADDR
-            value: "{{ .Values.cartservice.name }}:7070"
+            value: "{{ .Values.cartService.name }}:7070"
           - name: RECOMMENDATION_SERVICE_ADDR
-            value: "{{ .Values.recommendationservice.name }}:8080"
+            value: "{{ .Values.recommendationService.name }}:8080"
           - name: SHIPPING_SERVICE_ADDR
-            value: "{{ .Values.shippingservice.name }}:50051"
+            value: "{{ .Values.shippingService.name }}:50051"
           - name: CHECKOUT_SERVICE_ADDR
-            value: "{{ .Values.checkoutservice.name }}:5050"
+            value: "{{ .Values.checkoutService.name }}:5050"
           - name: AD_SERVICE_ADDR
-            value: "{{ .Values.adservice.name }}:9555"
+            value: "{{ .Values.adService.name }}:9555"
           - name: ENV_PLATFORM 
             value: {{ .Values.frontend.platform | quote }}
           {{- if .Values.opentelemetryCollector.create }}
@@ -174,7 +174,7 @@ spec:
   - from:
     - podSelector:
         matchLabels:
-          app: {{ .Values.loadgenerator.name }}
+          app: {{ .Values.loadGenerator.name }}
     {{- if .Values.frontend.virtualService.create }}
     - namespaceSelector:
         matchLabels:
@@ -204,12 +204,12 @@ spec:
   egress:
   - hosts:
     - istio-system/*
-    - ./{{ .Values.adservice.name }}.{{ .Release.Namespace }}.svc.cluster.local
-    - ./{{ .Values.cartservice.name }}.{{ .Release.Namespace }}.svc.cluster.local
-    - ./{{ .Values.checkoutservice.name }}.{{ .Release.Namespace }}.svc.cluster.local
-    - ./{{ .Values.currencyservice.name }}.{{ .Release.Namespace }}.svc.cluster.local
+    - ./{{ .Values.adService.name }}.{{ .Release.Namespace }}.svc.cluster.local
+    - ./{{ .Values.cartService.name }}.{{ .Release.Namespace }}.svc.cluster.local
+    - ./{{ .Values.checkoutService.name }}.{{ .Release.Namespace }}.svc.cluster.local
+    - ./{{ .Values.currencyService.name }}.{{ .Release.Namespace }}.svc.cluster.local
     - ./{{ .Values.productcatalogservice.name }}.{{ .Release.Namespace }}.svc.cluster.local
-    - ./{{ .Values.recommendationservice.name }}.{{ .Release.Namespace }}.svc.cluster.local
+    - ./{{ .Values.recommendationService.name }}.{{ .Release.Namespace }}.svc.cluster.local
     - ./{{ .Values.shippingservice.name }}.{{ .Release.Namespace }}.svc.cluster.local
 {{- end }}
 {{- if .Values.authorizationPolicies.create }}
@@ -231,7 +231,7 @@ spec:
         - '*'
         {{- else }}
         {{- if .Values.serviceAccounts.create }}
-        - cluster.local/ns/{{ .Release.Namespace }}/sa/{{ .Values.loadgenerator.name }}
+        - cluster.local/ns/{{ .Release.Namespace }}/sa/{{ .Values.loadGenerator.name }}
         {{- else }}
         - cluster.local/ns/{{ .Release.Namespace }}/sa/default
         {{- end }}

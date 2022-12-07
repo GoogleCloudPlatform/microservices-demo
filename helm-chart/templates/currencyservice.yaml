@@ -12,12 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-{{- if .Values.currencyservice.create }}
+{{- if .Values.currencyService.create }}
 {{- if .Values.serviceAccounts.create }}
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: {{ .Values.currencyservice.name }}
+  name: {{ .Values.currencyService.name }}
   namespace: {{.Release.Namespace}}
   {{- if not .Values.serviceAccounts.annotationsOnlyForCartservice }}
   {{- with .Values.serviceAccounts.annotations }}
@@ -30,19 +30,19 @@ metadata:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ .Values.currencyservice.name }}
+  name: {{ .Values.currencyService.name }}
   namespace: {{ .Release.Namespace }}
 spec:
   selector:
     matchLabels:
-      app: {{ .Values.currencyservice.name }}
+      app: {{ .Values.currencyService.name }}
   template:
     metadata:
       labels:
-        app: {{ .Values.currencyservice.name }}
+        app: {{ .Values.currencyService.name }}
     spec:
       {{- if .Values.serviceAccounts.create }}
-      serviceAccountName: {{ .Values.currencyservice.name }}
+      serviceAccountName: {{ .Values.currencyService.name }}
       {{- else }}
       serviceAccountName: default
       {{- end }}
@@ -61,7 +61,7 @@ spec:
               - all
           privileged: false
           readOnlyRootFilesystem: true
-        image: {{ .Values.images.repository }}/{{ .Values.currencyservice.name }}:{{ .Values.images.tag | default .Chart.AppVersion }}{{ .Values.images.tagSuffix }}
+        image: {{ .Values.images.repository }}/{{ .Values.currencyService.name }}:{{ .Values.images.tag | default .Chart.AppVersion }}{{ .Values.images.tagSuffix }}
         ports:
         - name: grpc
           containerPort: 7000
@@ -107,12 +107,12 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ .Values.currencyservice.name }}
+  name: {{ .Values.currencyService.name }}
   namespace: {{ .Release.Namespace }}
 spec:
   type: ClusterIP
   selector:
-    app: {{ .Values.currencyservice.name }}
+    app: {{ .Values.currencyService.name }}
   ports:
   - name: grpc
     port: 7000
@@ -122,12 +122,12 @@ spec:
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
-  name: {{ .Values.currencyservice.name }}
+  name: {{ .Values.currencyService.name }}
   namespace: {{ .Release.Namespace }}
 spec:
   podSelector:
     matchLabels:
-      app: {{ .Values.currencyservice.name }}
+      app: {{ .Values.currencyService.name }}
   policyTypes:
   - Ingress
   - Egress
@@ -138,7 +138,7 @@ spec:
           app: {{ .Values.frontend.name }}
     - podSelector:
         matchLabels:
-          app: {{ .Values.checkoutservice.name }}
+          app: {{ .Values.checkoutService.name }}
     ports:
      - port: 7000
        protocol: TCP
@@ -150,12 +150,12 @@ spec:
 apiVersion: networking.istio.io/v1beta1
 kind: Sidecar
 metadata:
-  name: {{ .Values.currencyservice.name }}
+  name: {{ .Values.currencyService.name }}
   namespace: {{ .Release.Namespace }}
 spec:
   workloadSelector:
     labels:
-      app: {{ .Values.currencyservice.name }}
+      app: {{ .Values.currencyService.name }}
   egress:
   - hosts:
     - istio-system/*
@@ -165,19 +165,19 @@ spec:
 apiVersion: security.istio.io/v1beta1
 kind: AuthorizationPolicy
 metadata:
-  name: {{ .Values.currencyservice.name }}
+  name: {{ .Values.currencyService.name }}
   namespace: {{ .Release.Namespace }}
 spec:
   selector:
     matchLabels:
-      app: {{ .Values.currencyservice.name }}
+      app: {{ .Values.currencyService.name }}
   rules:
   - from:
     - source:
         principals:
         {{- if .Values.serviceAccounts.create }}
         - cluster.local/ns/{{ .Release.Namespace }}/sa/{{ .Values.frontend.name }}
-        - cluster.local/ns/{{ .Release.Namespace }}/sa/{{ .Values.checkoutservice.name }}
+        - cluster.local/ns/{{ .Release.Namespace }}/sa/{{ .Values.checkoutService.name }}
         {{- else }}
         - cluster.local/ns/{{ .Release.Namespace }}/sa/default
         {{- end }}

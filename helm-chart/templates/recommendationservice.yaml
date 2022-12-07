@@ -12,12 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-{{- if .Values.recommendationservice.create }}
+{{- if .Values.recommendationService.create }}
 {{- if .Values.serviceAccounts.create }}
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: {{ .Values.recommendationservice.name }}
+  name: {{ .Values.recommendationService.name }}
   namespace: {{.Release.Namespace}}
   {{- if not .Values.serviceAccounts.annotationsOnlyForCartservice }}
   {{- with .Values.serviceAccounts.annotations }}
@@ -30,19 +30,19 @@ metadata:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ .Values.recommendationservice.name }}
+  name: {{ .Values.recommendationService.name }}
   namespace: {{ .Release.Namespace }}
 spec:
   selector:
     matchLabels:
-      app: {{ .Values.recommendationservice.name }}
+      app: {{ .Values.recommendationService.name }}
   template:
     metadata:
       labels:
-        app: {{ .Values.recommendationservice.name }}
+        app: {{ .Values.recommendationService.name }}
     spec:
       {{- if .Values.serviceAccounts.create }}
-      serviceAccountName: {{ .Values.recommendationservice.name }}
+      serviceAccountName: {{ .Values.recommendationService.name }}
       {{- else }}
       serviceAccountName: default
       {{- end }}
@@ -61,7 +61,7 @@ spec:
               - all
           privileged: false
           readOnlyRootFilesystem: true
-        image: {{ .Values.images.repository }}/{{ .Values.recommendationservice.name }}:{{ .Values.images.tag | default .Chart.AppVersion }}{{ .Values.images.tagSuffix }}
+        image: {{ .Values.images.repository }}/{{ .Values.recommendationService.name }}:{{ .Values.images.tag | default .Chart.AppVersion }}{{ .Values.images.tagSuffix }}
         ports:
         - containerPort: 8080
         readinessProbe:
@@ -86,7 +86,7 @@ spec:
         - name: PORT
           value: "8080"
         - name: PRODUCT_CATALOG_SERVICE_ADDR
-          value: "{{ .Values.productcatalogservice.name }}:3550"
+          value: "{{ .Values.productCatalogService.name }}:3550"
         {{- if .Values.opentelemetryCollector.create }}
         - name: COLLECTOR_SERVICE_ADDR
           value: "{{ .Values.opentelemetryCollector.name }}:4317"
@@ -110,12 +110,12 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ .Values.recommendationservice.name }}
+  name: {{ .Values.recommendationService.name }}
   namespace: {{ .Release.Namespace }}
 spec:
   type: ClusterIP
   selector:
-    app: {{ .Values.recommendationservice.name }}
+    app: {{ .Values.recommendationService.name }}
   ports:
   - name: grpc
     port: 8080
@@ -125,12 +125,12 @@ spec:
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
-  name: {{ .Values.recommendationservice.name }}
+  name: {{ .Values.recommendationService.name }}
   namespace: {{ .Release.Namespace }}
 spec:
   podSelector:
     matchLabels:
-      app: {{ .Values.recommendationservice.name }}
+      app: {{ .Values.recommendationService.name }}
   policyTypes:
   - Ingress
   - Egress
@@ -150,28 +150,28 @@ spec:
 apiVersion: networking.istio.io/v1beta1
 kind: Sidecar
 metadata:
-  name: {{ .Values.recommendationservice.name }}
+  name: {{ .Values.recommendationService.name }}
   namespace: {{ .Release.Namespace }}
 spec:
   workloadSelector:
     labels:
-      app: {{ .Values.recommendationservice.name }}
+      app: {{ .Values.recommendationService.name }}
   egress:
   - hosts:
     - istio-system/*
-    - ./{{ .Values.productcatalogservice.name }}.{{ .Release.Namespace }}.svc.cluster.local
+    - ./{{ .Values.productCatalogService.name }}.{{ .Release.Namespace }}.svc.cluster.local
 {{- end }}
 {{- if .Values.authorizationPolicies.create }}
 ---
 apiVersion: security.istio.io/v1beta1
 kind: AuthorizationPolicy
 metadata:
-  name: {{ .Values.recommendationservice.name }}
+  name: {{ .Values.recommendationService.name }}
   namespace: {{ .Release.Namespace }}
 spec:
   selector:
     matchLabels:
-      app: {{ .Values.recommendationservice.name }}
+      app: {{ .Values.recommendationService.name }}
   rules:
   - from:
     - source:

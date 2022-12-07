@@ -12,12 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-{{- if .Values.productcatalogservice.create }}
+{{- if .Values.productCatalogService.create }}
 {{- if .Values.serviceAccounts.create }}
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: {{ .Values.productcatalogservice.name }}
+  name: {{ .Values.productCatalogService.name }}
   namespace: {{.Release.Namespace}}
   {{- if not .Values.serviceAccounts.annotationsOnlyForCartservice }}
   {{- with .Values.serviceAccounts.annotations }}
@@ -30,19 +30,19 @@ metadata:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ .Values.productcatalogservice.name }}
+  name: {{ .Values.productCatalogService.name }}
   namespace: {{ .Release.Namespace }}
 spec:
   selector:
     matchLabels:
-      app: {{ .Values.productcatalogservice.name }}
+      app: {{ .Values.productCatalogService.name }}
   template:
     metadata:
       labels:
-        app: {{ .Values.productcatalogservice.name }}
+        app: {{ .Values.productCatalogService.name }}
     spec:
       {{- if .Values.serviceAccounts.create }}
-      serviceAccountName: {{ .Values.productcatalogservice.name }}
+      serviceAccountName: {{ .Values.productCatalogService.name }}
       {{- else }}
       serviceAccountName: default
       {{- end }}
@@ -61,7 +61,7 @@ spec:
               - all
           privileged: false
           readOnlyRootFilesystem: true
-        image: {{ .Values.images.repository }}/{{ .Values.productcatalogservice.name }}:{{ .Values.images.tag | default .Chart.AppVersion }}{{ .Values.images.tagSuffix }}
+        image: {{ .Values.images.repository }}/{{ .Values.productCatalogService.name }}:{{ .Values.images.tag | default .Chart.AppVersion }}{{ .Values.images.tagSuffix }}
         ports:
         - containerPort: 3550
         env:
@@ -80,7 +80,7 @@ spec:
           value: "1"
         {{- end }}
         - name: EXTRA_LATENCY
-          value: {{ .Values.productcatalogservice.extraLatency }}
+          value: {{ .Values.productCatalogService.extraLatency }}
         readinessProbe:
           {{- if .Values.nativeGrpcHealthCheck }}
           grpc:
@@ -108,12 +108,12 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ .Values.productcatalogservice.name }}
+  name: {{ .Values.productCatalogService.name }}
   namespace: {{ .Release.Namespace }}
 spec:
   type: ClusterIP
   selector:
-    app: {{ .Values.productcatalogservice.name }}
+    app: {{ .Values.productCatalogService.name }}
   ports:
   - name: grpc
     port: 3550
@@ -123,12 +123,12 @@ spec:
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
-  name: {{ .Values.productcatalogservice.name }}
+  name: {{ .Values.productCatalogService.name }}
   namespace: {{ .Release.Namespace }}
 spec:
   podSelector:
     matchLabels:
-      app: {{ .Values.productcatalogservice.name }}
+      app: {{ .Values.productCatalogService.name }}
   policyTypes:
   - Ingress
   - Egress
@@ -139,10 +139,10 @@ spec:
           app: {{ .Values.frontend.name }}
     - podSelector:
         matchLabels:
-          app: {{ .Values.checkoutservice.name }}
+          app: {{ .Values.checkoutService.name }}
     - podSelector:
         matchLabels:
-          app: {{ .Values.recommendationservice.name }}
+          app: {{ .Values.recommendationService.name }}
     ports:
      - port: 3550
        protocol: TCP
@@ -154,12 +154,12 @@ spec:
 apiVersion: networking.istio.io/v1beta1
 kind: Sidecar
 metadata:
-  name: {{ .Values.productcatalogservice.name }}
+  name: {{ .Values.productCatalogService.name }}
   namespace: {{ .Release.Namespace }}
 spec:
   workloadSelector:
     labels:
-      app: {{ .Values.productcatalogservice.name }}
+      app: {{ .Values.productCatalogService.name }}
   egress:
   - hosts:
     - istio-system/*
@@ -169,20 +169,20 @@ spec:
 apiVersion: security.istio.io/v1beta1
 kind: AuthorizationPolicy
 metadata:
-  name: {{ .Values.productcatalogservice.name }}
+  name: {{ .Values.productCatalogService.name }}
   namespace: {{ .Release.Namespace }}
 spec:
   selector:
     matchLabels:
-      app: {{ .Values.productcatalogservice.name }}
+      app: {{ .Values.productCatalogService.name }}
   rules:
   - from:
     - source:
         principals:
         {{- if .Values.serviceAccounts.create }}
         - cluster.local/ns/{{ .Release.Namespace }}/sa/{{ .Values.frontend.name }}
-        - cluster.local/ns/{{ .Release.Namespace }}/sa/{{ .Values.checkoutservice.name }}
-        - cluster.local/ns/{{ .Release.Namespace }}/sa/{{ .Values.recommendationservice.name }}
+        - cluster.local/ns/{{ .Release.Namespace }}/sa/{{ .Values.checkoutService.name }}
+        - cluster.local/ns/{{ .Release.Namespace }}/sa/{{ .Values.recommendationService.name }}
         {{- else }}
         - cluster.local/ns/{{ .Release.Namespace }}/sa/default
         {{- end }}
