@@ -109,9 +109,9 @@ gcloud services enable monitoring.googleapis.com \
    This will build and deploy the application. You no need to rebuild the images
    automatically as you refactor the code.
 
-    [![Tilt dashboard](./docs/img/tilt.png)](./docs/img/tilt.png)
-    [![Kubernetes dashboard - services](./docs/img/k8s-services.png)](./docs/img/k8s-services.png)
-    [![Online boutique frontend - local](./docs/img/online-boutique-frontend-local.png)](./docs/img/online-boutique-frontend-local.png)
+    [![Tilt dashboard](../docs/img/tilt.png)](../docs/img/tilt.png)
+    [![Kubernetes dashboard - services](../docs/img/k8s-services.png)](../docs/img/k8s-services.png)
+    [![Online boutique frontend - local](../docs/img/online-boutique-frontend-local.png)](../docs/img/online-boutique-frontend-local.png)
 
 4. Run `kubectl get pods` to verify the Pods are ready and running.
 
