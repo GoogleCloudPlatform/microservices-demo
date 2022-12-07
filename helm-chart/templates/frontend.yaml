@@ -208,7 +208,7 @@ spec:
     - ./{{ .Values.cartService.name }}.{{ .Release.Namespace }}.svc.cluster.local
     - ./{{ .Values.checkoutService.name }}.{{ .Release.Namespace }}.svc.cluster.local
     - ./{{ .Values.currencyService.name }}.{{ .Release.Namespace }}.svc.cluster.local
-    - ./{{ .Values.productcatalogService.name }}.{{ .Release.Namespace }}.svc.cluster.local
+    - ./{{ .Values.productCatalogService.name }}.{{ .Release.Namespace }}.svc.cluster.local
     - ./{{ .Values.recommendationService.name }}.{{ .Release.Namespace }}.svc.cluster.local
     - ./{{ .Values.shippingService.name }}.{{ .Release.Namespace }}.svc.cluster.local
 {{- end }}
