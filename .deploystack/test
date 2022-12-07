@@ -141,7 +141,7 @@ section_open "Testing Online Boutique's services are running"
     evalTest "kubectl get deployment shippingservice --no-headers -o=name 2> /dev/null"  "deployment.apps/shippingservice"
 section_close
 
-sleep 60
+sleep 120
 
 ENDPOINT=$( kubectl get service frontend-external --no-headers 2> /dev/null | awk '{print $4}')
 
