@@ -1,9 +1,13 @@
-Get the application URL by running these commands:
 {{- if and .Values.frontend.create .Values.frontend.externalService }}
-      NOTE: It may take a few minutes for the LoadBalancer IP to be available.
-      You can watch the status of by running 'kubectl get --namespace {{ .Release.Namespace }} svc -w {{ .Values.frontend.name }}-external'
-  export SERVICE_IP=$(kubectl get svc --namespace {{ .Release.Namespace }} {{ .Values.frontend.name }}-external --template "{{"{{ range (index .status.loadBalancer.ingress 0) }}{{.}}{{ end }}"}}")
-  echo http://$SERVICE_IP
+
+    Note: It may take a few minutes for the LoadBalancer IP to be available.
+
+    Watch the status of the frontend IP address with:
+        kubectl get --namespace {{ .Release.Namespace }} svc -w {{ .Values.frontend.name }}-external
+
+    Get the external IP address of the frontend:
+        export SERVICE_IP=$(kubectl get svc --namespace {{ .Release.Namespace }} {{ .Values.frontend.name }}-external --template "{{"{{ range (index .status.loadBalancer.ingress 0) }}{{.}}{{ end }}"}}")
+        echo http://$SERVICE_IP
 {{- end }}
 {{- if .Values.frontend.virtualService.create }}
 
