@@ -6,7 +6,7 @@
 #
 brotli==1.0.9
     # via geventhttpclient
-certifi==2022.9.24
+certifi==2022.12.7
     # via
     #   geventhttpclient
     #   requests
