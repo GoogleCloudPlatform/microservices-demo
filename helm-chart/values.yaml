@@ -43,6 +43,10 @@ googleCloudOperations:
   tracing: false
   metrics: false
 
+seccompProfile:
+  enable: false
+  type: RuntimeDefault
+
 adService:
   create: true
   name: adservice
