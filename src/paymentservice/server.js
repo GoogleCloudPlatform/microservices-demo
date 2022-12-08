@@ -67,7 +67,7 @@ class HipsterShopServer {
     const server = this.server 
     const port = this.port
     server.bindAsync(
-      `0.0.0.0:${port}`,
+      `[::]:${port}`,
       grpc.ServerCredentials.createInsecure(),
       function () {
         logger.info(`PaymentService gRPC server started on port ${port}`);
