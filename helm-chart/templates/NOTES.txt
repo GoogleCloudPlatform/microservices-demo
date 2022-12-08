@@ -1,4 +1,3 @@
-
 {{- if and .Values.frontend.create .Values.frontend.externalService }}
 Note: It may take a few minutes for the LoadBalancer IP to be available.
 
