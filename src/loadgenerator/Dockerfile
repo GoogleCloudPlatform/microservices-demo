@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-FROM python:3.11.0-slim@sha256:b59417e37f49eaf8f60a68193f1b27ea4f4c996394e88535b45509c8322a0f8a as base
+FROM python:3.11.0-slim@sha256:ff09e30b44097b761742f1c460f385046d3627c1cfdc5511e191b4274b416257 as base
 
 FROM base as builder
 
