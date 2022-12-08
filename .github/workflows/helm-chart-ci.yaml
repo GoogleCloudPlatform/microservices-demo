@@ -1,0 +1,68 @@
+# Copyright 2022 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+name: helm-chart-ci
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'helm-chart/**'
+      - '.github/workflows/helm-chart-ci.yaml'
+  pull_request:
+    paths:
+      - 'helm-chart/**'
+      - '.github/workflows/helm-chart-ci.yaml'
+jobs:
+  helm-chart-ci:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v3
+      - name: helm lint
+        run: |
+          cd helm-chart/
+          helm lint
+      - name: helm template default
+        run: |
+          cd helm-chart/
+          helm template . > helm-template.yaml
+          cat helm-template.yaml 
+      - name: kustomize build default
+        run: |
+          cd helm-chart/
+          kustomize create --resources helm-template.yaml
+          kustomize build .
+      - name: helm template advanced
+        run: |
+          cd helm-chart/
+          helm template . \
+            --set images.repository=us-docker.pkg.dev/my-project/containers/onlineboutique \
+            --set frontend.externalService=false \
+            --set redis.create=false \
+            --set cartservice.database.type=spanner \
+            --set cartservice.database.connectionString=projects/my-project/instances/onlineboutique/databases/carts \
+            --set serviceAccounts.create=true \
+            --set authorizationPolicies.create=true \
+            --set networkPolicies.create=true \
+            --set sidecars.create=true \
+            --set frontend.virtualService.create=true \
+            --set 'serviceAccounts.annotations.iam\.gke\.io/gcp-service-account=spanner-db-user@my-project.iam.gserviceaccount.com' \
+            --set serviceAccounts.annotationsOnlyForCartservice=true \
+            -n onlineboutique \
+            > helm-template.yaml
+          cat helm-template.yaml
+      - name: kustomize build advanced
+        run: |
+          cd helm-chart/
+          kustomize build .
