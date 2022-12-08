@@ -57,6 +57,7 @@ git pull
 git checkout -b "release/${TAG}"
 git add "${SCRIPTDIR}/../release/"
 git add "${SCRIPTDIR}/../kustomize/base/"
+git add "${SCRIPTDIR}/../helm-chart/"
 git commit --allow-empty -m "Release $TAG"
 log "Pushing k8s manifests to release/${TAG}..."
 git tag "$TAG"

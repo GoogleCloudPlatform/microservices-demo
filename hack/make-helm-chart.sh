@@ -25,7 +25,9 @@ TAG="${TAG:?TAG env variable must be specified}"
 HELM_CHART_REPO="us-docker.pkg.dev/online-boutique-ci/charts"
 
 cd helm-chart
-helm package . --version ${TAG:1} --app-version $TAG
+sed -i "s/^appVersion:.*/appVersion: \"${TAG}\"/" Chart.yaml
+sed -i "s/^version:.*/version: ${TAG:1}/" Chart.yaml
+helm package .
 helm push onlineboutique-$TAG.tgz oci://$HELM_CHART_REPO
 
 log "Successfully built and pushed the Helm chart."
