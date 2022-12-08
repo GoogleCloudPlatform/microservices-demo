@@ -1,0 +1,165 @@
+x-common-setting: &common-settings
+  restart: always
+
+volumes:
+  redis-cart:
+
+services:
+  adservice:
+    <<: *common-settings
+    container_name: advservice
+    environment:
+      - PORT=9555
+    image: adservice:v1
+    build:
+      context: ../src/adservice
+      dockerfile: Dockerfile
+    ports:
+      - 9555
+
+  cartservice:
+    <<: *common-settings
+    container_name: cartservice
+    image: cartservice:v1
+    build:
+      context: ../src/cartservice/src
+      dockerfile: Dockerfile
+    ports:
+      - 7070
+    environment:
+      - REDIS_ADDR=rediscart:6379
+
+  rediscart:
+    <<: *common-settings
+    container_name: rediscart
+    image: redis:alpine
+    ports:
+      - 6379
+    volumes:
+      - redis-cart:/data
+
+  checkoutservice:
+    <<: *common-settings
+    container_name: checkoutservice
+    image: checkoutservice:v1
+    build:
+      context: ../src/checkoutservice
+      dockerfile: Dockerfile
+    ports:
+      - 5050
+    environment:
+      - PORT=5050
+      - PRODUCT_CATALOG_SERVICE_ADDR=productcatalogservice:3550
+      - SHIPPING_SERVICE_ADDR=shippingservice:50051
+      - PAYMENT_SERVICE_ADDR=paymentservice:50051
+      - EMAIL_SERVICE_ADDR=emailservice:5000
+      - CURRENCY_SERVICE_ADDR=currencyservice:7000
+      - CART_SERVICE_ADDR=cartservice:7070
+      - DISABLE_PROFILER=1
+
+  currencyservice:
+    <<: *common-settings
+    container_name: currencyservice
+    image: currencyservice:v1
+    build:
+      context: ../src/currencyservice
+      dockerfile: Dockerfile
+    ports:
+      - 7000
+    environment:
+      - PORT=7000
+      - DISABLE_PROFILER=1
+
+  emailservice:
+    <<: *common-settings
+    container_name: emailservice
+    image: emailservice:v1
+    build:
+      context: ../src/emailservice
+      dockerfile: Dockerfile
+    ports:
+      - 8080
+      - 5000
+    environment:
+      - PORT=8080
+      - DISABLE_PROFILER=1
+
+  frontend:
+    <<: *common-settings
+    container_name: frontend
+    image: frontend:v1
+    build:
+      context: ../src/frontend
+      dockerfile: Dockerfile
+    ports:
+      - 8080:8080
+    environment:
+      PORT: 8080
+      AD_SERVICE_ADDR: "adservice:9555"
+      CHECKOUT_SERVICE_ADDR: "checkoutservice:5050"
+      SHIPPING_SERVICE_ADDR: "shippingservice:50051"
+      RECOMMENDATION_SERVICE_ADDR: "recommendationservice:8080"
+      CART_SERVICE_ADDR: "cartservice:7070"
+      CURRENCY_SERVICE_ADDR: "currencyservice:7000"
+      PRODUCT_CATALOG_SERVICE_ADDR: "productcatalogservice:3550"
+      DISABLE_PROFILER: 1
+
+  paymentservice:
+    container_name: paymentservice
+    <<: *common-settings
+    image: paymentservice:v1
+    build:
+      context: ../src/paymentservice
+      dockerfile: Dockerfile
+    ports:
+      - 50051
+    environment:
+      PORT: 50051
+      DISABLE_PROFILER: 1
+
+  productcatalogservice:
+    container_name: productcatalogservice
+    <<: *common-settings
+    image: productcatalogservice:v1
+    build:
+      context: ../src/productcatalogservice
+      dockerfile: Dockerfile
+    ports:
+      - 3550
+    environment:
+      PORT: 3550
+      DISABLE_PROFILER: 1
+
+  recommendationservice:
+    container_name: recommendationservice
+    <<: *common-settings
+    image: recommendationservice:v1
+    build:
+      context: ../src/recommendationservice
+      dockerfile: Dockerfile
+    ports:
+      - 8080
+    environment:
+      PORT: 8080
+      PRODUCT_CATALOG_SERVICE_ADDR: "productcatalogservice:3550"
+      DISABLE_PROFILER: 1
+
+  shippingservice:
+    container_name: shippingservice
+    <<: *common-settings
+    image: shippingservice:v1
+    build:
+      context: ../src/shippingservice
+      dockerfile: Dockerfile
+    ports:
+      - 50051
+    environment:
+      PORT: 50051
+      DISABLE_PROFILER: 1
+
+
+
+
+
+
+
