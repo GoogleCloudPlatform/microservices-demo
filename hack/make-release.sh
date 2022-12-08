@@ -50,6 +50,9 @@ git pull
 # update yaml
 "${SCRIPTDIR}"/make-release-artifacts.sh
 
+# build and push images
+"${SCRIPTDIR}"/make-helm-chart.sh
+
 # create git release / push to new branch
 git checkout -b "release/${TAG}"
 git add "${SCRIPTDIR}/../release/"
