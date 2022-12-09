@@ -1,6 +1,6 @@
-# Do not expose publicly the Online Boutique frontend Service
+# Remove the public exposure of Online Boutique's frontend
 
-By default, when you deploy this sample app, the Online Boutique's `frontend-external` is deployed as a public (`LoadBalancer`) `Service.
+By default, when you deploy Online Boutique, the `frontend-external` `Service` is deployed as a public `Service` of type `LoadBalancer`.
 But you may want to not expose this sample app publicly.
 
 ## Deploy Online Boutique without the default public endpoint
