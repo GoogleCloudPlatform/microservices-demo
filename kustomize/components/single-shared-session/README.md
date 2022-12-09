@@ -1,7 +1,8 @@
 # Manage a single shared session for the Online Boutique apps
 
-By default, when you deploy this sample app, the Online Boutique's `frontend` generates one `shop_session-id` cookie per session per instance.
-But you may want to share one unique `shop_session-id` cookie across the sessions (helpful for a multi-cluster setup for example).
+By default, when you deploy this sample app, the Online Boutique's `frontend` generates a `shop_session-id` cookie per browser session.
+But you may want to share one unique `shop_session-id` cookie across all browser sessions.
+This is useful for multi-cluster environments.
 
 ## Deploy Online Boutique to generate a single shared session 
 
