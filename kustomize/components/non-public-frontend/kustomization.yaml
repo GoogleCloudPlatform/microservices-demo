@@ -21,4 +21,4 @@ patchesStrategicMerge:
   kind: Service
   metadata:
     name: frontend-external
-  \$patch: delete
+  $patch: delete
