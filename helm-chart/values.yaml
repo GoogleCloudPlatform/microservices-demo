@@ -82,6 +82,8 @@ frontend:
     gateway:
       name: asm-ingressgateway
       namespace: asm-ingress
+      labelKey: asm
+      labelValue: ingressgateway
 
 loadGenerator:
   create: true

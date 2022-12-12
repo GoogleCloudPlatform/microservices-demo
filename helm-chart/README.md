@@ -6,12 +6,15 @@ If you'd like to deploy Online Boutique via its Helm chart, you could leverage t
 
 Deploy the default setup of Online Boutique:
 ```sh
-helm install onlineboutique oci://us-docker.pkg.dev/online-boutique-ci/charts/onlineboutique
+helm upgrade onlineboutique oci://us-docker.pkg.dev/online-boutique-ci/charts/onlineboutique \
+    --install
 ```
 
 Deploy advanced scenario of Online Boutique:
 ```sh
-helm install onlineboutique oci://us-docker.pkg.dev/online-boutique-ci/charts/onlineboutique \
+helm upgrade onlineboutique oci://us-docker.pkg.dev/online-boutique-ci/charts/onlineboutique \
+    --install \
+    --create-namespace \
     --set images.repository=us-docker.pkg.dev/my-project/containers/onlineboutique \
     --set frontend.externalService=false \
     --set redis.create=false \
@@ -28,3 +31,8 @@ helm install onlineboutique oci://us-docker.pkg.dev/online-boutique-ci/charts/on
 ```
 
 For the full list of configurations, see [values.yaml](./values.yaml).
+
+You could also find advanced scenarios with these blogs below:
+- [Online Boutique sample’s Helm chart, to simplify the setup of advanced and secured scenarios with Service Mesh and GitOps](https://medium.com/google-cloud/246119e46d53)
+- [gRPC health probes with Kubernetes 1.24+](https://medium.com/google-cloud/b5bd26253a4c)
+- [Use Google Cloud Spanner with the Online Boutique sample](https://medium.com/google-cloud/f7248e077339)
