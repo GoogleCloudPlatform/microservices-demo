@@ -60,6 +60,10 @@ resource "rediscloud_subscription_database" "mc-example" {
 data "google_compute_network" "network" {
   project = var.gcp_project_id
   name    = "default"
+  
+  depends_on = [
+    module.enable_google_apis
+  ]
 }
 
 resource "rediscloud_subscription_peering" "mc-example-peering" {
