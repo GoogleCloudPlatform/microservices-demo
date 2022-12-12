@@ -4,7 +4,7 @@ You can use [Network Policies](https://kubernetes.io/docs/concepts/services-netw
 
 To use `NetworkPolicies` in Google Kubernetes Engine (GKE), you will need a GKE cluster with network policy enforcement enabled, the recommended approach is to use [GKE Dataplane V2](https://cloud.google.com/kubernetes-engine/docs/how-to/dataplane-v2).
 
-To use `NetworkPolicies` on a local cluster such as [minikube](https://minikube.sigs.k8s.io/docs/start/), you will need to use an alternative CNI that supports `NetworkPolicies` like [Calico](https://projectcalico.docs.tigera.io/getting-started/kubernetes/minikube). To run a minikube cluster with Calico, run `minikube start --cni=calico`. By design, the minikube default CNI flannel does not support it.  
+To use `NetworkPolicies` on a local cluster such as [minikube](https://minikube.sigs.k8s.io/docs/start/), you will need to use an alternative CNI that supports `NetworkPolicies` like [Calico](https://projectcalico.docs.tigera.io/getting-started/kubernetes/minikube). To run a minikube cluster with Calico, run `minikube start --cni=calico`. By design, the minikube default CNI [Kindnet](https://github.com/aojea/kindnet) does not support it.  
 
 ## Deploy Online Boutique with `NetworkPolicies` via Kustomize
 
@@ -50,7 +50,7 @@ redis-cart              app=redis-cart              2m58s
 shippingservice         app=shippingservice         2m58s
 ```
 
-_Note: `Egress` is wide open in these `NetworkPolicies` . In our case, we do this is on purpose because there are multiple egress destinations to take into consideration like the Kubernetes DNS, Istio control plane (`istiod`), Cloud Trace API, Cloud Profiler API, Cloud Debugger API, etc._
+_Note: `Egress` is wide open in these `NetworkPolicies` . In our case, we do this is on purpose because there are multiple egress destinations to take into consideration like the Kubernetes DNS, Istio control plane (`istiod`), Cloud Trace API, Cloud Profiler API, etc._
 
 ## Related Resources
 

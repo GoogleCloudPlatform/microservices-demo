@@ -1,5 +1,5 @@
 <p align="center">
-<img src="src/frontend/static/icons/Hipster_HeroLogoCyan.svg" width="300" alt="Online Boutique" />
+<img src="src/frontend/static/icons/Hipster_HeroLogoMaroon.svg" width="300" alt="Online Boutique" />
 </p>
 
 
@@ -29,7 +29,7 @@ If you’re using this demo, please **★Star** this repository to show your int
 
 ## Quickstart (GKE)
 
-[![Open in Cloud Shell](https://gstatic.com/cloudssh/images/open-btn.svg)](https://ssh.cloud.google.com/cloudshell/editor?cloudshell_git_repo=https://github.com/GoogleCloudPlatform/microservices-demo&cloudshell_workspace=.&cloudshell_tutorial=docs/cloudshell-tutorial.md)
+[![Open in Cloud Shell](https://gstatic.com/cloudssh/images/open-btn.svg)](https://ssh.cloud.google.com/cloudshell/editor?cloudshell_git_repo=https%3A%2F%2Fgithub.com%2FGoogleCloudPlatform%2Fmicroservices-demo&shellonly=true&cloudshell_image=gcr.io/ds-artifacts-cloudshell/deploystack_custom_image)
 
 1. **[Create a Google Cloud Platform project](https://cloud.google.com/resource-manager/docs/creating-managing-projects#creating_a_project)** or use an existing project. Set the `PROJECT_ID` environment variable and ensure the Google Kubernetes Engine and Cloud Operations APIs are enabled.
 
@@ -140,7 +140,7 @@ The [`/kustomize` folder](kustomize) contains instructions for customizing the d
 ## Architecture
 
 **Online Boutique** is composed of 11 microservices written in different
-languages that talk to each other over gRPC. See the [Development Principles](/docs/development-principles.md) doc for more information.
+languages that talk to each other over gRPC.
 
 [![Architecture of
 microservices](./docs/img/architecture-diagram.png)](./docs/img/architecture-diagram.png)
@@ -170,7 +170,7 @@ Find **Protocol Buffers Descriptions** at the [`./pb` directory](./pb).
   communicate to each other.
 - **[Istio](https://istio.io):** Application works on Istio service mesh.
 - **[Cloud Operations (Stackdriver)](https://cloud.google.com/products/operations):** Many services
-  are instrumented with **Profiling**, **Tracing** and **Debugging**. In
+  are instrumented with **Profiling** and **Tracing**. In
   addition to these, using Istio enables features like Request/Response
   **Metrics** and **Context Graph** out of the box. When it is running out of
   Google Cloud, this code path remains inactive.

@@ -13,7 +13,7 @@
 # limitations under the License.
 
 # https://mcr.microsoft.com/v2/dotnet/sdk/tags/list
-FROM mcr.microsoft.com/dotnet/sdk:7.0.100 as builder
+FROM mcr.microsoft.com/dotnet/sdk:7.0.100@sha256:c6c842afe9350ac32fe23188b81d3233a6aebc33d0a569d565f928c4ff8966e1 as builder
 WORKDIR /app
 COPY cartservice.csproj .
 RUN dotnet restore cartservice.csproj -r linux-musl-x64
@@ -21,7 +21,7 @@ COPY . .
 RUN dotnet publish cartservice.csproj -p:PublishSingleFile=true -r linux-musl-x64 --self-contained true -p:PublishTrimmed=True -p:TrimMode=Link -c release -o /cartservice --no-restore
 
 # https://mcr.microsoft.com/v2/dotnet/runtime-deps/tags/list
-FROM mcr.microsoft.com/dotnet/runtime-deps:7.0.0-alpine3.16-amd64 as without-grpc-health-probe-bin
+FROM mcr.microsoft.com/dotnet/runtime-deps:7.0.0-alpine3.16-amd64@sha256:ddfb8ae9a6f1a4e44e9000ae8286e52ee82cb534f5891601502ad061ef2b5ffe as without-grpc-health-probe-bin
 
 WORKDIR /app
 COPY --from=builder /cartservice .
@@ -33,6 +33,7 @@ ENTRYPOINT ["/app/cartservice"]
 
 FROM without-grpc-health-probe-bin
 USER root
+# renovate: datasource=github-releases depName=grpc-ecosystem/grpc-health-probe
 RUN GRPC_HEALTH_PROBE_VERSION=v0.4.14 && \
     wget -qO/bin/grpc_health_probe https://github.com/grpc-ecosystem/grpc-health-probe/releases/download/${GRPC_HEALTH_PROBE_VERSION}/grpc_health_probe-linux-amd64 && \
     chmod +x /bin/grpc_health_probe

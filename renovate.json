@@ -10,7 +10,7 @@
     }
   },
   "constraints": {
-    "python": "~=3.9.0"
+    "python": "~=3.10.0"
   },
   "prConcurrentLimit":8,
   "stabilityDays":7,
@@ -39,5 +39,26 @@
   },
   "npm":{
     "addLabels": ["lang: nodejs"]
-  }
+  },
+  "docker": {
+    "pinDigests": true
+  },
+  "kubernetes": {
+    "fileMatch": ["\\.yaml$"],
+    "ignorePaths": [
+      "release/**",
+      "kustomize/base/**",
+      "kubernetes-manifests/**"
+    ]
+  },
+  "regexManagers": [
+    {
+      "fileMatch": [
+        "(^|/)Dockerfile[^/]*$"
+      ],
+      "matchStrings": [
+        "# renovate: datasource=(?<datasource>[a-z-]+?) depName=(?<depName>[^\\s]+?)(?: (lookupName|packageName)=(?<packageName>[^\\s]+?))?(?: versioning=(?<versioning>[a-z-0-9]+?))?\\s(?:ENV|ARG) .+?_VERSION[ =]\"?(?<currentValue>.+?)\"?\\s"
+      ]
+    }
+  ]
 }
