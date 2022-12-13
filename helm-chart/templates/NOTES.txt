@@ -9,5 +9,7 @@ Get the external IP address of the frontend:
     echo http://$SERVICE_IP
 {{- end }}
 {{- if .Values.frontend.virtualService.create }}
-
+Get the external IP address of the ingress gateway:
+    export SERVICE_IP=$(kubectl get svc --namespace {{ .Values.frontend.virtualService.gateway.namespace }} {{ .Values.frontend.virtualService.gateway.name }} --template "{{"{{ range (index .status.loadBalancer.ingress 0) }}{{.}}{{ end }}"}}")
+    echo http://$SERVICE_IP
 {{- end }}
