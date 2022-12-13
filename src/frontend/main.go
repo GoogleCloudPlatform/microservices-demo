@@ -84,7 +84,7 @@ type frontendServer struct {
 
 func main() {
 	ctx := context.Background()
-	log := logrus.New()
+	log := logrus.initializeLogger()
 	log.Level = logrus.DebugLevel
 	log.Formatter = &logrus.JSONFormatter{
 		FieldMap: logrus.FieldMap{
