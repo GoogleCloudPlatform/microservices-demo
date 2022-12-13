@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-FROM node:19.2.0-alpine@sha256:dae8ae40ed1077dfa383fb0c04a3d3bb8e6360e03147dd3ee963d62ac2275346 as base
+FROM node:19.2.0-alpine@sha256:3f3816755f0ca539b3967e3642e1905fb804968fbba7c3e1c425ca08b619b086 as base
 
 FROM base as builder
 
