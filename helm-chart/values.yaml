@@ -6,8 +6,6 @@ images:
   repository: gcr.io/google-samples/microservices-demo
   # Overrides the image tag whose default is the chart appVersion.
   tag: ""
-  # Adds a suffix to the image tag.
-  tagSuffix: ""
 
 serviceAccounts:
   # Specifies whether service accounts should be created.

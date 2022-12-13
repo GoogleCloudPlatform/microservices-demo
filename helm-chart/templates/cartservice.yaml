@@ -55,7 +55,11 @@ spec:
               - all
           privileged: false
           readOnlyRootFilesystem: true
-        image: {{ .Values.images.repository }}/{{ .Values.cartService.name }}:{{ .Values.images.tag | default .Chart.AppVersion }}{{ .Values.images.tagSuffix }}
+        {{- if .Values.nativeGrpcHealthCheck }}
+        image: {{ .Values.images.repository }}/{{ .Values.cartService.name }}:{{ .Values.images.tag | default .Chart.AppVersion }}-native-grpc-probes
+        {{- else }}
+        image: {{ .Values.images.repository }}/{{ .Values.cartService.name }}:{{ .Values.images.tag | default .Chart.AppVersion }}
+        {{- end }}
         ports:
         - containerPort: 7070
         env:
