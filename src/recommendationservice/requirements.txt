@@ -77,7 +77,7 @@ opentelemetry-semantic-conventions==0.35b0
     # via
     #   opentelemetry-instrumentation-grpc
     #   opentelemetry-sdk
-protobuf==3.20.3
+protobuf==4.21.10
     # via
     #   -r requirements.in
     #   google-api-core
