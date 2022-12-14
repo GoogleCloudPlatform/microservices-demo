@@ -10,7 +10,7 @@ cachetools==5.2.0
     # via google-auth
 certifi==2022.12.7
     # via requests
-charset-normalizer==3.0.1
+charset-normalizer==2.1.1
     # via requests
 deprecated==1.2.13
     # via opentelemetry-api
@@ -68,15 +68,15 @@ opentelemetry-api==1.15.0
     #   opentelemetry-instrumentation
     #   opentelemetry-instrumentation-grpc
     #   opentelemetry-sdk
-opentelemetry-distro==0.35b0
+opentelemetry-distro==0.36b0
     # via -r requirements.in
 opentelemetry-exporter-otlp-proto-grpc==1.15.0
     # via -r requirements.in
-opentelemetry-instrumentation==0.35b0
+opentelemetry-instrumentation==0.36b0
     # via
     #   opentelemetry-distro
     #   opentelemetry-instrumentation-grpc
-opentelemetry-instrumentation-grpc==0.35b0
+opentelemetry-instrumentation-grpc==0.36b0
     # via -r requirements.in
 opentelemetry-proto==1.15.0
     # via opentelemetry-exporter-otlp-proto-grpc
@@ -85,7 +85,7 @@ opentelemetry-sdk==1.15.0
     #   opentelemetry-distro
     #   opentelemetry-exporter-otlp-proto-grpc
     #   opentelemetry-instrumentation-grpc
-opentelemetry-semantic-conventions==0.35b0
+opentelemetry-semantic-conventions==0.36b0
     # via
     #   opentelemetry-instrumentation-grpc
     #   opentelemetry-sdk

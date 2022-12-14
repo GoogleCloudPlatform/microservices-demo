@@ -6,6 +6,6 @@ python-json-logger==2.0.4
 requests==2.28.1
 rsa==4.9
 protobuf==4.21.10 # transitive dependency, move when google-api is bumped safely
-opentelemetry-distro==0.35b0
-opentelemetry-instrumentation-grpc==0.35b0
+opentelemetry-distro==0.36b0
+opentelemetry-instrumentation-grpc==0.36b0
 opentelemetry-exporter-otlp-proto-grpc==1.15.0
