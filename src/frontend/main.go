@@ -24,7 +24,11 @@ import (
 	"cloud.google.com/go/profiler"
 	"github.com/gorilla/mux"
 	"github.com/pkg/errors"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/sirupsen/logrus"
+	prom "github.com/slok/go-http-metrics/metrics/prometheus"
+	"github.com/slok/go-http-metrics/middleware"
+	"github.com/slok/go-http-metrics/middleware/std"
 	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
 	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 	"go.opentelemetry.io/otel"
@@ -152,12 +156,19 @@ func main() {
 	if os.Getenv("ENABLE_TRACING") == "1" {
 		handler = otelhttp.NewHandler(handler, "frontend") // add OTel tracing
 	}
-
+	if os.Getenv("ENABLE_STATS") == "1" {
+		initStats(log, r)
+	}
 	log.Infof("starting server on " + addr + ":" + srvPort)
 	log.Fatal(http.ListenAndServe(addr+":"+srvPort, handler))
 }
-func initStats(log logrus.FieldLogger) {
-	// TODO(arbrown) Implement OpenTelemtry stats
+func initStats(log logrus.FieldLogger, r *mux.Router) {
+	mid := middleware.New(middleware.Config{
+		Recorder: prom.NewRecorder(prom.Config{Prefix: "frontend"}),
+	})
+	r.Use(std.HandlerProvider("", mid))
+
+	r.Path("/metrics").Handler(promhttp.Handler())
 }
 
 func initTracing(log logrus.FieldLogger, ctx context.Context, svc *frontendServer) (*sdktrace.TracerProvider, error) {

@@ -90,6 +90,8 @@ patchesStrategicMerge:
               value: "opentelemetrycollector:4317"
             - name: ENABLE_PROFILER
               value: "1"
+            - name: ENABLE_STATS
+              value: "1"
 # paymentservice - tracing, profiler
 - |-
   apiVersion: apps/v1
@@ -158,3 +160,4 @@ patchesStrategicMerge:
             env:
             - name: DISABLE_PROFILER
               $patch: delete
+

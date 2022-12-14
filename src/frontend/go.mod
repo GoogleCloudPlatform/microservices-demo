@@ -22,7 +22,9 @@ require (
 require (
 	cloud.google.com/go v0.105.0 // indirect
 	cloud.google.com/go/compute v1.12.1 // indirect
+	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/cenkalti/backoff/v4 v4.2.0 // indirect
+	github.com/cespare/xxhash/v2 v2.1.2 // indirect
 	github.com/felixge/httpsnoop v1.0.3 // indirect
 	github.com/go-logr/logr v1.2.3 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
@@ -32,6 +34,12 @@ require (
 	github.com/googleapis/enterprise-certificate-proxy v0.2.0 // indirect
 	github.com/googleapis/gax-go/v2 v2.7.0 // indirect
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.7.0 // indirect
+	github.com/matttproud/golang_protobuf_extensions v1.0.1 // indirect
+	github.com/prometheus/client_golang v1.14.0 // indirect
+	github.com/prometheus/client_model v0.3.0 // indirect
+	github.com/prometheus/common v0.37.0 // indirect
+	github.com/prometheus/procfs v0.8.0 // indirect
+	github.com/slok/go-http-metrics v0.10.0 // indirect
 	go.opencensus.io v0.23.0 // indirect
 	go.opentelemetry.io/otel/exporters/otlp/internal/retry v1.11.2 // indirect
 	go.opentelemetry.io/otel/exporters/otlp/otlptrace v1.11.2 // indirect
