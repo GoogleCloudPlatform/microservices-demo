@@ -78,7 +78,7 @@ spec:
         readinessProbe:
           {{- if .Values.nativeGrpcHealthCheck }}
           grpc:
-            port: 50051
+            port: 3550
           {{- else }}
           exec:
             command: ["/bin/grpc_health_probe", "-addr=:3550"]
@@ -86,7 +86,7 @@ spec:
         livenessProbe:
           {{- if .Values.nativeGrpcHealthCheck }}
           grpc:
-            port: 50051
+            port: 3550
           {{- else }}
           exec:
             command: ["/bin/grpc_health_probe", "-addr=:3550"]
