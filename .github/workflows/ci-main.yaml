@@ -25,6 +25,8 @@ on:
       - '.github/workflows/kustomize-build-ci.yaml'
       - 'terraform/**'
       - '.github/workflows/terraform-validate-ci.yaml'
+      - 'helm-chart/**'
+      - '.github/workflows/helm-chart-ci.yaml'
 jobs:
   code-tests:
     runs-on: [self-hosted, is-enabled]

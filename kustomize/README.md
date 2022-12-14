@@ -84,6 +84,8 @@ Here is the list of the variations available as Kustomize components that you co
 - [**Update the registry name of the container images**](components/container-images-registry)
 - [**Update the image tag of the container images**](components/container-images-tag)
 - [**Add an image tag suffix to the container images**](components/container-images-tag-suffix)
+- [**Do not expose the `frontend` publicly**](components/non-public-frontend)
+- [**Set the `frontend` to manage only one single shared session**](components/single-shared-session)
 
 ### Select variations
 

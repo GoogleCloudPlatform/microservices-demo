@@ -64,8 +64,6 @@ spec:
             value: "currencyservice:7000"
           - name: CART_SERVICE_ADDR
             value: "cartservice:7070"
-          - name: DISABLE_PROFILER
-            value: "1"
           resources:
             requests:
               cpu: 100m
