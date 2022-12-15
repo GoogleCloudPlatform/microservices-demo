@@ -156,13 +156,13 @@ func main() {
 	if os.Getenv("ENABLE_TRACING") == "1" {
 		handler = otelhttp.NewHandler(handler, "frontend") // add OTel tracing
 	}
-	if os.Getenv("ENABLE_STATS") == "1" {
-		initStats(log, r)
+	if os.Getenv("ENABLE_METRICS") == "1" {
+		initMetrics(log, r)
 	}
 	log.Infof("starting server on " + addr + ":" + srvPort)
 	log.Fatal(http.ListenAndServe(addr+":"+srvPort, handler))
 }
-func initStats(log logrus.FieldLogger, r *mux.Router) {
+func initMetrics(log logrus.FieldLogger, r *mux.Router) {
 	mid := middleware.New(middleware.Config{
 		Recorder: prom.NewRecorder(prom.Config{Prefix: "frontend"}),
 	})

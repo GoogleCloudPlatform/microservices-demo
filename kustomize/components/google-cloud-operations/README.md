@@ -1,6 +1,6 @@
 # Integrate Online Boutique with Google Cloud Operations
 
-By default, [Google Cloud Operations](https://cloud.google.com/products/operations) instrumentation is **turned off** for Online Boutique deployments. This includes Monitoring (Stats), Tracing, and Profiler. This means that even if you're running this app on [GKE](https://cloud.google.com/kubernetes-engine), traces (for example) will not be exported to [Google Cloud Trace](https://cloud.google.com/trace).
+By default, [Google Cloud Operations](https://cloud.google.com/products/operations) instrumentation is **turned off** for Online Boutique deployments. This includes Monitoring (Metrics), Tracing, and Profiler. This means that even if you're running this app on [GKE](https://cloud.google.com/kubernetes-engine), traces (for example) will not be exported to [Google Cloud Trace](https://cloud.google.com/trace).
 
 If you want to re-enable Google Cloud Operations instrumentation, the easiest way is to enable the included kustomize module, which enables traces, metrics, and adds a deployment of the [Open Telemetry Collector](https://opentelemetry.io/docs/collector/) to gather the traces and metrics and forward them to the appropriate Google Cloud backend.
 
@@ -69,13 +69,13 @@ spec:
           env:
           - name: COLLECTOR_SERVICE_ADDR
             value: "opentelemetrycollector:4317"
-          - name: ENABLE_STATS
+          - name: ENABLE_METRICS
             value: "1"
           - name: ENABLE_TRACING
             value: "1"
 ```
 
-This patch sets environment variables to enable export of stats and tracing, as well as a variable to tell the service how to reach the new collector deployment.
+This patch sets environment variables to enable export of metrics and tracing, as well as a variable to tell the service how to reach the new collector deployment.
 
 ## OpenTelemetry Collector
 

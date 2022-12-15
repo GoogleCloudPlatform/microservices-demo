@@ -143,8 +143,8 @@ func main() {
 	log.Fatal(err)
 }
 
-func initStats() {
-	//TODO(arbrown) Implement OpenTelemetry stats
+func initMetrics() {
+	//TODO(arbrown) Implement OpenTelemetry metrics
 }
 
 func initTracing() {

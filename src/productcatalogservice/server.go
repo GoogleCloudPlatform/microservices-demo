@@ -152,8 +152,8 @@ func run(port string) string {
 	return l.Addr().String()
 }
 
-func initStats() {
-	// TODO(drewbr) Implement OpenTelemetry stats
+func initMetrics() {
+	// TODO(drewbr) Implement OpenTelemetry metrics
 }
 
 func initTracing() error {

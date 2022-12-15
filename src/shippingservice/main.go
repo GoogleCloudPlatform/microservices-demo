@@ -80,11 +80,11 @@ func main() {
 	}
 
 	var srv *grpc.Server
-	if os.Getenv("DISABLE_STATS") == "" {
-		log.Info("Stats enabled, but temporarily unavailable")
+	if os.Getenv("DISABLE_METRICS") == "" {
+		log.Info("Metrics enabled, but temporarily unavailable")
 		srv = grpc.NewServer()
 	} else {
-		log.Info("Stats disabled.")
+		log.Info("Metrics disabled.")
 		srv = grpc.NewServer()
 	}
 	svc := &server{}
@@ -144,8 +144,8 @@ func (s *server) ShipOrder(ctx context.Context, in *pb.ShipOrderRequest) (*pb.Sh
 	}, nil
 }
 
-func initStats() {
-	//TODO(arbrown) Implement OpenTelemetry stats
+func initMetrics() {
+	//TODO(arbrown) Implement OpenTelemetry metrics
 }
 
 func initTracing() {

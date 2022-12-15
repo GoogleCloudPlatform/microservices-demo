@@ -192,17 +192,17 @@ public final class AdService {
         .build();
   }
 
-  private static void initStats() {
-    if (System.getenv("DISABLE_STATS") != null) {
-      logger.info("Stats disabled.");
+  private static void initMetrics() {
+    if (System.getenv("DISABLE_METRICS") != null) {
+      logger.info("Metrics disabled.");
       return;
     }
-    logger.info("Stats enabled, but temporarily unavailable");
+    logger.info("Metrics enabled, but temporarily unavailable");
 
     long sleepTime = 10; /* seconds */
     int maxAttempts = 5;
 
-    // TODO(arbrown) Implement OpenTelemetry stats
+    // TODO(arbrown) Implement OpenTelemetry metrics
 
   }
 
@@ -224,7 +224,7 @@ public final class AdService {
 
     new Thread(
             () -> {
-              initStats();
+              initMetrics();
               initTracing();
             })
         .start();
