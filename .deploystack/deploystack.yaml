@@ -1,6 +1,7 @@
 # The fields inside this deploystack.yaml file are documented in https://github.com/GoogleCloudPlatform/deploystack.
 
 title: Microservices Demo (Online Boutique)
+name: microservices-demo
 duration: 5
 collect_project: true
 collect_region: true
