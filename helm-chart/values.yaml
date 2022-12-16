@@ -111,6 +111,7 @@ cartDatabase:
   type: redis
   connectionString: "redis-cart:6379"
   inClusterRedis:
+    create: true
     name: redis-cart
     # Uses the public redis image from Docker Hub, otherwise will use the images.repository.
     publicRepository: true
