@@ -71,7 +71,7 @@ werkzeug==2.2.2
     #   locust
 zipp==3.11.0
     # via importlib-metadata
-zope-event==4.5.0
+zope-event==4.6
     # via gevent
 zope-interface==5.5.2
     # via gevent
