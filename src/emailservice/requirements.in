@@ -4,7 +4,7 @@ grpcio==1.51.1
 jinja2==3.1.2
 python-json-logger==2.0.4
 google-cloud-profiler==4.0.0
-google-cloud-trace==1.7.3
+google-cloud-trace==1.8.0
 requests==2.28.1
 protobuf==4.21.12 # transitive dependency, move when google-api is bumped safely
 opentelemetry-distro==0.36b0
