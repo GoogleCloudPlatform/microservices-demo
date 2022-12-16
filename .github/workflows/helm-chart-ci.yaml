@@ -93,7 +93,7 @@ jobs:
           cd helm-chart/
           REDIS_IP=0.0.0.0
           REDIS_PORT=7378
-          REDIS_CERT=dsjfgkldsjflkdsjflksdajfkldsjkfljsdaklfjaskjfakdsjfaklsdjflskad;jfklasjfkls
+          REDIS_CERT=dsjfgkldsjflkdsjflksdajfkldsjkfljsdaklfjaskjfakdsjfaklsdjflskadjfklasjfkls
           helm template . \
             --set cartDatabase.inClusterRedis.create=false \
             --set cartDatabase.connectionString=${REDIS_IP}:${REDIS_PORT} \
