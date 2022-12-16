@@ -87,7 +87,7 @@ jobs:
             > helm-template.yaml
           cat helm-template.yaml
           kustomize build .
-      - name: helm template asm
+      - name: helm template memorystore istio tls origination
         run: |
           # Test related to https://medium.com/google-cloud/64b71969318d
           cd helm-chart/
