@@ -8,6 +8,9 @@
     <PackageReference Include="Grpc.AspNetCore" Version="2.50.0" />
     <PackageReference Include="Grpc.HealthCheck" Version="2.50.0" />
     <PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="7.0.0" />
+    <PackageReference Include="prometheus-net" Version="7.0.0" />
+    <PackageReference Include="prometheus-net.AspNetCore" Version="7.0.0" />
+    <PackageReference Include="prometheus-net.AspNetCore.Grpc" Version="7.0.0" />
     <!-- Add explicit direct dependency required for ipv6, see https://github.com/dotnet/aspnetcore/issues/45424 -->
     <PackageReference Include="StackExchange.Redis" Version="2.6.80" />
     <PackageReference Include="Google.Cloud.Spanner.Data" Version="4.2.0" />

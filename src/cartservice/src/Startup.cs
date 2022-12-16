@@ -10,6 +10,7 @@ using Microsoft.Extensions.Hosting;
 using cartservice.cartstore;
 using cartservice.services;
 using Microsoft.Extensions.Caching.StackExchangeRedis;
+using Prometheus;
 
 namespace cartservice
 {
@@ -56,9 +57,15 @@ namespace cartservice
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
+            var enableMetrics = Configuration["ENABLE_METRICS"] == "1";
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
+            }
+
+            if (enableMetrics)
+            {
+                app.UseGrpcMetrics();
             }
 
             app.UseRouting();
@@ -67,6 +74,11 @@ namespace cartservice
             {
                 endpoints.MapGrpcService<CartService>();
                 endpoints.MapGrpcService<cartservice.services.HealthCheckService>();
+                if (enableMetrics) 
+                {
+                    Console.WriteLine("Metrics enabled");
+                    endpoints.MapMetrics();
+                }
 
                 endpoints.MapGet("/", async context =>
                 {

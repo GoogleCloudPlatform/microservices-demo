@@ -15,11 +15,23 @@
 apiVersion: monitoring.googleapis.com/v1
 kind: PodMonitoring
 metadata:
-  name: prom-scraper
+  name: frontend-scraper
 spec:
   selector:
-    matchLabels:
-      app: frontend
+    matchExpressions:
+      - {key: app, operator: In, values: [frontend]}
   endpoints:
   - port: 8080
+    interval: 30s
+---
+apiVersion: monitoring.googleapis.com/v1
+kind: PodMonitoring
+metadata:
+  name: cart-scraper
+spec:
+  selector:
+    matchExpressions:
+      - {key: app, operator: In, values: [cartservice]}
+  endpoints:
+  - port: 7070
     interval: 30s

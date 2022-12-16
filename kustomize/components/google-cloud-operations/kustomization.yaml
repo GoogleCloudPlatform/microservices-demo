@@ -18,6 +18,20 @@ resources:
   - otel-collector.yaml
 patchesStrategicMerge:
 # adservice - not yet implemented
+# cartservice - metrics
+- |-
+  apiVersion: apps/v1
+  kind: Deployment
+  metadata:
+    name: cartservice
+  spec:
+    template:
+      spec:
+        containers:
+          - name: server
+            env:
+            - name: ENABLE_METRICS
+              value: "1"
 # checkoutservice - tracing, profiler
 - |-
   apiVersion: apps/v1
