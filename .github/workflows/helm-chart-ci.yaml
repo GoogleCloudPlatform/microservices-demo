@@ -32,16 +32,29 @@ jobs:
       - name: helm lint
         run: |
           cd helm-chart/
-          helm lint
+          helm lint --strict
       - name: helm template default
         run: |
           cd helm-chart/
           helm template . > helm-template.yaml
           cat helm-template.yaml 
-      - name: kustomize build default
-        run: |
-          cd helm-chart/
           kustomize create --resources helm-template.yaml
+          kustomize build .
+      - name: helm template spanner
+        run: |
+          # Test related to https://medium.com/p/f7248e077339
+          cd helm-chart/
+          SPANNER_CONNECTION_STRING=projects/PROJECT_ID/instances/SPANNER_INSTANCE_NAME/databases/SPANNER_DATABASE_NAME
+          helm template . \
+            --set cartDatabase.inClusterRedis.create=false \
+            --set cartDatabase.type=spanner \
+            --set cartDatabase.connectionString=${SPANNER_CONNECTION_STRING} \
+            --set serviceAccounts.create=true \
+            --set serviceAccounts.annotationsOnlyForCartservice=true \
+            --set "serviceAccounts.annotations.iam\.gke\.io/gcp-service-account=${SPANNER_DB_USER_GSA_ID}" \
+            -n onlineboutique \
+            > helm-template.yaml
+          cat helm-template.yaml
           kustomize build .
       - name: helm template advanced
         run: |
@@ -62,7 +75,4 @@ jobs:
             -n onlineboutique \
             > helm-template.yaml
           cat helm-template.yaml
-      - name: kustomize build advanced
-        run: |
-          cd helm-chart/
           kustomize build .
