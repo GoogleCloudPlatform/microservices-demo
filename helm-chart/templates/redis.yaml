@@ -1,4 +1,4 @@
-{{- if eq .Values.cartDatabase.type "redis" }}
+{{- if .Values.cartDatabase.inClusterRedis.create }}
 {{- if .Values.serviceAccounts.create }}
 apiVersion: v1
 kind: ServiceAccount
@@ -157,11 +157,12 @@ spec:
         ports:
         - "6379"
 {{- end }}
+{{- end }}
 {{- if .Values.cartDatabase.externalRedisTlsOrigination.enable }}
 ---
 apiVersion: v1
 data:
-  {{ .Values.cartDatabase.externalRedisTlsOrigination.name }}.pem: {{ .Values.cartDatabase.externalRedisTlsOrigination.certificate }}
+  {{ .Values.cartDatabase.externalRedisTlsOrigination.name }}.pem: {{ .Values.cartDatabase.externalRedisTlsOrigination.certificate | b64enc | quote }}
 kind: Secret
 metadata:
   name: {{ .Values.cartDatabase.externalRedisTlsOrigination.name }}
@@ -199,5 +200,4 @@ spec:
   - number: {{ .Values.cartDatabase.externalRedisTlsOrigination.endpointPort }}
     name: tcp-redis
     protocol: TCP
-{{- end }}
 {{- end }}
