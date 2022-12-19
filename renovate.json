@@ -65,5 +65,7 @@
     {
       "matchUpdateTypes": ["minor", "patch", "digest"],
       "automerge": true
-    }]
+    }
+  ],
+  "platformAutomerge": true
 }
