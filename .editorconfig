@@ -19,5 +19,8 @@ indent_size = 4
 [*.go]
 indent_style = tab
 
+[*.java]
+indent_size = 4
+
 [*.py]
 indent_size = 4
