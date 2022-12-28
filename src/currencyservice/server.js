@@ -27,25 +27,28 @@ else {
   });
 }
 
-if(process.env.DISABLE_TRACING) {
-  console.log("Tracing disabled.")
-}
-else {
-  console.log("Tracing enabled.")
-  require('@google-cloud/trace-agent').start();
-}
 
-if(process.env.DISABLE_DEBUGGER) {
-  console.log("Debugger disabled.")
+if(process.env.ENABLE_TRACING == "1") {
+  console.log("Tracing enabled.")
+  const { NodeTracerProvider } = require('@opentelemetry/sdk-trace-node');
+  const { SimpleSpanProcessor } = require('@opentelemetry/sdk-trace-base');
+  const { GrpcInstrumentation } = require('@opentelemetry/instrumentation-grpc');
+  const { registerInstrumentations } = require('@opentelemetry/instrumentation');
+  const { OTLPTraceExporter } = require("@opentelemetry/exporter-otlp-grpc");
+
+  const provider = new NodeTracerProvider();
+  
+  const collectorUrl = process.env.COLLECTOR_SERVICE_ADDR
+
+  provider.addSpanProcessor(new SimpleSpanProcessor(new OTLPTraceExporter({url: collectorUrl})));
+  provider.register();
+
+  registerInstrumentations({
+    instrumentations: [new GrpcInstrumentation()]
+  });
 }
 else {
-  console.log("Debugger enabled.")
-  require('@google-cloud/debug-agent').start({
-    serviceContext: {
-      service: 'currencyservice',
-      version: 'VERSION'
-    }
-  });
+  console.log("Tracing disabled.")
 }
 
 const path = require('path');
@@ -64,9 +67,33 @@ const healthProto = _loadProto(HEALTH_PROTO_PATH).grpc.health.v1;
 const logger = pino({
   name: 'currencyservice-server',
   messageKey: 'message',
-  changeLevelName: 'severity',
-  useLevelLabels: true
+  formatters: {
+    level (logLevelString, logLevelNum) {
+      return { severity: logLevelString }
+    }
+  }
 });
+
+const CURRENCYSERVICE = "currencyservice";
+
+// NOTE: logLevel must be a GELF valid severity value (WARN or ERROR), INFO if not specified
+function emitLog(event, logLevel) {
+  var timestamp = new Date().toISOString();
+
+  switch (logLevel) {
+    case "ERROR":
+      logger.error(timestamp + " - ERROR - " + CURRENCYSERVICE + " - " + event);
+      break;
+
+    case "WARN":
+      logger.warn(timestamp + " - WARN - " + CURRENCYSERVICE + " - " + event);
+      break;
+
+    default:
+      logger.info(timestamp + " - INFO - " + CURRENCYSERVICE + " - " + event);
+      break;
+  }
+}
 
 /**
  * Helper function that loads a protobuf file.
@@ -105,27 +132,6 @@ function _carry (amount) {
   return amount;
 }
 
-const CURRENCYSERVICE = "currencyservice";
-
-// NOTE: logLevel must be a GELF valid severity value (WARN or ERROR), INFO if not specified
-function emitLog(event, logLevel) {
-  var timestamp = new Date().toISOString();
-
-  switch (logLevel) {
-    case "ERROR":
-      logger.error(timestamp + " - ERROR - " + CURRENCYSERVICE + " - " + event);
-      break;
-
-    case "WARN":
-      logger.warn(timestamp + " - WARN - " + CURRENCYSERVICE + " - " + event);
-      break;
-
-    default:
-      logger.info(timestamp + " - INFO - " + CURRENCYSERVICE + " - " + event);
-      break;
-  }
-}
-
 /**
  * Lists the supported currencies
  */
@@ -138,9 +144,7 @@ function getSupportedCurrencies (call, callback) {
   logger.info('Getting supported currencies...');
 
   _getCurrencyData((data) => {
-    event = "Answered request from " + ServiceName + " (request_id: " + SessionID[0] + ")";
-    emitLog(event, "INFO");
-
+    emitLog("Answered request from " + ServiceName + " (request_id: " + SessionID[0] + ")", "INFO");
     callback(null, {currency_codes: Object.keys(data)});
   });
 }
@@ -178,7 +182,6 @@ function convert (call, callback) {
 
       emitLog("Answered request from " + ServiceName + " (request_id: " + SessionID[0] + ")", "INFO");
       logger.info(`conversion request successful`);
-
       callback(null, result);
     });
   } catch (err) {
@@ -206,7 +209,7 @@ function main () {
   server.addService(healthProto.Health.service, {check});
 
   server.bindAsync(
-    `0.0.0.0:${PORT}`,
+    `[::]:${PORT}`,
     grpc.ServerCredentials.createInsecure(),
     function() {
       logger.info(`CurrencyService gRPC server started on port ${PORT}`);

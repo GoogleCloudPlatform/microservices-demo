@@ -30,24 +30,11 @@ import io.grpc.StatusRuntimeException;
 import io.grpc.health.v1.HealthCheckResponse.ServingStatus;
 import io.grpc.services.*;
 import io.grpc.stub.StreamObserver;
-import io.opencensus.common.Duration;
-import io.opencensus.contrib.grpc.metrics.RpcViews;
-import io.opencensus.exporter.stats.stackdriver.StackdriverStatsConfiguration;
-import io.opencensus.exporter.stats.stackdriver.StackdriverStatsExporter;
-import io.opencensus.exporter.trace.jaeger.JaegerExporterConfiguration;
-import io.opencensus.exporter.trace.jaeger.JaegerTraceExporter;
-import io.opencensus.exporter.trace.stackdriver.StackdriverTraceConfiguration;
-import io.opencensus.exporter.trace.stackdriver.StackdriverTraceExporter;
-import io.opencensus.trace.AttributeValue;
-import io.opencensus.trace.Span;
-import io.opencensus.trace.Tracer;
-import io.opencensus.trace.Tracing;
 import java.io.IOException;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.time.Instant;
-import java.lang.Thread;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -60,7 +47,6 @@ import org.apache.logging.log4j.Logger;
 public final class AdService {
 
   private static final Logger logger = LogManager.getLogger(AdService.class);
-  private static final Tracer tracer = Tracing.getTracer();
 
   @SuppressWarnings("FieldCanBeLocal")
   private static int MAX_ADS_TO_SERVE = 2;
@@ -81,15 +67,42 @@ public final class AdService {
       Object RequestID = headers.get(Metadata.Key.of("requestid", Metadata.ASCII_STRING_MARSHALLER));
       Object ServiceName = headers.get(Metadata.Key.of("servicename", Metadata.ASCII_STRING_MARSHALLER));
 
-      if (RequestID == null && ServiceName == null) {
-        AdService.emitLog(ADSERVICE + ": SessionID not found in header.", "ERROR");
-        return new ServerCall.Listener() {
-        };
+      if (RequestID == null || ServiceName == null) {
+        AdService.emitLog(ADSERVICE+": An error occurred while retrieving the metadata.", "ERROR");
+        return new ServerCall.Listener() {};
       }
 
       Context context = Context.current().withValues(REQUEST_ID, RequestID, SERVICE_NAME, ServiceName);
 
       return Contexts.interceptCall(context, call, headers, next);
+    }
+  }
+
+  public static String ADSERVICE = "adservice";
+
+  // NOTE: logLevel must be a GELF valid severity value (WARN or ERROR), INFO if
+  // not specified
+  public static void emitLog(String event, String logLevel) {
+    try {
+      Date date = new Date(System.currentTimeMillis());
+      SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
+      String timestamp = sdf.format(date);
+
+      switch (logLevel) {
+        case "ERROR":
+          logger.log(Level.ERROR, timestamp + " - ERROR - " + ADSERVICE + " - " + event);
+          break;
+
+        case "WARN":
+          logger.log(Level.WARN, timestamp + " - WARN - " + ADSERVICE + " - " + event);
+          break;
+
+        default:
+          logger.log(Level.INFO, timestamp + " - INFO - " + ADSERVICE + " - " + event);
+          break;
+      }
+    } catch (Exception err) {
+      logger.log(Level.ERROR, "adservice: Impossible to parse current timestamp.");
     }
   }
 
@@ -124,32 +137,6 @@ public final class AdService {
     }
   }
 
-  public static String ADSERVICE = "adservice";
-
-  // NOTE: logLevel must be a GELF valid severity value (WARN or ERROR), INFO if
-  // not specified
-  public static void emitLog(String event, String logLevel) {
-    try {
-	Date date = new Date(System.currentTimeMillis());
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
-        String timestamp = sdf.format(date);
-
-	switch (logLevel) {
-      	case "ERROR":
-        	logger.log(Level.ERROR, timestamp + " - ERROR - " + ADSERVICE + " - " + event);
-        break;
-
-      	case "WARN":
-        	logger.log(Level.WARN, timestamp + " - WARN - " + ADSERVICE + " - " + event);
-        break;
-
-      	default:
-        	logger.log(Level.INFO, timestamp + " - INFO - " + ADSERVICE + " - " + event);
-        break;
-	}
-    } catch(Exception err) { logger.log(Level.ERROR, "adservice: Impossible to parse current timestamp."); }
-  }
-
   private static class AdServiceImpl extends hipstershop.AdServiceGrpc.AdServiceImplBase {
 
     /**
@@ -163,50 +150,37 @@ public final class AdService {
     @Override
     public void getAds(AdRequest req, StreamObserver<AdResponse> responseObserver) {
       AdService service = AdService.getInstance();
-      Span span = tracer.getCurrentSpan();
 
       try {
         Object RequestID = MetadataInterceptor.REQUEST_ID.get();
         Object ServiceName = MetadataInterceptor.SERVICE_NAME.get();
 
-        String event = "Received request from " + ServiceName.toString() + " (request_id: " + RequestID.toString()
-            + ")";
-        AdService.emitLog(event, "INFO");
+        AdService.emitLog("Received request from " + ServiceName.toString() + " (request_id: " + RequestID.toString()
+        + ")", "INFO");
 
-        span.putAttribute("method", AttributeValue.stringAttributeValue("getAds"));
         List<Ad> allAds = new ArrayList<>();
         logger.info("received ad request (context_words=" + req.getContextKeysList() + ")");
         if (req.getContextKeysCount() > 0) {
-          span.addAnnotation(
-              "Constructing Ads using context",
-              ImmutableMap.of(
-                  "Context Keys",
-                  AttributeValue.stringAttributeValue(req.getContextKeysList().toString()),
-                  "Context Keys length",
-                  AttributeValue.longAttributeValue(req.getContextKeysCount())));
           for (int i = 0; i < req.getContextKeysCount(); i++) {
             Collection<Ad> ads = service.getAdsByCategory(req.getContextKeys(i));
             allAds.addAll(ads);
           }
         } else {
-          span.addAnnotation("No Context provided. Constructing random Ads.");
           allAds = service.getRandomAds();
         }
         if (allAds.isEmpty()) {
           // Serve random ads.
-          span.addAnnotation("No Ads found based on context. Constructing random Ads.");
           allAds = service.getRandomAds();
         }
 
-        event = "Answered request from " + ServiceName.toString() + " (request_id: " + RequestID.toString() + ")";
-        AdService.emitLog(event, "INFO");
+        AdService.emitLog("Answered request from " + ServiceName.toString() + " (request_id: " + RequestID.toString() + ")", "INFO");
 
         AdResponse reply = AdResponse.newBuilder().addAllAds(allAds).build();
         responseObserver.onNext(reply);
         responseObserver.onCompleted();
 
       } catch (StatusRuntimeException e) {
-        AdService.emitLog("GetAds Failed with status" + e.getStatus(), "ERROR");
+        AdService.emitLog("GetAds Failed with status" + e.getStatus(), "WARN");
         logger.log(Level.WARN, "GetAds Failed with status {}", e.getStatus());
         responseObserver.onError(e);
       }
@@ -288,38 +262,13 @@ public final class AdService {
       logger.info("Stats disabled.");
       return;
     }
-    logger.info("Stats enabled");
+    logger.info("Stats enabled, but temporarily unavailable");
 
     long sleepTime = 10; /* seconds */
     int maxAttempts = 5;
-    boolean statsExporterRegistered = false;
-    for (int i = 0; i < maxAttempts; i++) {
-      try {
-        if (!statsExporterRegistered) {
-          StackdriverStatsExporter.createAndRegister(
-              StackdriverStatsConfiguration.builder()
-                  .setExportInterval(Duration.create(60, 0))
-                  .build());
-          statsExporterRegistered = true;
-        }
-      } catch (Exception e) {
-        if (i == (maxAttempts - 1)) {
-          logger.log(
-              Level.WARN,
-              "Failed to register Stackdriver Exporter."
-                  + " Stats data will not reported to Stackdriver. Error message: "
-                  + e.toString());
-        } else {
-          logger.info("Attempt to register Stackdriver Exporter in " + sleepTime + " seconds ");
-          try {
-            Thread.sleep(TimeUnit.SECONDS.toMillis(sleepTime));
-          } catch (Exception se) {
-            logger.log(Level.WARN, "Exception while sleeping" + se.toString());
-          }
-        }
-      }
-    }
-    logger.info("Stats enabled - Stackdriver Exporter initialized.");
+
+    // TODO(arbrown) Implement OpenTelemetry stats
+
   }
 
   private static void initTracing() {
@@ -327,59 +276,16 @@ public final class AdService {
       logger.info("Tracing disabled.");
       return;
     }
-    logger.info("Tracing enabled");
+    logger.info("Tracing enabled but temporarily unavailable");
+    logger.info("See https://github.com/GoogleCloudPlatform/microservices-demo/issues/422 for more info.");
 
-    long sleepTime = 10; /* seconds */
-    int maxAttempts = 5;
-    boolean traceExporterRegistered = false;
+    // TODO(arbrown) Implement OpenTelemetry tracing
 
-    for (int i = 0; i < maxAttempts; i++) {
-      try {
-        if (!traceExporterRegistered) {
-          StackdriverTraceExporter.createAndRegister(
-              StackdriverTraceConfiguration.builder().build());
-          traceExporterRegistered = true;
-        }
-      } catch (Exception e) {
-        if (i == (maxAttempts - 1)) {
-          logger.log(
-              Level.WARN,
-              "Failed to register Stackdriver Exporter."
-                  + " Tracing data will not reported to Stackdriver. Error message: "
-                  + e.toString());
-        } else {
-          logger.info("Attempt to register Stackdriver Exporter in " + sleepTime + " seconds ");
-          try {
-            Thread.sleep(TimeUnit.SECONDS.toMillis(sleepTime));
-          } catch (Exception se) {
-            logger.log(Level.WARN, "Exception while sleeping" + se.toString());
-          }
-        }
-      }
-    }
     logger.info("Tracing enabled - Stackdriver exporter initialized.");
-  }
-
-  private static void initJaeger() {
-    String jaegerAddr = System.getenv("JAEGER_SERVICE_ADDR");
-    if (jaegerAddr != null && !jaegerAddr.isEmpty()) {
-      String jaegerUrl = String.format("http://%s/api/traces", jaegerAddr);
-      // Register Jaeger Tracing.
-      JaegerTraceExporter.createAndRegister(
-          JaegerExporterConfiguration.builder()
-              .setThriftEndpoint(jaegerUrl)
-              .setServiceName("adservice")
-              .build());
-      logger.info("Jaeger initialization complete.");
-    } else {
-      logger.info("Jaeger initialization disabled.");
-    }
   }
 
   /** Main launches the server from the command line. */
   public static void main(String[] args) throws IOException, InterruptedException {
-    // Registers all RPC views.
-    RpcViews.registerAllGrpcViews();
 
     new Thread(
         () -> {
@@ -387,9 +293,6 @@ public final class AdService {
           initTracing();
         })
         .start();
-
-    // Register Jaeger
-    initJaeger();
 
     // Start the RPC server. You shouldn't see any output from gRPC before this.
     logger.info("AdService starting.");

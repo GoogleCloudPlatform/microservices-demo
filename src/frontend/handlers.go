@@ -38,6 +38,11 @@ import (
 	"github.com/GoogleCloudPlatform/microservices-demo/src/frontend/money"
 )
 
+type platformDetails struct {
+	css      string
+	provider string
+}
+
 const (
 	FRONTEND              = "frontend"
 	ADSERVICE             = "adservice"
@@ -79,8 +84,6 @@ func checkResponse(responseCode codes.Code, serviceName string, reqId string, er
 	}
 }
 
-type ctxKey struct{}
-
 func setMetadata(ctx context.Context, invokingService string, invokedService string) (context.Context, string) {
 	RequestID, err := uuid.NewRandom()
 	if err != nil {
@@ -92,15 +95,9 @@ func setMetadata(ctx context.Context, invokingService string, invokedService str
 	metadataCtx := metadata.NewOutgoingContext(ctx, header)
 
 	// Log sending gRPC
-	event := "Sending message to " + invokedService + " (request_id: " + RequestID.String() + ")"
-	emitLog(event, "INFO")
+	emitLog("Sending message to "+invokedService+" (request_id: "+RequestID.String()+")", "INFO")
 
 	return metadataCtx, RequestID.String()
-}
-
-type platformDetails struct {
-	css      string
-	provider string
 }
 
 var (
@@ -222,7 +219,6 @@ func (fe *frontendServer) productHandler(w http.ResponseWriter, r *http.Request)
 		renderHTTPError(log, r, w, errors.Wrap(err, "could not retrieve product"), http.StatusInternalServerError)
 		return
 	}
-
 	currencies, err := fe.getCurrencies(r.Context())
 	if err != nil {
 		renderHTTPError(log, r, w, errors.Wrap(err, "could not retrieve currencies"), http.StatusInternalServerError)
@@ -241,10 +237,10 @@ func (fe *frontendServer) productHandler(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
+	// ignores the error retrieving recommendations since it is not critical
 	recommendations, err := fe.getRecommendations(r.Context(), sessionID(r), []string{id})
 	if err != nil {
-		renderHTTPError(log, r, w, errors.Wrap(err, "failed to get product recommendations"), http.StatusInternalServerError)
-		return
+		log.WithField("error", err).Warn("failed to get product recommendations")
 	}
 
 	product := struct {
@@ -321,10 +317,10 @@ func (fe *frontendServer) viewCartHandler(w http.ResponseWriter, r *http.Request
 		return
 	}
 
+	// ignores the error retrieving recommendations since it is not critical
 	recommendations, err := fe.getRecommendations(r.Context(), sessionID(r), cartIDs(cart))
 	if err != nil {
-		renderHTTPError(log, r, w, errors.Wrap(err, "failed to get product recommendations"), http.StatusInternalServerError)
-		return
+		log.WithField("error", err).Warn("failed to get product recommendations")
 	}
 
 	shippingCost, err := fe.getShippingQuote(r.Context(), cart, currentCurrency(r))
@@ -422,14 +418,14 @@ func (fe *frontendServer) placeOrderHandler(w http.ResponseWriter, r *http.Reque
 				ZipCode:       int32(zipCode),
 				Country:       country},
 		})
-
-	// Check gRPC reply
-	checkResponse(status.Code(err), CHECKOUTSERVICE, RequestID, err)
-
 	if err != nil {
 		renderHTTPError(log, r, w, errors.Wrap(err, "failed to complete the order"), http.StatusInternalServerError)
 		return
 	}
+
+	// Check gRPC reply
+	checkResponse(status.Code(err), CHECKOUTSERVICE, RequestID, err)
+
 	log.WithField("order", order.GetOrder().GetOrderId()).Info("order placed")
 
 	order.GetOrder().GetItems()
@@ -521,6 +517,7 @@ func renderHTTPError(log logrus.FieldLogger, r *http.Request, w http.ResponseWri
 		"error":             errMsg,
 		"status_code":       code,
 		"status":            http.StatusText(code),
+		"is_cymbal_brand":   isCymbalBrand,
 		"deploymentDetails": deploymentDetailsMap,
 	}); templateErr != nil {
 		log.Println(templateErr)

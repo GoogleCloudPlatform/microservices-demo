@@ -55,7 +55,7 @@ namespace cartservice.services
         }
 
         // Reads gRPC metadata and logs the received requests
-        public Tuple<string, string> initMetadata(ServerCallContext context) {
+        public Tuple<string, string> readMetadata(ServerCallContext context) {
             var RequestID = context.RequestHeaders.Get("requestid").Value;
             var ServiceName = context.RequestHeaders.Get("servicename").Value;
             Tuple<string, string> header = new Tuple<string, string>(RequestID.ToString(), ServiceName.ToString());
@@ -76,7 +76,7 @@ namespace cartservice.services
 
         public async override Task<Empty> AddItem(AddItemRequest request, ServerCallContext context)
         {
-            Tuple<string, string> header = initMetadata(context);
+            Tuple<string, string> header = readMetadata(context);
 
             await _cartStore.AddItemAsync(request.UserId, request.Item.ProductId, request.Item.Quantity);
 
@@ -87,7 +87,7 @@ namespace cartservice.services
 
         public override Task<Cart> GetCart(GetCartRequest request, ServerCallContext context)
         {
-            Tuple<string, string> header = initMetadata(context);
+            Tuple<string, string> header = readMetadata(context);
 
             emitLog("Answered request from " + header.Item1 + " (request_id: " + header.Item2 + ")", "INFO");
 
@@ -95,13 +95,12 @@ namespace cartservice.services
         }
 
         public async override Task<Empty> EmptyCart(EmptyCartRequest request, ServerCallContext context)
-        {
-            Tuple<string, string> header = initMetadata(context);
+        {   
+            Tuple<string, string> header = readMetadata(context);
 
             await _cartStore.EmptyCartAsync(request.UserId);
-
-            emitLog("Answered request from " + header.Item1 + " (request_id: " + header.Item2 + ")", "INFO");
             
+            emitLog("Answered request from " + header.Item1 + " (request_id: " + header.Item2 + ")", "INFO");
             return Empty;
         }
     }

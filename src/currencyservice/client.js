@@ -19,7 +19,6 @@ require('@google-cloud/trace-agent').start();
 
 const path = require('path');
 const grpc = require('grpc');
-const leftPad = require('left-pad');
 const pino = require('pino');
 
 const PROTO_PATH = path.join(__dirname, './proto/demo.proto');
@@ -32,8 +31,11 @@ const client = new shopProto.CurrencyService(`localhost:${PORT}`,
 const logger = pino({
   name: 'currencyservice-client',
   messageKey: 'message',
-  changeLevelName: 'severity',
-  useLevelLabels: true
+  formatters: {
+    level (logLevelString, logLevelNum) {
+      return { severity: logLevelString }
+    }
+  }
 });
 
 const request = {

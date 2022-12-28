@@ -16,9 +16,10 @@ package main
 
 import (
 	"context"
+	"time"
+
 	pb "github.com/GoogleCloudPlatform/microservices-demo/src/frontend/genproto"
 	"google.golang.org/grpc/status"
-	"time"
 
 	"github.com/pkg/errors"
 )
@@ -35,6 +36,9 @@ func (fe *frontendServer) getCurrencies(ctx context.Context) ([]string, error) {
 
 	currs, err := pb.NewCurrencyServiceClient(fe.currencySvcConn).
 		GetSupportedCurrencies(newCtx, &pb.Empty{})
+	if err != nil {
+		return nil, err
+	}
 
 	// Check gRPC reply
 	checkResponse(status.Code(err), CURRENCYSERVICE, RequestID, err)
@@ -131,9 +135,14 @@ func (fe *frontendServer) convertCurrency(ctx context.Context, money *pb.Money, 
 	newCtx, cancel := context.WithTimeout(metadataCtx, time.Second)
 	defer cancel()
 
-	res, err := pb.NewCurrencyServiceClient(fe.currencySvcConn).Convert(newCtx, &pb.CurrencyConversionRequest{
-		From:   money,
-		ToCode: currency})
+	if avoidNoopCurrencyConversionRPC && money.GetCurrencyCode() == currency {
+		return money, nil
+	}
+
+	res, err := pb.NewCurrencyServiceClient(fe.currencySvcConn).
+		Convert(newCtx, &pb.CurrencyConversionRequest{
+			From:   money,
+			ToCode: currency})
 
 	// Check gRPC reply
 	checkResponse(status.Code(err), CURRENCYSERVICE, RequestID, err)
@@ -151,16 +160,13 @@ func (fe *frontendServer) getShippingQuote(ctx context.Context, items []*pb.Cart
 		&pb.GetQuoteRequest{
 			Address: nil,
 			Items:   items})
-
+	if err != nil {
+		return nil, err
+	}
 	// Check gRPC reply
 	checkResponse(status.Code(err), SHIPPINGSERVICE, RequestID, err)
 
 	localized, err := fe.convertCurrency(ctx, quote.GetCostUsd(), currency)
-
-	if err != nil {
-		emitLog("failed to convert currency for shipping cost", "ERROR")
-	}
-
 	return localized, errors.Wrap(err, "failed to convert currency for shipping cost")
 }
 
@@ -172,25 +178,24 @@ func (fe *frontendServer) getRecommendations(ctx context.Context, userID string,
 
 	resp, err := pb.NewRecommendationServiceClient(fe.recommendationSvcConn).ListRecommendations(newCtx,
 		&pb.ListRecommendationsRequest{UserId: userID, ProductIds: productIDs})
+	if err != nil {
+		return nil, err
+	}
 
 	// Check gRPC reply
 	checkResponse(status.Code(err), RECOMMENDATIONSERVICE, RequestID, err)
 
 	out := make([]*pb.Product, len(resp.GetProductIds()))
-
 	for i, v := range resp.GetProductIds() {
-		p, err := fe.getProduct(ctx, v)
+		p, err := fe.getProduct(newCtx, v)
 		if err != nil {
-			emitLog("failed to get recommended product info (#"+v+")", "ERROR")
 			return nil, errors.Wrapf(err, "failed to get recommended product info (#%s)", v)
 		}
 		out[i] = p
 	}
-
 	if len(out) > 4 {
 		out = out[:4] // take only first four to fit the UI
 	}
-
 	return out, err
 }
 

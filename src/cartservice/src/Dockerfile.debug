@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-FROM mcr.microsoft.com/dotnet/sdk:7.0 AS build
+FROM mcr.microsoft.com/dotnet/sdk:7.0@sha256:81383de6f3bf443625eb277b203f6141f3496fd5a9e1b9b45a4c725266c9d92a AS build
 WORKDIR /app
 COPY . .
 RUN dotnet restore cartservice.csproj
@@ -22,11 +22,12 @@ FROM build AS publish
 RUN dotnet publish cartservice.csproj -c Debug -o /out
 
 # Building final image used in running container
-FROM mcr.microsoft.com/dotnet/aspnet:7.0 AS final
+FROM mcr.microsoft.com/dotnet/aspnet:7.0@sha256:442e00363ed50e17c5104305b658d5d41cf857bbd9d81e9829bc70754169d995 AS final
 # Installing procps on the container to enable debugging of .NET Core
 RUN apt-get update \
     && apt-get install -y unzip procps wget
-RUN GRPC_HEALTH_PROBE_VERSION=v0.4.12 && \
+# renovate: datasource=github-releases depName=grpc-ecosystem/grpc-health-probe
+RUN GRPC_HEALTH_PROBE_VERSION=v0.4.14 && \
     wget -qO/bin/grpc_health_probe https://github.com/grpc-ecosystem/grpc-health-probe/releases/download/${GRPC_HEALTH_PROBE_VERSION}/grpc_health_probe-linux-amd64 && \
     chmod +x /bin/grpc_health_probe
 WORKDIR /app

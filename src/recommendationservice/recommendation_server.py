@@ -14,34 +14,45 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from cmath import inf
 import os
 import random
 import time
 import datetime
-import traceback
 import uuid
+import traceback
 from concurrent import futures
 
-import googleclouddebugger
 import googlecloudprofiler
 from google.auth.exceptions import DefaultCredentialsError
 import grpc
-from opencensus.ext.stackdriver import trace_exporter as stackdriver_exporter
-from opencensus.ext.grpc import server_interceptor
-from opencensus.trace import samplers
-from opencensus.common.transports.async_ import AsyncTransport
 
 import demo_pb2
 import demo_pb2_grpc
 from grpc_health.v1 import health_pb2
 from grpc_health.v1 import health_pb2_grpc
 
+from opentelemetry import trace
+from opentelemetry.instrumentation.grpc import GrpcInstrumentorServer
+from opentelemetry.sdk.trace import TracerProvider
+from opentelemetry.sdk.trace.export import BatchSpanProcessor
+from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
+
 from logger import getJSONLogger
 logger = getJSONLogger('recommendationservice-server')
 
 RECOMMENDATIONSERVICE = "recommendationservice"
 PRODUCTCATALOGSERVICE = "productcatalogservice"
+
+# NOTE: logLevel must be a GELF valid severity value (WARN or ERROR), INFO if not specified
+def emitLog(event, logLevel):
+  timestamp = str(datetime.datetime.now().isoformat())
+  
+  if logLevel == "ERROR":
+    logger.error(timestamp + " - ERROR - " + RECOMMENDATIONSERVICE + " - " + event)
+  elif logLevel == "WARN":
+    logger.warn(timestamp + " - WARN - " + RECOMMENDATIONSERVICE + " - " + event)
+  else:
+    logger.info(timestamp + " - INFO - " + RECOMMENDATIONSERVICE + " - " + event)
 
 def initStackdriverProfiling():
   project_id = None
@@ -68,36 +79,24 @@ def initStackdriverProfiling():
         logger.warning("Could not initialize Stackdriver Profiler after retrying, giving up")
   return
 
-# NOTE: logLevel must be a GELF valid severity value (WARN or ERROR), INFO if not specified
-def emitLog(event, logLevel):
-  timestamp = str(datetime.datetime.now().isoformat())
-  
-  if logLevel == "ERROR":
-    logger.error(timestamp + " - ERROR - " + RECOMMENDATIONSERVICE + " - " + event)
-  elif logLevel == "WARN":
-    logger.warn(timestamp + " - WARN - " + RECOMMENDATIONSERVICE + " - " + event)
-  else:
-    logger.info(timestamp + " - INFO - " + RECOMMENDATIONSERVICE + " - " + event)
-
-
 class RecommendationService(demo_pb2_grpc.RecommendationServiceServicer):
     def ListRecommendations(self, request, context):
         metadict = dict(context.invocation_metadata())
         emitLog("Received request from " + metadict['servicename'] + " (request_id: " + metadict['requestid'] + ")", "INFO")
-
+        
         # adding metadata for gRPC towards ProductCatalogService
         newRequestid = '{0}'.format(uuid.uuid4())
         metadata = (('requestid', newRequestid), ('servicename', RECOMMENDATIONSERVICE))
-
+        
         try:
           max_responses = 5
           emitLog("Sending message to " + PRODUCTCATALOGSERVICE + " (request_id: " + newRequestid + ")", "INFO")
-
+          
           # fetch list of products from product catalog stub
           cat_response = product_catalog_stub.ListProducts(demo_pb2.Empty(), timeout=1, metadata=metadata)
           
           emitLog("Receiving answer from " + PRODUCTCATALOGSERVICE + " (request_id: " + newRequestid + ")", "INFO")
-
+          
           product_ids = [x.id for x in cat_response.products]
           filtered_products = list(set(product_ids)-set(request.product_ids))
           num_products = len(filtered_products)
@@ -109,19 +108,16 @@ class RecommendationService(demo_pb2_grpc.RecommendationServiceServicer):
           logger.info("[Recv ListRecommendations] product_ids={}".format(prod_list))
           # build and return response
           response = demo_pb2.ListRecommendationsResponse()
-          response.product_ids.extend(prod_list)
+          response.product_ids.extend(prod_list)  
           event = "Answered request from " + metadict['servicename'] + " (request_id: " + metadict['requestid'] + ")"
           emitLog(event, "INFO")
-
           return response
+        
         except grpc.RpcError as e:
-          
           if e.code() == grpc.StatusCode.UNAVAILABLE or e.code() == grpc.StatusCode.DEADLINE_EXCEEDED:
-            event = "Failing to contact " + PRODUCTCATALOGSERVICE + " (request_id: " + newRequestid + "). Root cause: (" + e.details() + ")"
-            emitLog(event, "ERROR")
+            emitLog("Failing to contact " + PRODUCTCATALOGSERVICE + " (request_id: " + newRequestid + "). Root cause: (" + e.details() + ")", "ERROR")
           else:
-            event = "Error response received from " + PRODUCTCATALOGSERVICE + " (request_id: " + newRequestid + ")"
-            emitLog(event, "ERROR")
+            emitLog("Error response received from " + PRODUCTCATALOGSERVICE + " (request_id: " + newRequestid + ")", "ERROR")
           return None
 
     def Check(self, request, context):
@@ -146,38 +142,23 @@ if __name__ == "__main__":
         logger.info("Profiler disabled.")
 
     try:
-      if "DISABLE_TRACING" in os.environ:
-        raise KeyError()
-      else:
-        logger.info("Tracing enabled.")
-        sampler = samplers.AlwaysOnSampler()
-        exporter = stackdriver_exporter.StackdriverExporter(
-          project_id=os.environ.get('GCP_PROJECT_ID'),
-          transport=AsyncTransport)
-        tracer_interceptor = server_interceptor.OpenCensusServerInterceptor(sampler, exporter)
+      if os.environ["ENABLE_TRACING"] == "1":
+        otel_endpoint = os.getenv("COLLECTOR_SERVICE_ADDR", "localhost:4317")
+        trace.set_tracer_provider(TracerProvider())
+        trace.get_tracer_provider().add_span_processor(
+          BatchSpanProcessor(
+              OTLPSpanExporter(
+              endpoint = otel_endpoint,
+              insecure = True
+            )
+          )
+        )
+      grpc_server_instrumentor = GrpcInstrumentorServer()
+      grpc_server_instrumentor.instrument()
     except (KeyError, DefaultCredentialsError):
         logger.info("Tracing disabled.")
-        tracer_interceptor = server_interceptor.OpenCensusServerInterceptor()
     except Exception as e:
         logger.warn(f"Exception on Cloud Trace setup: {traceback.format_exc()}, tracing disabled.") 
-        tracer_interceptor = server_interceptor.OpenCensusServerInterceptor()
-   
-    try:
-      if "DISABLE_DEBUGGER" in os.environ:
-        raise KeyError()
-      else:
-        logger.info("Debugger enabled.")
-        try:
-          googleclouddebugger.enable(
-              module='recommendationserver',
-              version='1.0.0'
-          )
-        except (Exception, DefaultCredentialsError):
-            logger.error("Could not enable debugger")
-            logger.error(traceback.print_exc())
-            pass
-    except (Exception, DefaultCredentialsError):
-        logger.info("Debugger disabled.")
 
     port = os.environ.get('PORT', "8080")
     catalog_addr = os.environ.get('PRODUCT_CATALOG_SERVICE_ADDR', '')
@@ -188,8 +169,7 @@ if __name__ == "__main__":
     product_catalog_stub = demo_pb2_grpc.ProductCatalogServiceStub(channel)
 
     # create gRPC server
-    server = grpc.server(futures.ThreadPoolExecutor(max_workers=10),
-                      interceptors=(tracer_interceptor,))
+    server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
 
     # add class to gRPC server
     service = RecommendationService()

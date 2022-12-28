@@ -32,19 +32,19 @@ import (
 	healthpb "google.golang.org/grpc/health/grpc_health_v1"
 
 	"cloud.google.com/go/profiler"
-	"contrib.go.opencensus.io/exporter/jaeger"
-	"contrib.go.opencensus.io/exporter/stackdriver"
 	"github.com/golang/protobuf/jsonpb"
+	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
-
-	//  "go.opencensus.io/exporter/jaeger"
-	"go.opencensus.io/plugin/ocgrpc"
-	"go.opencensus.io/stats/view"
-	"go.opencensus.io/trace"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
+
+	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc"
+	"go.opentelemetry.io/otel/propagation"
+	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 )
 
 var (
@@ -78,18 +78,10 @@ func emitLog(event string, logLevel string) {
 
 func readMetadata(ctx context.Context) (string, string) {
 	md, _ := metadata.FromIncomingContext(ctx)
-	reqId := md.Get("requestid")
-	invService := md.Get("servicename")
-	var RequestID, ServiceName string
+	RequestID := md.Get("requestid")[0]
+	ServiceName := md.Get("servicename")[0]
 
-	if len(reqId) > 0 && len(invService) > 0 {
-		RequestID = reqId[0]
-		ServiceName = invService[0]
-		emitLog("Received request from "+ServiceName+" (request_id: "+RequestID+")", "INFO")
-
-	} else {
-		emitLog(PRODUCTCATALOGSERVICE+": An error occurred while retrieving the RequestID", "ERROR")
-	}
+	emitLog("Received request from "+ServiceName+" (request_id: "+RequestID+")", "INFO")
 
 	return RequestID, ServiceName
 }
@@ -113,9 +105,11 @@ func init() {
 }
 
 func main() {
-	if os.Getenv("DISABLE_TRACING") == "" {
-		log.Info("Tracing enabled.")
-		go initTracing()
+	if os.Getenv("ENABLE_TRACING") == "1" {
+		err := initTracing()
+		if err != nil {
+			log.Warnf("warn: failed to start tracer: %+v", err)
+		}
 	} else {
 		log.Info("Tracing disabled.")
 	}
@@ -171,11 +165,11 @@ func run(port string) string {
 		log.Fatal(err)
 	}
 	var srv *grpc.Server
-	if os.Getenv("DISABLE_STATS") == "" {
-		log.Info("Stats enabled.")
-		srv = grpc.NewServer(grpc.StatsHandler(&ocgrpc.ServerHandler{}))
+	if os.Getenv("ENABLE_TRACING") == "1" {
+		srv = grpc.NewServer(
+			grpc.UnaryInterceptor(otelgrpc.UnaryServerInterceptor()),
+			grpc.StreamInterceptor(otelgrpc.StreamServerInterceptor()))
 	} else {
-		log.Info("Stats disabled.")
 		srv = grpc.NewServer()
 	}
 
@@ -187,63 +181,35 @@ func run(port string) string {
 	return l.Addr().String()
 }
 
-func initJaegerTracing() {
-	svcAddr := os.Getenv("JAEGER_SERVICE_ADDR")
-	if svcAddr == "" {
-		log.Info("jaeger initialization disabled.")
-		return
-	}
-	// Register the Jaeger exporter to be able to retrieve
-	// the collected spans.
-	exporter, err := jaeger.NewExporter(jaeger.Options{
-		Endpoint: fmt.Sprintf("http://%s", svcAddr),
-		Process: jaeger.Process{
-			ServiceName: "productcatalogservice",
-		},
-	})
+func initStats() {
+	// TODO(drewbr) Implement OpenTelemetry stats
+}
+
+func initTracing() error {
+	var (
+		collectorAddr string
+		collectorConn *grpc.ClientConn
+	)
+
+	ctx := context.Background()
+
+	mustMapEnv(&collectorAddr, "COLLECTOR_SERVICE_ADDR")
+	mustConnGRPC(ctx, &collectorConn, collectorAddr)
+
+	exporter, err := otlptracegrpc.New(
+		ctx,
+		otlptracegrpc.WithGRPCConn(collectorConn))
 	if err != nil {
-		log.Fatal(err)
+		log.Warnf("warn: Failed to create trace exporter: %v", err)
 	}
-	trace.RegisterExporter(exporter)
-	log.Info("jaeger initialization completed.")
-}
-
-func initStats(exporter *stackdriver.Exporter) {
-	view.SetReportingPeriod(60 * time.Second)
-	view.RegisterExporter(exporter)
-	if err := view.Register(ocgrpc.DefaultServerViews...); err != nil {
-		log.Info("Error registering default server views")
-	} else {
-		log.Info("Registered default server views")
-	}
-}
-
-func initStackdriverTracing() {
-	// TODO(ahmetb) this method is duplicated in other microservices using Go
-	// since they are not sharing packages.
-	for i := 1; i <= 3; i++ {
-		exporter, err := stackdriver.NewExporter(stackdriver.Options{})
-		if err != nil {
-			log.Warnf("failed to initialize Stackdriver exporter: %+v", err)
-		} else {
-			trace.RegisterExporter(exporter)
-			trace.ApplyConfig(trace.Config{DefaultSampler: trace.AlwaysSample()})
-			log.Info("registered Stackdriver tracing")
-
-			// Register the views to collect server stats.
-			initStats(exporter)
-			return
-		}
-		d := time.Second * 10 * time.Duration(i)
-		log.Infof("sleeping %v to retry initializing Stackdriver exporter", d)
-		time.Sleep(d)
-	}
-	log.Warn("could not initialize Stackdriver exporter after retrying, giving up")
-}
-
-func initTracing() {
-	initJaegerTracing()
-	initStackdriverTracing()
+	tp := sdktrace.NewTracerProvider(
+		sdktrace.WithBatcher(exporter),
+		sdktrace.WithSampler(sdktrace.AlwaysSample()))
+	otel.SetTracerProvider(tp)
+	otel.SetTextMapPropagator(
+		propagation.NewCompositeTextMapPropagator(
+			propagation.TraceContext{}, propagation.Baggage{}))
+	return err
 }
 
 func initProfiling(service, version string) {
@@ -306,18 +272,14 @@ func (p *productCatalog) Watch(req *healthpb.HealthCheckRequest, ws healthpb.Hea
 
 func (p *productCatalog) ListProducts(ctx context.Context, req *pb.Empty) (*pb.ListProductsResponse, error) {
 	RequestID, ServiceName := readMetadata(ctx)
-
-	time.Sleep(extraLatency)
-
+	//time.Sleep(extraLatency)
 	emitLog("Answered request from "+ServiceName+" (request_id: "+RequestID+")", "INFO")
-
 	return &pb.ListProductsResponse{Products: parseCatalog()}, nil
 }
 
 func (p *productCatalog) GetProduct(ctx context.Context, req *pb.GetProductRequest) (*pb.Product, error) {
 	RequestID, ServiceName := readMetadata(ctx)
-
-	time.Sleep(extraLatency)
+	//time.Sleep(extraLatency)
 	var found *pb.Product
 	for i := 0; i < len(parseCatalog()); i++ {
 		if req.Id == parseCatalog()[i].Id {
@@ -328,7 +290,6 @@ func (p *productCatalog) GetProduct(ctx context.Context, req *pb.GetProductReque
 		emitLog(PRODUCTCATALOGSERVICE+": no product with ID "+req.Id, "ERROR")
 		return nil, status.Errorf(codes.NotFound, "no product with ID %s", req.Id)
 	}
-
 	emitLog("Answered request from "+ServiceName+" (request_id: "+RequestID+")", "INFO")
 
 	return found, nil
@@ -336,8 +297,7 @@ func (p *productCatalog) GetProduct(ctx context.Context, req *pb.GetProductReque
 
 func (p *productCatalog) SearchProducts(ctx context.Context, req *pb.SearchProductsRequest) (*pb.SearchProductsResponse, error) {
 	RequestID, ServiceName := readMetadata(ctx)
-
-	time.Sleep(extraLatency)
+	//time.Sleep(extraLatency)
 	// Intepret query as a substring match in name or description.
 	var ps []*pb.Product
 	for _, p := range parseCatalog() {
@@ -346,8 +306,32 @@ func (p *productCatalog) SearchProducts(ctx context.Context, req *pb.SearchProdu
 			ps = append(ps, p)
 		}
 	}
-
 	emitLog("Answered request from "+ServiceName+" (request_id: "+RequestID+")", "INFO")
-
 	return &pb.SearchProductsResponse{Results: ps}, nil
+}
+
+func mustMapEnv(target *string, envKey string) {
+	v := os.Getenv(envKey)
+	if v == "" {
+		panic(fmt.Sprintf("environment variable %q not set", envKey))
+	}
+	*target = v
+}
+
+func mustConnGRPC(ctx context.Context, conn **grpc.ClientConn, addr string) {
+	var err error
+	ctx, cancel := context.WithTimeout(ctx, time.Second*3)
+	defer cancel()
+	if os.Getenv("ENABLE_TRACING") == "1" {
+		*conn, err = grpc.DialContext(ctx, addr,
+			grpc.WithInsecure(),
+			grpc.WithUnaryInterceptor(otelgrpc.UnaryClientInterceptor()),
+			grpc.WithStreamInterceptor(otelgrpc.StreamClientInterceptor()))
+	} else {
+		*conn, err = grpc.DialContext(ctx, addr,
+			grpc.WithInsecure())
+	}
+	if err != nil {
+		panic(errors.Wrapf(err, "grpc: failed to connect %s", addr))
+	}
 }

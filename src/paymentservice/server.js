@@ -22,9 +22,13 @@ const charge = require('./charge');
 const logger = pino({
   name: 'paymentservice-server',
   messageKey: 'message',
-  changeLevelName: 'severity',
-  useLevelLabels: true
+  formatters: {
+    level (logLevelString, logLevelNum) {
+      return { severity: logLevelString }
+    }
+  }
 });
+
 
 const PAYMENTSERVICE = "paymentservice";
 
@@ -71,17 +75,15 @@ class HipsterShopServer {
       var ServiceName = call.metadata.get("servicename");
       
       emitLog("Received request from " + ServiceName + " (request_id: " + SessionID[0] + ")", "INFO");
-      
-      // logger.info(`PaymentService#Charge invoked with request ${JSON.stringify(call.request)}`);
-      
+      logger.info(`PaymentService#Charge invoked with request ${JSON.stringify(call.request)}`);
+
       const response = charge(call.request);
-      callback(null, response);
-
+      
       emitLog("Answered request from " + ServiceName + " (request_id: " + SessionID[0] + ")", "INFO");
-
+      callback(null, response);
     } catch (err) {
       console.warn(err);
-      emitLog(err.toString(), "ERROR")
+      emitLog(err.toString(), "WARN")
       callback(err);
     }
   }
@@ -95,7 +97,7 @@ class HipsterShopServer {
     const server = this.server 
     const port = this.port
     server.bindAsync(
-      `0.0.0.0:${port}`,
+      `[::]:${port}`,
       grpc.ServerCredentials.createInsecure(),
       function () {
         logger.info(`PaymentService gRPC server started on port ${port}`);

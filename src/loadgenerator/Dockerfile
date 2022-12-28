@@ -12,13 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-FROM python:3.9-slim as base
+FROM python:3.11.1-slim@sha256:54924a2ee4a2ef17028ae076ce38e59b3f4054353a5c9f9318dfaee60377532c as base
 
 FROM base as builder
-
-RUN apt-get -qq update \
-    && apt-get install -y --no-install-recommends \
-        g++
 
 COPY requirements.txt .
 
