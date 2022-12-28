@@ -44,7 +44,7 @@ spec:
               - all
           privileged: false
           readOnlyRootFilesystem: true
-        image: busybox:latest@sha256:3b3128d9df6bbbcc92e2358e596c9fbd722a437a62bafbc51607970e9e3b8869
+        image: busybox:latest@sha256:05a79c7279f71f86a2a0d05eb72fcb56ea36139150f0a75cd87e80a4272e4e39
         command:
         - '/bin/sh'
         - '-c'
