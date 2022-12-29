@@ -23,7 +23,7 @@ COPY --from=builder /cartservice .
 COPY --from=builder /app/start .
 
 # Add the SFx.NET Instrumentation
-ARG TRACER_VERSION=0.2.9
+ARG TRACER_VERSION=1.0.0
 ADD https://github.com/signalfx/signalfx-dotnet-tracing/releases/download/v${TRACER_VERSION}/signalfx-dotnet-tracing_${TRACER_VERSION}_amd64.deb ./
 
 RUN mkdir -p /var/log/signalfx
@@ -35,5 +35,8 @@ ENV CORECLR_ENABLE_PROFILING=1
 ENV CORECLR_PROFILER={B4C89B0F-9908-4F73-9F59-0D77C5A06874}
 ENV CORECLR_PROFILER_PATH=/opt/signalfx/SignalFx.Tracing.ClrProfiler.Native.so
 ENV SIGNALFX_DOTNET_TRACER_HOME=/opt/signalfx
+ENV SIGNALFX_PROFILER_ENABLED=true
+ENV SIGNALFX_PROFILER_MEMORY_ENABLED=true
+ENV SIGNALFX_METRICS_Process_ENABLED=true
 
 ENTRYPOINT ["./cartservice", "start"]
