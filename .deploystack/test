@@ -78,10 +78,33 @@ function evalTest() {
     printf "$expected is ok\n"
 }
 
+function generateProject(){
+    local __resultvar=$1
+    local __STACKSUFFIX=$2
+    local __RANDOMSUFFIX=$(
+        LC_ALL=C tr -dc 'a-z0-9' </dev/urandom | head -c 8
+        echo
+    )
+    local __DATELABEL=$(date +%F)
+    local VALUE=ds-test-$__STACKSUFFIX-$__RANDOMSUFFIX
+    local __BA=$(gcloud beta billing accounts list --format="value(ACCOUNT_ID)" --limit=1 | xargs)
+   
+    gcloud projects create $VALUE --labels="deploystack-disposable-test-project=$__DATELABEL" --folder="155265971980"
+    gcloud beta billing projects link $VALUE --billing-account=$__BA
+    eval $__resultvar="'$VALUE'"
+}
+
 # END DON'T REMOVE FROM test script.
 
+suffix=ms
+
+# This is only needed if you tests fail alot because of overlaping runs of the
+# same set of tests.
+section_open "Generate random test project"
+    generateProject PROJECT "$suffix"
+section_close
+
 DIR="terraform"
-get_project_id PROJECT
 gcloud services enable cloudresourcemanager.googleapis.com --project=$PROJECT
 REGION="us-central1"
 NAME="online-boutique"
@@ -92,7 +115,13 @@ MEMORYSTORE="false"
 gcloud config set project ${PROJECT}
 
 terraform -chdir="$DIR" init
-terraform -chdir="$DIR" apply -auto-approve -var gcp_project_id="${PROJECT}" -var name="${NAME}" -var region="${REGION}" -var namespace="${NAMESPACE}"  -var filepath_manifest="${FILEPATH_MANIFEST}" -var memorystore="${MEMORYSTORE}"
+terraform -chdir="$DIR" apply -auto-approve \
+    -var gcp_project_id="${PROJECT}" \
+    -var name="${NAME}" \
+    -var region="${REGION}" \
+    -var namespace="${NAMESPACE}"  \
+    -var filepath_manifest="${FILEPATH_MANIFEST}" \
+    -var memorystore="${MEMORYSTORE}"
 
 section_open "Testing Google Kubernetes Engine cluster exists"
     evalTest 'gcloud container clusters describe online-boutique --format="value(name)" --region $REGION' "online-boutique"
@@ -112,7 +141,7 @@ section_open "Testing Online Boutique's services are running"
     evalTest "kubectl get deployment shippingservice --no-headers -o=name 2> /dev/null"  "deployment.apps/shippingservice"
 section_close
 
-sleep 60
+sleep 120
 
 ENDPOINT=$( kubectl get service frontend-external --no-headers 2> /dev/null | awk '{print $4}')
 
@@ -120,10 +149,23 @@ section_open "Testing Online Boutique's front-end is working"
     evalTest 'curl -s -o /dev/null -w "%{http_code}" $ENDPOINT' "200"
 section_close
 
-terraform -chdir="$DIR" destroy --auto-approve -var gcp_project_id="${PROJECT}" -var name="${NAME}" -var region="${REGION}" -var namespace="${NAMESPACE}"  -var filepath_manifest="${FILEPATH_MANIFEST}" -var memorystore="${MEMORYSTORE}"
+terraform -chdir="$DIR" destroy -auto-approve \
+    -var gcp_project_id="${PROJECT}" \
+    -var name="${NAME}" \
+    -var region="${REGION}" \
+    -var namespace="${NAMESPACE}"  \
+    -var filepath_manifest="${FILEPATH_MANIFEST}" \
+    -var memorystore="${MEMORYSTORE}"
 
 section_open "Testing Google Kubernetes Engine cluster does NOT exist"
     evalTest 'gcloud container clusters describe online-boutique --format="value(name)" --region $REGION' "EXPECTERROR"
+section_close
+
+# This is only needed if you tests fail alot because of overlaping runs of the
+# same set of tests. Really don't do this if you don't want to severly irritate 
+# @tpryan
+section_open "Delete Test Project"
+    gcloud projects delete $PROJECT -q
 section_close
 
 printf "$DIVIDER"
