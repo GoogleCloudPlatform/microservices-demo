@@ -35,13 +35,11 @@ greenlet==2.0.1
     # via gevent
 idna==3.4
     # via requests
-importlib-metadata==5.2.0
-    # via flask
 itsdangerous==2.1.2
     # via flask
 jinja2==3.1.2
     # via flask
-locust==2.14.0
+locust==2.14.2
     # via -r requirements.in
 markupsafe==2.1.1
     # via
@@ -69,8 +67,6 @@ werkzeug==2.2.2
     # via
     #   flask
     #   locust
-zipp==3.11.0
-    # via importlib-metadata
 zope-event==4.6
     # via gevent
 zope-interface==5.5.2
