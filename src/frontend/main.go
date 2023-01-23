@@ -98,6 +98,10 @@ func main() {
 
 	svc := new(frontendServer)
 
+	otel.SetTextMapPropagator(
+		propagation.NewCompositeTextMapPropagator(
+			propagation.TraceContext{}, propagation.Baggage{}))
+
 	if os.Getenv("ENABLE_TRACING") == "1" {
 		log.Info("Tracing enabled.")
 		initTracing(log, ctx, svc)
@@ -147,11 +151,9 @@ func main() {
 	r.HandleFunc("/_healthz", func(w http.ResponseWriter, _ *http.Request) { fmt.Fprint(w, "ok") })
 
 	var handler http.Handler = r
-	handler = &logHandler{log: log, next: handler} // add logging
-	handler = ensureSessionID(handler)             // add session ID
-	if os.Getenv("ENABLE_TRACING") == "1" {
-		handler = otelhttp.NewHandler(handler, "frontend") // add OTel tracing
-	}
+	handler = &logHandler{log: log, next: handler}     // add logging
+	handler = ensureSessionID(handler)                 // add session ID
+	handler = otelhttp.NewHandler(handler, "frontend") // add OTel tracing
 
 	log.Infof("starting server on " + addr + ":" + srvPort)
 	log.Fatal(http.ListenAndServe(addr+":"+srvPort, handler))
@@ -173,9 +175,7 @@ func initTracing(log logrus.FieldLogger, ctx context.Context, svc *frontendServe
 		sdktrace.WithBatcher(exporter),
 		sdktrace.WithSampler(sdktrace.AlwaysSample()))
 	otel.SetTracerProvider(tp)
-	otel.SetTextMapPropagator(
-		propagation.NewCompositeTextMapPropagator(
-			propagation.TraceContext{}, propagation.Baggage{}))
+
 	return tp, err
 }
 
@@ -214,15 +214,10 @@ func mustConnGRPC(ctx context.Context, conn **grpc.ClientConn, addr string) {
 	var err error
 	ctx, cancel := context.WithTimeout(ctx, time.Second*3)
 	defer cancel()
-	if os.Getenv("ENABLE_TRACING") == "1" {
-		*conn, err = grpc.DialContext(ctx, addr,
-			grpc.WithInsecure(),
-			grpc.WithUnaryInterceptor(otelgrpc.UnaryClientInterceptor()),
-			grpc.WithStreamInterceptor(otelgrpc.StreamClientInterceptor()))
-	} else {
-		*conn, err = grpc.DialContext(ctx, addr,
-			grpc.WithInsecure())
-	}
+	*conn, err = grpc.DialContext(ctx, addr,
+		grpc.WithInsecure(),
+		grpc.WithUnaryInterceptor(otelgrpc.UnaryClientInterceptor()),
+		grpc.WithStreamInterceptor(otelgrpc.StreamClientInterceptor()))
 	if err != nil {
 		panic(errors.Wrapf(err, "grpc: failed to connect %s", addr))
 	}

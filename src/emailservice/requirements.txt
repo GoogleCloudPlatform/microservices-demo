@@ -6,7 +6,7 @@
 #
 backoff==2.2.1
     # via opentelemetry-exporter-otlp-proto-grpc
-cachetools==5.2.0
+cachetools==5.2.1
     # via google-auth
 certifi==2022.12.7
     # via requests
@@ -89,7 +89,7 @@ opentelemetry-semantic-conventions==0.36b0
     # via
     #   opentelemetry-instrumentation-grpc
     #   opentelemetry-sdk
-proto-plus==1.22.1
+proto-plus==1.22.2
     # via google-cloud-trace
 protobuf==4.21.12
     # via
