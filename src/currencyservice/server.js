@@ -139,8 +139,7 @@ function getSupportedCurrencies (call, callback) {
   var SessionID = call.metadata.get("requestid");
   var ServiceName = call.metadata.get("servicename");
 
-  var event = "Received request from " + ServiceName + " (request_id: " + SessionID[0] + ")";
-  emitLog(event, "INFO");
+  emitLog("Received request from " + ServiceName + " (request_id: " + SessionID[0] + ")", "INFO");
   logger.info('Getting supported currencies...');
 
   _getCurrencyData((data) => {
@@ -185,7 +184,6 @@ function convert (call, callback) {
       callback(null, result);
     });
   } catch (err) {
-    emitLog(`conversion request failed: ${err}`, "ERROR");
     logger.error(`conversion request failed: ${err}`);
     callback(err.message);
   }

@@ -63,10 +63,10 @@ func readMetadata(ctx context.Context) (string, string) {
 	if len(reqId) > 0 && len(invService) > 0 {
 		RequestID = reqId[0]
 		ServiceName = invService[0]
-		emitLog("Received request from "+ServiceName+" (request_id: "+RequestID+")", "INFO")
+		log.Info("Received request from " + ServiceName + " (request_id: " + RequestID + ")")
 
 	} else {
-		emitLog(SHIPPINGSERVICE+": An error occurred while retrieving the RequestID", "ERROR")
+		log.Error(SHIPPINGSERVICE + ": An error occurred while retrieving the RequestID")
 	}
 
 	return RequestID, ServiceName

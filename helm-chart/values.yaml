@@ -1,0 +1,123 @@
+# Default values for onlineboutique.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+images:
+  repository: gcr.io/google-samples/microservices-demo
+  # Overrides the image tag whose default is the chart appVersion.
+  tag: ""
+
+serviceAccounts:
+  # Specifies whether service accounts should be created.
+  create: false
+  # Annotations to add to the service accounts.
+  annotations: {}
+  # Annotations to add only for the cartservice app. This allows to follow the least privilege principle where only cartservice needs to connect to external database for example via Workload Identity.
+  annotationsOnlyForCartservice: false
+
+# Specifies if the livenessProbe and readinessProbe are using the native gRPC support with Kubernetes 1.24.
+nativeGrpcHealthCheck: false
+
+networkPolicies:
+  # Specifies if the NetworkPolicies are created or not. If true, one fine granular NetworkPolicy per app is created.
+  create: false
+
+sidecars:
+  # Specifies if the Sidecars are created or not. If true, one fine granular Sidecar per app is created.
+  create: false
+
+authorizationPolicies:
+  # Specifies if the AuthorizationPolicies are created or not. If true, one fine granular AuthorizationPolicy per app is created.
+  create: false
+
+opentelemetryCollector:
+  create: false
+  name: opentelemetrycollector
+  # Specifies the project id for the otel collector. If set as "PROJECT_ID" (default value), an initContainer will automatically retrieve the project id value from the metadata server.
+  projectId: "PROJECT_ID"
+
+googleCloudOperations:
+  profiler: false
+  tracing: false
+  metrics: false
+
+seccompProfile:
+  enable: false
+  type: RuntimeDefault
+
+adService:
+  create: true
+  name: adservice
+
+cartService:
+  create: true
+  name: cartservice
+
+checkoutService:
+  create: true
+  name: checkoutservice
+
+currencyService:
+  create: true
+  name: currencyservice
+
+emailService:
+  create: true
+  name: emailservice
+
+frontend:
+  create: true
+  name: frontend
+  externalService: true
+  cymbalBranding: false
+  # One of: local, gcp, aws, azure, onprem, alibaba. When not set, defaults to "local" unless running in GKE, otherwise auto-sets to gcp.
+  platform: local
+  singleSharedSession: false
+  virtualService:
+    create: false
+    hosts:
+    - "*"
+    gateway:
+      name: asm-ingressgateway
+      namespace: asm-ingress
+      labelKey: asm
+      labelValue: ingressgateway
+
+loadGenerator:
+  create: true
+  name: loadgenerator
+  checkFrontendInitContainer: true
+
+paymentService:
+  create: true
+  name: paymentservice
+
+productCatalogService:
+  create: true
+  name: productcatalogservice
+  # Specifies an extra latency to any request on productcatalogservice, by default no extra latency.
+  extraLatency: ""
+
+recommendationService:
+  create: true
+  name: recommendationservice
+
+shippingService:
+  create: true
+  name: shippingservice
+
+cartDatabase:
+  # Specifies the type of the cartservice's database, could be either redis or spanner.
+  type: redis
+  connectionString: "redis-cart:6379"
+  inClusterRedis:
+    create: true
+    name: redis-cart
+    # Uses the public redis image from Docker Hub, otherwise will use the images.repository.
+    publicRepository: true
+  externalRedisTlsOrigination:
+    enable: false
+    name: exernal-redis-tls-origination
+    endpointAddress: ""
+    endpointPort: ""
+    certificate: ""

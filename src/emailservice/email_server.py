@@ -106,7 +106,6 @@ class EmailService(BaseEmailService):
     try:
       confirmation = template.render(order = order)
     except TemplateError as err:
-      emitLog(SERVICENAME + ": An error occurred when preparing the confirmation mail.", "ERROR")
       context.set_details("An error occurred when preparing the confirmation mail.")
       logger.error(err.message)
       context.set_code(grpc.StatusCode.INTERNAL)
@@ -115,7 +114,6 @@ class EmailService(BaseEmailService):
     try:
       EmailService.send_email(self.client, email, confirmation)
     except GoogleAPICallError as err:
-      emitLog(SERVICENAME+": An error occurred when sending the email.", "ERROR")
       context.set_details("An error occurred when sending the email.")
       print(err.message)
       context.set_code(grpc.StatusCode.INTERNAL)

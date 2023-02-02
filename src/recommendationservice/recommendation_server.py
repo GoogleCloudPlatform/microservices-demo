@@ -45,8 +45,8 @@ PRODUCTCATALOGSERVICE = "productcatalogservice"
 
 # NOTE: logLevel must be a GELF valid severity value (WARN or ERROR), INFO if not specified
 def emitLog(event, logLevel):
-  timestamp = str(datetime.datetime.now().isoformat())
-  
+  timestamp = str(datetime.datetime.now().isoformat())[:-3] + 'Z'
+
   if logLevel == "ERROR":
     logger.error(timestamp + " - ERROR - " + RECOMMENDATIONSERVICE + " - " + event)
   elif logLevel == "WARN":

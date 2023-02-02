@@ -37,8 +37,8 @@ variable "namespace" {
 
 variable "filepath_manifest" {
   type        = string
-  description = "Path to the Kubernetes manifest that defines the Online Boutique resources"
-  default     = "../release/kubernetes-manifests.yaml"
+  description = "Path to Online Boutique's Kubernetes resources, written using Kustomize"
+  default     = "../kustomize/"
 }
 
 variable "memorystore" {

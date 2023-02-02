@@ -1,0 +1,26 @@
+# The .editorconfig is used to maintain consistent code style.
+# The .editorconfig file is supported by most text editors.
+# See https://editorconfig.org
+
+root = true
+
+[*]
+insert_final_newline = true
+trim_trailing_whitespace = true
+indent_style = space
+indent_size = 2
+
+[*.cs]
+indent_size = 4
+
+[Dockerfile*]
+indent_size = 4
+
+[*.go]
+indent_style = tab
+
+[*.java]
+indent_size = 4
+
+[*.py]
+indent_size = 4

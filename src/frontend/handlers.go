@@ -87,7 +87,7 @@ func checkResponse(responseCode codes.Code, serviceName string, reqId string, er
 func setMetadata(ctx context.Context, invokingService string, invokedService string) (context.Context, string) {
 	RequestID, err := uuid.NewRandom()
 	if err != nil {
-		emitLog(invokingService+": An error occurred while generating the RequestID", "ERROR")
+		log.Error(invokingService + ": An error occurred while generating the RequestID")
 	}
 
 	// Add metadata to gRPC

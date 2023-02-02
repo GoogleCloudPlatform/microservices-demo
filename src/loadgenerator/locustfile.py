@@ -71,11 +71,11 @@ class UserBehavior(TaskSet):
 
     tasks = {index: 1,
         setCurrency: 2,
-        browseProduct: 10,
+        browseProduct: 5,
         addToCart: 2,
-        viewCart: 3,
-        checkout: 1}
+        viewCart: 1,
+        checkout: 3}
 
 class WebsiteUser(HttpUser):
     tasks = [UserBehavior]
-    wait_time = between(1, 10)
+    wait_time = between(1, 3)

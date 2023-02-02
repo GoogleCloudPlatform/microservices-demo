@@ -83,7 +83,6 @@ class HipsterShopServer {
       callback(null, response);
     } catch (err) {
       console.warn(err);
-      emitLog(err.toString(), "WARN")
       callback(err);
     }
   }

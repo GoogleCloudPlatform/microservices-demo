@@ -1,19 +1,19 @@
 # Create Kubernetes Service Accounts for Online Boutique
 
-Creating a `ServiceAccount` per `Deployment` could be helpful if you need to define a fine granular identity for each `Deployment` in your Kubernetes clusters. This could help if for example you want to give specific Google Cloud IAM role binding by leveraging [Workload Identity with GKE](/docs/workload-identity.md). Another scenario could be if you want to define fine granular [`AuthorizationPolicies` with Istio/ASM](https://cloud.google.com/service-mesh/docs/by-example/authz).
+Creating a `ServiceAccount` per `Deployment` could be helpful if you need to define a fine granular identity for each `Deployment` in your Kubernetes clusters. This could help if for example you want to give specific Google Cloud IAM role binding by leveraging [Workload Identity with GKE](https://cloud.google.com/kubernetes-engine/docs/how-to/workload-identity#enable). Another scenario could be if you want to define fine granular [`AuthorizationPolicies` with Istio/ASM](https://cloud.google.com/service-mesh/docs/by-example/authz).
 
 ## Deploy Online Boutique with `ServiceAccounts` via Kustomize
 
 To automate the deployment of Online Boutique integrated with fine granular `ServiceAccounts` (one per `Deployment`), you can leverage the following variation with [Kustomize](../..).
 
 From the `kustomize/` folder at the root level of this repository, execute this command:
-```
-kustomize edit add components/service-accounts
+```bash
+kustomize edit add component components/service-accounts
 ```
 _Note: this Kustomize component will also update the `serviceAccountName` field in all `Deployments`._
 
 This will update the `kustomize/kustomization.yaml` file which could be similar to:
-```
+```yaml
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
@@ -30,7 +30,7 @@ kubectl get serviceaccount
 ```
 
 The output could be similar to:
-```
+```output
 NAME                    SECRETS     AGE
 default                 1           2m58s
 adservice               1           2m58s

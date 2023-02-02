@@ -33,7 +33,7 @@ google-auth-httplib2==0.1.0
     #   google-cloud-profiler
 google-cloud-profiler==4.0.0
     # via -r requirements.in
-google-cloud-trace==1.7.3
+google-cloud-trace==1.8.0
     # via -r requirements.in
 googleapis-common-protos==1.57.0
     # via

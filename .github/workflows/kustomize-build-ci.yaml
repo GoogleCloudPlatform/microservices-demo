@@ -25,7 +25,7 @@ on:
       - 'kustomize/**'
       - '.github/workflows/kustomize-build-ci.yaml'
 jobs:
-  job:
+  kustomize-build-ci:
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v3
@@ -33,29 +33,13 @@ jobs:
         run: |
           cd kustomize/
           kubectl kustomize .
-      - name: kustomize build each component
+      # Build the different combinations of Kustomize components found in kustomize/tests.
+      - name: kustomize build tests
         run: |
-          cd kustomize/
-          COMPONENTS=$(ls components/)
-          for c in $COMPONENTS;
+          cd kustomize/tests
+          KUSTOMIZE_TESTS_SUBFOLDERS=$(ls -d */)
+          for test in $KUSTOMIZE_TESTS_SUBFOLDERS;
           do
-              echo "## kustomize build for " + $c
-              rm kustomization.yaml
-              kustomize create --resources base
-              kustomize edit add component components/$c
-              kustomize build .
+              echo "## kustomize build for " + $test
+              kustomize build $test
           done
-      - name: kustomize build multiple components
-        run: |
-          cd kustomize/
-          rm kustomization.yaml
-          kustomize create --resources base
-          kustomize edit add component components/cymbal-branding
-          kustomize edit add component components/google-cloud-operations
-          kustomize edit add component components/memorystore
-          kustomize edit add component components/network-policies
-          kustomize edit add component components/service-accounts
-          cd components/network-policies
-          kustomize edit remove resource network-policy-redis.yaml
-          cd ../..
-          kustomize build .

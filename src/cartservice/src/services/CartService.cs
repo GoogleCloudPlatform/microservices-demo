@@ -32,7 +32,7 @@ namespace cartservice.services
         public void emitLog(string messageEvent, string logLevel)
         {
             DateTime now = DateTime.UtcNow;
-            string timestamp = now.ToString("yyyy-MM-ddTHH:mm:ssZ", CultureInfo.InvariantCulture);
+            string timestamp = now.ToString("yyyy-MM-ddTHH:mm:ss.sssZ", CultureInfo.InvariantCulture);
             string logMessage = "";
 
             switch (logLevel)
@@ -61,7 +61,7 @@ namespace cartservice.services
             Tuple<string, string> header = new Tuple<string, string>(RequestID.ToString(), ServiceName.ToString());
 
             if (RequestID == null && ServiceName == null) {
-                emitLog(CARTSERVICE + ": An error occurred while retrieving the RequestID", "ERROR");
+                Console.WriteLine(CARTSERVICE + ": An error occurred while retrieving the RequestID", "ERROR");
                 return null;
             }
             emitLog("Received request from " + ServiceName.ToString() + " (request_id: " + RequestID.ToString() + ")", "INFO");

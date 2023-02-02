@@ -25,7 +25,7 @@ on:
       - 'terraform/**'
       - '.github/workflows/terraform-validate-ci.yaml'
 jobs:
-  job:
+  terraform-validate-ci:
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v3

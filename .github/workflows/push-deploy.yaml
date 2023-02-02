@@ -30,8 +30,5 @@ jobs:
         # tag with git hash
         skaffold build --default-repo=gcr.io/$PROJECT_ID \
                        --tag=$GITHUB_SHA
-        # tag as latest
-        skaffold build --default-repo=gcr.io/$PROJECT_ID \
-                       --tag=latest
       env:
         PROJECT_ID: ${{ secrets.PROJECT_ID }}

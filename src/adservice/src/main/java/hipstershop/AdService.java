@@ -68,7 +68,7 @@ public final class AdService {
       Object ServiceName = headers.get(Metadata.Key.of("servicename", Metadata.ASCII_STRING_MARSHALLER));
 
       if (RequestID == null || ServiceName == null) {
-        AdService.emitLog(ADSERVICE+": An error occurred while retrieving the metadata.", "ERROR");
+        logger.log(Level.ERROR, ADSERVICE+": An error occurred while retrieving the metadata.");
         return new ServerCall.Listener() {};
       }
 
@@ -180,7 +180,6 @@ public final class AdService {
         responseObserver.onCompleted();
 
       } catch (StatusRuntimeException e) {
-        AdService.emitLog("GetAds Failed with status" + e.getStatus(), "WARN");
         logger.log(Level.WARN, "GetAds Failed with status {}", e.getStatus());
         responseObserver.onError(e);
       }
@@ -280,7 +279,7 @@ public final class AdService {
     logger.info("See https://github.com/GoogleCloudPlatform/microservices-demo/issues/422 for more info.");
 
     // TODO(arbrown) Implement OpenTelemetry tracing
-
+    
     logger.info("Tracing enabled - Stackdriver exporter initialized.");
   }
 

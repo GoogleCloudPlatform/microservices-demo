@@ -407,7 +407,6 @@ func (cs *checkoutService) quoteShipping(ctx context.Context, address *pb.Addres
 			Address: address,
 			Items:   items})
 	if err != nil {
-		emitLog("failed to get shipping quote: %+v", "ERROR")
 		return nil, fmt.Errorf("failed to get shipping quote: %+v", err)
 	}
 
@@ -425,7 +424,6 @@ func (cs *checkoutService) getUserCart(ctx context.Context, userID string) ([]*p
 
 	cart, err := pb.NewCartServiceClient(cs.cartSvcConn).GetCart(newCtx, &pb.GetCartRequest{UserId: userID})
 	if err != nil {
-		emitLog("failed to get user cart during checkout: "+err.Error(), "ERROR")
 		return nil, fmt.Errorf("failed to get user cart during checkout: %+v", err)
 	}
 
@@ -444,7 +442,6 @@ func (cs *checkoutService) emptyUserCart(ctx context.Context, userID string) err
 	_, err := pb.NewCartServiceClient(cs.cartSvcConn).EmptyCart(newCtx, &pb.EmptyCartRequest{UserId: userID})
 
 	if err != nil {
-		emitLog("failed to empty user cart during checkout: "+err.Error(), "ERROR")
 		return fmt.Errorf("failed to empty user cart during checkout: %+v", err)
 	}
 
@@ -466,7 +463,6 @@ func (cs *checkoutService) prepOrderItems(ctx context.Context, items []*pb.CartI
 
 		product, err := cl.GetProduct(newCtx, &pb.GetProductRequest{Id: item.GetProductId()})
 		if err != nil {
-			emitLog("failed to get product #"+item.GetProductId(), "ERROR")
 			return nil, fmt.Errorf("failed to get product #%q", item.GetProductId())
 		}
 
@@ -480,7 +476,6 @@ func (cs *checkoutService) prepOrderItems(ctx context.Context, items []*pb.CartI
 
 		price, err := cs.convertCurrency(secondCtx, product.GetPriceUsd(), userCurrency)
 		if err != nil {
-			emitLog("failed to convert price of "+item.GetProductId()+" to "+userCurrency, "ERROR")
 			return nil, fmt.Errorf("failed to convert price of %q to %s", item.GetProductId(), userCurrency)
 		}
 
@@ -504,7 +499,6 @@ func (cs *checkoutService) convertCurrency(ctx context.Context, from *pb.Money, 
 		From:   from,
 		ToCode: toCurrency})
 	if err != nil {
-		emitLog("failed to convert currency: "+err.Error(), "ERROR")
 		return nil, fmt.Errorf("failed to convert currency: %+v", err)
 	}
 
@@ -524,7 +518,6 @@ func (cs *checkoutService) chargeCard(ctx context.Context, amount *pb.Money, pay
 		Amount:     amount,
 		CreditCard: paymentInfo})
 	if err != nil {
-		emitLog("could not charge the card: "+err.Error(), "ERROR")
 		return "", fmt.Errorf("could not charge the card: %+v", err)
 	}
 
@@ -559,7 +552,6 @@ func (cs *checkoutService) shipOrder(ctx context.Context, address *pb.Address, i
 		Address: address,
 		Items:   items})
 	if err != nil {
-		emitLog("shipment failed: "+err.Error(), "ERROR")
 		return "", fmt.Errorf("shipment failed: %+v", err)
 	}
 

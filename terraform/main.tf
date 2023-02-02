@@ -18,7 +18,6 @@ locals {
     "container.googleapis.com",
     "monitoring.googleapis.com",
     "cloudtrace.googleapis.com",
-    "clouddebugger.googleapis.com",
     "cloudprofiler.googleapis.com"
   ]
   memorystore_apis = ["redis.googleapis.com"]
@@ -32,7 +31,7 @@ locals {
 # Enable Google Cloud APIs
 module "enable_google_apis" {
   source  = "terraform-google-modules/project-factory/google//modules/project_services"
-  version = "~> 13.0"
+  version = "~> 14.0"
 
   project_id                  = var.gcp_project_id
   disable_services_on_destroy = false
@@ -75,7 +74,7 @@ module "gcloud" {
 resource "null_resource" "apply_deployment" {
   provisioner "local-exec" {
     interpreter = ["bash", "-exc"]
-    command     = "kubectl apply -f ${var.filepath_manifest}"
+    command     = "kubectl apply -k ${var.filepath_manifest}"
   }
 
   depends_on = [
@@ -87,7 +86,7 @@ resource "null_resource" "apply_deployment" {
 resource "null_resource" "wait_conditions" {
   provisioner "local-exec" {
     interpreter = ["bash", "-exc"]
-    command     = "kubectl wait --for=condition=ready pods --all -n ${var.namespace} --timeout=-1s"
+    command     = "kubectl wait --for=condition=ready pods --all -n ${var.namespace} --timeout=-1s 2> /dev/null"
   }
 
   depends_on = [
