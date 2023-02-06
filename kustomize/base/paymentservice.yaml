@@ -38,7 +38,7 @@ spec:
           allowPrivilegeEscalation: false
           capabilities:
             drop:
-              - all
+              - ALL
           privileged: false
           readOnlyRootFilesystem: true
         image: gcr.io/google-samples/microservices-demo/paymentservice:v0.5.1

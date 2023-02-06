@@ -63,7 +63,7 @@ spec:
           allowPrivilegeEscalation: false
           capabilities:
             drop:
-              - all
+              - ALL
           privileged: false
           readOnlyRootFilesystem: true
         image: busybox:latest
@@ -77,7 +77,7 @@ spec:
           allowPrivilegeEscalation: false
           capabilities:
             drop:
-              - all
+              - ALL
           privileged: false
           readOnlyRootFilesystem: true
         image: {{ .Values.images.repository }}/{{ .Values.loadGenerator.name }}:{{ .Values.images.tag | default .Chart.AppVersion }}
