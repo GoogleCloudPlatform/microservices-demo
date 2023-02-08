@@ -1,204 +1,201 @@
-<p align="center">
-<img src="src/frontend/static/icons/Hipster_HeroLogoCyan.svg" width="300" alt="Online Boutique" />
-</p>
+- [Usage](#usage)
+  - [1. Install pre-requisite tools](#1-install-pre-requisite-tools)
+  - [2. Clone sample services](#2-clone-sample-services)
+  - [3. Build and Push Images (Optional)](#3-build-and-push-images-optional)
+    - [Build images from source](#build-images-from-source)
+    - [Push services to container registry](#push-services-to-container-registry)
+  - [4. Deploy](#4-deploy)
+  - [5. Interacting with the microservices](#5-interacting-with-the-microservices)
+    - [Add to cart using gRPC API](#add-to-cart-using-grpc-api)
+  - [Add to cart using REST API](#add-to-cart-using-rest-api)
+    - [Add to cart using Thrift API](#add-to-cart-using-thrift-api)
+    - [Verify contents of cart](#verify-contents-of-cart)
+  - [Contributing Code](#contributing-code)
 
 
-![Continuous Integration](https://github.com/GoogleCloudPlatform/microservices-demo/workflows/Continuous%20Integration%20-%20Main/Release/badge.svg)
 
-**Online Boutique** is a cloud-native microservices demo application.
-Online Boutique consists of an 11-tier microservices application. The application is a
-web-based e-commerce app where users can browse items,
-add them to the cart, and purchase them.
 
-**Google uses this application to demonstrate use of technologies like
-Kubernetes/GKE, Istio, Stackdriver, gRPC and OpenCensus**. This application
-works on any Kubernetes cluster, as well as Google
-Kubernetes Engine. It’s **easy to deploy with little to no configuration**.
+This is a demo project based on [GCP **Online Boutique**](https://github.com/GoogleCloudPlatform/microservices-demo) with added support for REST and Thrift APIs.
 
-If you’re using this demo, please **★Star** this repository to show your interest!
+## Use Cases
 
-> 👓**Note to Googlers:** Please fill out the form at
-> [go/microservices-demo](http://go/microservices-demo) if you are using this
-> application.
+1. Use as a test project to compare performance of the same product implemented with different communication protocols.
+2. Learn how to implement Thrift (and REST) support for an existing project.
 
-## Screenshots
+Implemented by the [Skyramp](www.skyramp.dev) team.
 
-| Home Page                                                                                                         | Checkout Screen                                                                                                    |
-| ----------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
-| [![Screenshot of store homepage](./docs/img/online-boutique-frontend-1.png)](./docs/img/online-boutique-frontend-1.png) | [![Screenshot of checkout screen](./docs/img/online-boutique-frontend-2.png)](./docs/img/online-boutique-frontend-2.png) |
+## Implementation
+For each microservice in the repo, REST and Thrift implementations open up separate ports to listen to the corresponding traffic. Implementations are in the `rest.go` and `thrift.go` files in the top-level directory for each service. 
 
-## Quickstart (GKE)
-
-[![Open in Cloud Shell](https://gstatic.com/cloudssh/images/open-btn.svg)](https://ssh.cloud.google.com/cloudshell/editor?cloudshell_git_repo=https://github.com/GoogleCloudPlatform/microservices-demo&cloudshell_workspace=.&cloudshell_tutorial=docs/cloudshell-tutorial.md)
-
-1. **[Create a Google Cloud Platform project](https://cloud.google.com/resource-manager/docs/creating-managing-projects#creating_a_project)** or use an existing project. Set the `PROJECT_ID` environment variable and ensure the Google Kubernetes Engine and Cloud Operations APIs are enabled.
+Default ports for REST and Thrift are hardcoded in the `main.go` file in each service directory. For example, the `carts` microservice has the following ports defined:
 
 ```
-PROJECT_ID="<your-project-id>"
-gcloud services enable container.googleapis.com --project ${PROJECT_ID}
-gcloud services enable monitoring.googleapis.com \
-    cloudtrace.googleapis.com \
-    clouddebugger.googleapis.com \
-    cloudprofiler.googleapis.com \
-    --project ${PROJECT_ID}
+const (
+	serverCrt         = "server.crt"
+	serverKey         = "server.key"
+	defaultThriftPort = "50000"
+	defaultRestPort   = "60000"
+)
+```
+# Usage
+
+## 1. Install pre-requisite tools
+- docker
+- curl (required for REST)
+- jq (optional)
+- kubectl (optional)
+
+
+## 2. Clone sample services
+```
+git clone https://github.com/letsramp/sample-microservices.git
+cd sample-microservices/src
 ```
 
-2. **Clone this repository.**
+## 3. Build and Push Images (Optional)
 
+Images for sample-microservices are already available in a publically accessible registry. To use your own registry, follow these steps.
+
+### Build images from source 
 ```
-git clone https://github.com/GoogleCloudPlatform/microservices-demo.git
-cd microservices-demo
-```
-
-3. **Create a GKE cluster.**
-
-- GKE autopilot mode (see [Autopilot
-overview](https://cloud.google.com/kubernetes-engine/docs/concepts/autopilot-overview)
-to learn more):
-
-```
-REGION=us-central1
-gcloud container clusters create-auto onlineboutique \
-    --project=${PROJECT_ID} --region=${REGION}
+docker compose build
 ```
 
-- GKE Standard mode:
+### Push services to container registry
+Update the host path/s in the docke-compose.yaml file to point to your down docker registry. Push images by running: 
 
 ```
-ZONE=us-central1-b
-gcloud container clusters create onlineboutique \
-    --project=${PROJECT_ID} --zone=${ZONE} \
-    --machine-type=e2-standard-2 --num-nodes=4
+docker compose push
 ```
 
-4. **Deploy the sample app to the cluster.**
+## 4. Deploy
+
+Deploy Online Boutique by running the following command:
 
 ```
-kubectl apply -f ./release/kubernetes-manifests.yaml
+docker compose up
+```
+Now, familiarize yourself with the application by navigating to http://127.0.0.1:8080 on your browser.
+
+<br/><br/>
+<img width="1728" alt="Online Boutique" src="https://user-images.githubusercontent.com/1672645/217123094-00e455d5-316d-44f3-8e80-b56da07b668d.png">
+<br/><br/>
+
+> 📝 **NOTE:** If you are using Docker Desktop, you can look at the logs for `cart service` to see that we've opened up separate ports for gRPC(7070), REST(60000), and Thrift(50000) traffice to the service. 
+
+
+<img width="1127" alt="carts-ports" src="https://user-images.githubusercontent.com/1672645/217123495-9a516fe5-3bf1-4e97-bd46-2270ae130df6.png">
+
+
+## 5. Interacting with the microservices
+
+To demonstrate the REST and Thrift implementations, we've created simple clients (`src/clients`) for the "add to cart" scenario for each of the APIs. The clients are volume mounted in the clients container in the cluster.
+
+First, download and install [Docker Desktop](https://www.docker.com/products/docker-desktop/) to follow along.
+
+You will see that Docker Desktop shows the containers that are running. Click on the "clients_1" container and go to the CLI from there.
+
+<img width="1122" alt="CLI for the clients container" src="https://user-images.githubusercontent.com/1672645/217331154-3be0e78b-3c22-43c3-bdb2-ac5b5365c50b.png">
+
+
+### Add to cart using gRPC API
+
+1. In the `clients` container, navigate to the grpc/golang folder and download the required `go` modules.
+```
+cd /grpc/golang
+go mod download
 ```
 
-5. **Wait for the Pods to be ready.**
+2. In the `addCart.go` file, you will notice that we open a connection to port 7070 of `cart` microservice which listens to grpc traffic. 
 
 ```
-kubectl get pods
+conn, err := grpc.Dial("cartservice:7070", grpc.WithInsecure())
 ```
 
-After a few minutes, you should see:
+Run the code in the file to add an item to the cart.
 
 ```
-NAME                                     READY   STATUS    RESTARTS   AGE
-adservice-76bdd69666-ckc5j               1/1     Running   0          2m58s
-cartservice-66d497c6b7-dp5jr             1/1     Running   0          2m59s
-checkoutservice-666c784bd6-4jd22         1/1     Running   0          3m1s
-currencyservice-5d5d496984-4jmd7         1/1     Running   0          2m59s
-emailservice-667457d9d6-75jcq            1/1     Running   0          3m2s
-frontend-6b8d69b9fb-wjqdg                1/1     Running   0          3m1s
-loadgenerator-665b5cd444-gwqdq           1/1     Running   0          3m
-paymentservice-68596d6dd6-bf6bv          1/1     Running   0          3m
-productcatalogservice-557d474574-888kr   1/1     Running   0          3m
-recommendationservice-69c56b74d4-7z8r5   1/1     Running   0          3m1s
-redis-cart-5f59546cdd-5jnqf              1/1     Running   0          2m58s
-shippingservice-6ccc89f8fd-v686r         1/1     Running   0          2m58s
+go run ./cmd/cart
+```
+Expected result
+```
+Successfully added the item to the cart.
 ```
 
-7. **Access the web frontend in a browser** using the frontend's `EXTERNAL_IP`.
+Now, we can add the same item to the cart using REST and Thrift APIs. 
+
+## Add to cart using REST API
+
+Since cURL is already installed in the `clients` container, you can issue a request directly from the CLI as of the container to add an item to the cart.
 
 ```
-kubectl get service frontend-external | awk '{print $4}'
+curl -X 'POST' 'http://cartservice:60000/cart/user_id/abcde' \
+  -H 'accept: application/json' \
+  -H 'content-type: application/json' \
+  -d '{
+  "product_id": "L9ECAV7KIM",
+  "quantity": 1
+}'
 ```
 
-*Example output - do not copy*
+Again, notice that the request is being sent to port `60000` of `cart` microservice which listens to REST traffic.
+
+Result
 
 ```
-EXTERNAL-IP
-<your-ip>
+{"success":"200 OK"}
 ```
 
-**Note**- you may see `<pending>` while GCP provisions the load balancer. If this happens, wait a few minutes and re-run the command.
+### Add to cart using Thrift API
 
-8. [Optional] **Clean up**:
+1. In the `clients` container, navigate to the thrift/golang folder and download the required `go` modules for the Thrift client.
+
+Setup
+```
+cd /test/thrift-demo/sample-clients/local/golang
+go mod download
+```
+
+2. In the `addCart.go` file, you will notice that we open a connection to port 50000 of `cart` microservice which listens to Thrift traffic. 
 
 ```
-gcloud container clusters delete onlineboutique \
-    --project=${PROJECT_ID} --zone=${ZONE}
+clientAddr := "cartservice:50000"
 ```
 
-## Other Deployment Options
+Now, run the code in the file to add an item to the cart.
 
-- **Google Cloud Operations** (Monitoring, Tracing, Debugger, Profiler): [See these instructions](docs/gcp-instrumentation.md).
-- **Workload Identity**: [See these instructions.](docs/workload-identity.md)
-- **Istio**: [See these instructions.](docs/service-mesh.md)
-- **Anthos Service Mesh**: ASM requires Workload Identity to be enabled in your GKE cluster. [See the workload identity instructions](docs/workload-identity.md) to configure and deploy the app. Then, use the [service mesh guide](/docs/service-mesh.md).
-- **non-GKE clusters (Minikube, Kind)**: see the [Development Guide](/docs/development-guide.md)
-- **Memorystore**: [See these instructions](/docs/memorystore.md) to replace the in-cluster `redis` database with hosted Google Cloud Memorystore (redis).
-- **Cymbal Shops Branding**: [See these instructions](/docs/cymbal-shops.md)
-- **NetworkPolicies**: [See these instructions](/docs/network-policies/README.md)
+```
+go run ./cmd/cart
+```
+
+Result:
+
+```
+"Successfully added the item to the cart."
+```
 
 
-## Architecture
+### Verify contents of cart
 
-**Online Boutique** is composed of 11 microservices written in different
-languages that talk to each other over gRPC. See the [Development Principles](/docs/development-principles.md) doc for more information.
+You can now fetch the contents of the cart using REST API to see that a total of 3 items were added (one using each supported API).
 
-[![Architecture of
-microservices](./docs/img/architecture-diagram.png)](./docs/img/architecture-diagram.png)
+```
+curl -X 'GET' \
+  'http://cartservice:60000/cart/abcde' \
+   -H 'accept: application/json'
+```
 
-Find **Protocol Buffers Descriptions** at the [`./pb` directory](./pb).
+Result:
 
-| Service                                              | Language      | Description                                                                                                                       |
-| ---------------------------------------------------- | ------------- | --------------------------------------------------------------------------------------------------------------------------------- |
-| [frontend](./src/frontend)                           | Go            | Exposes an HTTP server to serve the website. Does not require signup/login and generates session IDs for all users automatically. |
-| [cartservice](./src/cartservice)                     | C#            | Stores the items in the user's shopping cart in Redis and retrieves it.                                                           |
-| [productcatalogservice](./src/productcatalogservice) | Go            | Provides the list of products from a JSON file and ability to search products and get individual products.                        |
-| [currencyservice](./src/currencyservice)             | Node.js       | Converts one money amount to another currency. Uses real values fetched from European Central Bank. It's the highest QPS service. |
-| [paymentservice](./src/paymentservice)               | Node.js       | Charges the given credit card info (mock) with the given amount and returns a transaction ID.                                     |
-| [shippingservice](./src/shippingservice)             | Go            | Gives shipping cost estimates based on the shopping cart. Ships items to the given address (mock)                                 |
-| [emailservice](./src/emailservice)                   | Python        | Sends users an order confirmation email (mock).                                                                                   |
-| [checkoutservice](./src/checkoutservice)             | Go            | Retrieves user cart, prepares order and orchestrates the payment, shipping and the email notification.                            |
-| [recommendationservice](./src/recommendationservice) | Python        | Recommends other products based on what's given in the cart.                                                                      |
-| [adservice](./src/adservice)                         | Java          | Provides text ads based on given context words.                                                                                   |
-| [loadgenerator](./src/loadgenerator)                 | Python/Locust | Continuously sends requests imitating realistic user shopping flows to the frontend.                                              |
+```
+{"user_id":"abcde","items":[{"product_id":"OLJCESPC7Z","quantity":3}]}
+```
 
-## Features
 
-- **[Kubernetes](https://kubernetes.io)/[GKE](https://cloud.google.com/kubernetes-engine/):**
-  The app is designed to run on Kubernetes (both locally on "Docker for
-  Desktop", as well as on the cloud with GKE).
-- **[gRPC](https://grpc.io):** Microservices use a high volume of gRPC calls to
-  communicate to each other.
-- **[Istio](https://istio.io):** Application works on Istio service mesh.
-- **[OpenCensus](https://opencensus.io/) Tracing:** Most services are
-  instrumented using OpenCensus trace interceptors for gRPC/HTTP.
-- **[Cloud Operations (Stackdriver)](https://cloud.google.com/products/operations):** Many services
-  are instrumented with **Profiling**, **Tracing** and **Debugging**. In
-  addition to these, using Istio enables features like Request/Response
-  **Metrics** and **Context Graph** out of the box. When it is running out of
-  Google Cloud, this code path remains inactive.
-- **[Skaffold](https://skaffold.dev):** Application
-  is deployed to Kubernetes with a single command using Skaffold.
-- **Synthetic Load Generation:** The application demo comes with a background
-  job that creates realistic usage patterns on the website using
-  [Locust](https://locust.io/) load generator.
+## Contributing Code
 
-## Local Development
+PRs are welcome!  
 
-If you would like to contribute features or fixes to this app, see the [Development Guide](/docs/development-guide.md) on how to build this demo locally.
+This project follows the [CNCF Code of Conduct](https://github.com/cncf/foundation/blob/main/code-of-conduct.md) .
 
-## Demos featuring Online Boutique
-
-- [From edge to mesh: Exposing service mesh applications through GKE Ingress](https://cloud.google.com/architecture/exposing-service-mesh-apps-through-gke-ingress)
-- [Take the first step toward SRE with Cloud Operations Sandbox](https://cloud.google.com/blog/products/operations/on-the-road-to-sre-with-cloud-operations-sandbox)
-- [Deploying the Online Boutique sample application on Anthos Service Mesh](https://cloud.google.com/service-mesh/docs/onlineboutique-install-kpt)
-- [Anthos Service Mesh Workshop: Lab Guide](https://codelabs.developers.google.com/codelabs/anthos-service-mesh-workshop)
-- [KubeCon EU 2019 - Reinventing Networking: A Deep Dive into Istio's Multicluster Gateways - Steve Dake, Independent](https://youtu.be/-t2BfT59zJA?t=982)
-- Google Cloud Next'18 SF
-  - [Day 1 Keynote](https://youtu.be/vJ9OaAqfxo4?t=2416) showing GKE On-Prem
-  - [Day 3 Keynote](https://youtu.be/JQPOPV_VH5w?t=815) showing Stackdriver
-    APM (Tracing, Code Search, Profiler, Google Cloud Build)
-  - [Introduction to Service Management with Istio](https://www.youtube.com/watch?v=wCJrdKdD6UM&feature=youtu.be&t=586)
-- [Google Cloud Next'18 London – Keynote](https://youtu.be/nIq2pkNcfEI?t=3071)
-  showing Stackdriver Incident Response Management
-
----
-
-This is not an official Google project.
+<br>
