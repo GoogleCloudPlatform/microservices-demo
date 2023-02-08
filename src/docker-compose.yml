@@ -1,0 +1,96 @@
+services:
+  adservice:
+    build:
+      context: ./adservice/.
+      dockerfile: Dockerfile
+    image: gcr.io/google-samples/microservices-demo/adservice:v0.5.1
+    env_file:
+      - 'variables.env'
+    environment:
+      - PORT=9550
+  cartservice:
+    build:
+      context: ./cartservice/src
+      dockerfile: Dockerfile
+    image: gcr.io/google-samples/microservices-demo/cartservice:v0.4.0
+    env_file:
+      - 'variables.env'
+    environment:
+      - PORT=7070
+  checkoutservice:
+    build:
+      context: ./checkoutservice/.
+      dockerfile: Dockerfile
+    image: gcr.io/google-samples/microservices-demo/checkoutservice:v0.4.0
+    env_file:
+      - 'variables.env'
+    environment:
+      - PORT=5050
+  currencyservice:
+    build:
+      context: ./currencyservice/.
+      dockerfile: Dockerfile
+    image: gcr.io/google-samples/microservices-demo/currencyservice:v0.4.0
+    env_file:
+      - 'variables.env'
+    environment:
+      - PORT=7000
+    ports:
+      - 50000:50000
+      - 60000:60000
+  emailservice:
+    build:
+      context: ./emailservice/.
+      dockerfile: Dockerfile
+    image: gcr.io/google-samples/microservices-demo/emailservice:v0.4.0
+    env_file:
+      - 'variables.env'
+    environment:
+      - PORT=5000
+  frontend:
+    build:
+      context: ./frontend/.
+      dockerfile: Dockerfile
+    image: gcr.io/google-samples/microservices-demo/frontend:v0.5.1
+    ports:
+      - 8080:80
+    env_file:
+      - 'variables.env'
+    environment:
+      - PORT=80
+  paymentservice:
+    build:
+      context: ./paymentservice/.
+      dockerfile: Dockerfile
+    image: gcr.io/google-samples/microservices-demo/paymentservice:v0.4.0
+    env_file:
+      - 'variables.env'
+    environment:
+      - PORT=50051
+  productcatalogservice:
+    build:
+      context: ./productcatalogservice/.
+      dockerfile: Dockerfile
+    image: gcr.io/google-samples/microservices-demo/productcatalogservice:v0.5.1
+    env_file:
+      - 'variables.env'
+    environment:
+      - PORT=3550
+  recommendationservice:
+    build:
+      context: ./recommendationservice/.
+      dockerfile: Dockerfile
+    image: gcr.io/google-samples/microservices-demo/recommendationservice:v0.5.1
+    env_file:
+      - 'variables.env'
+    environment:
+      - PORT=8080
+  shippingservice:
+    build:
+      context: ./shippingservice/.
+      dockerfile: Dockerfile
+    image: gcr.io/google-samples/microservices-demo/shippingservice:v0.5.1
+    env_file:
+      - 'variables.env'
+    environment:
+      - PORT=50051
