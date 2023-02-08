@@ -1,6 +1,0 @@
-**/*.sh
-**/*.bat
-**/bin/
-**/obj/
-**/out/
-Dockerfile*
