@@ -33,6 +33,7 @@ try:
 except:
     tracer_interceptor = client_interceptor.OpenCensusClientInterceptor()
 
+
 def send_confirmation_email(email, order):
   channel = grpc.insecure_channel('0.0.0.0:8080')
   channel = grpc.intercept_channel(channel, tracer_interceptor)

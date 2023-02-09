@@ -1,0 +1,17 @@
+#FROM golang:1.18.4-alpine as builder
+FROM qmcgaw/godevcontainer:debian
+RUN apt-get update && apt-get install -y dnsutils curl
+WORKDIR /skyramp
+
+# restore dependencies
+COPY go.mod go.sum ./
+RUN go mod download
+COPY . .
+
+RUN go build -o cartservice .
+
+WORKDIR /skyramp
+
+ENV THRIFT_PORT=50000
+ENV REST_PORT=60000
+ENTRYPOINT ["/skyramp/cartservice"]

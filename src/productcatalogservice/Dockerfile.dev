@@ -1,0 +1,18 @@
+#FROM golang:1.18.3-alpine AS builder
+FROM qmcgaw/godevcontainer:debian
+
+#WORKDIR /build
+WORKDIR /skyramp
+COPY go.mod go.sum ./
+RUN go mod download
+COPY . .
+RUN go build -o productcatalogservice .
+
+#FROM gcr.io/google-samples/microservices-demo/productcatalogservice:v0.3.8
+
+WORKDIR /skyramp
+#COPY --from=builder /productcatalogservice ./productcatalogservice
+COPY products.json .
+ENV THRIFT_PORT=50000
+ENV REST_PORT=60000
+ENTRYPOINT ["/skyramp/productcatalogservice"]

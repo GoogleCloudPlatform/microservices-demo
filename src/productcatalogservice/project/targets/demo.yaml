@@ -1,0 +1,6 @@
+---
+containers:
+  - container: recommendation-service
+  - container: product-catalog-service
+  - container: email-service
+    mock: true

@@ -1,0 +1,19 @@
+{
+  "name": "dev",
+  "dockerComposeFile": "../docker-compose.yml",
+  "service": "dev",
+  "workspaceFolder": "/workspace",
+  "extensions": [
+    "golang.go",
+    "eamodio.gitlens",
+    "ms-python.python",
+    "ms-python.vscode-pylance",
+    "shardulm94.trailing-spaces",
+    "Gruntfuggly.todo-tree",
+    "vscode-icons-team.vscode-icons",
+    "redhat.vscode-yaml",
+    "rangav.vscode-thunder-client",
+    "ms-azuretools.vscode-docker"
+  ],
+  "settings": {}
+}

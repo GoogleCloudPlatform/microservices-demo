@@ -1,0 +1,33 @@
+containers:
+  - name: email-service
+    image:
+      repository: docker.io/pellepedro/emailservice
+      tag: v0.0.1
+    ports:
+      - email-service-port50000
+
+ports:
+  - name: email-service-port50000
+    endpoints:
+    - EmailService
+    secure: true
+    thrift-options:
+      protocol: "binary"
+      buffered: true
+      framed: false
+    protocol: thrift
+    port: 50000
+endpoints:
+  - name: EmailService
+    defined:
+      name: EmailService
+      path: "thrift/demo.thrift"
+    methods:
+      - name: SendOrderConfirmation
+        output: SendOrderConfirmationResponse
+signatures:
+  - name: SendOrderConfirmationResponse
+    fields:
+    - name: result
+      type:  struct
+      default:

@@ -180,3 +180,10 @@ function main () {
 }
 
 main();
+
+
+module.exports = {
+  getSupportedCurrencies: getSupportedCurrencies,
+  getCurrencyData: _getCurrencyData,
+  convert : convert
+};

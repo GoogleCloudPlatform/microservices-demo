@@ -1,0 +1,15 @@
+services:
+  dev:
+    build:
+      context: ./.devcontainer
+      dockerfile: Dockerfile
+    volumes:
+      - .:/workspace:cached
+      - ~/.docker:/root/.docker:z
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ~/.ssh:/root/.ssh:z
+      - ../project/thrift:/skyramp/project
+    entrypoint: [ "sh", "-c", "while sleep 3600000; do :; done" ]
+  product-catalog-service:
+    build: .
+    image: registry.cequoi.ca/productcatalogservice:v0.0.1

@@ -3,7 +3,7 @@
   "version": "0.0.1",
   "description": "Payment Microservice demo",
   "repository": "https://github.com/GoogleCloudPlatform/microservices-demo",
-  "main": "index.js",
+  "main": "main.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "lint": "semistandard *.js"
@@ -18,7 +18,10 @@
     "@grpc/proto-loader": "0.6.13",
     "pino": "5.17.0",
     "simple-card-validator": "^1.1.0",
-    "uuid": "^3.2.1"
+    "uuid": "^3.2.1",
+    "express": "^4.18.1",
+    "thrift": "^0.16.0",
+    "worker-threads": "^1.0.0"
   },
   "devDependencies": {
     "semistandard": "16.0.1"

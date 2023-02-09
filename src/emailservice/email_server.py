@@ -17,6 +17,7 @@
 from concurrent import futures
 import argparse
 import os
+from pickle import NONE
 import sys
 import time
 import grpc
@@ -41,6 +42,8 @@ import googlecloudprofiler
 from logger import getJSONLogger
 logger = getJSONLogger('emailservice-server')
 
+tracer_interceptor = NONE
+
 # try:
 #     googleclouddebugger.enable(
 #         module='emailserver',
@@ -60,7 +63,7 @@ class BaseEmailService(demo_pb2_grpc.EmailServiceServicer):
   def Check(self, request, context):
     return health_pb2.HealthCheckResponse(
       status=health_pb2.HealthCheckResponse.SERVING)
-  
+
   def Watch(self, request, context):
     return health_pb2.HealthCheckResponse(
       status=health_pb2.HealthCheckResponse.UNIMPLEMENTED)
@@ -123,6 +126,7 @@ class HealthCheck():
       status=health_pb2.HealthCheckResponse.SERVING)
 
 def start(dummy_mode):
+  global tracer_interceptor
   server = grpc.server(futures.ThreadPoolExecutor(max_workers=10),
                        interceptors=(tracer_interceptor,))
   service = None
@@ -170,7 +174,8 @@ def initStackdriverProfiling():
   return
 
 
-if __name__ == '__main__':
+def startGrpc():
+  global tracer_interceptor
   logger.info('starting the email service in dummy mode.')
 
   # Profiler
@@ -198,7 +203,7 @@ if __name__ == '__main__':
       logger.info("Tracing disabled.")
       tracer_interceptor = server_interceptor.OpenCensusServerInterceptor()
   except Exception as e:
-      logger.warn(f"Exception on Cloud Trace setup: {traceback.format_exc()}, tracing disabled.") 
+      logger.warn(f"Exception on Cloud Trace setup: {traceback.format_exc()}, tracing disabled.")
       tracer_interceptor = server_interceptor.OpenCensusServerInterceptor()
-  
+
   start(dummy_mode = True)

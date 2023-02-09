@@ -1,0 +1,16 @@
+services:
+  dev:
+    build:
+      context: ./.devcontainer
+      dockerfile: Dockerfile
+    volumes:
+      - .:/workspace:cached
+      - ~/.docker:/root/.docker:z
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ~/.ssh:/root/.ssh:z
+    entrypoint: [ "sh", "-c", "while sleep 3600000; do :; done" ]
+  test-service:
+    image: python:3.7-slim
+    volumes:
+      - ../recommendationservice/:/client
+    entrypoint: [ "sh", "-c", "while sleep 3600000; do :; done" ]

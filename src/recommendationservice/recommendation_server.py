@@ -37,6 +37,8 @@ from grpc_health.v1 import health_pb2_grpc
 from logger import getJSONLogger
 logger = getJSONLogger('recommendationservice-server')
 
+product_catalog_stub = None
+
 def initStackdriverProfiling():
   project_id = None
   try:
@@ -64,6 +66,7 @@ def initStackdriverProfiling():
 
 class RecommendationService(demo_pb2_grpc.RecommendationServiceServicer):
     def ListRecommendations(self, request, context):
+        global product_catalog_stub
         max_responses = 5
         # fetch list of products from product catalog stub
         cat_response = product_catalog_stub.ListProducts(demo_pb2.Empty())
@@ -90,7 +93,10 @@ class RecommendationService(demo_pb2_grpc.RecommendationServiceServicer):
             status=health_pb2.HealthCheckResponse.UNIMPLEMENTED)
 
 
-if __name__ == "__main__":
+#if __name__ == "__main__":
+def startGrpc():
+    global product_catalog_stub
+    logger.info("startGrpc is called")
     logger.info("initializing recommendationservice")
 
     try:
@@ -116,9 +122,9 @@ if __name__ == "__main__":
         logger.info("Tracing disabled.")
         tracer_interceptor = server_interceptor.OpenCensusServerInterceptor()
     except Exception as e:
-        logger.warn(f"Exception on Cloud Trace setup: {traceback.format_exc()}, tracing disabled.") 
+        logger.warn(f"Exception on Cloud Trace setup: {traceback.format_exc()}, tracing disabled.")
         tracer_interceptor = server_interceptor.OpenCensusServerInterceptor()
-   
+
     try:
       if "DISABLE_DEBUGGER" in os.environ:
         raise KeyError()

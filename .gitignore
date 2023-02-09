@@ -1,5 +1,4 @@
 bin/
-pkg/
 .DS_Store
 *.pyc
 *.swp

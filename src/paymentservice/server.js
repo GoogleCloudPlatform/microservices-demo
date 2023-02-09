@@ -11,7 +11,7 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-
+const {parentPort, data} = require("worker_threads");
 const path = require('path');
 const grpc = require('@grpc/grpc-js');
 const pino = require('pino');
@@ -61,7 +61,7 @@ class HipsterShopServer {
 
 
   listen() {
-    const server = this.server 
+    const server = this.server
     const port = this.port
     server.bindAsync(
       `0.0.0.0:${port}`,

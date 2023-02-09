@@ -119,3 +119,8 @@ urllib3==1.26.10
 
 # The following packages are considered to be unsafe in a requirements file:
 # setuptools
+fastapi==0.79.0
+pydantic==1.9.1
+uvicorn==0.18.2
+thrift==0.16.0
+requests==2.28.1
