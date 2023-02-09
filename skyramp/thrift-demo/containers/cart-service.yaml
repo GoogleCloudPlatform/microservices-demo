@@ -1,0 +1,101 @@
+containers:
+  - name: cart-service
+    image:
+      repository: public.ecr.aws/j1n2c2p2/microservices-demo/cartservice
+      tag: v0.3.9
+    dependencies:
+      - redis
+    manifests:
+      - gcp-microservices-demo/deploy/kubernetes/kubernetes-manifests.yaml
+    ports:
+      - cart-service-port50000
+    envs:
+      REDIS_ADDR: "redis:6379"
+
+ports:
+  - name: cart-service-port50000
+    port: 50000
+    secure: false
+    thrift-options:
+      protocol: "binary"
+      buffered: true
+      http: true
+      framed: false
+    endpoints:
+      - CartService
+    protocol: thrift
+
+endpoints:
+  - name: CartService
+    defined:
+      name: CartService
+      path: "thrift/demo.thrift"
+    methods:
+      - name: AddCart
+        input: AddCartRequest
+      - name: EmptyCart
+        input: EmptyCartRequest
+      - name: GetCart
+        input: GetCartRequest
+        output: GetCartResponse
+
+signatures:
+  - name: AddCartRequest
+    fields:
+      - name: user_id
+        type: string
+        default: "abcde"
+      - name: item
+        type: map
+        fields:
+          - name: product_id
+            type: string
+            default: "YMWWN1N4O"
+          - name: quantity
+            type: integer
+            default: 3
+
+  - name: EmptyCartRequest
+    fields:
+      - name: user_id
+        type: string
+        default: "abcde"
+
+  - name: GetCartRequest
+    fields:
+      - name: user_id
+        type: string
+        default: "abcde"
+  - name: GetCartResponse
+    fields:
+      - name: result
+        type: map
+        fields:
+          - name: user_id
+            type: string
+            default: "abcde"
+          - name: items
+            type: array
+            subtype: map
+            fields:
+            - fields:
+              - name: product_id
+                type: string
+                default: "OLJCESPC7Z"
+              - name: quantity
+                type: integer
+                default: 2
+            - fields:
+              - name: product_id
+                type: string
+                default: "1YMWWN1N4O"
+              - name: quantity
+                type: integer
+                default: 1
+            - fields:
+              - name: product_id
+                type: string
+                default: "66VCHSJNUP"
+              - name: quantity
+                type: integer
+                default: 3

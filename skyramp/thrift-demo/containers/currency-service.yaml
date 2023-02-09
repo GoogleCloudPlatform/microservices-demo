@@ -1,0 +1,90 @@
+containers:
+  - name: currency-service
+    image:
+      repository: public.ecr.aws/j1n2c2p2/microservices-demo/currencyservice
+      tag: v0.3.9
+    manifests:
+      - gcp-microservices-demo/deploy/kubernetes/kubernetes-manifests.yaml
+    ports:
+      - currency-service-port50000
+    envs:
+      PORT: "7000"
+      DISABLE_TRACING: "1"
+      DISABLE_PROFILER: "1"
+      DISABLE_DEBUGGER: "1"
+
+ports:
+  - name: currency-service-port50000
+    port: 50000
+    secure: false
+    thrift-options:
+      protocol: "binary"
+      buffered: true
+      http: true
+      framed: false
+    endpoints:
+      - CurrencyService
+    protocol: thrift
+
+endpoints:
+  - name: CurrencyService
+    defined:
+      name: CurrencyService
+      path: "thrift/demo.thrift"
+    methods:
+      - name: GetSupportedCurrencies
+        input: GetSupportedCurrenciesRequest
+        output: GetSupportedCurrenciesResponse
+      - name: Convert
+        input: ConvertRequest
+        output: ConvertResponse
+
+signatures:
+  - name: GetSupportedCurrenciesRequest
+  - name: GetSupportedCurrenciesResponse
+    fields:
+      - name: result
+        type: array
+        subtype: string
+        fields:
+          - default: "USD"
+          - default: "CAD"
+          - default: "SEK"
+          - default: "NOK"
+          - default: "EUR"
+          - default: "GBP"
+          - default: "JPY"
+          - default: "CZK"
+
+  - name: ConvertRequest
+    fields:
+      - name: from_curr
+        type: map
+        fields:
+          - name: currency_code
+            type: string
+            default: "USD"
+          - name: units
+            type: integer
+            default: 100
+          - name: nanos
+            type: integer
+            default: 99000000
+      - name: to_curr
+        type: string
+        default: "CAD"
+
+  - name: ConvertResponse
+    fields:
+      - name: result
+        type: map
+        fields:
+          - name: currency_code
+            type: string
+            default: "CAD"
+          - name: units
+            type: integer
+            default: 130
+          - name: nanos
+            type: integer
+            default: 99000000

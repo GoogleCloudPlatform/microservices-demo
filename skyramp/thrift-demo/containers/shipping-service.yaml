@@ -1,0 +1,154 @@
+containers:
+  - name: shipping-service
+    image:
+      repository: public.ecr.aws/j1n2c2p2/microservices-demo/shippingservice
+      tag: v0.3.9
+    manifests:
+      - gcp-microservices-demo/deploy/kubernetes/kubernetes-manifests.yaml
+    ports:
+      - shipping-service-port50000
+    envs:
+      PORT: "50051"
+      DISABLE_TRACING: "1"
+      DISABLE_PROFILER: "1"
+      DISABLE_DEBUGGER: "1"
+
+ports:
+  - name: shipping-service-port50000
+    port: 50000
+    secure: false
+    thrift-options:
+      protocol: "binary"
+      buffered: true
+      http: true
+      framed: false
+    endpoints:
+      - ShippingService
+    protocol: thrift
+
+endpoints:
+  - name: ShippingService
+    defined:
+      name: ShippingService
+      path: "thrift/demo.thrift"
+    methods:
+      - name: GetQuote
+        input: GetQuoteRequest
+        output: GetQuoteResponse
+      - name: ShipOrder
+        input: ShipOrderRequest
+        output: ShipOrderResponse
+
+signatures:
+  - name: GetQuoteRequest
+    fields:
+      - name: shipping_address
+        type: map
+        fields:
+          - name: street_address
+            type: string
+            default: "Main Street 101"
+          - name: city
+            type: string
+            default: " San Fransisco"
+          - name: state
+            type: string
+            default: "CA"
+          - name: country
+            type: string
+            default: "US"
+          - name: zip_code
+            type: integer
+            default: 94043
+      - name: items
+        type: array
+        subtype: map
+        fields:
+          - fields:
+            - name: product_id
+              type: string
+              default: "OLJCESPC7Z"
+            - name: quantity
+              type: integer
+              default: 1
+          - fields:
+            - name: product_id
+              type: string
+              default: "66VCHSJNUP"
+            - name: quantity
+              type: integer
+              default: 3
+          - fields:
+            - name: product_id
+              type: string
+              default: "1YMWWN1N4O"
+            - name: quantity
+              type: integer
+              default: 2
+
+  - name: GetQuoteResponse
+    fields:
+      - name: result
+        type: map
+        fields:
+          - name: currency_code
+            type: string
+            default: "USD"
+          - name: units
+            type: integer
+            default: 150
+          - name: nanos
+            type: integer
+            default: 99000000
+
+  - name: ShipOrderRequest
+    fields:
+      - name: shipping_address
+        type: map
+        fields:
+          - name: street_address
+            type: string
+            default: "Main Street 101"
+          - name: city
+            type: string
+            default: " San Fransisco"
+          - name: state
+            type: string
+            default: "CA"
+          - name: country
+            type: string
+            default: "US"
+          - name: zip_code
+            type: integer
+            default: 95000
+      - name: items
+        type: array
+        subtype: map
+        fields:
+          - fields:
+            - name: product_id
+              type: string
+              default: "OLJCESPC7Z"
+            - name: quantity
+              type: integer
+              default: 1
+          - fields:
+            - name: product_id
+              type: string
+              default: "66VCHSJNUP"
+            - name: quantity
+              type: integer
+              default: 3
+          - fields:
+            - name: product_id
+              type: string
+              default: "1YMWWN1N4O"
+            - name: quantity
+              type: integer
+              default: 2
+
+  - name: ShipOrderResponse
+    fields:
+      - name: result
+        type: string
+        default: "tracking-id-5f32af7c-799e-404e-9dc3-42be5461bad5"

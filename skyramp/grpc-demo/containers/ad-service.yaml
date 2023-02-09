@@ -1,0 +1,14 @@
+containers:
+  - name: ad-service
+    image:
+      repository: public.ecr.aws/j1n2c2p2/microservices-demo/adservice
+      tag: v0.3.9
+    manifests:
+      - gcp-microservices-demo/deploy/kubernetes/kubernetes-manifests.yaml
+    ports:
+      - ad-service-port9555
+
+ports:
+  - name: ad-service-port9555
+    protocol: grpc
+    port: 9555

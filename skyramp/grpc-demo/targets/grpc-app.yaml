@@ -1,0 +1,12 @@
+---
+containers:
+  - container: ad-service
+  - container: frontend
+  - container: cart-service
+  - container: checkout-service
+  - container: payment-service
+  - container: product-catalog-service
+  - container: recommendation-service
+  - container: email-service
+  - container: shipping-service
+  - container: currency-service

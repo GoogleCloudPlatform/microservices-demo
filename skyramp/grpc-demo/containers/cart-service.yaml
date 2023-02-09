@@ -1,0 +1,35 @@
+containers:
+  - name: cart-service
+    image:
+      repository: public.ecr.aws/j1n2c2p2/microservices-demo/cartservice
+      tag: v0.3.9
+    dependencies:
+      - redis
+    manifests:
+      - gcp-microservices-demo/deploy/kubernetes/kubernetes-manifests.yaml
+    ports:
+      - cart-service-port7070
+    envs:
+      REDIS_ADDR: "redis:6379"
+
+ports:
+  - name: cart-service-port7070
+    protocol: grpc
+    endpoints:
+      - cartservice
+    port: 7070
+
+endpoints:
+  - name: cartservice
+    defined:
+      name: CartService
+      path: "pb/demo.proto"
+    methods:
+      - name: AddItem
+        input: AddItemRequest
+        output: Empty
+
+signatures:
+  - name: AddItemRequest
+  - name: Empty
+

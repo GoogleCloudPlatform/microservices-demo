@@ -1,0 +1,20 @@
+services:
+  python_dev:
+    image: python:3.10-slim
+    network_mode: "host"
+    extra_hosts:
+      - "cart-service-port50000.demo.skyramp.test:127.0.0.1"
+      - "checkout-service-port50000.demo.skyramp.test:127.0.0.1"
+      - "currency-service-port50000.demo.skyramp.test:127.0.0.1"
+      - "email-service-port50000.demo.skyramp.test:127.0.0.1"
+      - "payment-service-port50000.demo.skyramp.test:127.0.0.1"
+      - "product-catalog-service-port50000.demo.skyramp.test:127.0.0.1"
+      - "recommendation-service-port50000.demo.skyramp.test:127.0.0.1"
+      - "shipping-service-port50000.demo.skyramp.test:127.0.0.1"
+    volumes:
+      - .:/workspace
+      # SSH directory for Linux, OSX and WSL
+      - ~/.ssh:/root/.ssh:z
+      # Docker socket to access Docker server
+      - /var/run/docker.sock:/var/run/docker.sock
+    entrypoint: [ "sh", "-c", "while sleep 3600; do :; done" ]

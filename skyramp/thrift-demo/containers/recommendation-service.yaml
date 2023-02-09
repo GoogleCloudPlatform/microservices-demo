@@ -1,0 +1,52 @@
+containers:
+  - name: recommendation-service
+    image:
+      repository: public.ecr.aws/j1n2c2p2/microservices-demo/recommendationservice
+      tag: v0.3.9
+    dependencies:
+      - product-catalog-service
+    manifests:
+      - gcp-microservices-demo/deploy/kubernetes/kubernetes-manifests.yaml
+    ports:
+      - recommendation-service-port50000
+    envs:
+      PORT: "8080"
+      PRODUCT_CATALOG_SERVICE_ADDR: "product-catalog-service:3550"
+      DISABLE_TRACING: "1"
+      DISABLE_PROFILER: "1"
+      DISABLE_DEBUGGER: "1"
+
+ports:
+  - name: recommendation-service-port50000
+    port: 50000
+    secure: false
+    thrift-options:
+      protocol: "binary"
+      buffered: true
+      http: true
+      framed: false
+    endpoints:
+      - RecommendationService
+    protocol: thrift
+
+endpoints:
+  - name: RecommendationService
+    defined:
+      name: RecommendationService
+      path: "thrift/demo.thrift"
+    methods:
+      - name: ListRecommendations
+        output: ListRecommendationsResponse
+
+signatures:
+  - name: ListRecommendationsResponse
+    fields:
+      - name: result
+        type: array
+        subtype: string
+        fields:
+          - default: "OLJCESPC7Z"
+          - default: "66VCHSJNUP"
+          - default: "1YMWWN1N4O"
+          - default: "L9ECAV7KIM"
+          - default: "2ZYFJ3GM2N"

@@ -1,0 +1,45 @@
+containers:
+  - name: checkout-service
+    image:
+      repository: public.ecr.aws/j1n2c2p2/microservices-demo/checkoutservice
+      tag: v0.3.9
+    dependencies:
+      - email-service
+      - payment-service
+      - shipping-service
+      - product-catalog-service
+      - currency-service
+    manifests:
+      - gcp-microservices-demo/deploy/kubernetes/kubernetes-manifests.yaml
+    ports:
+      - checkout-service-port5050
+    envs:
+      PRODUCT_CATALOG_SERVICE_ADDR: "product-catalog-service:3550"
+      SHIPPING_SERVICE_ADDR: "shipping-service:50051"
+      PAYMENT_SERVICE_ADDR: "payment-service:50051"
+      EMAIL_SERVICE_ADDR: "email-service:5000"
+      CURRENCY_SERVICE_ADDR: "currency-service:7000"
+      CART_SERVICE_ADDR: "cart-service:7070"
+      DISABLE_TRACING: "1"
+      DISABLE_PROFILER: "1"
+ports:
+  - name: checkout-service-port5050
+    protocol: grpc
+    port: 5050
+    endpoints:
+      - checkout-service-endpoint
+
+endpoints:
+  - name: checkout-service-endpoint
+    defined:
+      name: CheckoutService
+      path: "pb/demo.proto"
+    methods:
+      - name: PlaceOrder
+        input: PlaceOrderRequest
+        output: PlaceOrderResponse
+
+signatures:
+  - name: PlaceOrderRequest
+  - name: PlaceOrderResponse
+

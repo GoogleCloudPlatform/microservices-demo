@@ -1,0 +1,14 @@
+containers:
+  - name: redis
+    image:
+      repository: redis
+      tag: alpine
+    manifests:
+      - gcp-microservices-demo/deploy/kubernetes/kubernetes-manifests.yaml
+    ports:
+      - redis-port6379
+
+ports:
+  - name: redis-port6379
+    protocol: protobuf
+    port: 6379

@@ -1,0 +1,19 @@
+containers:
+  - name: product-catalog-service
+    image:
+      repository: public.ecr.aws/j1n2c2p2/microservices-demo/productcatalogservice
+      tag: v0.3.9
+    manifests:
+      - gcp-microservices-demo/deploy/kubernetes/kubernetes-manifests.yaml
+    ports:
+      - product-catalog-service-port3550
+    envs:
+      PORT: "3550"
+      DISABLE_STATS: "1"
+      DISABLE_PROFILER: "1"
+      DISABLE_TRACING: "1"
+
+ports:
+  - name: product-catalog-service-port3550
+    protocol: grpc
+    port: 3550

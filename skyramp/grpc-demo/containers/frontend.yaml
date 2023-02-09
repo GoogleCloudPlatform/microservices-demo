@@ -1,0 +1,32 @@
+containers:
+  - name: frontend
+    image:
+      repository: public.ecr.aws/j1n2c2p2/microservices-demo/frontend
+      tag: v0.3.9
+    dependencies:
+      - cart-service
+      - recommendation-service
+      - product-catalog-service
+      - ad-service
+      - checkout-service
+      - shipping-service
+      - currency-service
+    manifests:
+      - gcp-microservices-demo/deploy/kubernetes/kubernetes-manifests.yaml
+    ports:
+      - frontend-port8080
+    envs:
+      PORT: "80"
+      PRODUCT_CATALOG_SERVICE_ADDR: "product-catalog-service:3550"
+      CURRENCY_SERVICE_ADDR: "currency-service:7000"
+      CART_SERVICE_ADDR: "cart-service:7070"
+      RECOMMENDATION_SERVICE_ADDR: "recommendation-service:8080"
+      SHIPPING_SERVICE_ADDR: "shipping-service:50051"
+      CHECKOUT_SERVICE_ADDR: "checkout-service:5050"
+      AD_SERVICE_ADDR: "ad-service:9555"
+      DISABLE_TRACING: "1"
+      DISABLE_PROFILER: "1"
+
+ports:
+  - name: frontend-port8080
+    port: 80

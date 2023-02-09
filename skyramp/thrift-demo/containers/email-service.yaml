@@ -1,0 +1,125 @@
+containers:
+  - name: email-service
+    image:
+      repository: public.ecr.aws/j1n2c2p2/microservices-demo/emailservice
+      tag: v0.3.9
+    manifests:
+      - gcp-microservices-demo/deploy/kubernetes/kubernetes-manifests.yaml
+    ports:
+      - email-service-port50000
+
+ports:
+  - name: email-service-port50000
+    port: 50000
+    secure: false
+    thrift-options:
+      protocol: "binary"
+      buffered: true
+      http: true
+      framed: false
+    endpoints:
+      - EmailService
+    protocol: thrift
+
+endpoints:
+  - name: EmailService
+    defined:
+      name: EmailService
+      path: "thrift/demo.thrift"
+    methods:
+      - name: SendOrderConfirmation
+        input: SendOrderConfirmationRequest
+
+signatures:
+  - name: SendOrderConfirmationRequest
+    fields:
+      - name: email
+        type: string
+        default: "someone@example.com"
+      - name: order
+        type: map
+        fields:
+          - name: order_id
+            type: string
+            default: "order-id-e2646f58-417a-11ed-b878-0242ac120002"
+          - name: order_id
+            type: string
+            default: "tracking-id-5f32af7c-799e-404e-9dc3-42be5461bad5"
+          - name: shipping_cost
+            type: map
+            fields:
+              - name: currency_code
+                type: string
+                default: "USD"
+              - name: units
+                type: int
+                default: 100
+              - name: nanos
+                type: int
+                default: 99000000
+          - name: shipping_address
+            type: map
+            fields:
+              - name: street_address
+                type: string
+                default: "1600 Amp street"
+              - name: city
+                type: string
+                default: "Mountain View"
+              - name: state
+                type: string
+                default: "CA"
+              - name: country
+                type: string
+                default: "USA"
+              - name: zip_code
+                type: integer
+                default: 94043
+          - name: items
+            type: array
+            subtype: map
+            fields:
+            - fields:
+              - name: item
+                type: map
+                fields:
+                - name: product_id
+                  type: string
+                  default: "66VCHSJNUP"
+                - name: quantity
+                  type: integer
+                  default: 1
+              - name: cost
+                type: map
+                fields:
+                - name: currency_code
+                  type: string
+                  default: "USD"
+                - name: units
+                  type: integer
+                  default: 17
+                - name: nanos
+                  type: integer
+                  default: 99000000
+            - fields:
+              - name: item
+                type: map
+                fields:
+                - name: product_id
+                  type: string
+                  default: "OLJCESPC7Z"
+                - name: quantity
+                  type: integer
+                  default: 3
+              - name: cost
+                type: map
+                fields:
+                - name: currency_code
+                  type: string
+                  default: "USD"
+                - name: units
+                  type: integer
+                  default: 17
+                - name: nanos
+                  type: integer
+                  default: 99000000

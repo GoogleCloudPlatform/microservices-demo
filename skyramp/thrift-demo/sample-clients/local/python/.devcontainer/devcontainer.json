@@ -1,0 +1,13 @@
+{
+  "name": "Skyramp Python Dev",
+  "dockerComposeFile": "../docker-compose.yml",
+  "service": "python_dev",
+  "workspaceFolder": "/workspace",
+  "extensions": [
+    "ms-python.python",
+    "ms-python.vscode-pylance",
+  ],
+  "postCreateCommand": "pip3 install -r requirements.txt",
+  "shutdownAction": "stopCompose",
+  "settings": {}
+}

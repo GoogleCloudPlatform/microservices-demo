@@ -1,0 +1,7 @@
+asyncio==3.4.3
+grpclib==0.4.3
+h2==4.1.0
+hpack==4.0.0
+hyperframe==6.0.1
+multidict==6.0.2
+protobuf==4.21.9

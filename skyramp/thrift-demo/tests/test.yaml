@@ -1,0 +1,49 @@
+tests:
+  - name: test
+    target: checkout-system
+    testPattern:
+      - startAt: 1s
+        scenario: scenario1
+
+scenarios:
+  - name: scenario1
+    steps:
+      - request: request1
+      - request: request2
+
+requests:
+  - name: request1
+    endpoint: CartService
+    method: AddItem
+    requestValue:
+      blob: |
+            {
+                "user_id": "abcde",
+                "item": {
+                    "product_id": "OLJCESPC7Z",
+                    "quantity": 1
+                }
+            }
+  - name: request2
+    endpoint: CheckoutService
+    method: PlaceOrder
+    requestValue:
+      blob: |
+        {
+            "user_id": "abcde",
+            "user_currency": "USD",
+            "address": {
+              "street_address": "1600 Amp street",
+              "city": "Mountain View",
+              "state": "CA",
+              "country": "USA",
+              "zip_code": 94043
+            },
+            "email": "someone@example.com",
+            "credit_card": {
+                "credit_card_number": "4432-8015-6152-0454",
+                "credit_card_cvv": 672,
+                "credit_card_expiration_year": 2024,
+                "credit_card_expiration_month": 1
+            }
+        }

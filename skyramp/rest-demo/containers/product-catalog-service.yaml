@@ -1,0 +1,201 @@
+containers:
+  - name: product-catalog-service
+    image:
+      repository: public.ecr.aws/j1n2c2p2/microservices-demo/productcatalogservice
+      tag: v0.3.9
+    manifests:
+      - gcp-microservices-demo/deploy/kubernetes/kubernetes-manifests.yaml
+    ports:
+      - product-catalog-service-port60000
+    envs:
+      PORT: "3550"
+      DISABLE_STATS: "1"
+      DISABLE_PROFILER: "1"
+      DISABLE_TRACING: "1"
+
+ports:
+  - name: product-catalog-service-port60000
+    port: 60000
+    protocol: rest
+    endpoints:
+      - get-product
+      - get-products
+      - search-products
+
+endpoints:
+  - name: get-product
+    path: "/get-product"
+    methods:
+      - type: 'GET'
+        input: GetProductRequest
+        output: GetProductResponse
+        name: get-product-get
+
+  - name: get-products
+    path: "/get-products"
+    methods:
+      - type: 'GET'
+        output: GetProductsResponse
+        name: get-products-get
+
+  - name: search-products
+    path: "/search-products"
+    methods:
+      - type: 'GET'
+        input: SearchProductsRequest
+        output: SearchProductsResponse
+        name: search-products-get
+
+signatures:
+  - name: GetProductRequest
+    restparams:
+      - name: product_id
+        type: string
+        in: path
+        value: "OLJCESPC7Z"
+  - name: GetProductResponse
+    fields:
+      - name: result
+        type: map
+        fields:
+          - name: id
+            type: string
+            default: "OLJCESPC7Z"
+          - name: name
+            type: string
+            default: "Sunglasses"
+          - name: description
+            type: string
+            default: "Add a modern touch to your outfits with these sleek aviator sunglasses."
+          - name: picture
+            type: string
+            default: "/static/img/products/sunglasses.jpg"
+          - name: price_usd
+            type: map
+            fields:
+              - name: currency_code
+                type: string
+                default: "USD"
+              - name: units
+                type: integer
+                default: 19
+              - name: nanos
+                type: string
+                default: 99000000
+          - name: categories
+            type: array
+            subtype: string
+            fields:
+              - default: "accessories"
+              - default: "fashion"
+
+  - name: GetProductsResponse
+    fields:
+      - name: product
+        type: array
+        subtype: map
+        fields:
+        - fields:
+          - name: id
+            type: string
+            default: "OLJCESPC7Z"
+          - name: name
+            type: string
+            default: "Sunglasses"
+          - name: description
+            type: string
+            default: "Add a modern touch to your outfits with these sleek aviator sunglasses."
+          - name: picture
+            type: string
+            default: "/static/img/products/sunglasses.jpg"
+          - name: price_usd
+            type: map
+            fields:
+              - name: currency_code
+                type: string
+                default: "USD"
+              - name: units
+                type: integer
+                default: 19
+              - name: nanos
+                type: string
+                default: 99000000
+          - name: categories
+            type: array
+            subtype: string
+            fields:
+              - default: "accessories"
+              - default: "fashion"
+        - fields:
+          - name: id
+            type: string
+            default: "OLJCESPC7Z"
+          - name: name
+            type: string
+            default: "Sunglasses"
+          - name: description
+            type: string
+            default: "Add a modern touch to your outfits with these sleek aviator sunglasses."
+          - name: picture
+            type: string
+            default: "/static/img/products/sunglasses.jpg"
+          - name: price_usd
+            type: map
+            fields:
+              - name: currency_code
+                type: string
+                default: "USD"
+              - name: units
+                type: integer
+                default: 19
+              - name: nanos
+                type: string
+                default: 99000000
+          - name: categories
+            type: array
+            subtype: string
+            fields:
+              - default: "accessories"
+              - default: "fashion"
+
+  - name: SearchProductsRequest
+    restparams:
+      - name: product_id
+        type: string
+        in: path
+        value: "OLJCESPC7Z"
+  - name: SearchProductsResponse
+    fields:
+      - name: products
+        type: map
+        default: |
+          [
+              {
+                 "id": "LS4PSXUNUM",
+                 "name": "Salt & Pepper Shakers",
+                 "description": "Add some flavor to your kitchen.",
+                 "picture": "/static/img/products/salt-and-pepper-shakers.jpg",
+                 "priceUsd": {
+                   "currencyCode": "USD",
+                   "units": 18,
+                   "nanos": 490000000
+                 },
+                 "categories": [
+                   "kitchen"
+                 ]
+               },
+               {
+                 "id": "9SIQT8TOJO",
+                 "name": "Bamboo Glass Jar",
+                 "description": "This bamboo glass jar can hold 57 oz (1.7 l) and is perfect for any kitchen.",
+                 "picture": "/static/img/products/bamboo-glass-jar.jpg",
+                 "priceUsd": {
+                   "currencyCode": "USD",
+                   "units": 5,
+                   "nanos": 490000000
+                 },
+                 "categories": [
+                   "kitchen"
+                 ]
+              }
+          ]

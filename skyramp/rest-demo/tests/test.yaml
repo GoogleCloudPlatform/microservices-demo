@@ -1,0 +1,74 @@
+tests:
+  - name: test
+    target: checkout-system
+    testPattern:
+      - startAt: 1s
+        scenario: scenario1
+
+scenarios:
+  - name: scenario1
+    steps:
+      - request: getProductRequest
+      - request: addCartRequest
+      - request: getCartRequest
+      - request: checkoutRequest
+
+requests:
+  - name: getProductRequest
+    endpoint: get-product
+    method: get-product-get
+    requestValue:
+      params:
+        - name: product_id
+          in: query
+          value: "L9ECAV7KIM"
+
+  - name: addCartRequest
+    endpoint: cart-service
+    method: cart-service-post
+    requestValue:
+      blob: |
+            {
+                "item": {
+                    "productId": "OLJCESPC7Z",
+                    "quantity": 1
+                }
+            }
+      params:
+        - name: user_id
+          in: path
+          value: abcde
+
+  - name: getCartRequest
+    endpoint: cart-service
+    method: cart-service-get
+    requestValue:
+      params:
+      - name: user_id
+        in: path
+        value: abcde
+
+  - name: checkoutRequest
+    endpoint: checkout-service
+    method: checkout-service-post
+    requestValue:
+      blob: |
+       {
+           "user_id": "abcde",
+           "user_currency": "UDS",
+           "address": {
+             "street_address": "1600 Amp street",
+             "city": "Mountain View",
+             "state": "CA",
+             "country": "USA",
+             "zip_code": "94043"
+           },
+           "email": "someone@example.com",
+           "credit_card": {
+             "credit_card_number": "4432-8015-6251-0454",
+             "credit_card_cvv": 672,
+             "credit_card_expiration_year": 24,
+             "credit_card_expiration_month": 1
+           }
+        }
+
