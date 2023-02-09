@@ -1,0 +1,33 @@
+containers:
+  - name: recommendation-service
+    image:
+      repository: docker.io/pellepedro/recommendationservice
+      tag: v0.0.2
+    ports:
+      - thrift-service-port50000
+ports:
+  - name: thrift-service-port50000
+    endpoints:
+    - ThriftRecommendationService
+    secure: true
+    thrift-options:
+      protocol: "binary"
+      buffered: true
+      framed: false
+    protocol: thrift
+    port: 50000
+endpoints:
+  - name: ThriftRecommendationService
+    defined:
+      name: RecommendationService # Must match servicename in thrift file
+      path: "thrift/demo.thrift"
+    methods:
+      - name: ListRecommendations
+        output: ListRecommendationsResponse
+signatures:
+  - name: ListRecommendationsResponse
+    fields:
+    - name: result
+      type: slice
+      default: |
+           ["123", "456", "789"]
