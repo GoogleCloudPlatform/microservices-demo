@@ -27,6 +27,16 @@ on:
       - '.github/workflows/helm-chart-ci.yaml'
 
 jobs:
+  docs-tests:
+    runs-on: [self-hosted, is-enabled]
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        ref: ${{github.event.pull_request.head.ref}}
+        repository: ${{github.event.pull_request.head.repo.full_name}}
+    - run: |
+        docker run --rm -v $(pwd)/docs:/out -v $(pwd)/pb:/protos pseudomuto/protoc-gen-doc --doc_opt=markdown,proto-documentation-to-test.md
+        cmp -s $pb/proto-documentation.md $pb/proto-documentation-to-test.md || echo "The documentation does not match the pb/demo.proto - has the API changed but new documentation has not been generated?" && exit 1
   code-tests:
     runs-on: [self-hosted, is-enabled]
     steps:
