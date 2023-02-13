@@ -1,3 +1,6 @@
+- [Introduction](#introduction)
+  - [Use Cases](#use-cases)
+  - [Implementation](#implementation)
 - [Usage](#usage)
   - [1. Install pre-requisite tools](#1-install-pre-requisite-tools)
   - [2. Clone sample services](#2-clone-sample-services)
@@ -7,12 +10,13 @@
   - [4. Deploy](#4-deploy)
   - [5. Interacting with the microservices](#5-interacting-with-the-microservices)
     - [Add to cart using gRPC API](#add-to-cart-using-grpc-api)
-  - [Add to cart using REST API](#add-to-cart-using-rest-api)
+    - [Add to cart using REST API](#add-to-cart-using-rest-api)
     - [Add to cart using Thrift API](#add-to-cart-using-thrift-api)
     - [Verify contents of cart](#verify-contents-of-cart)
   - [Contributing Code](#contributing-code)
 
 
+# Introduction
 
 This is a demo project based on [GCP **Online Boutique**](https://github.com/GoogleCloudPlatform/microservices-demo) with added support for REST and Thrift APIs. It is designed to be used during cloud-native development for testing across different APIs–REST, gRPC, and Thrift. It is extensible in support of  future functionality (e.g. GraphQL).
 
@@ -131,7 +135,7 @@ Successfully added the item to the cart.
 
 Having seen how to successfully add an item to the cart with a gRPC client calling the gRPC endpoint, we can see how to do the same through the REST and Thrift endpoints.
 
-## Add to cart using REST API
+### Add to cart using REST API
 
 Since cURL is already installed in the `clients` container, you can issue a request directly from the CLI as of the container to add an item to the cart.
 
