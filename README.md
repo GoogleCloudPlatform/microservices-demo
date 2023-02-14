@@ -98,7 +98,7 @@ To demonstrate the REST and Thrift implementations, we've created simple clients
 To connect to the `clients` container, run the following command in your terminal:
 
 ```
-docker compose exec -it ash
+docker compose exec -it clients ash
 ```
 
 
