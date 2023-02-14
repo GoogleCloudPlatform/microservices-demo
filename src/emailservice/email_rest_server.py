@@ -30,16 +30,9 @@ async def sendConfirmation():
     print("Sending Email confirmation")
     return {"status":"200 OK"}
 
-def startRest(opt):
-    if opt.tls:
-        uvicorn.run(
-            "email_rest_server:app",
-            host="0.0.0.0",
-            port=int(opt.port),
-            ssl_keyfile="./cert/key.pem",
-            ssl_certfile="./cert/cert.pem")
-    else:
-        uvicorn.run(
-            "email_rest_server:app",
-            host="0.0.0.0",
-            port=int(opt.port))
+def startRest(port):
+     uvicorn.run(
+         "email_rest_server:app",
+         host="0.0.0.0",
+         port=int(port))
+

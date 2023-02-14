@@ -37,7 +37,7 @@ function _carry(amount) {
  * Lists the supported currencies
  */
 function getSupportedCurrencies(call, callback) {
-  logger.info('Getting supported currencies...');
+  console.log('Getting supported currencies...');
   _getCurrencyData((data) => {
     callback(null, { currency_codes: Object.keys(data) });
   });
@@ -70,7 +70,7 @@ function convert(call, callback) {
       result.nanos = Math.floor(result.nanos);
       result.currency_code = request.to_code;
 
-      logger.info(`conversion request successful`);
+      console.log(`conversion request successful`);
       callback(null, result);
     });
   } catch (err) {

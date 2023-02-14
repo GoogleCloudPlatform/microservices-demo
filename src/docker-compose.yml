@@ -98,4 +98,5 @@ services:
     build:
       context: ./clients/.
       dockerfile: Dockerfile
-    image: public.ecr.aws/j1n2c2p2/microservices-demo/clients:v0.0.1
+    image: public.ecr.aws/j1n2c2p2/microservices-demo/clients:v0.0.2
+  

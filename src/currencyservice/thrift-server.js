@@ -23,7 +23,7 @@ var currencyHandler = {
   GetSupportedCurrencies: function(result) {
     common.getCurrencyData((data => {
       data = Object.keys(data)
-      result(data)
+      result(null,data)
     }));
   },
   Convert: function(money, to_curr, result) {
@@ -35,33 +35,24 @@ var currencyHandler = {
     }
     var reult = {}
     common.convert(call, (err, data) => {
-      const a = err
-      result(data)
+      result(null, data)
     });
   }
 };
 
-var transports = {
-  'buffered': thrift.TBufferedTransport,
-  'framed': thrift.TFramedTransport
-};
-
-var protocols = {
-  'json': thrift.TJSONProtocol,
-  'binary': thrift.TBinaryProtocol,
-  'compact': thrift.TCompactProtocol
+var currencySrvOpt = {
+    handler: currencyHandler,
+    processor: currencySvc,
+    protocol: thrift.TBinaryProtocol,
+    transport: thrift.TBufferedTransport
 };
 
 var serverOpt = {
-  transport: thrift.TBufferedTransport,
-  protocol: thrift.TBinaryProtocol,
-  key: fs.readFileSync('./cert/cert.pem'),
-  cert: fs.readFileSync('./cert/key.pem'),
+   services: {
+    "/CurrencyService": currencySrvOpt
+   }
 }
 
-
-thriftPort = process.env.THRIFT_PORT;
-
-var s = thrift.createServer(currencySvc, currencyHandler, serverOpt).on('error', function(error) { console.log(error); }) //.listen(thriftPort);
-s.listen(thriftPort)
+thriftPort =  process.env.THRIFT_PORT;
+var s = thrift.createWebServer(serverOpt).listen(thriftPort);
 console.log("CurrencyService thrift server started on port: " + thriftPort);

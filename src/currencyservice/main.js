@@ -19,8 +19,8 @@ process.on('SIGINT', cleanup);
 
 const { Worker } = require('worker_threads')
 
-process.env['REST_PORT'] = 50000;
-process.env['THRIFT_PORT'] = 60000;
+process.env['THRIFT_PORT'] = 50000;
+process.env['REST_PORT'] = 60000;
 process.env['DISABLE_PROFILER'] = "1";
 process.env['DISABLE_TRACING'] = "1";
 process.env['DISABLE_DEBUGGER'] = "1";
