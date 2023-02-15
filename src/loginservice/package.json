@@ -1,0 +1,25 @@
+{
+  "name": "paymentservice",
+  "version": "0.0.1",
+  "description": "Payment Microservice demo",
+  "repository": "https://github.com/GoogleCloudPlatform/microservices-demo",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Jonathan Lui",
+  "license": "ISC",
+  "dependencies": {
+    "@google-cloud/profiler": "5.0.3",
+    "@grpc/grpc-js": "1.8.4",
+    "@grpc/proto-loader": "0.7.4",
+    "@opentelemetry/api": "1.3.0",
+    "@opentelemetry/exporter-otlp-grpc": "0.26.0",
+    "@opentelemetry/instrumentation-grpc": "0.34.0",
+    "@opentelemetry/sdk-trace-base": "1.8.0",
+    "@opentelemetry/sdk-node": "0.34.0",
+    "pino": "8.8.0",
+    "simple-card-validator": "^1.1.0",
+    "uuid": "^9.0.0"
+  }
+}
