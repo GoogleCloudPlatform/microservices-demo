@@ -13,7 +13,7 @@
 # limitations under the License.
 
 # https://mcr.microsoft.com/v2/dotnet/sdk/tags/list
-FROM mcr.microsoft.com/dotnet/sdk:7.0.102@sha256:80dce5844ecdc7197049a1f2418d29180cadca1ff575acc72c56361b79717279 as builder
+FROM mcr.microsoft.com/dotnet/sdk:7.0.103@sha256:b71f327441d566f5b07e01d120b15da1089eda98f9665101f6389a3f471b01a5 as builder
 WORKDIR /app
 COPY cartservice.csproj .
 RUN dotnet restore cartservice.csproj -r linux-musl-x64
