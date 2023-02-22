@@ -44,7 +44,7 @@ spec:
           allowPrivilegeEscalation: false
           capabilities:
             drop:
-              - ALL
+              - all
           privileged: false
           readOnlyRootFilesystem: true
         image: gcr.io/google-samples/microservices-demo/emailservice:v0.5.1
@@ -109,7 +109,7 @@ spec:
             allowPrivilegeEscalation: false
             capabilities:
               drop:
-                - ALL
+                - all
             privileged: false
             readOnlyRootFilesystem: true
           image: gcr.io/google-samples/microservices-demo/checkoutservice:v0.5.1
@@ -183,7 +183,7 @@ spec:
           allowPrivilegeEscalation: false
           capabilities:
             drop:
-              - ALL
+              - all
           privileged: false
           readOnlyRootFilesystem: true
         image: gcr.io/google-samples/microservices-demo/recommendationservice:v0.5.1
@@ -252,7 +252,7 @@ spec:
             allowPrivilegeEscalation: false
             capabilities:
               drop:
-                - ALL
+                - all
             privileged: false
             readOnlyRootFilesystem: true
           image: gcr.io/google-samples/microservices-demo/frontend:v0.5.1
@@ -359,7 +359,7 @@ spec:
           allowPrivilegeEscalation: false
           capabilities:
             drop:
-              - ALL
+              - all
           privileged: false
           readOnlyRootFilesystem: true
         image: gcr.io/google-samples/microservices-demo/paymentservice:v0.5.1
@@ -423,7 +423,7 @@ spec:
           allowPrivilegeEscalation: false
           capabilities:
             drop:
-              - ALL
+              - all
           privileged: false
           readOnlyRootFilesystem: true
         image: gcr.io/google-samples/microservices-demo/productcatalogservice:v0.5.1
@@ -487,7 +487,7 @@ spec:
           allowPrivilegeEscalation: false
           capabilities:
             drop:
-              - ALL
+              - all
           privileged: false
           readOnlyRootFilesystem: true
         image: gcr.io/google-samples/microservices-demo/cartservice:v0.5.1
@@ -566,7 +566,7 @@ spec:
           allowPrivilegeEscalation: false
           capabilities:
             drop:
-              - ALL
+              - all
           privileged: false
           readOnlyRootFilesystem: true
         image: busybox:latest
@@ -579,7 +579,7 @@ spec:
           allowPrivilegeEscalation: false
           capabilities:
             drop:
-              - ALL
+              - all
           privileged: false
           readOnlyRootFilesystem: true
         image: gcr.io/google-samples/microservices-demo/loadgenerator:v0.5.1
@@ -622,7 +622,7 @@ spec:
           allowPrivilegeEscalation: false
           capabilities:
             drop:
-              - ALL
+              - all
           privileged: false
           readOnlyRootFilesystem: true
         image: gcr.io/google-samples/microservices-demo/currencyservice:v0.5.1
@@ -686,7 +686,7 @@ spec:
           allowPrivilegeEscalation: false
           capabilities:
             drop:
-              - ALL
+              - all
           privileged: false
           readOnlyRootFilesystem: true
         image: gcr.io/google-samples/microservices-demo/shippingservice:v0.5.1
@@ -749,7 +749,7 @@ spec:
           allowPrivilegeEscalation: false
           capabilities:
             drop:
-              - ALL
+              - all
           privileged: false
           readOnlyRootFilesystem: true
         image: redis:alpine
@@ -816,7 +816,7 @@ spec:
           allowPrivilegeEscalation: false
           capabilities:
             drop:
-              - ALL
+              - all
           privileged: false
           readOnlyRootFilesystem: true
         image: gcr.io/google-samples/microservices-demo/adservice:v0.5.1
