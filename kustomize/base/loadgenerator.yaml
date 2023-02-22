@@ -64,7 +64,7 @@ spec:
           allowPrivilegeEscalation: false
           capabilities:
             drop:
-              - ALL
+              - all
           privileged: false
           readOnlyRootFilesystem: true
         image: gcr.io/google-samples/microservices-demo/loadgenerator:v0.5.1
