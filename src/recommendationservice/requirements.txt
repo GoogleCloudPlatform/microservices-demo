@@ -32,7 +32,7 @@ google-auth-httplib2==0.1.0
     #   google-cloud-profiler
 google-cloud-profiler==4.0.0
     # via -r requirements.in
-googleapis-common-protos==1.57.0
+googleapis-common-protos==1.58.0
     # via
     #   google-api-core
     #   opentelemetry-exporter-otlp-proto-grpc
