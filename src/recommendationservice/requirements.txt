@@ -108,7 +108,7 @@ six==1.16.0
     # via
     #   google-auth
     #   google-auth-httplib2
-typing-extensions==4.4.0
+typing-extensions==4.5.0
     # via opentelemetry-sdk
 uritemplate==4.1.1
     # via google-api-python-client
