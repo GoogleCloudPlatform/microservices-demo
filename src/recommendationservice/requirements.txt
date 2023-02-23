@@ -49,31 +49,31 @@ httplib2==0.21.0
     #   google-auth-httplib2
 idna==3.4
     # via requests
-opentelemetry-api==1.15.0
+opentelemetry-api==1.16.0
     # via
     #   opentelemetry-distro
     #   opentelemetry-exporter-otlp-proto-grpc
     #   opentelemetry-instrumentation
     #   opentelemetry-instrumentation-grpc
     #   opentelemetry-sdk
-opentelemetry-distro==0.36b0
+opentelemetry-distro==0.37b0
     # via -r requirements.in
-opentelemetry-exporter-otlp-proto-grpc==1.15.0
+opentelemetry-exporter-otlp-proto-grpc==1.16.0
     # via -r requirements.in
-opentelemetry-instrumentation==0.36b0
+opentelemetry-instrumentation==0.37b0
     # via
     #   opentelemetry-distro
     #   opentelemetry-instrumentation-grpc
-opentelemetry-instrumentation-grpc==0.36b0
+opentelemetry-instrumentation-grpc==0.37b0
     # via -r requirements.in
-opentelemetry-proto==1.15.0
+opentelemetry-proto==1.16.0
     # via opentelemetry-exporter-otlp-proto-grpc
-opentelemetry-sdk==1.15.0
+opentelemetry-sdk==1.16.0
     # via
     #   opentelemetry-distro
     #   opentelemetry-exporter-otlp-proto-grpc
     #   opentelemetry-instrumentation-grpc
-opentelemetry-semantic-conventions==0.36b0
+opentelemetry-semantic-conventions==0.37b0
     # via
     #   opentelemetry-instrumentation-grpc
     #   opentelemetry-sdk
