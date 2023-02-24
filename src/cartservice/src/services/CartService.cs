@@ -32,7 +32,7 @@ namespace cartservice.services
         public void emitLog(string messageEvent, string logLevel)
         {
             DateTime now = DateTime.UtcNow;
-            string timestamp = now.ToString("yyyy-MM-ddTHH:mm:ss.sssZ", CultureInfo.InvariantCulture);
+            string timestamp = now.ToString("yyyy-MM-ddTHH:mm:ss.fffZ", CultureInfo.InvariantCulture);
             string logMessage = "";
 
             switch (logLevel)
