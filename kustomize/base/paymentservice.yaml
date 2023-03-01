@@ -38,10 +38,10 @@ spec:
           allowPrivilegeEscalation: false
           capabilities:
             drop:
-              - all
+              - ALL
           privileged: false
           readOnlyRootFilesystem: true
-        image: gcr.io/google-samples/microservices-demo/paymentservice:v0.5.1
+        image: gcr.io/google-samples/microservices-demo/paymentservice:v0.5.2
         ports:
         - containerPort: 50051
         env:
