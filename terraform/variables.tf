@@ -54,20 +54,20 @@ variable "enable_autopilot" {
 
 variable "gke_node_pool" {
   type = object({
-    machine_type = string
-
-    oauth_scopes = list(string)
-
-    labels = map(string)
-
     initial_node_count = number
+    labels             = map(string)
+    machine_type       = string
 
     autoscaling = object({
-      min_node_count = number
       max_node_count = number
+      min_node_count = number
     })
   })
-  nullable    = true
   description = "Defines machine type and size of the default GKE cluster node pool"
-  default     = null
+  default = {
+    initial_node_count = 3
+    labels             = {}
+    machine_type       = "e2-medium"
+    autoscaling        = null
+  }
 }

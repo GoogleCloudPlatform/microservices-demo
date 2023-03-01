@@ -58,23 +58,26 @@ resource "google_container_cluster" "my_autopilot_cluster" {
 # TODO: merge my_autopilot_cluster and my_cluster resource into one after
 # fixing https://github.com/hashicorp/terraform-provider-google/issues/13857
 resource "google_container_cluster" "my_cluster" {
-  count = var.enable_autopilot == false && var.gke_node_pool != null ? 1 : 0
+  count = var.enable_autopilot == false ? 1 : 0
 
   name     = var.name
   location = var.region
 
   node_pool {
-    node_config {
-      machine_type = var.gke_node_pool.machine_type
-      oauth_scopes = var.gke_node_pool.oauth_scopes
-      labels       = var.gke_node_pool.labels
-    }
-
     initial_node_count = var.gke_node_pool.initial_node_count
 
-    autoscaling {
-      min_node_count = var.gke_node_pool.autoscaling.min_node_count
-      max_node_count = var.gke_node_pool.autoscaling.max_node_count
+    node_config {
+      machine_type = var.gke_node_pool.machine_type
+      labels       = var.gke_node_pool.labels
+      oauth_scopes = ["https://www.googleapis.com/auth/cloud-platform"]
+    }
+
+    dynamic "autoscaling" {
+      for_each = var.gke_node_pool.autoscaling != null ? [var.gke_node_pool.autoscaling] : []
+      content {
+        min_node_count = autoscaling.value.min_node_count
+        max_node_count = autoscaling.value.max_node_count
+      }
     }
   }
 
