@@ -51,7 +51,7 @@ spec:
           allowPrivilegeEscalation: false
           capabilities:
             drop:
-              - all
+              - ALL
           privileged: false
           readOnlyRootFilesystem: true
         image: busybox:latest
@@ -64,10 +64,10 @@ spec:
           allowPrivilegeEscalation: false
           capabilities:
             drop:
-              - all
+              - ALL
           privileged: false
           readOnlyRootFilesystem: true
-        image: gcr.io/google-samples/microservices-demo/loadgenerator:v0.5.1
+        image: gcr.io/google-samples/microservices-demo/loadgenerator:v0.5.2
         env:
         - name: FRONTEND_ADDR
           value: "frontend:80"
