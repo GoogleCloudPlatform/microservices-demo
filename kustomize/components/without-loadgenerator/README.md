@@ -9,11 +9,13 @@ Note: This Kustomize component has not been tested with [other Kustomize Compone
 ## Use this component
 
 From the `kustomize/` folder at the root level of this repository, execute this command:
+
 ```bash
 kustomize edit add component components/without-loadgenerator
 ```
 
 This will update the `kustomize/kustomization.yaml` file which could be similar to:
+
 ```yaml
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization

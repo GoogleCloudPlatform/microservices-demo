@@ -7,10 +7,12 @@ By default the `cartservice` app is serializing the data in an in-cluster Redis 
 ## Provision a Memorystore (Redis) instance
 
 Important notes:
+
 - You can connect to a Memorystore (Redis) instance from GKE clusters that are in the same region and use the same network as your instance.
 - You cannot connect to a Memorystore (Redis) instance from a GKE cluster without VPC-native/IP aliasing enabled.
 
 To provision a Memorystore (Redis) instance you can follow the following instructions:
+
 ```bash
 ZONE="<your-GCP-zone>"
 REGION="<your-GCP-region>"
@@ -31,12 +33,15 @@ _Note: You can also find in this repository the Terraform script to provision th
 To automate the deployment of Online Boutique integrated with Memorystore (Redis) you can leverage the following variation with [Kustomize](../..).
 
 From the `kustomize/` folder at the root level of this repository, execute this command:
-```
+
+```bash
 kustomize edit add component components/memorystore
 ```
+
 _Note: this Kustomize component will also remove the `redis-cart` `Deployment` and `Service` not used anymore._
 
 This will update the `kustomize/kustomization.yaml` file which could be similar to:
+
 ```yaml
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
@@ -47,6 +52,7 @@ components:
 ```
 
 Update current Kustomize manifest to target this Memorystore (Redis) instance.
+
 ```bash
 REDIS_IP=$(gcloud redis instances describe redis-cart --region=${REGION} --format='get(host)')
 REDIS_PORT=$(gcloud redis instances describe redis-cart --region=${REGION} --format='get(port)')

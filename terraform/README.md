@@ -23,12 +23,14 @@ This page walks you through the steps required to deploy the [Online Boutique](h
 ## Deploy the sample application
 
 1. Clone the Github repository.
-    ```
+
+    ```bash
     git clone https://github.com/GoogleCloudPlatform/microservices-demo.git
     ```
 
 1. Move into the `terraform/` directory which contains the Terraform installation scripts.
-    ```
+
+    ```bash
     cd microservices-demo/terraform
     ```
 
@@ -37,17 +39,20 @@ This page walks you through the steps required to deploy the [Online Boutique](h
 1. (Optional) If you want to provision a [Google Cloud Memorystore (Redis)](https://cloud.google.com/memorystore) instance, you can change the value of `memorystore = false` to `memorystore = true` in this `terraform.tfvars` file.
 
 1. Initialize Terraform.
-    ```
+
+    ```bash
     terraform init
     ```
 
 1. See what resources will be created.
-    ```
+
+    ```bash
     terraform plan
     ```
 
 1. Create the resources and deploy the sample.
-    ```
+
+    ```bash
     terraform apply
     ```
 
@@ -58,7 +63,8 @@ This page walks you through the steps required to deploy the [Online Boutique](h
 Once the Terraform script has finished, you can locate the frontend's external IP address to access the sample application.
 
 - Option 1:
-    ```
+
+    ```bash
     kubectl get service frontend-external | awk '{print $4}'
     ```
 
@@ -73,8 +79,9 @@ To remove the individual resources created for by Terraform without deleting the
 1. Navigate to the `terraform/` directory.
 
 1. Run the following command:
-    ```
-    terraform destroy
-    ```
 
-    1. If there is a confirmation prompt, type `yes` and hit Enter/Return.
+   ```bash
+   terraform destroy
+   ```
+
+   1. If there is a confirmation prompt, type `yes` and hit Enter/Return.
