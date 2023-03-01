@@ -13,10 +13,13 @@
 // limitations under the License.
 
 using System;
+using Grpc.Core;
 using Npgsql;
 using Microsoft.Extensions.Configuration;
 using System.Threading.Tasks;
-
+using Google.Api.Gax.ResourceNames;
+using Google.Cloud.SecretManager.V1;
+ 
 namespace cartservice.cartstore
 {
     public class AlloyDBCartStore : ICartStore
@@ -24,11 +27,18 @@ namespace cartservice.cartstore
         private readonly string tableName;
         private readonly string connectionString;
 
-        public SpannerCartStore(IConfiguration configuration)
+        public AlloyDBCartStore(IConfiguration configuration)
         {
-            Console.WriteLine("TEST");
-            // TODO: Don't use passwords in the environment. We should be using KMS
-            string alloyDBPassword = configuration["PGPASSWORD"];
+            // Create a Cloud Secrets client.
+            SecretManagerServiceClient client = SecretManagerServiceClient.Create();
+            var projectId = configuration["PROJECT_ID"];
+            var secretId = configuration["ALLOYDB_SECRET_NAME"];
+            SecretVersionName secretVersionName = new SecretVersionName(projectId, secretId, "latest");
+
+            AccessSecretVersionResponse result = client.AccessSecretVersion(secretVersionName);
+            // Convert the payload to a string. Payloads are bytes by default.
+            string alloyDBPassword = result.Payload.Data.ToStringUtf8().TrimEnd('\r', '\n');
+        
             // TODO: Create a separate user for connecting within the application
             // rather than using our superuser
             string alloyDBUser = "postgres";
@@ -44,7 +54,6 @@ namespace cartservice.cartstore
                                alloyDBPassword  +
                                ";Database="     +
                                databaseName;
-            Console.WriteLine($"Built AlloyDB primary instance connection string: '{connectionString}'");
 
             tableName = configuration["ALLOYDB_TABLE_NAME"];
         }
@@ -59,25 +68,28 @@ namespace cartservice.cartstore
 
                 // Fetch the current quantity for our userId/productId tuple
                 var fetchCmd = $"SELECT quantity FROM {tableName} WHERE userID='{userId}' AND productID='{productId}'";
-                await using (var cmd = dataSource.CreateCommand(fetchCmd)
-                await using (var reader = await cmd.ExecuteReaderAsync())
+                var currentQuantity = 0;
+                var cmdRead = dataSource.CreateCommand(fetchCmd);
+                await using (var reader = await cmdRead.ExecuteReaderAsync())
                 {
-                    currentQuantity = "";
                     while (await reader.ReadAsync())
-                        currentQuantity += reader.GetString(0);
+                        currentQuantity += reader.GetInt32(0);
                 }
                 var totalQuantity = quantity + currentQuantity;
 
-                var insertCmd = $"INSERT INTO {tableName} (userId, productId, quantity) VALUES ({us    erId}, {productId}, {totalQuantity})";
-                await using (var cmd = dataSource.CreateCommand(insertCmd)
+                var insertCmd = $"INSERT INTO {tableName} (userId, productId, quantity) VALUES ('{userId}', '{productId}', {totalQuantity})";
+                await using (var cmdInsert = dataSource.CreateCommand(insertCmd))
                 {
-                    return await cmd.ExecuteNonQueryAsync();
+                    await Task.Run(() =>
+                    {
+                        return cmdInsert.ExecuteNonQueryAsync();
+                    });
                 }
             }
             catch (Exception ex)
             {
                 throw new RpcException(
-                    new Status(StatusCode.FailedPrecondition, $"Can't access cart storage at {databaseString}. {ex}"));
+                    new Status(StatusCode.FailedPrecondition, $"Can't access cart storage at {connectionString}. {ex}"));
             }
         }
 
@@ -90,27 +102,32 @@ namespace cartservice.cartstore
             try
             {
                 await using var dataSource = NpgsqlDataSource.Create(connectionString);
+
                 var cartFetchCmd = $"SELECT productId, quantity FROM {tableName} WHERE userId = '{userId}'";
-                await using (var cmd = dataSource.CreateCommand(cartFetchCmd);
-                await using (var reader = await cmd.ExecutReaderAsync())
+                var cmd = dataSource.CreateCommand(cartFetchCmd);
+                await using (var reader = await cmd.ExecuteReaderAsync())
                 {
                     while (await reader.ReadAsync())
                     {
-                        Hipstership.CartItem item = new()
+                        Hipstershop.CartItem item = new()
                         {
-                            ProductId = reader.GetString(0);
-                            Quantity = reader.GetString(1);
-                        }
+                            ProductId = reader.GetString(0),
+                            Quantity = reader.GetInt32(1)
+                        };
                         cart.Items.Add(item);
                     }
-                    return cart;
                 }
+                await Task.Run(() =>
+                {
+                    return cart;
+                });
             }
             catch (Exception ex)
             {
                 throw new RpcException(
-                    new Status(StatusCode.FailedPrecondition, $"Can't access cart storage at {databaseString}. {ex}"));
+                    new Status(StatusCode.FailedPrecondition, $"Can't access cart storage at {connectionString}. {ex}"));
             }
+            return cart;
         }
 
 
@@ -121,16 +138,19 @@ namespace cartservice.cartstore
             try
             {
                 await using var dataSource = NpgsqlDataSource.Create(connectionString);
-                var deleteCmd = $"DELETE FROM {tableName} WHERE userID = userId";
-                await using (var cmd = dataSource.CreateCommand(deleteCmd)
+                var deleteCmd = $"DELETE FROM {tableName} WHERE userID = '{userId}'";
+                await using (var cmd = dataSource.CreateCommand(deleteCmd))
                 {
-                    return await cmd.ExecuteNonQueryAsync();
+                    await Task.Run(() =>
+                    {
+                        return cmd.ExecuteNonQueryAsync();
+                    });
                 }
             }
             catch (Exception ex)
             {
                 throw new RpcException(
-                    new Status(StatusCode.FailedPrecondition, $"Can't access cart storage at {databaseString}. {ex}"));
+                    new Status(StatusCode.FailedPrecondition, $"Can't access cart storage at {connectionString}. {ex}"));
             }
         }
 

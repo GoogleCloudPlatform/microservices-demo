@@ -43,7 +43,7 @@ namespace cartservice
             {
                 services.AddSingleton<ICartStore, SpannerCartStore>();
             }
-            else if (!string.IsNullOrEmpty(alloyDBConnectionString)
+            else if (!string.IsNullOrEmpty(alloyDBConnectionString))
             {
                 Console.WriteLine("Creating AlloyDB cart store");
                 services.AddSingleton<ICartStore, AlloyDBCartStore>();

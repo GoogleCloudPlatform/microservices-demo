@@ -32,7 +32,15 @@ patchesStrategicMerge:
             - name: REDIS_ADDR
               $patch: delete
             - name: ALLOYDB_PRIMARY_IP
-              value: 10.70.0.22
+              value: ALLOYDB_PRIMARY_IP_VAL
+            - name: ALLOYDB_DATABASE_NAME
+              value: ALLOYDB_DATABASE_NAME_VAL
+            - name: ALLOYDB_TABLE_NAME
+              value: ALLOYDB_TABLE_NAME_VAL
+            - name: ALLOYDB_SECRET_NAME
+              value: ALLOYDB_SECRET_NAME_VAL
+            - name: PROJECT_ID
+              value: PROJECT_ID_VAL
 # cartservice - add the GSA annotation for the cartservice KSA
 - |-
   apiVersion: v1

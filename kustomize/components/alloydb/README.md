@@ -19,10 +19,6 @@ USE_GKE_GCLOUD_AUTH_PLUGIN=True
 
 ALLOYDB_NETWORK=default
 ALOYDB_SERVICE_NAME=onlineboutique-network-range
-
-# NOTE: In a perfect world this would be in KMS rather than an env var. Do not use <password> as your password. Create a strong password to be used.
-PGPASSWORD=<password>
-
 ALOYDB_CLUSTER_NAME=onlineboutique-cluster
 ALLOYDB_INSTANCE_NAME=onlineboutique-instance
 
@@ -35,12 +31,20 @@ ALLOYDB_TABLE_NAME=cart_items
 ALLOYDB_USER_GSA_NAME=alloydb-user-sa
 ALLOYDB_USER_GSA_ID=${ALLOYDB_USER_GSA_NAME}@${PROJECT_ID}.iam.gserviceaccount.com
 CARTSERVICE_KSA_NAME=cartservice
-
+ALLOYDB_SECRET_NAME=alloydb-secret
+# PGPASSWORD needs to be set in order to run the psql from the CLI easily. The value for this
+# needs to be set behind the Secret mentioned above
+PGPASSWORD=<password>
 
 To provision an AlloyDB instance you can follow the following instructions:
 ```bash
 gcloud services enable alloydb.googleapis.com
 gcloud services enable servicenetworking.googleapis.com
+gcloud services enable secretmanager.googleapis.com
+
+# Set our DB credentials behind the secret. Replace <password> with whatever you want
+# to use as the credentials for the database. Don't use $ in the password.
+echo <password> | gcloud secrets create ${ALLOYDB_SECRET_NAME} --data-file=-
 
 # Setting up needed service connection
 gcloud compute addresses create ${ALLOYDB_SERVICE_NAME} \
@@ -88,12 +92,13 @@ psql -h ${ALLOYDB_PRIMARY_IP} -U postgres -d ${ALLOYDB_DATABASE_NAME} -c "CREATE
 
 **Important note:** Your GKE cluster should have [Workload Identity enabled](https://cloud.google.com/kubernetes-engine/docs/how-to/workload-identity#enable).
 
-As a good practice, let's create a dedicated least privilege Google Service Account to allow the `cartservice` to communicate with the Spanner database:
+As a good practice, let's create a dedicated least privilege Google Service Account to allow the `cartservice` to communicate with the AlloyDB database and grab the database password from the Secret manager.:
 ```bash
 gcloud iam service-accounts create ${ALLOYDB_USER_GSA_NAME} \
     --display-name=${ALLOYDB_USER_GSA_NAME}
 
 gcloud projects add-iam-policy-binding ${PROJECT_ID} --member=serviceAccount:${ALLOYDB_USER_GSA_ID} --role=roles/alloydb.client
+gcloud projects add-iam-policy-binding ${PROJECT_ID} --member=serviceAccount:${ALLOYDB_USER_GSA_ID} --role=roles/secretmanager.secretAccessor
 
 gcloud iam service-accounts add-iam-policy-binding ${ALLOYDB_USER_GSA_ID} \
     --member "serviceAccount:${PROJECT_ID}.svc.id.goog[default/${CARTSERVICE_KSA_NAME}]" \
@@ -124,8 +129,12 @@ components:
 
 Update current Kustomize manifest to target this Spanner database.
 ```bash
+sed -i "s/PROJECT_ID_VAL/${PROJECT_ID}/g" components/alloydb/kustomization.yaml
 sed -i "s/ALLOYDB_PRIMARY_IP_VAL/${ALLOYDB_PRIMARY_IP}/g" components/alloydb/kustomization.yaml
 sed -i "s/ALLOYDB_USER_GSA_ID/${ALLOYDB_USER_GSA_ID}/g" components/alloydb/kustomize.yaml
+sed -i "s/ALLOYDB_DATABASE_NAME_VAL/${ALLOYDB_DATABASE_NAME}/g" components/alloydb/kustomization.yaml
+sed -i "s/ALLOYDB_TABLE_NAME_VAL/${ALLOYDB_TABLE_NAME}/g" components/alloydb/kustomization.yaml
+sed -i "s/ALLOYDB_SECRET_NAME_VAL/${ALLOYDB_SECRET_NAME}/g" components/alloydb/kustomization.yaml
 ```
 
 You can locally render these manifests by running `kubectl kustomize .` as well as deploying them by running `kubectl apply -k .`.
@@ -138,4 +147,6 @@ gcloud compute addresses delete ${ALLOYDB_SERVICE_NAME} --global
 gcloud alloydb clusters delete ${ALLOYDB_CLUSTER_NAME} --force
 
 gcloud iam service-accounts delete ${ALLOYDB_USER_GSA_ID}
+
+gcloud secrets delete ${ALLOYDB_SECRET_NAME}
 ```
