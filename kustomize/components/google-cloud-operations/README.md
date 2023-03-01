@@ -84,3 +84,27 @@ Currently, this component adds a single collector service which collects traces 
 ![Collector Architecture Diagram](collector-model.png)
 
 If you wish to experiment with different backends, you can modify the appropriate lines in [otel-collector.yaml](otel-collector.yaml) to export traces or metrics to a different backend.  See the [OpenTelemetry docs](https://opentelemetry.io/docs/collector/configuration/) for more details.
+
+## Workload Identity
+If you are running this sample on GKE, your GKE cluster may be configured to use [Workload Identity](https://cloud.google.com/kubernetes-engine/docs/how-to/workload-identity) to manage access to Google Cloud APIs (like Cloud Trace). If this is the case, you may not see traces properly exported, or may see an error message like `failed to export to Google Cloud Trace: rpc error: code = PermissionDenied desc = The caller does not have permission` logged by your `opentelemetrycollector` Pod(s). In order to export traces with such a setup, you need to associate the Kubernetes [ServiceAccount](https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/) (`default/default`) with your [default compute service account](https://cloud.google.com/compute/docs/access/service-accounts#default_service_account) on Google Cloud (or a custom Google Cloud service account you may create for this purpose).
+
+* To get the email address associated with your Google service account, check in the IAM section of the Cloud Console.  Or run the following command in your terminal:
+```
+gcloud iam service-accounts list
+```
+* Then, allow the Kubernetes service account to act as your Google service account with the following command (using your own `PROJECT_ID` and the `GSA_EMAIL` you found in the previous step):
+```
+gcloud iam service-accounts add-iam-policy-binding ${GSA_EMAIL} \
+  --role roles/iam.workloadIdentityUser \
+  --member "serviceAccount:${PROJECT_ID}.svc.id.goog[default/default]"
+```
+* Annotate your Kubernetes service account (`default/default` for the `default` namespace) to use the Google IAM service account:
+```
+kubectl annotate serviceaccount default \
+  iam.gke.io/gcp-service-account=${GSA_EMAIL}
+```
+* Finally, restart your `opentelemetrycollector` deployment to reflect the new settings:
+```
+kubectl rollout restart deployment opentelemetrycollector
+```
+When the new Pod rolls out, you should start to see traces appear in the cloud console.

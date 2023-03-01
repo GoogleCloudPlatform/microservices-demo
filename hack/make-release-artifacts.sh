@@ -92,6 +92,11 @@ mk_istio_manifests() {
 mk_kustomize_base() {
   for file_to_copy in ./kubernetes-manifests/*.yaml
   do
+    # Don't copy kustomization.yaml.
+    if [[ $file_to_copy == "./kubernetes-manifests/kustomization.yaml" ]]; then
+      continue
+    fi
+
     cp ${file_to_copy} ./kustomize/base/
 
     service_name="$(basename "${file_to_copy}" .yaml)"

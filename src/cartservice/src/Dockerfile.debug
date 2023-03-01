@@ -13,10 +13,14 @@
 # limitations under the License.
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 FROM mcr.microsoft.com/dotnet/sdk:7.0@sha256:81383de6f3bf443625eb277b203f6141f3496fd5a9e1b9b45a4c725266c9d92a AS build
 =======
 FROM mcr.microsoft.com/dotnet/sdk:7.0@sha256:7864257426b137231c0cf13cee1261c2b029f879ebcacea077de631404ba6447 AS build
 >>>>>>> b2ef53f7ba9d222201d53cb40046b9d07c8d77c6
+=======
+FROM mcr.microsoft.com/dotnet/sdk:7.0@sha256:b71f327441d566f5b07e01d120b15da1089eda98f9665101f6389a3f471b01a5 AS build
+>>>>>>> a7a8201a78154a67a439ceb7f1a0ca7478547bd1
 WORKDIR /app
 COPY . .
 RUN dotnet restore cartservice.csproj
@@ -27,10 +31,14 @@ RUN dotnet publish cartservice.csproj -c Debug -o /out
 
 # Building final image used in running container
 <<<<<<< HEAD
+<<<<<<< HEAD
 FROM mcr.microsoft.com/dotnet/aspnet:7.0@sha256:442e00363ed50e17c5104305b658d5d41cf857bbd9d81e9829bc70754169d995 AS final
 =======
 FROM mcr.microsoft.com/dotnet/aspnet:7.0@sha256:00c2cfd910760eac2f1e2656bfb2db14937d73cd1858abae131046ad65a926b2 AS final
 >>>>>>> b2ef53f7ba9d222201d53cb40046b9d07c8d77c6
+=======
+FROM mcr.microsoft.com/dotnet/aspnet:7.0@sha256:59785b036995c76a23391b39cf79be8926d31e5d74115e4b0a175ccadfcd6e4a AS final
+>>>>>>> a7a8201a78154a67a439ceb7f1a0ca7478547bd1
 # Installing procps on the container to enable debugging of .NET Core
 RUN apt-get update \
     && apt-get install -y unzip procps wget
