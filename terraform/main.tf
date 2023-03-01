@@ -21,11 +21,7 @@ locals {
     "cloudprofiler.googleapis.com"
   ]
   memorystore_apis = ["redis.googleapis.com"]
-  
-  # Variables cluster_list and cluster_name are used for an implicit dependency
-  # between module "gcloud" and resource "google_container_cluster" 
-  cluster_id_parts = split("/", google_container_cluster.my_cluster.id)
-  cluster_name = element(local.cluster_id_parts, length(local.cluster_id_parts) - 1)
+  cluster_name     = var.enable_autopilot == true ? google_container_cluster.my_autopilot_cluster[0].name : google_container_cluster.my_cluster[0].name
 }
 
 # Enable Google Cloud APIs
@@ -41,7 +37,9 @@ module "enable_google_apis" {
 }
 
 # Create GKE cluster
-resource "google_container_cluster" "my_cluster" {
+resource "google_container_cluster" "my_autopilot_cluster" {
+  count = var.enable_autopilot == true ? 1 : 0
+
   name     = var.name
   location = var.region
 
@@ -50,6 +48,34 @@ resource "google_container_cluster" "my_cluster" {
 
   # Setting an empty ip_allocation_policy to allow autopilot cluster to spin up correctly
   ip_allocation_policy {
+  }
+
+  depends_on = [
+    module.enable_google_apis
+  ]
+}
+
+# TODO: merge my_autopilot_cluster and my_cluster resource into one after
+# fixing https://github.com/hashicorp/terraform-provider-google/issues/13857
+resource "google_container_cluster" "my_cluster" {
+  count = var.enable_autopilot == false && var.gke_node_pool != null ? 1 : 0
+
+  name     = var.name
+  location = var.region
+
+  node_pool {
+    node_config {
+      machine_type = var.gke_node_pool.machine_type
+      oauth_scopes = var.gke_node_pool.oauth_scopes
+      labels       = var.gke_node_pool.labels
+    }
+
+    initial_node_count = var.gke_node_pool.initial_node_count
+
+    autoscaling {
+      min_node_count = var.gke_node_pool.autoscaling.min_node_count
+      max_node_count = var.gke_node_pool.autoscaling.max_node_count
+    }
   }
 
   depends_on = [
@@ -66,8 +92,9 @@ module "gcloud" {
   additional_components = ["kubectl", "beta"]
 
   create_cmd_entrypoint = "gcloud"
-  # Use local variable cluster_name for an implicit dependency on resource "google_container_cluster" 
-  create_cmd_body = "container clusters get-credentials ${local.cluster_name} --zone=${var.region}"
+  # Module does not support explicit dependency
+  # Enforce implicit dependency through use of local variable
+  create_cmd_body = "container clusters get-credentials ${local.cluster_name} --zone=${var.region} --project=${var.gcp_project_id}"
 }
 
 # Apply YAML kubernetes-manifest configurations

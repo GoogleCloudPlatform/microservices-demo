@@ -11,11 +11,13 @@ To use `NetworkPolicies` on a local cluster such as [minikube](https://minikube.
 To automate the deployment of Online Boutique integrated with fine granular `NetworkPolicies` (one per `Deployment`), you can leverage the following variation with [Kustomize](../..).
 
 From the `kustomize/` folder at the root level of this repository, execute this command:
+
 ```bash
 kustomize edit add component components/network-policies
 ```
 
 This will update the `kustomize/kustomization.yaml` file which could be similar to:
+
 ```yaml
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
@@ -28,11 +30,13 @@ components:
 You can locally render these manifests by running `kubectl kustomize .` as well as deploying them by running `kubectl apply -k .`.
 
 Once deployed, you can verify that the `NetworkPolicies` are successfully deployed:
+
 ```bash
 kubectl get networkpolicy
 ```
 
 The output could be similar to:
+
 ```output
 NAME                    POD-SELECTOR                AGE
 adservice               app=adservice               2m58s

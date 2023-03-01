@@ -7,14 +7,17 @@ The current container images of the Online Boutique apps contains the [grpc-heal
 To automate the deployment of Online Boutique integrated with native gRPC probes you can leverage the following variation with [Kustomize](../..).
 
 From the `kustomize/` folder at the root level of this repository, execute this command:
+
 ```bash
 ONLINE_BOUTIQUE_VERSION=$(curl -s https://api.github.com/repos/GoogleCloudPlatform/microservices-demo/releases | jq -r '[.[]] | .[0].tag_name')
 sed -i "s/ONLINE_BOUTIQUE_VERSION/$ONLINE_BOUTIQUE_VERSION/g" components/native-grpc-health-check/kustomization.yaml
 kustomize edit add component components/native-grpc-health-check
 ```
+
 _Note: we are applying the `-native-grpc-probes` tag suffix to all the container images, it's a prebuilt image without the [grpc-health-probe](https://github.com/grpc-ecosystem/grpc-health-probe) binary since the version 0.4.0 of Online Boutique._
 
 This will update the `kustomize/kustomization.yaml` file which could be similar to:
+
 ```yaml
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
