@@ -21,7 +21,7 @@ locals {
     "cloudprofiler.googleapis.com"
   ]
   memorystore_apis = ["redis.googleapis.com"]
-  cluster_name     = var.enable_autopilot == true ? google_container_cluster.my_autopilot_cluster[0].name : google_container_cluster.my_cluster[0].name
+  cluster_name     = google_container_cluster.my_cluster.name
 }
 
 # Enable Google Cloud APIs
@@ -37,8 +37,7 @@ module "enable_google_apis" {
 }
 
 # Create GKE cluster
-resource "google_container_cluster" "my_autopilot_cluster" {
-  count = var.enable_autopilot == true ? 1 : 0
+resource "google_container_cluster" "my_cluster" {
 
   name     = var.name
   location = var.region
@@ -48,37 +47,6 @@ resource "google_container_cluster" "my_autopilot_cluster" {
 
   # Setting an empty ip_allocation_policy to allow autopilot cluster to spin up correctly
   ip_allocation_policy {
-  }
-
-  depends_on = [
-    module.enable_google_apis
-  ]
-}
-
-# TODO: merge my_autopilot_cluster and my_cluster resource into one after
-# fixing https://github.com/hashicorp/terraform-provider-google/issues/13857
-resource "google_container_cluster" "my_cluster" {
-  count = var.enable_autopilot == false ? 1 : 0
-
-  name     = var.name
-  location = var.region
-
-  node_pool {
-    initial_node_count = var.gke_node_pool.initial_node_count
-
-    node_config {
-      machine_type = var.gke_node_pool.machine_type
-      labels       = var.gke_node_pool.labels
-      oauth_scopes = ["https://www.googleapis.com/auth/cloud-platform"]
-    }
-
-    dynamic "autoscaling" {
-      for_each = var.gke_node_pool.autoscaling != null ? [var.gke_node_pool.autoscaling] : []
-      content {
-        min_node_count = autoscaling.value.min_node_count
-        max_node_count = autoscaling.value.max_node_count
-      }
-    }
   }
 
   depends_on = [
@@ -104,7 +72,7 @@ module "gcloud" {
 resource "null_resource" "apply_deployment" {
   provisioner "local-exec" {
     interpreter = ["bash", "-exc"]
-    command     = "kubectl apply -k ${var.filepath_manifest}"
+    command     = "kubectl apply -k ${var.filepath_manifest} -n ${var.namespace}"
   }
 
   depends_on = [
