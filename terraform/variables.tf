@@ -45,3 +45,29 @@ variable "memorystore" {
   type        = bool
   description = "If true, Online Boutique's in-cluster Redis cache will be replaced with a Google Cloud Memorystore Redis cache"
 }
+
+variable "enable_autopilot" {
+  type        = bool
+  description = "If true, GKE cluster is provisioned in autopilot mode. Provisioning in autopilot mode ignores values set in 'gke_node_pool' variable"
+  default     = true
+}
+
+variable "gke_node_pool" {
+  type = object({
+    machine_type = string
+
+    oauth_scopes = list(string)
+
+    labels = map(string)
+
+    initial_node_count = number
+
+    autoscaling = object({
+      min_node_count = number
+      max_node_count = number
+    })
+  })
+  nullable    = true
+  description = "Defines machine type and size of the default GKE cluster node pool"
+  default     = null
+}

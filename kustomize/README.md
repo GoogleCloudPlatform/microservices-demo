@@ -1,4 +1,4 @@
-# Deploy Online Boutique variations with Kustomize
+# Use Online Boutique with Kustomize
 
 This page contains instructions on deploying variations of the [Online Boutique](https://github.com/GoogleCloudPlatform/microservices-demo) sample application using [Kustomize](https://kustomize.io/). Each variations is designed as a [**Kustomize component**](https://github.com/kubernetes-sigs/kustomize/blob/master/examples/components.md), so multiple variations can be composed together in the deployment.
 
@@ -14,31 +14,31 @@ You need to have a Kubernetes cluster where you will deploy the Online Boutique'
 
 1. From the root folder of this repository, navigate to the `kustomize/` directory.
 
-    ```
+    ```bash
     cd kustomize/
     ```
 
 1. See what the default Kustomize configuration defined by `kustomize/kustomization.yaml` will generate (without actually deploying them yet).
 
-    ```
+    ```bash
     kubectl kustomize .
     ```
 
 1. Apply the default Kustomize configuration (`kustomize/kustomization.yaml`).
 
-    ```
+    ```bash
     kubectl apply -k .
     ```
 
 1. Wait for all Pods to show `STATUS` of `Running`.
 
-    ```
+    ```bash
     kubectl get pods
     ```
 
     The output should be similar to the following:
 
-    ```
+    ```terminal
     NAME                                     READY   STATUS    RESTARTS   AGE
     adservice-76bdd69666-ckc5j               1/1     Running   0          2m58s
     cartservice-66d497c6b7-dp5jr             1/1     Running   0          2m59s
@@ -57,7 +57,7 @@ You need to have a Kubernetes cluster where you will deploy the Online Boutique'
 
 1. Access the web frontend in a browser using the frontend's `EXTERNAL_IP`.
 
-    ```
+    ```bash
     kubectl get service frontend-external | awk '{print $4}'
     ```
 
@@ -94,12 +94,14 @@ To customize Online Boutique with its variations, you need to update the default
 #### Use `kustomize edit` to select variations
 
 Here is an example with the [**Cymbal Shops Branding**](components/cymbal-branding) variation, from the `kustomize/` folder, run the command below:
-```
+
+```bash
 kustomize edit add component components/cymbal-branding
 ```
 
 You could now combine it with other variations, like for example with the [**Google Cloud Operations**](components/google-cloud-operations) variation:
-```
+
+```bash
 kustomize edit add component components/google-cloud-operations
 ```
 
@@ -108,7 +110,8 @@ kustomize edit add component components/google-cloud-operations
 Like explained earlier, you can locally render these manifests by running `kubectl kustomize .` as well as deploying them by running `kubectl apply -k .`.
 
 So for example, the associated `kustomization.yaml` could look like:
-```
+
+```yaml
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
@@ -121,7 +124,8 @@ components:
 ### Use remote Kustomize targets
 
 Kustomize allows you to reference public remote resources so the `kustomization.yaml` could look like:
-```
+
+```yaml
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
@@ -130,4 +134,5 @@ components:
 - github.com/GoogleCloudPlatform/microservices-demo/kustomize/components/cymbal-branding
 - github.com/GoogleCloudPlatform/microservices-demo/kustomize/components/google-cloud-operations
 ```
+
 Learn more about [Kustomize remote targets](https://github.com/kubernetes-sigs/kustomize/blob/master/examples/remoteBuild.md).

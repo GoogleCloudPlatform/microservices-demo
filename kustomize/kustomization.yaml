@@ -27,3 +27,4 @@ components:
 # - components/container-images-tag-suffix
 # - components/container-images-registry
 # - components/native-grpc-health-check
+# - components/without-loadgenerator
