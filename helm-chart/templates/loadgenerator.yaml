@@ -63,10 +63,10 @@ spec:
           allowPrivilegeEscalation: false
           capabilities:
             drop:
-              - all
+              - ALL
           privileged: false
           readOnlyRootFilesystem: true
-        image: busybox:latest
+        image: busybox:latest@sha256:7b3ccabffc97de872a30dfd234fd972a66d247c8cfc69b0550f276481852627c
         env:
         - name: FRONTEND_ADDR
           value: "{{ .Values.frontend.name }}:80"
@@ -77,7 +77,7 @@ spec:
           allowPrivilegeEscalation: false
           capabilities:
             drop:
-              - all
+              - ALL
           privileged: false
           readOnlyRootFilesystem: true
         image: {{ .Values.images.repository }}/{{ .Values.loadGenerator.name }}:{{ .Values.images.tag | default .Chart.AppVersion }}

@@ -49,7 +49,7 @@ spec:
             allowPrivilegeEscalation: false
             capabilities:
               drop:
-                - all
+                - ALL
             privileged: false
             readOnlyRootFilesystem: true
           image: {{ .Values.images.repository }}/{{ .Values.frontend.name }}:{{ .Values.images.tag | default .Chart.AppVersion }}
@@ -168,7 +168,7 @@ spec:
     {{- if .Values.frontend.virtualService.create }}
     - namespaceSelector:
         matchLabels:
-          name: {{ .Values.frontend.virtualService.gateway.namespace }}
+          kubernetes.io/metadata.name: {{ .Values.frontend.virtualService.gateway.namespace }}
       podSelector:
         matchLabels:
           {{ .Values.frontend.virtualService.gateway.labelKey }}: {{ .Values.frontend.virtualService.gateway.labelValue }}

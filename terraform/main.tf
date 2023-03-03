@@ -21,11 +21,7 @@ locals {
     "cloudprofiler.googleapis.com"
   ]
   memorystore_apis = ["redis.googleapis.com"]
-  
-  # Variables cluster_list and cluster_name are used for an implicit dependency
-  # between module "gcloud" and resource "google_container_cluster" 
-  cluster_id_parts = split("/", google_container_cluster.my_cluster.id)
-  cluster_name = element(local.cluster_id_parts, length(local.cluster_id_parts) - 1)
+  cluster_name     = google_container_cluster.my_cluster.name
 }
 
 # Enable Google Cloud APIs
@@ -42,6 +38,7 @@ module "enable_google_apis" {
 
 # Create GKE cluster
 resource "google_container_cluster" "my_cluster" {
+
   name     = var.name
   location = var.region
 
@@ -66,15 +63,16 @@ module "gcloud" {
   additional_components = ["kubectl", "beta"]
 
   create_cmd_entrypoint = "gcloud"
-  # Use local variable cluster_name for an implicit dependency on resource "google_container_cluster" 
-  create_cmd_body = "container clusters get-credentials ${local.cluster_name} --zone=${var.region}"
+  # Module does not support explicit dependency
+  # Enforce implicit dependency through use of local variable
+  create_cmd_body = "container clusters get-credentials ${local.cluster_name} --zone=${var.region} --project=${var.gcp_project_id}"
 }
 
 # Apply YAML kubernetes-manifest configurations
 resource "null_resource" "apply_deployment" {
   provisioner "local-exec" {
     interpreter = ["bash", "-exc"]
-    command     = "kubectl apply -k ${var.filepath_manifest}"
+    command     = "kubectl apply -k ${var.filepath_manifest} -n ${var.namespace}"
   }
 
   depends_on = [

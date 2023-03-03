@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-FROM eclipse-temurin:19@sha256:1037fb7fa9f809c67b8d12ceab5221cebcef5acc792ba183050a2d50da459e2f as builder
+FROM eclipse-temurin:19@sha256:a0901c0803060995ca6e13d19756e3100987101ac33e3d7eb091d5477374282c as builder
 
 WORKDIR /app
 
@@ -44,6 +44,6 @@ ENTRYPOINT ["/app/build/install/hipstershop/bin/AdService"]
 FROM without-grpc-health-probe-bin
 
 # renovate: datasource=github-releases depName=grpc-ecosystem/grpc-health-probe
-RUN GRPC_HEALTH_PROBE_VERSION=v0.4.14 && \
-    wget -qO/bin/grpc_health_probe https://github.com/grpc-ecosystem/grpc-health-probe/releases/download/${GRPC_HEALTH_PROBE_VERSION}/grpc_health_probe-linux-amd64 && \
+ENV GRPC_HEALTH_PROBE_VERSION=v0.4.15
+RUN wget -qO/bin/grpc_health_probe https://github.com/grpc-ecosystem/grpc-health-probe/releases/download/${GRPC_HEALTH_PROBE_VERSION}/grpc_health_probe-linux-amd64 && \
     chmod +x /bin/grpc_health_probe
