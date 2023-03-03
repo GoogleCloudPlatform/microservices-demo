@@ -14,10 +14,10 @@
 
 output "cluster_location" {
   description = "Location of the cluster"
-  value       = var.enable_autopilot == true ? resource.google_container_cluster.my_autopilot_cluster[0].location : resource.google_container_cluster.my_cluster[0].location
+  value       = resource.google_container_cluster.my_cluster.location
 }
 
 output "cluster_name" {
   description = "Name of the cluster"
-  value       = var.name
+  value       = resource.google_container_cluster.my_cluster.name
 }
