@@ -27,3 +27,4 @@ resources:
 - recommendationservice.yaml
 - redis.yaml
 - shippingservice.yaml
+- netpols.yaml
