@@ -114,7 +114,7 @@ uritemplate==4.1.1
     # via google-api-python-client
 urllib3==1.26.14
     # via requests
-wrapt==1.14.1
+wrapt==1.15.0
     # via
     #   deprecated
     #   opentelemetry-instrumentation
