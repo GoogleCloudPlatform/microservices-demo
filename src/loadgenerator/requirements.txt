@@ -39,7 +39,7 @@ itsdangerous==2.1.2
     # via flask
 jinja2==3.1.2
     # via flask
-locust==2.14.2
+locust==2.15.0
     # via -r requirements.in
 markupsafe==2.1.2
     # via
