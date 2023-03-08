@@ -4,7 +4,7 @@ go 1.19
 
 require (
 	cloud.google.com/go/profiler v0.3.1
-	github.com/golang/protobuf v1.5.2
+	github.com/golang/protobuf v1.5.3
 	github.com/google/go-cmp v0.5.9
 	github.com/pkg/errors v0.9.1
 	github.com/sirupsen/logrus v1.9.0
