@@ -5,7 +5,8 @@ Today, the primary purpose of Online Boutique is to demonstrate:
 * [Google Kubernetes Engine (GKE)](https://cloud.google.com/kubernetes-engine)
 * [Anthos](https://cloud.google.com/anthos)
 * [Google Cloud Operations](https://cloud.google.com/products/operations)
-* tools and technologies commonly used alongside the above products
+* tools, technologies, and patterns commonly used alongside the above products
+* tools, technologies, and patterns commonly used by the retail industry
 
 while being accessible and useful to all new Kubernetes users.
 
