@@ -7,24 +7,25 @@ Note that because of AlloyDB's current connectivity, you'll need to run all this
 VPC access to the network you want to use for everything (out of the box this should just use the
 default network). The Cloud Shell doesn't work because of transitive VPC peering not working.
 
-## Provision an AlloyDB database and the supporting infrastructure
+# Provision an AlloyDB database and the supporting infrastructure
 
-# Environmental variables needed for setup. These should be set in a .bashrc or similar as some of the variables are used in the application itself. Default values are supplied in this readme, but any of them can be changed.
+Environmental variables needed for setup. These should be set in a .bashrc or similar as some of the variables are used in the application itself. Default values are supplied in this readme, but any of them can be changed. Anything in <> needs to be replaced.
+
+```bash
 # PROJECT_ID should be set to the project ID that was created to hold the demo
-PROJECT_ID
-# Just need to pick a region near you that also has AlloyDB available. See available regions here:
-# https://cloud.google.com/alloydb/docs/locations
-REGION
-USE_GKE_GCLOUD_AUTH_PLUGIN=True
+PROJECT_ID=<project_id>
 
+#Pick a region near you that also has AlloyDB available. See available regions: https://cloud.google.com/alloydb/docs/locations
+REGION=<region>
+USE_GKE_GCLOUD_AUTH_PLUGIN=True
 ALLOYDB_NETWORK=default
 ALOYDB_SERVICE_NAME=onlineboutique-network-range
 ALOYDB_CLUSTER_NAME=onlineboutique-cluster
 ALLOYDB_INSTANCE_NAME=onlineboutique-instance
 
-# NOTE: Primary and Read IP will need to be set after you create the instance. The command to set this in the shell is included below, but it would also be a good idea to run the command, and manually set the IP address in the .bashrc
-ALLOYDB_PRIMARY_IP
-ALLOYDB_READ_IP
+# **Note:** Primary and Read IP will need to be set after you create the instance. The command to set this in the shell is included below, but it would also be a good idea to run the command, and manually set the IP address in the .bashrc
+ALLOYDB_PRIMARY_IP=<ip set below after instance created>
+ALLOYDB_READ_IP=<ip set below after instance created>
 
 ALLOYDB_DATABASE_NAME=carts
 ALLOYDB_TABLE_NAME=cart_items
@@ -32,9 +33,11 @@ ALLOYDB_USER_GSA_NAME=alloydb-user-sa
 ALLOYDB_USER_GSA_ID=${ALLOYDB_USER_GSA_NAME}@${PROJECT_ID}.iam.gserviceaccount.com
 CARTSERVICE_KSA_NAME=cartservice
 ALLOYDB_SECRET_NAME=alloydb-secret
+
 # PGPASSWORD needs to be set in order to run the psql from the CLI easily. The value for this
 # needs to be set behind the Secret mentioned above
 PGPASSWORD=<password>
+```
 
 To provision an AlloyDB instance you can follow the following instructions:
 ```bash
@@ -88,7 +91,7 @@ psql -h ${ALLOYDB_PRIMARY_IP} -U postgres -d ${ALLOYDB_DATABASE_NAME} -c "CREATE
 psql -h ${ALLOYDB_PRIMARY_IP} -U postgres -d ${ALLOYDB_DATABASE_NAME} -c "CREATE INDEX cartItemsByUserId ON ${ALLOYDB_TABLE_NAME}(userId)"
 ```
 
-## Grant the `cartservice`'s service account access to the AlloyDB database
+# Grant the `cartservice`'s service account access to the AlloyDB database
 
 **Important note:** Your GKE cluster should have [Workload Identity enabled](https://cloud.google.com/kubernetes-engine/docs/how-to/workload-identity#enable).
 
@@ -105,7 +108,7 @@ gcloud iam service-accounts add-iam-policy-binding ${ALLOYDB_USER_GSA_ID} \
     --role roles/iam.workloadIdentityUser
 ```
 
-## Deploy Online Boutique connected to an AlloyDB database
+# Deploy Online Boutique connected to an AlloyDB database
 
 To automate the deployment of Online Boutique integrated with AlloyDB you can leverage the following variation with [Kustomize](../..).
 
@@ -114,7 +117,7 @@ From the `kustomize/` folder at the root level of this repository, execute these
 kustomize edit add component components/service-accounts
 kustomize edit add component components/alloydb
 ```
-_Note: this Kustomize component will also remove the `redis-cart` `Deployment` and `Service` not used anymore._
+_**Note:** this Kustomize component will also remove the `redis-cart` `Deployment` and `Service` not used anymore._
 
 This will update the `kustomize/kustomization.yaml` file which could be similar to:
 ```yaml
@@ -139,7 +142,7 @@ sed -i "s/ALLOYDB_SECRET_NAME_VAL/${ALLOYDB_SECRET_NAME}/g" components/alloydb/k
 
 You can locally render these manifests by running `kubectl kustomize .` as well as deploying them by running `kubectl apply -k .`.
 
-## Extra cleanup steps
+# Extra cleanup steps
 ```bash
 gcloud compute addresses delete ${ALLOYDB_SERVICE_NAME} --global
 
