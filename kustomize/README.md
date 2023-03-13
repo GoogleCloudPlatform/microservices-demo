@@ -86,6 +86,7 @@ Here is the list of the variations available as Kustomize components that you co
 - [**Add an image tag suffix to the container images**](components/container-images-tag-suffix)
 - [**Do not expose the `frontend` publicly**](components/non-public-frontend)
 - [**Set the `frontend` to manage only one single shared session**](components/single-shared-session)
+- [**Configure `Istio` service mesh resources**](components/service-mesh-istio)
 
 ### Select variations
 
