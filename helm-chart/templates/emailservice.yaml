@@ -92,12 +92,7 @@ spec:
             command: ["/bin/grpc_health_probe", "-addr=:8080"]
           {{- end }}
         resources:
-          requests:
-            cpu: 100m
-            memory: 64Mi
-          limits:
-            cpu: 200m
-            memory: 128Mi
+          {{- toYaml .Values.emailService.resources | nindent 10 }}
 ---
 apiVersion: v1
 kind: Service

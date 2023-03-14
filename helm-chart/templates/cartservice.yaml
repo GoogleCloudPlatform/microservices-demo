@@ -70,12 +70,7 @@ spec:
         {{- end }}
           value: {{ .Values.cartDatabase.connectionString | quote }}
         resources:
-          requests:
-            cpu: 200m
-            memory: 64Mi
-          limits:
-            cpu: 300m
-            memory: 128Mi
+          {{- toYaml .Values.cartService.resources | nindent 10 }}
         readinessProbe:
           initialDelaySeconds: 15
           {{- if .Values.nativeGrpcHealthCheck }}
