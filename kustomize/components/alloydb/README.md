@@ -130,7 +130,7 @@ components:
 - components/alloydb
 ```
 
-Update current Kustomize manifest to target this Spanner database.
+Update current Kustomize manifest to target this AlloyDB database.
 ```bash
 sed -i "s/PROJECT_ID_VAL/${PROJECT_ID}/g" components/alloydb/kustomization.yaml
 sed -i "s/ALLOYDB_PRIMARY_IP_VAL/${ALLOYDB_PRIMARY_IP}/g" components/alloydb/kustomization.yaml
