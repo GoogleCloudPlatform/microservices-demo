@@ -48,7 +48,7 @@ patchesStrategicMerge:
   metadata:
     name: cartservice
     annotations:
-      iam.gke.io/gcp-service-account: alloydb-user-sa@cds-2023-demo.iam.gserviceaccount.com
+      iam.gke.io/gcp-service-account: ALLOYDB_USER_GSA_ID
 # redis - remove the redis-cart Deployment
 - |-
   apiVersion: apps/v1
