@@ -8,7 +8,7 @@ Kustomize is a Kubernetes configuration management tool that allows users to cus
 
 ## Prerequisites
 
-You need to have the kustomize binary installed. Instructions can be found here: https://kubectl.docs.kubernetes.io/installation/
+Optionally, [install the `kustomize` binary](https://kubectl.docs.kubernetes.io/installation/) to avoid manually editing a `kustomization.yaml` file. Online Boutique's instructions will often use `kustomize edit` (like `kustomize edit add component components/some-component`), but you can skip these commands and instead add components manually to the [`/kustomize/kustomization.yaml` file](/kustomize/kustomization.yaml).
 
 You need to have a Kubernetes cluster where you will deploy the Online Boutique's Kubernetes manifests. To set up a GKE (Google Kubernetes Engine) cluster, you can follow the instruction in the [root `/README.md`](/).
 
