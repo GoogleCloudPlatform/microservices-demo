@@ -68,8 +68,6 @@ gcloud alloydb clusters create ${ALLOYDB_CLUSTER_NAME} \
     --disable-automated-backup \
     --network=${ALLOYDB_NETWORK}
 
-# Note: Creating the AlloyDB instances takes awhile. Could be 10-12 minutes for the primary instance
-# and another 10-12 for the read pool.
 gcloud alloydb instances create ${ALLOYDB_INSTANCE_NAME} \
     --cluster=${ALLOYDB_CLUSTER_NAME} \
     --region=${REGION} \
