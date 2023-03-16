@@ -20,7 +20,7 @@ REGION=<region>
 USE_GKE_GCLOUD_AUTH_PLUGIN=True
 ALLOYDB_NETWORK=default
 ALOYDB_SERVICE_NAME=onlineboutique-network-range
-ALOYDB_CLUSTER_NAME=onlineboutique-cluster
+ALLOYDB_CLUSTER_NAME=onlineboutique-cluster
 ALLOYDB_INSTANCE_NAME=onlineboutique-instance
 
 # **Note:** Primary and Read IP will need to be set after you create the instance. The command to set this in the shell is included below, but it would also be a good idea to run the command, and manually set the IP address in the .bashrc
