@@ -110,7 +110,7 @@ gcloud iam service-accounts add-iam-policy-binding ${ALLOYDB_USER_GSA_ID} \
     --role roles/iam.workloadIdentityUser
 ```
 
-# Deploy Online Boutique connected to an AlloyDB database
+## Deploy Online Boutique connected to an AlloyDB database
 
 To automate the deployment of Online Boutique integrated with AlloyDB you can leverage the following variation with [Kustomize](../..).
 
