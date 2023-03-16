@@ -46,7 +46,7 @@ EOF
     sed "$@"
 }
 
-read_manifests() {
+read_manifests_except_kustomization() {
     local dir
     dir="$1"
 
@@ -61,7 +61,7 @@ read_manifests() {
 }
 
 mk_kubernetes_manifests() {
-    out_manifest="$(read_manifests "${SCRIPTDIR}/../kubernetes-manifests")"
+    out_manifest="$(read_manifests_except_kustomization "${SCRIPTDIR}/../kubernetes-manifests")"
 
     # replace "image" repo, tag for each service
     for dir in ./src/*/
@@ -88,7 +88,7 @@ mk_istio_manifests() {
 
     # This just copies the yaml from the component (excluding kustomization.yaml)
     # since there is no easy way to render individual kustomize component resources
-    read_manifests "${SCRIPTDIR}/../kustomize/components/service-mesh-istio/"
+    read_manifests_except_kustomization "${SCRIPTDIR}/../kustomize/components/service-mesh-istio/"
     echo '# [END servicemesh_release_istio_manifests_microservices_demo]'
 }
 

@@ -1,6 +1,6 @@
 # Istio Service Mesh
 
-You can use [Istio](https://isito.io) to enable [service mesh features](https://cloud.google.com/service-mesh/docs/overview) such as traffic management, observability, and security. Istio can be provisioned using Anthos Service Mesh (ASM), the Open Source Software (OSS) istioctl tool, or via other Istio providers. You can then label individual namespaces for sidecar injection and configure an Istio gateway to replace the frontend-external load balancer.
+You can use [Istio](https://istio.io) to enable [service mesh features](https://cloud.google.com/service-mesh/docs/overview) such as traffic management, observability, and security. Istio can be provisioned using Anthos Service Mesh (ASM), the Open Source Software (OSS) istioctl tool, or via other Istio providers. You can then label individual namespaces for sidecar injection and configure an Istio gateway to replace the frontend-external load balancer.
 
 # Provision a GKE Cluster
  
@@ -42,16 +42,16 @@ gcloud container fleet memberships register ${CLUSTER_NAME} \
 FLEET_PROJECT_NUMBER=$(gcloud projects describe ${PROJECT_ID} --format 'value(projectNumber)')
 # Apply mesh_id label to clusters that should be added to the service mesh
 gcloud container clusters update --project ${PROJECT_ID} ${CLUSTER_NAME} \
-  --zone ${ZONE} --update-labels="mesh_id=proj-$FLEET_PROJECT_NUMBER"
+    --zone ${ZONE} --update-labels="mesh_id=proj-$FLEET_PROJECT_NUMBER"
 
 # Configure automatic control plane upgrades
 gcloud container fleet mesh update --project ${PROJECT_ID} \
-     --management automatic \
-     --memberships ${CLUSTER_NAME}
+    --management automatic \
+    --memberships ${CLUSTER_NAME}
 
 # Configure Managed Data Plane (automatic restart of workloads when envoy sidecar is updated)
 kubectl annotate --overwrite namespace default \
-  mesh.cloud.google.com/proxy='{"managed":"false"}'
+    mesh.cloud.google.com/proxy='{"managed":"false"}'
 
 # Enable sidecar injection for Kubernetes namespace where workload is deployed
 kubectl label namespace default istio-injection- istio.io/rev=asm-managed --overwrite
@@ -81,7 +81,7 @@ gke-onlineboutique-c94d71e8-master  gke-vpc  INGRESS    1000      tcp:10250,tcp:
 
 # Update firewall rule (or create a new one) to allow webhook port 15017
 gcloud compute firewall-rules update gke-onlineboutique-c94d71e8-master \
-  --allow tcp:10250,tcp:443,tcp:15017
+    --allow tcp:10250,tcp:443,tcp:15017
 ```
 
 # Deploy and Validate Online Boutique with `Istio`
@@ -154,17 +154,6 @@ serviceentry.networking.istio.io/allow-egress-googleapis created
 virtualservice.networking.istio.io/frontend created
 ```
 
-## Deploy via `istio-manifests.yaml`
-
-Instead of using Kustomize you can just apply the static manifest from the [release](../../../release/) folder or it's full URL:
-```bash
-kubectl apply -f ./release/istio-manifests.yaml
-# Or
-kubectl apply -f https://raw.githubusercontent.com/GoogleCloudPlatform/microservices-demo/main/release/istio-manifests.yaml
-```
-
-_Note: The static manifest will not include other changes like creating individual service accounts or disabling the frondend-ingress load balancer._
-
 # Verify Online Boutique Deployment
 
 Run `kubectl get pods,gateway,svc` to see pods and gateway are in a healthy and ready state.
@@ -209,7 +198,7 @@ Find the IP address of your Istio gateway and visit the application frontend in 
 
 ```sh
 INGRESS_HOST="$(kubectl get gateway istio-gateway \
-   -o jsonpath='{.status.addresses[*].value}')"
+    -o jsonpath='{.status.addresses[*].value}')"
 curl -v "http://$INGRESS_HOST"
 ```
 
