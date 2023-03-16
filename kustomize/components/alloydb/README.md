@@ -7,7 +7,7 @@ Note that because of AlloyDB's current connectivity, you'll need to run all this
 VPC access to the network you want to use for everything (out of the box this should just use the
 default network). The Cloud Shell doesn't work because of transitive VPC peering not working.
 
-# Provision an AlloyDB database and the supporting infrastructure
+## Provision an AlloyDB database and the supporting infrastructure
 
 Environmental variables needed for setup. These should be set in a .bashrc or similar as some of the variables are used in the application itself. Default values are supplied in this readme, but any of them can be changed. Anything in <> needs to be replaced.
 
@@ -19,8 +19,8 @@ PROJECT_ID=<project_id>
 REGION=<region>
 USE_GKE_GCLOUD_AUTH_PLUGIN=True
 ALLOYDB_NETWORK=default
-ALOYDB_SERVICE_NAME=onlineboutique-network-range
-ALOYDB_CLUSTER_NAME=onlineboutique-cluster
+ALLOYDB_SERVICE_NAME=onlineboutique-network-range
+ALLOYDB_CLUSTER_NAME=onlineboutique-cluster
 ALLOYDB_INSTANCE_NAME=onlineboutique-instance
 
 # **Note:** Primary and Read IP will need to be set after you create the instance. The command to set this in the shell is included below, but it would also be a good idea to run the command, and manually set the IP address in the .bashrc
@@ -91,7 +91,9 @@ psql -h ${ALLOYDB_PRIMARY_IP} -U postgres -d ${ALLOYDB_DATABASE_NAME} -c "CREATE
 psql -h ${ALLOYDB_PRIMARY_IP} -U postgres -d ${ALLOYDB_DATABASE_NAME} -c "CREATE INDEX cartItemsByUserId ON ${ALLOYDB_TABLE_NAME}(userId)"
 ```
 
-# Grant the `cartservice`'s service account access to the AlloyDB database
+_Note: It can take more than 20 minutes for the AlloyDB instances to be created._
+
+## Grant the `cartservice`'s service account access to the AlloyDB database
 
 **Important note:** Your GKE cluster should have [Workload Identity enabled](https://cloud.google.com/kubernetes-engine/docs/how-to/workload-identity#enable).
 
@@ -108,7 +110,7 @@ gcloud iam service-accounts add-iam-policy-binding ${ALLOYDB_USER_GSA_ID} \
     --role roles/iam.workloadIdentityUser
 ```
 
-# Deploy Online Boutique connected to an AlloyDB database
+## Deploy Online Boutique connected to an AlloyDB database
 
 To automate the deployment of Online Boutique integrated with AlloyDB you can leverage the following variation with [Kustomize](../..).
 
@@ -142,7 +144,7 @@ sed -i "s/ALLOYDB_SECRET_NAME_VAL/${ALLOYDB_SECRET_NAME}/g" components/alloydb/k
 
 You can locally render these manifests by running `kubectl kustomize .` as well as deploying them by running `kubectl apply -k .`.
 
-# Extra cleanup steps
+## Extra cleanup steps
 ```bash
 gcloud compute addresses delete ${ALLOYDB_SERVICE_NAME} --global
 
