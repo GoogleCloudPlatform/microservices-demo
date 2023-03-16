@@ -19,7 +19,7 @@ PROJECT_ID=<project_id>
 REGION=<region>
 USE_GKE_GCLOUD_AUTH_PLUGIN=True
 ALLOYDB_NETWORK=default
-ALOYDB_SERVICE_NAME=onlineboutique-network-range
+ALLOYDB_SERVICE_NAME=onlineboutique-network-range
 ALLOYDB_CLUSTER_NAME=onlineboutique-cluster
 ALLOYDB_INSTANCE_NAME=onlineboutique-instance
 
