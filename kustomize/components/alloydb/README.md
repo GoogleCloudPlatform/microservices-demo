@@ -144,7 +144,7 @@ sed -i "s/ALLOYDB_SECRET_NAME_VAL/${ALLOYDB_SECRET_NAME}/g" components/alloydb/k
 
 You can locally render these manifests by running `kubectl kustomize .` as well as deploying them by running `kubectl apply -k .`.
 
-# Extra cleanup steps
+## Extra cleanup steps
 ```bash
 gcloud compute addresses delete ${ALLOYDB_SERVICE_NAME} --global
 
