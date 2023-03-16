@@ -7,7 +7,7 @@ Note that because of AlloyDB's current connectivity, you'll need to run all this
 VPC access to the network you want to use for everything (out of the box this should just use the
 default network). The Cloud Shell doesn't work because of transitive VPC peering not working.
 
-# Provision an AlloyDB database and the supporting infrastructure
+## Provision an AlloyDB database and the supporting infrastructure
 
 Environmental variables needed for setup. These should be set in a .bashrc or similar as some of the variables are used in the application itself. Default values are supplied in this readme, but any of them can be changed. Anything in <> needs to be replaced.
 
