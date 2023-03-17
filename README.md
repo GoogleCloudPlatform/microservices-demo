@@ -124,8 +124,7 @@ The [`/terraform` folder](terraform) contains instructions for using [Terraform]
 
 ## Other deployment variations
 
-- **Istio**: [See these instructions.](docs/service-mesh.md)
-- **Anthos Service Mesh**: [See these instructions](/docs/service-mesh.md)
+- **Istio/Anthos Service Mesh**: [See these instructions.](/kustomize/components/service-mesh-istio/README.md)
 - **non-GKE clusters (Minikube, Kind)**: see the [Development Guide](/docs/development-guide.md)
 
 ## Deploy Online Boutique variations with Kustomize
