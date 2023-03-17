@@ -23,6 +23,7 @@ components:
 # - components/network-policies
 # - components/service-accounts
 # - components/spanner
+# - components/alloydb
 # - components/container-images-tag
 # - components/container-images-tag-suffix
 # - components/container-images-registry
