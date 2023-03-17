@@ -11,6 +11,8 @@
     <!-- Add explicit direct dependency required for ipv6, see https://github.com/dotnet/aspnetcore/issues/45424 -->
     <PackageReference Include="StackExchange.Redis" Version="2.6.96" />
     <PackageReference Include="Google.Cloud.Spanner.Data" Version="4.3.0" />
+    <PackageReference Include="Npgsql" Version="7.0.2" />
+    <PackageReference Include="Google.Cloud.SecretManager.V1" Version="2.1.0" />
   </ItemGroup>
 
   <ItemGroup>

@@ -8,6 +8,8 @@ Kustomize is a Kubernetes configuration management tool that allows users to cus
 
 ## Prerequisites
 
+Optionally, [install the `kustomize` binary](https://kubectl.docs.kubernetes.io/installation/) to avoid manually editing a `kustomization.yaml` file. Online Boutique's instructions will often use `kustomize edit` (like `kustomize edit add component components/some-component`), but you can skip these commands and instead add components manually to the [`/kustomize/kustomization.yaml` file](/kustomize/kustomization.yaml).
+
 You need to have a Kubernetes cluster where you will deploy the Online Boutique's Kubernetes manifests. To set up a GKE (Google Kubernetes Engine) cluster, you can follow the instruction in the [root `/README.md`](/).
 
 ## Deploy Online Boutique with Kustomize
@@ -75,6 +77,9 @@ Here is the list of the variations available as Kustomize components that you co
   - The default Online Boutique deployment uses the in-cluster `redis` database for storing the contents of its shopping cart. The Memorystore deployment variation overrides the default database with its own Memorystore (Redis) database. These changes directly affect `cartservice`.
 - [**Integrate with Spanner**](components/spanner)
   - The default Online Boutique deployment uses the in-cluster `redis` database for storing the contents of its shopping cart. The Spanner deployment variation overrides the default database with its own Spanner database. These changes directly affect `cartservice`.
+- [**Integrate with AlloyDB**](components/alloydb)
+  - The default Online Boutique deployment uses the in-cluster `redis` database for storing the contents of its shopping cart. The AlloyDB deployment variation overrides the default database with its own AlloyDB database.
+These changes directly affect `cartservice`.
 - [**Secure with Network Policies**](components/network-policies)
   - Deploy fine granular `NetworkPolicies` for Online Boutique.
 - [**Create Kubernetes Service Accounts**](components/service-accounts)

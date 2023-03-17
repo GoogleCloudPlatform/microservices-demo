@@ -29,6 +29,7 @@ namespace cartservice
             string redisAddress = Configuration["REDIS_ADDR"];
             string spannerProjectId = Configuration["SPANNER_PROJECT"];
             string spannerConnectionString = Configuration["SPANNER_CONNECTION_STRING"];
+            string alloyDBConnectionString = Configuration["ALLOYDB_PRIMARY_IP"];
 
             if (!string.IsNullOrEmpty(redisAddress))
             {
@@ -41,6 +42,11 @@ namespace cartservice
             else if (!string.IsNullOrEmpty(spannerProjectId) || !string.IsNullOrEmpty(spannerConnectionString))
             {
                 services.AddSingleton<ICartStore, SpannerCartStore>();
+            }
+            else if (!string.IsNullOrEmpty(alloyDBConnectionString))
+            {
+                Console.WriteLine("Creating AlloyDB cart store");
+                services.AddSingleton<ICartStore, AlloyDBCartStore>();
             }
             else
             {
