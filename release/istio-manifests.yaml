@@ -18,36 +18,34 @@
 
 # [START servicemesh_release_istio_manifests_microservices_demo]
 ---
-apiVersion: networking.istio.io/v1alpha3
+apiVersion: gateway.networking.k8s.io/v1beta1
 kind: Gateway
 metadata:
-  name: frontend-gateway
+  name: istio-gateway
 spec:
-  selector:
-    istio: ingressgateway # use Istio default gateway implementation
-  servers:
-  - port:
-      number: 80
-      name: http
-      protocol: HTTP
-    hosts:
-    - "*"
+  gatewayClassName: istio
+  listeners:
+  - name: http
+    port: 80
+    protocol: HTTP
+    allowedRoutes:
+      namespaces:
+        from: Same
 ---
-apiVersion: networking.istio.io/v1alpha3
-kind: VirtualService
+apiVersion: gateway.networking.k8s.io/v1beta1
+kind: HTTPRoute
 metadata:
-  name: frontend-ingress
+  name: frontend-route
 spec:
-  hosts:
-  - "*"
-  gateways:
-  - frontend-gateway
-  http:
-  - route:
-    - destination:
-        host: frontend
-        port:
-          number: 80
+  parentRefs:
+  - name: istio-gateway
+  rules:
+  - matches:
+    - path:
+        value: /
+    backendRefs:
+    - name: frontend
+      port: 80
 ---
 apiVersion: networking.istio.io/v1alpha3
 kind: ServiceEntry
