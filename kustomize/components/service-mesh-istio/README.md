@@ -51,7 +51,7 @@ gcloud container fleet mesh update --project ${PROJECT_ID} \
 
 # Configure Managed Data Plane (automatic restart of workloads when envoy sidecar is updated)
 kubectl annotate --overwrite namespace default \
-    mesh.cloud.google.com/proxy='{"managed":"false"}'
+    mesh.cloud.google.com/proxy='{"managed":"true"}'
 
 # Enable sidecar injection for Kubernetes namespace where workload is deployed
 kubectl label namespace default istio-injection- istio.io/rev=asm-managed --overwrite
