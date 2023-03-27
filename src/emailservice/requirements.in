@@ -6,7 +6,7 @@ python-json-logger==2.0.7
 google-cloud-profiler==4.0.0
 google-cloud-trace==1.11.0
 requests==2.28.2
-protobuf==4.22.0 # transitive dependency, move when google-api is bumped safely
+protobuf==4.22.1 # transitive dependency, move when google-api is bumped safely
 opentelemetry-distro==0.37b0
 opentelemetry-instrumentation-grpc==0.37b0
 opentelemetry-exporter-otlp-proto-grpc==1.16.0

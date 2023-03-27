@@ -1,4 +1,4 @@
-# Copyright 2022 Google LLC
+# Copyright 2023 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,21 +15,10 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
-- base
+- ../../base
 components:
-# - components/cymbal-branding
-# - components/google-cloud-operations
-# - components/memorystore
-# - components/network-policies
-# - components/non-public-frontend
-# - components/service-accounts
-# - components/alloydb
-# - components/single-shared-session
-# - components/spanner
-# - components/service-mesh-istio
-# - components/without-loadgenerator
-# These must be run last and in this order
-# - components/container-images-tag
-# - components/container-images-tag-suffix
-# - components/container-images-registry
-# - components/native-grpc-health-check
+- ../../components/cymbal-branding
+- ../../components/google-cloud-operations
+- ../../components/network-policies
+- ../../components/service-accounts
+- ../../components/service-mesh-istio
