@@ -1,5 +1,5 @@
 plugins {
-    id 'com.google.protobuf' version '3.22.2'
+    id 'com.google.protobuf' version '0.9.2'
     id 'com.github.sherter.google-java-format' version '0.9'
     id 'idea'
     id 'application'
@@ -14,7 +14,7 @@ description = 'Ad Service'
 group = "adservice"
 version = "0.1.0-SNAPSHOT"
 
-def grpcVersion = "1.53.0"
+def grpcVersion = "1.54.0"
 def jacksonCoreVersion = "2.14.2"
 def jacksonDatabindVersion = "2.14.2"
 def protocVersion = "3.22.2"
