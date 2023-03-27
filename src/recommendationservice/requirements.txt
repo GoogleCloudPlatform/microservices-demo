@@ -10,7 +10,7 @@ cachetools==5.3.0
     # via google-auth
 certifi==2022.12.7
     # via requests
-charset-normalizer==3.0.1
+charset-normalizer==3.1.0
     # via requests
 deprecated==1.2.13
     # via opentelemetry-api
