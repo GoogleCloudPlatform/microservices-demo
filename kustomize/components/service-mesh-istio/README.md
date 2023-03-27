@@ -44,14 +44,10 @@ FLEET_PROJECT_NUMBER=$(gcloud projects describe ${PROJECT_ID} --format 'value(pr
 gcloud container clusters update --project ${PROJECT_ID} ${CLUSTER_NAME} \
     --zone ${ZONE} --update-labels="mesh_id=proj-$FLEET_PROJECT_NUMBER"
 
-# Configure automatic control plane upgrades
+# Enable managed Anthos Service Mesh on the cluster
 gcloud container fleet mesh update --project ${PROJECT_ID} \
     --management automatic \
     --memberships ${CLUSTER_NAME}
-
-# Configure Managed Data Plane (automatic restart of workloads when envoy sidecar is updated)
-kubectl annotate --overwrite namespace default \
-    mesh.cloud.google.com/proxy='{"managed":"false"}'
 
 # Enable sidecar injection for Kubernetes namespace where workload is deployed
 kubectl label namespace default istio-injection- istio.io/rev=asm-managed --overwrite
