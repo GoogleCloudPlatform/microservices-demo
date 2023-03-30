@@ -18,7 +18,7 @@ google-api-core==2.11.0
     # via
     #   -r requirements.in
     #   google-api-python-client
-google-api-python-client==2.82.0
+google-api-python-client==2.83.0
     # via google-cloud-profiler
 google-auth==2.16.2
     # via
