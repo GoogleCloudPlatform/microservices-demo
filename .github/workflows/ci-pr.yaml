@@ -39,7 +39,7 @@ jobs:
         DOTNET_INSTALL_DIR: "./.dotnet"
       with:
         dotnet-version: '7.0'
-    - uses: actions/setup-go@v3
+    - uses: actions/setup-go@v4
       with:
         go-version: '1.19'
     - name: Go Unit Tests
