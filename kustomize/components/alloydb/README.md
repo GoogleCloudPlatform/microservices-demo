@@ -149,7 +149,7 @@ You can locally render these manifests by running `kubectl kustomize .` as well 
 gcloud compute addresses delete ${ALLOYDB_SERVICE_NAME} --global
 
 # Force takes care of cleaning up the instances inside the cluster automatically
-gcloud alloydb clusters delete ${ALLOYDB_CLUSTER_NAME} --force
+gcloud alloydb clusters delete ${ALLOYDB_CLUSTER_NAME} --force --region ${REGION}
 
 gcloud iam service-accounts delete ${ALLOYDB_USER_GSA_ID}
 
