@@ -86,6 +86,7 @@ function generateProject(){
     local __RANDOMSUFFIX
     local __DATELABEL
     local PROJECTID
+    local current
 
 
     __resultvar=$1
@@ -97,7 +98,7 @@ function generateProject(){
     )
     __DATELABEL=$(date +%F)
     PROJECTID=ds-test-$__STACKSUFFIX-$__RANDOMSUFFIX
-
+    current=$(gcloud config list account --format "value(core.account)")
     # shellcheck disable=SC2034
     GOOGLE_APPLICATION_CREDENTIALS=.deploystack/creds.json
 
@@ -107,6 +108,7 @@ function generateProject(){
     gcloud config set account test-runner@ds-tester-helper.iam.gserviceaccount.com -q
 
     gcloud beta billing projects link "$PROJECTID" --billing-account="$__BA" -q
+    gcloud config set account "$current" -q
     eval "$__resultvar"="'$PROJECTID'"
     
 }
