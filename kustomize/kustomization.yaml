@@ -21,10 +21,15 @@ components:
 # - components/google-cloud-operations
 # - components/memorystore
 # - components/network-policies
+# - components/non-public-frontend
 # - components/service-accounts
+# - components/alloydb
+# - components/single-shared-session
 # - components/spanner
+# - components/service-mesh-istio
+# - components/without-loadgenerator
+# These must be run last and in this order
 # - components/container-images-tag
 # - components/container-images-tag-suffix
 # - components/container-images-registry
 # - components/native-grpc-health-check
-# - components/without-loadgenerator

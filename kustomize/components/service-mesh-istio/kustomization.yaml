@@ -1,4 +1,4 @@
-# Copyright 2022 Google LLC
+# Copyright 2023 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,12 +12,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-output "cluster_location" {
-  description = "Location of the cluster"
-  value       = resource.google_container_cluster.my_cluster.location
-}
-
-output "cluster_name" {
-  description = "Name of the cluster"
-  value       = resource.google_container_cluster.my_cluster.name
-}
+apiVersion: kustomize.config.k8s.io/v1alpha1
+kind: Component
+resources:
+  - allow-egress-googleapis.yaml
+  - frontend-gateway.yaml
+  - frontend.yaml
+patchesStrategicMerge:
+# frontend - delete frontend-external service (same as non-public-frontend component)
+- |-
+  apiVersion: v1
+  kind: Service
+  metadata:
+    name: frontend-external
+  $patch: delete

@@ -91,12 +91,7 @@ spec:
             command: ["/bin/grpc_health_probe", "-addr=:7000"]
           {{- end }}
         resources:
-          requests:
-            cpu: 100m
-            memory: 64Mi
-          limits:
-            cpu: 200m
-            memory: 128Mi
+          {{- toYaml .Values.currencyService.resources | nindent 10 }}
 ---
 apiVersion: v1
 kind: Service

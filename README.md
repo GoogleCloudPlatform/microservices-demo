@@ -124,15 +124,14 @@ The [`/terraform` folder](terraform) contains instructions for using [Terraform]
 
 ## Other deployment variations
 
-- **Istio**: [See these instructions.](docs/service-mesh.md)
-- **Anthos Service Mesh**: [See these instructions](/docs/service-mesh.md)
+- **Istio/Anthos Service Mesh**: [See these instructions.](/kustomize/components/service-mesh-istio/README.md)
 - **non-GKE clusters (Minikube, Kind)**: see the [Development Guide](/docs/development-guide.md)
 
 ## Deploy Online Boutique variations with Kustomize
 
 The [`/kustomize` folder](kustomize) contains instructions for customizing the deployment of Online Boutique with different variations such as:
 * integrating with [Google Cloud Operations](kustomize/components/google-cloud-operations/)
-* replacing the in-cluster Redis cache with [Google Cloud Memorystore (Redis)](kustomize/components/memorystore) or [Google Cloud Spanner](kustomize/components/spanner)
+* replacing the in-cluster Redis cache with [Google Cloud Memorystore (Redis)](kustomize/components/memorystore), [AlloyDB](kustomize/components/alloydb) or [Google Cloud Spanner](kustomize/components/spanner)
 * etc.
 
 ## Architecture
