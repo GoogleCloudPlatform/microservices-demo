@@ -16,7 +16,7 @@ apiVersion: kustomize.config.k8s.io/v1alpha1
 kind: Component
 resources:
   - otel-collector.yaml
-patchesStrategicMerge:
+patches:
 # adservice - not yet implemented
 # checkoutservice - tracing, profiler
 - |-
