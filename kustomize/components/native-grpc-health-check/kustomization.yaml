@@ -33,7 +33,7 @@ images:
   newTag: ONLINE_BOUTIQUE_VERSION-native-grpc-probes
 - name: gcr.io/google-samples/microservices-demo/shippingservice
   newTag: ONLINE_BOUTIQUE_VERSION-native-grpc-probes
-patchesStrategicMerge:
+patches:
 # adservice - remove the exec and add the grpc for liveness and readiness probes
 - |-
   apiVersion: apps/v1
