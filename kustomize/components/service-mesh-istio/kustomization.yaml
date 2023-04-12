@@ -18,7 +18,7 @@ resources:
   - allow-egress-googleapis.yaml
   - frontend-gateway.yaml
   - frontend.yaml
-patchesStrategicMerge:
+patches:
 # frontend - delete frontend-external service (same as non-public-frontend component)
 - |-
   apiVersion: v1
