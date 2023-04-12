@@ -14,7 +14,7 @@
 
 apiVersion: kustomize.config.k8s.io/v1alpha1
 kind: Component
-patchesStrategicMerge:
+patches:
 # cartservice - replace REDIS_ADDR to target new Memorystore (redis) instance
 - |-
   apiVersion: apps/v1
