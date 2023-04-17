@@ -31,7 +31,7 @@ These tests run on every commit for every open PR, as well as any commit to main
 
 This is the Continuous Deployment workflow, and it runs on every commit to the main branch. This workflow:
 
-1. Builds the contaner images for every service, tagging as `latest`.
+1. Builds the container images for every service, tagging as `latest`.
 2. Pushes those images to Google Container Registry.
 
 Note that this workflow does not update the image tags used in `release/kubernetes-manifests.yaml` - these release manifests are tied to a stable `v0.x.x` release.
