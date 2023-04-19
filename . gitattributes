@@ -1,0 +1,4 @@
+# This file configures the git settings for this repository.
+
+# Converts CR + LF to LF when committing, for all "text" files.
+* text=auto
