@@ -20,9 +20,9 @@ resources:
   - frontend.yaml
 patches:
 # frontend - delete frontend-external service (same as non-public-frontend component)
-- |-
-  apiVersion: v1
-  kind: Service
-  metadata:
-    name: frontend-external
-  $patch: delete
+- patch: |-
+    apiVersion: v1
+    kind: Service
+    metadata:
+      name: frontend-external
+    $patch: delete
