@@ -69,7 +69,7 @@ werkzeug==2.2.3
     #   locust
 zope-event==4.6
     # via gevent
-zope-interface==5.5.2
+zope-interface==6.0
     # via gevent
 
 # The following packages are considered to be unsafe in a requirements file:
