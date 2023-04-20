@@ -9,4 +9,4 @@ requests==2.28.2
 protobuf==4.22.3 # transitive dependency, move when google-api is bumped safely
 opentelemetry-distro==0.37b0
 opentelemetry-instrumentation-grpc==0.37b0
-opentelemetry-exporter-otlp-proto-grpc==1.16.0
+opentelemetry-exporter-otlp-proto-grpc==1.17.0
