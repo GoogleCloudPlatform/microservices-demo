@@ -14,42 +14,42 @@
 
 apiVersion: kustomize.config.k8s.io/v1alpha1
 kind: Component
-patchesStrategicMerge:
+patches:
 # cartservice - replace REDIS_ADDR by SPANNER_CONNECTION_STRING for the cartservice Deployment
-- |-
-  apiVersion: apps/v1
-  kind: Deployment
-  metadata:
-    name: cartservice
-  spec:
-    template:
-      spec:
-        containers:
-          - name: server
-            env:
-            - name: REDIS_ADDR
-              $patch: delete
-            - name: SPANNER_CONNECTION_STRING
-              value: projects/SPANNER_PROJECT/instances/SPANNER_INSTANCE/databases/SPANNER_DATABASE
+- patch: |-
+    apiVersion: apps/v1
+    kind: Deployment
+    metadata:
+      name: cartservice
+    spec:
+      template:
+        spec:
+          containers:
+            - name: server
+              env:
+              - name: REDIS_ADDR
+                $patch: delete
+              - name: SPANNER_CONNECTION_STRING
+                value: projects/SPANNER_PROJECT/instances/SPANNER_INSTANCE/databases/SPANNER_DATABASE
 # cartservice - add the GSA annotation for the cartservice KSA
-- |-
-  apiVersion: v1
-  kind: ServiceAccount
-  metadata:
-    name: cartservice
-    annotations:
-      iam.gke.io/gcp-service-account: SPANNER_DB_USER_GSA_ID
+- patch: |-
+    apiVersion: v1
+    kind: ServiceAccount
+    metadata:
+      name: cartservice
+      annotations:
+        iam.gke.io/gcp-service-account: SPANNER_DB_USER_GSA_ID
 # redis - remove the redis-cart Deployment
-- |-
-  apiVersion: apps/v1
-  kind: Deployment
-  metadata:
-    name: redis-cart
-  $patch: delete
+- patch: |-
+    apiVersion: apps/v1
+    kind: Deployment
+    metadata:
+      name: redis-cart
+    $patch: delete
 # redis - remove the redis-cart Service
-- |-
-  apiVersion: v1
-  kind: Service
-  metadata:
-    name: redis-cart
-  $patch: delete
+- patch: |-
+    apiVersion: v1
+    kind: Service
+    metadata:
+      name: redis-cart
+    $patch: delete
