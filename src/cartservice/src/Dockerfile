@@ -13,7 +13,7 @@
 # limitations under the License.
 
 # https://mcr.microsoft.com/v2/dotnet/sdk/tags/list
-FROM mcr.microsoft.com/dotnet/sdk:7.0.202@sha256:f712881bafadf0e56250ece1da28ba2baedd03fb3dd49a67f209f9d0cf928e81 as builder
+FROM mcr.microsoft.com/dotnet/sdk:7.0.203@sha256:a06d87abe11238f2fbc076149edfbf91e88f06f54ab9c7282824e346322b8665 as builder
 WORKDIR /app
 COPY cartservice.csproj .
 RUN dotnet restore cartservice.csproj -r linux-musl-x64
@@ -34,7 +34,7 @@ ENTRYPOINT ["/app/cartservice"]
 FROM without-grpc-health-probe-bin
 USER root
 # renovate: datasource=github-releases depName=grpc-ecosystem/grpc-health-probe
-ENV GRPC_HEALTH_PROBE_VERSION=v0.4.17
+ENV GRPC_HEALTH_PROBE_VERSION=v0.4.18
 RUN wget -qO/bin/grpc_health_probe https://github.com/grpc-ecosystem/grpc-health-probe/releases/download/${GRPC_HEALTH_PROBE_VERSION}/grpc_health_probe-linux-amd64 && \
     chmod +x /bin/grpc_health_probe
 USER 1000
