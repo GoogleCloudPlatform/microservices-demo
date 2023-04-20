@@ -91,7 +91,7 @@ opentelemetry-semantic-conventions==0.37b0
     #   opentelemetry-sdk
 proto-plus==1.22.2
     # via google-cloud-trace
-protobuf==4.22.1
+protobuf==4.22.3
     # via
     #   -r requirements.in
     #   google-api-core
