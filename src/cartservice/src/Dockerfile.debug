@@ -27,7 +27,7 @@ FROM mcr.microsoft.com/dotnet/aspnet:7.0@sha256:db181c925678b0c193c6bdeaf9d04759
 RUN apt-get update \
     && apt-get install -y unzip procps wget
 # renovate: datasource=github-releases depName=grpc-ecosystem/grpc-health-probe
-ENV GRPC_HEALTH_PROBE_VERSION=v0.4.17
+ENV GRPC_HEALTH_PROBE_VERSION=v0.4.18
 RUN wget -qO/bin/grpc_health_probe https://github.com/grpc-ecosystem/grpc-health-probe/releases/download/${GRPC_HEALTH_PROBE_VERSION}/grpc_health_probe-linux-amd64 && \
     chmod +x /bin/grpc_health_probe
 WORKDIR /app
