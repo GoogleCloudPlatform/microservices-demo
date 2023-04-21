@@ -17,14 +17,15 @@
 # Packages and pushes Online Boutique's Helm chart in public Artifact Registry.
 
 set -euo pipefail
-SCRIPTDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+REPO_ROOT=$SCRIPT_DIR/../..
 
 log() { echo "$1" >&2; }
 
 TAG="${TAG:?TAG env variable must be specified}"
 HELM_CHART_REPO="us-docker.pkg.dev/online-boutique-ci/charts"
 
-cd helm-chart
+cd ${REPO_ROOT}/helm-chart
 gsed -i "s/^appVersion:.*/appVersion: \"${TAG}\"/" Chart.yaml
 gsed -i "s/^version:.*/version: ${TAG:1}/" Chart.yaml
 helm package .

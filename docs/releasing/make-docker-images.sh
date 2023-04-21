@@ -17,7 +17,8 @@
 # Builds and pushes docker image for each demo microservice.
 
 set -euo pipefail
-SCRIPTDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+REPO_ROOT=$SCRIPT_DIR/../..
 
 log() { echo "$1" >&2; }
 
@@ -50,6 +51,6 @@ while IFS= read -d $'\0' -r dir; do
             docker push "${image}-native-grpc-probes"
         fi
     )
-done < <(find "${SCRIPTDIR}/../src" -mindepth 1 -maxdepth 1 -type d -print0)
+done < <(find "${REPO_ROOT}/src" -mindepth 1 -maxdepth 1 -type d -print0)
 
 log "Successfully built and pushed all images."

@@ -21,7 +21,8 @@
 # - 4. pushing the tag/commit to main.
 
 set -euo pipefail
-SCRIPTDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+REPO_ROOT=$SCRIPT_DIR/../..
 [[ -n "${DEBUG:-}" ]] && set -x
 
 log() { echo "$1" >&2; }
@@ -45,19 +46,19 @@ git checkout main
 git pull
 
 # build and push images
-"${SCRIPTDIR}"/make-docker-images.sh
+"${SCRIPT_DIR}"/make-docker-images.sh
 
 # update yaml
-"${SCRIPTDIR}"/make-release-artifacts.sh
+"${SCRIPT_DIR}"/make-release-artifacts.sh
 
 # build and push images
-"${SCRIPTDIR}"/make-helm-chart.sh
+"${SCRIPT_DIR}"/make-helm-chart.sh
 
 # create git release / push to new branch
 git checkout -b "release/${TAG}"
-git add "${SCRIPTDIR}/../release/"
-git add "${SCRIPTDIR}/../kustomize/base/"
-git add "${SCRIPTDIR}/../helm-chart/"
+git add "${REPO_ROOT}/release/"
+git add "${REPO_ROOT}/kustomize/base/"
+git add "${REPO_ROOT}/helm-chart/"
 git commit --allow-empty -m "Release $TAG"
 log "Pushing k8s manifests to release/${TAG}..."
 git tag "$TAG"
