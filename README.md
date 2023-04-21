@@ -58,7 +58,7 @@ If you’re using this demo, please **★Star** this repository to show your int
    gcloud container clusters get-credentials online-boutique
    ```
 
-5. Deploy Bank of Anthos to the cluster.
+5. Deploy Online Boutique to the cluster.
 
    ```sh
    kubectl apply -f ./release/kubernetes-manifests.yaml
