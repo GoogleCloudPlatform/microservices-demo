@@ -44,9 +44,10 @@ If you’re using this demo, please **★Star** this repository to show your int
 3. Set the Google Cloud project and region and ensure the Google Kubernetes Engine API is enabled.
 
    ```sh
-   gcloud config set project <PROJECT_ID>
-   gcloud config set compute/region us-central1
-   gcloud services enable container.googleapis.com
+   export PROJECT_ID=<PROJECT_ID>
+   export REGION=us-central1
+   gcloud services enable container.googleapis.com \
+     --project=${PROJECT_ID} --region=${REGION}
    ```
 
    Substitute `<PROJECT_ID>` with the ID of your Google Cloud project.
@@ -54,9 +55,11 @@ If you’re using this demo, please **★Star** this repository to show your int
 4. Create a GKE cluster and get the credentials for it.
 
    ```sh
-   gcloud container clusters create-auto online-boutique
-   gcloud container clusters get-credentials online-boutique
+   gcloud container clusters create-auto online-boutique \
+     --project=${PROJECT_ID} --region=${REGION}
    ```
+
+   Creating the cluster may take a few minutes.
 
 5. Deploy Online Boutique to the cluster.
 
@@ -90,16 +93,17 @@ If you’re using this demo, please **★Star** this repository to show your int
 
 7. Access the web frontend in a browser using the frontend's external IP.
 
-   ```
+   ```sh
    kubectl get service frontend-external | awk '{print $4}'
    ```
 
-   Visit `https://EXTERNAL_IP` to access your instance of Online Boutique.
+   Visit `http://EXTERNAL_IP` in a web browser to access your instance of Online Boutique.
 
 8. Once you are done with it, delete the GKE cluster.
 
-   ```
-   gcloud container clusters delete online-boutique
+   ```sh
+   gcloud container clusters delete online-boutique \
+     --project=${PROJECT_ID} --region=${REGION}
    ```
 
 ## Use Terraform to provision a GKE cluster and deploy Online Boutique
