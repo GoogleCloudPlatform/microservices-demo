@@ -106,6 +106,8 @@ If you’re using this demo, please **★Star** this repository to show your int
      --project=${PROJECT_ID} --region=${REGION}
    ```
 
+   Deleting the cluster may take a few minutes.
+
 ## Use Terraform to provision a GKE cluster and deploy Online Boutique
 
 The [`/terraform` folder](/terraform) contains instructions for using [Terraform](https://www.terraform.io/intro) to replicate the steps from [**Quickstart (GKE)**](#quickstart-gke) above.
