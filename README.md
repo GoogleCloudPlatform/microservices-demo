@@ -94,7 +94,7 @@ If you’re using this demo, please **★Star** this repository to show your int
    kubectl get service frontend-external | awk '{print $4}'
    ```
 
-   Visit `https://EXTERNAL_IP` to access your instance of Bank of Anthos.
+   Visit `https://EXTERNAL_IP` to access your instance of Online Boutique.
 
 8. Once you are done with it, delete the GKE cluster.
 
