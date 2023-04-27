@@ -17,7 +17,7 @@ version = "0.1.0-SNAPSHOT"
 def grpcVersion = "1.54.1"
 def jacksonCoreVersion = "2.14.2"
 def jacksonDatabindVersion = "2.14.2"
-def protocVersion = "3.21.12"
+def protocVersion = "3.22.3"
 
 tasks.withType(JavaCompile) {
     sourceCompatibility = JavaVersion.VERSION_19
@@ -40,7 +40,8 @@ dependencies {
                 "io.grpc:grpc-netty:${grpcVersion}",
                 "io.grpc:grpc-services:${grpcVersion}",
                 "io.grpc:grpc-census:${grpcVersion}",
-                "org.apache.logging.log4j:log4j-core:2.20.0"
+                "org.apache.logging.log4j:log4j-core:2.20.0",
+                "com.google.protobuf:protobuf-java:${protocVersion}"
 
         runtimeOnly "com.fasterxml.jackson.core:jackson-core:${jacksonCoreVersion}",
                 "com.fasterxml.jackson.core:jackson-databind:${jacksonDatabindVersion}",
