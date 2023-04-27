@@ -2,7 +2,7 @@
 
 This directory contains extra deploy manifests for configuring Online Boutique solution on GKE for onlineboutique.dev.
 
-_Note: before moving forward, the OnlineBoutique apps should already be deployed [on the online-boutique-release GKE cluster](../../hack#10-deploy-releasekubernetes-manifestsyaml-to-our-online-boutique-release-gke-cluster)._
+_Note: before moving forward, the Online Boutique apps should already be deployed [on the online-boutique-release GKE cluster](/docs/releasing#10-deploy-releasekubernetes-manifestsyaml-to-our-online-boutique-release-gke-cluster)._
 
 ## Public static IP address
 

@@ -198,7 +198,7 @@ INGRESS_HOST="$(kubectl get gateway istio-gateway \
 curl -v "http://$INGRESS_HOST"
 ```
 
-# Additional service mesh demos using OnlineBoutique 
+# Additional service mesh demos using Online Boutique 
 
 - [Canary deployment](https://github.com/GoogleCloudPlatform/istio-samples/tree/master/istio-canary-gke)
 - [Security (mTLS, JWT, Authorization)](https://github.com/GoogleCloudPlatform/istio-samples/tree/master/security-intro)

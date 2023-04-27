@@ -18,17 +18,18 @@
 # /release/...
 
 set -euo pipefail
-SCRIPTDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+REPO_ROOT=$SCRIPT_DIR/../..
 [[ -n "${DEBUG:-}" ]] && set -x
 
 log() { echo "$1" >&2; }
 
 TAG="${TAG:?TAG env variable must be specified}"
 REPO_PREFIX="${REPO_PREFIX:?REPO_PREFIX env variable must be specified}"
-OUT_DIR="${OUT_DIR:-${SCRIPTDIR}/../release}"
+OUT_DIR="${OUT_DIR:-${REPO_ROOT}/release}"
 
 print_license_header() {
-    cat "${SCRIPTDIR}/license_header.txt"
+    cat "${SCRIPT_DIR}/license_header.txt"
     echo
 }
 
@@ -61,7 +62,7 @@ read_manifests_except_kustomization() {
 }
 
 mk_kubernetes_manifests() {
-    out_manifest="$(read_manifests_except_kustomization "${SCRIPTDIR}/../kubernetes-manifests")"
+    out_manifest="$(read_manifests_except_kustomization "${REPO_ROOT}/kubernetes-manifests")"
 
     # replace "image" repo, tag for each service
     for dir in ./src/*/
@@ -88,7 +89,7 @@ mk_istio_manifests() {
 
     # This just copies the yaml from the component (excluding kustomization.yaml)
     # since there is no easy way to render individual kustomize component resources
-    read_manifests_except_kustomization "${SCRIPTDIR}/../kustomize/components/service-mesh-istio/"
+    read_manifests_except_kustomization "${REPO_ROOT}/kustomize/components/service-mesh-istio/"
     echo '# [END servicemesh_release_istio_manifests_microservices_demo]'
 }
 

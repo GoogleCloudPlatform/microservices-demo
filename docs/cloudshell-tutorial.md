@@ -4,7 +4,7 @@ This tutorial shows you how to deploy **[Online Boutique](https://github.com/Goo
 
 You'll be able to run Online Boutique on:
 - a local **[minikube](https://minikube.sigs.k8s.io/docs/)** cluster, which comes built in to the Cloud Shell instance
-- a **[Google Kubernetes Engine](https://cloud.google.com/kubernetes-engine)** cluster using a new or existing [Google Cloud Platform project](https://cloud.google.com/resource-manager/docs/creating-managing-projects#creating_a_project)
+- a **[Google Kubernetes Engine](https://cloud.google.com/kubernetes-engine)** cluster using a new or existing [Google Cloud project](https://cloud.google.com/resource-manager/docs/creating-managing-projects#creating_a_project)
 
 Let's get started!
 
@@ -29,7 +29,7 @@ Once minikube has started, you're ready to move on to the next step.
 
 ### GKE instructions
 
-In order to create a GKE cluster, you'll need to **[create a Google Cloud Platform project](https://cloud.google.com/resource-manager/docs/creating-managing-projects#creating_a_project)** or use an existing project.
+In order to create a GKE cluster, you'll need to **[create a Google Cloud project](https://cloud.google.com/resource-manager/docs/creating-managing-projects#creating_a_project)** or use an existing project.
 
 1. Access the command palette by going to **View > Find Command**.
 
@@ -83,7 +83,7 @@ You can start, stop, and debug apps from the Debug view.
 
 ### Clean up
 
-If you've deployed your app to a GKE cluster in your Google Cloud Platform project, you'll want to delete the cluster to avoid incurring charges.
+If you've deployed your app to a GKE cluster in your Google Cloud project, you'll want to delete the cluster to avoid incurring charges.
 
 1. Navigate to the <walkthrough-editor-spotlight spotlightId="activity-bar-cloud-k8s">Cloud Code - Kubernetes view</walkthrough-editor-spotlight> in the Activity bar.
 
