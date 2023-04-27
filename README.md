@@ -47,7 +47,7 @@ If you’re using this demo, please **★Star** this repository to show your int
    export PROJECT_ID=<PROJECT_ID>
    export REGION=us-central1
    gcloud services enable container.googleapis.com \
-     --project=${PROJECT_ID} --region=${REGION}
+     --project=${PROJECT_ID}
    ```
 
    Substitute `<PROJECT_ID>` with the ID of your Google Cloud project.
