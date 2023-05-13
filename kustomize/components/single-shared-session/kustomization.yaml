@@ -14,18 +14,18 @@
 
 apiVersion: kustomize.config.k8s.io/v1alpha1
 kind: Component
-patchesStrategicMerge:
+patches:
 # frontend - ENABLE_SINGLE_SHARED_SESSION
-- |-
-  apiVersion: apps/v1
-  kind: Deployment
-  metadata:
-    name: frontend
-  spec:
-    template:
-      spec:
-        containers:
-          - name: server
-            env:
-            - name: ENABLE_SINGLE_SHARED_SESSION
-              value: "true"
+- patch: |-
+    apiVersion: apps/v1
+    kind: Deployment
+    metadata:
+      name: frontend
+    spec:
+      template:
+        spec:
+          containers:
+            - name: server
+              env:
+              - name: ENABLE_SINGLE_SHARED_SESSION
+                value: "true"

@@ -26,7 +26,7 @@ resources:
 - service-account-productcatalogservice.yaml
 - service-account-recommendationservice.yaml
 - service-account-shippingservice.yaml
-patchesJson6902:
+patches:
 - target:
     kind: Deployment
     name: adservice

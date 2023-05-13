@@ -1,3 +1,4 @@
+#! /bin/bash
 # Copyright 2021 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -79,19 +80,37 @@ function evalTest() {
 }
 
 function generateProject(){
-    local __resultvar=$1
-    local __STACKSUFFIX=$2
-    local __RANDOMSUFFIX=$(
+    local __resultvar
+    local __STACKSUFFIX
+    local __BA
+    local __RANDOMSUFFIX
+    local __DATELABEL
+    local PROJECTID
+    local current
+
+
+    __resultvar=$1
+    __STACKSUFFIX=$2
+    __BA=$3
+    __RANDOMSUFFIX=$(
         LC_ALL=C tr -dc 'a-z0-9' </dev/urandom | head -c 8
         echo
     )
-    local __DATELABEL=$(date +%F)
-    local VALUE=ds-test-$__STACKSUFFIX-$__RANDOMSUFFIX
-    local __BA=$(gcloud beta billing accounts list --format="value(ACCOUNT_ID)" --limit=1 | xargs)
+    __DATELABEL=$(date +%F)
+    PROJECTID=ds-test-$__STACKSUFFIX-$__RANDOMSUFFIX
+    current=$(gcloud config list account --format "value(core.account)")
+    # shellcheck disable=SC2034
+    GOOGLE_APPLICATION_CREDENTIALS=.deploystack/creds.json
 
-    gcloud projects create $VALUE --labels="deploystack-disposable-test-project=$__DATELABEL" --folder="155265971980"
-    gcloud beta billing projects link $VALUE --billing-account=$__BA
-    eval $__resultvar="'$VALUE'"
+    gcloud projects create "$PROJECTID" --labels="deploystack-disposable-test-project=$__DATELABEL" --folder="155265971980"
+    
+    gcloud auth activate-service-account --project="$PROJECTID" --key-file=.deploystack/creds.json -q
+    gcloud config set account test-runner@ds-tester-helper.iam.gserviceaccount.com -q
+
+    gcloud beta billing projects link "$PROJECTID" --billing-account="$__BA" -q
+    gcloud config set account "$current" -q
+    eval "$__resultvar"="'$PROJECTID'"
+    
 }
 
 # END DON'T REMOVE FROM test script.
@@ -101,7 +120,7 @@ suffix=ms
 # This is only needed if you tests fail alot because of overlaping runs of the
 # same set of tests.
 section_open "Generate random test project"
-    generateProject PROJECT "$suffix"
+    generateProject PROJECT "$suffix" "$BA"
 section_close
 
 # We need to force the use of gke-gcloud-auth-plugin (for GKE authentication)
