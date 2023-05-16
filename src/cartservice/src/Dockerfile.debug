@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-FROM mcr.microsoft.com/dotnet/sdk:7.0@sha256:9a2ca5d061f18a406702e298c71fc2e333657a5f1602c8733e59da2329bf434f AS build
+FROM mcr.microsoft.com/dotnet/sdk:7.0@sha256:5c638e77052b5ae4f6f1da3885035b510fc379d2ce4be274c70679114bcdb936 AS build
 WORKDIR /app
 COPY . .
 RUN dotnet restore cartservice.csproj
