@@ -71,6 +71,11 @@ header .cart-size-circle {
   background-color: #853B5C;
 }
 
+header .navbar {
+  padding-top: 5px;
+  padding-bottom: 5px;
+}
+
 header .h-free-shipping {
   font-size: 14px;
 }
