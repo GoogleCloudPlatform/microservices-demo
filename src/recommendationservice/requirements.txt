@@ -78,7 +78,7 @@ opentelemetry-semantic-conventions==0.38b0
     # via
     #   opentelemetry-instrumentation-grpc
     #   opentelemetry-sdk
-protobuf==4.22.3
+protobuf==4.23.0
     # via
     #   google-api-core
     #   google-cloud-profiler
