@@ -47,7 +47,7 @@ spec:
               - ALL
           privileged: false
           readOnlyRootFilesystem: true
-        image: gcr.io/google-samples/microservices-demo/emailservice:v0.6.0
+        image: gcr.io/google-samples/microservices-demo/emailservice:v0.7.0
         ports:
         - containerPort: 8080
         env:
@@ -112,7 +112,7 @@ spec:
                 - ALL
             privileged: false
             readOnlyRootFilesystem: true
-          image: gcr.io/google-samples/microservices-demo/checkoutservice:v0.6.0
+          image: gcr.io/google-samples/microservices-demo/checkoutservice:v0.7.0
           ports:
           - containerPort: 5050
           readinessProbe:
@@ -186,7 +186,7 @@ spec:
               - ALL
           privileged: false
           readOnlyRootFilesystem: true
-        image: gcr.io/google-samples/microservices-demo/recommendationservice:v0.6.0
+        image: gcr.io/google-samples/microservices-demo/recommendationservice:v0.7.0
         ports:
         - containerPort: 8080
         readinessProbe:
@@ -255,7 +255,7 @@ spec:
                 - ALL
             privileged: false
             readOnlyRootFilesystem: true
-          image: gcr.io/google-samples/microservices-demo/frontend:v0.6.0
+          image: gcr.io/google-samples/microservices-demo/frontend:v0.7.0
           ports:
           - containerPort: 8080
           readinessProbe:
@@ -292,13 +292,15 @@ spec:
           - name: AD_SERVICE_ADDR
             value: "adservice:9555"
           # # ENV_PLATFORM: One of: local, gcp, aws, azure, onprem, alibaba
-          # # When not set, defaults to "local" unless running in GKE, otherwies auto-sets to gcp 
-          # - name: ENV_PLATFORM 
+          # # When not set, defaults to "local" unless running in GKE, otherwies auto-sets to gcp
+          # - name: ENV_PLATFORM
           #   value: "aws"
           - name: ENABLE_PROFILER
             value: "0"
           # - name: CYMBAL_BRANDING
           #   value: "true"
+          # - name: FRONTEND_MESSAGE
+          #   value: "Replace this with a message you want to display on all pages."
           resources:
             requests:
               cpu: 100m
@@ -362,7 +364,7 @@ spec:
               - ALL
           privileged: false
           readOnlyRootFilesystem: true
-        image: gcr.io/google-samples/microservices-demo/paymentservice:v0.6.0
+        image: gcr.io/google-samples/microservices-demo/paymentservice:v0.7.0
         ports:
         - containerPort: 50051
         env:
@@ -426,7 +428,7 @@ spec:
               - ALL
           privileged: false
           readOnlyRootFilesystem: true
-        image: gcr.io/google-samples/microservices-demo/productcatalogservice:v0.6.0
+        image: gcr.io/google-samples/microservices-demo/productcatalogservice:v0.7.0
         ports:
         - containerPort: 3550
         env:
@@ -490,7 +492,7 @@ spec:
               - ALL
           privileged: false
           readOnlyRootFilesystem: true
-        image: gcr.io/google-samples/microservices-demo/cartservice:v0.6.0
+        image: gcr.io/google-samples/microservices-demo/cartservice:v0.7.0
         ports:
         - containerPort: 7070
         env:
@@ -582,7 +584,7 @@ spec:
               - ALL
           privileged: false
           readOnlyRootFilesystem: true
-        image: gcr.io/google-samples/microservices-demo/loadgenerator:v0.6.0
+        image: gcr.io/google-samples/microservices-demo/loadgenerator:v0.7.0
         env:
         - name: FRONTEND_ADDR
           value: "frontend:80"
@@ -625,7 +627,7 @@ spec:
               - ALL
           privileged: false
           readOnlyRootFilesystem: true
-        image: gcr.io/google-samples/microservices-demo/currencyservice:v0.6.0
+        image: gcr.io/google-samples/microservices-demo/currencyservice:v0.7.0
         ports:
         - name: grpc
           containerPort: 7000
@@ -689,7 +691,7 @@ spec:
               - ALL
           privileged: false
           readOnlyRootFilesystem: true
-        image: gcr.io/google-samples/microservices-demo/shippingservice:v0.6.0
+        image: gcr.io/google-samples/microservices-demo/shippingservice:v0.7.0
         ports:
         - containerPort: 50051
         env:
@@ -819,7 +821,7 @@ spec:
               - ALL
           privileged: false
           readOnlyRootFilesystem: true
-        image: gcr.io/google-samples/microservices-demo/adservice:v0.6.0
+        image: gcr.io/google-samples/microservices-demo/adservice:v0.7.0
         ports:
         - containerPort: 9555
         env:
