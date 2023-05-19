@@ -40,7 +40,7 @@ googleapis-common-protos==1.59.0
     #   google-api-core
     #   grpcio-status
     #   opentelemetry-exporter-otlp-proto-grpc
-grpcio==1.54.0
+grpcio==1.54.2
     # via
     #   -r requirements.in
     #   google-api-core
@@ -129,7 +129,9 @@ typing-extensions==4.5.0
 uritemplate==4.1.1
     # via google-api-python-client
 urllib3==1.26.15
-    # via requests
+    # via
+    #   google-auth
+    #   requests
 wrapt==1.15.0
     # via
     #   deprecated
