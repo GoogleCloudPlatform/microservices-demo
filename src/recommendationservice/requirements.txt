@@ -40,7 +40,7 @@ grpcio==1.54.2
     # via
     #   grpcio-health-checking
     #   opentelemetry-exporter-otlp-proto-grpc
-grpcio-health-checking==1.54.0
+grpcio-health-checking==1.54.2
     # via -r requirements.in
 httplib2==0.22.0
     # via
@@ -113,7 +113,9 @@ typing-extensions==4.5.0
 uritemplate==4.1.1
     # via google-api-python-client
 urllib3==1.26.15
-    # via requests
+    # via
+    #   google-auth
+    #   requests
 wrapt==1.15.0
     # via
     #   deprecated
