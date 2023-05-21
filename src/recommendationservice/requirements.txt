@@ -112,7 +112,7 @@ typing-extensions==4.5.0
     # via opentelemetry-sdk
 uritemplate==4.1.1
     # via google-api-python-client
-urllib3==1.26.15
+urllib3==2.0.2
     # via
     #   google-auth
     #   requests
