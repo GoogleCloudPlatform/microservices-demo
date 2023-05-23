@@ -95,7 +95,7 @@ pyparsing==3.0.9
     # via httplib2
 python-json-logger==2.0.7
     # via -r requirements.in
-requests==2.30.0
+requests==2.31.0
     # via
     #   -r requirements.in
     #   google-api-core
