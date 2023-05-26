@@ -18,7 +18,7 @@ processors:
 
 exporters:
   logging:
-    logLevel: debug
+    verbosity: detailed
   sapm:
     access_token: "${SPLUNK_ACCESS_TOKEN}"
     endpoint: "https://ingest.${SPLUNK_REALM}.signalfx.com/v2/trace"
