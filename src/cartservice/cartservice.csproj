@@ -8,15 +8,18 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="CommandLineParser" Version="2.8.0" />
-    <PackageReference Include="Google.Protobuf" Version="3.19.4" />
-    <PackageReference Include="Google.Protobuf.Tools" Version="3.19.4" />
-    <PackageReference Include="Grpc" Version="2.43.0" />
-    <PackageReference Include="Grpc.HealthCheck" Version="2.43.0" />
-    <PackageReference Include="Grpc.Tools" Version="1.12.0" />
-    <PackageReference Include="Microsoft.Extensions.Configuration" Version="6.0.0" />
+    <PackageReference Include="CommandLineParser" Version="2.9.1" />
+    <PackageReference Include="Google.Protobuf" Version="3.23.1" />
+    <PackageReference Include="Google.Protobuf.Tools" Version="3.23.1" />
+    <PackageReference Include="Grpc" Version="2.46.6" />
+    <PackageReference Include="Grpc.HealthCheck" Version="2.53.0" />
+    <PackageReference Include="Grpc.Tools" Version="2.54.0">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.Extensions.Configuration" Version="7.0.0" />
     <PackageReference Include="OpenTracing" Version="0.12.1" />
-    <PackageReference Include="StackExchange.Redis" Version="2.2.88" />
+    <PackageReference Include="StackExchange.Redis" Version="2.6.111" />
   </ItemGroup>
 
   <ItemGroup>
