@@ -1,4 +1,4 @@
-ARG NET_VERSION=6.0
+ARG NET_VERSION=7.0
 FROM mcr.microsoft.com/dotnet/sdk:${NET_VERSION} as builder
 
 WORKDIR /app
