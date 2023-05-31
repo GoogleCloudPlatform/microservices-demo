@@ -13,13 +13,12 @@
 // limitations under the License.
 
 using System;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using cartservice.interfaces;
 using Google.Protobuf;
 using Grpc.Core;
-using OpenTracing;
-using OpenTracing.Util;
 using StackExchange.Redis;
 
 namespace cartservice.cartstore
@@ -31,12 +30,11 @@ namespace cartservice.cartstore
     private readonly byte[] emptyCartBytes;
 
     private static double EXTERNAL_DB_ACCESS_RATE = Convert.ToDouble(Environment.GetEnvironmentVariable("EXTERNAL_DB_ACCESS_RATE"));
-    private static Int16 EXTERNAL_DB_MAX_DURATION_MILLIS = Convert.ToInt16(Environment.GetEnvironmentVariable("EXTERNAL_DB_MAX_DURATION_MILLIS"));
+    private static short EXTERNAL_DB_MAX_DURATION_MILLIS = Convert.ToInt16(Environment.GetEnvironmentVariable("EXTERNAL_DB_MAX_DURATION_MILLIS"));
     private static double EXTERNAL_DB_ERROR_RATE = Convert.ToDouble(Environment.GetEnvironmentVariable("EXTERNAL_DB_ERROR_RATE"));
     private static string EXTERNAL_DB_NAME = Environment.GetEnvironmentVariable("EXTERNAL_DB_NAME") ?? "global.datastore";
 
 
-    private readonly ITracer _tracer;
     private readonly Random _random;
     private readonly DatabaseCache _dbCache;
 
@@ -46,7 +44,6 @@ namespace cartservice.cartstore
       var cart = new Hipstershop.Cart();
       emptyCartBytes = cart.ToByteArray();
 
-      _tracer = GlobalTracer.Instance;
       _random = Random.Shared;
       _dbCache = new DatabaseCache(connection);
     }
@@ -179,22 +176,20 @@ namespace cartservice.cartstore
         return false;
       }
 
-      using (IScope scope = _tracer.BuildSpan(operation).WithTag("span.kind", "client").StartActive())
+      using var activity = ActivitySourceUtil.ActivitySource.StartActivity(operation, ActivityKind.Client);
+
+      activity?.SetTag("db.system", "postgres");
+      activity?.SetTag("db.type", "postgres");
+      activity?.SetTag("peer.service", EXTERNAL_DB_NAME + ":98321");
+
+      if (_random.NextDouble() < EXTERNAL_DB_ERROR_RATE)
       {
-        ISpan span = scope.Span;
-        span.SetTag("db.system", "postgres");
-        span.SetTag("db.type", "postgres");
-        span.SetTag("peer.service", EXTERNAL_DB_NAME + ":98321");
-
-        if (_random.NextDouble() < EXTERNAL_DB_ERROR_RATE)
-        {
-          span.SetTag("error", "true");
-        }
-
-        await Task.Delay(_random.Next(0, EXTERNAL_DB_MAX_DURATION_MILLIS));
-
-        return true;
+          activity?.SetStatus(ActivityStatusCode.Error);
       }
+
+      await Task.Delay(_random.Next(0, EXTERNAL_DB_MAX_DURATION_MILLIS));
+
+      return true;
     }
   }
 }

@@ -8,7 +8,7 @@ They make the application exercise different features available in the Splunk Ob
 ### Synthetic External DB Access
 
 These environment variables are used to simulate access to an external DB for some of the requests.
-The access to DB is wrapped by OpenTracing spans and the backend infers an external DB from these spans.
+The access to DB is wrapped by OpenTelemetry spans and the backend infers an external DB from these spans.
 
 - `EXTERNAL_DB_ACCESS_RATE`: float [0, 1], percentage of redis spans that will be turned into external database spans
 - `EXTERNAL_DB_ERROR_RATE`: float [0, 1], percentage of external DB access spans that will report error
@@ -17,8 +17,8 @@ The access to DB is wrapped by OpenTracing spans and the backend infers an exter
 
 ### Optimizations
 
-These environment variables are used to trigger behaviors on the application that affect its perfomance characteristics.
-Each optimization affects lantency, CPU, and memory in different ways.
+These environment variables are used to trigger behaviors on the application that affect its performance characteristics.
+Each optimization affects latency, CPU, and memory in different ways.
 Keep that in mind when interpreting their effect.
 All these environment variables are boolean.
 
@@ -50,4 +50,4 @@ popd
 If you want to send data to the backend set the following environment below when starting the `docker-compose`:
 
 - `SPLUNK_ACCESS_TOKEN`
-- `SIGNALFX_ENV`
+- `OTEL_RESOURCE_ATTRIBUTES=deployment.environment=`

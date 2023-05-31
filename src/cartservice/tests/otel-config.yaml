@@ -37,11 +37,11 @@ exporters:
 service:
   pipelines:
     traces:
-      receivers: [zipkin]
+      receivers: [otlp]
       processors: [batch]
       exporters: [logging, sapm]
     metrics:
-      receivers: [signalfx]
+      receivers: [otlp]
       processors: [batch]
       exporters: [logging, signalfx]
     logs:

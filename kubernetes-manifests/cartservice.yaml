@@ -45,22 +45,14 @@ spec:
           valueFrom:
             fieldRef:
               fieldPath: status.hostIP
-        - name: SIGNALFX_ENDPOINT_URL
-          value: "http://$(NODE_IP):9411/api/v2/spans"
-        - name: SIGNALFX_METRICS_ENDPOINT_URL
-          value: "http://$(NODE_IP):9943/v2/datapoint"
-        - name: SIGNALFX_PROFILER_ENABLED
-          value: "true"
-        - name: SIGNALFX_PROFILER_CALL_STACK_INTERVAL
-          value: "1000"
-        - name: SIGNALFX_PROFILER_LOGS_ENDPOINT
-          value: "http://$(NODE_IP):4318/v1/logs"
-        - name: SIGNALFX_RUNTIME_METRICS_ENABLED
-          value: "true"
-        - name: SIGNALFX_SERVICE_NAME
+        - name: OTEL_EXPORTER_OTLP_ENDPOINT
+          value: "http://$(NODE_IP):4318"
+        - name: OTEL_SERVICE_NAME
           value: "cartservice"
-        - name: SIGNALFX_ENV
-          value: "demo"
+        - name: OTEL_RESOURCE_ATTRIBUTES
+          value: "deployment.environment=demo"
+        - name: OTEL_DOTNET_AUTO_TRACES_ADDITIONAL_SOURCES
+          value: "Cartservice"
         - name: EXTERNAL_DB_NAME
           value: "Galactus.Postgres"
         - name: EXTERNAL_DB_ACCESS_RATE

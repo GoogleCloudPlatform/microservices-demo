@@ -19,10 +19,7 @@ using cartservice.interfaces;
 using Grpc.Core;
 using Hipstershop;
 using static Hipstershop.CartService;
-using OpenTracing;
-using OpenTracing.Propagation;
-using OpenTracing.Util;
-using System.Collections;
+using System.Diagnostics;
 
 namespace cartservice
 {
@@ -30,9 +27,8 @@ namespace cartservice
     // Cart wrapper to deal with grpc communication
     internal class CartServiceImpl : CartServiceBase
     {
-        private ITracer tracer;
         private ICartStore cartStore;
-        private readonly static Empty Empty = new Empty();
+        private static readonly Empty Empty = new();
 
         private static readonly Func<Grpc.Core.Metadata, string, IEnumerable<string>> Getter =
             (md, key) =>
@@ -48,85 +44,83 @@ namespace cartservice
         public CartServiceImpl(ICartStore cartStore)
         {
             this.cartStore = cartStore;
-            this.tracer = GlobalTracer.Instance;
         }
 
-        public ISpanContext TraceContextFromGrpcContext(Grpc.Core.ServerCallContext context)
+        // Simplified implementation for B3multi propagator
+        // It is needed as we do not have support for Grpc server in OpenTelemetry .NET Instrumentation
+        public ActivityContext TraceContextFromGrpcContext(ServerCallContext context)
         {
-            var carrier = new MetadataCarrier(context.RequestHeaders);
-            return this.tracer.Extract(BuiltinFormats.HttpHeaders, carrier);
-        }
-
-        public async override Task<Empty> AddItem(AddItemRequest request, Grpc.Core.ServerCallContext context)
-        {
-            using (IScope scope = this.tracer.BuildSpan("AddItem").AsChildOf(this.TraceContextFromGrpcContext(context)).StartActive())
+            try
             {
-                ISpan span = scope.Span;
-                span.SetTag("span.kind", "server");
-                span.SetTag("component", "rpc");
-                span.SetTag("grpc.method", "/hipstershop.CartService/AddItem");
+                string traceId = null;
+                string spanId = null;
+                string sampled = null;
+                foreach (var header in context.RequestHeaders)
+                {
+                    if (header.IsBinary)
+                    {
+                        continue;
+                    }
 
-                await cartStore.AddItemAsync(request.UserId, request.Item.ProductId, request.Item.Quantity);
-                return Empty;
+                    switch (header.Key.ToLowerInvariant())
+                    {
+                        case "x-b3-traceid":
+                            traceId = header.Value;
+                            if (traceId.Length == 16)
+                            {
+                                traceId = "0000000000000000" + traceId;
+                            }
+                            break;
+                        case "x-b3-spanid":
+                            spanId = header.Value;
+                            break;
+                        case "x-b3-sampled":
+                            sampled = header.Value;
+                            break;
+                    }
+                }
+
+                return !string.IsNullOrEmpty(traceId) && !string.IsNullOrEmpty(spanId) && !string.IsNullOrEmpty(sampled)
+                    ? new ActivityContext(ActivityTraceId.CreateFromString(traceId),
+                        ActivitySpanId.CreateFromString(spanId),
+                        sampled == "1" ? ActivityTraceFlags.Recorded : ActivityTraceFlags.None, isRemote: true)
+                    : new ActivityContext();
+            }
+            catch
+            {
+                return new ActivityContext();
             }
         }
 
-        public async override Task<Empty> EmptyCart(EmptyCartRequest request, ServerCallContext context)
+        public override async Task<Empty> AddItem(AddItemRequest request, ServerCallContext context)
         {
-            using (IScope scope = this.tracer.BuildSpan("EmptyCart").AsChildOf(this.TraceContextFromGrpcContext(context)).StartActive())
-            {
-                ISpan span = scope.Span;
-                span.SetTag("span.kind", "server");
-                span.SetTag("component", "rpc");
-                span.SetTag("grpc.method", "/hipstershop.CartService/EmptyCart");
+            using var activity = ActivitySourceUtil.ActivitySource.StartActivity("AddItem", ActivityKind.Server, TraceContextFromGrpcContext(context));
+            activity?.SetTag("component", "rpc");
+            activity?.SetTag("grpc.method", "/hipstershop.CartService/AddItem");
 
-                await cartStore.EmptyCartAsync(request.UserId);
-                return Empty;
-            }
+            await cartStore.AddItemAsync(request.UserId, request.Item.ProductId, request.Item.Quantity);
+            return Empty;
         }
 
-        public override Task<Hipstershop.Cart> GetCart(GetCartRequest request, ServerCallContext context)
+        public override async Task<Empty> EmptyCart(EmptyCartRequest request, ServerCallContext context)
         {
-            using (IScope scope = this.tracer.BuildSpan("GetCart").AsChildOf(this.TraceContextFromGrpcContext(context)).StartActive())
+            using var activity = ActivitySourceUtil.ActivitySource.StartActivity("EmptyCart", ActivityKind.Server, TraceContextFromGrpcContext(context));
+            activity?.SetTag("component", "rpc");
+            activity?.SetTag("grpc.method", "/hipstershop.CartService/EmptyCart");
+
+            await cartStore.EmptyCartAsync(request.UserId);
+            return Empty;
+        }
+
+        public override Task<Cart> GetCart(GetCartRequest request, ServerCallContext context)
+        {
+            using var activity = ActivitySourceUtil.ActivitySource.StartActivity("GetCart", ActivityKind.Server, TraceContextFromGrpcContext(context));
             {
-                ISpan span = scope.Span;
-                span.SetTag("span.kind", "server");
-                span.SetTag("component", "rpc");
-                span.SetTag("grpc.method", "/hipstershop.CartService/GetCart");
+                activity?.SetTag("component", "rpc");
+                activity?.SetTag("grpc.method", "/hipstershop.CartService/GetCart");
 
                 return cartStore.GetCartAsync(request.UserId);
             }
-        }
-    }
-
-    internal class MetadataCarrier : ITextMap
-    {
-        private readonly Metadata _metadata;
-
-        public MetadataCarrier(Metadata metadata)
-        {
-            _metadata = metadata;
-        }
-
-        public void Set(string key, string value)
-        {
-            _metadata.Add(key, value);
-        }
-
-        public IEnumerator<KeyValuePair<string, string>> GetEnumerator()
-        {
-            foreach (var entry in _metadata)
-            {
-                if (entry.IsBinary)
-                    continue;
-
-                yield return new KeyValuePair<string, string>(entry.Key, entry.Value);
-            }
-        }
-
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return GetEnumerator();
         }
     }
 }

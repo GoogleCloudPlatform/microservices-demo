@@ -22,21 +22,25 @@ WORKDIR /app
 COPY --from=builder /cartservice .
 COPY --from=builder /app/start .
 
-# Add the SFx.NET Instrumentation
-ARG TRACER_VERSION=1.1.0
-ADD https://github.com/signalfx/signalfx-dotnet-tracing/releases/download/v${TRACER_VERSION}/signalfx-dotnet-tracing_${TRACER_VERSION}_amd64.deb ./
+# Add the Splunk Distribution of OpenTelemetry .NET
+RUN apt-get update && \
+    apt-get install -y \
+            curl \
+            unzip
 
-RUN mkdir -p /var/log/signalfx
-RUN mkdir -p /opt/signalfx
-RUN dpkg -i ./signalfx-dotnet-tracing_${TRACER_VERSION}_amd64.deb
-RUN rm ./signalfx-dotnet-tracing_${TRACER_VERSION}_amd64.deb
+ARG SPLUNK_OTEL_VERSION=0.2.0-beta.1
+ENV OTEL_DOTNET_AUTO_HOME=/.splunk-otel-dotnet
+ADD https://github.com/signalfx/splunk-otel-dotnet/releases/download/v${SPLUNK_OTEL_VERSION}/splunk-otel-dotnet-install.sh ./
+RUN chmod +x ./splunk-otel-dotnet-install.sh && \
+    ./splunk-otel-dotnet-install.sh && \
+    rm ./splunk-otel-dotnet-install.sh
 
 ENV CORECLR_ENABLE_PROFILING=1
-ENV CORECLR_PROFILER={B4C89B0F-9908-4F73-9F59-0D77C5A06874}
-ENV CORECLR_PROFILER_PATH=/opt/signalfx/SignalFx.Tracing.ClrProfiler.Native.so
-ENV SIGNALFX_DOTNET_TRACER_HOME=/opt/signalfx
-ENV SIGNALFX_PROFILER_ENABLED=true
-ENV SIGNALFX_PROFILER_MEMORY_ENABLED=true
-ENV SIGNALFX_METRICS_Process_ENABLED=true
+ENV CORECLR_PROFILER={918728DD-259F-4A6A-AC2B-B85E1B658318}
+ENV CORECLR_PROFILER_PATH=/.splunk-otel-dotnet/linux-x64/OpenTelemetry.AutoInstrumentation.Native.so
+ENV DOTNET_ADDITIONAL_DEPS=/.splunk-otel-dotnet/AdditionalDeps
+ENV DOTNET_SHARED_STORE=/.splunk-otel-dotnet/store
+ENV DOTNET_STARTUP_HOOKS=/.splunk-otel-dotnet/net/OpenTelemetry.AutoInstrumentation.StartupHook.dll
+ENV OTEL_DOTNET_AUTO_PLUGINS="Splunk.OpenTelemetry.AutoInstrumentation.Plugin, Splunk.OpenTelemetry.AutoInstrumentation"
 
 ENTRYPOINT ["./cartservice", "start"]
