@@ -84,7 +84,7 @@ resource "null_resource" "apply_deployment" {
 resource "null_resource" "wait_conditions" {
   provisioner "local-exec" {
     interpreter = ["bash", "-exc"]
-    command     = "kubectl wait --for=condition=ready pods --all -n ${var.namespace} --timeout=-1s 2> /dev/null"
+    command     = "kubectl wait --for=condition=ready pods --all -n ${var.namespace} --timeout=-1s"
   }
 
   depends_on = [
