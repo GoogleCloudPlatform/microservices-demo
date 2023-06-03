@@ -61,7 +61,7 @@ six==1.16.0
     # via
     #   flask-cors
     #   geventhttpclient
-typing-extensions==4.6.2
+typing-extensions==4.6.3
     # via locust
 urllib3==2.0.2
     # via requests
