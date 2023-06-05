@@ -99,7 +99,7 @@ opentelemetry-semantic-conventions==0.39b0
     #   opentelemetry-sdk
 proto-plus==1.22.2
     # via google-cloud-trace
-protobuf==4.23.1
+protobuf==4.23.2
     # via
     #   google-api-core
     #   google-cloud-profiler
