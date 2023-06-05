@@ -85,8 +85,8 @@ resource "null_resource" "wait_conditions" {
   provisioner "local-exec" {
     interpreter = ["bash", "-exc"]
     command     = <<-EOT
-    kubectl wait --for=condition=AVAILABLE apiservice/v1beta1.metrics.k8s.io --timeout=1200s
-    kubectl wait --for=condition=ready pods --all -n ${var.namespace} --timeout=1200s
+    kubectl wait --for=condition=AVAILABLE apiservice/v1beta1.metrics.k8s.io --timeout=180s
+    kubectl wait --for=condition=ready pods --all -n ${var.namespace} --timeout=280s
     EOT
   }
 
