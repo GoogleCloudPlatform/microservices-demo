@@ -5,7 +5,7 @@ go 1.19
 require (
 	cloud.google.com/go/profiler v0.3.1
 	github.com/golang/protobuf v1.5.3
-	github.com/sirupsen/logrus v1.9.2
+	github.com/sirupsen/logrus v1.9.3
 	golang.org/x/net v0.10.0
 	google.golang.org/grpc v1.55.0
 )
