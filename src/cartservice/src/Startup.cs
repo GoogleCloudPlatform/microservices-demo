@@ -30,6 +30,7 @@ namespace cartservice
             string spannerProjectId = Configuration["SPANNER_PROJECT"];
             string spannerConnectionString = Configuration["SPANNER_CONNECTION_STRING"];
             string alloyDBConnectionString = Configuration["ALLOYDB_PRIMARY_IP"];
+            string mysqlDBHost = Configuration["MYSQL_HOST"];
 
             if (!string.IsNullOrEmpty(redisAddress))
             {
@@ -47,6 +48,11 @@ namespace cartservice
             {
                 Console.WriteLine("Creating AlloyDB cart store");
                 services.AddSingleton<ICartStore, AlloyDBCartStore>();
+            }
+            else if (!string.IsNullOrEmpty(mysqlDBHost))
+            {
+                Console.WriteLine("Creating MySQLDB cart store");
+                services.AddSingleton<ICartStore, MySQLDBCartStore>();
             }
             else
             {

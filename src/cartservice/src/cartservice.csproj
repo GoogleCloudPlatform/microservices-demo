@@ -12,6 +12,8 @@
     <PackageReference Include="StackExchange.Redis" Version="2.6.111" />
     <PackageReference Include="Google.Cloud.Spanner.Data" Version="4.5.0" />
     <PackageReference Include="Npgsql" Version="7.0.4" />
+    <!-- <PackageReference Include="MySql.Data" Version="8.0.33" /> -->
+    <PackageReference Include="MySqlConnector" Version="2.2.6" />
     <PackageReference Include="Google.Cloud.SecretManager.V1" Version="2.1.0" />
   </ItemGroup>
 
