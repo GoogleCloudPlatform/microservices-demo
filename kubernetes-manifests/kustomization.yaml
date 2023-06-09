@@ -27,11 +27,11 @@ resources:
  - recommendationservice.yaml
  - redis.yaml
  - shippingservice.yaml
-# components:
+components:
 # - ../kustomize/components/cymbal-branding
 # - ../kustomize/components/google-cloud-operations
 # - ../kustomize/components/memorystore
-# - ../kustomize/components/mysqldb
+- ../kustomize/components/mysqldb
 # - ../kustomize/components/network-policies
 # - ../kustomize/components/service-accounts
 # - ../kustomize/components/spanner
