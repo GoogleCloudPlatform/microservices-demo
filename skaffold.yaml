@@ -88,20 +88,20 @@ profiles:
   - op: add
     path: /manifests/kustomize/paths/1
     value: kustomize/components/network-policies
----
-apiVersion: skaffold/v3
-kind: Config
-metadata:
-  name: loadgenerator
-requires:
-- configs:
-  - app
-build:
-  artifacts:
-  - image: loadgenerator
-    context: src/loadgenerator
-manifests:
-  rawYaml:
-  - ./kubernetes-manifests/loadgenerator.yaml
-deploy:
-  kubectl: {}
+# ---
+# apiVersion: skaffold/v3
+# kind: Config
+# metadata:
+#   name: loadgenerator
+# requires:
+# - configs:
+#   - app
+# build:
+#   artifacts:
+#   - image: loadgenerator
+#     context: src/loadgenerator
+# manifests:
+#   rawYaml:
+#   - ./kubernetes-manifests/loadgenerator.yaml
+# deploy:
+#   kubectl: {}
