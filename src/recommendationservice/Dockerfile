@@ -31,7 +31,7 @@ RUN wget -qO/bin/grpc_health_probe https://github.com/grpc-ecosystem/grpc-health
 COPY requirements.txt .
 RUN pip install -r requirements.txt
 
-FROM base as without-grpc-health-probe-bin
+FROM base
 # Enable unbuffered logging
 ENV PYTHONUNBUFFERED=1
 
@@ -49,6 +49,3 @@ ENV PORT "8080"
 EXPOSE 8080
 
 ENTRYPOINT ["python", "recommendation_server.py"]
-
-FROM without-grpc-health-probe-bin
-COPY --from=builder /bin/grpc_health_probe /bin/grpc_health_probe
