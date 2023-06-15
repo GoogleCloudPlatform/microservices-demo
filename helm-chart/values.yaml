@@ -15,9 +15,6 @@ serviceAccounts:
   # Annotations to add only for the cartservice app. This allows to follow the least privilege principle where only cartservice needs to connect to external database for example via Workload Identity.
   annotationsOnlyForCartservice: false
 
-# Specifies if the livenessProbe and readinessProbe are using the native gRPC support with Kubernetes 1.24.
-nativeGrpcHealthCheck: false
-
 networkPolicies:
   # Specifies if the NetworkPolicies are created or not. If true, one fine granular NetworkPolicy per app is created.
   create: false
