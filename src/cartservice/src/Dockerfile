@@ -21,7 +21,7 @@ COPY . .
 RUN dotnet publish cartservice.csproj -p:PublishSingleFile=true -r linux-musl-x64 --self-contained true -p:PublishTrimmed=True -p:TrimMode=Link -c release -o /cartservice --no-restore
 
 # https://mcr.microsoft.com/v2/dotnet/runtime-deps/tags/list
-FROM mcr.microsoft.com/dotnet/runtime-deps:7.0.4-alpine3.16-amd64@sha256:7141eea9c7be5f4d2f09df427ba37620e50be150fc93015288b3e26c5071af81
+FROM mcr.microsoft.com/dotnet/runtime-deps:7.0.7-alpine3.18-amd64@sha256:cdaa6ee7b3bcfdc0463ced2893ab27d8bcd1be839a6ee98712da6252770b2369
 
 WORKDIR /app
 COPY --from=builder /cartservice .
