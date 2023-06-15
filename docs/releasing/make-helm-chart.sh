@@ -31,6 +31,6 @@ gsed -i "s/^version:.*/version: ${TAG:1}/" Chart.yaml
 helm package .
 helm push onlineboutique-${TAG:1}.tgz oci://$HELM_CHART_REPO
 
-rm ./helm-chart/onlineboutique-${TAG:1}.tgz
+rm ./onlineboutique-${TAG:1}.tgz
 
 log "Successfully built and pushed the Helm chart."
