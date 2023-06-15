@@ -41,7 +41,7 @@ spec:
               - ALL
           privileged: false
           readOnlyRootFilesystem: true
-        image: gcr.io/google-samples/microservices-demo/currencyservice:v0.7.0
+        image: gcr.io/google-samples/microservices-demo/currencyservice:v0.8.0
         ports:
         - name: grpc
           containerPort: 7000
@@ -51,11 +51,11 @@ spec:
         - name: DISABLE_PROFILER
           value: "1"
         readinessProbe:
-          exec:
-            command: ["/bin/grpc_health_probe", "-addr=:7000"]
+          grpc:
+            port: 7000
         livenessProbe:
-          exec:
-            command: ["/bin/grpc_health_probe", "-addr=:7000"]
+          grpc:
+            port: 7000
         resources:
           requests:
             cpu: 100m
