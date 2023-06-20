@@ -4,18 +4,23 @@ This doc explains how to build and run the Online Boutique source code locally u
 
 ## Prerequisites 
 
-- [Docker for Desktop](https://www.docker.com/products/docker-desktop).
-- kubectl (can be installed via `gcloud components install kubectl`)
+- [kubectl](https://kubernetes.io/docs/tasks/tools/) (can be installed via `gcloud components install kubectl` for Option1 - GKE)
 - [skaffold **2.0.2+**](https://skaffold.dev/docs/install/) (latest version recommended), a tool that builds and deploys Docker images in bulk. 
-- A Google Cloud project with Google Container Registry enabled. 
-- Enable GCP APIs for Cloud Monitoring, Tracing, Profiler:
-```
-gcloud services enable monitoring.googleapis.com \
-    cloudtrace.googleapis.com \
-    cloudprofiler.googleapis.com
-```
-- [Minikube](https://minikube.sigs.k8s.io/docs/start/) (optional - see Local Cluster)
-- [Kind](https://kind.sigs.k8s.io/) (optional - see Local Cluster)
+- Clone the repository.
+    ```sh
+    git clone https://github.com/GoogleCloudPlatform/microservices-demo
+    cd microservices-demo/
+    ```
+- A Google Cloud project with Google Container Registry enabled. (for Option1 - GKE)
+- Enable GCP APIs for Cloud Monitoring, Tracing, Profiler (for Option1 - GKE):
+    ```
+    gcloud services enable monitoring.googleapis.com \
+        cloudtrace.googleapis.com \
+        cloudprofiler.googleapis.com
+    ```
+- [Docker for Desktop](https://www.docker.com/products/docker-desktop) (for Option2 - Local Cluster)
+- [Minikube](https://minikube.sigs.k8s.io/docs/start/) (optional for Option2 - Local Cluster)
+- [Kind](https://kind.sigs.k8s.io/) (optional for Option2 - Local Cluster)
 
 ## Option 1: Google Kubernetes Engine (GKE)
 
@@ -71,6 +76,7 @@ gcloud services enable monitoring.googleapis.com \
 
         kubectl get service frontend-external
 
+5.  Navigate to `http://EXTERNAL-IP` to access the web frontend.
 
 ## Option 2 - Local Cluster 
 
