@@ -26,9 +26,12 @@ on:
       - 'helm-chart/**'
       - 'kustomize/**'
       - '.github/workflows/kubevious-manifests-ci.yaml'
+permissions:
+  contents: read
 jobs:
   kubevious-manifests-ci:
     runs-on: ubuntu-22.04
+    timeout-minutes: 1
     steps:
       - uses: actions/checkout@v3
 
