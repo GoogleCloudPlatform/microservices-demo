@@ -18,7 +18,7 @@ This doc explains how to build and run the Online Boutique source code locally u
         cloudtrace.googleapis.com \
         cloudprofiler.googleapis.com
     ```
-- [Docker for Desktop](https://www.docker.com/products/docker-desktop) (for Option2 - Local Cluster)
+- [Docker for Desktop](https://www.docker.com/products/docker-desktop)
 - [Minikube](https://minikube.sigs.k8s.io/docs/start/) (optional for Option 2 - Local Cluster)
 - [Kind](https://kind.sigs.k8s.io/) (optional for Option2 - Local Cluster)
 
