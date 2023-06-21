@@ -2,8 +2,9 @@
 
 This doc explains how to build and run the Online Boutique source code locally using the `skaffold` command-line tool.  
 
-## Prerequisites 
+## Prerequisites
 
+- [Docker for Desktop](https://www.docker.com/products/docker-desktop)
 - [kubectl](https://kubernetes.io/docs/tasks/tools/) (can be installed via `gcloud components install kubectl` for Option1 - GKE)
 - [skaffold **2.0.2+**](https://skaffold.dev/docs/install/) (latest version recommended), a tool that builds and deploys Docker images in bulk. 
 - Clone the repository.
@@ -11,14 +12,7 @@ This doc explains how to build and run the Online Boutique source code locally u
     git clone https://github.com/GoogleCloudPlatform/microservices-demo
     cd microservices-demo/
     ```
-- A Google Cloud project with Google Container Registry enabled. (for Option1 - GKE)
-- Enable GCP APIs for Cloud Monitoring, Tracing, Profiler (for Option1 - GKE):
-    ```
-    gcloud services enable monitoring.googleapis.com \
-        cloudtrace.googleapis.com \
-        cloudprofiler.googleapis.com
-    ```
-- [Docker for Desktop](https://www.docker.com/products/docker-desktop)
+- A Google Cloud project with Google Container Registry enabled. (for Option 1 - GKE)
 - [Minikube](https://minikube.sigs.k8s.io/docs/start/) (optional for Option 2 - Local Cluster)
 - [Kind](https://kind.sigs.k8s.io/) (optional for Option 2 - Local Cluster)
 
