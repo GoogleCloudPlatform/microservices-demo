@@ -6,10 +6,10 @@ releases:
       - appReplicas: 1
       - volumeName: "redis-cart-data"
       
-  # - name: adservice
-  #   chart: charts/microservice
-  #   values:
-  #   - values/ad-service-values.yaml
+  - name: adservice
+    chart: charts/microservice
+    values:
+    - values/ad-service-values.yaml
 
   - name: emailservice
     chart: charts/microservices
