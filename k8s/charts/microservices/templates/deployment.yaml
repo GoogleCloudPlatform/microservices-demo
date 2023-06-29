@@ -1,0 +1,34 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.appName }}
+spec:
+  selector:
+    matchLabels:
+      app: {{ .Values.appName }}
+  replicas: {{ .Values.appReplicas }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.appName }}
+    spec:
+      containers:
+        - name: {{ .Values.appName }}
+          image: "{{ .Values.appImage }}:{{ .Values.appVersion }}"
+          ports:
+            - containerPort: {{ .Values.containerPort }}
+          env:
+          {{- range .Values.containerEnvVars }}
+          - name: {{ .name }}
+            value: {{ .value | quote}}
+          {{- end }}
+          readinessProbe:
+            exec:
+              command: ["/bin/grpc_health_probe", "-addr=:{{ .Values.servicePort }}"]
+            initialDelaySeconds: 20
+            periodSeconds: 15
+          livenessProbe:
+            exec:
+              command: ["/bin/grpc_health_probe", "-addr=:{{ .Values.servicePort }}"]
+            initialDelaySeconds: 20
+            periodSeconds: 15

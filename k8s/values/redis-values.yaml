@@ -1,0 +1,2 @@
+appName: redis-cart
+appReplicas: 2
