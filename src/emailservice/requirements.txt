@@ -97,7 +97,7 @@ opentelemetry-semantic-conventions==0.39b0
     # via
     #   opentelemetry-instrumentation-grpc
     #   opentelemetry-sdk
-proto-plus==1.22.2
+proto-plus==1.22.3
     # via google-cloud-trace
 protobuf==4.23.3
     # via
