@@ -21,7 +21,7 @@ google-api-core[grpc]==2.11.1
     #   -r requirements.in
     #   google-api-python-client
     #   google-cloud-trace
-google-api-python-client==2.90.0
+google-api-python-client==2.91.0
     # via google-cloud-profiler
 google-auth==2.19.1
     # via
