@@ -22,7 +22,7 @@ google-api-core==2.11.1
     #   google-api-python-client
 google-api-python-client==2.91.0
     # via google-cloud-profiler
-google-auth==2.20.0
+google-auth==2.21.0
     # via
     #   google-api-core
     #   google-api-python-client
