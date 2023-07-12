@@ -42,7 +42,7 @@ grpcio==1.56.0
     # via
     #   grpcio-health-checking
     #   opentelemetry-exporter-otlp-proto-grpc
-grpcio-health-checking==1.55.0
+grpcio-health-checking==1.56.0
     # via -r requirements.in
 httplib2==0.22.0
     # via
