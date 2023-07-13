@@ -39,17 +39,20 @@ func (p *productCatalog) Watch(req *healthpb.HealthCheckRequest, ws healthpb.Hea
 
 func (p *productCatalog) ListProducts(context.Context, *pb.Empty) (*pb.ListProductsResponse, error) {
 	time.Sleep(extraLatency)
+
 	return &pb.ListProductsResponse{Products: p.parseCatalog()}, nil
 }
 
 func (p *productCatalog) GetProduct(ctx context.Context, req *pb.GetProductRequest) (*pb.Product, error) {
 	time.Sleep(extraLatency)
+
 	var found *pb.Product
 	for i := 0; i < len(p.parseCatalog()); i++ {
 		if req.Id == p.parseCatalog()[i].Id {
 			found = p.parseCatalog()[i]
 		}
 	}
+
 	if found == nil {
 		return nil, status.Errorf(codes.NotFound, "no product with ID %s", req.Id)
 	}
@@ -58,6 +61,7 @@ func (p *productCatalog) GetProduct(ctx context.Context, req *pb.GetProductReque
 
 func (p *productCatalog) SearchProducts(ctx context.Context, req *pb.SearchProductsRequest) (*pb.SearchProductsResponse, error) {
 	time.Sleep(extraLatency)
+
 	// Interpret query as a substring match in name or description.
 	var ps []*pb.Product
 	for _, product := range p.parseCatalog() {
@@ -66,6 +70,7 @@ func (p *productCatalog) SearchProducts(ctx context.Context, req *pb.SearchProdu
 			ps = append(ps, product)
 		}
 	}
+
 	return &pb.SearchProductsResponse{Results: ps}, nil
 }
 
