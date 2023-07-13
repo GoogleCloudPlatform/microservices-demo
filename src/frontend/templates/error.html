@@ -24,10 +24,10 @@
     <main role="main">
         <div class="py-5">
             <div class="container bg-light py-3 px-lg-5 py-lg-5">
-                <h1>{{ renderWording .languageIsoCode "ErrorUhOh" }}</h1>
-                <p>{{ renderWording .languageIsoCode "ErrorSomethingFailedDetailsBelow" }}</p>
+                <h1>{{ renderWording "ErrorUhOh" }}</h1>
+                <p>{{ renderWording "ErrorSomethingFailedDetailsBelow" }}</p>
 
-                <p><strong>{{ renderWording .languageIsoCode "ErrorHttpStatus" }}:</strong> {{.status_code}} {{.status}}</p>
+                <p><strong>{{ renderWording "ErrorHttpStatus" }}:</strong> {{.status_code}} {{.status}}</p>
                 <pre class="border border-danger p-3"
                     style="white-space: pre-wrap; word-break: keep-all;">
                     {{- .error -}}
