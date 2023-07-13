@@ -99,7 +99,7 @@
         {
             "id": "6E92ZMYYFZ",
             "name": "Taza",
-            "description": "Una taza simple con interior mostaza",
+            "description": "Una taza simple con interior color mostaza",
             "picture": "/static/img/products/mug.jpg",
             "priceUsd": {
                 "currencyCode": "USD",
