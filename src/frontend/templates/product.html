@@ -48,7 +48,7 @@
               </select>
               <img src="/static/icons/Hipster_DownArrow.svg" alt="">
             </div>
-            <button type="submit" class="cymbal-button-primary">Add To Cart</button>
+            <button type="submit" class="cymbal-button-primary">{{ renderWording .languageIsoCode "ProductAddToCart" }}</button>
           </form>
         </div>
       </div>
@@ -56,11 +56,13 @@
   </div>
   <div>
     {{ if $.recommendations}}
-      {{ template "recommendations" $.recommendations }}
+      {{ template "recommendations" . }}
     {{ end }}
   </div>
   <div class="ad">
-   {{ with $.ad }}{{ template "text_ad" . }}{{ end }}
+    {{ if $.ad }}
+      {{ template "text_ad" . }}
+    {{ end }}
   </div>
 </main>
 {{ template "footer" . }}

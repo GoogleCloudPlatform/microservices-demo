@@ -17,9 +17,9 @@
 {{ define "text_ad" }}
 <div class="container py-3 px-lg-5 py-lg-5">
     <div role="alert">
-        <strong>Ad</strong>
+        <strong>{{ renderWording .languageIsoCode "Ad" }}</strong>
         <a href="{{.RedirectUrl}}" rel="nofollow" target="_blank">
-            {{.Text}}
+          {{ .ad.Text }}
         </a>
     </div>
 </div>
