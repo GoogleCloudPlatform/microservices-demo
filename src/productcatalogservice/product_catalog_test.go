@@ -25,27 +25,29 @@ import (
 )
 
 var (
-	catalog *productCatalog
+	pc *productCatalog
 )
 
 func TestMain(m *testing.M) {
-	catalog = &productCatalog{}
-	catalog.catalog = pb.ListProductsResponse{}
-	catalog.catalog.Products = []*pb.Product{}
+	pc = &productCatalog{
+		catalog: pb.ListProductsResponse{
+			Products: []*pb.Product{},
+		},
+	}
 
-	catalog.catalog.Products = append(catalog.catalog.Products, &pb.Product{
+	pc.catalog.Products = append(pc.catalog.Products, &pb.Product{
 		Id:   "abc001",
 		Name: "Product Alpha One",
 	})
-	catalog.catalog.Products = append(catalog.catalog.Products, &pb.Product{
+	pc.catalog.Products = append(pc.catalog.Products, &pb.Product{
 		Id:   "abc002",
 		Name: "Product Delta",
 	})
-	catalog.catalog.Products = append(catalog.catalog.Products, &pb.Product{
+	pc.catalog.Products = append(pc.catalog.Products, &pb.Product{
 		Id:   "abc003",
 		Name: "Product Alpha Two",
 	})
-	catalog.catalog.Products = append(catalog.catalog.Products, &pb.Product{
+	pc.catalog.Products = append(pc.catalog.Products, &pb.Product{
 		Id:   "abc004",
 		Name: "Product Gamma",
 	})
@@ -54,7 +56,9 @@ func TestMain(m *testing.M) {
 }
 
 func TestGetProductExists(t *testing.T) {
-	product, err := catalog.GetProduct(context.Background(), &pb.GetProductRequest{Id: "abc003"})
+	product, err := pc.GetProduct(context.Background(),
+		&pb.GetProductRequest{Id: "abc003"},
+	)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -64,7 +68,7 @@ func TestGetProductExists(t *testing.T) {
 }
 
 func TestGetProductNotFound(t *testing.T) {
-	_, err := catalog.GetProduct(context.Background(),
+	_, err := pc.GetProduct(context.Background(),
 		&pb.GetProductRequest{Id: "abc005"},
 	)
 	if got, want := status.Code(err), codes.NotFound; got != want {
@@ -73,7 +77,7 @@ func TestGetProductNotFound(t *testing.T) {
 }
 
 func TestListProducts(t *testing.T) {
-	products, err := catalog.ListProducts(context.Background(), &pb.Empty{})
+	products, err := pc.ListProducts(context.Background(), &pb.Empty{})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -83,8 +87,8 @@ func TestListProducts(t *testing.T) {
 }
 
 func TestSearchProducts(t *testing.T) {
-	products, err := catalog.SearchProducts(context.Background(),
-		&pb.SearchProductsRequest{Query: "Alpha"},
+	products, err := pc.SearchProducts(context.Background(),
+		&pb.SearchProductsRequest{Query: "alpha"},
 	)
 	if err != nil {
 		t.Fatal(err)
