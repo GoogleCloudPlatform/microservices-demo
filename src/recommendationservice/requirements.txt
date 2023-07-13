@@ -38,11 +38,11 @@ googleapis-common-protos==1.59.1
     # via
     #   google-api-core
     #   opentelemetry-exporter-otlp-proto-grpc
-grpcio==1.55.0
+grpcio==1.56.0
     # via
     #   grpcio-health-checking
     #   opentelemetry-exporter-otlp-proto-grpc
-grpcio-health-checking==1.55.0
+grpcio-health-checking==1.56.0
     # via -r requirements.in
 httplib2==0.22.0
     # via
@@ -97,7 +97,7 @@ pyasn1==0.5.0
     #   rsa
 pyasn1-modules==0.3.0
     # via google-auth
-pyparsing==3.0.9
+pyparsing==3.1.0
     # via httplib2
 python-json-logger==2.0.7
     # via -r requirements.in
@@ -114,7 +114,7 @@ six==1.16.0
     # via
     #   google-auth
     #   google-auth-httplib2
-typing-extensions==4.6.3
+typing-extensions==4.7.1
     # via opentelemetry-sdk
 uritemplate==4.1.1
     # via google-api-python-client
