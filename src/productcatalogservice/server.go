@@ -43,7 +43,6 @@ import (
 )
 
 var (
-	//cat          pb.ListProductsResponse
 	catalogMutex *sync.Mutex
 	log          *logrus.Logger
 	extraLatency time.Duration
@@ -65,10 +64,6 @@ func init() {
 	}
 	log.Out = os.Stdout
 	catalogMutex = &sync.Mutex{}
-	//err := readCatalogFile(&cat)
-	//if err != nil {
-	//	log.Warnf("could not parse product catalog")
-	//}
 }
 
 func main() {
@@ -228,25 +223,18 @@ func mustConnGRPC(ctx context.Context, conn **grpc.ClientConn, addr string) {
 func readCatalogFile(catalog *pb.ListProductsResponse) error {
 	catalogMutex.Lock()
 	defer catalogMutex.Unlock()
+
 	catalogJSON, err := ioutil.ReadFile("products.json")
 	if err != nil {
 		log.Fatalf("failed to open product catalog json file: %v", err)
 		return err
 	}
+	
 	if err := jsonpb.Unmarshal(bytes.NewReader(catalogJSON), catalog); err != nil {
 		log.Warnf("failed to parse the catalog JSON: %v", err)
 		return err
 	}
+
 	log.Info("successfully parsed product catalog json")
 	return nil
 }
-
-//func parseCatalog() []*pb.Product {
-//	if reloadCatalog || len(cat.Products) == 0 {
-//		err := readCatalogFile(&cat)
-//		if err != nil {
-//			return []*pb.Product{}
-//		}
-//	}
-//	return cat.Products
-//}
