@@ -3,7 +3,7 @@
         {
             "id": "OLJCESPC7Z",
             "name": "Gafas de sol",
-            "description": "Dale un toque moderno a tus outfits con estas elegantes gafas de sol aviador.",
+            "description": "Dale un toque moderno a tus outfits con estas elegantes gafas de sol estilo aviador.",
             "picture": "/static/img/products/sunglasses.jpg",
             "priceUsd": {
                 "currencyCode": "USD",
@@ -15,7 +15,7 @@
         {
             "id": "66VCHSJNUP",
             "name": "Top de tirantes",
-            "description": "Top de algodón de corte perfecto, con escote en pico.",
+            "description": "Top de algodón de corte perfecto, con escote redondo.",
             "picture": "/static/img/products/tank-top.jpg",
             "priceUsd": {
                 "currencyCode": "USD",
@@ -63,7 +63,7 @@
         {
             "id": "0PUK6V6EV0",
             "name": "Soporte para velas",
-            "description": "Este pequeño pero intrincado portavelas es un excelente regalo.",
+            "description": "Este pequeño pero lleno de detalles portavelas es un excelente regalo.",
             "picture": "/static/img/products/candle-holder.jpg",
             "priceUsd": {
                 "currencyCode": "USD",
