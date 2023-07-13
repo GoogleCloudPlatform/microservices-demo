@@ -28,6 +28,7 @@ var wordingEn = map[string]string{
 	"CartMonth12":                      "December",
 	"CartPaymentMethod":                "Payment method",
 	"CartPlaceOrder":                   "Place order",
+	"CartQuantity":                     "Quantity",
 	"CartShipping":                     "Shipping",
 	"CartShippingAddress":              "Shipping address",
 	"CartState":                        "State",
