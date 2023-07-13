@@ -2,8 +2,8 @@
     "products": [
         {
             "id": "OLJCESPC7Z",
-            "name": "Sunglasses",
-            "description": "Add a modern touch to your outfits with these sleek aviator sunglasses.",
+            "name": "Gafas de sol",
+            "description": "Dale un toque moderno a tus outfits con estas elegantes gafas de sol aviador.",
             "picture": "/static/img/products/sunglasses.jpg",
             "priceUsd": {
                 "currencyCode": "USD",
@@ -14,8 +14,8 @@
         },
         {
             "id": "66VCHSJNUP",
-            "name": "Tank Top",
-            "description": "Perfectly cropped cotton tank, with a scooped neckline.",
+            "name": "Top de tirantes",
+            "description": "Top de algodón de corte perfecto, con escote en pico.",
             "picture": "/static/img/products/tank-top.jpg",
             "priceUsd": {
                 "currencyCode": "USD",
@@ -26,8 +26,8 @@
         },
         {
             "id": "1YMWWN1N4O",
-            "name": "Watch",
-            "description": "This gold-tone stainless steel watch will work with most of your outfits.",
+            "name": "Reloj",
+            "description": "Este reloj de acero inoxidable dorado combina con la mayoría de tus outfits.",
             "picture": "/static/img/products/watch.jpg",
             "priceUsd": {
                 "currencyCode": "USD",
@@ -38,8 +38,8 @@
         },
         {
             "id": "L9ECAV7KIM",
-            "name": "Loafers",
-            "description": "A neat addition to your summer wardrobe.",
+            "name": "Mocasines",
+            "description": "Un buen complemento para tu guardarropa de verano.",
             "picture": "/static/img/products/loafers.jpg",
             "priceUsd": {
                 "currencyCode": "USD",
@@ -50,8 +50,8 @@
         },
         {
             "id": "2ZYFJ3GM2N",
-            "name": "Hairdryer",
-            "description": "This lightweight hairdryer has 3 heat and speed settings. It's perfect for travel.",
+            "name": "Secador de pelo",
+            "description": "Este secador de pelo ligero tiene 3 ajustes de calor y velocidad. Es perfecto para viajar.",
             "picture": "/static/img/products/hairdryer.jpg",
             "priceUsd": {
                 "currencyCode": "USD",
@@ -62,8 +62,8 @@
         },
         {
             "id": "0PUK6V6EV0",
-            "name": "Candle Holder",
-            "description": "This small but intricate candle holder is an excellent gift.",
+            "name": "Soporte para velas",
+            "description": "Este pequeño pero intrincado portavelas es un excelente regalo.",
             "picture": "/static/img/products/candle-holder.jpg",
             "priceUsd": {
                 "currencyCode": "USD",
@@ -74,8 +74,8 @@
         },
         {
             "id": "LS4PSXUNUM",
-            "name": "Salt & Pepper Shakers",
-            "description": "Add some flavor to your kitchen.",
+            "name": "Pimenteros y saleros",
+            "description": "Dale un toque de sabor a tu cocina.",
             "picture": "/static/img/products/salt-and-pepper-shakers.jpg",
             "priceUsd": {
                 "currencyCode": "USD",
@@ -86,8 +86,8 @@
         },
         {
             "id": "9SIQT8TOJO",
-            "name": "Bamboo Glass Jar",
-            "description": "This bamboo glass jar can hold 57 oz (1.7 l) and is perfect for any kitchen.",
+            "name": "Frasco de cristal de bambú",
+            "description": "Este frasco de cristal de bambú puede contener 57 oz (1.7 l) y es perfecto para cualquier cocina.",
             "picture": "/static/img/products/bamboo-glass-jar.jpg",
             "priceUsd": {
                 "currencyCode": "USD",
@@ -98,8 +98,8 @@
         },
         {
             "id": "6E92ZMYYFZ",
-            "name": "Mug",
-            "description": "A simple mug with a mustard interior.",
+            "name": "Taza",
+            "description": "Una taza simple con interior mostaza",
             "picture": "/static/img/products/mug.jpg",
             "priceUsd": {
                 "currencyCode": "USD",
