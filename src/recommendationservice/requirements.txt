@@ -10,7 +10,7 @@ cachetools==5.3.1
     # via google-auth
 certifi==2023.5.7
     # via requests
-charset-normalizer==3.1.0
+charset-normalizer==3.2.0
     # via requests
 deprecated==1.2.14
     # via
