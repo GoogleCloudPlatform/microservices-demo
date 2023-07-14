@@ -27,7 +27,7 @@ flask-basicauth==0.2.0
     # via locust
 flask-cors==4.0.0
     # via locust
-gevent==22.10.2
+gevent==23.7.0
     # via
     #   geventhttpclient
     #   locust
