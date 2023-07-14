@@ -93,7 +93,7 @@ opentelemetry-sdk==1.19.0
     #   opentelemetry-distro
     #   opentelemetry-exporter-otlp-proto-grpc
     #   opentelemetry-instrumentation-grpc
-opentelemetry-semantic-conventions==0.39b0
+opentelemetry-semantic-conventions==0.40b0
     # via
     #   opentelemetry-instrumentation-grpc
     #   opentelemetry-sdk
