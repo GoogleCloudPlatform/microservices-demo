@@ -23,7 +23,7 @@ google-api-core[grpc]==2.11.1
     #   google-cloud-trace
 google-api-python-client==2.93.0
     # via google-cloud-profiler
-google-auth==2.21.0
+google-auth==2.22.0
     # via
     #   google-api-core
     #   google-api-python-client
