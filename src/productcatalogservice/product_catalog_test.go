@@ -1,4 +1,4 @@
-// Copyright 2018 Google LLC
+// Copyright 2023 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -25,29 +25,29 @@ import (
 )
 
 var (
-	pc *productCatalog
+	mockProductCatalog *productCatalog
 )
 
 func TestMain(m *testing.M) {
-	pc = &productCatalog{
+	mockProductCatalog = &productCatalog{
 		catalog: pb.ListProductsResponse{
 			Products: []*pb.Product{},
 		},
 	}
 
-	pc.catalog.Products = append(pc.catalog.Products, &pb.Product{
+	mockProductCatalog.catalog.Products = append(mockProductCatalog.catalog.Products, &pb.Product{
 		Id:   "abc001",
 		Name: "Product Alpha One",
 	})
-	pc.catalog.Products = append(pc.catalog.Products, &pb.Product{
+	mockProductCatalog.catalog.Products = append(mockProductCatalog.catalog.Products, &pb.Product{
 		Id:   "abc002",
 		Name: "Product Delta",
 	})
-	pc.catalog.Products = append(pc.catalog.Products, &pb.Product{
+	mockProductCatalog.catalog.Products = append(mockProductCatalog.catalog.Products, &pb.Product{
 		Id:   "abc003",
 		Name: "Product Alpha Two",
 	})
-	pc.catalog.Products = append(pc.catalog.Products, &pb.Product{
+	mockProductCatalog.catalog.Products = append(mockProductCatalog.catalog.Products, &pb.Product{
 		Id:   "abc004",
 		Name: "Product Gamma",
 	})
@@ -56,7 +56,7 @@ func TestMain(m *testing.M) {
 }
 
 func TestGetProductExists(t *testing.T) {
-	product, err := pc.GetProduct(context.Background(),
+	product, err := mockProductCatalog.GetProduct(context.Background(),
 		&pb.GetProductRequest{Id: "abc003"},
 	)
 	if err != nil {
@@ -68,7 +68,7 @@ func TestGetProductExists(t *testing.T) {
 }
 
 func TestGetProductNotFound(t *testing.T) {
-	_, err := pc.GetProduct(context.Background(),
+	_, err := mockProductCatalog.GetProduct(context.Background(),
 		&pb.GetProductRequest{Id: "abc005"},
 	)
 	if got, want := status.Code(err), codes.NotFound; got != want {
@@ -77,7 +77,9 @@ func TestGetProductNotFound(t *testing.T) {
 }
 
 func TestListProducts(t *testing.T) {
-	products, err := pc.ListProducts(context.Background(), &pb.Empty{})
+	products, err := mockProductCatalog.ListProducts(context.Background(),
+		&pb.Empty{},
+	)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -87,7 +89,7 @@ func TestListProducts(t *testing.T) {
 }
 
 func TestSearchProducts(t *testing.T) {
-	products, err := pc.SearchProducts(context.Background(),
+	products, err := mockProductCatalog.SearchProducts(context.Background(),
 		&pb.SearchProductsRequest{Query: "alpha"},
 	)
 	if err != nil {
