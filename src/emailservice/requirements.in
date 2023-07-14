@@ -8,4 +8,4 @@ google-cloud-trace==1.11.2
 requests==2.31.0
 opentelemetry-distro==0.39b0
 opentelemetry-instrumentation-grpc==0.39b0
-opentelemetry-exporter-otlp-proto-grpc==1.18.0
+opentelemetry-exporter-otlp-proto-grpc==1.19.0
