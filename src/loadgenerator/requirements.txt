@@ -69,7 +69,7 @@ werkzeug==2.3.6
     # via
     #   flask
     #   locust
-zope-event==4.6
+zope-event==5.0
     # via gevent
 zope-interface==6.0
     # via gevent
