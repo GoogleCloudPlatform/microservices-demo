@@ -26,11 +26,18 @@
 # `gcloud builds submit --config=cloudbuild.yaml --substitutions=_ZONE=us-central1-b,_CLUSTER=demo-app-staging .`
 
 steps:
-- name: 'gcr.io/cloud-builders/gcloud'
-  entrypoint: /bin/bash
+- id: 'Deploy application to cluster'
+  name: 'gcr.io/k8s-skaffold/skaffold:v2.6.2'
+  entrypoint: 'bash'
   args:
-  - -c
-  - |
-     gcloud builds submit 'src/cartservice' --config 'src/cartservice/cloudbuild.yaml'
-# [END cloudbuild_microservice_demo_cloudbuild]
+  - '-c'
+  - >
+    gcloud container clusters get-credentials --zone=$_ZONE $_CLUSTER;
+    skaffold run -f=skaffold.yaml --default-repo=gcr.io/$PROJECT_ID;
 
+# Add more power, and more time, for heavy Skaffold build
+timeout: '3600s'
+options:
+  machineType: 'N1_HIGHCPU_8'
+  
+# [END cloudbuild_microservice_demo_cloudbuild]
