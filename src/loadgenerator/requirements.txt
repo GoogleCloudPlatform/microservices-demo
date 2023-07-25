@@ -8,7 +8,7 @@ blinker==1.6.2
     # via flask
 brotli==1.0.9
     # via geventhttpclient
-certifi==2023.5.7
+certifi==2023.7.22
     # via
     #   geventhttpclient
     #   requests
@@ -58,9 +58,7 @@ requests==2.31.0
 roundrobin==0.0.4
     # via locust
 six==1.16.0
-    # via
-    #   flask-cors
-    #   geventhttpclient
+    # via geventhttpclient
 typing-extensions==4.7.1
     # via locust
 urllib3==2.0.2
