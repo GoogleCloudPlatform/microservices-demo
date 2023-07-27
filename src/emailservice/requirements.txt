@@ -51,7 +51,7 @@ grpcio==1.56.2
     #   opentelemetry-exporter-otlp-proto-grpc
 grpcio-health-checking==1.56.0
     # via -r requirements.in
-grpcio-status==1.56.0
+grpcio-status==1.56.2
     # via google-api-core
 httplib2==0.22.0
     # via
