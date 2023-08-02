@@ -20,6 +20,6 @@
     "@opentelemetry/sdk-trace-base": "1.15.1",
     "@opentelemetry/sdk-node": "0.41.1",
     "pino": "8.14.1",
-    "xml2js": "0.6.1"
+    "xml2js": "0.6.2"
   }
 }
