@@ -69,12 +69,19 @@ class HipsterShopServer {
     server.bindAsync(
       `[::]:${port}`,
       grpc.ServerCredentials.createInsecure(),
-      function () {
-        logger.info(`PaymentService gRPC server started on port ${port}`);
+      //function () {
+        //logger.info(`PaymentService gRPC server started on port ${port}`);
+        (error, port) => {
+          if (error) {
+            logger.error(`Error binding to port ${port}: ${error}`);
+          } else {
+            logger.info(`PaymentService gRPC server started on port ${port}`);
+            server.start();
         server.start();
-      }
+            }
+        }
     );
-  }
+  
 
   loadProto(path) {
     const packageDefinition = protoLoader.loadSync(

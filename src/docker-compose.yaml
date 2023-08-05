@@ -1,0 +1,52 @@
+version: '3'
+services:
+  adservice:
+    build:
+      context: ./adservice
+    
+  cartservice:
+    build:
+      context: ./cartservice/src
+    
+  checkoutservice:
+    build:
+      context: ./checkoutservice
+    environment:
+      - SHIPPING_SERVICE_ADDR=http:/localhost:8080
+
+  currencyservice:
+    build:
+      context: ./currencyservice
+
+  emailservice:
+    build:
+      context: ./emailservice
+
+  frontend:
+    build:
+      context: ./frontend
+    environment:
+      - PRODUCT_CATALOG_SERVICE_ADDR=http://localhost:8080
+
+  loadgenerator:
+    build:
+      context: ./loadgenerator
+
+  paymentservice:
+    build:
+      context: ./paymentservice
+
+  productcatalogservice:
+    build:
+      context: ./productcatalogservice
+
+  recommendationservice:
+    build:
+      context: ./recommendationservice
+    environment:
+      - PRODUCT_CATALOG_SERVICE_ADDR=http://localhost:5000
+      - OTHER_ENV_VARIABLE=value
+  shippingservice:
+    build:
+      context: ./shippingservice
+    

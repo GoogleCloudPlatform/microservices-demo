@@ -83,6 +83,7 @@ type checkoutService struct {
 
 func main() {
 	ctx := context.Background()
+	productCatalogServiceAddr := mustMapEnv("PRODUCT_CATALOG_SERVICE_ADDR")
 	if os.Getenv("ENABLE_TRACING") == "1" {
 		log.Info("Tracing enabled.")
 		initTracing()
