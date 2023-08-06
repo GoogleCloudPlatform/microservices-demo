@@ -115,7 +115,7 @@ pyasn1==0.5.0
     #   rsa
 pyasn1-modules==0.3.0
     # via google-auth
-pyparsing==3.1.0
+pyparsing==3.1.1
     # via httplib2
 python-json-logger==2.0.7
     # via -r requirements.in
