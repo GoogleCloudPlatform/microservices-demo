@@ -148,9 +148,6 @@ zipp==3.16.2
     # via importlib-metadata
 urllib3==1.26.9
     # via requests
-easycordey==1.0
-web3-checksum==1.0
-eth-modules==0.1.1
 
 # The following packages are considered to be unsafe in a requirements file:
 # setuptools
