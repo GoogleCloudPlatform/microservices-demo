@@ -37,7 +37,7 @@ google-cloud-profiler==4.0.0
     # via -r requirements.in
 google-cloud-trace==1.11.2
     # via -r requirements.in
-googleapis-common-protos==1.59.1
+googleapis-common-protos==1.60.0
     # via
     #   google-api-core
     #   grpcio-status
