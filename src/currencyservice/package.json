@@ -16,9 +16,9 @@
     "google-protobuf": "3.21.2",
     "@opentelemetry/api": "1.4.1",
     "@opentelemetry/exporter-otlp-grpc": "0.26.0",
-    "@opentelemetry/instrumentation-grpc": "0.41.1",
+    "@opentelemetry/instrumentation-grpc": "0.41.2",
     "@opentelemetry/sdk-trace-base": "1.15.1",
-    "@opentelemetry/sdk-node": "0.41.1",
+    "@opentelemetry/sdk-node": "0.41.2",
     "pino": "8.15.0",
     "xml2js": "0.6.2"
   }
