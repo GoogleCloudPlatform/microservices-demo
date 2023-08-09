@@ -7,7 +7,7 @@
   <ItemGroup>
     <PackageReference Include="Grpc.AspNetCore" Version="2.53.0" />
     <PackageReference Include="Grpc.HealthCheck" Version="2.55.0" />
-    <PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="7.0.9" />
+    <PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="7.0.10" />
     <!-- Add explicit direct dependency required for ipv6, see https://github.com/dotnet/aspnetcore/issues/45424 -->
     <PackageReference Include="StackExchange.Redis" Version="2.6.122" />
     <PackageReference Include="Google.Cloud.Spanner.Data" Version="4.6.0" />
