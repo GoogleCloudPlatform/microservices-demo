@@ -62,7 +62,6 @@ func (p *productCatalog) GetProduct(ctx context.Context, req *pb.GetProductReque
 func (p *productCatalog) SearchProducts(ctx context.Context, req *pb.SearchProductsRequest) (*pb.SearchProductsResponse, error) {
 	time.Sleep(extraLatency)
 
-	// Interpret query as a substring match in name or description.
 	var ps []*pb.Product
 	for _, product := range p.parseCatalog() {
 		if strings.Contains(strings.ToLower(product.Name), strings.ToLower(req.Query)) ||
