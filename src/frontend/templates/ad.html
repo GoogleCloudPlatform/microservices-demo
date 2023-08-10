@@ -18,7 +18,7 @@
 <div class="container py-3 px-lg-5 py-lg-5">
     <div role="alert">
         <strong>{{ renderWording .languageIsoCode "Ad" }}</strong>
-        <a href="{{.RedirectUrl}}&lang={{ $.languageIsoCode }}" rel="nofollow" target="_blank">
+        <a href="{{.RedirectUrl}}?lang={{ $.languageIsoCode }}" rel="nofollow" target="_blank">
           {{ .ad.Text }}
         </a>
     </div>
