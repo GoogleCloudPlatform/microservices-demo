@@ -30,16 +30,16 @@
             <div class="row">
                 <div class="col-12 text-center">
                     <h3>
-                        {{ renderWording "OrderYourOrderIsComplete" }}
+                        {{ renderWording .languageIsoCode "OrderYourOrderIsComplete" }}
                     </h3>
                 </div>
                 <div class="col-12 text-center">
-                    <p>{{ renderWording "OrderWeSentConfirmationEmail" }}</p>
+                    <p>{{ renderWording .languageIsoCode "OrderWeSentConfirmationEmail" }}</p>
                 </div>
             </div>
             <div class="row border-bottom-solid padding-y-24">
                 <div class="col-6 pl-md-0">
-                  {{ renderWording "OrderConfirmationNumber" }}
+                  {{ renderWording .languageIsoCode "OrderConfirmationNumber" }}
                 </div>
                 <div class="col-6 pr-md-0 text-right">
                     {{.order.OrderId}}
@@ -47,7 +47,7 @@
             </div>
             <div class="row border-bottom-solid padding-y-24">
                 <div class="col-6 pl-md-0">
-                  {{ renderWording "OrderTrackingNumber" }}
+                  {{ renderWording .languageIsoCode "OrderTrackingNumber" }}
                 </div>
                 <div class="col-6 pr-md-0 text-right">
                     {{.order.ShippingTrackingId}}
@@ -55,7 +55,7 @@
             </div>
             <div class="row padding-y-24">
                 <div class="col-6 pl-md-0">
-                  {{ renderWording "OrderTotalPaid" }}
+                  {{ renderWording .languageIsoCode "OrderTotalPaid" }}
                 </div>
                 <div class="col-6 pr-md-0 text-right">
                     {{renderMoney .total_paid}}
@@ -64,7 +64,7 @@
             <div class="row">
                 <div class="col-12 text-center">
                     <a class="cymbal-button-primary" href="/" role="button">
-                      {{ renderWording "OrderContinueShopping" }}
+                      {{ renderWording .languageIsoCode "OrderContinueShopping" }}
                     </a>
                 </div>
             </div>

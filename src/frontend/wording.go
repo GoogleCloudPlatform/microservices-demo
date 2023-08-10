@@ -1,10 +1,10 @@
 package main
 
-func getRenderWordingFunc(languageIsoCode string) func(string) string {
+func renderWording(requestedLanguage string, key string) string {
 	// Spanish
-	if languageIsoCode == "es" {
-		return func(key string) string { return wordingEs[key] }
+	if requestedLanguage == "es" {
+		return wordingEs[key]
 	}
 	// Default to English
-	return func(key string) string { return wordingEn[key] }
+	return wordingEn[key]
 }

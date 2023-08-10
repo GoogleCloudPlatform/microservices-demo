@@ -44,6 +44,7 @@ var (
 	isCymbalBrand   = "true" == strings.ToLower(os.Getenv("CYMBAL_BRANDING"))
 	templates       = template.Must(template.New("").
 			Funcs(template.FuncMap{
+			"renderWording":      renderWording,
 			"renderMoney":        renderMoney,
 			"renderCurrencyLogo": renderCurrencyLogo,
 		}).ParseGlob("templates/*.html"))
@@ -118,7 +119,7 @@ func (fe *frontendServer) homeHandler(w http.ResponseWriter, r *http.Request) {
 		"is_cymbal_brand":   isCymbalBrand,
 		"deploymentDetails": deploymentDetailsMap,
 		"frontendMessage":   frontendMessage,
-		"renderWording":     getRenderWordingFunc(parseLanguageIsoCodeOfRequest(r)),
+		"languageIsoCode":   getLanguageIsoCodeOfRequest(r),
 	}); err != nil {
 		log.Error(err)
 	}
@@ -205,7 +206,7 @@ func (fe *frontendServer) productHandler(w http.ResponseWriter, r *http.Request)
 		"is_cymbal_brand":   isCymbalBrand,
 		"deploymentDetails": deploymentDetailsMap,
 		"frontendMessage":   frontendMessage,
-		"renderWording":     getRenderWordingFunc(parseLanguageIsoCodeOfRequest(r)),
+		"languageIsoCode":   getLanguageIsoCodeOfRequest(r),
 	}); err != nil {
 		log.Println(err)
 	}
@@ -319,7 +320,7 @@ func (fe *frontendServer) viewCartHandler(w http.ResponseWriter, r *http.Request
 		"is_cymbal_brand":   isCymbalBrand,
 		"deploymentDetails": deploymentDetailsMap,
 		"frontendMessage":   frontendMessage,
-		"renderWording":     getRenderWordingFunc(parseLanguageIsoCodeOfRequest(r)),
+		"languageIsoCode":   getLanguageIsoCodeOfRequest(r),
 	}); err != nil {
 		log.Println(err)
 	}
@@ -394,7 +395,7 @@ func (fe *frontendServer) placeOrderHandler(w http.ResponseWriter, r *http.Reque
 		"is_cymbal_brand":   isCymbalBrand,
 		"deploymentDetails": deploymentDetailsMap,
 		"frontendMessage":   frontendMessage,
-		"renderWording":     getRenderWordingFunc(parseLanguageIsoCodeOfRequest(r)),
+		"languageIsoCode":   getLanguageIsoCodeOfRequest(r),
 	}); err != nil {
 		log.Println(err)
 	}
@@ -459,7 +460,7 @@ func renderHTTPError(log logrus.FieldLogger, r *http.Request, w http.ResponseWri
 		"is_cymbal_brand":   isCymbalBrand,
 		"deploymentDetails": deploymentDetailsMap,
 		"frontendMessage":   frontendMessage,
-		"renderWording":     getRenderWordingFunc(parseLanguageIsoCodeOfRequest(r)),
+		"languageIsoCode":   getLanguageIsoCodeOfRequest(r),
 	}); templateErr != nil {
 		log.Println(templateErr)
 	}
@@ -521,13 +522,8 @@ func renderCurrencyLogo(currencyCode string) string {
 }
 
 // Users can change the language of the frontend by using a GET URL parameter like "?lang=en".
-func parseLanguageIsoCodeOfRequest(r *http.Request) string {
-	lang := r.URL.Query().Get("lang")
-	lang = strings.ToLower(lang)
-	if lang == "es" {
-		return "es"
-	}
-	return "en" // Invalid and unsupported languages will default to English.
+func getLanguageIsoCodeOfRequest(r *http.Request) string {
+	return r.URL.Query().Get("lang")
 }
 
 func stringinSlice(slice []string, val string) bool {
