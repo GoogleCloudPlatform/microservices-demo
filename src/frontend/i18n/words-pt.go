@@ -5,7 +5,7 @@ var wordsPT = map[string]string{
 	"ProductAddToCart":                 "Adicionar ao carrinho",
 	"Cart":                             "Carrinho",
 	"CartCity":                         "Cidade",
-	"CartCotinueShopping":              "Continuar comprando",
+	"CartContinueShopping":             "Continuar comprando",
 	"CartCountry":                      "País",
 	"CartCreditCartNumber":             "Número do cartão de crédito",
 	"CardCvv":                          "CVV",

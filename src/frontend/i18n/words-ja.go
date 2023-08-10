@@ -5,7 +5,7 @@ var wordsJA = map[string]string{
 	"ProductAddToCart":                 "カートに追加",
 	"Cart":                             "カート",
 	"CartCity":                         "市",
-	"CartCotinueShopping":              "買い物を続ける",
+	"CartContinueShopping":             "買い物を続ける",
 	"CartCountry":                      "国",
 	"CartCreditCartNumber":             "クレジットカード番号",
 	"CardCvv":                          "CVV",
