@@ -1,6 +1,6 @@
-package main
+package i18n
 
-var wordingEn = map[string]string{
+var wordsEN = map[string]string{
 	"Ad":                               "Ad",
 	"ProductAddToCart":                 "Add to cart",
 	"Cart":                             "Cart",

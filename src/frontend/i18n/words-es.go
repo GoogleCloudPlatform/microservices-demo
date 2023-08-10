@@ -1,7 +1,6 @@
-package main
+package i18n
 
-// "Es" stands for Espanol (Spanish).
-var wordingEs = map[string]string{
+var wordsES = map[string]string{
 	"Ad":                               "Anuncio",
 	"ProductAddToCart":                 "Añadir al carrito",
 	"Cart":                             "Carrito",

@@ -26,6 +26,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/GoogleCloudPlatform/microservices-demo/src/frontend/i18n"
 	"github.com/gorilla/mux"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
@@ -44,7 +45,7 @@ var (
 	isCymbalBrand   = "true" == strings.ToLower(os.Getenv("CYMBAL_BRANDING"))
 	templates       = template.Must(template.New("").
 			Funcs(template.FuncMap{
-			"renderWording":      renderWording,
+			"renderWording":      i18n.RenderWording,
 			"renderMoney":        renderMoney,
 			"renderCurrencyLogo": renderCurrencyLogo,
 		}).ParseGlob("templates/*.html"))
