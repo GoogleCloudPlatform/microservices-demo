@@ -29,7 +29,7 @@
         <section class="empty-cart-section">
             <h3>{{ renderWording .languageIsoCode "CartIsEmpty" }}</h3>
             <p>{{ renderWording .languageIsoCode "CartItemAppearHere" }}</p>
-            <a class="cymbal-button-primary" href="/" role="button">{{ renderWording .languageIsoCode "CartContinueShopping" }}</a>
+            <a class="cymbal-button-primary" href="/&lang={{ $.languageIsoCode }}" role="button">{{ renderWording .languageIsoCode "CartContinueShopping" }}</a>
         </section>
         {{ else }}
         <section class="container">
@@ -46,7 +46,7 @@
                                 <button class="cymbal-button-secondary cart-summary-empty-cart-button" type="submit">
                                   {{ renderWording .languageIsoCode "CartEmptyCart" }}
                                 </button>
-                                <a class="cymbal-button-primary" href="/" role="button">
+                                <a class="cymbal-button-primary" href="/&lang={{ $.languageIsoCode }}" role="button">
                                   {{ renderWording .languageIsoCode "CartContinueShopping" }}
                                 </a>
                             </form>
@@ -56,7 +56,7 @@
                     {{ range $.items }}
                     <div class="row cart-summary-item-row">
                         <div class="col-md-4 pl-md-0">
-                            <a href="/product/{{.Item.Id}}">
+                            <a href="/product/{{.Item.Id}}&lang={{ $.languageIsoCode }}">
                                 <img class="img-fluid" alt="" src="{{.Item.Picture}}" />
                             </a>
                         </div>
