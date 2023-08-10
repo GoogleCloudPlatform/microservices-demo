@@ -12,7 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+<<<<<<< HEAD
 FROM python:3.10.13-slim@sha256:1d517e04d033a04d86f7de57bf41cae166ca362b37a1cb229e326bc1d754db55 as base
+=======
+FROM python:3.10.8-slim as base
+>>>>>>> 62b5938 (Fix code to support ARM on M1/M2)
 
 FROM base as builder
 
