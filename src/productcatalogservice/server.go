@@ -20,6 +20,7 @@ import (
 	"flag"
 	"fmt"
 	"net"
+	"net/http"
 	"os"
 	"os/signal"
 	"sync"
@@ -30,6 +31,7 @@ import (
 	"google.golang.org/grpc/credentials/insecure"
 	healthpb "google.golang.org/grpc/health/grpc_health_v1"
 
+	"cloud.google.com/go/compute/metadata"
 	"cloud.google.com/go/profiler"
 	"github.com/golang/protobuf/jsonpb"
 	"github.com/pkg/errors"
@@ -49,7 +51,9 @@ var (
 
 	port = "3550"
 
-	reloadCatalog bool
+	reloadCatalog                bool
+	cachedGoogleCloudProjectId   string
+	isGoogleCloudProjectIdCached bool
 )
 
 func init() {
@@ -235,4 +239,20 @@ func readCatalogFile(catalog *pb.ListProductsResponse) error {
 
 	log.Info("successfully parsed product catalog json")
 	return nil
+}
+
+// Get the Google Cloud Project ID of the GKE cluster where this microservice is running.
+func getGoogleCloudProjectId() string {
+	if isGoogleCloudProjectIdCached {
+		return cachedGoogleCloudProjectId
+	}
+	var metaServerClient = metadata.NewClient(&http.Client{})
+	projectId, err := metaServerClient.ProjectID()
+	cachedGoogleCloudProjectId = projectId
+	isGoogleCloudProjectIdCached = true
+	if err != nil {
+		log.Warn("Google Cloud Project ID unavailable")
+		return ""
+	}
+	return projectId
 }

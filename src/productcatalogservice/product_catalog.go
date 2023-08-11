@@ -16,6 +16,7 @@ package main
 
 import (
 	"context"
+	"errors"
 	"strings"
 	"time"
 
@@ -27,6 +28,7 @@ import (
 
 type productCatalog struct {
 	catalog pb.ListProductsResponse
+	pb.UnimplementedProductCatalogServiceServer
 }
 
 func (p *productCatalog) Check(ctx context.Context, req *healthpb.HealthCheckRequest) (*healthpb.HealthCheckResponse, error) {
@@ -37,10 +39,10 @@ func (p *productCatalog) Watch(req *healthpb.HealthCheckRequest, ws healthpb.Hea
 	return status.Errorf(codes.Unimplemented, "health check via Watch not implemented")
 }
 
-func (p *productCatalog) ListProducts(ctx context.Context, _ *pb.Empty) (*pb.ListProductsResponse, error) {
+func (p *productCatalog) ListProducts(ctx context.Context, req *pb.ListProductsRequest) (*pb.ListProductsResponse, error) {
 	time.Sleep(extraLatency)
 	products := p.parseCatalog()
-	translateProducts(ctx, "nimjay-playground", "hi", products)
+	translateProductsInPlace(ctx, getGoogleCloudProjectId(), req.Language, products)
 	return &pb.ListProductsResponse{Products: products}, nil
 }
 
@@ -48,6 +50,8 @@ func (p *productCatalog) GetProduct(ctx context.Context, req *pb.GetProductReque
 	time.Sleep(extraLatency)
 
 	var found *pb.Product
+	products := p.parseCatalog()
+	translateProductsInPlace(ctx, getGoogleCloudProjectId(), req.Language, products)
 	for i := 0; i < len(p.parseCatalog()); i++ {
 		if req.Id == p.parseCatalog()[i].Id {
 			found = p.parseCatalog()[i]
@@ -85,13 +89,33 @@ func (p *productCatalog) parseCatalog() []*pb.Product {
 	return p.catalog.Products
 }
 
-func translateProducts(ctx context.Context, projectId, targetLangCode string, products []*pb.Product) error {
-	strings := make([]string, len(products)*2)
-	for i, product := range products {
-		strings[i*2] = product.Name
-		strings[(i*2)+1] = product.Description
+func translateProductsInPlace(ctx context.Context, projectId, targetLangCode string, products []*pb.Product) error {
+	// Handle English to English translations.
+	if targetLangCode == "en" {
+		return nil
 	}
-	translatedStrings, _ := translateStrings(ctx, projectId, targetLangCode, strings)
+	// Ensure the target language is supported.
+	supportedTargetLangs := map[string]bool{
+		"es": true,
+		"hi": true,
+		"ja": true,
+		"pt": true,
+	}
+	if !supportedTargetLangs[targetLangCode] {
+		return errors.New("Unsupported target language")
+	}
+	// Collect the strings to be translated.
+	stringsToTranslate := make([]string, len(products)*2)
+	for i, product := range products {
+		stringsToTranslate[i*2] = product.Name
+		stringsToTranslate[(i*2)+1] = product.Description
+	}
+	// Translate the strings.
+	translatedStrings, err := translateStrings(ctx, projectId, targetLangCode, stringsToTranslate)
+	if err != nil {
+		return err
+	}
+	// Update products in-place with translations.
 	for i, product := range products {
 		product.Name = translatedStrings[i*2]
 		product.Description = translatedStrings[(i*2)+1]

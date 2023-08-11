@@ -13,7 +13,7 @@
 // limitations under the License.
 
 syntax = "proto3";
-
+option go_package = "pkg/onlineboutique";
 package hipstershop;
 
 // -----------------Cart service-----------------
@@ -67,7 +67,7 @@ message ListRecommendationsResponse {
 // ---------------Product Catalog----------------
 
 service ProductCatalogService {
-    rpc ListProducts(Empty) returns (ListProductsResponse) {}
+    rpc ListProducts(ListProductsRequest) returns (ListProductsResponse) {}
     rpc GetProduct(GetProductRequest) returns (Product) {}
     rpc SearchProducts(SearchProductsRequest) returns (SearchProductsResponse) {}
 }
@@ -84,12 +84,17 @@ message Product {
     repeated string categories = 6;
 }
 
+message ListProductsRequest {
+  string language = 1;
+}
+
 message ListProductsResponse {
     repeated Product products = 1;
 }
 
 message GetProductRequest {
     string id = 1;
+    string language = 2;
 }
 
 message SearchProductsRequest {
