@@ -1,5 +1,5 @@
 grpcio-health-checking==1.30.0
-grpcio==1.30.0
+grpcio==1.53.0
 opentelemetry-api==0.13b0
 opentelemetry-instrumentation==0.13b0
 opentelemetry-sdk==0.13b0
