@@ -48,7 +48,7 @@ opentelemetry-sdk==0.13b0
     #   -r requirements.in
     #   opentelemetry-exporter-zipkin
     #   opentelemetry-instrumentation-grpc
-protobuf==3.13.0
+protobuf==3.18.3
     # via grpcio-health-checking
 python-json-logger==0.1.11
     # via -r requirements.in
@@ -56,8 +56,6 @@ requests==2.26.0
     # via
     #   opentelemetry-exporter-zipkin
     #   opentelemetry-instrumentation-requests
-six==1.15.0
-    # via protobuf
 urllib3==1.26.6
     # via
     #   -r requirements.in
@@ -67,6 +65,3 @@ wrapt==1.12.1
     #   opentelemetry-instrumentation
     #   opentelemetry-instrumentation-dbapi
     #   opentelemetry-instrumentation-sqlite3
-
-# The following packages are considered to be unsafe in a requirements file:
-# setuptools
