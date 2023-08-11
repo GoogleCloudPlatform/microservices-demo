@@ -97,6 +97,7 @@ func translateProductsInPlace(ctx context.Context, projectId, targetLangCode str
 	// Ensure the target language is supported.
 	supportedTargetLangs := map[string]bool{
 		"es": true,
+		"fr": true,
 		"hi": true,
 		"ja": true,
 		"pt": true,
