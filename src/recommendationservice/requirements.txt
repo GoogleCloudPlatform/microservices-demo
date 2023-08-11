@@ -4,7 +4,7 @@
 #
 #    pip-compile --output-file=requirements.txt requirements.in
 #
-certifi==2021.5.30
+certifi==2023.7.22
     # via requests
 charset-normalizer==2.0.6
     # via requests
