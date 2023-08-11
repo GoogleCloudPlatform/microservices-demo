@@ -45,7 +45,6 @@ var (
 	isCymbalBrand   = "true" == strings.ToLower(os.Getenv("CYMBAL_BRANDING"))
 	templates       = template.Must(template.New("").
 			Funcs(template.FuncMap{
-			"renderWording":      i18n.RenderWording,
 			"renderMoney":        renderMoney,
 			"renderCurrencyLogo": renderCurrencyLogo,
 		}).ParseGlob("templates/*.html"))
@@ -436,6 +435,7 @@ func templateDataWithDefaults(r *http.Request, payload map[string]interface{}) m
 		"deploymentDetails": deploymentDetailsMap,
 		"frontendMessage":   frontendMessage,
 		"languageIsoCode":   getLanguageIsoCodeOfRequest(r),
+		"i18n":              i18n.GetWords(getLanguageIsoCodeOfRequest(r)),
 	}
 
 	for k, v := range payload {

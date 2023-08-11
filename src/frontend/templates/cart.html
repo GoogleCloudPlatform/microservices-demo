@@ -27,9 +27,9 @@
 
         {{ if eq (len $.items) 0 }}
         <section class="empty-cart-section">
-            <h3>{{ renderWording .languageIsoCode "CartIsEmpty" }}</h3>
-            <p>{{ renderWording .languageIsoCode "CartItemAppearHere" }}</p>
-            <a class="cymbal-button-primary" href="/?lang={{ $.languageIsoCode }}" role="button">{{ renderWording .languageIsoCode "CartContinueShopping" }}</a>
+            <h3>{{ index .i18n "CartIsEmpty" }}</h3>
+            <p>{{ index .i18n "CartItemAppearHere" }}</p>
+            <a class="cymbal-button-primary" href="/?lang={{ $.languageIsoCode }}" role="button">{{ index .i18n "CartContinueShopping" }}</a>
         </section>
         {{ else }}
         <section class="container">
@@ -39,15 +39,15 @@
 
                     <div class="row mb-3 py-2">
                         <div class="col-4 pl-md-0">
-                            <h3>{{ renderWording .languageIsoCode "Cart" }} ({{ $.cart_size }})</h3>
+                            <h3>{{ index .i18n "Cart" }} ({{ $.cart_size }})</h3>
                         </div>
                         <div class="col-8 pr-md-0 text-right">
                             <form method="POST" action="/cart/empty?lang={{ $.languageIsoCode }}">
                                 <button class="cymbal-button-secondary cart-summary-empty-cart-button" type="submit">
-                                  {{ renderWording .languageIsoCode "CartEmptyCart" }}
+                                  {{ index .i18n "CartEmptyCart" }}
                                 </button>
                                 <a class="cymbal-button-primary" href="/?lang={{ $.languageIsoCode }}" role="button">
-                                  {{ renderWording .languageIsoCode "CartContinueShopping" }}
+                                  {{ index .i18n "CartContinueShopping" }}
                                 </a>
                             </form>
                         </div>
@@ -86,12 +86,12 @@
                     {{ end }}
 
                     <div class="row cart-summary-shipping-row">
-                        <div class="col pl-md-0">{{ renderWording .languageIsoCode "CartShipping" }}</div>
+                        <div class="col pl-md-0">{{ index .i18n "CartShipping" }}</div>
                         <div class="col pr-md-0 text-right">{{ renderMoney .shipping_cost }}</div>
                     </div>
 
                     <div class="row cart-summary-total-row">
-                        <div class="col pl-md-0">{{ renderWording .languageIsoCode "Total" }}</div>
+                        <div class="col pl-md-0">{{ index .i18n "Total" }}</div>
                         <div class="col pr-md-0 text-right">{{ renderMoney .total_cost }}</div>
                     </div>
 
@@ -103,13 +103,13 @@
 
                         <div class="row">
                             <div class="col">
-                                <h3>{{ renderWording .languageIsoCode "CartShippingAddress" }}</h3>
+                                <h3>{{ index .i18n "CartShippingAddress" }}</h3>
                             </div>
                         </div>
 
                         <div class="form-row">
                             <div class="col cymbal-form-field">
-                                <label for="email">{{ renderWording .languageIsoCode "CartEmailAddress" }}</label>
+                                <label for="email">{{ index .i18n "CartEmailAddress" }}</label>
                                 <input type="email" id="email"
                                     name="email" value="someone@example.com" required>
                             </div>
@@ -117,7 +117,7 @@
 
                         <div class="form-row">
                             <div class="col cymbal-form-field">
-                                <label for="street_address">{{ renderWording .languageIsoCode "CartStreetAddress" }}</label>
+                                <label for="street_address">{{ index .i18n "CartStreetAddress" }}</label>
                                 <input type="text" name="street_address"
                                     id="street_address" value="1600 Amphitheatre Parkway" required>
                             </div>
@@ -125,7 +125,7 @@
 
                         <div class="form-row">
                             <div class="col cymbal-form-field">
-                                <label for="zip_code">{{ renderWording .languageIsoCode "CartZipCode" }}</label>
+                                <label for="zip_code">{{ index .i18n "CartZipCode" }}</label>
                                 <input type="text"
                                     name="zip_code" id="zip_code" value="94043" required pattern="\d{4,5}">
                             </div>
@@ -133,7 +133,7 @@
 
                         <div class="form-row">
                             <div class="col cymbal-form-field">
-                                <label for="city">{{ renderWording .languageIsoCode "CartCity" }}</label>
+                                <label for="city">{{ index .i18n "CartCity" }}</label>
                                 <input type="text" name="city" id="city"
                                     value="Mountain View" required>
                                 </div>
@@ -141,12 +141,12 @@
 
                         <div class="form-row">
                             <div class="col-md-5 cymbal-form-field">
-                                <label for="state">{{ renderWording .languageIsoCode "CartState" }}</label>
+                                <label for="state">{{ index .i18n "CartState" }}</label>
                                 <input type="text" name="state" id="state"
                                     value="CA" required>
                             </div>
                             <div class="col-md-7 cymbal-form-field">
-                                <label for="country">{{ renderWording .languageIsoCode "CartCountry" }}</label>
+                                <label for="country">{{ index .i18n "CartCountry" }}</label>
                                 <input type="text" id="country"
                                     placeholder="Country Name"
                                     name="country" value="United States" required>
@@ -155,13 +155,13 @@
 
                         <div class="row">
                             <div class="col">
-                                <h3 class="payment-method-heading">{{ renderWording .languageIsoCode "CartPaymentMethod" }}</h3>
+                                <h3 class="payment-method-heading">{{ index .i18n "CartPaymentMethod" }}</h3>
                             </div>
                         </div>
 
                         <div class="form-row">
                             <div class="col cymbal-form-field">
-                                <label for="credit_card_number">{{ renderWording .languageIsoCode "CartCreditCartNumber" }}</label>
+                                <label for="credit_card_number">{{ index .i18n "CartCreditCartNumber" }}</label>
                                 <input type="text" id="credit_card_number"
                                     name="credit_card_number"
                                     placeholder="0000-0000-0000-0000"
@@ -172,25 +172,25 @@
 
                         <div class="form-row">
                             <div class="col-md-5 cymbal-form-field">
-                                <label for="credit_card_expiration_month">{{ renderWording .languageIsoCode "CartMonth" }}</label>
+                                <label for="credit_card_expiration_month">{{ index .i18n "CartMonth" }}</label>
                                 <select name="credit_card_expiration_month" id="credit_card_expiration_month">
-                                    <option value="1">{{ renderWording .languageIsoCode "CartMonth01" }}</option>
-                                    <option value="2">{{ renderWording .languageIsoCode "CartMonth02" }}</option>
-                                    <option value="3">{{ renderWording .languageIsoCode "CartMonth03" }}</option>
-                                    <option value="4">{{ renderWording .languageIsoCode "CartMonth04" }}</option>
-                                    <option value="5">{{ renderWording .languageIsoCode "CartMonth05" }}</option>
-                                    <option value="6">{{ renderWording .languageIsoCode "CartMonth06" }}</option>
-                                    <option value="7">{{ renderWording .languageIsoCode "CartMonth07" }}</option>
-                                    <option value="8">{{ renderWording .languageIsoCode "CartMonth08" }}</option>
-                                    <option value="9">{{ renderWording .languageIsoCode "CartMonth09" }}</option>
-                                    <option value="10">{{ renderWording .languageIsoCode "CartMonth10" }}</option>
-                                    <option value="11">{{ renderWording .languageIsoCode "CartMonth11" }}</option>
-                                    <option value="12">{{ renderWording .languageIsoCode "CartMonth12" }}</option>
+                                    <option value="1">{{ index .i18n "CartMonth01" }}</option>
+                                    <option value="2">{{ index .i18n "CartMonth02" }}</option>
+                                    <option value="3">{{ index .i18n "CartMonth03" }}</option>
+                                    <option value="4">{{ index .i18n "CartMonth04" }}</option>
+                                    <option value="5">{{ index .i18n "CartMonth05" }}</option>
+                                    <option value="6">{{ index .i18n "CartMonth06" }}</option>
+                                    <option value="7">{{ index .i18n "CartMonth07" }}</option>
+                                    <option value="8">{{ index .i18n "CartMonth08" }}</option>
+                                    <option value="9">{{ index .i18n "CartMonth09" }}</option>
+                                    <option value="10">{{ index .i18n "CartMonth10" }}</option>
+                                    <option value="11">{{ index .i18n "CartMonth11" }}</option>
+                                    <option value="12">{{ index .i18n "CartMonth12" }}</option>
                                 </select>
                                 <img src="/static/icons/Hipster_DownArrow.svg" alt="" class="cymbal-dropdown-chevron">
                             </div>
                             <div class="col-md-4 cymbal-form-field">
-                                    <label for="credit_card_expiration_year">{{ renderWording .languageIsoCode "CartYear" }}</label>
+                                    <label for="credit_card_expiration_year">{{ index .i18n "CartYear" }}</label>
                                     <select name="credit_card_expiration_year" id="credit_card_expiration_year">
                                     {{ range $i, $y := $.expiration_years}}<option value="{{$y}}"
                                         {{if eq $i 1 -}}
@@ -201,7 +201,7 @@
                                     <img src="/static/icons/Hipster_DownArrow.svg" alt="" class="cymbal-dropdown-chevron">
                                 </div>
                             <div class="col-md-3 cymbal-form-field">
-                                <label for="credit_card_cvv">{{ renderWording .languageIsoCode "CardCvv" }}</label>
+                                <label for="credit_card_cvv">{{ index .i18n "CardCvv" }}</label>
                                 <input type="password" id="credit_card_cvv"
                                     name="credit_card_cvv" value="672" required pattern="\d{3}">
                             </div>
@@ -210,7 +210,7 @@
                         <div class="form-row justify-content-center">
                             <div class="col text-center">
                                 <button class="cymbal-button-primary" type="submit">
-                                  {{ renderWording .languageIsoCode "CartPlaceOrder" }}
+                                  {{ index .i18n "CartPlaceOrder" }}
                                 </button>
                             </div>
                         </div>

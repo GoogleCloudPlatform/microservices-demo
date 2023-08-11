@@ -1,17 +1,23 @@
 package i18n
 
-func RenderWording(lang string, key string) string {
-	wordsMaps := map[string]map[string]string{
+var (
+	wordsMaps = map[string]map[string]string{
 		"en": wordsEN,
 		"es": wordsES,
 		"hi": wordsHI,
 		"ja": wordsJA,
 		"pt": wordsPT,
 	}
+)
 
+func GetWord(lang string, key string) string {
+	return GetWords(lang)[key]
+}
+
+func GetWords(lang string) map[string]string {
 	if words, ok := wordsMaps[lang]; ok {
-		return words[key]
+		return words
 	}
 
-	return wordsEN[key]
+	return wordsEN
 }

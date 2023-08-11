@@ -19,8 +19,8 @@
 <footer class="py-5">
     <div class="footer-top">
         <div class="container footer-social">
-            <p class="footer-text">{{ renderWording .languageIsoCode "FooterDemoOnlyNotGoogleProduct" }}</p>
-            <p class="footer-text">© 2020 Google Inc (<a href="https://github.com/GoogleCloudPlatform/microservices-demo">{{ renderWording .languageIsoCode "FooterSourceCode" }}</a>)</p>
+            <p class="footer-text">{{ index .i18n "FooterDemoOnlyNotGoogleProduct" }}</p>
+            <p class="footer-text">© 2020 Google Inc (<a href="https://github.com/GoogleCloudPlatform/microservices-demo">{{ index .i18n "FooterSourceCode" }}</a>)</p>
             <p class="footer-text">
                 <small>
                     {{ if $.session_id }}session-id: {{ $.session_id }} — {{end}}
@@ -39,8 +39,8 @@
                         <b>Pod: </b>{{ index .deploymentDetails "HOSTNAME" }}
                         {{ end }}
                     {{ else }}
-                    {{ renderWording .languageIsoCode "FooterDeploymentDetailsLoading" }}
-                    {{ renderWording .languageIsoCode "FooterTryRefreshingPage" }}
+                    {{ index .i18n "FooterDeploymentDetailsLoading" }}
+                    {{ index .i18n "FooterTryRefreshingPage" }}
                     {{ end }}
                 </small>
             </p>
