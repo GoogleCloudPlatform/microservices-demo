@@ -233,7 +233,7 @@ func (fe *frontendServer) addToCartHandler(w http.ResponseWriter, r *http.Reques
 		renderHTTPError(log, r, w, errors.Wrap(err, "failed to add to cart"), http.StatusInternalServerError)
 		return
 	}
-	w.Header().Set("location", "/cart")
+	w.Header().Set("location", "/cart?lang="+getLanguageIsoCodeOfRequest(r))
 	w.WriteHeader(http.StatusFound)
 }
 
@@ -245,7 +245,7 @@ func (fe *frontendServer) emptyCartHandler(w http.ResponseWriter, r *http.Reques
 		renderHTTPError(log, r, w, errors.Wrap(err, "failed to empty cart"), http.StatusInternalServerError)
 		return
 	}
-	w.Header().Set("location", "/")
+	w.Header().Set("location", "/?lang="+getLanguageIsoCodeOfRequest(r))
 	w.WriteHeader(http.StatusFound)
 }
 
@@ -410,7 +410,7 @@ func (fe *frontendServer) logoutHandler(w http.ResponseWriter, r *http.Request) 
 		c.MaxAge = -1
 		http.SetCookie(w, c)
 	}
-	w.Header().Set("Location", "/")
+	w.Header().Set("Location", "/?lang="+getLanguageIsoCodeOfRequest(r))
 	w.WriteHeader(http.StatusFound)
 }
 
@@ -429,7 +429,7 @@ func (fe *frontendServer) setCurrencyHandler(w http.ResponseWriter, r *http.Requ
 	}
 	referer := r.Header.Get("referer")
 	if referer == "" {
-		referer = "/"
+		referer = "/?lang=" + getLanguageIsoCodeOfRequest(r)
 	}
 	w.Header().Set("Location", referer)
 	w.WriteHeader(http.StatusFound)
@@ -524,7 +524,11 @@ func renderCurrencyLogo(currencyCode string) string {
 
 // Users can change the language of the frontend by using a GET URL parameter like "?lang=en".
 func getLanguageIsoCodeOfRequest(r *http.Request) string {
-	return r.URL.Query().Get("lang")
+	if r.URL.Query().Has("lang") {
+		return r.URL.Query().Get("lang")
+	}
+
+	return "en"
 }
 
 func stringinSlice(slice []string, val string) bool {
