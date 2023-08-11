@@ -20,7 +20,7 @@ require (
 	github.com/signalfx/signalfx-go-tracing v1.5.0
 	github.com/sirupsen/logrus v1.4.2
 	github.com/tinylib/msgp v1.1.2 // indirect
-	golang.org/x/net v0.0.0-20200202094626-16171245cfb2
+	golang.org/x/net v0.14.0
 	google.golang.org/appengine v1.6.1 // indirect
 	google.golang.org/grpc v1.26.0
 )
