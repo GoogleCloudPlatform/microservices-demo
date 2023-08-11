@@ -37,10 +37,11 @@ func (p *productCatalog) Watch(req *healthpb.HealthCheckRequest, ws healthpb.Hea
 	return status.Errorf(codes.Unimplemented, "health check via Watch not implemented")
 }
 
-func (p *productCatalog) ListProducts(context.Context, *pb.Empty) (*pb.ListProductsResponse, error) {
+func (p *productCatalog) ListProducts(ctx context.Context, _ *pb.Empty) (*pb.ListProductsResponse, error) {
 	time.Sleep(extraLatency)
-
-	return &pb.ListProductsResponse{Products: p.parseCatalog()}, nil
+	products := p.parseCatalog()
+	translateProducts(ctx, "nimjay-playground", "hi", products)
+	return &pb.ListProductsResponse{Products: products}, nil
 }
 
 func (p *productCatalog) GetProduct(ctx context.Context, req *pb.GetProductRequest) (*pb.Product, error) {
@@ -82,4 +83,18 @@ func (p *productCatalog) parseCatalog() []*pb.Product {
 	}
 
 	return p.catalog.Products
+}
+
+func translateProducts(ctx context.Context, projectId, targetLangCode string, products []*pb.Product) error {
+	strings := make([]string, len(products)*2)
+	for i, product := range products {
+		strings[i*2] = product.Name
+		strings[(i*2)+1] = product.Description
+	}
+	translatedStrings, _ := translateStrings(ctx, projectId, targetLangCode, strings)
+	for i, product := range products {
+		product.Name = translatedStrings[i*2]
+		product.Description = translatedStrings[(i*2)+1]
+	}
+	return nil
 }
