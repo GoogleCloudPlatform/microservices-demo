@@ -10,7 +10,6 @@ import (
 
 // A function that translates a list of strings from English to multiple different languages
 func translateStrings(ctx context.Context, projectID, targetLangCode string, strings []string) ([]string, error) {
-	// return strings, nil // TODO: REMOVE THIS LINE! REMOVE THIS LINE! REMOVE THIS LINE! REMOVE THIS LINE! REMOVE THIS LINE! REMOVE THIS LINE!
 	// Create a client for Cloud Translation API.
 	client, err := translate.NewTranslationClient(ctx)
 	if err != nil {
