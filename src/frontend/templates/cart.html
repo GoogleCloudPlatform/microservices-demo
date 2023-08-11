@@ -42,7 +42,7 @@
                             <h3>{{ renderWording .languageIsoCode "Cart" }} ({{ $.cart_size }})</h3>
                         </div>
                         <div class="col-8 pr-md-0 text-right">
-                            <form method="POST" action="/cart/empty">
+                            <form method="POST" action="/cart/empty?lang={{ $.languageIsoCode }}">
                                 <button class="cymbal-button-secondary cart-summary-empty-cart-button" type="submit">
                                   {{ renderWording .languageIsoCode "CartEmptyCart" }}
                                 </button>
@@ -99,7 +99,7 @@
 
                 <div class="col-lg-5 offset-lg-1 col-xl-4">
 
-                    <form class="cart-checkout-form" action="/cart/checkout" method="POST">
+                    <form class="cart-checkout-form" action="/cart/checkout?lang={{ $.languageIsoCode }}" method="POST">
 
                         <div class="row">
                             <div class="col">

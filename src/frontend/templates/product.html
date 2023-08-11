@@ -35,7 +35,7 @@
           <p class="product-price">{{ renderMoney $.product.Price }}</p>
           <p>{{ $.product.Item.Description }}</p>
 
-          <form method="POST" action="/cart">
+          <form method="POST" action="/cart?lang={{ $.languageIsoCode }}">
             <input type="hidden" name="product_id" value="{{$.product.Item.Id}}" />
             <div class="product-quantity-dropdown">
               <select name="quantity" id="quantity">
