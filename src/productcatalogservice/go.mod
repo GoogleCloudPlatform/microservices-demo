@@ -4,6 +4,7 @@ go 1.19
 
 require (
 	cloud.google.com/go/profiler v0.3.1
+	cloud.google.com/go/translate v1.7.0
 	github.com/golang/protobuf v1.5.3
 	github.com/pkg/errors v0.9.1
 	github.com/sirupsen/logrus v1.9.3
@@ -19,6 +20,7 @@ require (
 	cloud.google.com/go v0.110.0 // indirect
 	cloud.google.com/go/compute v1.19.1 // indirect
 	cloud.google.com/go/compute/metadata v0.2.3 // indirect
+	cloud.google.com/go/longrunning v0.4.1 // indirect
 	github.com/cenkalti/backoff/v4 v4.2.1 // indirect
 	github.com/go-logr/logr v1.2.4 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
