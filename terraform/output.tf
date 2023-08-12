@@ -1,23 +1,59 @@
-# Copyright 2022 Google LLC
 #
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
+# Outputs
 #
-#      http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
 
-output "cluster_location" {
-  description = "Location of the cluster"
-  value       = resource.google_container_cluster.my_cluster.location
+locals {
+  config_map_aws_auth = <<CONFIGMAPAWSAUTH
+
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: aws-auth
+  namespace: kube-system
+data:
+  mapRoles: |
+    - rolearn: ${aws_iam_role.eks_cluster.arn}
+      username: system:node:{{EC2PrivateDNSName}}
+      groups:
+        - system:bootstrappers
+        - system:nodes
+CONFIGMAPAWSAUTH
+
+  kubeconfig = <<KUBECONFIG
+
+
+apiVersion: v1
+clusters:
+- cluster:
+    server: ${aws_eks_cluster.eks_cluster.endpoint}
+    certificate-authority-data: ${aws_eks_cluster.eks_cluster.certificate_authority.0.data}
+  name: kubernetes
+contexts:
+- context:
+    cluster: kubernetes
+    user: aws
+  name: aws
+current-context: aws
+kind: Config  
+preferences: {}
+users:
+- name: aws
+  user:
+    exec:
+      apiVersion: client.authentication.k8s.io/v1beta1
+      command: aws-iam-authenticator
+      args:
+        - "token"
+        - "-i"
+        - "${var.cluster-name}"
+KUBECONFIG
 }
 
-output "cluster_name" {
-  description = "Name of the cluster"
-  value       = resource.google_container_cluster.my_cluster.name
+output "config_map_aws_auth" {
+  value = local.config_map_aws_auth
+}
+
+output "kubeconfig" {
+  value = local.kubeconfig
 }
