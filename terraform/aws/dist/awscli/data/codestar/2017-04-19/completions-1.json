@@ -1,0 +1,164 @@
+{
+  "version": "1.0",
+  "resources": {
+    "Project": {
+      "operation": "ListProjects",
+      "resourceIdentifier": {
+        "projectId": "projects[].projectId"
+      }
+    },
+    "UserProfile": {
+      "operation": "ListUserProfiles",
+      "resourceIdentifier": {
+        "userArn": "userProfiles[].userArn",
+        "displayName": "userProfiles[].displayName",
+        "emailAddress": "userProfiles[].emailAddress",
+        "sshPublicKey": "userProfiles[].sshPublicKey"
+      }
+    }
+  },
+  "operations": {
+    "AssociateTeamMember": {
+      "projectId": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "Project",
+            "resourceIdentifier": "projectId"
+          }
+        ]
+      },
+      "userArn": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "UserProfile",
+            "resourceIdentifier": "userArn"
+          }
+        ]
+      }
+    },
+    "DeleteUserProfile": {
+      "userArn": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "UserProfile",
+            "resourceIdentifier": "userArn"
+          }
+        ]
+      }
+    },
+    "DescribeUserProfile": {
+      "userArn": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "UserProfile",
+            "resourceIdentifier": "userArn"
+          }
+        ]
+      }
+    },
+    "DisassociateTeamMember": {
+      "projectId": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "Project",
+            "resourceIdentifier": "projectId"
+          }
+        ]
+      },
+      "userArn": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "UserProfile",
+            "resourceIdentifier": "userArn"
+          }
+        ]
+      }
+    },
+    "ListResources": {
+      "projectId": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "Project",
+            "resourceIdentifier": "projectId"
+          }
+        ]
+      }
+    },
+    "ListTeamMembers": {
+      "projectId": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "Project",
+            "resourceIdentifier": "projectId"
+          }
+        ]
+      }
+    },
+    "UpdateTeamMember": {
+      "projectId": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "Project",
+            "resourceIdentifier": "projectId"
+          }
+        ]
+      },
+      "userArn": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "UserProfile",
+            "resourceIdentifier": "userArn"
+          }
+        ]
+      }
+    },
+    "UpdateUserProfile": {
+      "userArn": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "UserProfile",
+            "resourceIdentifier": "userArn"
+          }
+        ]
+      },
+      "displayName": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "UserProfile",
+            "resourceIdentifier": "displayName"
+          }
+        ]
+      },
+      "emailAddress": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "UserProfile",
+            "resourceIdentifier": "emailAddress"
+          }
+        ]
+      },
+      "sshPublicKey": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "UserProfile",
+            "resourceIdentifier": "sshPublicKey"
+          }
+        ]
+      }
+    }
+  }
+}

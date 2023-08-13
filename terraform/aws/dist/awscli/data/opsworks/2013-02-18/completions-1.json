@@ -1,0 +1,1823 @@
+{
+  "version": "1.0",
+  "resources": {
+    "App": {
+      "operation": "DescribeApps",
+      "resourceIdentifier": {
+        "Description": "Apps[].Description",
+        "DataSources": "Apps[].DataSources",
+        "AppSource": "Apps[].AppSource",
+        "Domains": "Apps[].Domains",
+        "EnableSsl": "Apps[].EnableSsl",
+        "SslConfiguration": "Apps[].SslConfiguration",
+        "Environment": "Apps[].Environment"
+      }
+    },
+    "Command": {
+      "operation": "DescribeCommands",
+      "resourceIdentifier": {
+        "CommandId": "Commands[].CommandId"
+      }
+    },
+    "Deployment": {
+      "operation": "DescribeDeployments",
+      "resourceIdentifier": {
+        "DeploymentId": "Deployments[].DeploymentId",
+        "AppId": "Deployments[].AppId",
+        "InstanceIds": "Deployments[].InstanceIds"
+      }
+    },
+    "ElasticLoadBalancer": {
+      "operation": "DescribeElasticLoadBalancers",
+      "resourceIdentifier": {
+        "ElasticLoadBalancerName": "ElasticLoadBalancers[].ElasticLoadBalancerName"
+      }
+    },
+    "Instance": {
+      "operation": "DescribeInstances",
+      "resourceIdentifier": {
+        "AmiId": "Instances[].AmiId",
+        "Architecture": "Instances[].Architecture",
+        "AutoScalingType": "Instances[].AutoScalingType",
+        "EbsOptimized": "Instances[].EbsOptimized",
+        "EcsClusterArn": "Instances[].EcsClusterArn",
+        "ElasticIp": "Instances[].ElasticIp",
+        "Hostname": "Instances[].Hostname",
+        "InstanceType": "Instances[].InstanceType",
+        "LayerIds": "Instances[].LayerIds",
+        "Os": "Instances[].Os",
+        "PrivateIp": "Instances[].PrivateIp",
+        "PublicIp": "Instances[].PublicIp",
+        "SshKeyName": "Instances[].SshKeyName"
+      }
+    },
+    "Layer": {
+      "operation": "DescribeLayers",
+      "resourceIdentifier": {
+        "LayerId": "Layers[].LayerId",
+        "Shortname": "Layers[].Shortname",
+        "CloudWatchLogsConfiguration": "Layers[].CloudWatchLogsConfiguration",
+        "CustomInstanceProfileArn": "Layers[].CustomInstanceProfileArn",
+        "CustomSecurityGroupIds": "Layers[].CustomSecurityGroupIds",
+        "Packages": "Layers[].Packages",
+        "VolumeConfigurations": "Layers[].VolumeConfigurations",
+        "EnableAutoHealing": "Layers[].EnableAutoHealing",
+        "AutoAssignElasticIps": "Layers[].AutoAssignElasticIps",
+        "AutoAssignPublicIps": "Layers[].AutoAssignPublicIps",
+        "CustomRecipes": "Layers[].CustomRecipes",
+        "InstallUpdatesOnBoot": "Layers[].InstallUpdatesOnBoot",
+        "UseEbsOptimizedInstances": "Layers[].UseEbsOptimizedInstances",
+        "LifecycleEventConfiguration": "Layers[].LifecycleEventConfiguration"
+      }
+    },
+    "Permission": {
+      "operation": "DescribePermissions",
+      "resourceIdentifier": {
+        "AllowSsh": "Permissions[].AllowSsh",
+        "AllowSudo": "Permissions[].AllowSudo",
+        "Level": "Permissions[].Level"
+      }
+    },
+    "ServiceError": {
+      "operation": "DescribeServiceErrors",
+      "resourceIdentifier": {
+        "ServiceErrorId": "ServiceErrors[].ServiceErrorId",
+        "Type": "ServiceErrors[].Type"
+      }
+    },
+    "Stack": {
+      "operation": "DescribeStacks",
+      "resourceIdentifier": {
+        "StackId": "Stacks[].StackId",
+        "VpcId": "Stacks[].VpcId",
+        "Attributes": "Stacks[].Attributes",
+        "ServiceRoleArn": "Stacks[].ServiceRoleArn",
+        "DefaultInstanceProfileArn": "Stacks[].DefaultInstanceProfileArn",
+        "DefaultOs": "Stacks[].DefaultOs",
+        "HostnameTheme": "Stacks[].HostnameTheme",
+        "DefaultAvailabilityZone": "Stacks[].DefaultAvailabilityZone",
+        "DefaultSubnetId": "Stacks[].DefaultSubnetId",
+        "CustomJson": "Stacks[].CustomJson",
+        "ConfigurationManager": "Stacks[].ConfigurationManager",
+        "ChefConfiguration": "Stacks[].ChefConfiguration",
+        "UseCustomCookbooks": "Stacks[].UseCustomCookbooks",
+        "UseOpsworksSecurityGroups": "Stacks[].UseOpsworksSecurityGroups",
+        "CustomCookbooksSource": "Stacks[].CustomCookbooksSource",
+        "DefaultSshKeyName": "Stacks[].DefaultSshKeyName",
+        "DefaultRootDeviceType": "Stacks[].DefaultRootDeviceType",
+        "AgentVersion": "Stacks[].AgentVersion"
+      }
+    },
+    "UserProfile": {
+      "operation": "DescribeUserProfiles",
+      "resourceIdentifier": {
+        "IamUserArn": "UserProfiles[].IamUserArn",
+        "SshUsername": "UserProfiles[].SshUsername",
+        "SshPublicKey": "UserProfiles[].SshPublicKey",
+        "AllowSelfManagement": "UserProfiles[].AllowSelfManagement"
+      }
+    },
+    "Volume": {
+      "operation": "DescribeVolumes",
+      "resourceIdentifier": {
+        "VolumeId": "Volumes[].VolumeId",
+        "Ec2VolumeId": "Volumes[].Ec2VolumeId",
+        "Name": "Volumes[].Name",
+        "RaidArrayId": "Volumes[].RaidArrayId",
+        "InstanceId": "Volumes[].InstanceId",
+        "MountPoint": "Volumes[].MountPoint",
+        "Region": "Volumes[].Region"
+      }
+    }
+  },
+  "operations": {
+    "AssignInstance": {
+      "InstanceId": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "Volume",
+            "resourceIdentifier": "InstanceId"
+          }
+        ]
+      },
+      "LayerIds": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "Instance",
+            "resourceIdentifier": "LayerIds"
+          }
+        ]
+      }
+    },
+    "AssignVolume": {
+      "VolumeId": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "Volume",
+            "resourceIdentifier": "VolumeId"
+          }
+        ]
+      },
+      "InstanceId": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "Volume",
+            "resourceIdentifier": "InstanceId"
+          }
+        ]
+      }
+    },
+    "AssociateElasticIp": {
+      "ElasticIp": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "Instance",
+            "resourceIdentifier": "ElasticIp"
+          }
+        ]
+      },
+      "InstanceId": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "Volume",
+            "resourceIdentifier": "InstanceId"
+          }
+        ]
+      }
+    },
+    "AttachElasticLoadBalancer": {
+      "ElasticLoadBalancerName": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "ElasticLoadBalancer",
+            "resourceIdentifier": "ElasticLoadBalancerName"
+          }
+        ]
+      },
+      "LayerId": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "Layer",
+            "resourceIdentifier": "LayerId"
+          }
+        ]
+      }
+    },
+    "CloneStack": {
+      "Name": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "Volume",
+            "resourceIdentifier": "Name"
+          }
+        ]
+      },
+      "Region": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "Volume",
+            "resourceIdentifier": "Region"
+          }
+        ]
+      },
+      "VpcId": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "Stack",
+            "resourceIdentifier": "VpcId"
+          }
+        ]
+      },
+      "Attributes": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "Stack",
+            "resourceIdentifier": "Attributes"
+          }
+        ]
+      },
+      "ServiceRoleArn": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "Stack",
+            "resourceIdentifier": "ServiceRoleArn"
+          }
+        ]
+      },
+      "DefaultInstanceProfileArn": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "Stack",
+            "resourceIdentifier": "DefaultInstanceProfileArn"
+          }
+        ]
+      },
+      "DefaultOs": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "Stack",
+            "resourceIdentifier": "DefaultOs"
+          }
+        ]
+      },
+      "HostnameTheme": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "Stack",
+            "resourceIdentifier": "HostnameTheme"
+          }
+        ]
+      },
+      "DefaultAvailabilityZone": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "Stack",
+            "resourceIdentifier": "DefaultAvailabilityZone"
+          }
+        ]
+      },
+      "DefaultSubnetId": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "Stack",
+            "resourceIdentifier": "DefaultSubnetId"
+          }
+        ]
+      },
+      "CustomJson": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "Stack",
+            "resourceIdentifier": "CustomJson"
+          }
+        ]
+      },
+      "ConfigurationManager": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "Stack",
+            "resourceIdentifier": "ConfigurationManager"
+          }
+        ]
+      },
+      "ChefConfiguration": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "Stack",
+            "resourceIdentifier": "ChefConfiguration"
+          }
+        ]
+      },
+      "UseCustomCookbooks": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "Stack",
+            "resourceIdentifier": "UseCustomCookbooks"
+          }
+        ]
+      },
+      "UseOpsworksSecurityGroups": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "Stack",
+            "resourceIdentifier": "UseOpsworksSecurityGroups"
+          }
+        ]
+      },
+      "CustomCookbooksSource": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "Stack",
+            "resourceIdentifier": "CustomCookbooksSource"
+          }
+        ]
+      },
+      "DefaultSshKeyName": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "Stack",
+            "resourceIdentifier": "DefaultSshKeyName"
+          }
+        ]
+      },
+      "DefaultRootDeviceType": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "Stack",
+            "resourceIdentifier": "DefaultRootDeviceType"
+          }
+        ]
+      },
+      "AgentVersion": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "Stack",
+            "resourceIdentifier": "AgentVersion"
+          }
+        ]
+      }
+    },
+    "DeleteApp": {
+      "AppId": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "Deployment",
+            "resourceIdentifier": "AppId"
+          }
+        ]
+      }
+    },
+    "DeleteInstance": {
+      "InstanceId": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "Volume",
+            "resourceIdentifier": "InstanceId"
+          }
+        ]
+      }
+    },
+    "DeleteLayer": {
+      "LayerId": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "Layer",
+            "resourceIdentifier": "LayerId"
+          }
+        ]
+      }
+    },
+    "DeleteStack": {
+      "StackId": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "Stack",
+            "resourceIdentifier": "StackId"
+          }
+        ]
+      }
+    },
+    "DeleteUserProfile": {
+      "IamUserArn": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "UserProfile",
+            "resourceIdentifier": "IamUserArn"
+          }
+        ]
+      }
+    },
+    "DeregisterEcsCluster": {
+      "EcsClusterArn": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "Instance",
+            "resourceIdentifier": "EcsClusterArn"
+          }
+        ]
+      }
+    },
+    "DeregisterElasticIp": {
+      "ElasticIp": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "Instance",
+            "resourceIdentifier": "ElasticIp"
+          }
+        ]
+      }
+    },
+    "DeregisterInstance": {
+      "InstanceId": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "Volume",
+            "resourceIdentifier": "InstanceId"
+          }
+        ]
+      }
+    },
+    "DeregisterVolume": {
+      "VolumeId": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "Volume",
+            "resourceIdentifier": "VolumeId"
+          }
+        ]
+      }
+    },
+    "DescribeAgentVersions": {
+      "StackId": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "Stack",
+            "resourceIdentifier": "StackId"
+          }
+        ]
+      },
+      "ConfigurationManager": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "Stack",
+            "resourceIdentifier": "ConfigurationManager"
+          }
+        ]
+      }
+    },
+    "DescribeApps": {
+      "StackId": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "Stack",
+            "resourceIdentifier": "StackId"
+          }
+        ]
+      },
+      "AppIds": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "Deployment",
+            "resourceIdentifier": "AppId"
+          }
+        ]
+      }
+    },
+    "DescribeCommands": {
+      "DeploymentId": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "Deployment",
+            "resourceIdentifier": "DeploymentId"
+          }
+        ]
+      },
+      "InstanceId": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "Volume",
+            "resourceIdentifier": "InstanceId"
+          }
+        ]
+      },
+      "CommandIds": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "Command",
+            "resourceIdentifier": "CommandId"
+          }
+        ]
+      }
+    },
+    "DescribeDeployments": {
+      "StackId": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "Stack",
+            "resourceIdentifier": "StackId"
+          }
+        ]
+      },
+      "AppId": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "Deployment",
+            "resourceIdentifier": "AppId"
+          }
+        ]
+      },
+      "DeploymentIds": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "Deployment",
+            "resourceIdentifier": "DeploymentId"
+          }
+        ]
+      }
+    },
+    "DescribeEcsClusters": {
+      "EcsClusterArns": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "Instance",
+            "resourceIdentifier": "EcsClusterArn"
+          }
+        ]
+      },
+      "StackId": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "Stack",
+            "resourceIdentifier": "StackId"
+          }
+        ]
+      }
+    },
+    "DescribeElasticIps": {
+      "InstanceId": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "Volume",
+            "resourceIdentifier": "InstanceId"
+          }
+        ]
+      },
+      "StackId": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "Stack",
+            "resourceIdentifier": "StackId"
+          }
+        ]
+      }
+    },
+    "DescribeElasticLoadBalancers": {
+      "StackId": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "Stack",
+            "resourceIdentifier": "StackId"
+          }
+        ]
+      },
+      "LayerIds": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "Instance",
+            "resourceIdentifier": "LayerIds"
+          }
+        ]
+      }
+    },
+    "DescribeInstances": {
+      "StackId": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "Stack",
+            "resourceIdentifier": "StackId"
+          }
+        ]
+      },
+      "LayerId": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "Layer",
+            "resourceIdentifier": "LayerId"
+          }
+        ]
+      },
+      "InstanceIds": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "Deployment",
+            "resourceIdentifier": "InstanceIds"
+          }
+        ]
+      }
+    },
+    "DescribeLayers": {
+      "StackId": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "Stack",
+            "resourceIdentifier": "StackId"
+          }
+        ]
+      },
+      "LayerIds": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "Instance",
+            "resourceIdentifier": "LayerIds"
+          }
+        ]
+      }
+    },
+    "DescribeLoadBasedAutoScaling": {
+      "LayerIds": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "Instance",
+            "resourceIdentifier": "LayerIds"
+          }
+        ]
+      }
+    },
+    "DescribePermissions": {
+      "IamUserArn": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "UserProfile",
+            "resourceIdentifier": "IamUserArn"
+          }
+        ]
+      },
+      "StackId": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "Stack",
+            "resourceIdentifier": "StackId"
+          }
+        ]
+      }
+    },
+    "DescribeRaidArrays": {
+      "InstanceId": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "Volume",
+            "resourceIdentifier": "InstanceId"
+          }
+        ]
+      },
+      "StackId": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "Stack",
+            "resourceIdentifier": "StackId"
+          }
+        ]
+      },
+      "RaidArrayIds": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "Volume",
+            "resourceIdentifier": "RaidArrayId"
+          }
+        ]
+      }
+    },
+    "DescribeRdsDbInstances": {
+      "StackId": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "Stack",
+            "resourceIdentifier": "StackId"
+          }
+        ]
+      }
+    },
+    "DescribeServiceErrors": {
+      "StackId": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "Stack",
+            "resourceIdentifier": "StackId"
+          }
+        ]
+      },
+      "InstanceId": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "Volume",
+            "resourceIdentifier": "InstanceId"
+          }
+        ]
+      },
+      "ServiceErrorIds": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "ServiceError",
+            "resourceIdentifier": "ServiceErrorId"
+          }
+        ]
+      }
+    },
+    "DescribeStackProvisioningParameters": {
+      "StackId": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "Stack",
+            "resourceIdentifier": "StackId"
+          }
+        ]
+      }
+    },
+    "DescribeStackSummary": {
+      "StackId": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "Stack",
+            "resourceIdentifier": "StackId"
+          }
+        ]
+      }
+    },
+    "DescribeStacks": {
+      "StackIds": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "Stack",
+            "resourceIdentifier": "StackId"
+          }
+        ]
+      }
+    },
+    "DescribeTimeBasedAutoScaling": {
+      "InstanceIds": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "Deployment",
+            "resourceIdentifier": "InstanceIds"
+          }
+        ]
+      }
+    },
+    "DescribeUserProfiles": {
+      "IamUserArns": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "UserProfile",
+            "resourceIdentifier": "IamUserArn"
+          }
+        ]
+      }
+    },
+    "DescribeVolumes": {
+      "InstanceId": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "Volume",
+            "resourceIdentifier": "InstanceId"
+          }
+        ]
+      },
+      "StackId": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "Stack",
+            "resourceIdentifier": "StackId"
+          }
+        ]
+      },
+      "RaidArrayId": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "Volume",
+            "resourceIdentifier": "RaidArrayId"
+          }
+        ]
+      },
+      "VolumeIds": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "Volume",
+            "resourceIdentifier": "VolumeId"
+          }
+        ]
+      }
+    },
+    "DetachElasticLoadBalancer": {
+      "ElasticLoadBalancerName": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "ElasticLoadBalancer",
+            "resourceIdentifier": "ElasticLoadBalancerName"
+          }
+        ]
+      },
+      "LayerId": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "Layer",
+            "resourceIdentifier": "LayerId"
+          }
+        ]
+      }
+    },
+    "DisassociateElasticIp": {
+      "ElasticIp": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "Instance",
+            "resourceIdentifier": "ElasticIp"
+          }
+        ]
+      }
+    },
+    "GetHostnameSuggestion": {
+      "LayerId": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "Layer",
+            "resourceIdentifier": "LayerId"
+          }
+        ]
+      }
+    },
+    "GrantAccess": {
+      "InstanceId": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "Volume",
+            "resourceIdentifier": "InstanceId"
+          }
+        ]
+      }
+    },
+    "RebootInstance": {
+      "InstanceId": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "Volume",
+            "resourceIdentifier": "InstanceId"
+          }
+        ]
+      }
+    },
+    "RegisterEcsCluster": {
+      "EcsClusterArn": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "Instance",
+            "resourceIdentifier": "EcsClusterArn"
+          }
+        ]
+      },
+      "StackId": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "Stack",
+            "resourceIdentifier": "StackId"
+          }
+        ]
+      }
+    },
+    "RegisterElasticIp": {
+      "ElasticIp": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "Instance",
+            "resourceIdentifier": "ElasticIp"
+          }
+        ]
+      },
+      "StackId": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "Stack",
+            "resourceIdentifier": "StackId"
+          }
+        ]
+      }
+    },
+    "RegisterInstance": {
+      "StackId": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "Stack",
+            "resourceIdentifier": "StackId"
+          }
+        ]
+      },
+      "Hostname": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "Instance",
+            "resourceIdentifier": "Hostname"
+          }
+        ]
+      },
+      "PublicIp": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "Instance",
+            "resourceIdentifier": "PublicIp"
+          }
+        ]
+      },
+      "PrivateIp": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "Instance",
+            "resourceIdentifier": "PrivateIp"
+          }
+        ]
+      }
+    },
+    "RegisterRdsDbInstance": {
+      "StackId": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "Stack",
+            "resourceIdentifier": "StackId"
+          }
+        ]
+      }
+    },
+    "RegisterVolume": {
+      "Ec2VolumeId": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "Volume",
+            "resourceIdentifier": "Ec2VolumeId"
+          }
+        ]
+      },
+      "StackId": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "Stack",
+            "resourceIdentifier": "StackId"
+          }
+        ]
+      }
+    },
+    "SetLoadBasedAutoScaling": {
+      "LayerId": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "Layer",
+            "resourceIdentifier": "LayerId"
+          }
+        ]
+      }
+    },
+    "SetPermission": {
+      "StackId": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "Stack",
+            "resourceIdentifier": "StackId"
+          }
+        ]
+      },
+      "IamUserArn": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "UserProfile",
+            "resourceIdentifier": "IamUserArn"
+          }
+        ]
+      },
+      "AllowSsh": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "Permission",
+            "resourceIdentifier": "AllowSsh"
+          }
+        ]
+      },
+      "AllowSudo": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "Permission",
+            "resourceIdentifier": "AllowSudo"
+          }
+        ]
+      },
+      "Level": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "Permission",
+            "resourceIdentifier": "Level"
+          }
+        ]
+      }
+    },
+    "SetTimeBasedAutoScaling": {
+      "InstanceId": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "Volume",
+            "resourceIdentifier": "InstanceId"
+          }
+        ]
+      }
+    },
+    "StartInstance": {
+      "InstanceId": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "Volume",
+            "resourceIdentifier": "InstanceId"
+          }
+        ]
+      }
+    },
+    "StartStack": {
+      "StackId": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "Stack",
+            "resourceIdentifier": "StackId"
+          }
+        ]
+      }
+    },
+    "StopInstance": {
+      "InstanceId": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "Volume",
+            "resourceIdentifier": "InstanceId"
+          }
+        ]
+      }
+    },
+    "StopStack": {
+      "StackId": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "Stack",
+            "resourceIdentifier": "StackId"
+          }
+        ]
+      }
+    },
+    "UnassignInstance": {
+      "InstanceId": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "Volume",
+            "resourceIdentifier": "InstanceId"
+          }
+        ]
+      }
+    },
+    "UnassignVolume": {
+      "VolumeId": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "Volume",
+            "resourceIdentifier": "VolumeId"
+          }
+        ]
+      }
+    },
+    "UpdateApp": {
+      "AppId": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "Deployment",
+            "resourceIdentifier": "AppId"
+          }
+        ]
+      },
+      "Name": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "Volume",
+            "resourceIdentifier": "Name"
+          }
+        ]
+      },
+      "Description": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "App",
+            "resourceIdentifier": "Description"
+          }
+        ]
+      },
+      "DataSources": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "App",
+            "resourceIdentifier": "DataSources"
+          }
+        ]
+      },
+      "Type": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "ServiceError",
+            "resourceIdentifier": "Type"
+          }
+        ]
+      },
+      "AppSource": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "App",
+            "resourceIdentifier": "AppSource"
+          }
+        ]
+      },
+      "Domains": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "App",
+            "resourceIdentifier": "Domains"
+          }
+        ]
+      },
+      "EnableSsl": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "App",
+            "resourceIdentifier": "EnableSsl"
+          }
+        ]
+      },
+      "SslConfiguration": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "App",
+            "resourceIdentifier": "SslConfiguration"
+          }
+        ]
+      },
+      "Attributes": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "Stack",
+            "resourceIdentifier": "Attributes"
+          }
+        ]
+      },
+      "Environment": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "App",
+            "resourceIdentifier": "Environment"
+          }
+        ]
+      }
+    },
+    "UpdateElasticIp": {
+      "ElasticIp": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "Instance",
+            "resourceIdentifier": "ElasticIp"
+          }
+        ]
+      },
+      "Name": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "Volume",
+            "resourceIdentifier": "Name"
+          }
+        ]
+      }
+    },
+    "UpdateInstance": {
+      "InstanceId": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "Volume",
+            "resourceIdentifier": "InstanceId"
+          }
+        ]
+      },
+      "LayerIds": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "Instance",
+            "resourceIdentifier": "LayerIds"
+          }
+        ]
+      },
+      "InstanceType": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "Instance",
+            "resourceIdentifier": "InstanceType"
+          }
+        ]
+      },
+      "AutoScalingType": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "Instance",
+            "resourceIdentifier": "AutoScalingType"
+          }
+        ]
+      },
+      "Hostname": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "Instance",
+            "resourceIdentifier": "Hostname"
+          }
+        ]
+      },
+      "Os": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "Instance",
+            "resourceIdentifier": "Os"
+          }
+        ]
+      },
+      "AmiId": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "Instance",
+            "resourceIdentifier": "AmiId"
+          }
+        ]
+      },
+      "SshKeyName": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "Instance",
+            "resourceIdentifier": "SshKeyName"
+          }
+        ]
+      },
+      "Architecture": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "Instance",
+            "resourceIdentifier": "Architecture"
+          }
+        ]
+      },
+      "InstallUpdatesOnBoot": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "Layer",
+            "resourceIdentifier": "InstallUpdatesOnBoot"
+          }
+        ]
+      },
+      "EbsOptimized": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "Instance",
+            "resourceIdentifier": "EbsOptimized"
+          }
+        ]
+      },
+      "AgentVersion": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "Stack",
+            "resourceIdentifier": "AgentVersion"
+          }
+        ]
+      }
+    },
+    "UpdateLayer": {
+      "LayerId": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "Layer",
+            "resourceIdentifier": "LayerId"
+          }
+        ]
+      },
+      "Name": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "Volume",
+            "resourceIdentifier": "Name"
+          }
+        ]
+      },
+      "Shortname": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "Layer",
+            "resourceIdentifier": "Shortname"
+          }
+        ]
+      },
+      "Attributes": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "Stack",
+            "resourceIdentifier": "Attributes"
+          }
+        ]
+      },
+      "CloudWatchLogsConfiguration": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "Layer",
+            "resourceIdentifier": "CloudWatchLogsConfiguration"
+          }
+        ]
+      },
+      "CustomInstanceProfileArn": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "Layer",
+            "resourceIdentifier": "CustomInstanceProfileArn"
+          }
+        ]
+      },
+      "CustomJson": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "Stack",
+            "resourceIdentifier": "CustomJson"
+          }
+        ]
+      },
+      "CustomSecurityGroupIds": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "Layer",
+            "resourceIdentifier": "CustomSecurityGroupIds"
+          }
+        ]
+      },
+      "Packages": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "Layer",
+            "resourceIdentifier": "Packages"
+          }
+        ]
+      },
+      "VolumeConfigurations": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "Layer",
+            "resourceIdentifier": "VolumeConfigurations"
+          }
+        ]
+      },
+      "EnableAutoHealing": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "Layer",
+            "resourceIdentifier": "EnableAutoHealing"
+          }
+        ]
+      },
+      "AutoAssignElasticIps": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "Layer",
+            "resourceIdentifier": "AutoAssignElasticIps"
+          }
+        ]
+      },
+      "AutoAssignPublicIps": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "Layer",
+            "resourceIdentifier": "AutoAssignPublicIps"
+          }
+        ]
+      },
+      "CustomRecipes": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "Layer",
+            "resourceIdentifier": "CustomRecipes"
+          }
+        ]
+      },
+      "InstallUpdatesOnBoot": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "Layer",
+            "resourceIdentifier": "InstallUpdatesOnBoot"
+          }
+        ]
+      },
+      "UseEbsOptimizedInstances": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "Layer",
+            "resourceIdentifier": "UseEbsOptimizedInstances"
+          }
+        ]
+      },
+      "LifecycleEventConfiguration": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "Layer",
+            "resourceIdentifier": "LifecycleEventConfiguration"
+          }
+        ]
+      }
+    },
+    "UpdateMyUserProfile": {
+      "SshPublicKey": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "UserProfile",
+            "resourceIdentifier": "SshPublicKey"
+          }
+        ]
+      }
+    },
+    "UpdateStack": {
+      "StackId": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "Stack",
+            "resourceIdentifier": "StackId"
+          }
+        ]
+      },
+      "Name": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "Volume",
+            "resourceIdentifier": "Name"
+          }
+        ]
+      },
+      "Attributes": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "Stack",
+            "resourceIdentifier": "Attributes"
+          }
+        ]
+      },
+      "ServiceRoleArn": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "Stack",
+            "resourceIdentifier": "ServiceRoleArn"
+          }
+        ]
+      },
+      "DefaultInstanceProfileArn": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "Stack",
+            "resourceIdentifier": "DefaultInstanceProfileArn"
+          }
+        ]
+      },
+      "DefaultOs": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "Stack",
+            "resourceIdentifier": "DefaultOs"
+          }
+        ]
+      },
+      "HostnameTheme": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "Stack",
+            "resourceIdentifier": "HostnameTheme"
+          }
+        ]
+      },
+      "DefaultAvailabilityZone": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "Stack",
+            "resourceIdentifier": "DefaultAvailabilityZone"
+          }
+        ]
+      },
+      "DefaultSubnetId": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "Stack",
+            "resourceIdentifier": "DefaultSubnetId"
+          }
+        ]
+      },
+      "CustomJson": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "Stack",
+            "resourceIdentifier": "CustomJson"
+          }
+        ]
+      },
+      "ConfigurationManager": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "Stack",
+            "resourceIdentifier": "ConfigurationManager"
+          }
+        ]
+      },
+      "ChefConfiguration": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "Stack",
+            "resourceIdentifier": "ChefConfiguration"
+          }
+        ]
+      },
+      "UseCustomCookbooks": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "Stack",
+            "resourceIdentifier": "UseCustomCookbooks"
+          }
+        ]
+      },
+      "CustomCookbooksSource": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "Stack",
+            "resourceIdentifier": "CustomCookbooksSource"
+          }
+        ]
+      },
+      "DefaultSshKeyName": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "Stack",
+            "resourceIdentifier": "DefaultSshKeyName"
+          }
+        ]
+      },
+      "DefaultRootDeviceType": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "Stack",
+            "resourceIdentifier": "DefaultRootDeviceType"
+          }
+        ]
+      },
+      "UseOpsworksSecurityGroups": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "Stack",
+            "resourceIdentifier": "UseOpsworksSecurityGroups"
+          }
+        ]
+      },
+      "AgentVersion": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "Stack",
+            "resourceIdentifier": "AgentVersion"
+          }
+        ]
+      }
+    },
+    "UpdateUserProfile": {
+      "IamUserArn": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "UserProfile",
+            "resourceIdentifier": "IamUserArn"
+          }
+        ]
+      },
+      "SshUsername": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "UserProfile",
+            "resourceIdentifier": "SshUsername"
+          }
+        ]
+      },
+      "SshPublicKey": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "UserProfile",
+            "resourceIdentifier": "SshPublicKey"
+          }
+        ]
+      },
+      "AllowSelfManagement": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "UserProfile",
+            "resourceIdentifier": "AllowSelfManagement"
+          }
+        ]
+      }
+    },
+    "UpdateVolume": {
+      "VolumeId": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "Volume",
+            "resourceIdentifier": "VolumeId"
+          }
+        ]
+      },
+      "Name": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "Volume",
+            "resourceIdentifier": "Name"
+          }
+        ]
+      },
+      "MountPoint": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "Volume",
+            "resourceIdentifier": "MountPoint"
+          }
+        ]
+      }
+    }
+  }
+}

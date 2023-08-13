@@ -1,0 +1,477 @@
+{
+  "version": "1.0",
+  "resources": {
+    "Destination": {
+      "operation": "DescribeDestinations",
+      "resourceIdentifier": {
+        "destinationName": "destinations[].destinationName",
+        "targetArn": "destinations[].targetArn",
+        "roleArn": "destinations[].roleArn",
+        "accessPolicy": "destinations[].accessPolicy"
+      }
+    },
+    "ExportTask": {
+      "operation": "DescribeExportTasks",
+      "resourceIdentifier": {
+        "taskId": "exportTasks[].taskId"
+      }
+    },
+    "LogGroup": {
+      "operation": "DescribeLogGroups",
+      "resourceIdentifier": {
+        "retentionInDays": "logGroups[].retentionInDays",
+        "kmsKeyId": "logGroups[].kmsKeyId"
+      }
+    },
+    "MetricFilter": {
+      "operation": "DescribeMetricFilters",
+      "resourceIdentifier": {
+        "filterName": "metricFilters[].filterName",
+        "filterPattern": "metricFilters[].filterPattern",
+        "metricTransformations": "metricFilters[].metricTransformations",
+        "logGroupName": "metricFilters[].logGroupName"
+      }
+    },
+    "ResourcePolicy": {
+      "operation": "DescribeResourcePolicies",
+      "resourceIdentifier": {
+        "policyName": "resourcePolicies[].policyName",
+        "policyDocument": "resourcePolicies[].policyDocument"
+      }
+    }
+  },
+  "operations": {
+    "AssociateKmsKey": {
+      "logGroupName": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "MetricFilter",
+            "resourceIdentifier": "logGroupName"
+          }
+        ]
+      },
+      "kmsKeyId": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "LogGroup",
+            "resourceIdentifier": "kmsKeyId"
+          }
+        ]
+      }
+    },
+    "CancelExportTask": {
+      "taskId": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "ExportTask",
+            "resourceIdentifier": "taskId"
+          }
+        ]
+      }
+    },
+    "DeleteDestination": {
+      "destinationName": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "Destination",
+            "resourceIdentifier": "destinationName"
+          }
+        ]
+      }
+    },
+    "DeleteLogGroup": {
+      "logGroupName": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "MetricFilter",
+            "resourceIdentifier": "logGroupName"
+          }
+        ]
+      }
+    },
+    "DeleteLogStream": {
+      "logGroupName": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "MetricFilter",
+            "resourceIdentifier": "logGroupName"
+          }
+        ]
+      }
+    },
+    "DeleteMetricFilter": {
+      "logGroupName": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "MetricFilter",
+            "resourceIdentifier": "logGroupName"
+          }
+        ]
+      },
+      "filterName": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "MetricFilter",
+            "resourceIdentifier": "filterName"
+          }
+        ]
+      }
+    },
+    "DeleteResourcePolicy": {
+      "policyName": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "ResourcePolicy",
+            "resourceIdentifier": "policyName"
+          }
+        ]
+      }
+    },
+    "DeleteRetentionPolicy": {
+      "logGroupName": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "MetricFilter",
+            "resourceIdentifier": "logGroupName"
+          }
+        ]
+      }
+    },
+    "DeleteSubscriptionFilter": {
+      "logGroupName": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "MetricFilter",
+            "resourceIdentifier": "logGroupName"
+          }
+        ]
+      },
+      "filterName": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "MetricFilter",
+            "resourceIdentifier": "filterName"
+          }
+        ]
+      }
+    },
+    "DescribeExportTasks": {
+      "taskId": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "ExportTask",
+            "resourceIdentifier": "taskId"
+          }
+        ]
+      }
+    },
+    "DescribeLogStreams": {
+      "logGroupName": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "MetricFilter",
+            "resourceIdentifier": "logGroupName"
+          }
+        ]
+      }
+    },
+    "DescribeMetricFilters": {
+      "logGroupName": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "MetricFilter",
+            "resourceIdentifier": "logGroupName"
+          }
+        ]
+      }
+    },
+    "DescribeSubscriptionFilters": {
+      "logGroupName": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "MetricFilter",
+            "resourceIdentifier": "logGroupName"
+          }
+        ]
+      }
+    },
+    "DisassociateKmsKey": {
+      "logGroupName": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "MetricFilter",
+            "resourceIdentifier": "logGroupName"
+          }
+        ]
+      }
+    },
+    "FilterLogEvents": {
+      "logGroupName": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "MetricFilter",
+            "resourceIdentifier": "logGroupName"
+          }
+        ]
+      },
+      "filterPattern": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "MetricFilter",
+            "resourceIdentifier": "filterPattern"
+          }
+        ]
+      }
+    },
+    "GetLogEvents": {
+      "logGroupName": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "MetricFilter",
+            "resourceIdentifier": "logGroupName"
+          }
+        ]
+      }
+    },
+    "ListTagsLogGroup": {
+      "logGroupName": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "MetricFilter",
+            "resourceIdentifier": "logGroupName"
+          }
+        ]
+      }
+    },
+    "PutDestination": {
+      "destinationName": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "Destination",
+            "resourceIdentifier": "destinationName"
+          }
+        ]
+      },
+      "targetArn": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "Destination",
+            "resourceIdentifier": "targetArn"
+          }
+        ]
+      },
+      "roleArn": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "Destination",
+            "resourceIdentifier": "roleArn"
+          }
+        ]
+      }
+    },
+    "PutDestinationPolicy": {
+      "destinationName": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "Destination",
+            "resourceIdentifier": "destinationName"
+          }
+        ]
+      },
+      "accessPolicy": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "Destination",
+            "resourceIdentifier": "accessPolicy"
+          }
+        ]
+      }
+    },
+    "PutLogEvents": {
+      "logGroupName": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "MetricFilter",
+            "resourceIdentifier": "logGroupName"
+          }
+        ]
+      }
+    },
+    "PutMetricFilter": {
+      "logGroupName": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "MetricFilter",
+            "resourceIdentifier": "logGroupName"
+          }
+        ]
+      },
+      "filterName": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "MetricFilter",
+            "resourceIdentifier": "filterName"
+          }
+        ]
+      },
+      "filterPattern": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "MetricFilter",
+            "resourceIdentifier": "filterPattern"
+          }
+        ]
+      },
+      "metricTransformations": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "MetricFilter",
+            "resourceIdentifier": "metricTransformations"
+          }
+        ]
+      }
+    },
+    "PutResourcePolicy": {
+      "policyName": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "ResourcePolicy",
+            "resourceIdentifier": "policyName"
+          }
+        ]
+      },
+      "policyDocument": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "ResourcePolicy",
+            "resourceIdentifier": "policyDocument"
+          }
+        ]
+      }
+    },
+    "PutRetentionPolicy": {
+      "logGroupName": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "MetricFilter",
+            "resourceIdentifier": "logGroupName"
+          }
+        ]
+      },
+      "retentionInDays": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "LogGroup",
+            "resourceIdentifier": "retentionInDays"
+          }
+        ]
+      }
+    },
+    "PutSubscriptionFilter": {
+      "logGroupName": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "MetricFilter",
+            "resourceIdentifier": "logGroupName"
+          }
+        ]
+      },
+      "filterName": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "MetricFilter",
+            "resourceIdentifier": "filterName"
+          }
+        ]
+      },
+      "filterPattern": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "MetricFilter",
+            "resourceIdentifier": "filterPattern"
+          }
+        ]
+      },
+      "roleArn": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "Destination",
+            "resourceIdentifier": "roleArn"
+          }
+        ]
+      }
+    },
+    "TagLogGroup": {
+      "logGroupName": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "MetricFilter",
+            "resourceIdentifier": "logGroupName"
+          }
+        ]
+      }
+    },
+    "TestMetricFilter": {
+      "filterPattern": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "MetricFilter",
+            "resourceIdentifier": "filterPattern"
+          }
+        ]
+      }
+    },
+    "UntagLogGroup": {
+      "logGroupName": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "MetricFilter",
+            "resourceIdentifier": "logGroupName"
+          }
+        ]
+      }
+    }
+  }
+}

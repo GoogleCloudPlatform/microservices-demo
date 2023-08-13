@@ -1,0 +1,111 @@
+{
+  "version": "1.0",
+  "resources": {
+    "Device": {
+      "operation": "ListDevices",
+      "resourceIdentifier": {
+        "DeviceId": "Devices[].DeviceId",
+        "Enabled": "Devices[].Enabled"
+      }
+    }
+  },
+  "operations": {
+    "DescribeDevice": {
+      "DeviceId": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "Device",
+            "resourceIdentifier": "DeviceId"
+          }
+        ]
+      }
+    },
+    "FinalizeDeviceClaim": {
+      "DeviceId": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "Device",
+            "resourceIdentifier": "DeviceId"
+          }
+        ]
+      }
+    },
+    "GetDeviceMethods": {
+      "DeviceId": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "Device",
+            "resourceIdentifier": "DeviceId"
+          }
+        ]
+      }
+    },
+    "InitiateDeviceClaim": {
+      "DeviceId": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "Device",
+            "resourceIdentifier": "DeviceId"
+          }
+        ]
+      }
+    },
+    "InvokeDeviceMethod": {
+      "DeviceId": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "Device",
+            "resourceIdentifier": "DeviceId"
+          }
+        ]
+      }
+    },
+    "ListDeviceEvents": {
+      "DeviceId": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "Device",
+            "resourceIdentifier": "DeviceId"
+          }
+        ]
+      }
+    },
+    "UnclaimDevice": {
+      "DeviceId": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "Device",
+            "resourceIdentifier": "DeviceId"
+          }
+        ]
+      }
+    },
+    "UpdateDeviceState": {
+      "DeviceId": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "Device",
+            "resourceIdentifier": "DeviceId"
+          }
+        ]
+      },
+      "Enabled": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "Device",
+            "resourceIdentifier": "Enabled"
+          }
+        ]
+      }
+    }
+  }
+}

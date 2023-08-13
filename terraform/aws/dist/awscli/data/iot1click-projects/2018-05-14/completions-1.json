@@ -1,0 +1,123 @@
+{
+  "version": "1.0",
+  "resources": {
+    "Project": {
+      "operation": "ListProjects",
+      "resourceIdentifier": {
+        "projectName": "projects[].projectName"
+      }
+    }
+  },
+  "operations": {
+    "AssociateDeviceWithPlacement": {
+      "projectName": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "Project",
+            "resourceIdentifier": "projectName"
+          }
+        ]
+      }
+    },
+    "DeletePlacement": {
+      "projectName": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "Project",
+            "resourceIdentifier": "projectName"
+          }
+        ]
+      }
+    },
+    "DeleteProject": {
+      "projectName": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "Project",
+            "resourceIdentifier": "projectName"
+          }
+        ]
+      }
+    },
+    "DescribePlacement": {
+      "projectName": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "Project",
+            "resourceIdentifier": "projectName"
+          }
+        ]
+      }
+    },
+    "DescribeProject": {
+      "projectName": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "Project",
+            "resourceIdentifier": "projectName"
+          }
+        ]
+      }
+    },
+    "DisassociateDeviceFromPlacement": {
+      "projectName": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "Project",
+            "resourceIdentifier": "projectName"
+          }
+        ]
+      }
+    },
+    "GetDevicesInPlacement": {
+      "projectName": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "Project",
+            "resourceIdentifier": "projectName"
+          }
+        ]
+      }
+    },
+    "ListPlacements": {
+      "projectName": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "Project",
+            "resourceIdentifier": "projectName"
+          }
+        ]
+      }
+    },
+    "UpdatePlacement": {
+      "projectName": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "Project",
+            "resourceIdentifier": "projectName"
+          }
+        ]
+      }
+    },
+    "UpdateProject": {
+      "projectName": {
+        "completions": [
+          {
+            "parameters": {},
+            "resourceName": "Project",
+            "resourceIdentifier": "projectName"
+          }
+        ]
+      }
+    }
+  }
+}
