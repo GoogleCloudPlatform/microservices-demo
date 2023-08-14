@@ -90,6 +90,7 @@ func (p *productCatalog) parseCatalog() []*pb.Product {
 }
 
 func translateProductsInPlace(ctx context.Context, projectId, targetLangCode string, products []*pb.Product) error {
+	log.Infof("Translating products to %v", targetLangCode)
 	// Handle English to English translations.
 	if targetLangCode == "en" {
 		return nil
@@ -121,5 +122,6 @@ func translateProductsInPlace(ctx context.Context, projectId, targetLangCode str
 		product.Name = translatedStrings[i*2]
 		product.Description = translatedStrings[(i*2)+1]
 	}
+	log.Infof("Successfully translated products to %v", targetLangCode)
 	return nil
 }
