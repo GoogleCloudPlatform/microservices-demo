@@ -43,14 +43,18 @@ func (fe *frontendServer) getCurrencies(ctx context.Context) ([]string, error) {
 }
 
 func (fe *frontendServer) getProducts(ctx context.Context, languageIsoCode string) ([]*pb.Product, error) {
+	log.Infof("Getting products from productcatalogservice in language %v", languageIsoCode)
 	resp, err := pb.NewProductCatalogServiceClient(fe.productCatalogSvcConn).
 		ListProducts(ctx, &pb.ListProductsRequest{Language: languageIsoCode})
+	log.Infof("Got products from productcatalogservice including %v", resp.Products[0].Name)
 	return resp.GetProducts(), err
 }
 
 func (fe *frontendServer) getProduct(ctx context.Context, id string, languageIsoCode string) (*pb.Product, error) {
+	log.Infof("Getting product from productcatalogservice in language %v", languageIsoCode)
 	resp, err := pb.NewProductCatalogServiceClient(fe.productCatalogSvcConn).
 		GetProduct(ctx, &pb.GetProductRequest{Id: id, Language: languageIsoCode})
+	log.Infof("Got product from productcatalogservice %v", resp.Name)
 	return resp, err
 }
 
