@@ -39,11 +39,33 @@ func (p *productCatalog) Watch(req *healthpb.HealthCheckRequest, ws healthpb.Hea
 	return status.Errorf(codes.Unimplemented, "health check via Watch not implemented")
 }
 
+func shallowCopyProducts(products []*pb.Product) []*pb.Product {
+	productsClone := make([]*pb.Product, len(products))
+	for i, product := range products {
+		productsClone[i] = shallowCopyProduct(product)
+	}
+	return productsClone
+}
+
+func shallowCopyProduct(product *pb.Product) *pb.Product {
+	productCopy := pb.Product{}
+	// Copy fields.
+	productCopy.Id = product.Id
+	productCopy.Name = product.Name
+	productCopy.Description = product.Description
+	productCopy.Picture = product.Picture
+	// Warning: This method returns a shallow copy! The following fields will not be "cloned".
+	productCopy.PriceUsd = product.PriceUsd
+	productCopy.Categories = product.Categories
+	return &productCopy
+}
+
 func (p *productCatalog) ListProducts(ctx context.Context, req *pb.ListProductsRequest) (*pb.ListProductsResponse, error) {
 	time.Sleep(extraLatency)
 	products := p.parseCatalog()
-	translateProductsInPlace(ctx, getGoogleCloudProjectId(), req.Language, products)
-	return &pb.ListProductsResponse{Products: products}, nil
+	productsClone := shallowCopyProducts(products)
+	translateProductsInPlace(ctx, getGoogleCloudProjectId(), req.Language, productsClone)
+	return &pb.ListProductsResponse{Products: productsClone}, nil
 }
 
 func (p *productCatalog) GetProduct(ctx context.Context, req *pb.GetProductRequest) (*pb.Product, error) {
@@ -51,17 +73,17 @@ func (p *productCatalog) GetProduct(ctx context.Context, req *pb.GetProductReque
 
 	var found *pb.Product
 	products := p.parseCatalog()
-	translateProductsInPlace(ctx, getGoogleCloudProjectId(), req.Language, products)
-	for i := 0; i < len(p.parseCatalog()); i++ {
-		if req.Id == p.parseCatalog()[i].Id {
-			found = p.parseCatalog()[i]
+	for i := 0; i < len(products); i++ {
+		if req.Id == products[i].Id {
+			found = products[i]
 		}
 	}
-
 	if found == nil {
 		return nil, status.Errorf(codes.NotFound, "no product with ID %s", req.Id)
 	}
-	return found, nil
+	productClone := shallowCopyProduct(found)
+	translateProductsInPlace(ctx, getGoogleCloudProjectId(), req.Language, []*pb.Product{productClone})
+	return productClone, nil
 }
 
 func (p *productCatalog) SearchProducts(ctx context.Context, req *pb.SearchProductsRequest) (*pb.SearchProductsResponse, error) {
@@ -92,7 +114,7 @@ func (p *productCatalog) parseCatalog() []*pb.Product {
 func translateProductsInPlace(ctx context.Context, projectId, targetLangCode string, products []*pb.Product) error {
 	log.Infof("Translating products to %v", targetLangCode)
 	// Handle English to English translations.
-	if targetLangCode == "en" {
+	if targetLangCode == "en" || targetLangCode == "" {
 		return nil
 	}
 	// Ensure the target language is supported.
