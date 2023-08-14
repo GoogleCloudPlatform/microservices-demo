@@ -469,7 +469,7 @@ similar to that of the hot-products-row.
 
 .local,
 .aws-platform,
-.onprem-platform,
+.byok,
 .azure-platform,
 .alibaba-platform,
 .gcp-platform {
@@ -488,8 +488,8 @@ similar to that of the hot-products-row.
   background-color: #ff9900;
 }
 
-.onprem-platform,
-.onprem-platform .platform-flag {
+.byok,
+.byok .platform-flag {
   background-color: #34A853;
 }
 
