@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-FROM node:20.5.1-alpine@sha256:254989045b0555ee411cd8fe7bd8e3ae306fef34b4c9d5dfd020bdda86cdad97 as base
+FROM node:20.5.0-alpine@sha256:11087abe911baf2fd7e34192f4598bf7e438239e9914f5b7ecda5fb5a7b1a2dd as base
 
 FROM base as builder
 
@@ -25,13 +25,23 @@ RUN apk add --update --no-cache \
 
 WORKDIR /usr/src/app
 
-COPY package*.json ./
-
+#COPY package*.json ./
+COPY . .
 RUN npm install --only=production
+ENV NODE_DEBUG=sl
+RUN npm i slnodejs
+RUN  ./node_modules/.bin/slnodejs config --tokenfile sltoken.txt --appname "payment_service1" --branch "master" --build "pyment_service1.3"
 
+
+RUN ./node_modules/.bin/slnodejs scan --tokenfile sltoken.txt --buildsessionidfile buildSessionId --workspacepath "." --scm none --es6Modules
+
+RUN ls
 FROM base
 
 WORKDIR /usr/src/app
+COPY --from=builder /usr/src/app/buildSessionId .
+
+#RUN ./node_modules/.bin/slnodejs run --tokenfile sltoken.txt --buildsessionidfile buildSessionId --labid integ_master_loadgenerator --workspacepath "." --useinitialcolor true --useslnode2 -- ./server.js
 
 COPY --from=builder /usr/src/app/node_modules ./node_modules
 
@@ -39,4 +49,4 @@ COPY . .
 
 EXPOSE 50051
 
-ENTRYPOINT [ "node", "index.js" ]
+ENTRYPOINT [ "./node_modules/.bin/slnodejs","run", "--tokenfile","sltoken.txt", "--buildsessionidfile", "buildSessionId", "--labid", "integ_main_GoogleMicroserviceDemo", "--workspacepath", ".","index.js"]
