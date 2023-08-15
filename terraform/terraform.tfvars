@@ -15,3 +15,4 @@
 #gcp_project_id = "<project_id_here>"
 
 #memorystore = false
+eks_node_instance_type = "t2.medium"
