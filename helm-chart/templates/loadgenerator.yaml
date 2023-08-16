@@ -72,6 +72,10 @@ spec:
           readOnlyRootFilesystem: false
         image: ahmadsealights/loadgeneratorbadimage
         env:
+        - name: SL_TOKEN
+          value: "{{ .Values.SealightsEnvVars.token }}"
+        - name: SL_LAB_ID
+          value: "{{ .Values.SealightsEnvVars.lab_id }}"
         - name: FRONTEND_ADDR
           value: "{{ .Values.frontend.name }}:80"
         - name: USERS
