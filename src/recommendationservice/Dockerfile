@@ -21,11 +21,17 @@ RUN apt-get -qq update \
         wget g++ \
     && rm -rf /var/lib/apt/lists/*
 
+# download the grpc health probe
+# renovate: datasource=github-releases depName=grpc-ecosystem/grpc-health-probe
+RUN GRPC_HEALTH_PROBE_VERSION=v0.4.14 && \
+    wget -qO/bin/grpc_health_probe https://github.com/grpc-ecosystem/grpc-health-probe/releases/download/${GRPC_HEALTH_PROBE_VERSION}/grpc_health_probe-linux-amd64 && \
+    chmod +x /bin/grpc_health_probe
+
 # get packages
 COPY requirements.txt .
 RUN pip install -r requirements.txt
 
-FROM base
+FROM base as without-grpc-health-probe-bin
 # Enable unbuffered logging
 ENV PYTHONUNBUFFERED=1
 
@@ -43,3 +49,6 @@ ENV PORT "8080"
 EXPOSE 8080
 
 ENTRYPOINT ["python", "recommendation_server.py"]
+
+FROM without-grpc-health-probe-bin
+COPY --from=builder /bin/grpc_health_probe /bin/grpc_health_probe

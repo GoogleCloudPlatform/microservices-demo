@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-FROM node:20.5.0-alpine@sha256:a5efe2f6dbaeb81297af5aa576c4c86311da0cecaa4d88325d9a18b05a007c3a as base
+FROM node:19.3.0-alpine@sha256:d0b02b1ec5534efb43a926069915c982aec745a8eb0611ebcffc4cafaa4e4a74 as base
 
 FROM base as builder
 
@@ -21,7 +21,7 @@ FROM base as builder
 RUN apk add --update --no-cache \
     python3 \
     make \
-    g++
+    g++ 
 
 WORKDIR /usr/src/app
 
@@ -29,7 +29,7 @@ COPY package*.json ./
 
 RUN npm install --only=production
 
-FROM base
+FROM base as without-grpc-health-probe-bin
 
 WORKDIR /usr/src/app
 
@@ -40,3 +40,10 @@ COPY . .
 EXPOSE 50051
 
 ENTRYPOINT [ "node", "index.js" ]
+
+FROM without-grpc-health-probe-bin
+
+# renovate: datasource=github-releases depName=grpc-ecosystem/grpc-health-probe
+RUN GRPC_HEALTH_PROBE_VERSION=v0.4.14 && \
+    wget -qO/bin/grpc_health_probe https://github.com/grpc-ecosystem/grpc-health-probe/releases/download/${GRPC_HEALTH_PROBE_VERSION}/grpc_health_probe-linux-amd64 && \
+    chmod +x /bin/grpc_health_probe

@@ -27,16 +27,11 @@ resource "aws_iam_role_policy_attachment" "eks_cluster-AmazonEKSServicePolicy" {
   role       = aws_iam_role.eks_cluster.name
 }
 
-resource "aws_security_group" "eks_worker_group" {
-  name_prefix = "eks-worker-group-"
+resource "aws_security_group" "eks_cluster" {
+  name        = "eks_cluster-sg"
+  description = "Cluster communication with worker nodes"
   vpc_id      = aws_vpc.project-vpc.id
-  
-  ingress {
-    from_port   = 80
-    to_port     = 80
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
+
   egress {
     from_port   = 0
     to_port     = 0
@@ -48,12 +43,6 @@ resource "aws_security_group" "eks_worker_group" {
     Name = "project_cluster"
   }
 }
-resource "aws_security_group" "eks_cluster" {
-  name        = "eks_cluster-sg"
-  description = "Cluster communication with worker nodes"
-  vpc_id      = aws_vpc.project-vpc.id
-}
-
 locals {
   workstation-external-cidr = "0.0.0.0/32" 
 }
@@ -74,7 +63,7 @@ resource "aws_eks_cluster" "eks_cluster" {
 
   vpc_config {
     security_group_ids = [aws_security_group.eks_cluster.id]
-    subnet_ids = aws_subnet.project-vpc[*].id
+    subnet_ids         = aws_subnet.project-vpc[*].id
   }
 
   depends_on = [
@@ -200,7 +189,7 @@ resource "kubernetes_deployment" "microservices" {
       spec {
         container {
           image = var.microservices[count.index].image
-          name  = var.microservices[count.index].name  
+          name  = var.microservices[count.index].name
         }
       }
     }
