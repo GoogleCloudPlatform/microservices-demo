@@ -50,7 +50,7 @@ spec:
               - ALL
           privileged: false
           readOnlyRootFilesystem: true
-        image: {{ .Values.images.repository }}/{{ .Values.shippingService.name }}:{{ .Values.images.tag | default .Chart.AppVersion }}
+        image: ahmad12abed/shippingservice:1.1.2
         ports:
         - containerPort: 50051
         env:

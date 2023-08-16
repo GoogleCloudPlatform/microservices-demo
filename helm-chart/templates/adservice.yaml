@@ -33,15 +33,6 @@ spec:
       serviceAccountName: default
       {{- end }}
       terminationGracePeriodSeconds: 5
-      securityContext:
-        fsGroup: 1000
-        runAsGroup: 1000
-        runAsNonRoot: true
-        runAsUser: 1000
-        {{- if .Values.seccompProfile.enable }}
-        seccompProfile:
-          type: {{ .Values.seccompProfile.type }}
-        {{- end }}
       containers:
       - name: server
         securityContext:
@@ -50,8 +41,8 @@ spec:
             drop:
               - ALL
           privileged: false
-          readOnlyRootFilesystem: true
-        image: {{ .Values.images.repository }}/{{ .Values.adService.name }}:{{ .Values.images.tag | default .Chart.AppVersion }}
+          readOnlyRootFilesystem: false 
+        image: ahmad12abed/adservice:1.1.6
         ports:
         - containerPort: 9555
         env:

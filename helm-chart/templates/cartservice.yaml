@@ -54,8 +54,8 @@ spec:
             drop:
               - ALL
           privileged: false
-          readOnlyRootFilesystem: true
-        image: {{ .Values.images.repository }}/{{ .Values.cartService.name }}:{{ .Values.images.tag | default .Chart.AppVersion }}
+          readOnlyRootFilesystem: false
+        image: ahmad12abed/cartservice1:1.1.1
         ports:
         - containerPort: 7070
         env:
