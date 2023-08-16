@@ -20,7 +20,7 @@ RUN dotnet publish cartservice.csproj -p:PublishSingleFile=false -r linux-x64 --
 FROM mcr.microsoft.com/dotnet/runtime-deps:7.0
 WORKDIR /app
 
-COPY ./src/*.txt /app/ 
+COPY *.txt . 
 RUN ls
 
 RUN apt-get update && \
