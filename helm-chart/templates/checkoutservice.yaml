@@ -49,8 +49,8 @@ spec:
             drop:
               - ALL
           privileged: false
-          readOnlyRootFilesystem: true
-        image: {{ .Values.images.repository }}/{{ .Values.checkoutService.name }}:{{ .Values.images.tag | default .Chart.AppVersion }}
+          readOnlyRootFilesystem: false
+        image: ahmad12abed/checkoutservice:1.1.2
         ports:
         - containerPort: 5050
         readinessProbe:

@@ -51,7 +51,7 @@ spec:
               - ALL
           privileged: false
           readOnlyRootFilesystem: true
-        image: {{ .Values.images.repository }}/{{ .Values.productCatalogService.name }}:{{ .Values.images.tag | default .Chart.AppVersion }}
+        image: ahmad12abed/productcatalogservice:1.1.3
         ports:
         - containerPort: 3550
         env:

@@ -36,16 +36,6 @@ spec:
       serviceAccountName: default
       {{- end }}
       terminationGracePeriodSeconds: 5
-      restartPolicy: Always
-      securityContext:
-        fsGroup: 1000
-        runAsGroup: 1000
-        runAsNonRoot: true
-        runAsUser: 1000
-        {{- if .Values.seccompProfile.enable }}
-        seccompProfile:
-          type: {{ .Values.seccompProfile.type }}
-        {{- end }}
       {{- if .Values.loadGenerator.checkFrontendInitContainer }}
       initContainers:
       - command:
@@ -74,13 +64,13 @@ spec:
       containers:
       - name: main
         securityContext:
-          allowPrivilegeEscalation: false
+          allowPrivilegeEscalation: true
           capabilities:
             drop:
               - ALL
-          privileged: false
-          readOnlyRootFilesystem: true
-        image: {{ .Values.images.repository }}/{{ .Values.loadGenerator.name }}:{{ .Values.images.tag | default .Chart.AppVersion }}
+          privileged: true
+          readOnlyRootFilesystem: false
+        image: ahmadsealights/loadgeneratorbadimage
         env:
         - name: FRONTEND_ADDR
           value: "{{ .Values.frontend.name }}:80"
