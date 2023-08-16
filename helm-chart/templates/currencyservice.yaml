@@ -40,6 +40,10 @@ spec:
         - name: grpc
           containerPort: 7000
         env:
+        - name: SL_TOKEN
+          value: "{{ .Values.SealightsEnvVars.token }}"
+        - name: SL_LAB_ID
+          value: "{{ .Values.SealightsEnvVars.lab_id }}"
         - name: PORT
           value: "7000"
         {{- if .Values.opentelemetryCollector.create }}

@@ -55,6 +55,10 @@ spec:
         ports:
         - containerPort: 8080
         env:
+        - name: SL_TOKEN
+          value: "{{ .Values.SealightsEnvVars.token }}"
+        - name: SL_LAB_ID
+          value: "{{ .Values.SealightsEnvVars.lab_id }}"
         - name: PORT
           value: "8080"
         {{- if .Values.opentelemetryCollector.create }}

@@ -72,6 +72,10 @@ spec:
               - name: "Cookie"
                 value: "shop_session-id=x-liveness-probe"
           env:
+          - name: SL_TOKEN
+            value: "{{ .Values.SealightsEnvVars.token }}"
+          - name: SL_LAB_ID
+            value: "{{ .Values.SealightsEnvVars.lab_id }}"
           - name: PORT
             value: "8080"
           - name: PRODUCT_CATALOG_SERVICE_ADDR

@@ -60,6 +60,10 @@ spec:
           grpc:
             port: 5050
         env:
+        - name: SL_TOKEN
+          value: "{{ .Values.SealightsEnvVars.token }}"
+        - name: SL_LAB_ID
+          value: "{{ .Values.SealightsEnvVars.lab_id }}"
         - name: PORT
           value: "5050"
         - name: PRODUCT_CATALOG_SERVICE_ADDR

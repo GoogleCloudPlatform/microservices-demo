@@ -54,6 +54,10 @@ spec:
         ports:
         - containerPort: 50051
         env:
+        - name: SL_TOKEN
+          value: "{{ .Values.SealightsEnvVars.token }}"
+        - name: SL_LAB_ID
+          value: "{{ .Values.SealightsEnvVars.lab_id }}"
         - name: PORT
           value: "50051"
         {{- if not .Values.googleCloudOperations.profiler }}
