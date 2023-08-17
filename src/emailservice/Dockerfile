@@ -31,11 +31,14 @@ RUN sl-python scan --scm none --token eyJhbGciOiJSUzUxMiIsInR5cCI6IkpXVCJ9.eyJpc
 FROM python:3.10.8-slim@sha256:49749648f4426b31b20fca55ad854caa55ff59dc604f2f76b57d814e0a47c181
 # Enable unbuffered logging
 ENV PYTHONUNBUFFERED=1
+
+WORKDIR /emailservice
+
 # get packages
 RUN pip install sealights-python-agent
 COPY --from=builder /usr/local/lib/python3.10/ /usr/local/lib/python3.10/
 COPY . .
-WORKDIR /emailservice
+
 RUN export SL_BUILD_SESSION_ID=`cat buildSessionId.txt`
 RUN export SL_DEBUG=true
 
