@@ -34,7 +34,7 @@ ENV PYTHONUNBUFFERED=1
 # get packages
 RUN pip install sealights-python-agent
 COPY --from=builder /usr/local/lib/python3.10/ /usr/local/lib/python3.10/
-COPY --from=builder . .
+COPY . .
 WORKDIR /emailservice
 RUN export SL_BUILD_SESSION_ID=`cat buildSessionId.txt`
 RUN export SL_DEBUG=true
