@@ -51,7 +51,7 @@ spec:
           privileged: false
           readOnlyRootFilesystem: true
         {{- if .Values.cartDatabase.inClusterRedis.publicRepository }}
-        image: redis:alpine@sha256:32dcb8aedb557eb0d3463537f5fc3c765d1688d4940d487c1f0c3752f2c3916c
+        image: redis:alpine@sha256:fd5de2340bc46cbc2241975ab027797c350dec6fd86349e3ac384e3a41be6fee
         {{- else }}
         image: {{ .Values.images.repository }}/redis:alpine
         {{- end }}
