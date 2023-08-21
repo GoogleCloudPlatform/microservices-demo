@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-FROM python:3.11.1-slim@sha256:1591aa8c01b5b37ab31dbe5662c5bdcf40c2f1bce4ef1c1fd24802dae3d01052 as base
+FROM python:3.8-slim as base
 
 RUN apt-get -qq update \
     && apt-get install -y --no-install-recommends \
@@ -26,11 +26,15 @@ COPY requirements.txt .
 
 RUN pip install --prefix="/install" -r requirements.txt
 
+
 FROM base
+
 
 WORKDIR /loadgen
 
-COPY --from=builder /install /usr/local
+RUN pip install sealights-python-agent
+
+COPY sltoken.txt sltoken.txt
 
 # Add application code.
 COPY test_pytest.py .

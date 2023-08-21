@@ -34,9 +34,17 @@ RUN mkdir -p /opt/cprof && \
     wget -q -O- https://storage.googleapis.com/cloud-profiler/java/latest/profiler_java_agent_alpine.tar.gz \
     | tar xzv -C /opt/cprof && \
     rm -rf profiler_java_agent.tar.gz
-
+RUN ls /opt/cprof
 WORKDIR /app
+RUN wget -nv https://agents.sealights.co/sl-cd-agent/sl-cd-agent-latest.zip && \
+        unzip -oq sl-cd-agent-latest.zip
+
 COPY --from=builder /app .
+COPY ./sltoken.txt /app
+RUN ls
+ENV JAVA_TOOL_OPTIONS="-javaagent:/app/sl-cd-agent.jar -Dsl.branchName=master  -Dsl.tokenFile=sltoken.txt -Dsl.appName=adservice -Dsl.buildName=adservice1.1.1 -Dsl.tags=script,container -Dsl.labId=integ_main_GoogleMicroserviceDemo -Dsl.includes=*hipstershop* -Dsl.workspace=./ -Dsl.log.toConsole=true -Dsl.log.level=info"
+
+
 
 EXPOSE 9555
 ENTRYPOINT ["/app/build/install/hipstershop/bin/AdService"]
