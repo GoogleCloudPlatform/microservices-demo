@@ -24,14 +24,13 @@ RUN apt-get -qq update \
 
 ENV PYTHONUNBUFFERED=1
 # get packages
-COPY --from=builder /usr/local/lib/python3.10/ /usr/local/lib/python3.10/
 RUN pip install sealights-python-agent
+COPY --from=builder /usr/local/lib/python3.10/ /usr/local/lib/python3.10/
 WORKDIR /recommendationservice
 COPY . .
-
 # Grab packages from builder
 # Add the application
 # set listen port
 ENV PORT "8080"
 EXPOSE 8080
-ENTRYPOINT sl-python run python recommendation_server.py --token ${SL_TOKEN} --labid ${SL_LAB_ID}
+ENTRYPOINT ["/bin/bash", "-c","sl-python run python recommendation_server.py --labid $SL_LAB_ID --token $SL_TOKEN"]
