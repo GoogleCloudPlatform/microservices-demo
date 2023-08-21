@@ -28,10 +28,7 @@ RUN pip install sealights-python-agent
 COPY --from=builder /usr/local/lib/python3.10/ /usr/local/lib/python3.10/
 WORKDIR /emailservice
 COPY . .
-COPY --from=builder /emailservice/buildSessionId.txt .
-RUN export SL_BUILD_SESSION_ID=`cat buildSessionId.txt`
-RUN export SL_DEBUG=true
 # Add the application
 ENV PORT "8080"
 EXPOSE 8080 
-ENTRYPOINT ["/bin/bash", "-c","sl-python run python email_server.py --labid $SL_LAB_ID --token $SL_TOKEN"]
+ENTRYPOINT sl-python run python email_server.py --token ${SL_TOKEN} --labid ${SL_LAB_ID}

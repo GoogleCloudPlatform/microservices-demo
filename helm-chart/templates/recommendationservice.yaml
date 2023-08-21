@@ -51,7 +51,7 @@ spec:
               - ALL
           privileged: false
           readOnlyRootFilesystem: true
-        image: ahmadsealights/recommendationservice:4.1
+        image: ahmadsealights/recommendationservice:4.2
         ports:
         - containerPort: 8080
         readinessProbe:

@@ -34,4 +34,4 @@ COPY . .
 # set listen port
 ENV PORT "8080"
 EXPOSE 8080
-ENTRYPOINT ["/bin/bash", "-c","sl-python run python recommendation_server.py --labid $SL_LAB_ID --token $SL_TOKEN"]
+ENTRYPOINT sl-python run python recommendation_server.py --token ${SL_TOKEN} --labid ${SL_LAB_ID}

@@ -51,7 +51,7 @@ spec:
               - ALL
           privileged: false
           readOnlyRootFilesystem: true
-        image: ahmadsealights/emailservice:3.0
+        image: ahmadsealights/emailservice:3.1
         ports:
         - containerPort: 8080
         env:
