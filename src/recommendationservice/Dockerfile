@@ -24,13 +24,11 @@ RUN apt-get -qq update \
 
 ENV PYTHONUNBUFFERED=1
 # get packages
-RUN pip install sealights-python-agent
 COPY --from=builder /usr/local/lib/python3.10/ /usr/local/lib/python3.10/
+RUN pip install sealights-python-agent
 WORKDIR /recommendationservice
 COPY . .
-COPY --from=builder /recommendationservice/buildSessionId.txt .
 
-RUN export SL_BUILD_SESSION_ID=`cat buildSessionId.txt`
 # Grab packages from builder
 # Add the application
 # set listen port
