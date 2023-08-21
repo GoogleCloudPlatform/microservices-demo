@@ -21,7 +21,7 @@ pipeline {
   }
 
   parameters {
-    string(name: 'latest', defaultValue: '1.2.2', description: 'ecr btq/adservice')
+    string(name: 'latest', defaultValue: '', description: 'ecr btq/adservice')
     string(name: 'branch', defaultValue: 'ahmad-branch', description: 'Branch to clone (ahmad-branch)')
     //string(name: 'ecr_uri1', defaultValue: '534369319675.dkr.ecr.us-west-2.amazonaws.com/btq-', description: 'ecr btq')
   }
@@ -32,12 +32,11 @@ pipeline {
         script {
           // Clone the repository with the specified branch
           git branch: params.branch, url: 'https://github.com/Sealights/microservices-demo.git'
-          sh 'ls'
         }
       }
     }
     //Build parallel images
-    stage ('Build Dockerfiles') {
+    stage ('Build BTQ') {
       steps {
         script {
           def parallelLabs = [:]
