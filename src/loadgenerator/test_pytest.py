@@ -17,7 +17,7 @@ products = [
 
 load=10#number of users for load test
 
-BASE_URL = "http://" + os.environ.get("FRONTEND_ADDR", "10.2.10.237:8081")#internal or external test
+BASE_URL = "http://" + os.environ.get("FRONTEND_ADDR", "10.2.10.163:8081")#internal or external test
 
 def test_load():
     threads = []

@@ -1,36 +1,48 @@
-# Copyright 2020 Google LLC
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#      http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
+FROM golang:1.20.6-alpine@sha256:6f592e0689192b7e477313264bb190024d654ef0a08fb1732af4f4b498a2e8ad as builder
 
-FROM golang:1.21.0-alpine@sha256:dd8888bb7f1b0b05e1e625aa29483f50f38a9b64073a4db00b04076cec52b71c as builder
 RUN apk add --no-cache ca-certificates git
 RUN apk add build-base
+ARG SEALIGHTS_TOKEN=eyJhbGciOiJSUzUxMiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJodHRwczovL1BST0QtQ1VTVE9NRVJTMi5hdXRoLnNlYWxpZ2h0cy5pby8iLCJqd3RpZCI6IlBST0QtQ1VTVE9NRVJTMixuZWVkVG9SZW1vdmUsQVBJR1ctZDk5MWY3YWMtMDc2MC00OTQ4LWIzNzctZmUzZjEwYjU5NGNiLDE2OTEwMDIzMDkzMTgiLCJzdWJqZWN0Ijoic2VhbGlnaHRzX21vbml0b3JAYWdlbnQiLCJhdWRpZW5jZSI6WyJhZ2VudHMiXSwieC1zbC1yb2xlIjoiYWdlbnQiLCJ4LXNsLXNlcnZlciI6Imh0dHBzOi8vdHV0b3JpYWwuc2VhbGlnaHRzLmNvL2FwaSIsInNsX2ltcGVyX3N1YmplY3QiOiIiLCJpYXQiOjE2OTEwMDIzMDl9.PPpTPq4cHdX3J6e9TPkaLzJ-9l3ZvPHVjxch4Wfs1alBY7PlZSggi6nEaDcyzEp13FIi9_LT_qecJs7wzkmT4bNYxLqTSc773Btifo3_R22VdcDOq-RtXlU3CsR9fNXg1jHbwhkeQEsefT2Xly0vtxT0bqXjipLlCT6DwldR-9yagZA5x98JNGRCY3Ch9a6jrxRu9AQXMkLAE-2Cxti9IoTCSQPa3Yi_UajPLmHwF0tCcGxAmm03UdcReIF_KjnHdD7uOwvkIx4frzi7a1_AAInnDxMZzMYxRtCEb_MFRIZKQIz43n53aPR6lTZMce4dA00AxKtU-6oHKmteC0KLQYHLs1YhzzoOwmM42EcL2BeSKhIHc4iGsyuSsmroeIU_Mbj1EgkKa1nsnUCdozc2ev4ytRALvQEY9OZcwWKAEndqScZZw8VKPAwKEgvabY9apc2u9BLpqBlh8En3HW5FMwGhVzoYnRYtHnKnaT_ndddQ9RiDPrMeNFnleqjZoOmPIw8QJc_02boytk5eCW1EMSBimV-Eh-EIsMojgpEaF2hCwjSDzvFAYS0ClbM6iUvowyfFp59WkLohBWsgAfHceG4IzEPt1NpDC1czCTJVZMyuCg8VjsSisr0nU7mKvCjyYs9R0Y5AGaGfHK9nbS-WUuWgSvIzGpqzbdkS03mpxl8
+ARG BRANCH_NAME=master
+ARG BUILD_NAME=checkoutservice1.1.3
+ARG SERVICE_NAME=chechoutservice
+ENV OS_ARCH linux-amd64
+
+
+
 WORKDIR /src
 
 # restore dependencies
 COPY go.mod go.sum ./
+ENV SEALIGHTS_LAB_ID=integ_main_GoogleMicroserviceDemo
+COPY . .
+RUN wget -U "slgoagent" -q -O slgoagent.tar.gz \
+   https://agents.sealights.co/slgoagent/latest/slgoagent-${OS_ARCH}.tar.gz \
+    && tar -xvf slgoagent.tar.gz \
+    && rm slgoagent.tar.gz
+RUN wget -U "slcli" -q -O slcli.tar.gz \
+    https://agents.sealights.co/slcli/latest/slcli-${OS_ARCH}.tar.gz \
+    && tar -xvf slcli.tar.gz \
+    && rm slcli.tar.gz
+RUN echo ${SEALIGHTS_TOKEN} >> ./token.txt
+RUN ./slcli config init --lang go --token ./token.txt
+RUN ./slcli config create-bsid --app ${SERVICE_NAME} --branch ${BRANCH_NAME} --build ${BUILD_NAME}
+RUN ./slcli scan --bsid buildSessionId.txt --path-to-scanner ./slgoagent --workspacepath ./ --scm none
+
+RUN go build -gcflags="${SKAFFOLD_GO_GCFLAGS}" -o /checkoutservice .
 RUN go mod download
 
-COPY . .
+#RUN go build -o main .
 
+FROM alpine:3.18.2@sha256:82d1e9d7ed48a7523bdebc18cf6290bdb97b82302a8a9c27d4fe885949ea94d1
 # Skaffold passes in debug-oriented compiler flags
 ARG SKAFFOLD_GO_GCFLAGS
-RUN go build -gcflags="${SKAFFOLD_GO_GCFLAGS}" -o /checkoutservice .
 
-FROM alpine:3.18.3@sha256:7144f7bab3d4c2648d7e59409f15ec52a18006a128c733fcff20d3a4a54ba44a
+ENV SEALIGHTS_TOKEN=${SL_TOKEN}
+ENV SEALIGHTS_LAB_ID=${SL_LAB_ID}
+RUN echo ${SEALIGHTS_LAB_ID}
 RUN apk add --no-cache ca-certificates
 
-WORKDIR /src
 COPY --from=builder /checkoutservice /src/checkoutservice
 
 # Definition of this variable is used by 'skaffold debug' to identify a golang binary.

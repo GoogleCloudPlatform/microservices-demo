@@ -14,8 +14,14 @@
 
 FROM python:3.11.1-slim@sha256:1591aa8c01b5b37ab31dbe5662c5bdcf40c2f1bce4ef1c1fd24802dae3d01052 as base
 
+RUN apt-get -qq update \
+    && apt-get install -y --no-install-recommends \
+        wget g++ git \
+    && rm -rf /var/lib/apt/lists/*
+
 FROM base as builder
 
+RUN pip install --prefix="/install" sealights-python-agent
 COPY requirements.txt .
 
 RUN pip install --prefix="/install" -r requirements.txt
@@ -27,9 +33,9 @@ WORKDIR /loadgen
 COPY --from=builder /install /usr/local
 
 # Add application code.
-COPY locustfile.py .
-
+COPY test_pytest.py .
+COPY doTest.sh .
 # enable gevent support in debugger
 ENV GEVENT_SUPPORT=True
 
-ENTRYPOINT locust --host="http://${FRONTEND_ADDR}" --headless -u "${USERS:-10}" 2>&1
+ENTRYPOINT sl-python pytest --teststage "Pytest tests" --token ${SL_TOKEN} --labid ${SL_LAB_ID} test_pytest.py
