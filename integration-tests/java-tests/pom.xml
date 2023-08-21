@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.mycompany</groupId>
-    <artifactId>load-testing</artifactId>
+    <artifactId>LoadTest</artifactId>
     <version>1.0-SNAPSHOT</version>
 
     <dependencies>
