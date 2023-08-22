@@ -7,9 +7,9 @@ SealightsEnvVars:
   lab_id: "integ_main_TestAutomation"
 
 images:
-  repository: gcr.io/google-samples/microservices-demo
+  repository: 534369319675.dkr.ecr.us-west-2.amazonaws.com
   # Overrides the image tag whose default is the chart appVersion.
-  tag: ""
+  tag: "1.0"
 
 serviceAccounts:
   # Specifies whether service accounts should be created.
