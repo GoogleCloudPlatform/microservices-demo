@@ -1,22 +1,14 @@
 {
-  "name": "tests",
+  "name": "mocha-test-conversion",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
-  "directories": {
-    "test": "test"
-  },
+  "description": "Converting pytest tests to Mocha tests for Node.js",
+  "main": "test.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "devDependencies": {
-    "axios": "^1.4.0",
-    "mocha": "^10.2.0"
+    "test": "mocha test.js"
   },
   "dependencies": {
-    "chai": "^4.3.7"
+    "axios": "^0.24.0",
+    "chai": "^4.3.4",
+    "mocha": "^9.1.3"
   }
 }
