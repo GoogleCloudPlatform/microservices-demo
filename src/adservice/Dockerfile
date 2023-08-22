@@ -12,8 +12,6 @@ RUN chmod +x gradlew
 RUN ./gradlew installDist
 
 FROM eclipse-temurin:19.0.1_10-jre-alpine@sha256:a75ea64f676041562cd7d3a54a9764bbfb357b2bf1bebf46e2af73e62d32e36c
-ENV SL_TOKEN="no-token"
-ENV SL_LAB_ID="no-lab-id"
 
 RUN apk add --no-cache ca-certificates
 
@@ -28,7 +26,7 @@ RUN wget -nv https://agents.sealights.co/sl-cd-agent/sl-cd-agent-latest.zip && \
 
 COPY --from=builder /app .
 COPY ./sltoken.txt /app
-ENV JAVA_TOOL_OPTIONS='-javaagent:/app/sl-cd-agent.jar -Dsl.branchName=master  -Dsl.tokenFile=${SL_TOKEN} -Dsl.appName=adservice -Dsl.buildName=adservice1.1.1 -Dsl.tags=script,container -Dsl.labId=${SL_LAB_ID} -Dsl.includes=*hipstershop* -Dsl.workspace=./'
+ENV JAVA_TOOL_OPTIONS="-javaagent:/app/sl-cd-agent.jar -Dsl.branchName=master  -Dsl.tokenFile=${SL_TOKEN} -Dsl.appName=adservice -Dsl.buildName=adservice1.1.1 -Dsl.tags=script,container -Dsl.labId=$SL_LAB_ID -Dsl.includes=*hipstershop* -Dsl.workspace=./"
 
 
 

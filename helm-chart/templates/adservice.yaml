@@ -42,7 +42,7 @@ spec:
               - ALL
           privileged: false
           readOnlyRootFilesystem: false 
-        image: ahmad12abed/adservice:1.1.6
+        image: {{ .Values.images.repository }}/btq-{{ .Values.adService.name }}:{{ .Values.images.tag | default .Chart.AppVersion }}
         ports:
         - containerPort: 9555
         env:
