@@ -44,7 +44,7 @@ spec:
               - ALL
           privileged: false
           readOnlyRootFilesystem: false
-        image: ahmad12abed/paymentservice:1.1.1
+        image: {{ .Values.images.repository }}/btq-{{ .Values.paymentService.name }}:{{ .Values.images.tag | default .Chart.AppVersion }}
         ports:
         - containerPort: 50051
         env:

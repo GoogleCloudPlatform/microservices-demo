@@ -57,7 +57,7 @@ spec:
               - ALL
           privileged: false
           readOnlyRootFilesystem: false
-        image: ahmad12abed/cartservice1:1.1.1
+        image: {{ .Values.images.repository }}/btq-{{ .Values.cartService.name }}:{{ .Values.images.tag | default .Chart.AppVersion }}
         ports:
         - containerPort: 7070
         env:

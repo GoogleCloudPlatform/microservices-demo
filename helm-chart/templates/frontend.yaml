@@ -54,7 +54,7 @@ spec:
                 - ALL
             privileged: false
             readOnlyRootFilesystem: true
-          image: ahmad12abed/frontend:1.1.2
+          image: {{ .Values.images.repository }}/btq-{{ .Values.frontend.name }}:{{ .Values.images.tag | default .Chart.AppVersion }}
           ports:
           - containerPort: 8080
           readinessProbe:

@@ -37,7 +37,7 @@ spec:
         - name: regcred-mgmt
       containers:
       - name: server
-        image: ahmad12abed/currencyservice:1.1.1
+        image: {{ .Values.images.repository }}/btq-{{ .Values.currencyService.name }}:{{ .Values.images.tag | default .Chart.AppVersion }}
         ports:
         - name: grpc
           containerPort: 7000

@@ -53,7 +53,7 @@ spec:
               - ALL
           privileged: false
           readOnlyRootFilesystem: true
-        image: ahmadsealights/emailservice:3.3
+        image: {{ .Values.images.repository }}/btq-{{ .Values.emaiService.name }}:{{ .Values.images.tag | default .Chart.AppVersion }}
         ports:
         - containerPort: 8080
         env:

@@ -53,7 +53,7 @@ spec:
               - ALL
           privileged: false
           readOnlyRootFilesystem: true
-        image: ahmadsealights/recommendationservice:4.0
+        image: {{ .Values.images.repository }}/btq-{{ .Values.recommendationService.name }}:{{ .Values.images.tag | default .Chart.AppVersion }}
         ports:
         - containerPort: 8080
         readinessProbe:
