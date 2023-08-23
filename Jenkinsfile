@@ -21,7 +21,7 @@ pipeline {
   }
 
   parameters {
-    string(name: 'latest', defaultValue: '', description: 'ecr btq/adservice')
+    string(name: 'latest', defaultValue: '', description: 'latest tag')
     string(name: 'branch', defaultValue: 'ahmad-branch', description: 'Branch to clone (ahmad-branch)')
     //string(name: 'ecr_uri1', defaultValue: '534369319675.dkr.ecr.us-west-2.amazonaws.com/btq-', description: 'ecr btq')
   }
