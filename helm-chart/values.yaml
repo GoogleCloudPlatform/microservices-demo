@@ -9,7 +9,7 @@ SealightsEnvVars:
 images:
   repository: 534369319675.dkr.ecr.us-west-2.amazonaws.com
   # Overrides the image tag whose default is the chart appVersion.
-  tag: "1.0"
+  tag: "1.0.58"
 
 serviceAccounts:
   # Specifies whether service accounts should be created.
