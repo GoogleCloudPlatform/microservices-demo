@@ -1,11 +1,4 @@
 @Library('main-shared-library') _
-def gettoken(token){
-  if("${params.SL_TOKEN}".empty)
-    return ${env.DEV_INTEGRATION_SL_TOKEN}
-  else {
-    return ${params.SL_TOKEN}
-  }
-}
 pipeline {
 
   agent {
@@ -39,8 +32,7 @@ pipeline {
 
   environment {
       DEV_INTEGRATION_SL_TOKEN = secrets.get_secret("mgmt/btq-token", "us-west-2")
-      TOKEN = gettoken(${params.SL_TOKEN})
-        //"${params.SL_TOKEN}" == "" ? "${env.DEV_INTEGRATION_SL_TOKEN}" : "${params.SL_TOKEN}"
+      TOKEN = "${params.SL_TOKEN}" == "" ? "${env.DEV_INTEGRATION_SL_TOKEN}" : "${params.SL_TOKEN}"
       DEV_INTEGRATION_LABID = "integ_master_BTQ"
     }
 
