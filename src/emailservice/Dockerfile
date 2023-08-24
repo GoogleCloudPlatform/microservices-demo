@@ -34,4 +34,4 @@ RUN export SL_DEBUG=true
 # Add the application
 ENV PORT "8080"
 EXPOSE 8080 
-ENTRYPOINT ["/bin/bash", "-c","sl-python run python email_server.py --labid $SL_LAB_ID --token $SL_TOKEN"]
+CMD sl-python run python email_server.py --labid ${SL_LAB_ID} --token ${SL_TOKEN}
