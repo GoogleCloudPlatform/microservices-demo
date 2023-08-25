@@ -136,6 +136,7 @@ func translateProductsInPlace(ctx context.Context, projectId, targetLangCode str
 	}
 	// Translate the strings.
 	translatedStrings, err := translateStrings(ctx, projectId, targetLangCode, stringsToTranslate)
+	overrideTranslationsInPlace(translatedStrings)
 	if err != nil {
 		return err
 	}
@@ -146,4 +147,27 @@ func translateProductsInPlace(ctx context.Context, projectId, targetLangCode str
 	}
 	log.Infof("Successfully translated products to %v", targetLangCode)
 	return nil
+}
+
+// Because single word translation requests lack context, Translate API can sometimes get translations wrong.
+// For instance, "watch" was translated to the Portuguese word "Assistir" which is the verb "watch" (as in "watching a movie").
+// But we want the noun "watch" (as in "wearing a watch").
+func overrideTranslationsInPlace(translations []string) {
+	translationsToOverride := map[string]string{
+		"Oculos de sol": "Óculos de sol", // Sunglasses
+		"Assistir":      "Relógio",       // Watch
+		"マグ":            "マグカップ",         // Mug
+		"हॉट उत्पाद":    "चहीते सामान",   // Hot Products
+		"धूप का चश्मा":  "धूप-चश्मा",     // Sunglasses
+		"छोटा टॉप":      "बनियान",        // Tank Top
+		"मोमबत्ती का स्टैंड":   "मोमबत्तीदान",                    // Candler Holder
+		"बांस का ग्लास जार":    "बांस के ढक्कन वाला कांच का जार", // Bamboo Glass Jar
+		"लूट के लिए हमला करना": "प्याला",                         // Mug
+	} // The formatting above may look odd because monospace fonts don't do well with non-Latin characters.
+	for i, translation := range translations {
+		replacement, isKeyInMap := translationsToOverride[translation]
+		if isKeyInMap {
+			translations[i] = replacement
+		}
+	}
 }
