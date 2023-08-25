@@ -19,6 +19,7 @@ resources:
 components:
 # - components/cymbal-branding
 # - components/google-cloud-operations
+# - components/https-frontend-domain
 # - components/memorystore
 # - components/network-policies
 # - components/non-public-frontend

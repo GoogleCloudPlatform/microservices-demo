@@ -30,6 +30,7 @@ resources:
 components:
 - ../kustomize/components/cymbal-branding
 # - ../kustomize/components/google-cloud-operations
+# - ../kustomize/components/https-frontend-domain
 # - ../kustomize/components/memorystore
 # - ../kustomize/components/network-policies
 - ../kustomize/components/service-accounts
