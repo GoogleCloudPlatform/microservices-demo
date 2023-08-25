@@ -43,7 +43,7 @@ var wordsHI = map[string]string{
 	"FooterDeploymentDetailsLoading":   "डिप्लॉयमेंट विवरण अभी भी लोड हो रहे हैं।",
 	"FooterTryRefreshingPage":          "पृष्ठ को फिर से लोड करने का प्रयास करें।",
 	"FooterSourceCode":                 "स्रोत कोड",
-	"HomeHotProducts":                  "हॉट उत्पाद",
+	"HomeHotProducts":                  "चहीते सामान",
 	"OrderConfirmationNumber":          "पुष्टिकरण #",
 	"OrderContinueShopping":            "जारी रखें खरीदारी",
 	"OrderTotalPaid":                   "कुल भुगतान",

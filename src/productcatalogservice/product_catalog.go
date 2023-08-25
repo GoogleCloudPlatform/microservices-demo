@@ -158,7 +158,6 @@ func overrideTranslationsInPlace(translations []string) {
 		"Oculos de sol": "Óculos de sol", // Sunglasses
 		"Assistir":      "Relógio",       // Watch
 		"マグ":            "マグカップ",         // Mug
-		"हॉट उत्पाद":    "चहीते सामान",   // Hot Products
 		"धूप का चश्मा":  "धूप-चश्मा",     // Sunglasses
 		"छोटा टॉप":      "बनियान",        // Tank Top
 		"मोमबत्ती का स्टैंड":   "मोमबत्तीदान",                    // Candler Holder
