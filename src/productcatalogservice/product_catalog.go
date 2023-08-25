@@ -154,6 +154,7 @@ func translateProductsInPlace(ctx context.Context, projectId, targetLangCode str
 // But we want the noun "watch" (as in "wearing a watch").
 func overrideTranslationsInPlace(translations []string) {
 	translationsToOverride := map[string]string{
+		"Mirar":         "Reloj",         // Watch
 		"Oculos de sol": "Óculos de sol", // Sunglasses
 		"Assistir":      "Relógio",       // Watch
 		"マグ":            "マグカップ",         // Mug
