@@ -48,7 +48,7 @@ pipeline {
               //def special_services = ["cartservice"]
               services_list.each { service ->
                 parallelLabs["${service}"] = {
-                  build(job: 'BTQ-BUILD', parameters: [string(name: 'SERVICE', value: "${service}"), string(name:'TAG' , value:"Wahbi-${env.CURRENT_VERSION}")])
+                  build(job: 'BTQ-BUILD', parameters: [string(name: 'SERVICE', value: "${service}"), string(name:'TAG' , value:"Wahbi-${env.CURRENT_VERSION}"),string(name: 'branch', value: "${params.branch}")])
                 }
               }
               parallel parallelLabs
