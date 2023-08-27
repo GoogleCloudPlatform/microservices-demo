@@ -10,7 +10,7 @@ SealightsEnvVars:
 images:
   repository: 534369319675.dkr.ecr.us-west-2.amazonaws.com
   # Overrides the image tag whose default is the chart appVersion.
-  tag: "Wahbi-1.0.9"
+  tag: "Wahbi-1.0.10"
 
 serviceAccounts:
   # Specifies whether service accounts should be created.

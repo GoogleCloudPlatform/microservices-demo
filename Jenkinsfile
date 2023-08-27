@@ -23,7 +23,7 @@ pipeline {
   parameters {
     
     string(name: 'latest', defaultValue: '', description: 'latest tag')
-    string(name: 'branch', defaultValue: 'ahmad-branch', description: 'Branch to clone (ahmad-branch)')
+    string(name: 'branch', defaultValue: 'Wahbi-branch', description: 'Branch to clone (ahmad-branch)')
     string(name: 'JOB_NAME', defaultValue: '', description: 'tests job name ')
   }
 
@@ -48,7 +48,7 @@ pipeline {
               //def special_services = ["cartservice"]
               services_list.each { service ->
                 parallelLabs["${service}"] = {
-                  build(job: 'BTQ-BUILD', parameters: [string(name: 'SERVICE', value: "${service}"), string(name:'TAG' , value:"${params.BUILD_TAG}")])
+                  build(job: 'BTQ-BUILD', parameters: [string(name: 'SERVICE', value: "${service}"), string(name:'TAG' , value:"Wahbi-${env.CURRENT_VERSION}")])
                 }
               }
               parallel parallelLabs
