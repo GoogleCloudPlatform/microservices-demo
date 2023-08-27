@@ -22,7 +22,7 @@ pipeline {
 
   parameters {
     string(name: 'latest', defaultValue: '1.2.2', description: 'ecr btq/adservice')
-    string(name: 'branch', defaultValue: 'ahmad-branch', description: 'Branch to clone (ahmad-branch)')
+    string(name: 'branch', defaultValue: 'Wahbi-branch', description: 'Branch to clone (Wahbi-branch)')
     //string(name: 'ecr_uri1', defaultValue: '534369319675.dkr.ecr.us-west-2.amazonaws.com/btq-', description: 'ecr btq')
   }
 
@@ -46,7 +46,7 @@ pipeline {
           //def special_services = ["cartservice"]
           services_list.each { service ->
             parallelLabs["${service}"] = {
-              build(job: 'AhmadTest', parameters: [string(name: 'SERVICE', value: "${service}"), string(name:'TAG' , value:"1.0.${BUILD_NUMBER}")])
+              build(job: 'AhmadTest', parameters: [string(name: 'SERVICE', value: "${service}"), string(name:'TAG' , value:"Wahbi-1.0.${BUILD_NUMBER}")])
             }
           }
           parallel parallelLabs
