@@ -6,7 +6,7 @@ pipeline{
       yaml kubernetes.base_pod([
         base_image_uri: "534369319675.dkr.ecr.us-west-2.amazonaws.com/sl-jenkins-base-ci:latest",
         ecr_uri: "534369319675.dkr.ecr.us-west-2.amazonaws.com",
-        shell_memory_request: "2000M",
+        shell_memory_request: "2000Mi",
         shell_cpu_request: "1.5",
         shell_memory_limit: "3000Mi",
         shell_cpu_limit: "2.5",
@@ -23,8 +23,8 @@ pipeline{
   }
 
   parameters {
-    string(name: 'TAG', defaultValue: '1.2.2', description: 'ecr btq/adservice')
-    string(name: 'branch', defaultValue: 'ahmad-branch', description: 'Branch to clone (ahmad-branch)')
+    string(name: 'TAG', defaultValue: '1.2.2', description: 'latest tag')
+    string(name: 'branch', defaultValue: 'main', description: 'defult branch')
     //string(name: 'ecr_uri1', defaultValue: '534369319675.dkr.ecr.us-west-2.amazonaws.com/btq', description: 'ecr btq')
     string(name: 'SERVICE', defaultValue: '', description: 'SErvice name to build')
   }
@@ -38,10 +38,10 @@ pipeline{
         script {
           // Clone the repository with the specified branch
           git branch: params.branch, url: 'https://github.com/Sealights/microservices-demo.git'
-          sh 'ls'
+      
 
-          def repo_policy = libraryResource 'ci/ecr/repo_policy.json'
           stage("Create ECR repository") {
+            def repo_policy = libraryResource 'ci/ecr/repo_policy.json'
             ecr.create_repo([
               artifact_name: "${env.ECR_FULL_NAME}",
               key_type: "KMS"

@@ -1,0 +1,3 @@
+is_global = true
+build_property.RootNamespace = FrontendTests
+build_property.ProjectDir = /Users/ahmadabed/Desktop/dotnet-tests/
