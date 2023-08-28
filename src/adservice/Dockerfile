@@ -27,4 +27,4 @@ RUN wget -nv https://agents.sealights.co/sl-cd-agent/sl-cd-agent-latest.zip && \
 COPY --from=builder /app .
 
 EXPOSE 9555
-CMD export JAVA_TOOL_OPTIONS="-javaagent:/app/sl-cd-agent.jar -Dsl.branchName=master  -Dsl.token=${SL_TOKEN} -Dsl.appName=adservice -Dsl.buildName=adservice1.1.1 -Dsl.tags=script,container -Dsl.labId=${SL_LAB_ID} -Dsl.includes=*hipstershop* -Dsl.workspace=./" && /app/build/install/hipstershop/bin/AdService
+CMD export JAVA_TOOL_OPTIONS="-javaagent:/app/sl-cd-agent.jar -Dsl.branchName=main  -Dsl.token=${SL_TOKEN} -Dsl.appName=adservice -Dsl.buildName=0.1 -Dsl.tags=script,container -Dsl.labId=${SL_LAB_ID} -Dsl.includes=*hipstershop* -Dsl.workspace=./" && /app/build/install/hipstershop/bin/AdService
