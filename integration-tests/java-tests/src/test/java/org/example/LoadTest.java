@@ -29,7 +29,7 @@ public class LoadTest {
 
     @Test
     public void testIndex() throws IOException {
-        String myEnvVariable = System.getProperty("machine_dns", "machine_dns");
+        String myEnvVariable = System.getenv("machine_dns");
         HttpGet request = new HttpGet(myEnvVariable);
         HttpResponse response = httpClient.execute(request);
         assertEquals(200, response.getStatusLine().getStatusCode());
