@@ -23,7 +23,7 @@ pipeline {
   parameters {
     
     string(name: 'latest', defaultValue: '', description: 'latest tag')
-    string(name: 'branch', defaultValue: 'main', description: 'Branch to clone')
+    string(name: 'branch', defaultValue: 'Wahbi-branch', description: 'Branch to clone')
     string(name: 'JOB_NAME', defaultValue: '', description: 'tests job name ')
   }
 
@@ -48,7 +48,7 @@ pipeline {
               //def special_services = ["cartservice"]
               services_list.each { service ->
                 parallelLabs["${service}"] = {
-                  build(job: 'BTQ-BUILD', parameters: [string(name: 'SERVICE', value: "${service}"), string(name:'TAG' , value:"${env.CURRENT_VERSION}"),string(name: 'branch', value: params.branch)])
+                  build(job: 'BTQ-BUILD', parameters: [string(name: 'SERVICE', value: "${service}"), string(name:'TAG' , value:"Wahbi-${env.CURRENT_VERSION}"),string(name: 'branch', value: params.branch)])
                 }
               }
               parallel parallelLabs
@@ -65,7 +65,7 @@ pipeline {
               def jobs_list = ["BTQ-java-tests","BTQ-python-tests","BTQ-nodejs-tests","BTQ-dotnet-tests"]
               jobs_list.each { job ->
                 parallelLabs["${job}"] = {
-                  build(job:"${job}", parameters: [string(name: 'branch', value: "main"),string(name: 'SL_LABID', value: "integ_main_TestAutomation") , string(name:'SL_TOKEN' , value:"eyJhbGciOiJSUzUxMiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJodHRwczovL1BST0QtQ1VTVE9NRVJTMi5hdXRoLnNlYWxpZ2h0cy5pby8iLCJqd3RpZCI6IlBST0QtQ1VTVE9NRVJTMixuZWVkVG9SZW1vdmUsQVBJR1ctZDk5MWY3YWMtMDc2MC00OTQ4LWIzNzctZmUzZjEwYjU5NGNiLDE2OTEwMDIzMDkzMTgiLCJzdWJqZWN0Ijoic2VhbGlnaHRzX21vbml0b3JAYWdlbnQiLCJhdWRpZW5jZSI6WyJhZ2VudHMiXSwieC1zbC1yb2xlIjoiYWdlbnQiLCJ4LXNsLXNlcnZlciI6Imh0dHBzOi8vdHV0b3JpYWwuc2VhbGlnaHRzLmNvL2FwaSIsInNsX2ltcGVyX3N1YmplY3QiOiIiLCJpYXQiOjE2OTEwMDIzMDl9.PPpTPq4cHdX3J6e9TPkaLzJ-9l3ZvPHVjxch4Wfs1alBY7PlZSggi6nEaDcyzEp13FIi9_LT_qecJs7wzkmT4bNYxLqTSc773Btifo3_R22VdcDOq-RtXlU3CsR9fNXg1jHbwhkeQEsefT2Xly0vtxT0bqXjipLlCT6DwldR-9yagZA5x98JNGRCY3Ch9a6jrxRu9AQXMkLAE-2Cxti9IoTCSQPa3Yi_UajPLmHwF0tCcGxAmm03UdcReIF_KjnHdD7uOwvkIx4frzi7a1_AAInnDxMZzMYxRtCEb_MFRIZKQIz43n53aPR6lTZMce4dA00AxKtU-6oHKmteC0KLQYHLs1YhzzoOwmM42EcL2BeSKhIHc4iGsyuSsmroeIU_Mbj1EgkKa1nsnUCdozc2ev4ytRALvQEY9OZcwWKAEndqScZZw8VKPAwKEgvabY9apc2u9BLpqBlh8En3HW5FMwGhVzoYnRYtHnKnaT_ndddQ9RiDPrMeNFnleqjZoOmPIw8QJc_02boytk5eCW1EMSBimV-Eh-EIsMojgpEaF2hCwjSDzvFAYS0ClbM6iUvowyfFp59WkLohBWsgAfHceG4IzEPt1NpDC1czCTJVZMyuCg8VjsSisr0nU7mKvCjyYs9R0Y5AGaGfHK9nbS-WUuWgSvIzGpqzbdkS03mpxl8")])
+                  build(job:"${job}", parameters: [string(name: 'branch', value: "Wahbi-branch"),string(name: 'SL_LABID', value: "integ_master_BTQ") , string(name:'SL_TOKEN' , value:"eyJhbGciOiJSUzUxMiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJodHRwczovL0RFVi1pbnRlZ3JhdGlvbi5hdXRoLnNlYWxpZ2h0cy5pby8iLCJqd3RpZCI6IkRFVi1pbnRlZ3JhdGlvbixuZWVkVG9SZW1vdmUsQVBJR1ctYzNiM2IyY2YtYjA1Yy00ZWM2LThjNjYtZTBmZTJiYzIwNzAzLDE2OTI4Nzc3MDM4ODUiLCJzdWJqZWN0IjoiU2VhTGlnaHRzQGFnZW50IiwiYXVkaWVuY2UiOlsiYWdlbnRzIl0sIngtc2wtcm9sZSI6ImFnZW50IiwieC1zbC1zZXJ2ZXIiOiJodHRwczovL2Rldi1pbnRlZ3JhdGlvbi5kZXYuc2VhbGlnaHRzLmNvL2FwaSIsInNsX2ltcGVyX3N1YmplY3QiOiIiLCJpYXQiOjE2OTI4Nzc3MDN9.dORXtjiTVw9vM3u2eO9l2r3f54NwEFPWVnhZnOWqV4_ZA-q2T86X861S6o4G7M371hMnoePRNoWgkjXp9isgEPEHoG_LQ_pvwc66vi5gBy8okjlypKGMTrz-N8bF1LeswguuSDDPIpm0Qq7KSjcm-GZmtO2IhJu4Q6f-tX0otMvvr6_nuwfVReExsT0Mxoyu0ZFs2HHwuIqhu12v1wNUuiTNIxQnGqckLw1qrroTG-qrDa8ydC111ML9C-u4qdS6G0iDsSdrQk9RETe0b1ow1vMXMFZeQ0vBrJDFjMnaCUhU6iid8xjkZG3T6XAI0k5SBRN8R6dtTO45mE638ohJi1_YBQL8hSkHL-8X_QkbRCH6IFqPcku0Wu2AcaRkBKOoiYAowFxnrQgYx5n_FVuTXNwW-s18Gnebd-bTBveCAHQH6CEbnpznXyMNXc15tOVdfp1n3RHLx9YE2lYI3dsTdwUlwNhto4J1Ym3ZOrLW_GZwLzZyIITfmNUOQVspwzsVOioeA48DZNpZhpZUAK5P19v0KY_iyJKxGajWnAUkXbyqc72d7eG5cUsIgv-r_p7fwnO4Rm1FVaZJ4Cpv7b4yf5YHGJ7BADI5Zw6YXuWQ3d9snZfvKOR50KVZGOykqwExYEwBACpN1WSEoIg8No7wTry_xNPmkTYOHbNoWuzyjTo")])
                 }
               }
               parallel parallelLabs
