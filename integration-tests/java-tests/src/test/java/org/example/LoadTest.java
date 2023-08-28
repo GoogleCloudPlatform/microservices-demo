@@ -29,7 +29,7 @@ public class LoadTest {
 
     @Test
     public void testIndex() throws IOException {
-        String myEnvVariable = System.getProperty("machine_dns.dev.sealights.co:8081", "http://10.2.10.163:8081");
+        String myEnvVariable = System.getProperty("http://dev-ahmad-branch-1-0-89.dev.sealights.co:8081", "http://dev-ahmad-branch-1-0-89.dev.sealights.co:8081");
         HttpGet request = new HttpGet(myEnvVariable);
         HttpResponse response = httpClient.execute(request);
         assertEquals(200, response.getStatusLine().getStatusCode());
@@ -40,7 +40,7 @@ public class LoadTest {
         String[] currencies = {"EUR", "USD", "JPY", "CAD"};
         String currency = currencies[new Random().nextInt(currencies.length)];
 
-        HttpGet request = new HttpGet("http://10.2.10.163:8081/setCurrency?currency_code=" + currency);
+        HttpGet request = new HttpGet("http://dev-ahmad-branch-1-0-89.dev.sealights.co:8081/setCurrency?currency_code=" + currency);
         HttpResponse response = httpClient.execute(request);
         assertEquals(405, response.getStatusLine().getStatusCode());
     }
@@ -61,7 +61,7 @@ public class LoadTest {
 
         String product = products[new Random().nextInt(products.length)];
 
-        HttpGet request = new HttpGet("http://10.2.10.163:8081/product/" + product);
+        HttpGet request = new HttpGet("http://dev-ahmad-branch-1-0-89.dev.sealights.co:8081/product/" + product);
         HttpResponse response = httpClient.execute(request);
         assertEquals(200, response.getStatusLine().getStatusCode());
     }
