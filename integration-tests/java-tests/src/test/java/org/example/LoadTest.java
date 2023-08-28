@@ -29,7 +29,7 @@ public class LoadTest {
 
     @Test
     public void testIndex() throws IOException {
-        String myEnvVariable = System.getProperty("machine_dns:8081", "machine_dns:8081");
+        String myEnvVariable = System.getProperty("machine_dns", "machine_dns");
         HttpGet request = new HttpGet(myEnvVariable);
         HttpResponse response = httpClient.execute(request);
         assertEquals(200, response.getStatusLine().getStatusCode());
@@ -40,7 +40,7 @@ public class LoadTest {
         String[] currencies = {"EUR", "USD", "JPY", "CAD"};
         String currency = currencies[new Random().nextInt(currencies.length)];
 
-        HttpGet request = new HttpGet("machine_dns:8081/setCurrency?currency_code=" + currency);
+        HttpGet request = new HttpGet("machine_dns/setCurrency?currency_code=" + currency);
         HttpResponse response = httpClient.execute(request);
         assertEquals(405, response.getStatusLine().getStatusCode());
     }
@@ -61,7 +61,7 @@ public class LoadTest {
 
         String product = products[new Random().nextInt(products.length)];
 
-        HttpGet request = new HttpGet("machine_dns:8081/product/" + product);
+        HttpGet request = new HttpGet("machine_dns/product/" + product);
         HttpResponse response = httpClient.execute(request);
         assertEquals(200, response.getStatusLine().getStatusCode());
     }
