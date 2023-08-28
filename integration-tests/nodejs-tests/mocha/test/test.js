@@ -2,7 +2,7 @@ const chai = require('chai');
 const axios = require('axios');
 const { expect } = chai;
 
-const BASE_URL = process.env.machine_dns || 'http://10.2.10.163:8081';
+const BASE_URL = process.env.machine_dns.dev.sealights.co:8081 || 'http://10.2.10.163:8081';
 
 describe('Api Tests', function () {
   let session;
