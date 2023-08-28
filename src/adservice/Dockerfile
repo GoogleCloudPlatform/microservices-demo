@@ -16,11 +16,11 @@ FROM eclipse-temurin:19.0.1_10-jre-alpine@sha256:a75ea64f676041562cd7d3a54a9764b
 RUN apk add --no-cache ca-certificates
 
 # Download Stackdriver Profiler Java agent
+WORKDIR /app
 RUN mkdir -p /opt/cprof && \
     wget -q -O- https://storage.googleapis.com/cloud-profiler/java/latest/profiler_java_agent_alpine.tar.gz \
     | tar xzv -C /opt/cprof && \
     rm -rf profiler_java_agent.tar.gz
-WORKDIR /app
 RUN wget -nv https://agents.sealights.co/sl-cd-agent/sl-cd-agent-latest.zip && \
         unzip -oq sl-cd-agent-latest.zip
 
