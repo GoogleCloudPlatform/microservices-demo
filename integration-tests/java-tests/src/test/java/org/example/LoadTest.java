@@ -40,7 +40,7 @@ public class LoadTest {
         String[] currencies = {"EUR", "USD", "JPY", "CAD"};
         String currency = currencies[new Random().nextInt(currencies.length)];
 
-        HttpGet request = new HttpGet("myEnvVariable/setCurrency?currency_code=" + currency);
+        HttpGet request = new HttpGet(myEnvVariable + "/setCurrency?currency_code=" + currency);
         HttpResponse response = httpClient.execute(request);
         assertEquals(405, response.getStatusLine().getStatusCode());
     }
@@ -61,7 +61,7 @@ public class LoadTest {
 
         String product = products[new Random().nextInt(products.length)];
 
-        HttpGet request = new HttpGet("myEnvVariable/product/" + product);
+        HttpGet request = new HttpGet(myEnvVariable + "/product/" + product);
         HttpResponse response = httpClient.execute(request);
         assertEquals(200, response.getStatusLine().getStatusCode());
     }
