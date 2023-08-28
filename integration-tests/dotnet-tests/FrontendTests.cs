@@ -27,7 +27,7 @@ namespace FrontendTests.Tests
         [TestInitialize]
         public void Setup()
         {
-            client = new HttpClient { BaseAddress = new Uri(Environment.GetEnvironmentVariable("machine_dns") ?? "http://10.2.10.163:8081") };
+            client = new HttpClient { BaseAddress = new Uri(Environment.GetEnvironmentVariable("machine_dns.dev.sealights.co") ?? "http://10.2.10.163:8081") };
         }
 
         [TestMethod]
