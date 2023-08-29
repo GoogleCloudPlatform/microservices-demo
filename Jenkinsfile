@@ -23,7 +23,7 @@ pipeline {
   parameters {
     
     string(name: 'latest', defaultValue: '', description: 'latest tag')
-    string(name: 'branch', defaultValue: 'main' description: 'Branch to clone')
+    string(name: 'branch', defaultValue: 'main', description: 'Branch to clone')
     string(name: 'JOB_NAME', defaultValue: '', description: 'tests job name ')
   }
 
