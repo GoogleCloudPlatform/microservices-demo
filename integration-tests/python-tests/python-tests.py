@@ -17,7 +17,7 @@ products = [
 
 load = 10  # number of users for load test
 
-BASE_URL = "http://" + os.environ.get("machine_dns", "10.2.11.78:8081")  # internal or external test
+BASE_URL =os.environ.get("machine_dns", "http://10.2.11.78:8081")  # internal or external test
 
 
 def test_load():
