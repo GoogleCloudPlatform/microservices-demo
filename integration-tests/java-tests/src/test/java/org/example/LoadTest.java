@@ -16,12 +16,10 @@ import static org.junit.Assert.assertEquals;
 public class LoadTest {
 
     private CloseableHttpClient httpClient;
-    private String myEnvVariable; // Define the variable at the class level
 
     @Before
     public void setUp() {
         httpClient = HttpClients.createDefault();
-        myEnvVariable = System.getenv("machine_dns"); // Initialize the variable
     }
 
     @After
@@ -31,6 +29,7 @@ public class LoadTest {
 
     @Test
     public void testIndex() throws IOException {
+        String myEnvVariable = System.getenv("machine_dns");
         HttpGet request = new HttpGet(myEnvVariable);
         HttpResponse response = httpClient.execute(request);
         assertEquals(200, response.getStatusLine().getStatusCode());
@@ -62,8 +61,9 @@ public class LoadTest {
 
         String product = products[new Random().nextInt(products.length)];
 
-        HttpGet request = new HttpGet(myEnvVariable + "/product/" + product);
+        HttpGet request = new HttpGet(myEnvVariable+ "/product/" + product);
         HttpResponse response = httpClient.execute(request);
         assertEquals(200, response.getStatusLine().getStatusCode());
     }
+
 }

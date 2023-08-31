@@ -39,7 +39,7 @@ pipeline{
         script {
           // Clone the repository with the specified branch
           git branch: params.BRANCH, url: 'https://github.com/Sealights/microservices-demo.git'
-      
+
 
           stage("Create ECR repository") {
             def repo_policy = libraryResource 'ci/ecr/repo_policy.json'

@@ -94,7 +94,7 @@ pipeline {
           def jobs_list = ["BTQ-java-tests","BTQ-python-tests","BTQ-nodejs-tests","BTQ-dotnet-tests"]
           jobs_list.each { job ->
             parallelLabs["${job}"] = {
-              build(job:"${job}", parameters: [string(name: 'BRANCH', value: "ahmad-branch"),string(name: 'SL_LABID', value: "${env.LAB_ID}") , string(name:'SL_TOKEN' , value:"${env.TOKEN}") ,string(name:'MACHINE_DNS1' , value:"${env.MACHINE_DNS}")])
+              build(job:"${job}", parameters: [string(name: 'BRANCH', value: "${params.BRANCH}"),string(name: 'SL_LABID', value: "${env.LAB_ID}") , string(name:'SL_TOKEN' , value:"${env.TOKEN}") ,string(name:'MACHINE_DNS1' , value:"${env.MACHINE_DNS}")])
             }
           }
           parallel parallelLabs
