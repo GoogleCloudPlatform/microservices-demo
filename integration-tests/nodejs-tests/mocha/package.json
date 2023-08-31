@@ -1,0 +1,14 @@
+{
+  "name": "mocha-test-conversion",
+  "version": "1.0.0",
+  "description": "Converting pytest tests to Mocha tests for Node.js",
+  "main": "test.js",
+  "scripts": {
+    "test": "mocha test.js"
+  },
+  "dependencies": {
+    "axios": "^0.24.0",
+    "chai": "^4.3.4",
+    "mocha": "^9.1.3"
+  }
+}

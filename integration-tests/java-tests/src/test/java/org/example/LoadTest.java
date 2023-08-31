@@ -29,7 +29,8 @@ public class LoadTest {
 
     @Test
     public void testIndex() throws IOException {
-        HttpGet request = new HttpGet("http://10.2.10.163:8081");
+        String myEnvVariable = System.getenv("machine_dns");
+        HttpGet request = new HttpGet(myEnvVariable);
         HttpResponse response = httpClient.execute(request);
         assertEquals(200, response.getStatusLine().getStatusCode());
     }
@@ -39,7 +40,7 @@ public class LoadTest {
         String[] currencies = {"EUR", "USD", "JPY", "CAD"};
         String currency = currencies[new Random().nextInt(currencies.length)];
 
-        HttpGet request = new HttpGet("http://10.2.10.163:8081/setCurrency?currency_code=" + currency);
+        HttpGet request = new HttpGet(myEnvVariable + "/setCurrency?currency_code=" + currency);
         HttpResponse response = httpClient.execute(request);
         assertEquals(405, response.getStatusLine().getStatusCode());
     }
@@ -47,20 +48,20 @@ public class LoadTest {
     @Test
     public void testBrowseProduct() throws IOException {
         String[] products = {
-                "0PUK6V6EV0",
-                "1YMWWN1N4O",
-                "2ZYFJ3GM2N",
-                "66VCHSJNUP",
-                "6E92ZMYYFZ",
-                "9SIQT8TOJO",
-                "L9ECAV7KIM",
-                "LS4PSXUNUM",
-                "OLJCESPC7Z"
+            "0PUK6V6EV0",
+            "1YMWWN1N4O",
+            "2ZYFJ3GM2N",
+            "66VCHSJNUP",
+            "6E92ZMYYFZ",
+            "9SIQT8TOJO",
+            "L9ECAV7KIM",
+            "LS4PSXUNUM",
+            "OLJCESPC7Z"
         };
 
         String product = products[new Random().nextInt(products.length)];
 
-        HttpGet request = new HttpGet("http://10.2.10.163:8081/product/" + product);
+        HttpGet request = new HttpGet(myEnvVariable+ "/product/" + product);
         HttpResponse response = httpClient.execute(request);
         assertEquals(200, response.getStatusLine().getStatusCode());
     }

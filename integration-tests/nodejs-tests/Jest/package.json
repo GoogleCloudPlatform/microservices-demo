@@ -1,0 +1,20 @@
+{
+  "name": "your-project-name",
+  "version": "1.0.0",
+  "description": "Your project description",
+  "main": "index.js",
+  "scripts": {
+    "test": "jest"
+  },
+  "keywords": [],
+  "author": "Your Name",
+  "license": "ISC",
+  "dependencies": {
+    "axios": "^0.24.0"
+  },
+  "jest": {
+    "testTimeout": 10000
+  }
+}
+
+//npx jest --config jest.config.js
