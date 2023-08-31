@@ -2,9 +2,9 @@ const chai = require('chai');
 const axios = require('axios');
 const { expect } = chai;
 
-const BASE_URL = process.env.FRONTEND_ADDR || 'http://10.2.10.163:8081';
+const BASE_URL = process.env.machine_dns || 'http://10.2.10.163:8081';
 
-describe('Frontend Tests', function () {
+describe('Api Tests', function () {
   let session;
 
   before(function () {
@@ -60,7 +60,4 @@ describe('Frontend Tests', function () {
       expect(error.response.status).to.equal(400);
     }
   });
-
-  // ... Other tests ...
-
 });
