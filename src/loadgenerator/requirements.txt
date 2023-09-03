@@ -31,7 +31,7 @@ gevent==23.9.0.post1
     # via
     #   geventhttpclient
     #   locust
-geventhttpclient==2.0.9
+geventhttpclient==2.0.10
     # via locust
 greenlet==2.0.2
     # via gevent
