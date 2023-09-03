@@ -54,7 +54,7 @@ pipeline{
           stage("Build Docker ${params.SERVICE} Image") {
             //List of dockerfiles path
             def dockerfile_path = "${params.SERVICE}" == "cartservice" ? "./src/${params.SERVICE}/src" : "./src/${params.SERVICE}"
-            //List of dockerfiles context
+            //List of dockerfiles context.
             def dockerfile_context = "${dockerfile_path}/Dockerfile"
             def destinations = [
               "${env.ECR_URI}:-${params.TAG}"
