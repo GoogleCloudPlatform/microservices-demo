@@ -29,7 +29,7 @@ WORKDIR /usr/src/app
 COPY . .
 RUN npm install --only=production
 RUN npm i slnodejs
-RUN  ./node_modules/.bin/slnodejs config --tokenfile sltoken.txt --appname "paymentservice" --branch "main" --build "0.1"
+RUN  ./node_modules/.bin/slnodejs config --tokenfile sltoken.txt --appname "paymentservice" --branch "main" --build "0.2"
 
 
 RUN ./node_modules/.bin/slnodejs scan --tokenfile sltoken.txt --buildsessionidfile buildSessionId --workspacepath "." --scm none --es6Modules
