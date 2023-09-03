@@ -74,8 +74,8 @@ pipeline {
             machine: "https://dev-integration.dev.sealights.co",
             app: "${env.CURRENT_VERSION}",
             branch: "${params.BUILD_BRANCH}",
-            test_env: "dev-${env.IDENTIFIER}.dev.sealights.co",
-            lab_alias: "dev-${env.IDENTIFIER}.dev.sealights.co",
+            test_env: "${env.IDENTIFIER}",
+            lab_alias: "${env.IDENTIFIER}",
             cdOnly: true,
           )
 
