@@ -21,7 +21,7 @@ google-api-core[grpc]==2.11.1
     #   -r requirements.in
     #   google-api-python-client
     #   google-cloud-trace
-google-api-python-client==2.96.0
+google-api-python-client==2.97.0
     # via google-cloud-profiler
 google-auth==2.22.0
     # via
@@ -33,7 +33,7 @@ google-auth-httplib2==0.1.0
     # via
     #   google-api-python-client
     #   google-cloud-profiler
-google-cloud-profiler==4.0.0
+google-cloud-profiler==4.1.0
     # via -r requirements.in
 google-cloud-trace==1.11.2
     # via -r requirements.in
@@ -99,7 +99,7 @@ opentelemetry-semantic-conventions==0.40b0
     #   opentelemetry-sdk
 proto-plus==1.22.3
     # via google-cloud-trace
-protobuf==4.24.0
+protobuf==4.24.2
     # via
     #   google-api-core
     #   google-cloud-profiler

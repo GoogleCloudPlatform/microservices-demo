@@ -24,9 +24,10 @@ pipeline{
 
   parameters {
     string(name: 'TAG', defaultValue: '1.2.2', description: 'latest tag')
-    string(name: 'branch', defaultValue: 'Wahbi-branch', description: 'defult branch')
+    string(name: 'BRANCH', defaultValue: 'main', description: 'defult branch')
     //string(name: 'ecr_uri1', defaultValue: '534369319675.dkr.ecr.us-west-2.amazonaws.com/btq', description: 'ecr btq')
-    string(name: 'SERVICE', defaultValue: '', description: 'Service name to build')
+    string(name: 'SERVICE', defaultValue: '', description: 'SErvice name to build')
+    string(name: 'machine_dns', defaultValue: 'http://DEV-${env.IDENTIFIER}.dev.sealights.co', description: 'machine DNS')
   }
   environment{
     ECR_FULL_NAME = "btq${params.SERVICE}"
@@ -37,8 +38,8 @@ pipeline{
       steps {
         script {
           // Clone the repository with the specified branch
-          git branch: params.branch, url: 'https://github.com/Sealights/microservices-demo.git'
-      
+          git branch: params.BRANCH, url: 'https://github.com/Sealights/microservices-demo.git'
+
 
           stage("Create ECR repository") {
             def repo_policy = libraryResource 'ci/ecr/repo_policy.json'
