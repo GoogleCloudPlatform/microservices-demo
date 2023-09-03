@@ -20,7 +20,7 @@ ENV NODE_DEBUG=sl
 RUN npm i slnodejs
 
 #run comfig
-RUN  ./node_modules/.bin/slnodejs config --tokenfile sltoken.txt --appname "currencyservice" --branch "main" --build "0.2"
+RUN  ./node_modules/.bin/slnodejs config --tokenfile sltoken.txt --appname "currencyservice" --branch "main" --build "0.3"
 #sl-scan
 RUN ./node_modules/.bin/slnodejs scan --tokenfile sltoken.txt --buildsessionidfile buildSessionId --workspacepath "." --scm none --es6Modules
 

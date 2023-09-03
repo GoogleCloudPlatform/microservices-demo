@@ -6,9 +6,8 @@ COPY ["build.gradle", "gradlew", "./"]
 COPY gradle gradle
 RUN chmod +x gradlew
 RUN ./gradlew downloadRepos
+
 COPY . .
-RUN wget -nv https://agents.sealights.co/sl-cd-agent/sl-cd-agent-latest.zip && \
-        unzip -oq sl-cd-agent-latest.zip
 RUN chmod +x gradlew
 RUN ./gradlew installDist
 
@@ -22,6 +21,8 @@ RUN mkdir -p /opt/cprof && \
     wget -q -O- https://storage.googleapis.com/cloud-profiler/java/latest/profiler_java_agent_alpine.tar.gz \
     | tar xzv -C /opt/cprof && \
     rm -rf profiler_java_agent.tar.gz
+RUN wget -nv https://agents.sealights.co/sl-cd-agent/sl-cd-agent-latest.zip && \
+        unzip -oq sl-cd-agent-latest.zip
 
 COPY --from=builder /app .
 
