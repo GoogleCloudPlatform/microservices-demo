@@ -1,3 +1,5 @@
-module.exports = {
-  testTimeout: 10000,  // Equivalent to the Mocha timeout option
-};
+const {configCreator} = require('sealights-jest-plugin')
+
+module.exports = configCreator({
+    testTimeout: 10000,
+});
