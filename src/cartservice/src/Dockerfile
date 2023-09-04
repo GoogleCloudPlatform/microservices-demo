@@ -34,14 +34,12 @@ RUN apt-get update && \
 RUN mkdir -p /app/sealights/logs
 RUN mkdir -p /app/sealights/agent
 RUN wget -nv -O sealights-dotnet-agent-linux.tar.gz https://agents.sealights.co/dotnetcore/latest/sealights-dotnet-agent-linux-self-contained.tar.gz
-RUN ls
 RUN tar -xzf ./sealights-dotnet-agent-linux.tar.gz --directory /app/sealights/agent
 COPY sltoken.txt /app/sealights/agent
 RUN ls /app/sealights/agent
 RUN cat /app/sealights/agent/sltoken.txt
 RUN chmod -R 777 /app/sealights
 
-RUN ls
 COPY --from=builder /cartservice .
 EXPOSE 7070
 ENV DOTNET_EnableDiagnostics=0 \
