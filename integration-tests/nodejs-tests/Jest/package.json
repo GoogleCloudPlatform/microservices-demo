@@ -13,8 +13,5 @@
     "axios": "^0.24.0",
     "sealights-jest-plugin": "^2.0.13"
   },
-  "jest": {
-    "testTimeout": 10000
-  }
 }
 
