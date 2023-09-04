@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "Uv6T3l/xuIzjextgGNuEDa46i9QnDIJyILFVQ1THrRLdkDk5z3Sh7iKfMzWodX0B/hS+k4lnkr+uEW9VGN85Gg==",
+  "dgSpecHash": "U+b+6YbLiOyAuFP7rAdfYUrhmQ0EHWI5LRO2oIAmzvveaC0g35qaqGfdiAFsxG5ZwsaUOO6Ef7GyP2L6YXEXMQ==",
   "success": true,
-  "projectFilePath": "/Users/ahmadabed/Desktop/dotnet-tests/FrontendTests.csproj",
+  "projectFilePath": "/Users/ahmadabed/Desktop/micro-services/microservices-demo/integration-tests/dotnet-tests/FrontendTests.csproj",
   "expectedPackageFiles": [
     "/Users/ahmadabed/.nuget/packages/microsoft.codecoverage/16.11.0/microsoft.codecoverage.16.11.0.nupkg.sha512",
     "/Users/ahmadabed/.nuget/packages/microsoft.csharp/4.0.1/microsoft.csharp.4.0.1.nupkg.sha512",

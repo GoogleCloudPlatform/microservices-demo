@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "/Users/ahmadabed/Desktop/dotnet-tests/FrontendTests.csproj": {}
+    "/Users/ahmadabed/Desktop/micro-services/microservices-demo/integration-tests/dotnet-tests/FrontendTests.csproj": {}
   },
   "projects": {
-    "/Users/ahmadabed/Desktop/dotnet-tests/FrontendTests.csproj": {
+    "/Users/ahmadabed/Desktop/micro-services/microservices-demo/integration-tests/dotnet-tests/FrontendTests.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "/Users/ahmadabed/Desktop/dotnet-tests/FrontendTests.csproj",
+        "projectUniqueName": "/Users/ahmadabed/Desktop/micro-services/microservices-demo/integration-tests/dotnet-tests/FrontendTests.csproj",
         "projectName": "FrontendTests",
-        "projectPath": "/Users/ahmadabed/Desktop/dotnet-tests/FrontendTests.csproj",
+        "projectPath": "/Users/ahmadabed/Desktop/micro-services/microservices-demo/integration-tests/dotnet-tests/FrontendTests.csproj",
         "packagesPath": "/Users/ahmadabed/.nuget/packages/",
-        "outputPath": "/Users/ahmadabed/Desktop/dotnet-tests/obj/",
+        "outputPath": "/Users/ahmadabed/Desktop/micro-services/microservices-demo/integration-tests/dotnet-tests/obj/",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "/Users/ahmadabed/.nuget/NuGet/NuGet.Config"
