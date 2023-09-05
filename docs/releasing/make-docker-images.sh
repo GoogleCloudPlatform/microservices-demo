@@ -30,7 +30,7 @@ while IFS= read -d $'\0' -r dir; do
     svcname="$(basename "${dir}")"
     builddir="${dir}"
     #PR 516 moved cartservice build artifacts one level down to src
-    if [ $svcname == "cartservice" ] 
+    if [ $svcname == "cartservice" ]
     then
         builddir="${dir}/src"
     fi
@@ -42,14 +42,6 @@ while IFS= read -d $'\0' -r dir; do
 
         log "Pushing: ${image}"
         docker push "${image}"
-
-        if [ $svcname != "frontend" ] && [ $svcname != "loadgenerator" ]
-        then
-            log "Building: ${image}-native-grpc-probes"
-            docker build --pull -t "${image}-native-grpc-probes" . --target without-grpc-health-probe-bin
-            log "Pushing: ${image}-native-grpc-probes"
-            docker push "${image}-native-grpc-probes"
-        fi
     )
 done < <(find "${REPO_ROOT}/src" -mindepth 1 -maxdepth 1 -type d -print0)
 

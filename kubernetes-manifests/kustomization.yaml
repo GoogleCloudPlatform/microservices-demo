@@ -37,4 +37,3 @@ resources:
 # - ../kustomize/components/container-images-tag
 # - ../kustomize/components/container-images-tag-suffix
 # - ../kustomize/components/container-images-registry
-# - ../kustomize/components/native-grpc-health-check
