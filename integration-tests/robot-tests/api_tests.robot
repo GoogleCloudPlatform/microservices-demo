@@ -12,13 +12,13 @@ ${BASE_URL}       ${mdns}
 *** Test Cases ***
 Load Test
     FOR    ${i}    IN RANGE    ${load}
-        Run Keyword    Test Session
+        Run Keyword    Test Session    ${i}
     END
 
 *** Keywords ***
 Test Session
-    [Arguments]    ${session}
-    ${session}=    Create Session    ${BASE_URL}    alias=${session}
+    [Arguments]    ${session_number}
+    ${session}=    Create Session    ${BASE_URL}    alias=Session_${session_number}
     Test Bad Requests    ${session}
     Test Index    ${session}
     Test Set Currency    ${session}
