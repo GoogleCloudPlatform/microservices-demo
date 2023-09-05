@@ -11,68 +11,71 @@ ${BASE_URL}       ${mdns}
 
 *** Test Cases ***
 Load Test
-    ${threads}=    Create List
+    ${session}=    Create Session    ${BASE_URL}
     FOR    ${i}    IN RANGE    ${load}
-        ${mdns}=    Set Machine DNS
-        ${thread}=    Run Keyword    Test Session    ${mdns}
-        Append To List    ${threads}    ${thread}
+        Run Keyword    Test Session    ${session}
     END
-    FOR    ${thread}    IN    @{threads}
-        Wait Until Keyword Succeeds    2s    10ms    ${thread}
 
 Test Session
-    [Arguments]    ${mdns}
+    [Arguments]    ${session}
     ${order}=    Create List    Test Index    Test Set Currency    Test Browse Product    Test Add To Cart    Test View Cart    Test Add To Cart    Test Checkout
-    ${session}=    Create Session    ${BASE_URL}
     FOR    ${o}    IN    @{order}
         Run Keyword    ${o}    ${session}
 
 Test Bad Requests
-    ${response}=    GET On Session    ${session}    ${BASE_URL}/product/89
+    [Arguments]    ${session}
+    ${response}=    Get Request    ${BASE_URL}/product/89
     Should Be Equal As Strings    ${response.status_code}    500
     ${data}=    Create Dictionary    currency_code    not a currency
-    ${response}=    POST On Session    ${session}    ${BASE_URL}/setCurrency    data=${data}
+    ${response}=    Post Request    ${BASE_URL}/setCurrency    data=${data}
     Should Be Equal As Strings    ${response.status_code}    500
 
 Test Index
-    ${response}=    GET On Session    ${session}    ${BASE_URL}/
+    [Arguments]    ${session}
+    ${response}=    Get Request    ${BASE_URL}/
     Should Be Equal As Strings    ${response.status_code}    200
 
 Test Set Currency
+    [Arguments]    ${session}
     ${currencies}=    Create List    EUR    USD    JPY    CAD
     FOR    ${currency}    IN    @{currencies}
         ${data}=    Create Dictionary    currency_code    ${currency}
-        ${response}=    POST On Session    ${session}    ${BASE_URL}/setCurrency    data=${data}
+        ${response}=    Post Request    ${BASE_URL}/setCurrency    data=${data}
         Should Be Equal As Strings    ${response.status_code}    200
     ${data}=    Create Dictionary    currency_code    ${random.choice(['EUR', 'USD', 'JPY', 'CAD'])}
-    ${response}=    POST On Session    ${session}    ${BASE_URL}/setCurrency    data=${data}
+    ${response}=    Post Request    ${BASE_URL}/setCurrency    data=${data}
 
 Test Browse Product
+    [Arguments]    ${session}
     FOR    ${product_id}    IN    @{products}
-        ${response}=    GET On Session    ${session}    ${BASE_URL}/product/${product_id}
+        ${response}=    Get Request    ${BASE_URL}/product/${product_id}
         Should Be Equal As Strings    ${response.status_code}    200
 
 Test View Cart
-    ${response}=    GET On Session    ${session}    ${BASE_URL}/cart
+    [Arguments]    ${session}
+    ${response}=    Get Request    ${BASE_URL}/cart
     Should Be Equal As Strings    ${response.status_code}    200
-    ${response}=    POST On Session    ${session}    ${BASE_URL}/cart/empty
+    ${response}=    Post Request    ${BASE_URL}/cart/empty
     Should Be Equal As Strings    ${response.status_code}    200
 
 Test Add To Cart
+    [Arguments]    ${session}
     FOR    ${product_id}    IN    @{products}
-        ${response}=    GET On Session    ${session}    ${BASE_URL}/product/${product_id}
+        ${response}=    Get Request    ${BASE_URL}/product/${product_id}
         Should Be Equal As Strings    ${response.status_code}    200
         ${data}=    Create Dictionary    product_id    ${product_id}    quantity    ${random.choice([1, 2, 3, 4, 5, 10])}
-        ${response}=    POST On Session    ${session}    ${BASE_URL}/cart    data=${data}
+        ${response}=    Post Request    ${BASE_URL}/cart    data=${data}
         Should Be Equal As Strings    ${response.status_code}    200
 
 Test Checkout
+    [Arguments]    ${session}
     ${data}=    Create Dictionary    email    someone@example.com    street_address    1600 Amphitheatre Parkway    zip_code    94043    city    Mountain View    state    CA    country    United States    credit_card_number    4432-8015-6152-0454    credit_card_expiration_month    1    credit_card_expiration_year    2039    credit_card_cvv    672
     FOR    ${product_id}    IN    @{products}
-        ${response}=    POST On Session    ${session}    ${BASE_URL}/cart/checkout    data=${data}
+        ${response}=    Post Request    ${BASE_URL}/cart/checkout    data=${data}
         Should Be Equal As Strings    ${response.status_code}    200
 
 *** Keywords ***
-Set Machine DNS
-    [Return]    ${mdns}
-    ${mdns}=    Get Environment Variable    machine_dns
+Create Session
+    [Arguments]    ${base_url}
+    ${session}=    Create Session    ${base_url}
+    Set Suite Variable    ${session}
