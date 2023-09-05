@@ -19,11 +19,8 @@ RUN dotnet publish cartservice.csproj -p:PublishSingleFile=false -r linux-x64 --
 # https://mcr.microsoft.com/v2/dotnet/runtime-deps/tags/list
 FROM mcr.microsoft.com/dotnet/runtime-deps:7.0
 WORKDIR /app
-
+COPY . .
 COPY start-app.sh .
-
-RUN ls
-
 RUN apt-get update && \
     apt-get install -y wget && \
     apt-get clean && \
@@ -36,8 +33,6 @@ RUN mkdir -p /app/sealights/agent
 RUN wget -nv -O sealights-dotnet-agent-linux.tar.gz https://agents.sealights.co/dotnetcore/latest/sealights-dotnet-agent-linux-self-contained.tar.gz
 RUN tar -xzf ./sealights-dotnet-agent-linux.tar.gz --directory /app/sealights/agent
 COPY sltoken.txt /app/sealights/agent
-RUN ls /app/sealights/agent
-RUN cat /app/sealights/agent/sltoken.txt
 RUN chmod -R 777 /app/sealights
 
 COPY --from=builder /cartservice .
