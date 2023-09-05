@@ -11,14 +11,14 @@ ${BASE_URL}       ${mdns}
 
 *** Test Cases ***
 Load Test
-    [Template]    Test Session
     ${threads}=    Create List
     FOR    ${i}    IN RANGE    ${load}
-        ${thread}=    Run Keyword    Test Session
+        ${mdns}=    Set Machine DNS
+        ${thread}=    Run Keyword    Test Session    ${mdns}
         Append To List    ${threads}    ${thread}
     END
     FOR    ${thread}    IN    @{threads}
-        Wait Until Keyword Succeeds    2s    10ms    Test Session
+        Wait Until Keyword Succeeds    2s    10ms    ${thread}
 
 Test Session
     [Arguments]    ${mdns}
@@ -28,46 +28,51 @@ Test Session
         Run Keyword    ${o}    ${session}
 
 Test Bad Requests
-    ${response}=    Get Request    ${BASE_URL}/product/89
+    ${response}=    GET On Session    ${session}    ${BASE_URL}/product/89
     Should Be Equal As Strings    ${response.status_code}    500
     ${data}=    Create Dictionary    currency_code    not a currency
-    ${response}=    Post Request    ${BASE_URL}/setCurrency    data=${data}
+    ${response}=    POST On Session    ${session}    ${BASE_URL}/setCurrency    data=${data}
     Should Be Equal As Strings    ${response.status_code}    500
 
 Test Index
-    ${response}=    Get Request    ${BASE_URL}/
+    ${response}=    GET On Session    ${session}    ${BASE_URL}/
     Should Be Equal As Strings    ${response.status_code}    200
 
 Test Set Currency
     ${currencies}=    Create List    EUR    USD    JPY    CAD
     FOR    ${currency}    IN    @{currencies}
         ${data}=    Create Dictionary    currency_code    ${currency}
-        ${response}=    Post Request    ${BASE_URL}/setCurrency    data=${data}
+        ${response}=    POST On Session    ${session}    ${BASE_URL}/setCurrency    data=${data}
         Should Be Equal As Strings    ${response.status_code}    200
     ${data}=    Create Dictionary    currency_code    ${random.choice(['EUR', 'USD', 'JPY', 'CAD'])}
-    ${response}=    Post Request    ${BASE_URL}/setCurrency    data=${data}
+    ${response}=    POST On Session    ${session}    ${BASE_URL}/setCurrency    data=${data}
 
 Test Browse Product
     FOR    ${product_id}    IN    @{products}
-        ${response}=    Get Request    ${BASE_URL}/product/${product_id}
+        ${response}=    GET On Session    ${session}    ${BASE_URL}/product/${product_id}
         Should Be Equal As Strings    ${response.status_code}    200
 
 Test View Cart
-    ${response}=    Get Request    ${BASE_URL}/cart
+    ${response}=    GET On Session    ${session}    ${BASE_URL}/cart
     Should Be Equal As Strings    ${response.status_code}    200
-    ${response}=    Post Request    ${BASE_URL}/cart/empty
+    ${response}=    POST On Session    ${session}    ${BASE_URL}/cart/empty
     Should Be Equal As Strings    ${response.status_code}    200
 
 Test Add To Cart
     FOR    ${product_id}    IN    @{products}
-        ${response}=    Get Request    ${BASE_URL}/product/${product_id}
+        ${response}=    GET On Session    ${session}    ${BASE_URL}/product/${product_id}
         Should Be Equal As Strings    ${response.status_code}    200
         ${data}=    Create Dictionary    product_id    ${product_id}    quantity    ${random.choice([1, 2, 3, 4, 5, 10])}
-        ${response}=    Post Request    ${BASE_URL}/cart    data=${data}
+        ${response}=    POST On Session    ${session}    ${BASE_URL}/cart    data=${data}
         Should Be Equal As Strings    ${response.status_code}    200
 
 Test Checkout
     ${data}=    Create Dictionary    email    someone@example.com    street_address    1600 Amphitheatre Parkway    zip_code    94043    city    Mountain View    state    CA    country    United States    credit_card_number    4432-8015-6152-0454    credit_card_expiration_month    1    credit_card_expiration_year    2039    credit_card_cvv    672
     FOR    ${product_id}    IN    @{products}
-        ${response}=    Post Request    ${BASE_URL}/cart/checkout    data=${data}
+        ${response}=    POST On Session    ${session}    ${BASE_URL}/cart/checkout    data=${data}
         Should Be Equal As Strings    ${response.status_code}    200
+
+*** Keywords ***
+Set Machine DNS
+    [Return]    ${mdns}
+    ${mdns}=    Get Environment Variable    machine_dns
