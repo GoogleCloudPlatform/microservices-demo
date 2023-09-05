@@ -22,7 +22,7 @@ RUN npm i slnodejs
 #run comfig
 RUN  ./node_modules/.bin/slnodejs config --tokenfile sltoken.txt --appname "currencyservice" --branch "main" --build "0.4"
 #sl-scan
-RUN ./node_modules/.bin/slnodejs scan --tokenfile sltoken.txt --buildsessionidfile buildSessionId --workspacepath "." --scm none --es6Modules
+RUN ./node_modules/.bin/slnodejs scan --tokenfile sltoken.txt --buildsessionidfile buildSessionId --workspacepath "." --scm none --es6Modules --instrumentForBrowsers --enableOpenTelemetry --outputpath "sl_web"
 
 FROM base
 
