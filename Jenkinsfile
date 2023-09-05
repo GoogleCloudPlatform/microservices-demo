@@ -24,7 +24,7 @@ pipeline {
 
   parameters {
     string(name: 'LATEST', defaultValue: '', description: 'latest tag')
-    string(name: 'BRANCH', defaultValue: 'ahmad-branch', description: 'Branch to clone (ahmad-branch)')
+    string(name: 'BRANCH', defaultValue: 'Wahbi-branch', description: 'Branch to clone (ahmad-branch)')
     string(name: 'JOB_NAME', defaultValue: '', description: 'tests job name ')
     string(name: 'BUILD_BRANCH', defaultValue: 'Wahbi-branch', description: 'Branch to Build images that have the creational LAB_ID (send to wahbi branch to build)')
     string(name: 'SL_TOKEN', defaultValue: '', description: 'sl-token')
@@ -48,7 +48,7 @@ pipeline {
     stage ('Build BTQ') {
       steps {
         script {
-          env.CURRENT_VERSION = "1-0-${BUILD_NUMBER}"
+          env.CURRENT_VERSION = "1.0.${BUILD_NUMBER}"
           def parallelLabs = [:]
           //List of all the images name
           env.TOKEN= "${params.SL_TOKEN}" == "" ? "${env.DEV_INTEGRATION_SL_TOKEN}"  : "${params.SL_TOKEN}"
@@ -91,7 +91,7 @@ pipeline {
           //env.machine_dns = "http://dev-${env.IDENTIFIER}.dev.sealights.co:8081"
           def parallelLabs = [:]
           //List of all the jobs
-          def jobs_list = ["BTQ-java-tests(Junit without testNG)" , "BTQ-python-tests(Pytest framework)" , "BTQ-nodejs-tests(Mocha framework)" , "BTQ-dotnet-tests(MS-test framework)" , "BTQ-nodejs-tests(Jest framework)"]
+          def jobs_list = ["BTQ-java-tests(Junit without testNG)" , "BTQ-python-tests(Pytest framework)" , "BTQ-nodejs-tests(Mocha framework)" , "BTQ-dotnet-tests(MS-test framework)" , "BTQ-nodejs-tests(Jest framework)" , "BTQ-python-tests(Robot framework)"]
           jobs_list.each { job ->
             parallelLabs["${job}"] = {
               build(job:"${job}", parameters: [string(name: 'BRANCH', value: "${params.BRANCH}"),string(name: 'SL_LABID', value: "${env.LAB_ID}") , string(name:'SL_TOKEN' , value:"${env.TOKEN}") ,string(name:'MACHINE_DNS1' , value:"${env.MACHINE_DNS}")])

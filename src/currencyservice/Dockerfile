@@ -20,11 +20,10 @@ ENV NODE_DEBUG=sl
 RUN npm i slnodejs
 
 #run comfig
-RUN  ./node_modules/.bin/slnodejs config --tokenfile sltoken.txt --appname "currency_service1" --branch "master" --build "currency_service1.2"
+RUN  ./node_modules/.bin/slnodejs config --tokenfile sltoken.txt --appname "currencyservice" --branch "main" --build "0.4"
 #sl-scan
 RUN ./node_modules/.bin/slnodejs scan --tokenfile sltoken.txt --buildsessionidfile buildSessionId --workspacepath "." --scm none --es6Modules
 
-RUN ls
 FROM base
 
 WORKDIR /usr/src/app
@@ -35,4 +34,4 @@ COPY --from=builder /usr/src/app/node_modules ./node_modules
 COPY . .
 
 EXPOSE 7000
-ENTRYPOINT [ "./node_modules/.bin/slnodejs","run", "--tokenfile","sltoken.txt", "--buildsessionidfile", "buildSessionId", "--labid", "integ_main_GoogleMicroserviceDemo", "--workspacepath", ".","server.js"]
+CMD  ./node_modules/.bin/slnodejs run --token "${SL_TOKEN}" --buildsessionidfile buildSessionId --labid "${SL_LAB_ID}" --workspacepath . server.js

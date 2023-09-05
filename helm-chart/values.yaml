@@ -1,11 +1,15 @@
 # Default values for onlineboutique.
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
+# enter sealight vars here
+SealightsEnvVars:
+  token: ""
+  lab_id: ""
 
 images:
-  repository: gcr.io/google-samples/microservices-demo
+  repository: 534369319675.dkr.ecr.us-west-2.amazonaws.com
   # Overrides the image tag whose default is the chart appVersion.
-  tag: ""
+  tag: "latest"
 
 serviceAccounts:
   # Specifies whether service accounts should be created.
@@ -121,18 +125,6 @@ frontend:
     limits:
       cpu: 200m
       memory: 128Mi
-
-loadGenerator:
-  create: true
-  name: loadgenerator
-  checkFrontendInitContainer: true
-  resources:
-    requests:
-      cpu: 300m
-      memory: 256Mi
-    limits:
-      cpu: 500m
-      memory: 512Mi
 
 paymentService:
   create: true

@@ -41,6 +41,8 @@ spec:
         seccompProfile:
           type: {{ .Values.seccompProfile.type }}
         {{- end }}
+      imagePullSecrets:
+        - name: regcred-mgmt
       containers:
       - name: server
         securityContext:
@@ -49,8 +51,8 @@ spec:
             drop:
               - ALL
           privileged: false
-          readOnlyRootFilesystem: true
-        image: {{ .Values.images.repository }}/{{ .Values.checkoutService.name }}:{{ .Values.images.tag | default .Chart.AppVersion }}
+          readOnlyRootFilesystem: false
+        image: {{ .Values.images.repository }}/btq-{{ .Values.checkoutService.name }}:{{ .Values.images.tag | default .Chart.AppVersion }}
         ports:
         - containerPort: 5050
         readinessProbe:
@@ -60,6 +62,10 @@ spec:
           grpc:
             port: 5050
         env:
+        - name: SL_TOKEN
+          value: "{{ .Values.SealightsEnvVars.token }}"
+        - name: SL_LAB_ID
+          value: "{{ .Values.SealightsEnvVars.lab_id }}"
         - name: PORT
           value: "5050"
         - name: PRODUCT_CATALOG_SERVICE_ADDR

@@ -28,14 +28,12 @@ WORKDIR /usr/src/app
 #COPY package*.json ./
 COPY . .
 RUN npm install --only=production
-ENV NODE_DEBUG=sl
 RUN npm i slnodejs
-RUN  ./node_modules/.bin/slnodejs config --tokenfile sltoken.txt --appname "payment_service1" --branch "master" --build "pyment_service1.3"
+RUN  ./node_modules/.bin/slnodejs config --tokenfile sltoken.txt --appname "paymentservice" --branch "main" --build "0.4"
 
 
 RUN ./node_modules/.bin/slnodejs scan --tokenfile sltoken.txt --buildsessionidfile buildSessionId --workspacepath "." --scm none --es6Modules
 
-RUN ls
 FROM base
 
 WORKDIR /usr/src/app
@@ -46,7 +44,7 @@ COPY --from=builder /usr/src/app/buildSessionId .
 COPY --from=builder /usr/src/app/node_modules ./node_modules
 
 COPY . .
-
+ENV NODE_DEBUG=sl
 EXPOSE 50051
 
-ENTRYPOINT [ "./node_modules/.bin/slnodejs","run", "--tokenfile","sltoken.txt", "--buildsessionidfile", "buildSessionId", "--labid", "integ_main_GoogleMicroserviceDemo", "--workspacepath", ".","index.js"]
+CMD  ./node_modules/.bin/slnodejs run --token "${SL_TOKEN}" --buildsessionidfile buildSessionId --labid "${SL_LAB_ID}" --workspacepath . index.js
