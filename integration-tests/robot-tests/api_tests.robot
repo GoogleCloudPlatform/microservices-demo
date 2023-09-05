@@ -17,7 +17,8 @@ Load Test
 
 *** Keywords ***
 Test Session
-    ${session}=    Create Session    ${BASE_URL}
+    [Arguments]    ${session}
+    ${session}=    Create Session    ${BASE_URL}    alias=${session}
     Test Bad Requests    ${session}
     Test Index    ${session}
     Test Set Currency    ${session}
@@ -29,15 +30,15 @@ Test Session
 
 Test Bad Requests
     [Arguments]    ${session}
-    ${response}=    Get Request    ${session}    ${BASE_URL}/product/89
+    ${response}=    Get Request    ${session}    /product/89
     Should Be Equal As Strings    ${response.status_code}    500
     ${data}=    Create Dictionary    currency_code    not a currency
-    ${response}=    Post Request    ${session}    ${BASE_URL}/setCurrency    data=${data}
+    ${response}=    Post Request    ${session}    /setCurrency    data=${data}
     Should Be Equal As Strings    ${response.status_code}    500
 
 Test Index
     [Arguments]    ${session}
-    ${response}=    Get Request    ${session}    ${BASE_URL}/
+    ${response}=    Get Request    ${session}    /
     Should Be Equal As Strings    ${response.status_code}    200
 
 Test Set Currency
@@ -45,36 +46,36 @@ Test Set Currency
     ${currencies}=    Create List    EUR    USD    JPY    CAD
     FOR    ${currency}    IN    @{currencies}
         ${data}=    Create Dictionary    currency_code    ${currency}
-        ${response}=    Post Request    ${session}    ${BASE_URL}/setCurrency    data=${data}
+        ${response}=    Post Request    ${session}    /setCurrency    data=${data}
         Should Be Equal As Strings    ${response.status_code}    200
     ${data}=    Create Dictionary    currency_code    ${random.choice(['EUR', 'USD', 'JPY', 'CAD'])}
-    ${response}=    Post Request    ${session}    ${BASE_URL}/setCurrency    data=${data}
+    ${response}=    Post Request    ${session}    /setCurrency    data=${data}
 
 Test Browse Product
     [Arguments]    ${session}
     FOR    ${product_id}    IN    @{products}
-        ${response}=    Get Request    ${session}    ${BASE_URL}/product/${product_id}
+        ${response}=    Get Request    ${session}    /product/${product_id}
         Should Be Equal As Strings    ${response.status_code}    200
 
 Test View Cart
     [Arguments]    ${session}
-    ${response}=    Get Request    ${session}    ${BASE_URL}/cart
+    ${response}=    Get Request    ${session}    /cart
     Should Be Equal As Strings    ${response.status_code}    200
-    ${response}=    Post Request    ${session}    ${BASE_URL}/cart/empty
+    ${response}=    Post Request    ${session}    /cart/empty
     Should Be Equal As Strings    ${response.status_code}    200
 
 Test Add To Cart
     [Arguments]    ${session}
     FOR    ${product_id}    IN    @{products}
-        ${response}=    Get Request    ${session}    ${BASE_URL}/product/${product_id}
+        ${response}=    Get Request    ${session}    /product/${product_id}
         Should Be Equal As Strings    ${response.status_code}    200
         ${data}=    Create Dictionary    product_id    ${product_id}    quantity    ${random.choice([1, 2, 3, 4, 5, 10])}
-        ${response}=    Post Request    ${session}    ${BASE_URL}/cart    data=${data}
+        ${response}=    Post Request    ${session}    /cart    data=${data}
         Should Be Equal As Strings    ${response.status_code}    200
 
 Test Checkout
     [Arguments]    ${session}
     ${data}=    Create Dictionary    email    someone@example.com    street_address    1600 Amphitheatre Parkway    zip_code    94043    city    Mountain View    state    CA    country    United States    credit_card_number    4432-8015-6152-0454    credit_card_expiration_month    1    credit_card_expiration_year    2039    credit_card_cvv    672
     FOR    ${product_id}    IN    @{products}
-        ${response}=    Post Request    ${session}    ${BASE_URL}/cart/checkout    data=${data}
+        ${response}=    Post Request    ${session}    /cart/checkout    data=${data}
         Should Be Equal As Strings    ${response.status_code}    200
