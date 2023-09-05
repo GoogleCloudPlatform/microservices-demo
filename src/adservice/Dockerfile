@@ -1,5 +1,6 @@
-#FROM eclipse-temurin:19@sha256:f3fbf1ad599d4b5dbdd7ceb55708d10cb9fafb08e094ef91e92aa63b520a232e as builder
+#FROM eclipse-temurin:19@sha256:f3fbf1ad599d4b5dbdd7ceb55708d10cb9fafb08e094ef9$
 FROM eclipse-temurin:17 as builder
+# FROM gradle:jdk17-alpine as builder
 
 WORKDIR /app
 
@@ -30,7 +31,7 @@ RUN wget -nv https://agents.sealights.co/sl-cd-agent/sl-cd-agent-latest.zip && \
 COPY --from=builder /app .
 
 EXPOSE 9555
-ENV JAVA_TOOL_OPTIONS="-javaagent:/app/sl-cd-agent.jar -Dsl.branchName=main -Dsl.httpDebugLog=DEBUG -Dsl.logEnabled=true -Dsl.log.toConsole=true -Dsl.logLevel=DEBUG -Dsl.token=$SL_TOKEN -Dsl.appName=adservice -Dsl.buildName=0.8 -Dsl.tags=script,container,docker -Dsl.labId=$SL_LAB_ID -Dsl.includes=*hipstershop* -Dsl.workspace=/app/build/install/hipstershop/lib"
+ENV JAVA_TOOL_OPTIONS="-javaagent:/app/sl-cd-agent.jar -Dsl.branchName=main -Dsl.httpDebugLog=DEBUG -Dsl.logEnabled=true -Dsl.log.toConsole=true -Dsl.logLevel=DEBUG -Dsl.token=$SL_TOKEN -Dsl.appName=adservice -Dsl.buildName=0.7 -Dsl.tags=script,container,docker -Dsl.labId=integ_Wahbibranch_f336_Boutique -Dsl.includes=*hipstershop* -Dsl.workspace=/app/build/install/hipstershop/lib"
 
 
 ENTRYPOINT ["/app/build/install/hipstershop/bin/AdService"]
