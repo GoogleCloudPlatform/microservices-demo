@@ -10,11 +10,8 @@
   "author": "Your Name",
   "license": "ISC",
   "dependencies": {
-    "axios": "^0.24.0"
-  },
-  "jest": {
-    "testTimeout": 10000
+    "axios": "^0.24.0",
+    "sealights-jest-plugin": "^2.0.13"
   }
 }
 
-//npx jest --config jest.config.js

@@ -6,10 +6,13 @@
     "cypress:open": "cypress open"
   },
   "devDependencies": {
-    "cypress": "^9.7.0"
+    "cypress": "^12.17.4"
   },
   "main": "index.js",
   "keywords": [],
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "dependencies": {
+    "SL.Cypress.Plugin": "github:kristijanstefanoski/SL.Cypress.Plugin#v1.1.3"
+  }
 }
