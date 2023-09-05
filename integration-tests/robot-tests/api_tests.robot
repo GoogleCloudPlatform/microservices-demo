@@ -7,8 +7,8 @@ Suite Setup       Set Base URL
 *** Variables ***
 @{products}       0PUK6V6EV0  1YMWWN1N4O  2ZYFJ3GM2N  66VCHSJNUP  6E92ZMYYFZ  9SIQT8TOJO  L9ECAV7KIM  LS4PSXUNUM  OLJCESPC7Z
 ${load}           10
-${machine_dns}    Get Environment Variable    machine_dns
-${BASE_URL}       http://${machine_dns}
+${mdns}    Get Environment Variable    machine_dns
+${BASE_URL}       ${mdns}
 
 *** Test Cases ***
 Load Test
@@ -23,7 +23,7 @@ Load Test
 
 *** Keywords ***
 Set Base URL
-    [Arguments]    ${env}=    machine_dns
+    [Arguments]    ${env}=    mdns
 
 Test Session
     ${order}=    Create List    Test Index    Test Set Currency    Test Browse Product    Test Add To Cart    Test View Cart    Test Add To Cart    Test Checkout
