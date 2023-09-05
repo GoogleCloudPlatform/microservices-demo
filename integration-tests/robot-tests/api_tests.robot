@@ -24,8 +24,6 @@ Load Test
 *** Keywords ***
 Set Base URL
     [Arguments]    ${env}=    machine_dns
-    ${base_url}=    Set Variable    http://${${env} | 10.2.10.163:8081}
-    Set Suite Variable    ${BASE_URL}    ${base_url}
 
 Test Session
     ${order}=    Create List    Test Index    Test Set Currency    Test Browse Product    Test Add To Cart    Test View Cart    Test Add To Cart    Test Checkout
