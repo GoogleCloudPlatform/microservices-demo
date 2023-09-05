@@ -7,7 +7,7 @@ Suite Setup       Set Base URL
 *** Variables ***
 @{products}       0PUK6V6EV0  1YMWWN1N4O  2ZYFJ3GM2N  66VCHSJNUP  6E92ZMYYFZ  9SIQT8TOJO  L9ECAV7KIM  LS4PSXUNUM  OLJCESPC7Z
 ${load}           10
-${BASE_URL}       http://${FRONTEND_ADDR | 10.2.10.163:8081}
+${BASE_URL}       http://${machine_dns | 10.2.10.163:8081}
 
 *** Test Cases ***
 Load Test
@@ -22,7 +22,7 @@ Load Test
 
 *** Keywords ***
 Set Base URL
-    [Arguments]    ${env}=    FRONTEND_ADDR
+    [Arguments]    ${env}=    machine_dns
     ${base_url}=    Set Variable    http://${${env} | 10.2.10.163:8081}
     Set Suite Variable    ${BASE_URL}    ${base_url}
 
