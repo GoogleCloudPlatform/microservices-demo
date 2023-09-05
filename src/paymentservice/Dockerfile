@@ -32,7 +32,7 @@ RUN npm i slnodejs
 RUN  ./node_modules/.bin/slnodejs config --tokenfile sltoken.txt --appname "paymentservice" --branch "main" --build "0.4"
 
 
-RUN ./node_modules/.bin/slnodejs scan --tokenfile sltoken.txt --buildsessionidfile buildSessionId --workspacepath "." --scm none --es6Modules --instrumentForBrowsers --enableOpenTelemetry --outputpath "sl_web"
+RUN ./node_modules/.bin/slnodejs scan --tokenfile sltoken.txt --buildsessionidfile buildSessionId --workspacepath "." --scm none --es6Modules 
 
 FROM base
 
