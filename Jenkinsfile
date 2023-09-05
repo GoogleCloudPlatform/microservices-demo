@@ -26,7 +26,7 @@ pipeline {
     string(name: 'LATEST', defaultValue: '', description: 'latest tag')
     string(name: 'BRANCH', defaultValue: 'main', description: 'Branch to clone (ahmad-branch)')
     string(name: 'JOB_NAME', defaultValue: '', description: 'tests job name ')
-    string(name: 'BUILD_BRANCH', defaultValue: 'main', description: 'Branch to Build images that have the creational LAB_ID (send to wahbi branch to build)')
+    string(name: 'BUILD_BRANCH', defaultValue: 'Wahbi-branch', description: 'Branch to Build images that have the creational LAB_ID (send to wahbi branch to build)')
     string(name: 'SL_TOKEN', defaultValue: '', description: 'sl-token')
   }
 
@@ -56,7 +56,7 @@ pipeline {
           //def special_services = ["cartservice"]
           services_list.each { service ->
             parallelLabs["${service}"] = {
-              build(job: 'BTQ-BUILD', parameters: [string(name: 'SERVICE', value: "${service}"), string(name:'TAG' , value:"${env.CURRENT_VERSION}") , string(name:'BRANCH' , value: params.branch)])
+              build(job: 'BTQ-BUILD', parameters: [string(name: 'SERVICE', value: "${service}"), string(name:'TAG' , value:"${env.CURRENT_VERSION}") , string(name:'BRANCH' , value:params.branch)])
             }
           }
           parallel parallelLabs
