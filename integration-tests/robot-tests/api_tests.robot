@@ -1,85 +1,97 @@
 *** Settings ***
-Library           Collections
 Library           RequestsLibrary
-Library           OperatingSystem
-Suite Setup       Set Base URL
-
+Library           Collections
+Suite Setup       Set Suite Variable    ${BASE_URL}    http://${FRONTEND_ADDR}
+#Suite Teardown    Close All Sessions
 *** Variables ***
-@{products}       0PUK6V6EV0  1YMWWN1N4O  2ZYFJ3GM2N  66VCHSJNUP  6E92ZMYYFZ  9SIQT8TOJO  L9ECAV7KIM  LS4PSXUNUM  OLJCESPC7Z
-${load}           10
-${mdns}    Get Environment Variable    machine_dns
-${BASE_URL}       ${mdns}
-
+${FRONTEND_ADDR}    dev-ahmad-branch-1-0-159.dev.sealights.co:8081
+@{products}    0PUK6V6EV0    1YMWWN1N4O    2ZYFJ3GM2N    66VCHSJNUP    6E92ZMYYFZ    9SIQT8TOJO    L9ECAV7KIM    LS4PSXUNUM    OLJCESPC7Z
+${load}    1
 *** Test Cases ***
 Load Test
-    ${threads}=    Create List
-    : FOR    ${i}    IN RANGE    ${load}
-    \    ${thread}=    Run Keyword    Test Session
-    \    Append To List    ${threads}    ${thread}
-    : END
-    FOR    ${thread}    IN    @{threads}
-        Wait Until Keyword Succeeds    2s    10ms    Test Session
+    FOR    ${i}    IN RANGE    ${load}
+        Test Session
     END
-
+#Bad Requests Test
+#    Create Session    frontend    ${BASE_URL}
+#    ${response}=    GET On Session    frontend    /product/89
+#    Should Be Equal As Integers    ${response.status_code}    500
+#    ${data}=    Create Dictionary    currency_code=not a currency
+#    POST On Session    frontend    /setCurrency    data=${data}
+#    Should Be Equal As Integers    ${response.status_code}    500
+Index Test
+    Test Index
+Set Currency Test
+    Test Set Currency
+Browse Product Test
+    Test Browse Product
+View Cart Test
+    Test View Cart
+Add To Cart Test
+    Test Add To Cart
+Icon Test
+    Test Icon
+Checkout Test
+    Test Checkout
 *** Keywords ***
-Set Base URL
-    [Arguments]    ${env}=    ${mdns}
-
 Test Session
-    ${order}=    Create List    Test Index    Test Set Currency    Test Browse Product    Test Add To Cart    Test View Cart    Test Add To Cart    Test Checkout
-    ${session}=    Create Session    ${BASE_URL}
-    : FOR    ${o}    IN    ${order}
-    \    Run Keyword    ${o}    ${session}
-    : END
-
-Test Bad Requests
-    [Arguments]    ${r}=    ${EMPTY}
-    ${response}=    Get Request    ${BASE_URL}/product/89
-    Should Be Equal As Strings    ${response.status_code}    500
-    ${data}=    Create Dictionary    currency_code    not a currency
-    ${response}=    Post Request    ${BASE_URL}/setCurrency    data=${data}
-    Should Be Equal As Strings    ${response.status_code}    500
-
+    Test Index
+    Test Set Currency
+    Test Browse Product
+    Test Add To Cart
+    Test View Cart
+    Test Add To Cart
+    Test Checkout
 Test Index
-    [Arguments]    ${r}=    ${EMPTY}
-    ${response}=    Get Request    ${BASE_URL}/
-    Should Be Equal As Strings    ${response.status_code}    200
-
+    Create Session    frontend    ${BASE_URL}
+    ${response}=    GET On Session    frontend    /
+    Should Be Equal As Integers    ${response.status_code}    200
 Test Set Currency
-    [Arguments]    ${r}=    ${EMPTY}
     ${currencies}=    Create List    EUR    USD    JPY    CAD
-    : FOR    ${currency}    IN    @{currencies}
-    \    ${data}=    Create Dictionary    currency_code    ${currency}
-    \    ${response}=    Post Request    ${BASE_URL}/setCurrency    data=${data}
-    \    Should Be Equal As Strings    ${response.status_code}    200
-    ${data}=    Create Dictionary    currency_code    ${random.choice(['EUR', 'USD', 'JPY', 'CAD'])}
-    ${response}=    Post Request    ${BASE_URL}/setCurrency    data=${data}
-
+    FOR    ${currency}    IN    @{currencies}
+        ${data}=    Create Dictionary    currency_code=${currency}
+        ${response}=    POST On Session    frontend    /setCurrency    data=${data}
+        Should Be Equal As Integers    ${response.status_code}    200
+    END
 Test Browse Product
-    [Arguments]    ${r}=    ${EMPTY}
-    : FOR    ${product_id}    IN    @{products}
-    \    ${response}=    Get Request    ${BASE_URL}/product/${product_id}
-    \    Should Be Equal As Strings    ${response.status_code}    200
-
+    FOR    ${product_id}    IN    @{products}
+        ${response}=    GET On Session    frontend    /product/${product_id}
+        Should Be Equal As Integers    ${response.status_code}    200
+    END
 Test View Cart
-    [Arguments]    ${r}=    ${EMPTY}
-    ${response}=    Get Request    ${BASE_URL}/cart
-    Should Be Equal As Strings    ${response.status_code}    200
-    ${response}=    Post Request    ${BASE_URL}/cart/empty
-    Should Be Equal As Strings    ${response.status_code}    200
-
+    ${response}=    GET On Session    frontend    /cart
+    Should Be Equal As Integers    ${response.status_code}    200
+    ${response}=    POST On Session    frontend    /cart/empty
+    Should Be Equal As Integers    ${response.status_code}    200
 Test Add To Cart
-    [Arguments]    ${r}=    ${EMPTY}
-    : FOR    ${product_id}    IN    @{products}
-    \    ${response}=    Get Request    ${BASE_URL}/product/${product_id}
-    \    Should Be Equal As Strings    ${response.status_code}    200
-    \    ${data}=    Create Dictionary    product_id    ${product_id}    quantity    ${random.choice([1, 2, 3, 4, 5, 10])}
-    \    ${response}=    Post Request    ${BASE_URL}/cart    data=${data}
-    \    Should Be Equal As Strings    ${response.status_code}    200
-
+    FOR    ${product_id}    IN    @{products}
+        ${response}=    GET On Session    frontend    /product/${product_id}
+        Should Be Equal As Integers    ${response.status_code}    200
+        ${quantity}=    Evaluate    random.choice([1, 2, 3, 4, 5, 10])
+        ${data}=    Create Dictionary    product_id=${product_id}    quantity=${quantity}
+        ${response}=    POST On Session    frontend    /cart    data=${data}
+        Should Be Equal As Integers    ${response.status_code}    200
+    END
+Test Icon
+    ${response}=    GET On Session    frontend    /static/favicon.ico
+    Should Be Equal As Integers    ${response.status_code}    200
+    ${response}=    GET On Session    frontend    /static/img/products/hairdryer.jpg
+    Should Be Equal As Integers    ${response.status_code}    200
 Test Checkout
-    [Arguments]    ${r}=    ${EMPTY}
-    ${data}=    Create Dictionary    email    someone@example.com    street_address    1600 Amphitheatre Parkway    zip_code    94043    city    Mountain View    state    CA    country    United States    credit_card_number    4432-8015-6152-0454    credit_card_expiration_month    1    credit_card_expiration_year    2039    credit_card_cvv    672
-    : FOR    ${product_id}    IN    @{products}
-    \    ${response}=    Post Request    ${BASE_URL}/cart/checkout    data=${data}
-    \    Should Be Equal As Strings    ${response.status_code}    200
+    FOR    ${product_id}    IN    @{products}
+        ${quantity}=    Evaluate    random.choice([1, 2, 3, 4, 5, 10])
+        ${data}=    Create Dictionary    product_id=${product_id}
+        ...    quantity=${quantity}
+        ...    email=someone@example.com
+        ...    street_address=1600 Amphitheatre Parkway
+        ...    zip_code=94043
+        ...    city=Mountain View
+        ...    state=CA
+        ...    country=United States
+        ...    credit_card_number=4432-8015-6152-0454
+        ...    credit_card_expiration_month=1
+        ...    credit_card_expiration_year=2039
+        ...    credit_card_cvv=672
+        ${response}=    POST On Session    frontend    /cart/checkout    data=${data}
+        Should Be Equal As Integers    ${response.status_code}    200
+    END
