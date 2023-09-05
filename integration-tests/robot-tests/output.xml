@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<robot generator="Robot 6.1.1 (Python 3.11.4 on linux)" generated="20230824 14:01:14.577" rpa="false" schemaversion="4">
+<suite id="s1" name="Api Tests" source="/home/ahmad/testingFarmework/robot/api_tests.robot">
+<kw name="Set Base URL" type="SETUP">
+<msg timestamp="20230824 14:01:14.645" level="FAIL">Invalid argument specification: Multiple errors:
+- Invalid argument syntax 'FRONTEND_ADDR'.
+- Non-default argument after default arguments.</msg>
+<status status="FAIL" starttime="20230824 14:01:14.645" endtime="20230824 14:01:14.646"/>
+</kw>
+<test id="s1-t1" name="Load Test" line="13">
+<status status="FAIL" starttime="20230824 14:01:14.646" endtime="20230824 14:01:14.646">Parent suite setup failed:
+Invalid argument specification: Multiple errors:
+- Invalid argument syntax 'FRONTEND_ADDR'.
+- Non-default argument after default arguments.</status>
+</test>
+<status status="FAIL" starttime="20230824 14:01:14.578" endtime="20230824 14:01:14.646">Suite setup failed:
+Invalid argument specification: Multiple errors:
+- Invalid argument syntax 'FRONTEND_ADDR'.
+- Non-default argument after default arguments.</status>
+</suite>
+<statistics>
+<total>
+<stat pass="0" fail="1" skip="0">All Tests</stat>
+</total>
+<tag>
+</tag>
+<suite>
+<stat pass="0" fail="1" skip="0" id="s1" name="Api Tests">Api Tests</stat>
+</suite>
+</statistics>
+<errors>
+<msg timestamp="20230824 14:01:14.578" level="ERROR">Error in file '/home/ahmad/testingFarmework/robot/api_tests.robot' on line 24: Creating keyword 'Set Base URL' failed: Invalid argument specification: Multiple errors:
+- Invalid argument syntax 'FRONTEND_ADDR'.
+- Non-default argument after default arguments.</msg>
+<msg timestamp="20230824 14:01:14.578" level="ERROR">Error in file '/home/ahmad/testingFarmework/robot/api_tests.robot' on line 36: Creating keyword 'Test Bad Requests' failed: Invalid argument specification: Non-default argument after default arguments.</msg>
+<msg timestamp="20230824 14:01:14.578" level="ERROR">Error in file '/home/ahmad/testingFarmework/robot/api_tests.robot' on line 44: Creating keyword 'Test Index' failed: Invalid argument specification: Non-default argument after default arguments.</msg>
+<msg timestamp="20230824 14:01:14.578" level="ERROR">Error in file '/home/ahmad/testingFarmework/robot/api_tests.robot' on line 49: Creating keyword 'Test Set Currency' failed: Invalid argument specification: Non-default argument after default arguments.</msg>
+<msg timestamp="20230824 14:01:14.578" level="ERROR">Error in file '/home/ahmad/testingFarmework/robot/api_tests.robot' on line 59: Creating keyword 'Test Browse Product' failed: Invalid argument specification: Non-default argument after default arguments.</msg>
+<msg timestamp="20230824 14:01:14.578" level="ERROR">Error in file '/home/ahmad/testingFarmework/robot/api_tests.robot' on line 65: Creating keyword 'Test View Cart' failed: Invalid argument specification: Non-default argument after default arguments.</msg>
+<msg timestamp="20230824 14:01:14.578" level="ERROR">Error in file '/home/ahmad/testingFarmework/robot/api_tests.robot' on line 72: Creating keyword 'Test Add To Cart' failed: Invalid argument specification: Non-default argument after default arguments.</msg>
+<msg timestamp="20230824 14:01:14.578" level="ERROR">Error in file '/home/ahmad/testingFarmework/robot/api_tests.robot' on line 81: Creating keyword 'Test Checkout' failed: Invalid argument specification: Non-default argument after default arguments.</msg>
+<msg timestamp="20230824 14:01:14.645" level="ERROR">Error in file '/home/ahmad/testingFarmework/robot/api_tests.robot' on line 10: Setting variable '${BASE_URL}' failed: Resolving variable '${FRONTEND_ADDR | 10.2.10.163:8081}' failed: Variable '${FRONTEND_ADDR }' not found.</msg>
+</errors>
+</robot>
