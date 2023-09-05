@@ -11,7 +11,7 @@ ${BASE_URL}       ${mdns}
 
 *** Test Cases ***
 Load Test
-    [Setup]    Test Setup    ${mdns}
+    [Template]    Test Session
     ${threads}=    Create List
     FOR    ${i}    IN RANGE    ${load}
         ${thread}=    Run Keyword    Test Session
@@ -19,7 +19,6 @@ Load Test
     END
     FOR    ${thread}    IN    @{threads}
         Wait Until Keyword Succeeds    2s    10ms    Test Session
-    END
 
 Test Session
     [Arguments]    ${mdns}
@@ -27,10 +26,8 @@ Test Session
     ${session}=    Create Session    ${BASE_URL}
     FOR    ${o}    IN    @{order}
         Run Keyword    ${o}    ${session}
-    END
 
 Test Bad Requests
-    [Arguments]    ${session}
     ${response}=    Get Request    ${BASE_URL}/product/89
     Should Be Equal As Strings    ${response.status_code}    500
     ${data}=    Create Dictionary    currency_code    not a currency
@@ -38,12 +35,10 @@ Test Bad Requests
     Should Be Equal As Strings    ${response.status_code}    500
 
 Test Index
-    [Arguments]    ${session}
     ${response}=    Get Request    ${BASE_URL}/
     Should Be Equal As Strings    ${response.status_code}    200
 
 Test Set Currency
-    [Arguments]    ${session}
     ${currencies}=    Create List    EUR    USD    JPY    CAD
     FOR    ${currency}    IN    @{currencies}
         ${data}=    Create Dictionary    currency_code    ${currency}
@@ -53,20 +48,17 @@ Test Set Currency
     ${response}=    Post Request    ${BASE_URL}/setCurrency    data=${data}
 
 Test Browse Product
-    [Arguments]    ${session}
     FOR    ${product_id}    IN    @{products}
         ${response}=    Get Request    ${BASE_URL}/product/${product_id}
         Should Be Equal As Strings    ${response.status_code}    200
 
 Test View Cart
-    [Arguments]    ${session}
     ${response}=    Get Request    ${BASE_URL}/cart
     Should Be Equal As Strings    ${response.status_code}    200
     ${response}=    Post Request    ${BASE_URL}/cart/empty
     Should Be Equal As Strings    ${response.status_code}    200
 
 Test Add To Cart
-    [Arguments]    ${session}
     FOR    ${product_id}    IN    @{products}
         ${response}=    Get Request    ${BASE_URL}/product/${product_id}
         Should Be Equal As Strings    ${response.status_code}    200
@@ -75,7 +67,6 @@ Test Add To Cart
         Should Be Equal As Strings    ${response.status_code}    200
 
 Test Checkout
-    [Arguments]    ${session}
     ${data}=    Create Dictionary    email    someone@example.com    street_address    1600 Amphitheatre Parkway    zip_code    94043    city    Mountain View    state    CA    country    United States    credit_card_number    4432-8015-6152-0454    credit_card_expiration_month    1    credit_card_expiration_year    2039    credit_card_cvv    672
     FOR    ${product_id}    IN    @{products}
         ${response}=    Post Request    ${BASE_URL}/cart/checkout    data=${data}
