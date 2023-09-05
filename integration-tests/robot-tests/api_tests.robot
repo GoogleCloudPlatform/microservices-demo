@@ -7,8 +7,7 @@ Suite Setup       Set Base URL
 *** Variables ***
 @{products}       0PUK6V6EV0  1YMWWN1N4O  2ZYFJ3GM2N  66VCHSJNUP  6E92ZMYYFZ  9SIQT8TOJO  L9ECAV7KIM  LS4PSXUNUM  OLJCESPC7Z
 ${load}           10
-${mdns}    Get Environment Variable    machine_dns
-${BASE_URL}       ${mdns}
+${BASE_URL}       Get Environment Variable    machine_dns
 
 *** Test Cases ***
 Load Test
