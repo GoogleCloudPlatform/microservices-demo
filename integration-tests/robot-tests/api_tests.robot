@@ -4,7 +4,7 @@ Library           Collections
 Suite Setup       Set Suite Variable    ${BASE_URL}    ${machine_dns}
 #Suite Teardown    Close All Sessions
 *** Variables ***
-${FRONTEND_ADDR}    dev-ahmad-branch-1-0-159.dev.sealights.co:8081
+${machine_dns}    dev-ahmad-branch-1-0-159.dev.sealights.co:8081
 @{products}    0PUK6V6EV0    1YMWWN1N4O    2ZYFJ3GM2N    66VCHSJNUP    6E92ZMYYFZ    9SIQT8TOJO    L9ECAV7KIM    LS4PSXUNUM    OLJCESPC7Z
 ${load}    1
 *** Test Cases ***
