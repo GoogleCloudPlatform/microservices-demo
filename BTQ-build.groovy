@@ -28,6 +28,8 @@ pipeline{
     //string(name: 'ecr_uri1', defaultValue: '534369319675.dkr.ecr.us-west-2.amazonaws.com/btq', description: 'ecr btq')
     string(name: 'SERVICE', defaultValue: '', description: 'SErvice name to build')
     string(name: 'machine_dns', defaultValue: 'http://DEV-${env.IDENTIFIER}.dev.sealights.co', description: 'machine DNS')
+    string(name: 'BUILD_NAME', defaultValue: '', description: 'build name')
+
   }
   environment{
     ECR_FULL_NAME = "btq${params.SERVICE}"
@@ -39,8 +41,6 @@ pipeline{
         script {
           // Clone the repository with the specified branch
           git branch: params.BRANCH, url: 'https://github.com/Sealights/microservices-demo.git'
-
-
           stage("Create ECR repository") {
             def repo_policy = libraryResource 'ci/ecr/repo_policy.json'
             ecr.create_repo([
@@ -55,12 +55,15 @@ pipeline{
           stage("Build Docker ${params.SERVICE} Image") {
             //List of dockerfiles path
             def dockerfile_path = "${params.SERVICE}" == "cartservice" ? "./src/${params.SERVICE}/src" : "./src/${params.SERVICE}"
-            //List of dockerfiles context.
+            //List of dockerfiles context
             def dockerfile_context = "${dockerfile_path}/Dockerfile"
             def destinations = [
               "${env.ECR_URI}:-${params.TAG}"
             ]
             container(name: 'kaniko'){
+              environment {
+                BUILD_NAME = "${env.BUILD_NAME}"
+              }
               kaniko.executor([
                 context:dockerfile_path,
                 dockerfile_path:dockerfile_context,
