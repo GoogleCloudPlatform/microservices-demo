@@ -37,7 +37,6 @@ pipeline{
     stage('Init') {
       steps {
         script {
-          env.BUILD_NAME="${params.SERVICE}:${params.BRANCH}-${params.TAG}"
           // Clone the repository with the specified branch
           git branch: params.BRANCH, url: 'https://github.com/Sealights/microservices-demo.git'
 
