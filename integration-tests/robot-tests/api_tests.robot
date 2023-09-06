@@ -10,6 +10,7 @@ ${load}    1
 Load Test
     FOR    ${i}    IN RANGE    ${load}
         Test Session
+    END
 
 Test Session
     Test Index
@@ -20,6 +21,8 @@ Test Session
     Test Add To Cart
     Test Icon
     Test Checkout
+
+    END
 
 Test Index
     Create Session    frontend    ${BASE_URL}
