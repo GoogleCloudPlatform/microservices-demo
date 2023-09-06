@@ -1,6 +1,5 @@
-#FROM eclipse-temurin:19@sha256:f3fbf1ad599d4b5dbdd7ceb55708d10cb9fafb08e094ef9$
 FROM eclipse-temurin:17 as builder
-# FROM gradle:jdk17-alpine as builder
+
 
 WORKDIR /app
 
@@ -11,7 +10,6 @@ RUN ./gradlew downloadRepos
 
 COPY . .
 RUN chmod +x gradlew
-RUN ls -l
 RUN ./gradlew installDist
 
 # FROM eclipse-temurin:19.0.1_10-jre-alpine@sha256:a75ea64f676041562cd7d3a54a9764bbfb357b2bf1bebf46e2af73e62d32e36c
@@ -31,7 +29,6 @@ RUN wget -nv https://agents.sealights.co/sl-cd-agent/sl-cd-agent-latest.zip && \
 COPY --from=builder /app .
 
 EXPOSE 9555
-ENV JAVA_TOOL_OPTIONS="-javaagent:/app/sl-cd-agent.jar -Dsl.branchName=main  -Dsl.token=$SL_TOKEN -Dsl.appName=adservice -Dsl.buildName=0.8.1 -Dsl.tags=script,container,docker -Dsl.labId=$SL_LAB_ID -Dsl.includes=*hipstershop* -Dsl.workspace=/app/build/install/hipstershop/lib"
 
 
-ENTRYPOINT ["/app/build/install/hipstershop/bin/AdService"]
+CMD export JAVA_TOOL_OPTIONS="-javaagent:/app/sl-cd-agent.jar -Dsl.branchName=main -Dsl.token=${SL_TOKEN} -Dsl.appName=adservice -Dsl.buildName=0.8.4 -Dsl.tags=script,container,docker -Dsl.labId=${SL_LAB_ID} -Dsl.includes=*hipstershop* -Dsl.workspace=/app/build/install/hipstershop/lib" && /app/build/install/hipstershop/bin/AdService
