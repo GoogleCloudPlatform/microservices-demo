@@ -62,7 +62,7 @@ pipeline{
             ]
             container(name: 'kaniko'){
               environment {
-                BUILD_NAME = "${env.BUILD_NAME}"
+                BUILD_NAME = "${params.BUILD_NAME}"
               }
               kaniko.executor([
                 context:dockerfile_path,
