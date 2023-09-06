@@ -24,9 +24,9 @@ pipeline {
 
   parameters {
     string(name: 'LATEST', defaultValue: '', description: 'latest tag')
-    string(name: 'BRANCH', defaultValue: 'Wahbi-branch', description: 'Branch to clone (ahmad-branch)')
+    string(name: 'BRANCH', defaultValue: 'initContainer', description: 'Branch to clone (ahmad-branch)')
     string(name: 'JOB_NAME', defaultValue: '', description: 'tests job name ')
-    string(name: 'BUILD_BRANCH', defaultValue: 'Wahbi-branch', description: 'Branch to Build images that have the creational LAB_ID (send to wahbi branch to build)')
+    string(name: 'BUILD_BRANCH', defaultValue: 'initContainer', description: 'Branch to Build images that have the creational LAB_ID (send to wahbi branch to build)')
     string(name: 'SL_TOKEN', defaultValue: '', description: 'sl-token')
   }
 
@@ -56,7 +56,7 @@ pipeline {
           //def special_services = ["cartservice"]
           services_list.each { service ->
             parallelLabs["${service}"] = {
-              build(job: 'BTQ-BUILD', parameters: [string(name: 'SERVICE', value: "${service}"), string(name:'TAG' , value:"${env.CURRENT_VERSION}") , string(name:'BRANCH' , value:"Wahbi-branch")])
+              build(job: 'BTQ-BUILD', parameters: [string(name: 'SERVICE', value: "${service}"), string(name:'TAG' , value:"${env.CURRENT_VERSION}") , string(name:'BRANCH' , value:"${params.BRANCH}")])
             }
           }
           parallel parallelLabs
@@ -79,7 +79,7 @@ pipeline {
             cdOnly: true,
           )
 
-          build(job: 'SpinUpBoutiqeEnvironment', parameters: [string(name: 'ENV_TYPE', value: "DEV"), string(name:'IDENTIFIER' , value:"${env.IDENTIFIER}") ,string(name:'CUSTOM_EC2_INSTANCE_TYPE' , value:"t3a.medium"),string(name:'GIT_BRANCH' , value:"Wahbi-branch"),string(name:'BTQ_LAB_ID' , value:"${env.LAB_ID}"),string(name:'BTQ_TOKEN' , value:"${env.TOKEN}"),string(name:'BTQ_VERSION' , value:"${env.CURRENT_VERSION}")])
+          build(job: 'SpinUpBoutiqeEnvironment', parameters: [string(name: 'ENV_TYPE', value: "DEV"), string(name:'IDENTIFIER' , value:"${env.IDENTIFIER}") ,string(name:'CUSTOM_EC2_INSTANCE_TYPE' , value:"t3a.medium"),string(name:'GIT_BRANCH' , value:"${params.BRANCH}"),string(name:'BTQ_LAB_ID' , value:"${env.LAB_ID}"),string(name:'BTQ_TOKEN' , value:"${env.TOKEN}"),string(name:'BTQ_VERSION' , value:"${env.CURRENT_VERSION}")])
         }
       }
     }
@@ -88,8 +88,7 @@ pipeline {
       steps {
         script {
           sleep time: 60, unit: 'SECONDS'
-          env.IDENTIFIER = "${params.BRANCH}-${env.CURRENT_VERSION}"
-          env.MACHINE_DNS = "http://dev-${env.IDENTIFIER}.dev.sealights.co:8081"
+          //env.machine_dns = "http://dev-${env.IDENTIFIER}.dev.sealights.co:8081"
           def parallelLabs = [:]
           //List of all the jobs
           def jobs_list = ["BTQ-java-tests(Junit without testNG)" , "BTQ-python-tests(Pytest framework)" , "BTQ-nodejs-tests(Mocha framework)" , "BTQ-dotnet-tests(MS-test framework)" , "BTQ-nodejs-tests(Jest framework)"]
