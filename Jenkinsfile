@@ -24,9 +24,9 @@ pipeline {
 
   parameters {
     string(name: 'LATEST', defaultValue: '', description: 'latest tag')
-    string(name: 'BRANCH', defaultValue: 'initContainer', description: 'Branch to clone (ahmad-branch)')
+    string(name: 'BRANCH', defaultValue: 'Wahbi-branch', description: 'Branch to clone (ahmad-branch)')
     string(name: 'JOB_NAME', defaultValue: '', description: 'tests job name ')
-    string(name: 'BUILD_BRANCH', defaultValue: 'initContainer', description: 'Branch to Build images that have the creational LAB_ID (send to wahbi branch to build)')
+    string(name: 'BUILD_BRANCH', defaultValue: 'Wahbi-branch', description: 'Branch to Build images that have the creational LAB_ID (send to wahbi branch to build)')
     string(name: 'SL_TOKEN', defaultValue: '', description: 'sl-token')
   }
 
