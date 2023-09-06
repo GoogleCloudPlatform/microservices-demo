@@ -31,7 +31,7 @@ RUN wget -nv https://agents.sealights.co/sl-cd-agent/sl-cd-agent-latest.zip && \
 COPY --from=builder /app .
 
 EXPOSE 9555
-ENV JAVA_TOOL_OPTIONS="-javaagent:/app/sl-cd-agent.jar -Dsl.branchName=main -Dsl.httpDebugLog=DEBUG -Dsl.logEnabled=true -Dsl.log.toConsole=true -Dsl.logLevel=DEBUG -Dsl.token=$SL_TOKEN -Dsl.appName=adservice -Dsl.buildName=0.8 -Dsl.tags=script,container,docker -Dsl.labId=integ_Wahbibranch_f336_Boutique -Dsl.includes=*hipstershop* -Dsl.workspace=/app/build/install/hipstershop/lib"
+ENV JAVA_TOOL_OPTIONS="-javaagent:/app/sl-cd-agent.jar -Dsl.branchName=main -Dsl.token=$SL_TOKEN -Dsl.appName=adservice -Dsl.buildName=0.8 -Dsl.tags=script,container,docker -Dsl.labId=integ_Wahbibranch_f336_Boutique -Dsl.includes=*hipstershop* -Dsl.workspace=/app/build/install/hipstershop/lib"
 
 
 ENTRYPOINT ["/app/build/install/hipstershop/bin/AdService"]
