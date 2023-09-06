@@ -28,7 +28,6 @@ pipeline{
     //string(name: 'ecr_uri1', defaultValue: '534369319675.dkr.ecr.us-west-2.amazonaws.com/btq', description: 'ecr btq')
     string(name: 'SERVICE', defaultValue: '', description: 'SErvice name to build')
     string(name: 'machine_dns', defaultValue: 'http://DEV-${env.IDENTIFIER}.dev.sealights.co', description: 'machine DNS')
-    string(name: 'BUILD_NAME', defaultValue: '', description: 'build name')
 
   }
   environment{
@@ -61,9 +60,6 @@ pipeline{
               "${env.ECR_URI}:-${params.TAG}"
             ]
             container(name: 'kaniko'){
-              environment {
-                BUILD_NAME = "${env.BUILD_NAME}"
-              }
               kaniko.executor([
                 context:dockerfile_path,
                 dockerfile_path:dockerfile_context,
