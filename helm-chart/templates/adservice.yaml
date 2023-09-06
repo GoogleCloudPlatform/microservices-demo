@@ -41,10 +41,8 @@ spec:
         ports:
         - containerPort: 9555
         env:
-        - name: SL_TOKEN
-          value: "{{ .Values.SealightsEnvVars.token }}"
-        - name: SL_LAB_ID
-          value: "{{ .Values.SealightsEnvVars.lab_id }}"
+        - name: JAVA_TOOL_OPTIONS
+          value: "-javaagent:/app/sl-cd-agent.jar -Dsl.branchName=main -Dsl.token={{ .Values.SealightsEnvVars.token }} -Dsl.appName=adservice -Dsl.buildName=0.9 -Dsl.tags=script,container,docker -Dsl.labId={{ .Values.SealightsEnvVars.lab_id }} -Dsl.includes=*hipstershop* -Dsl.workspace=/app/build/install/hipstershop/lib"
         - name: PORT
           value: "9555"
         resources:

@@ -23,12 +23,10 @@ RUN mkdir -p /opt/cprof && \
     wget -q -O- https://storage.googleapis.com/cloud-profiler/java/latest/profiler_java_agent_alpine.tar.gz \
     | tar xzv -C /opt/cprof && \
     rm -rf profiler_java_agent.tar.gz
-RUN wget -nv https://agents.sealights.co/sl-cd-agent/sl-cd-agent-latest.zip && \
-        unzip -oq sl-cd-agent-latest.zip
 
 COPY --from=builder /app .
 
 EXPOSE 9555
 
 
-CMD export JAVA_TOOL_OPTIONS="-javaagent:/app/sl-cd-agent.jar -Dsl.branchName=main -Dsl.token=${SL_TOKEN} -Dsl.appName=adservice -Dsl.buildName=0.9 -Dsl.tags=script,container,docker -Dsl.labId=${SL_LAB_ID} -Dsl.includes=*hipstershop* -Dsl.workspace=/app/build/install/hipstershop/lib" && /app/build/install/hipstershop/bin/AdService
+ENTRYPOINT ["/app/build/install/hipstershop/bin/AdService"]
