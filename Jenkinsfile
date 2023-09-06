@@ -56,7 +56,7 @@ pipeline {
           //def special_services = ["cartservice"]
           services_list.each { service ->
             parallelLabs["${service}"] = {
-              build(job: 'BTQ-BUILD', parameters: [string(name: 'SERVICE', value: "${service}"), string(name:'TAG' , value:"${env.CURRENT_VERSION}") , string(name:'BRANCH' , value:"Wahbi-branch")])
+              build(job: 'BTQ-BUILD', parameters: [string(name: 'SERVICE', value: "${service}"), string(name:'TAG' , value:"${env.CURRENT_VERSION}") , string(name:'BRANCH' , value:"Wahbi-branch") , string(name:'BUILD_NAME' , value:"${service}:${params.BRANCH}-${env.CURRENT_VERSION}")])
             }
           }
           parallel parallelLabs
@@ -91,7 +91,7 @@ pipeline {
           //env.machine_dns = "http://dev-${env.IDENTIFIER}.dev.sealights.co:8081"
           def parallelLabs = [:]
           //List of all the jobs
-          def jobs_list = ["BTQ-java-tests(Junit without testNG)" , "BTQ-python-tests(Pytest framework)" , "BTQ-nodejs-tests(Mocha framework)" , "BTQ-dotnet-tests(MS-test framework)" , "BTQ-nodejs-tests(Jest framework)" , "BTQ-python-tests(Robot framework)"]
+          def jobs_list = ["BTQ-java-tests(Junit without testNG)" , "BTQ-python-tests(Pytest framework)" , "BTQ-nodejs-tests(Mocha framework)" , "BTQ-dotnet-tests(MS-test framework)" , "BTQ-nodejs-tests(Jest framework)" , "BTQ-python-tests(Robot framework)" , "BTQ-dotnet-tests(NUnit-test framework)"]
           jobs_list.each { job ->
             parallelLabs["${job}"] = {
               build(job:"${job}", parameters: [string(name: 'BRANCH', value: "${params.BRANCH}"),string(name: 'SL_LABID', value: "${env.LAB_ID}") , string(name:'SL_TOKEN' , value:"${env.TOKEN}") ,string(name:'MACHINE_DNS1' , value:"${env.MACHINE_DNS}")])
