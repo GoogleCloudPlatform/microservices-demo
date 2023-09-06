@@ -1,7 +1,7 @@
 *** Settings ***
 Library           RequestsLibrary
 Library           Collections
-Suite Setup       Set Suite Variable    ${BASE_URL}    http://${FRONTEND_ADDR}
+Suite Setup       Set Suite Variable    ${BASE_URL}    ${machine_dns}
 #Suite Teardown    Close All Sessions
 *** Variables ***
 ${FRONTEND_ADDR}    dev-ahmad-branch-1-0-159.dev.sealights.co:8081
