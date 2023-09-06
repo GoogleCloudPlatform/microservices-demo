@@ -88,7 +88,8 @@ pipeline {
       steps {
         script {
           sleep time: 60, unit: 'SECONDS'
-          //env.machine_dns = "http://dev-${env.IDENTIFIER}.dev.sealights.co:8081"
+          env.IDENTIFIER = "${params.BRANCH}-${env.CURRENT_VERSION}"
+          env.MACHINE_DNS = "http://dev-${env.IDENTIFIER}.dev.sealights.co:8081"
           def parallelLabs = [:]
           //List of all the jobs
           def jobs_list = ["BTQ-java-tests(Junit without testNG)" , "BTQ-python-tests(Pytest framework)" , "BTQ-nodejs-tests(Mocha framework)" , "BTQ-dotnet-tests(MS-test framework)" , "BTQ-nodejs-tests(Jest framework)"]
