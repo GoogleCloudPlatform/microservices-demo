@@ -22,7 +22,6 @@ Test Session
     Test Icon
     Test Checkout
 
-    END
 
 Test Index
     Create Session    frontend    ${BASE_URL}
