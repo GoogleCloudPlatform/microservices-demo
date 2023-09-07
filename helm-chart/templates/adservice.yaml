@@ -27,13 +27,6 @@ spec:
       labels:
         app: {{ .Values.adService.name }}
     spec:
-      initContainers:
-      - name: java-cd-agent
-        image: ahmadsealights/javainit:19
-        command: ["/bin/sh", "-c", "cp /download/sl-cd-agent.jar /sealights"]
-        volumeMounts:
-          - mountPath: /sealights
-            name: java-cd-agent-file 
       {{- if .Values.serviceAccounts.create }}
       serviceAccountName: {{ .Values.adService.name }}
       {{- else }}
