@@ -13,6 +13,6 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "SL.Cypress.Plugin": "github:kristijanstefanoski/SL.Cypress.Plugin#v1.1.3"
+    "SL.Cypress.Plugin": "github:kristijanstefanoski/SL.Cypress.Plugin#latest"
   }
 }

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <testsuite name="Api Tests" tests="1" errors="0" failures="1" skipped="0" time="0.068" timestamp="2023-08-24T14:01:14.578000">
 <testcase classname="Api Tests" name="Load Test" time="0.000">
-<failure message="Parent suite setup failed:&#10;Invalid argument specification: Multiple errors:&#10;- Invalid argument syntax 'FRONTEND_ADDR'.&#10;- Non-default argument after default arguments." type="AssertionError"/>
+<failure message="Parent suite setup failed:&#10;Invalid argument specification: Multiple errors:&#10;- Invalid argument syntax 'machine_dns'.&#10;- Non-default argument after default arguments." type="AssertionError"/>
 </testcase>
 </testsuite>
