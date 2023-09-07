@@ -63,7 +63,11 @@ pipeline{
             container(name: 'kaniko'){
               environment {
                 BUILD_NAME = "${params.BUILD_NAME}"
-                SL_BUILD_TOKEN= "${params.SL_BUILD_TOKEN}"
+                SL_TOKEN= "${params.SL_TOKEN}"
+              }
+              script {
+                echo "BUILD_NAME: ${BUILD_NAME}"
+                echo "SL_TOKEN: ${SL_TOKEN}"
               }
               kaniko.executor([
                 context:dockerfile_path,
@@ -71,7 +75,7 @@ pipeline{
                 destinations:destinations,
                 args: [
                   "--build-arg BUILD_NAME=${BUILD_NAME}",
-                  "--build-arg SEALIGHTS_TOKEN=${SL_BUILD_TOKEN}"
+                  "--build-arg SEALIGHTS_TOKEN=${SL_TOKEN}"
                 ]
               ])
             }
