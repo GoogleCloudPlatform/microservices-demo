@@ -16,6 +16,9 @@ FROM node:20.5.0-alpine@sha256:11087abe911baf2fd7e34192f4598bf7e438239e9914f5b7e
 
 FROM base as builder
 
+ARG SEALIGHTS_TOKEN
+ARG BUILD_NAME
+
 # Some packages (e.g. @google-cloud/profiler) require additional
 # deps for post-install scripts
 RUN apk add --update --no-cache \
@@ -29,7 +32,7 @@ WORKDIR /usr/src/app
 COPY . .
 RUN npm install --only=production
 RUN npm i slnodejs
-RUN  ./node_modules/.bin/slnodejs config --tokenfile sltoken.txt --appname "paymentservice" --branch "main" --build "0.4.1"
+RUN  ./node_modules/.bin/slnodejs config --token ${SEALIGHTS_TOKEN} --appname "paymentservice" --branch "main" --build ${BUILD_NAME}
 
 
 RUN ./node_modules/.bin/slnodejs scan --tokenfile sltoken.txt --buildsessionidfile buildSessionId --workspacepath "." --scm none --es6Modules 
