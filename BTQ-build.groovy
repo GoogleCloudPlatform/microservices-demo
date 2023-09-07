@@ -70,8 +70,8 @@ pipeline{
                 dockerfile_path:dockerfile_context,
                 destinations:destinations,
                 args: [
-                  "--build-arg BUILD_NAME=${BUILD_NAME}",
-                  "--build-arg SEALIGHTS_TOKEN=${SL_TOKEN}",
+                  "--build-arg=BUILD_NAME=${BUILD_NAME}",
+                  "--build-arg=SEALIGHTS_TOKEN=${SL_BUILD_TOKEN}",
                 ]
               ])
             }
