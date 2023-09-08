@@ -75,7 +75,7 @@ opentelemetry-proto==1.19.0
     # via
     #   opentelemetry-exporter-otlp-proto-common
     #   opentelemetry-exporter-otlp-proto-grpc
-opentelemetry-sdk==1.19.0
+opentelemetry-sdk==1.20.0
     # via
     #   opentelemetry-distro
     #   opentelemetry-exporter-otlp-proto-grpc
