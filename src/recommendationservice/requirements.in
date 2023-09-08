@@ -6,4 +6,4 @@ requests==2.31.0
 rsa==4.9
 opentelemetry-distro==0.40b0
 opentelemetry-instrumentation-grpc==0.40b0
-opentelemetry-exporter-otlp-proto-grpc==1.19.0
+opentelemetry-exporter-otlp-proto-grpc==1.20.0
