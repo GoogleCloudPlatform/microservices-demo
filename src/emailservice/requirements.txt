@@ -84,7 +84,7 @@ opentelemetry-instrumentation==0.40b0
     #   opentelemetry-instrumentation-grpc
 opentelemetry-instrumentation-grpc==0.40b0
     # via -r requirements.in
-opentelemetry-proto==1.19.0
+opentelemetry-proto==1.20.0
     # via
     #   opentelemetry-exporter-otlp-proto-common
     #   opentelemetry-exporter-otlp-proto-grpc
