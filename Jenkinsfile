@@ -28,6 +28,7 @@ pipeline {
     string(name: 'JOB_NAME', defaultValue: '', description: 'tests job name ')
     string(name: 'BUILD_BRANCH', defaultValue: 'Wahbi-branch', description: 'Branch to Build images that have the creational LAB_ID (send to wahbi branch to build)')
     string(name: 'SL_TOKEN', defaultValue: '', description: 'sl-token')
+    string(name: 'BUILD_NAME', defaultValue: '', description: 'sl-token')
   }
 
   environment {
@@ -49,6 +50,7 @@ pipeline {
       steps {
         script {
           env.CURRENT_VERSION = "1.0.${BUILD_NUMBER}"
+          env.BUILD_NAME="${params.BUILD_NAME}"==""?"${service}:${params.BRANCH}-${env.CURRENT_VERSION}":"${params.BUILD_NAME}"
           def parallelLabs = [:]
           //List of all the images name
           env.TOKEN= "${params.SL_TOKEN}" == "" ? "${env.DEV_INTEGRATION_SL_TOKEN}"  : "${params.SL_TOKEN}"
@@ -56,7 +58,7 @@ pipeline {
           //def special_services = ["cartservice"]
           services_list.each { service ->
             parallelLabs["${service}"] = {
-              build(job: 'BTQ-BUILD', parameters: [string(name: 'SERVICE', value: "${service}"), string(name:'TAG' , value:"${env.CURRENT_VERSION}") , string(name:'BRANCH' , value:"${params.BRANCH}"),string(name:'BUILD_NAME' , value:"${service}:${params.BRANCH}-${env.CURRENT_VERSION}"), string(name:'SL_TOKEN' , value:"${env.TOKEN}") ])
+              build(job: 'BTQ-BUILD', parameters: [string(name: 'SERVICE', value: "${service}"), string(name:'TAG' , value:"${env.CURRENT_VERSION}") , string(name:'BRANCH' , value:"${params.BRANCH}"),string(name:'BUILD_NAME' , value:"${env.BUILD_NAME}"), string(name:'SL_TOKEN' , value:"${env.TOKEN}") ])
             }
           }
           parallel parallelLabs

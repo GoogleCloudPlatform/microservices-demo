@@ -51,7 +51,7 @@ spec:
               - ALL
           privileged: false
           readOnlyRootFilesystem: false
-        image: ahmadsealights/adservice:0.3
+        image: {{ .Values.images.repository }}/btq-{{ .Values.adService.name }}:{{ .Values.images.tag | default .Chart.AppVersion }}
         ports:
         - containerPort: 9555
         env:
