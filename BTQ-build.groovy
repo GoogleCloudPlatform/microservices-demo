@@ -68,7 +68,7 @@ pipeline{
               script {
                 echo "BUILD_NAME: ${BUILD_NAME}"
                 echo "SL_TOKEN: ${SL_TOKEN}"
-              
+
               kaniko.executor([
                 context:dockerfile_path,
                 dockerfile_path:dockerfile_context,

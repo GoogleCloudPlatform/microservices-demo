@@ -48,7 +48,6 @@ COPY --from=builder /checkoutservice /src/checkoutservice
 # See https://golang.org/pkg/runtime/
 ENV GOTRACEBACK=single
 ENV SEALIGHTS_LAB_ID="none"
-ENV SEALIGHTS_DISABLE=FALSE
-ENV SEALIGHTS_LOG_LEVEL="debug"
+
 EXPOSE 5050
 CMD export SEALIGHTS_TOKEN="${SL_TOKEN}" && export SEALIGHTS_LAB_ID="${SL_LAB_ID}" && /src/checkoutservice
