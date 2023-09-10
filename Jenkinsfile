@@ -24,18 +24,16 @@ pipeline {
 
   parameters {
     string(name: 'LATEST', defaultValue: '', description: 'latest tag')
-    string(name: 'BRANCH', defaultValue: 'ahmad-branch', description: 'Branch to clone (ahmad-branch)')
+    string(name: 'BRANCH', defaultValue: 'Wahbi-branch', description: 'Branch to clone (ahmad-branch)')
     string(name: 'JOB_NAME', defaultValue: '', description: 'tests job name ')
     string(name: 'BUILD_BRANCH', defaultValue: 'Wahbi-branch', description: 'Branch to Build images that have the creational LAB_ID (send to wahbi branch to build)')
     string(name: 'SL_TOKEN', defaultValue: '', description: 'sl-token')
     string(name: 'BUILD_NAME', defaultValue: '', description: 'build name')
-
   }
 
   environment {
     DEV_INTEGRATION_SL_TOKEN = secrets.get_secret("mgmt/btq_token", "us-west-2")
     // DEV_INTEGRATION_LABID = "integ_master_BTQ"
-    BUILD_NAME="${params.BUILD_NAME}"==""?"${service}:${params.BRANCH}-${env.CURRENT_VERSION}":"${params.BUILD_NAME}"
   }
 
   stages {
@@ -60,7 +58,8 @@ pipeline {
           services_list.each { service ->
             parallelLabs["${service}"] = {
               env.BUILD_NAME="${params.BUILD_NAME}" == "" ? "${service}:${params.BRANCH}-${env.CURRENT_VERSION}" : "${params.BUILD_NAME}"
-              build(job: 'BTQ-BUILD', parameters: [string(name: 'SERVICE', value: "${service}"), string(name:'TAG' , value:"${env.CURRENT_VERSION}") , string(name:'BRANCH' , value:"${params.BRANCH}"),string(name:'BUILD_NAME' , value:"${env.BUILD_NAME}"), string(name:'SL_TOKEN' , value:"${env.TOKEN}") ])}
+              build(job: 'BTQ-BUILD', parameters: [string(name: 'SERVICE', value: "${service}"), string(name:'TAG' , value:"${env.CURRENT_VERSION}") , string(name:'BRANCH' , value:"${params.BRANCH}"),string(name:'BUILD_NAME' , value:"${env.BUILD_NAME}"), string(name:'SL_TOKEN' , value:"${env.TOKEN}") ])
+            }
           }
           parallel parallelLabs
         }
@@ -82,7 +81,7 @@ pipeline {
             cdOnly: true,
           )
 
-          build(job: 'SpinUpBoutiqeEnvironment', parameters: [string(name: 'ENV_TYPE', value: "DEV"), string(name:'IDENTIFIER' , value:"${env.IDENTIFIER}") ,string(name:'CUSTOM_EC2_INSTANCE_TYPE' , value:"t3a.medium"),string(name:'GIT_BRANCH' , value:"Wahbi-branch"),string(name:'BTQ_LAB_ID' , value:"${env.LAB_ID}"),string(name:'BTQ_TOKEN' , value:"${env.TOKEN}"),string(name:'BTQ_VERSION' , value:"${env.CURRENT_VERSION}")])
+          build(job: 'SpinUpBoutiqeEnvironment', parameters: [string(name: 'ENV_TYPE', value: "DEV"), string(name:'IDENTIFIER' , value:"${env.IDENTIFIER}") ,string(name:'CUSTOM_EC2_INSTANCE_TYPE' , value:"t3a.medium"),string(name:'GIT_BRANCH' , value:"${params.BRANCH}"),string(name:'BTQ_LAB_ID' , value:"${env.LAB_ID}"),string(name:'BTQ_TOKEN' , value:"${env.TOKEN}"),string(name:'BTQ_VERSION' , value:"${env.CURRENT_VERSION}")])
         }
       }
     }
