@@ -33,6 +33,7 @@ pipeline {
 
   environment {
     DEV_INTEGRATION_SL_TOKEN = secrets.get_secret("mgmt/btq_token", "us-west-2")
+    BUILD_NAME= "${params.BUILD_NAME}" == "" ? "${service}:${params.BRANCH}-${env.CURRENT_VERSION}" : "${params.BUILD_NAME}"
     // DEV_INTEGRATION_LABID = "integ_master_BTQ"
   }
 
@@ -50,7 +51,6 @@ pipeline {
       steps {
         script {
           env.CURRENT_VERSION = "1.0.${BUILD_NUMBER}"
-          env.BUILD_NAME= "${params.BUILD_NAME}" == "" ? "${service}:${params.BRANCH}-${env.CURRENT_VERSION}" : "${params.BUILD_NAME}"
           def parallelLabs = [:]
           //List of all the images name
           env.TOKEN= "${params.SL_TOKEN}" == "" ? "${env.DEV_INTEGRATION_SL_TOKEN}"  : "${params.SL_TOKEN}"
