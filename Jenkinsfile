@@ -51,10 +51,10 @@ pipeline {
       steps {
         script {
           env.CURRENT_VERSION = "1.0.${BUILD_NUMBER}"
-          env.BUILD_NAME= "${params.BUILD_NAME}" == "" ? "${service}:${params.BRANCH}-${env.CURRENT_VERSION}" : "${params.BUILD_NAME}"
           def parallelLabs = [:]
           //List of all the images name
           env.TOKEN= "${params.SL_TOKEN}" == "" ? "${env.DEV_INTEGRATION_SL_TOKEN}"  : "${params.SL_TOKEN}"
+          env.BUILD_NAME= "${params.BUILD_NAME}" == "" ? "${service}:${params.BRANCH}-${env.CURRENT_VERSION}" : "${params.BUILD_NAME}"
           def services_list = ["adservice","cartservice","checkoutservice", "currencyservice","emailservice","frontend","paymentservice","productcatalogservice","recommendationservice","shippingservice"]
           //def special_services = ["cartservice"]
           services_list.each { service ->
