@@ -28,7 +28,7 @@ RUN wget -U "slcli" -q -O slcli.tar.gz \
 RUN echo ${SEALIGHTS_TOKEN} >> ./token.txt
 RUN ./slcli config init --lang go --token ./token.txt
 RUN ./slcli config create-bsid --app ${SERVICE_NAME} --branch ${BRANCH_NAME} --build ${BUILD_NAME}
-RUN ./slcli scan --bsid buildSessionId.txt --path-to-scanner ./slgoagent --workspacepath ./ --scm none
+RUN ./slcli scan --bsid buildSessionId.txt --path-to-scanner ./slgoagent --workspacepath ./ --scm none --disable-on-init false
 
 RUN go build -gcflags="${SKAFFOLD_GO_GCFLAGS}" -o /checkoutservice .
 RUN go mod download
@@ -48,5 +48,6 @@ COPY --from=builder /checkoutservice /src/checkoutservice
 # See https://golang.org/pkg/runtime/
 ENV GOTRACEBACK=single
 ENV SEALIGHTS_LAB_ID="none"
+ENV SEALIGHTS_DISABLE_ON_INIT=FALSE
 EXPOSE 5050
 CMD export SEALIGHTS_TOKEN="${SL_TOKEN}" && export SEALIGHTS_LAB_ID="${SL_LAB_ID}" && /src/checkoutservice
