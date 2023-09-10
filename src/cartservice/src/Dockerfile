@@ -9,18 +9,12 @@
 # limitations under the License.
 
 # https://mcr.microsoft.com/v2/dotnet/sdk/tags/list
-FROM mcr.microsoft.com/dotnet/sdk:6.0 as builder
+FROM mcr.microsoft.com/dotnet/sdk:7.0.306@sha256:94e91c9e8349b4caba454beb630cf05b56ee3a985e6c0c967ce57f5c58537033 as builder
 WORKDIR /app
 COPY cartservice.csproj .
 RUN dotnet restore cartservice.csproj -r linux-x64
 COPY . .
 RUN dotnet publish cartservice.csproj -p:PublishSingleFile=false -r linux-x64 --self-contained true -p:PublishTrimmed=True -p:TrimMode=Link -c release -o /cartservice --no-restore
-
-# https://mcr.microsoft.com/v2/dotnet/runtime-deps/tags/list
-FROM mcr.microsoft.com/dotnet/runtime-deps:6.0.8
-WORKDIR /app
-
-COPY start-app.sh .
 
 RUN apt-get update && \
     apt-get install -y wget && \
@@ -31,10 +25,18 @@ RUN apt-get update && \
 # Best practice it to mount a pre-existing sealights directory depending on the environment (test or prod)
 RUN mkdir -p /app/sealights/logs
 RUN mkdir -p /app/sealights/agent
-RUN wget -nv -O sealights-dotnet-agent-linux.tar.gz https://agents.sealights.co/dotnetcore/latest/sealights-dotnet-agent-linux-self-contained.tar.gz
+RUN wget -nv -O sealights-dotnet-agent-linux.tar.gz https://agents.sealights.co/dotnetcore/v3.7.6/sealights-dotnet-agent-linux-self-contained.tar.gz
 RUN tar -xzf ./sealights-dotnet-agent-linux.tar.gz --directory /app/sealights/agent
 RUN chmod -R 777 /app/sealights
+# https://mcr.microsoft.com/v2/dotnet/runtime-deps/tags/list
+FROM mcr.microsoft.com/dotnet/runtime-deps:7.0
+WORKDIR /app
 
+COPY start-app.sh .
+
+
+
+COPY --from=builder /app .
 COPY --from=builder /cartservice .
 EXPOSE 7070
 ENV DOTNET_EnableDiagnostics=0 \
