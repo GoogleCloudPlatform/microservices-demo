@@ -50,7 +50,7 @@ pipeline {
       steps {
         script {
           env.CURRENT_VERSION = "1.0.${BUILD_NUMBER}"
-          env.BUILD_NAME="${params.BUILD_NAME}"==""?"${service}:${params.BRANCH}-${env.CURRENT_VERSION}":"${params.BUILD_NAME}"
+          env.BUILD_NAME= "${params.BUILD_NAME}" == "" ? "${service}:${params.BRANCH}-${env.CURRENT_VERSION}" : "${params.BUILD_NAME}"
           def parallelLabs = [:]
           //List of all the images name
           env.TOKEN= "${params.SL_TOKEN}" == "" ? "${env.DEV_INTEGRATION_SL_TOKEN}"  : "${params.SL_TOKEN}"
