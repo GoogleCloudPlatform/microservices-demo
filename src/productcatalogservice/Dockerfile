@@ -25,7 +25,7 @@ RUN wget -U "slcli" -q -O slcli.tar.gz \
 RUN echo ${SEALIGHTS_TOKEN} >> ./token.txt
 RUN ./slcli config init --lang go --token ./token.txt
 RUN ./slcli config create-bsid --app ${SERVICE_NAME} --branch ${BRANCH_NAME} --build ${BUILD_NAME}
-RUN ./slcli scan --bsid buildSessionId.txt --path-to-scanner ./slgoagent --workspacepath ./ --scm none
+RUN ./slcli scan --bsid buildSessionId.txt --path-to-scanner ./slgoagent --workspacepath ./ --scm none --disable-on-init false
 
 
 
@@ -44,6 +44,7 @@ COPY products.json .
 # Default behavior - a failure prints a stack trace for the current goroutine.
 # See https://golang.org/pkg/runtime/
 ENV GOTRACEBACK=single
+ENV SEALIGHTS_DISABLE_ON_INIT=false
 
 EXPOSE 3550
 CMD export SEALIGHTS_TOKEN="${SL_TOKEN}" && export SEALIGHTS_LAB_ID="${SL_LAB_ID}" && /src/server
