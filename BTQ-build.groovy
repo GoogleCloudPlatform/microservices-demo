@@ -50,31 +50,24 @@ pipeline{
             ])
           }
           stage("Build Docker ${params.SERVICE} Image") {
-            //List of dockerfiles path
-            def dockerfile_path = "${params.SERVICE}" == "cartservice" ? "./src/${params.SERVICE}/src" : "./src/${params.SERVICE}"
-            //List of dockerfiles context
-            def dockerfile_context = "${dockerfile_path}/Dockerfile"
-            def destinations = [
-              "${env.ECR_URI}:-${params.TAG}"
-            ]
             container(name: 'kaniko'){
-              environment {
-                BUILD_NAME = "${params.BUILD_NAME}"
-                SL_TOKEN= "${params.SL_TOKEN}"
-              }
               script {
+                def CONTEXT = params.SERVICE == "cartservice" ? "./src/${params.SERVICE}/src" : "./src/${params.SERVICE}"
+                def DP = "${CONTEXT}/Dockerfile"
+                def D = "${env.ECR_URI}:${params.TAG}"
+                def BUILD_NAME = params.BUILD_NAME
+                def SL_TOKEN = params.SL_TOKEN
                 echo "BUILD_NAME: ${BUILD_NAME}"
                 echo "SL_TOKEN: ${SL_TOKEN}"
+                sh """
+            /kaniko/executor \
+            --context ${CONTEXT} \
+            --dockerfile ${DP} \
+            --destination ${D} \
+            --build-arg BUILD_NAME=${BUILD_NAME} \
+            --build-arg SEALIGHTS_TOKEN=${SL_TOKEN}
+        """
               }
-              kaniko.executor([
-                context:dockerfile_path,
-                dockerfile_path:dockerfile_context,
-                destinations:destinations,
-                build_args: [
-                  "BUILD_NAME=${BUILD_NAME}",
-                  "SEALIGHTS_TOKEN=${SL_TOKEN}"
-                ]
-              ])
             }
           }
         }
