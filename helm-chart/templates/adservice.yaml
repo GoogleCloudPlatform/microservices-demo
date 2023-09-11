@@ -1,1 +1,167 @@
-integ_master_BTQ
+{{- if .Values.adService.create }}
+  {{- if .Values.serviceAccounts.create }}
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: {{ .Values.adService.name }}
+  namespace: {{.Release.Namespace}}
+  {{- if not .Values.serviceAccounts.annotationsOnlyForCartservice }}
+  {{- with .Values.serviceAccounts.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  {{- end }}
+---
+  {{- end }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.adService.name }}
+  namespace: {{ .Release.Namespace }}
+spec:
+  selector:
+    matchLabels:
+      app: {{ .Values.adService.name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.adService.name }}
+    spec:
+      initContainers:
+        - name: java-cd-agent
+          image: ahmadsealights/javainit:19
+          #image: ahmadsealights/javainit:19
+          command: ["/bin/sh", "-c", "cp /sl-cd-agent.jar /sealights"]
+          volumeMounts:
+            - mountPath: /sealights
+              name: java-cd-agent-file
+      {{- if .Values.serviceAccounts.create }}
+      serviceAccountName: {{ .Values.adService.name }}
+      {{- else }}
+      serviceAccountName: default
+      {{- end }}
+      terminationGracePeriodSeconds: 5
+      imagePullSecrets:
+        - name: regcred-mgmt
+      containers:
+        - name: server
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            privileged: false
+            readOnlyRootFilesystem: false
+          image: {{ .Values.images.repository }}/btq-{{ .Values.adService.name }}:{{ .Values.images.tag | default .Chart.AppVersion }}
+          ports:
+            - containerPort: 9555
+          env:
+            - name: JAVA_TOOL_OPTIONS
+              value: "-javaagent:/sealights/sl-cd-agent.jar -Dsl.branchName=main -Dsl.token={{ .Values.SealightsEnvVars.token }} -Dsl.appName=adservice -Dsl.buildName=init2 -Dsl.tags=script,container,docker -Dsl.labId={{ .Values.SealightsEnvVars.lab_id }} -Dsl.includes=*hipstershop* -Dsl.workspace=/app/build/install/hipstershop/lib"
+            - name: PORT
+              value: "9555"
+          resources:
+            {{- toYaml .Values.adService.resources | nindent 10 }}
+          readinessProbe:
+            initialDelaySeconds: 20
+            periodSeconds: 15
+            grpc:
+              port: 9555
+          livenessProbe:
+            initialDelaySeconds: 20
+            periodSeconds: 15
+            grpc:
+              port: 9555
+          volumeMounts:
+            - mountPath: /sealights
+              name: java-cd-agent-file
+      volumes:
+        - name: java-cd-agent-file
+          emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.adService.name }}
+  namespace: {{ .Release.Namespace }}
+spec:
+  type: ClusterIP
+  selector:
+    app: {{ .Values.adService.name }}
+  ports:
+    - name: grpc
+      port: 9555
+      targetPort: 9555
+  {{- if .Values.networkPolicies.create }}
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ .Values.adService.name }}
+  namespace: {{ .Release.Namespace }}
+spec:
+  podSelector:
+    matchLabels:
+      app: {{ .Values.adService.name }}
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app: {{ .Values.frontend.name }}
+      ports:
+        - port: 9555
+          protocol: TCP
+  egress:
+    - {}
+  {{- end }}
+  {{- if .Values.sidecars.create }}
+---
+apiVersion: networking.istio.io/v1beta1
+kind: Sidecar
+metadata:
+  name: {{ .Values.adService.name }}
+  namespace: {{ .Release.Namespace }}
+spec:
+  workloadSelector:
+    labels:
+      app: {{ .Values.adService.name }}
+  egress:
+    - hosts:
+        - istio-system/*
+      {{- if .Values.opentelemetryCollector.create }}
+      - ./{{ .Values.opentelemetryCollector.name }}.{{ .Release.Namespace }}.svc.cluster.local
+      {{- end }}
+  {{- end }}
+  {{- if .Values.authorizationPolicies.create }}
+---
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+  name: {{ .Values.adService.name }}
+  namespace: {{ .Release.Namespace }}
+spec:
+  selector:
+    matchLabels:
+      app: {{ .Values.adService.name }}
+  rules:
+    - from:
+        - source:
+            principals:
+            {{- if .Values.serviceAccounts.create }}
+            - cluster.local/ns/{{ .Release.Namespace }}/sa/{{ .Values.frontend.name }}
+            {{- else }}
+            - cluster.local/ns/{{ .Release.Namespace }}/sa/default
+            {{- end }}
+      to:
+        - operation:
+            paths:
+              - /hipstershop.AdService/GetAds
+            methods:
+              - POST
+            ports:
+              - "9555"
+  {{- end }}
+  {{- end }}
