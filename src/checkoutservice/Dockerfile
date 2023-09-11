@@ -47,8 +47,7 @@ COPY --from=builder /checkoutservice /src/checkoutservice
 # Default behavior - a failure prints a stack trace for the current goroutine.
 # See https://golang.org/pkg/runtime/
 ENV GOTRACEBACK=single
-ENV SEALIGHTS_LAB_ID="${SL_LAB_ID}"
-ENV SEALIGHTS_TOKEN="${SL_TOKEN}"
+ENV SEALIGHTS_LAB_ID="none"
 
 EXPOSE 5050
-CMD /src/checkoutservice
+CMD export SEALIGHTS_TOKEN="${SL_TOKEN}" && export SEALIGHTS_LAB_ID="${SL_LAB_ID}" && /src/checkoutservice
