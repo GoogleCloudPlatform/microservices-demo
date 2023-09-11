@@ -1,5 +1,4 @@
 @Library('main-shared-library') _
-
 pipeline{
   agent {
     kubernetes {
@@ -16,12 +15,10 @@ pipeline{
         kaniko_cpu_limit: "2.5",
         kaniko_storage_limit:"6500Mi",
         node_selector: "jenkins"
-
       ])
       defaultContainer 'shell'
     }
   }
-
   parameters {
     string(name: 'TAG', defaultValue: '1.2.2', description: 'latest tag')
     string(name: 'BRANCH', defaultValue: 'main', description: 'defult branch')
