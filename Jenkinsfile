@@ -49,7 +49,7 @@ pipeline {
     stage ('Build BTQ') {
       steps {
         script {
-          env.CURRENT_VERSION = "1.0.1"
+          env.CURRENT_VERSION = "ahmad"
           def parallelLabs = [:]
           //List of all the images name
           env.TOKEN= "${params.SL_TOKEN}" == "" ? "${env.DEV_INTEGRATION_SL_TOKEN}"  : "${params.SL_TOKEN}"
