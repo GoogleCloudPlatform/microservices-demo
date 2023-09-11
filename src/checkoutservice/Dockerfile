@@ -25,8 +25,8 @@ RUN wget -U "slcli" -q -O slcli.tar.gz \
     https://agents.sealights.co/slcli/latest/slcli-${OS_ARCH}.tar.gz \
     && tar -xvf slcli.tar.gz \
     && rm slcli.tar.gz
-RUN echo ${SEALIGHTS_TOKEN} >> ./token.txt
-RUN ./slcli config init --lang go --token ./token.txt
+
+RUN ./slcli config init --lang go --token ${SEALIGHTS_TOKEN}
 RUN ./slcli config create-bsid --app ${SERVICE_NAME} --branch ${BRANCH_NAME} --build ${BUILD_NAME}
 RUN ./slcli scan --bsid buildSessionId.txt --path-to-scanner ./slgoagent --workspacepath ./ --scm none --disable-on-init false
 
@@ -47,7 +47,8 @@ COPY --from=builder /checkoutservice /src/checkoutservice
 # Default behavior - a failure prints a stack trace for the current goroutine.
 # See https://golang.org/pkg/runtime/
 ENV GOTRACEBACK=single
-ENV SEALIGHTS_LAB_ID="none"
+ENV SEALIGHTS_LAB_ID="${SL_LAB_ID}"
+ENV SEALIGHTS_TOKEN="${SL_TOKEN}"
 
 EXPOSE 5050
-CMD export SEALIGHTS_TOKEN="${SL_TOKEN}" && export SEALIGHTS_LAB_ID="${SL_LAB_ID}" && /src/checkoutservice
+CMD /src/checkoutservice
