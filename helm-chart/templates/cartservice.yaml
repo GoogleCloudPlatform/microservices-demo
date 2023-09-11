@@ -63,7 +63,7 @@ spec:
         env:
         - name: SL_TOKEN
           value: "{{ .Values.SealightsEnvVars.token }}"
-        - name: SL_LABID
+        - name: SL_LAB_ID
           value: "{{ .Values.SealightsEnvVars.lab_id }}"
         {{- if eq .Values.cartDatabase.type "spanner" }}
         - name: SPANNER_CONNECTION_STRING
