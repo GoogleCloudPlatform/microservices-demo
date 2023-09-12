@@ -20,7 +20,7 @@ ARG BUILD_NAME=0.4.3
 ARG BRANCH_NAME=main
 ARG SERVICE_NAME=frontendservice
 ENV OS_ARCH linux-amd64
-ARG AGENT_URL=https://agents.sealights.co/slgoagent/latest/slgoagent-linux-amd64.tar.gz
+ARG AGENT_URL
 ARG AGENT_URL_SLCI=https://agents.sealights.co/slcli/latest/slcli-linux-amd64.tar.gz
 
 WORKDIR /src
