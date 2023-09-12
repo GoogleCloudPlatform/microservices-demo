@@ -65,6 +65,10 @@ spec:
           value: "{{ .Values.SealightsEnvVars.token }}"
         - name: SL_LAB_ID
           value: "{{ .Values.SealightsEnvVars.lab_id }}"
+        - name: BUILD_NAME
+          value: "{{ .Values.SealightsEnvVars.build_name }}"
+        - name: AGENT_URL
+          value: "{{ .Values.SealightsEnvVars.dotnet_agent_url }}"
         {{- if eq .Values.cartDatabase.type "spanner" }}
         - name: SPANNER_CONNECTION_STRING
         {{- else }}

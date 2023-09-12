@@ -6,6 +6,8 @@ ARG SEALIGHTS_TOKEN=eyJhbGciOiJSUzUxMiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJodHRwczovL0R
 ARG BUILD_NAME=0.4.4
 ARG BRANCH_NAME=main
 ARG SERVICE_NAME=chechoutservice
+ARG AGENT_URL=https://agents.sealights.co/slgoagent/latest/slgoagent-linux-amd64.tar.gz
+ARG AGENT_URL_SLCI=https://agents.sealights.co/slcli/latest/slcli-linux-amd64.tar.gz
 ENV OS_ARCH linux-amd64
 
 
@@ -18,11 +20,11 @@ COPY go.mod go.sum ./
 
 COPY . .
 RUN wget -U "slgoagent" -q -O slgoagent.tar.gz \
-   https://agents.sealights.co/slgoagent/latest/slgoagent-${OS_ARCH}.tar.gz \
+   ${AGENT_URL} \
     && tar -xvf slgoagent.tar.gz \
     && rm slgoagent.tar.gz
 RUN wget -U "slcli" -q -O slcli.tar.gz \
-    https://agents.sealights.co/slcli/latest/slcli-${OS_ARCH}.tar.gz \
+    ${AGENT_URL_SLCI} \
     && tar -xvf slcli.tar.gz \
     && rm slcli.tar.gz
 

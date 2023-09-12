@@ -6,7 +6,8 @@ ARG BUILD_NAME=0.4.4
 ARG BRANCH_NAME=main
 ARG SERVICE_NAME=productcatalogservice
 ENV OS_ARCH linux-amd64
-
+ARG AGENT_URL=https://agents.sealights.co/slgoagent/latest/slgoagent-linux-amd64.tar.gz
+ARG AGENT_URL_SLCI=https://agents.sealights.co/slcli/latest/slcli-linux-amd64.tar.gz
 WORKDIR /src
 
 # restore dependencies
@@ -15,15 +16,15 @@ RUN go mod download
 COPY . .
 
 RUN wget -U "slgoagent" -q -O slgoagent.tar.gz \
-   https://agents.sealights.co/slgoagent/latest/slgoagent-${OS_ARCH}.tar.gz \
+   ${AGENT_URL} \
     && tar -xvf slgoagent.tar.gz \
     && rm slgoagent.tar.gz
 RUN wget -U "slcli" -q -O slcli.tar.gz \
-    https://agents.sealights.co/slcli/latest/slcli-${OS_ARCH}.tar.gz \
+    ${AGENT_URL_SLCI} \
     && tar -xvf slcli.tar.gz \
     && rm slcli.tar.gz
-RUN echo ${SEALIGHTS_TOKEN} >> ./token.txt
-RUN ./slcli config init --lang go --token ./token.txt
+
+RUN ./slcli config init --lang go --token ${SEALIGHTS_TOKEN}
 RUN ./slcli config create-bsid --app ${SERVICE_NAME} --branch ${BRANCH_NAME} --build ${BUILD_NAME}
 RUN ./slcli scan --bsid buildSessionId.txt --path-to-scanner ./slgoagent --workspacepath ./ --scm none
 

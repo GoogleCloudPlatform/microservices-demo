@@ -29,6 +29,12 @@ pipeline {
     string(name: 'BUILD_BRANCH', defaultValue: 'Wahbi-branch', description: 'Branch to Build images that have the creational LAB_ID (send to wahbi branch to build)')
     string(name: 'SL_TOKEN', defaultValue: '', description: 'sl-token')
     string(name: 'BUILD_NAME', defaultValue: '', description: 'build name')
+    string(name: 'JAVA_AGENT_URL', defaultValue: 'https://storage.googleapis.com/cloud-profiler/java/latest/profiler_java_agent_alpine.tar.gz', description: 'use different java agent')
+    string(name: 'DOTNET_AGENT_URL', defaultValue: 'https://agents.sealights.co/dotnetcore/latest/sealights-dotnet-agent-alpine-self-contained.tar.gz', description: 'use different dotnet agent')
+    string(name: 'NODE_AGENT_URL', defaultValue: 'slnodejs', description: 'use different node agent')
+    string(name: 'GO_AGENT_URL', defaultValue: 'https://agents.sealights.co/slgoagent/latest/slgoagent-linux-amd64.tar.gz', description: 'use different go agent')
+    string(name: 'GO_SLCI_AGENT_URL', defaultValue: 'https://agents.sealights.co/slcli/latest/slcli-linux-amd64.tar.gz', description: 'use different slci go agent')
+    string(name: 'PYTHON_AGENT_URL', defaultValue: 'sealights-python-agent', description: 'use different python agent')
   }
 
   environment {
@@ -58,7 +64,10 @@ pipeline {
           services_list.each { service ->
             parallelLabs["${service}"] = {
               env.BUILD_NAME= "${params.BUILD_NAME}" == "" ? "${service}:${params.BRANCH}-${env.CURRENT_VERSION}" : "${params.BUILD_NAME}"
-              build(job: 'BTQ-BUILD', parameters: [string(name: 'SERVICE', value: "${service}"), string(name:'TAG' , value:"${env.CURRENT_VERSION}") , string(name:'BRANCH' , value:"${params.BRANCH}"),string(name:'BUILD_NAME' , value:"${env.BUILD_NAME}"), string(name:'SL_TOKEN' , value:"${env.TOKEN}") ])
+              def AGENT_URL = getParamForService(service)
+              build(job: 'BTQ-BUILD', parameters: [string(name: 'SERVICE', value: "${service}"), string(name:'TAG' , value:"${env.CURRENT_VERSION}"), 
+              string(name:'BRANCH' , value:"${params.BRANCH}"),string(name:'BUILD_NAME' , value:"${env.BUILD_NAME}"), 
+              string(name:'SL_TOKEN' , value:"${env.TOKEN}"), string(name:'AGENT_URL' , value:AGENT_URL[0]), string(name:'AGENT_URL_SLCI' , value:AGENT_URL[1])])
             }
           }
           parallel parallelLabs
@@ -81,7 +90,11 @@ pipeline {
             cdOnly: true,
           )
 
-          build(job: 'SpinUpBoutiqeEnvironment', parameters: [string(name: 'ENV_TYPE', value: "DEV"), string(name:'IDENTIFIER' , value:"${env.IDENTIFIER}") ,string(name:'CUSTOM_EC2_INSTANCE_TYPE' , value:"t3a.large"),string(name:'GIT_BRANCH' , value:"${params.BRANCH}"),string(name:'BTQ_LAB_ID' , value:"${env.LAB_ID}"),string(name:'BTQ_TOKEN' , value:"${env.TOKEN}"),string(name:'BTQ_VERSION' , value:"${env.CURRENT_VERSION}")])
+          build(job: 'SpinUpBoutiqeEnvironment', parameters: [string(name: 'ENV_TYPE', value: "DEV"), 
+          string(name:'IDENTIFIER' , value:"${env.IDENTIFIER}") ,string(name:'CUSTOM_EC2_INSTANCE_TYPE' , value:"t3a.large"),
+          string(name:'GIT_BRANCH' , value:"${params.BRANCH}"),string(name:'BTQ_LAB_ID' , value:"${env.LAB_ID}"),string(name:'BTQ_TOKEN' , value:"${env.TOKEN}"),
+          string(name:'BTQ_VERSION' , value:"${env.CURRENT_VERSION}"),string(name:'BUILD_NAME' , value:"${env.BUILD_NAME}"),
+          string(name:'JAVA_AGENT_URL' , value: "${params.JAVA_AGENT_URL}"),string(name:'DOTNET_AGENT_URL' , value: "${params.DOTNET_AGENT_URL}")])
         }
       }
     }
@@ -122,3 +135,18 @@ pipeline {
   }
 }
 
+  def getParamForService(service) {
+    switch (service) {
+        case "adservice":
+          return [params.JAVA_AGENT_URL,""]
+        case "cartservice":
+          return [params.DOTNET_AGENT_URL,""]
+        case ["checkoutservice","frontend","productcatalogservice","shippingservice"]:
+          return [params.GO_AGENT_URL,params.GO_SLCI_AGENT_URL]
+        case ["emailservice","recommendationservice"]:
+          return [params.PYTHON_AGENT_URL,""]
+        case ["currencyservice","paymentservice"]:
+          return [params.NODE_AGENT_URL,""]
+
+    }
+}

@@ -19,11 +19,6 @@ RUN apk add --no-cache ca-certificates
 
 # Download Stackdriver Profiler Java agent
 WORKDIR /app
-RUN mkdir -p /opt/cprof && \
-    wget -q -O- https://storage.googleapis.com/cloud-profiler/java/latest/profiler_java_agent_alpine.tar.gz \
-    | tar xzv -C /opt/cprof && \
-    rm -rf profiler_java_agent.tar.gz
-
 COPY --from=builder /app .
 
 EXPOSE 9555
