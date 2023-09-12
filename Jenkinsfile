@@ -63,8 +63,8 @@ pipeline {
           //def special_services = ["cartservice"].
           services_list.each { service ->
             parallelLabs["${service}"] = {
-              env.BUILD_NAME= "${params.BUILD_NAME}" == "" ? "${service}:${params.BRANCH}-${env.CURRENT_VERSION}" : "${params.BUILD_NAME}"
               def AGENT_URL = getParamForService(service)
+              env.BUILD_NAME= "${params.BUILD_NAME}" == "" ? "${service}:${params.BRANCH}-${env.CURRENT_VERSION}" : "${params.BUILD_NAME}"
               build(job: 'BTQ-BUILD', parameters: [string(name: 'SERVICE', value: "${service}"), string(name:'TAG' , value:"${env.CURRENT_VERSION}"), 
               string(name:'BRANCH' , value:"${params.BRANCH}"),string(name:'BUILD_NAME' , value:"${env.BUILD_NAME}"), 
               string(name:'SL_TOKEN' , value:"${env.TOKEN}"), string(name:'AGENT_URL' , value:AGENT_URL[0]), string(name:'AGENT_URL_SLCI' , value:AGENT_URL[1])])
