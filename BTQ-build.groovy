@@ -61,8 +61,6 @@ pipeline{
                 def SL_TOKEN = params.SL_TOKEN
                 def AGENT_URL = params.AGENT_URL
 
-                echo "BUILD_NAME: ${BUILD_NAME}"
-                echo "SL_TOKEN: ${SL_TOKEN}"
                 sh """
                     /kaniko/executor \
                     --context ${CONTEXT} \
