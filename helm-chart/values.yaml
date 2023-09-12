@@ -7,7 +7,7 @@ SealightsEnvVars:
   lab_id: ""
   build_name: ""
   java_agent_url: ""
-  dotnet_agent_url: ""
+  dotnet_agent_url: "hello"
 
 images:
   repository: 534369319675.dkr.ecr.us-west-2.amazonaws.com
