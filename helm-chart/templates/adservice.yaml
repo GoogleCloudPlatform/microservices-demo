@@ -31,7 +31,7 @@ spec:
       - name: java-cd-agent
         image: ahmadsealights/javainit:19
         #image: ahmadsealights/javainit:19
-        command: ["/bin/sh", "-c", "cp /sl-cd-agent.jar /sealights"]
+        command: ["/bin/sh", "-c", "cp ./sl-cd-agent.jar /sealights"]
         volumeMounts:
           - mountPath: /sealights
             name: java-cd-agent-file
