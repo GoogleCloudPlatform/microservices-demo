@@ -28,4 +28,4 @@ EXPOSE 7070
 ENV DOTNET_EnableDiagnostics=0 \
   ASPNETCORE_URLS=http://*:7070
 USER 1000
-CMD export BUILD_NAME=${BUILD_NAME} && sh start-app.sh /app/cartservice
+CMD export BUILD_NAME="${BUILD_NAME}" && sh start-app.sh /app/cartservice
