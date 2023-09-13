@@ -11,7 +11,7 @@ WORKDIR /app
 COPY start-app.sh .
 
 ARG AGENT_URL="https://agents.sealights.co/dotnetcore/latest/sealights-dotnet-agent-alpine-self-contained.tar.gz"
-ARG BUILD_NAME
+ENV BUILD_NAME="hello"
 
 # Sealights - install prereq, agent, token, bsid
 # Best practice it to mount a pre-existing sealights directory depending on the environment (test or prod)
