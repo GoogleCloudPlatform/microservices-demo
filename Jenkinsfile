@@ -65,7 +65,6 @@ pipeline {
 
           env.BUILD_NAME= "${params.BUILD_NAME}" == "" ? "${params.BRANCH}-${env.CURRENT_VERSION}" : "${params.BUILD_NAME}"
           all_services_list.each { service ->          
-          services_list.each { service ->
             parallelLabs["${service}"] = {
               def AGENT_URL = getParamForService(service)
               build(job: 'BTQ-BUILD', parameters: [string(name: 'SERVICE', value: "${service}"), string(name:'TAG' , value:"${env.CURRENT_VERSION}"), 
