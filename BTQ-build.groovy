@@ -55,6 +55,13 @@ pipeline{
            container(name: 'kaniko'){
             script {
                 def CONTEXT = params.SERVICE == "cartservice" ? "./src/${params.SERVICE}/src" : "./src/${params.SERVICE}"
+
+                // def CONTEXT = params.SERVICE.startsWith("init") // to build init container or service
+                // ? "./initContainers/${params.SERVICE}" 
+                // : (params.SERVICE == "cartservice" 
+                //     ? "./src/${params.SERVICE}/src" 
+                //     : "./src/${params.SERVICE}")
+
                 def DP = "${CONTEXT}/Dockerfile"
                 def D = "${env.ECR_URI}:${params.TAG}"
                 def BUILD_NAME = params.BUILD_NAME
