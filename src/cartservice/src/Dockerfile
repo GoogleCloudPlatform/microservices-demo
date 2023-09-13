@@ -10,7 +10,8 @@ FROM mcr.microsoft.com/dotnet/runtime-deps:7.0.9-alpine3.18-amd64@sha256:f855dff
 WORKDIR /app
 COPY start-app.sh .
 
-ENV AGENT_URL="https://agents.sealights.co/dotnetcore/latest/sealights-dotnet-agent-alpine-self-contained.tar.gz"
+ARG AGENT_URL="https://agents.sealights.co/dotnetcore/latest/sealights-dotnet-agent-alpine-self-contained.tar.gz"
+ARG BUILD_NAME
 
 # Sealights - install prereq, agent, token, bsid
 # Best practice it to mount a pre-existing sealights directory depending on the environment (test or prod)
@@ -27,4 +28,4 @@ EXPOSE 7070
 ENV DOTNET_EnableDiagnostics=0 \
   ASPNETCORE_URLS=http://*:7070
 USER 1000
-ENTRYPOINT ["sh","start-app.sh","/app/cartservice"]
+CMD export BUILD_NAME=${BUILD_NAME} && ./start-app.sh /app/cartservice
