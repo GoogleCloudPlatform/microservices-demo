@@ -38,7 +38,7 @@ jobs:
       env:
         DOTNET_INSTALL_DIR: "./.dotnet"
       with:
-        dotnet-version: '7.0'
+        dotnet-version: '8.0'
     - uses: actions/setup-go@v4
       with:
         go-version: '1.19'

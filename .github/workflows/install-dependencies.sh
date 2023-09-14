@@ -30,7 +30,7 @@ sudo chown root:root /etc/apt/sources.list.d/microsoft-prod.list
 
 sudo apt-get install -y apt-transport-https && \
 sudo apt-get update && \
-sudo apt-get install -y dotnet-sdk-7.0
+sudo apt-get install -y dotnet-sdk-8.0
 echo "✅ dotnet installed"
 
 # install kubectl
