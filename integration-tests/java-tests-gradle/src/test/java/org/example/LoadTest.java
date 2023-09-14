@@ -48,7 +48,7 @@ public class LoadTest {
 
     @Test
     public void testBrowseProduct() throws IOException {
-        String myEnvVariable = System.getenv("machine_dns"); // Declare and initialize myEnvVariable
+        String myEnvVariable = System.getenv("machine_dns"); // Declare and initialize myEnvVariable.
         String[] products = {
             "0PUK6V6EV0",
             "1YMWWN1N4O",
