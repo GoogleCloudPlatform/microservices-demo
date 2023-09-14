@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-FROM mcr.microsoft.com/dotnet/sdk:7.0@sha256:bdcfb498261ca18f023ac67615d814ea743aa3288eb880855fa2eb86c6313ccc AS build
+FROM mcr.microsoft.com/dotnet/sdk:7.0@sha256:7e9de7e0e7698cb581687e852006d953eb36b52a7861697dab05f7a03a70b55e AS build
 WORKDIR /app
 COPY . .
 RUN dotnet restore cartservice.csproj
@@ -22,7 +22,7 @@ FROM build AS publish
 RUN dotnet publish cartservice.csproj -c Debug -o /out
 
 # Building final image used in running container
-FROM mcr.microsoft.com/dotnet/aspnet:7.0@sha256:b236eb1df512af4d8034ce8f65f9e8740f1845d894b7906a4b1b66890946c03f AS final
+FROM mcr.microsoft.com/dotnet/aspnet:7.0@sha256:6b491db4eb9cc645e449d79d48775c761d55127bc429de5afa3022474d67c718 AS final
 # Installing procps on the container to enable debugging of .NET Core
 RUN apt-get update \
     && apt-get install -y unzip procps wget
