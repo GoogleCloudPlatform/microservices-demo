@@ -40,7 +40,7 @@ RUN wget -U "slcli" -q -O slcli.tar.gz \
     && rm slcli.tar.gz
 
 RUN ./slcli config init --lang go --token ${SEALIGHTS_TOKEN}
-RUN ./slcli config create-bsid --app ${SERVICE_NAME} --branch ${BRANCH_NAME} --build ${BUILD_NAME}
+RUN ./slcli config create-bsid --app ${SERVICE_NAME} --branch ${BRANCH_NAME} --build ${BUILD_NAME} --packages-excluded *genproto*
 RUN ./slcli scan --bsid buildSessionId.txt --path-to-scanner ./slgoagent --workspacepath ./ --scm none
 
 # Skaffold passes in debug-oriented compiler flags

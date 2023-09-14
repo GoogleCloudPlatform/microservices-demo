@@ -14,9 +14,9 @@ RUN pip install -r requirements.txt
 RUN pip install ${AGENT_URL}
 WORKDIR /emailservice
 COPY . .
-RUN sl-python config --appname emailservice --branchname main --buildname ${BUILD_NAME} --workspacepath ./ --token ${SEALIGHTS_TOKEN}
+RUN sl-python config --appname emailservice --branchname main --buildname ${BUILD_NAME} --workspacepath ./ --token ${SEALIGHTS_TOKEN} --exclude "*grpc*"
 RUN export SL_BUILD_SESSION_ID=`cat buildSessionId.txt`
-RUN sl-python scan --scm none --token ${SEALIGHTS_TOKEN} --exclude "*grpc*"
+RUN sl-python scan --scm none --token ${SEALIGHTS_TOKEN}
 
 FROM python:3.10.8-slim@sha256:49749648f4426b31b20fca55ad854caa55ff59dc604f2f76b57d814e0a47c181
 
