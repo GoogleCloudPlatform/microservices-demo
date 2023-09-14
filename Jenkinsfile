@@ -115,7 +115,8 @@ pipeline {
                           "BTQ-python-tests(Robot framework)" ,
                           "BTQ-dotnet-tests(NUnit-test framework)" ,
                           "BTQ-java-tests(Junit support-testNG)" ,
-                          "BTQ-java-tests(Cucumber framework)"]
+                          "BTQ-java-tests(Cucumber framework)" ,]
+                          "BTQ-java-tests(SoapUi framework)"
           jobs_list.each { job ->
             parallelLabs["${job}"] = {
               build(job:"${job}", parameters: [string(name: 'BRANCH', value: "${params.BRANCH}"),string(name: 'SL_LABID', value: "${env.LAB_ID}") , string(name:'SL_TOKEN' , value:"${env.TOKEN}") ,string(name:'MACHINE_DNS1' , value:"${env.MACHINE_DNS}")])
