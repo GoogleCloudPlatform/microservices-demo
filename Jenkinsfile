@@ -23,7 +23,7 @@ pipeline {
 
 
   parameters {
-    string(name: 'LATEST', defaultValue: '', description: 'latest tag')
+    string(name: 'APP_NAME', defaultValue: 'Wahbi-BTQ', description: 'name of the app (integration build)')
     string(name: 'BRANCH', defaultValue: 'Wahbi-branch', description: 'Branch to clone (ahmad-branch)')
     string(name: 'JOB_NAME', defaultValue: '', description: 'tests job name ')
     string(name: 'BUILD_BRANCH', defaultValue: 'Wahbi-branch', description: 'Branch to Build images that have the creational LAB_ID (send to wahbi branch to build)')
@@ -66,7 +66,7 @@ pipeline {
             parallelLabs["${service}"] = {
               def AGENT_URL = getParamForService(service)
               build(job: 'BTQ-BUILD', parameters: [string(name: 'SERVICE', value: "${service}"), string(name:'TAG' , value:"${env.CURRENT_VERSION}"), 
-              string(name:'BRANCH' , value:"${params.BRANCH}"),string(name:'BUILD_NAME' , value:"${env.BUILD_NAME}"), 
+              string(name:'BRANCH' , value:"${params.BRANCH}"),string(name:'BUILD_NAME' , value:"${APP_NAME}-${env.BUILD_NAME}"), 
               string(name:'SL_TOKEN' , value:"${env.TOKEN}"), string(name:'AGENT_URL' , value:AGENT_URL[0]), string(name:'AGENT_URL_SLCI' , value:AGENT_URL[1])])
             }
           }
@@ -83,7 +83,7 @@ pipeline {
           env.LAB_ID = sealights.create_lab_id(
             token: "${env.TOKEN}",
             machine: "https://dev-integration.dev.sealights.co",
-            app: "Wahbi-BTQ",
+            app: "${APP_NAME}",
             branch: "${params.BUILD_BRANCH}",
             test_env: "${env.IDENTIFIER}",
             lab_alias: "${env.IDENTIFIER}",
