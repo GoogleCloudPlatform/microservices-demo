@@ -47,7 +47,7 @@ spec:
       securityContext:
         fsGroup: 1000
         runAsGroup: 1000
-        runAsNonRoot: true
+        runAsNonRoot: false
         runAsUser: 1000
         {{- if .Values.seccompProfile.enable }}
         seccompProfile:
