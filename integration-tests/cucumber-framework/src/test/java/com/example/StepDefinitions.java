@@ -26,7 +26,7 @@ public class StepDefinitions {
                     .setConnectionRequestTimeout(HTTP_TIMEOUT_MS)
                     .build()
     ).build();
-    private static final String BASE_URL_DEFAULT = "http://10.2.10.50:8081";
+    private static final String BASE_URL_DEFAULT = "http://10.2.11.19:8081";
     private static final String BASE_URL = Optional.ofNullable(System.getenv("machine_dns")).orElse(BASE_URL_DEFAULT);
 
     private String[] products = {
