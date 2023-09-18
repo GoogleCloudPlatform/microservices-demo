@@ -6,11 +6,11 @@
     <artifactId>ecommerce</artifactId>
     <version>1.0-SNAPSHOT</version>
 
-    <!-- Specify Java 17 as the source and target compatibility -->
-<!--    <properties>-->
-<!--        <maven.compiler.source>17</maven.compiler.source>-->
-<!--        <maven.compiler.target>17</maven.compiler.target>-->
-<!--    </properties>-->
+     Specify Java 17 as the source and target compatibility
+    <properties>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
+    </properties>
 
     <dependencies>
         <!-- Apache HttpClient -->
