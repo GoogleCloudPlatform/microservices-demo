@@ -6,8 +6,6 @@ RUN mkdir -p ./sealights/agent
 RUN wget -nv -O sealights-dotnet-agent-alpine.tar.gz https://agents.sealights.co/dotnetcore/latest/sealights-dotnet-agent-alpine-self-contained.tar.gz
 
 RUN tar -xzf ./sealights-dotnet-agent-alpine.tar.gz --directory /app/sealights/agent
-RUN ls
 RUN chmod -R 777 /app/sealights
-RUN ls
 COPY start-app.sh /app/sealights
-ENTRYPOINT [ "/bin/sh", "-c","sleep 120" ]
+ENTRYPOINT ["/bin/sh", "-c", "ls / cp -r /app/sealights /sealights"]
