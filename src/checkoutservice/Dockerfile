@@ -30,7 +30,10 @@ RUN wget -U "slcli" -q -O slcli.tar.gz \
 
 RUN ./slcli config init --lang go --token ${SEALIGHTS_TOKEN}
 RUN ./slcli config create-bsid --app ${SERVICE_NAME} --branch ${BRANCH_NAME} --build ${BUILD_NAME}
-RUN ./slcli scan --bsid buildSessionId.txt --path-to-scanner ./slgoagent --workspacepath ./ --scm none --packages-excluded "*genproto*"
+RUN ./slcli scan --bsid buildSessionId.txt --path-to-scanner ./slgoagent --workspacepath ./ --scm none --packages-excluded "github.com/GoogleCloudPlatform/microservices-demo/src/checkoutservice/genproto"
+
+RUN ./slcli config create-bsid --help
+RUN ./slcli scan --help
 
 RUN go build -gcflags="${SKAFFOLD_GO_GCFLAGS}" -o /checkoutservice .
 RUN go mod download
@@ -46,7 +49,7 @@ RUN apk add --no-cache ca-certificates
 COPY --from=builder /checkoutservice /src/checkoutservice
 
 # Definition of this variable is used by 'skaffold debug' to identify a golang binary.
-# Default behavior - a failure prints a stack trace for the current goroutine.
+# Default behavior - a failure prints a stack trace for the current goroutine
 # See https://golang.org/pkg/runtime/
 ENV GOTRACEBACK=single
 ENV SEALIGHTS_LAB_ID="none"

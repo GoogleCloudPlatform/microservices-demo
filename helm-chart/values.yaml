@@ -1,7 +1,7 @@
 # Default values for onlineboutique.
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
-# enter sealight vars here
+# enter sealight vars here:
 SealightsEnvVars:
   token: ""
   lab_id: ""
