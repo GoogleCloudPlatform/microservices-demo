@@ -15,13 +15,7 @@ ENV BUILD_NAME="hello"
 
 # Sealights - install prereq, agent, token, bsid
 # Best practice it to mount a pre-existing sealights directory depending on the environment (test or prod)
-RUN mkdir -p /app/sealights/logs
-RUN mkdir -p /app/sealights/agent
-RUN wget -nv -O sealights-dotnet-agent-alpine.tar.gz ${AGENT_URL}
 
-RUN tar -xzf ./sealights-dotnet-agent-alpine.tar.gz --directory /app/sealights/agent
-
-RUN chmod -R 777 /app/sealights
 
 COPY --from=builder /cartservice .
 EXPOSE 7070

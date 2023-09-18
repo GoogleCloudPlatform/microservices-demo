@@ -31,6 +31,13 @@ spec:
       labels:
         app: {{ .Values.cartService.name }}
     spec:
+      initContainers:
+      - name: dotnet-cd-agent
+        image: ahmadsealights/javainit:latest
+        command: ["/bin/sh", "-c", "cp -r /sealights /sealights"]
+        volumeMounts:
+          - mountPath: /sealights
+            name: dotnet-cd-agent-file
       {{- if .Values.serviceAccounts.create }}
       serviceAccountName: {{ .Values.cartService.name }}
       {{- else }}
@@ -86,6 +93,12 @@ spec:
           periodSeconds: 10
           grpc:
             port: 7070
+        volumeMounts:
+          - mountPath: /sealights
+            name: dotnet-cd-agent-file
+      volumes:
+      - name: dotnet-cd-agent-file
+        emptyDir: {}
 ---
 apiVersion: v1
 kind: Service
