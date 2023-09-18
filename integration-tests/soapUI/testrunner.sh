@@ -23,13 +23,12 @@ then
     # get the full path (without any relative bits)
     SOAPUI_HOME=`cd $DIRNAME/..; pwd`
 fi
-export SOAPUI_HOME
+export SOAPUI_HOME=./
 
-SOAPUI_CLASSPATH=$SOAPUI_HOME/bin/soapui-5.7.1.jar:$SOAPUI_HOME/lib/*
+SOAPUI_CLASSPATH=./soapui-5.7.1.jar
 JFXRTPATH=`java -cp $SOAPUI_CLASSPATH com.eviware.soapui.tools.JfxrtLocator`
 SOAPUI_CLASSPATH=$JFXRTPATH:$SOAPUI_CLASSPATH
 
-export SOAPUI_HOME
 
 JAVA_OPTS="-Xms128m -Xmx1024m -Dsoapui.properties=soapui.properties -Dsoapui.home=$SOAPUI_HOME/bin"
 
