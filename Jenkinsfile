@@ -57,7 +57,7 @@ pipeline {
         script {
           env.CURRENT_VERSION = "1.0.${BUILD_NUMBER}"
           def parallelLabs = [:]
-          //List of all the images name
+          //List of all the images name 
           env.TOKEN= "${params.SL_TOKEN}" == "" ? "${env.DEV_INTEGRATION_SL_TOKEN}"  : "${params.SL_TOKEN}"
           def services_list = ["adservice","cartservice","checkoutservice", "currencyservice","emailservice","frontend","paymentservice","productcatalogservice","recommendationservice","shippingservice"]
           //def special_services = ["cartservice"].
