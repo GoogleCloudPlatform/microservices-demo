@@ -1,14 +1,11 @@
-bin/
 pkg/
 .DS_Store
 *.pyc
 *.swp
 *.tfstate
 *.tfstate*
-*~
 .vscode/
 .vs/
-.idea
 .skaffold-*.yaml
 .kubernetes-manifests-*/
 .project
