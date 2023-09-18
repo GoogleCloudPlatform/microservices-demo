@@ -25,8 +25,14 @@ then
 fi
 export SOAPUI_HOME
 
-SOAPUI_CLASSPATH=./integration-tests/soapUI/soapui-5.7.1.jar
-JFXRTPATH=`java -cp $SOAPUI_CLASSPATH com.eviware.soapui.tools.JfxrtLocator`
+if [ -d "${JAVA_HOME}" ]; then
+  JAVA_CMD=${JAVA_HOME}/bin/java
+else
+  JAVA_CMD=java
+fi
+
+SOAPUI_CLASSPATH="${DIRNAME}/soapui-5.7.1.jar:${DIRNAME}/deps/*"
+JFXRTPATH=`${JAVA_CMD} -cp $SOAPUI_CLASSPATH com.eviware.soapui.tools.JfxrtLocator`
 SOAPUI_CLASSPATH=$JFXRTPATH:$SOAPUI_CLASSPATH
 
 
@@ -36,7 +42,7 @@ JAVA_OPTS="-Xms128m -Xmx1024m -Dsoapui.properties=soapui.properties -Dsoapui.hom
 JAVA_OPTS="$JAVA_OPTS -Dlog4j2.formatMsgNoLookups=true"
 
 #JAVA 16
-JAVA_OPTS="$JAVA_OPTS --illegal-access=permit"
+#JAVA_OPTS="$JAVA_OPTS --illegal-access=permit"
 
 if [ $SOAPUI_HOME != "" ]
 then
@@ -64,5 +70,11 @@ echo ================================
 
 pwd
 
-java -javaagent:sl-test-listener.jar -Dsl.token="${TOKEN}" -Dsl.labId="${LAB_ID}" -Dsl.testStage="Soapui Tests" $JAVA_OPTS -cp $SOAPUI_CLASSPATH com.eviware.soapui.tools.SoapUITestCaseRunner "$@"
+SL_JAVA_AGENT_PATH="/home/jenkins/agent/workspace/BTQ-java-tests-SoapUi-framework/integration-tests/sl-test-listener.jar"
 
+if [ -e "${SL_JAVA_AGENT_PATH}" ]; then
+  SL_JAVA_AGENT_OPTS="'-javaagent:${SL_JAVA_AGENT_PATH} -Dsl.token=${TOKEN} -Dsl.labId=${LAB_ID} -Dsl.testStage=Soapui\ Tests"
+fi
+
+
+"${JAVA_CMD}"  ${SL_JAVA_AGENT_OPTS} $JAVA_OPTS -cp "$SOAPUI_CLASSPATH" com.eviware.soapui.tools.SoapUITestCaseRunner "$@"
