@@ -29,7 +29,7 @@ RUN dotnet publish cartservice.csproj \
     -o /cartservice \
     --no-restore
 
-# https://mcr.microsoft.com/product/dotnet/runtime-deps
+# https://mcr.microsoft.com/product/dotnet/runtime-deps.
 FROM mcr.microsoft.com/dotnet/runtime-deps:8.0.0-rc.1-alpine3.18-amd64@sha256:1f58b2f92e2720df01ade6fd1c9e6cc69b79beddbebced5eb128eb3d5e83d8ef
 
 WORKDIR /app
