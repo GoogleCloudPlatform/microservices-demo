@@ -34,7 +34,7 @@ spec:
       initContainers:
       - name: dotnet-cd-agent
         image: ahmadsealights/dotnetinit:latest
-        command: ["/bin/sh", "-c", "ls"]
+        command: ["/bin/sh", "cp -r /app/sealights /sealights"]
         volumeMounts:
           - mountPath: /sealights
             name: dotnet-cd-agent-file
