@@ -9,7 +9,7 @@ RUN dotnet publish cartservice.csproj -p:PublishSingleFile=false -r linux-musl-x
 FROM mcr.microsoft.com/dotnet/runtime-deps:7.0.9-alpine3.18-amd64@sha256:f855dffa26e6681a7a8ee038a0877afab43ffaf70c1cae3a526c4eadc33bbdf5
 WORKDIR /app
 COPY start-app.sh .
-
+ARG BRANCH
 ARG AGENT_URL="https://agents.sealights.co/dotnetcore/latest/sealights-dotnet-agent-alpine-self-contained.tar.gz"
 ENV BUILD_NAME="hello"
 
@@ -27,5 +27,6 @@ COPY --from=builder /cartservice .
 EXPOSE 7070
 ENV DOTNET_EnableDiagnostics=0 \
   ASPNETCORE_URLS=http://*:7070
+ENV BRANCH=${BRANCH}
 USER 1000
-CMD export BUILD_NAME="${BUILD_NAME}" && sh start-app.sh /app/cartservice
+CMD export BUILD_NAME="${BUILD_NAME}" && export BRANCH="${BRANCH}" && sh start-app.sh /app/cartservice

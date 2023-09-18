@@ -51,7 +51,7 @@ pipeline {
         }
       }
     }
-    //Build parallel images 
+    //Build parallel images
     stage ('Build BTQ') {
       steps {
         script {
@@ -66,7 +66,7 @@ pipeline {
             parallelLabs["${service}"] = {
               def AGENT_URL = getParamForService(service)
               build(job: 'BTQ-BUILD', parameters: [string(name: 'SERVICE', value: "${service}"), string(name:'TAG' , value:"${env.CURRENT_VERSION}"), 
-              string(name:'BRANCH' , value:"${params.BRANCH}"),string(name:'BUILD_NAME' , value:"${APP_NAME}-${env.BUILD_NAME}"), 
+              string(name:'BRANCH' , value:"${params.BRANCH}"),string(name:'BUILD_NAME' , value:"${env.BUILD_NAME}"), 
               string(name:'SL_TOKEN' , value:"${env.TOKEN}"), string(name:'AGENT_URL' , value:AGENT_URL[0]), string(name:'AGENT_URL_SLCI' , value:AGENT_URL[1])])
             }
           }

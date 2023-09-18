@@ -57,6 +57,7 @@ pipeline{
                 def CONTEXT = params.SERVICE == "cartservice" ? "./src/${params.SERVICE}/src" : "./src/${params.SERVICE}"
                 def DP = "${CONTEXT}/Dockerfile"
                 def D = "${env.ECR_URI}:${params.TAG}"
+                def BRANCH = params.BRANCH
                 def BUILD_NAME = params.BUILD_NAME
                 def SL_TOKEN = params.SL_TOKEN
                 def AGENT_URL = params.AGENT_URL
@@ -67,6 +68,7 @@ pipeline{
                     --context ${CONTEXT} \
                     --dockerfile ${DP} \
                     --destination ${D} \
+                    --build-arg BRANCH=${BRANCH} \
                     --build-arg BUILD_NAME=${BUILD_NAME} \
                     --build-arg SEALIGHTS_TOKEN=${SL_TOKEN} \
                     --build-arg AGENT_URL=${AGENT_URL} \
