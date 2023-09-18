@@ -44,6 +44,11 @@ spec:
       serviceAccountName: default
       {{- end }}
       terminationGracePeriodSeconds: 5
+      securityContext:
+        fsGroup: 1000
+        runAsGroup: 1000
+        runAsNonRoot: true
+        runAsUser: 1000
         {{- if .Values.seccompProfile.enable }}
         seccompProfile:
           type: {{ .Values.seccompProfile.type }}
@@ -52,6 +57,13 @@ spec:
         - name: regcred-mgmt
       containers:
       - name: server
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+              - ALL
+          privileged: false
+          readOnlyRootFilesystem: false
         image: {{ .Values.images.repository }}/btq-{{ .Values.cartService.name }}:{{ .Values.images.tag | default .Chart.AppVersion }}
         ports:
         - containerPort: 7070
@@ -89,7 +101,7 @@ spec:
           - -c 
           - |
             /sealights/agent/SL.DotNet cdAgent --appName cartservice --branchName init --buildName ${BUILD_NAME} \
-            --binDir /app  --includeNamespace * --target /app/cartservice --token ${SL_TOKEN} --workingDir /app \
+            --binDir /app  --includeNamespace *.services* --target /app/cartservice --token ${SL_TOKEN} --workingDir /app \
             --identifyMethodsByFqn --labId ${SL_LAB_ID}
       volumes:
       - name: dotnet-cd-agent-file
