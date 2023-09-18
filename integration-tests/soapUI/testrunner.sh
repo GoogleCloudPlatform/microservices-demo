@@ -25,7 +25,7 @@ then
 fi
 export SOAPUI_HOME
 
-SOAPUI_CLASSPATH=./integration-tests/soapui-5.7.1.jar
+SOAPUI_CLASSPATH=./integration-tests/soapUI/soapui-5.7.1.jar
 JFXRTPATH=`java -cp $SOAPUI_CLASSPATH com.eviware.soapui.tools.JfxrtLocator`
 SOAPUI_CLASSPATH=$JFXRTPATH:$SOAPUI_CLASSPATH
 
