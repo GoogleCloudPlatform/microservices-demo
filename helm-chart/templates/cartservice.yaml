@@ -96,7 +96,7 @@ spec:
         volumeMounts:
           - mountPath: /sealights
             name: dotnet-cd-agent-file
-        entrypoint: ["sh", "start-app.sh", "/app/cartservice"]
+        command: ["sh", "/sealights/start-app.sh", "/app/cartservice"]
       volumes:
       - name: dotnet-cd-agent-file
         emptyDir: {}
