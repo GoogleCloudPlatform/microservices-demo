@@ -83,7 +83,7 @@ pipeline {
           env.LAB_ID = sealights.create_lab_id(
             token: "${env.TOKEN}",
             machine: "https://dev-integration.dev.sealights.co",
-            app: "BTQ",
+            app: "Wahbi-BTQ",
             branch: "${params.BUILD_BRANCH}",
             test_env: "${env.IDENTIFIER}",
             lab_alias: "${env.IDENTIFIER}",
