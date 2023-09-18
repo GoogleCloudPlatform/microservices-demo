@@ -53,8 +53,11 @@ spec:
       containers:
       - name: server
         securityContext:
-          allowPrivilegeEscalation: true
-          privileged: true
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+              - ALL
+          privileged: false
           readOnlyRootFilesystem: false
         image: {{ .Values.images.repository }}/btq-{{ .Values.cartService.name }}:{{ .Values.images.tag | default .Chart.AppVersion }}
         ports:
@@ -136,7 +139,7 @@ spec:
           app: {{ .Values.checkoutService.name }}
     ports:
      - port: 7070
-       protocol: TCPservices
+       protocol: TCP
   egress:
   - {}
 {{- end }}
