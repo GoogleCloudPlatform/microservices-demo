@@ -62,5 +62,7 @@ echo ================================
 #export TOKEN="${params.sl_token}"
 #sed -i 's/machine_dns/machine_dns1/' testrunner.sh
 
-java -javaagent:./integration-tests/sl-test-listener.jar -Dsl.token="${TOKEN}" -Dsl.labId="${LAB_ID}" -Dsl.testStage="Soapui Tests" $JAVA_OPTS -cp $SOAPUI_CLASSPATH com.eviware.soapui.tools.SoapUITestCaseRunner "$@"
+pwd
+
+java -javaagent:/integration-tests/sl-test-listener.jar -Dsl.token="${TOKEN}" -Dsl.labId="${LAB_ID}" -Dsl.testStage="Soapui Tests" $JAVA_OPTS -cp $SOAPUI_CLASSPATH com.eviware.soapui.tools.SoapUITestCaseRunner "$@"
 
