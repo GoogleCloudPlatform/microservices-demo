@@ -30,7 +30,7 @@
         <KeyValuePair key="logging.googleapis.com/spanId" value="$${ctx:spanId}"/>
         <KeyValuePair key="logging.googleapis.com/traceSampled" value="$${ctx:traceSampled}"/>
         <KeyValuePair key="time" value="$${date:yyyy-MM-dd}T$${date:HH:mm:ss.SSS}Z"/>
-     </JsonLayout>
+      </JsonLayout>
 
     </Console>
   </Appenders>
