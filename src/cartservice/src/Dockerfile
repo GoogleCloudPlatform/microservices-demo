@@ -13,7 +13,7 @@
 # limitations under the License.
 
 # https://mcr.microsoft.com/product/dotnet/sdk
-FROM mcr.microsoft.com/dotnet/sdk:7.0.306@sha256:94e91c9e8349b4caba454beb630cf05b56ee3a985e6c0c967ce57f5c58537033 as builder
+FROM mcr.microsoft.com/dotnet/sdk:8.0.100-rc.1@sha256:c8adacc63831a6dfb3d92fbfe68d227cdb0c334d7029bbab2963ccc2833f2248 as builder
 WORKDIR /app
 COPY cartservice.csproj .
 RUN dotnet restore cartservice.csproj \
@@ -23,13 +23,13 @@ RUN dotnet publish cartservice.csproj \
     -p:PublishSingleFile=false \
     -r linux-musl-x64 \
     --self-contained true \
-    -p:TrimMode=Full \
+    -p:PublishTrimmed=True \
     -c release \
     -o /cartservice \
     --no-restore
 
-# https://mcr.microsoft.com/product/dotnet/runtime-deps.
-FROM mcr.microsoft.com/dotnet/runtime-deps:7.0.9-alpine3.18-amd64@sha256:f855dffa26e6681a7a8ee038a0877afab43ffaf70c1cae3a526c4eadc33bbdf5
+# https://mcr.microsoft.com/product/dotnet/runtime-deps
+FROM mcr.microsoft.com/dotnet/runtime-deps:8.0.0-rc.1-alpine3.18-amd64@sha256:1f58b2f92e2720df01ade6fd1c9e6cc69b79beddbebced5eb128eb3d5e83d8ef
 
 WORKDIR /app
 COPY --from=builder /cartservice .
