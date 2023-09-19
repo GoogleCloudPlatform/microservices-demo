@@ -116,7 +116,7 @@ pipeline {
                           "BTQ-dotnet-tests(NUnit-test framework)" ,
                           "BTQ-java-tests(Junit support-testNG)" ,
                           "BTQ-java-tests(Cucumber framework)" ,
-                          "BTQ-java-tests(SoapUi framework)"]
+                          "BTQ-java-tests-SoapUi-framework"]
 
           jobs_list.each { job ->
             parallelLabs["${job}"] = {
