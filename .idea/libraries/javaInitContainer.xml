@@ -1,0 +1,11 @@
+<component name="libraryTable">
+  <library name="javaInitContainer">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/initContainers/javaInitContainer/sl-build-scanner.jar!/" />
+      <root url="jar://$PROJECT_DIR$/initContainers/javaInitContainer/sl-test-listener.jar!/" />
+      <root url="jar://$PROJECT_DIR$/initContainers/javaInitContainer/sl-cd-agent.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

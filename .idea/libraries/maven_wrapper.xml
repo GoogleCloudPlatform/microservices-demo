@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="maven-wrapper">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/integration-tests/cucumber-framework/.mvn/wrapper/maven-wrapper.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>
