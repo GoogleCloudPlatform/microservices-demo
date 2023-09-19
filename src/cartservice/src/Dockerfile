@@ -23,7 +23,6 @@ RUN dotnet publish cartservice.csproj \
     -p:PublishSingleFile=false \
     -r linux-musl-x64 \
     --self-contained true \
-    -p:PublishTrimmed=True \
     -p:TrimMode=Full \
     -c release \
     -o /cartservice \
