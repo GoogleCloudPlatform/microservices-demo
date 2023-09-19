@@ -29,7 +29,7 @@ spec:
     spec:
       initContainers:
       - name: java-cd-agent
-        image: ahmadsealights/javainit:latest
+        image: sealights/javainitcontainer:latest
         command: ["/bin/sh", "-c", "cp /sl-cd-agent.jar /sealights"]
         volumeMounts:
           - mountPath: /sealights
