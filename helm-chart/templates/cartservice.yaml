@@ -79,7 +79,7 @@ spec:
         - name: ASPNETCORE_URLS
           value: http://*:7070
         - name: SL_BRANCH
-          value: {{ .Values.SealightsEnvVars.sl_branch }}
+          value: "{{ .Values.SealightsEnvVars.sl_branch }}""
         {{- if eq .Values.cartDatabase.type "spanner" }}
         - name: SPANNER_CONNECTION_STRING
         {{- else }}
