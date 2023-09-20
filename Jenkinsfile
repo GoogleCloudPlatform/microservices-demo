@@ -164,6 +164,7 @@ pipeline {
             string(name: 'SL_TOKEN', value: "${env.TOKEN}"),
             string(name: 'MACHINE_DNS1', value: "${env.MACHINE_DNS}")
           ])
+          sleep time: 60, unit: 'SECONDS'
         }
       }
     }
