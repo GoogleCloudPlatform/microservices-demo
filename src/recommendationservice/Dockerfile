@@ -18,7 +18,7 @@ RUN pip install ${AGENT_URL}
 WORKDIR /recommendationservice
 COPY . .
 RUN sl-python config --appname recommendationservice --branchname ${BRANCH} --buildname ${BUILD_NAME} --workspacepath ./ --token ${SEALIGHTS_TOKEN} --exclude "*grpc*"
-RUN sl-python scan --scm none --token ${SEALIGHTS_TOKEN} --exclude grpc
+RUN sl-python scan --scm none --token ${SEALIGHTS_TOKEN}
 
 FROM base
 
