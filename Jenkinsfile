@@ -105,7 +105,7 @@ pipeline {
       }
     }
 
-//    stage ('Run Tests') {
+//    stage ('Run Tests parallel') {
 //      steps {
 //        script {
 //          sleep time: 120, unit: 'SECONDS'
@@ -137,7 +137,7 @@ pipeline {
 //    }
 
 
-      stage('Run Tests') {
+      stage('Run Tests sequential') {
     steps {
       script {
         sleep time: 120, unit: 'SECONDS'
@@ -168,13 +168,7 @@ pipeline {
       }
     }
   }
-
-
-
-
   }
-
-
 
   post {
     success {
@@ -185,6 +179,11 @@ pipeline {
     }
     failure {
       script {
+        sts.set_assume_role([
+          env: "dev",
+          account_id: "159616352881",
+          role_name: "CD-TF-Role"
+        ])
         def env_instance_id = sh(returnStdout: true, script: "aws ec2 --region eu-west-1 describe-instances --filters 'Name=tag:Name,Values=EUW-ALLINONE-DEV-${env.IDENTIFIER}' 'Name=instance-state-name,Values=running' | jq -r '.Reservations[].Instances[].InstanceId'")
         sh "aws ec2 --region eu-west-1 stop-instances --instance-ids ${env_instance_id}"
         slackSend channel: "#btq-ci", tokenCredentialId: "slack_sldevops", color: "danger", message: "BTQ-CI build ${env.CURRENT_VERSION} for branch ${BRANCH_NAME} finished with status ${currentBuild.currentResult} (<${env.BUILD_URL}|Open>) and TearDownBoutiqeEnvironment"
