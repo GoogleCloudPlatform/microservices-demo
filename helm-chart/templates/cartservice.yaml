@@ -78,6 +78,8 @@ spec:
           value: "{{ .Values.SealightsEnvVars.dotnet_agent_url }}"
         - name: ASPNETCORE_URLS
           value: http://*:7070
+        - name: SL_BRANCH
+          value: {{ .Values.SealightsEnvVars.sl_branch }}
         {{- if eq .Values.cartDatabase.type "spanner" }}
         - name: SPANNER_CONNECTION_STRING
         {{- else }}
@@ -102,7 +104,7 @@ spec:
           - /bin/sh
           - -c 
           - |
-            /sealights/agent/SL.DotNet cdAgent --appName cartservice --branchName {{ .Values.SealightsEnvVars.sl_branch }} --buildName ${BUILD_NAME} \
+            /sealights/agent/SL.DotNet cdAgent --appName cartservice --branchName ${SL_BRANCH} --buildName ${BUILD_NAME} \
             --binDir /app  --includeNamespace *.services* --target /app/cartservice --token ${SL_TOKEN} --workingDir /app \
             --identifyMethodsByFqn --labId ${SL_LAB_ID}
       volumes:
