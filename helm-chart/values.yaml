@@ -8,6 +8,7 @@ SealightsEnvVars:
   build_name: ""
   java_agent_url: ""
   dotnet_agent_url: ""
+  sl_branch: ""
 
 images:
   repository: 534369319675.dkr.ecr.us-west-2.amazonaws.com
