@@ -20,7 +20,3 @@ dependencies {
 sourceCompatibility = '1.8'
 targetCompatibility = '1.8'
 
-test {
-    // Including all Java files for test, as per maven-surefire-plugin configuration
-    include '**/*.java'
-}
