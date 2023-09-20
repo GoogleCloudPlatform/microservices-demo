@@ -102,7 +102,7 @@ spec:
           - /bin/sh
           - -c 
           - |
-            /sealights/agent/SL.DotNet cdAgent --appName cartservice --branchName {{ .Values.SealightsEnvVars.build_name }} --buildName ${BUILD_NAME} \
+            /sealights/agent/SL.DotNet cdAgent --appName cartservice --branchName {{ .Values.SealightsEnvVars.sl_branch }} --buildName ${BUILD_NAME} \
             --binDir /app  --includeNamespace *.services* --target /app/cartservice --token ${SL_TOKEN} --workingDir /app \
             --identifyMethodsByFqn --labId ${SL_LAB_ID}
       volumes:

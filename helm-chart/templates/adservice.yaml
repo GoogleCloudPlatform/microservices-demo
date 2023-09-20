@@ -56,7 +56,7 @@ spec:
         - containerPort: 9555
         env:
         - name: JAVA_TOOL_OPTIONS
-          value: "-javaagent:/sealights/sl-cd-agent.jar -Dsl.branchName={ .Values.SealightsEnvVars.sl_token }} -Dsl.token={{ .Values.SealightsEnvVars.token }} -Dsl.appName=adservice -Dsl.buildName={{ .Values.SealightsEnvVars.build_name }} -Dsl.tags=script,container,docker -Dsl.labId={{ .Values.SealightsEnvVars.lab_id }} -Dsl.excludes=*Grpc*,*Demo* -Dsl.includes=*hipstershop* -Dsl.workspace=/app/build/install/hipstershop/lib"
+          value: "-javaagent:/sealights/sl-cd-agent.jar -Dsl.branchName={ .Values.SealightsEnvVars.sl_branch }} -Dsl.token={{ .Values.SealightsEnvVars.token }} -Dsl.appName=adservice -Dsl.buildName={{ .Values.SealightsEnvVars.build_name }} -Dsl.tags=script,container,docker -Dsl.labId={{ .Values.SealightsEnvVars.lab_id }} -Dsl.excludes=*Grpc*,*Demo* -Dsl.includes=*hipstershop* -Dsl.workspace=/app/build/install/hipstershop/lib"
         - name: PORT
           value: "9555"
         resources:
