@@ -29,8 +29,8 @@ RUN apk add --update --no-cache \
 
 WORKDIR /usr/src/app
 
-COPY package*.json ./
-#COPY . .
+#COPY package*.json ./
+COPY . .
 RUN npm install --only=production
 RUN npm i ${AGENT_URL}
 RUN  ./node_modules/.bin/slnodejs config --token ${SEALIGHTS_TOKEN} --appname "paymentservice" --branch ${BRANCH} --build ${BUILD_NAME}
