@@ -77,7 +77,7 @@ spec:
         - name: AGENT_URL
           value: "{{ .Values.SealightsEnvVars.dotnet_agent_url }}"
         - name: ASPNETCORE_URLS
-          value: http://*:7070
+          value: "http://*:7070"
         - name: SL_BRANCH
           value: "{{ .Values.SealightsEnvVars.sl_branch }}"
         {{- if eq .Values.cartDatabase.type "spanner" }}
