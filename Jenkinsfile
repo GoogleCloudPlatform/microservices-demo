@@ -95,7 +95,7 @@ pipeline {
           string(name:'GIT_BRANCH' , value:"${params.BRANCH}"),string(name:'BTQ_LAB_ID' , value:"${env.LAB_ID}"),string(name:'BTQ_TOKEN' , value:"${env.TOKEN}"),
           string(name:'BTQ_VERSION' , value:"${env.CURRENT_VERSION}"),string(name:'BUILD_NAME' , value:"${env.BUILD_NAME}"),
           string(name:'JAVA_AGENT_URL' , value: "${params.JAVA_AGENT_URL}"),string(name:'DOTNET_AGENT_URL' , value: "${params.DOTNET_AGENT_URL}"),
-           string(name:'SL_BRANCH' , value:"${params.BRANCH}")])
+          string(name:'SL_BRANCH' , value:"${params.BRANCH}")])
         }
       }
     }
@@ -104,7 +104,7 @@ pipeline {
       steps {
         script {
           sleep time: 150, unit: 'SECONDS'
-          //env.machine_dns = "http://dev-${env.IDENTIFIER}.dev.sealights.co:8081"
+          //env.machine_dns = "http://dev-${env.IDENTIFIER}.dev.sealights.co:8081" 
           def parallelLabs = [:]
           //List of all the jobs
           def jobs_list = ["BTQ-java-tests(Junit without testNG)" ,"BTQ-java-tests(Junit without testNG)-gradle" , "BTQ-python-tests(Pytest framework)" , "BTQ-nodejs-tests(Mocha framework)" , "BTQ-dotnet-tests(MS-test framework)" , "BTQ-nodejs-tests(Jest framework)" , "BTQ-python-tests(Robot framework)" , "BTQ-dotnet-tests(NUnit-test framework)" , "BTQ-java-tests(Junit support-testNG)"]
