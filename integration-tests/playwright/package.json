@@ -1,0 +1,15 @@
+{
+  "name": "playwright-api-tests",
+  "version": "1.0.0",
+  "description": "Playwright API Tests",
+  "scripts": {
+    "test": "playwright test"
+  },
+  "dependencies": {
+    "@playwright/test": "^1.38.0",
+    "axios": "^0.21.4",
+    "playwright": "^1.38.0"
+  },
+  "author": "Your Name",
+  "license": "MIT"
+}
