@@ -1,4 +1,4 @@
-FROM golang:1.14-alpine as builder
+FROM golang:1.20-alpine as builder
 RUN apk add --no-cache ca-certificates git
 
 ENV PROJECT github.com/signalfx/microservices-demo/src/shippingservice
