@@ -29,29 +29,21 @@ from grpc_health.v1 import health_pb2
 from grpc_health.v1 import health_pb2_grpc
 
 from opentelemetry import trace
-from opentelemetry import propagators
+from opentelemetry.propagate import set_global_textmap
 from opentelemetry.sdk.trace import TracerProvider
-from opentelemetry.exporter import zipkin
-from opentelemetry.sdk.trace.export import BatchExportSpanProcessor
-from opentelemetry.sdk.trace.propagation.b3_format import B3Format
+from opentelemetry.exporter.zipkin.json import ZipkinExporter
+from opentelemetry.sdk.trace.export import BatchSpanProcessor
+from opentelemetry.propagators.b3 import B3MultiFormat
 from opentelemetry.instrumentation.grpc import GrpcInstrumentorServer
 from opentelemetry.instrumentation.grpc import GrpcInstrumentorClient
-from opentelemetry.instrumentation.grpc.grpcext import intercept_server
 
 from logger import getJSONLogger
 logger = getJSONLogger('emailservice-server')
 
-export_url = urllib.parse.urlparse(os.environ['SIGNALFX_ENDPOINT_URL'])
-zipkin_exporter = zipkin.ZipkinSpanExporter(
-    service_name="emailservice",
-    host_name=export_url.hostname,
-    port=export_url.port,
-    endpoint=export_url.path,
-    protocol=export_url.scheme
-)
-span_processor = BatchExportSpanProcessor(zipkin_exporter)
+zipkin_exporter = ZipkinExporter(endpoint=os.environ['SIGNALFX_ENDPOINT_URL'])
+span_processor = BatchSpanProcessor(zipkin_exporter)
 
-propagators.set_global_httptextformat(B3Format())
+set_global_textmap(B3MultiFormat)
 trace.set_tracer_provider(TracerProvider())
 trace.get_tracer_provider().add_span_processor(span_processor)
 tracer = trace.get_tracer(__name__)
@@ -93,8 +85,7 @@ class HealthCheck():
       context.write(health_pb2.HealthCheckResponse(status=health_pb2.HealthCheckResponse.SERVING))
 
 def start():
-  server = grpc.server(futures.ThreadPoolExecutor(max_workers=10),
-                       interceptors=tuple())
+  server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
   service = None
   service = DummyEmailService()
 
