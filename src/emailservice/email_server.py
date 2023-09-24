@@ -43,7 +43,7 @@ logger = getJSONLogger('emailservice-server')
 zipkin_exporter = ZipkinExporter(endpoint=os.environ['SIGNALFX_ENDPOINT_URL'])
 span_processor = BatchSpanProcessor(zipkin_exporter)
 
-set_global_textmap(B3MultiFormat)
+set_global_textmap(B3MultiFormat())
 trace.set_tracer_provider(TracerProvider())
 trace.get_tracer_provider().add_span_processor(span_processor)
 tracer = trace.get_tracer(__name__)
