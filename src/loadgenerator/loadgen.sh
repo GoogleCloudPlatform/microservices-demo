@@ -32,4 +32,4 @@ if test $STATUSCODE -ne 200; then
 fi
 
 # else, run loadgen
-locust --host="http://${FRONTEND_ADDR}" -u "${USERS:-10}"
+locust --host="http://${FRONTEND_ADDR}" -u "${USERS:-10}" --autostart
