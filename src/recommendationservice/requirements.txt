@@ -5,7 +5,9 @@
 #    pip-compile requirements.in
 #
 backoff==2.2.1
-    # via opentelemetry-exporter-otlp-proto-grpc
+    # via
+    #   opentelemetry-exporter-otlp-proto-common
+    #   opentelemetry-exporter-otlp-proto-grpc
 cachetools==5.3.1
     # via google-auth
 certifi==2023.7.22
@@ -20,15 +22,15 @@ google-api-core==2.11.1
     # via
     #   -r requirements.in
     #   google-api-python-client
-google-api-python-client==2.98.0
+google-api-python-client==2.100.0
     # via google-cloud-profiler
-google-auth==2.22.0
+google-auth==2.23.0
     # via
     #   google-api-core
     #   google-api-python-client
     #   google-auth-httplib2
     #   google-cloud-profiler
-google-auth-httplib2==0.1.0
+google-auth-httplib2==0.1.1
     # via
     #   google-api-python-client
     #   google-cloud-profiler
@@ -38,11 +40,11 @@ googleapis-common-protos==1.60.0
     # via
     #   google-api-core
     #   opentelemetry-exporter-otlp-proto-grpc
-grpcio==1.57.0
+grpcio==1.58.0
     # via
     #   grpcio-health-checking
     #   opentelemetry-exporter-otlp-proto-grpc
-grpcio-health-checking==1.57.0
+grpcio-health-checking==1.58.0
     # via -r requirements.in
 httplib2==0.22.0
     # via
@@ -52,39 +54,39 @@ idna==3.4
     # via requests
 importlib-metadata==6.0.1
     # via opentelemetry-api
-opentelemetry-api==1.19.0
+opentelemetry-api==1.20.0
     # via
     #   opentelemetry-distro
     #   opentelemetry-exporter-otlp-proto-grpc
     #   opentelemetry-instrumentation
     #   opentelemetry-instrumentation-grpc
     #   opentelemetry-sdk
-opentelemetry-distro==0.40b0
+opentelemetry-distro==0.41b0
     # via -r requirements.in
-opentelemetry-exporter-otlp-proto-common==1.19.0
+opentelemetry-exporter-otlp-proto-common==1.20.0
     # via opentelemetry-exporter-otlp-proto-grpc
-opentelemetry-exporter-otlp-proto-grpc==1.19.0
+opentelemetry-exporter-otlp-proto-grpc==1.20.0
     # via -r requirements.in
-opentelemetry-instrumentation==0.40b0
+opentelemetry-instrumentation==0.41b0
     # via
     #   opentelemetry-distro
     #   opentelemetry-instrumentation-grpc
-opentelemetry-instrumentation-grpc==0.40b0
+opentelemetry-instrumentation-grpc==0.41b0
     # via -r requirements.in
-opentelemetry-proto==1.19.0
+opentelemetry-proto==1.20.0
     # via
     #   opentelemetry-exporter-otlp-proto-common
     #   opentelemetry-exporter-otlp-proto-grpc
-opentelemetry-sdk==1.19.0
+opentelemetry-sdk==1.20.0
     # via
     #   opentelemetry-distro
     #   opentelemetry-exporter-otlp-proto-grpc
     #   opentelemetry-instrumentation-grpc
-opentelemetry-semantic-conventions==0.40b0
+opentelemetry-semantic-conventions==0.41b0
     # via
     #   opentelemetry-instrumentation-grpc
     #   opentelemetry-sdk
-protobuf==4.24.2
+protobuf==4.24.3
     # via
     #   google-api-core
     #   google-cloud-profiler
@@ -114,7 +116,7 @@ six==1.16.0
     # via
     #   google-auth
     #   google-auth-httplib2
-typing-extensions==4.7.1
+typing-extensions==4.8.0
     # via opentelemetry-sdk
 uritemplate==4.1.1
     # via google-api-python-client
