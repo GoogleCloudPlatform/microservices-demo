@@ -1,0 +1,94 @@
+version: 2
+updates:
+  - package-ecosystem: "gradle"
+    directory: "/src/adservice"
+    schedule:
+      interval: "daily"
+  - package-ecosystem: "docker"
+    directory: "/src/adservice"
+    schedule:
+      interval: "daily"
+  - package-ecosystem: "nuget"
+    directory: "/src/cartservice"
+    schedule:
+      interval: "daily"
+  - package-ecosystem: "docker"
+    directory: "/src/cartservice"
+    schedule:
+      interval: "daily"
+  - package-ecosystem: "gomod"
+    directory: "/src/checkoutservice"
+    schedule:
+      interval: "daily"
+  - package-ecosystem: "docker"
+    directory: "/src/checkoutservice"
+    schedule:
+      interval: "daily"
+  - package-ecosystem: "npm"
+    directory: "/src/currencyservice"
+    schedule:
+      interval: "daily"
+  - package-ecosystem: "docker"
+    directory: "/src/currencyservice"
+    schedule:
+      interval: "daily"
+  - package-ecosystem: "pip"
+    directory: "/src/emailservice"
+    schedule:
+      interval: "daily"
+  - package-ecosystem: "docker"
+    directory: "/src/emailservice"
+    schedule:
+      interval: "daily"
+  - package-ecosystem: "gomod"
+    directory: "/src/frontend"
+    schedule:
+      interval: "daily"
+  - package-ecosystem: "docker"
+    directory: "/src/frontend"
+    schedule:
+      interval: "daily"
+  - package-ecosystem: "pip"
+    directory: "/src/loadgenerator"
+    schedule:
+      interval: "daily"
+  - package-ecosystem: "docker"
+    directory: "/src/loadgenerator"
+    schedule:
+      interval: "daily"
+  - package-ecosystem: "npm"
+    directory: "/src/paymentservice"
+    schedule:
+      interval: "daily"
+  - package-ecosystem: "docker"
+    directory: "/src/paymentservice"
+    schedule:
+      interval: "daily"
+  - package-ecosystem: "gomod"
+    directory: "/src/productcatalogservice"
+    schedule:
+      interval: "daily"
+  - package-ecosystem: "docker"
+    directory: "/src/productcatalogservice"
+    schedule:
+      interval: "daily"
+  - package-ecosystem: "pip"
+    directory: "/src/recommendationservice"
+    schedule:
+      interval: "daily"
+  - package-ecosystem: "docker"
+    directory: "/src/recommendationservice"
+    schedule:
+      interval: "daily"
+  - package-ecosystem: "gomod"
+    directory: "/src/shippingservice"
+    schedule:
+      interval: "daily"
+  - package-ecosystem: "docker"
+    directory: "/src/shippingservice"
+    schedule:
+      interval: "daily"
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "daily"
