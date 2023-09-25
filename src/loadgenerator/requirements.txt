@@ -59,7 +59,7 @@ roundrobin==0.0.4
     # via locust
 six==1.16.0
     # via geventhttpclient
-typing-extensions==4.7.1
+typing-extensions==4.8.0
     # via locust
 urllib3==2.0.2
     # via requests
