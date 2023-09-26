@@ -26,7 +26,7 @@ pipeline {
     string(name: 'LATEST', defaultValue: '', description: 'latest tag')
     string(name: 'BRANCH', defaultValue: 'ahmad-branch', description: 'Branch to clone (ahmad-branch)')
     string(name: 'JOB_NAME', defaultValue: '', description: 'tests job name ')
-    string(name: 'BUILD_BRANCH', defaultValue: 'Wahbi-branch', description: 'Branch to Build images that have the creational LAB_ID (send to wahbi branch to build)')
+    string(name: 'BUILD_BRANCH', defaultValue: 'ahmad-branch', description: 'Branch to Build images that have the creational LAB_ID (send to ahmad branch to build)')
     string(name: 'SL_TOKEN', defaultValue: '', description: 'sl-token')
     string(name: 'BUILD_NAME', defaultValue: '', description: 'build name')
     string(name: 'JAVA_AGENT_URL', defaultValue: 'https://storage.googleapis.com/cloud-profiler/java/latest/profiler_java_agent_alpine.tar.gz', description: 'use different java agent')
@@ -61,6 +61,7 @@ pipeline {
           env.TOKEN= "${params.SL_TOKEN}" == "" ? "${env.DEV_INTEGRATION_SL_TOKEN}"  : "${params.SL_TOKEN}"
           def services_list = ["adservice","cartservice","checkoutservice", "currencyservice","emailservice","frontend","paymentservice","productcatalogservice","recommendationservice","shippingservice"]
           //def special_services = ["cartservice"].
+          env.BUILD_NAME= "${params.BUILD_NAME}" == "" ? "${params.BRANCH}-${env.CURRENT_VERSION}" : "${params.BUILD_NAME}"
           env.BUILD_NAME= "${params.BUILD_NAME}" == "" ? "${params.BRANCH}-${env.CURRENT_VERSION}" : "${params.BUILD_NAME}"
           services_list.each { service ->
             parallelLabs["${service}"] = {
