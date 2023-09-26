@@ -1,0 +1,19 @@
+{
+  "name": "protractor-test-project",
+  "version": "1.0.0",
+  "description": "Protractor test project for API testing",
+  "main": "index.js",
+  "scripts": {
+    "test": "protractor protractor.conf.js"
+  },
+  "author": "Your Name",
+  "license": "MIT",
+  "dependencies": {
+    "protractor": "^7.0.0",
+    "webdriver-manager": "^13.0.0",
+    "jasmine": "^3.10.0"
+
+  },
+  "devDependencies": {
+  }
+}

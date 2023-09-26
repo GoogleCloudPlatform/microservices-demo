@@ -113,15 +113,39 @@ pipeline {
           "BTQ-java-tests(Junit support-testNG)", "BTQ-postman-tests","BTQ-java-tests(Cucumber-framework-java)" ,"BTQ-java-tests-SoapUi-framework" ,
           "BTQ-nodejs-tests-Cypress-framework"]
 
-          jobs_list.each { job ->
-            parallelLabs["${job}"] = {
-              build(job:"${job}", parameters: [string(name: 'BRANCH', value: "${params.BRANCH}"),string(name: 'SL_LABID', value: "${env.LAB_ID}") , string(name:'SL_TOKEN' , value:"${env.TOKEN}") ,string(name:'MACHINE_DNS1' , value:"${env.MACHINE_DNS}")])
-            }
-          }
-          parallel parallelLabs
+
+      stage('Run Tests sequential') {
+    steps {
+      script {
+        sleep time: 120, unit: 'SECONDS'
+        // env.machine_dns = "http://dev-${env.IDENTIFIER}.dev.sealights.co:8081"
+        def jobs_list = [
+          "BTQ-java-tests(Junit without testNG)",
+          "BTQ-python-tests(Pytest framework)",
+          "BTQ-nodejs-tests(Mocha framework)",
+          "BTQ-dotnet-tests(MS-test framework)",
+          "BTQ-nodejs-tests(Jest framework)",
+          "BTQ-python-tests(Robot framework)",
+          "BTQ-dotnet-tests(NUnit-test framework)",
+          "BTQ-java-tests(Junit support-testNG)",
+          "BTQ-java-tests(Cucumber-framework-java)",
+          "BTQ-java-tests-SoapUi-framework",
+          "BTQ-java-tests(Junit without testNG)-gradle",
+          "BTQ-nodejs-tests-Cypress-framework"
+        ]
+
+        jobs_list.each { job ->
+          build(job: "${job}", parameters: [
+            string(name: 'BRANCH', value: "${params.BRANCH}"),
+            string(name: 'SL_LABID', value: "${env.LAB_ID}"),
+            string(name: 'SL_TOKEN', value: "${env.TOKEN}"),
+            string(name: 'MACHINE_DNS1', value: "${env.MACHINE_DNS}")
+          ])
+          sleep time: 60, unit: 'SECONDS'
         }
       }
     }
+  }
   }
 
   post {
@@ -133,6 +157,11 @@ pipeline {
     }
     failure {
       script {
+        sts.set_assume_role([
+          env: "dev",
+          account_id: "159616352881",
+          role_name: "CD-TF-Role"
+        ])
         def env_instance_id = sh(returnStdout: true, script: "aws ec2 --region eu-west-1 describe-instances --filters 'Name=tag:Name,Values=EUW-ALLINONE-DEV-${env.IDENTIFIER}' 'Name=instance-state-name,Values=running' | jq -r '.Reservations[].Instances[].InstanceId'")
         sh "aws ec2 --region eu-west-1 stop-instances --instance-ids ${env_instance_id}"
         slackSend channel: "#btq-ci", tokenCredentialId: "slack_sldevops", color: "danger", message: "BTQ-CI build ${env.CURRENT_VERSION} for branch ${BRANCH_NAME} finished with status ${currentBuild.currentResult} (<${env.BUILD_URL}|Open>) and TearDownBoutiqeEnvironment"
