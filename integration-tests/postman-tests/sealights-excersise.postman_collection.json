@@ -1,7 +1,7 @@
 {
 	"info": {
 		"_postman_id": "f201456e-9d72-4909-8161-11b782e9c0da",
-		"name": "sealights excersise",
+		"name": "sealights-excersise",
 		"description": "These are the tests for all APIs, including the bonus\n\nEach test title describes what the test is for",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
 		"_exporter_id": "29924214"
@@ -47,13 +47,9 @@
 					}
 				},
 				"url": {
-					"raw": "{{machine_dns}}:8081/",
+					"raw": "{{machine_dns}}",
 					"host": [
 						"{{machine_dns}}"
-					],
-					"port": "8081",
-					"path": [
-						""
 					]
 				}
 			},
@@ -90,11 +86,10 @@
 					}
 				},
 				"url": {
-					"raw": "{{machine_dns}}:8081/product/0PUK6V6EV0",
+					"raw": "{{machine_dns}}/product/0PUK6V6EV0",
 					"host": [
 						"{{machine_dns}}"
 					],
-					"port": "8081",
 					"path": [
 						"product",
 						"0PUK6V6EV0"
@@ -134,11 +129,10 @@
 					}
 				},
 				"url": {
-					"raw": "{{machine_dns}}:8081/product/032E",
+					"raw": "{{machine_dns}}/product/032E",
 					"host": [
 						"{{machine_dns}}"
 					],
-					"port": "8081",
 					"path": [
 						"product",
 						"032E"
@@ -175,11 +169,10 @@
 					}
 				},
 				"url": {
-					"raw": "{{machine_dns}}:8081/setCurrency?currency_code=USD",
+					"raw": "{{machine_dns}}/setCurrency?currency_code=USD",
 					"host": [
 						"{{machine_dns}}"
 					],
-					"port": "8081",
 					"path": [
 						"setCurrency"
 					],
@@ -221,11 +214,10 @@
 					}
 				},
 				"url": {
-					"raw": "{{machine_dns}}:8081/cart?product_id=66VCHSJNUP&quantity=2",
+					"raw": "{{machine_dns}}/cart?product_id=66VCHSJNUP&quantity=2",
 					"host": [
 						"{{machine_dns}}"
 					],
-					"port": "8081",
 					"path": [
 						"cart"
 					],
@@ -271,11 +263,10 @@
 					}
 				},
 				"url": {
-					"raw": "{{machine_dns}}:8081/cart/empty",
+					"raw": "{{machine_dns}}/cart/empty",
 					"host": [
 						"{{machine_dns}}"
 					],
-					"port": "8081",
 					"path": [
 						"cart",
 						"empty"
