@@ -1,0 +1,16 @@
+{
+  "name": "cucumber-js-demo",
+  "version": "1.0.0",
+  "description": "Cucumber.js Demo Project",
+  "main": "index.js",
+  "scripts": {
+    "test": "cucumber-js"
+  },
+  "author": "Your Name",
+  "license": "MIT",
+  "dependencies": {
+    "@cucumber/cucumber": "^7.0.0",
+    "axios": "^0.21.4",
+    "sealights-cucumber-plugin": "^2.0.16"
+  }
+}
