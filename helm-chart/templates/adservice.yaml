@@ -1,5 +1,5 @@
 {{- if .Values.adService.create }}
-{{- if .Values.serviceAccounts.create }}
+  {{- if .Values.serviceAccounts.create }}
 apiVersion: v1
 kind: ServiceAccount
 metadata:
@@ -12,7 +12,7 @@ metadata:
   {{- end }}
   {{- end }}
 ---
-{{- end }}
+  {{- end }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -88,10 +88,10 @@ spec:
   selector:
     app: {{ .Values.adService.name }}
   ports:
-  - name: grpc
-    port: 9555
-    targetPort: 9555
-{{- if .Values.networkPolicies.create }}
+    - name: grpc
+      port: 9555
+      targetPort: 9555
+  {{- if .Values.networkPolicies.create }}
 ---
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
@@ -103,20 +103,20 @@ spec:
     matchLabels:
       app: {{ .Values.adService.name }}
   policyTypes:
-  - Ingress
-  - Egress
+    - Ingress
+    - Egress
   ingress:
-  - from:
-    - podSelector:
-        matchLabels:
-          app: {{ .Values.frontend.name }}
-    ports:
-     - port: 9555
-       protocol: TCP
+    - from:
+        - podSelector:
+            matchLabels:
+              app: {{ .Values.frontend.name }}
+      ports:
+        - port: 9555
+          protocol: TCP
   egress:
-  - {}
-{{- end }}
-{{- if .Values.sidecars.create }}
+    - {}
+  {{- end }}
+  {{- if .Values.sidecars.create }}
 ---
 apiVersion: networking.istio.io/v1beta1
 kind: Sidecar
@@ -128,13 +128,13 @@ spec:
     labels:
       app: {{ .Values.adService.name }}
   egress:
-  - hosts:
-    - istio-system/*
-    {{- if .Values.opentelemetryCollector.create }}
-    - ./{{ .Values.opentelemetryCollector.name }}.{{ .Release.Namespace }}.svc.cluster.local
-    {{- end }}
-{{- end }}
-{{- if .Values.authorizationPolicies.create }}
+    - hosts:
+        - istio-system/*
+      {{- if .Values.opentelemetryCollector.create }}
+      - ./{{ .Values.opentelemetryCollector.name }}.{{ .Release.Namespace }}.svc.cluster.local
+      {{- end }}
+  {{- end }}
+  {{- if .Values.authorizationPolicies.create }}
 ---
 apiVersion: security.istio.io/v1beta1
 kind: AuthorizationPolicy

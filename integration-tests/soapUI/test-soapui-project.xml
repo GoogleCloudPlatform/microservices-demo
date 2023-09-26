@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<con:soapui-project id="47c62331-8d7d-4209-8445-12506488fe64" activeEnvironment="Default" name="test"
+                    resourceRoot="${projectDir}" soapui-version="5.7.1" abortOnError="false" runType="SEQUENTIAL"
+                    xmlns:con="http://eviware.com/soapui/config"
+                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                    xsi:schemaLocation="http://eviware.com/soapui/config ">
+  <con:settings/>
+  <con:interface xsi:type="con:RestService" id="32189eb6-8c80-4c5d-a871-db3a8290f0d6"
+                 wadlVersion="http://wadl.dev.java.net/2009/02" name="machine_dns" type="rest"
+                 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <con:settings/>
+    <con:definitionCache type="TEXT" rootPart=""/>
+    <con:endpoints>
+      <con:endpoint>machine_dns</con:endpoint>
+    </con:endpoints>
+    <con:resource name="" path="/" id="02a17f3f-639c-4008-828b-309f9257e6ac">
+      <con:settings/>
+      <con:parameters/>
+      <con:method name="1" id="218095a4-64c3-41fc-8fef-d0c37d76446c" method="GET">
+        <con:settings/>
+        <con:parameters/>
+        <con:representation type="FAULT">
+          <con:mediaType>text/plain; charset=utf-8</con:mediaType>
+          <con:status>404</con:status>
+          <con:params/>
+          <con:element>data</con:element>
+        </con:representation>
+        <con:representation type="RESPONSE">
+          <con:mediaType>text/html; charset=utf-8</con:mediaType>
+          <con:status>200</con:status>
+          <con:params/>
+          <con:element>html</con:element>
+        </con:representation>
+        <con:representation type="RESPONSE">
+          <con:mediaType xsi:nil="true"/>
+          <con:status>0</con:status>
+          <con:params/>
+          <con:element>data</con:element>
+        </con:representation>
+        <con:request name="Request 1" id="38de1708-5ca6-497e-963e-4708864a7098" mediaType="application/json">
+          <con:settings>
+            <con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting>
+          </con:settings>
+          <con:endpoint>machine_dns</con:endpoint>
+          <con:request/>
+          <con:originalUri>machine_dns/cart/</con:originalUri>
+          <con:credentials>
+            <con:authType>No Authorization</con:authType>
+          </con:credentials>
+          <con:jmsConfig JMSDeliveryMode="PERSISTENT"/>
+          <con:jmsPropertyConfig/>
+          <con:parameters/>
+          <con:parameterOrder/>
+        </con:request>
+      </con:method>
+    </con:resource>
+  </con:interface>
+  <con:testSuite id="5c3248ac-b227-4d7f-811e-029a853fd81b" name="TestSuite 1">
+    <con:settings/>
+    <con:runType>SEQUENTIAL</con:runType>
+    <con:testCase id="0bb7a091-bad8-4013-97d8-15ad355dff45" failOnError="true" failTestCaseOnErrors="true"
+                  keepSession="false" maxResults="0" name="TestCase 1" searchProperties="true">
+      <con:settings/>
+      <con:testStep type="restrequest" name="1 - Request 1" id="21f326c1-ed62-4047-9467-0551252f0f35">
+        <con:settings/>
+        <con:config service="machine_dns" resourcePath="/" methodName="1" xsi:type="con:RestRequestStep"
+                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+          <con:restRequest name="1 - Request 1" id="38de1708-5ca6-497e-963e-4708864a7098" mediaType="application/json">
+            <con:settings>
+              <con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/>
+              </con:setting>
+            </con:settings>
+            <con:endpoint>machine_dns/cart</con:endpoint>
+            <con:request/>
+            <con:originalUri>machine_dns/cart/</con:originalUri>
+            <con:assertion type="Valid HTTP Status Codes" id="e99b7487-c47c-4cac-ac36-77a22b2f40bb"
+                           name="Valid HTTP Status Codes">
+              <con:configuration>
+                <codes>404
+                </codes>
+              </con:configuration>
+            </con:assertion>
+            <con:assertion type="GroovyScriptAssertion" id="7ece926b-318d-4247-bc13-30e5fb7dfadf"
+                           name="Script Assertion">
+              <con:configuration>
+                <scriptText>assert messageExchange.timeTaken != 249
+                </scriptText>
+              </con:configuration>
+            </con:assertion>
+            <con:credentials>
+              <con:authType>No Authorization</con:authType>
+            </con:credentials>
+            <con:jmsConfig JMSDeliveryMode="PERSISTENT"/>
+            <con:jmsPropertyConfig/>
+            <con:parameters/>
+            <con:parameterOrder/>
+          </con:restRequest>
+        </con:config>
+      </con:testStep>
+      <con:testStep type="restrequest" name="1 - Request 1 1" id="a8261804-994a-4b2c-87bc-df3ec0b8d208">
+        <con:settings/>
+        <con:config service="machine_dns" resourcePath="/" methodName="1" xsi:type="con:RestRequestStep"
+                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+          <con:restRequest name="1 - Request 1 1" id="38de1708-5ca6-497e-963e-4708864a7098"
+                           mediaType="application/json">
+            <con:settings>
+              <con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/>
+              </con:setting>
+            </con:settings>
+            <con:endpoint>machine_dns</con:endpoint>
+            <con:request/>
+            <con:originalUri>machine_dns/cart/</con:originalUri>
+            <con:assertion type="GroovyScriptAssertion" id="edfb8b4b-502a-4241-b510-de84a6b3901b"
+                           name="Script Assertion">
+              <con:configuration>
+                <scriptText/>
+              </con:configuration>
+            </con:assertion>
+            <con:assertion type="GroovyScriptAssertion" id="84208128-94ea-413c-946e-fcc2eb7c531b"
+                           name="Script Assertion 1">
+              <con:configuration>
+                <scriptText>{
+                  x=10
+                  }
+                </scriptText>
+              </con:configuration>
+            </con:assertion>
+            <con:assertion type="GroovyScriptAssertion" id="75b0c9e7-8190-4360-b423-a3ce04294bd1">
+              <con:configuration/>
+            </con:assertion>
+            <con:credentials>
+              <con:authType>No Authorization</con:authType>
+            </con:credentials>
+            <con:jmsConfig JMSDeliveryMode="PERSISTENT"/>
+            <con:jmsPropertyConfig/>
+            <con:parameters/>
+            <con:parameterOrder/>
+          </con:restRequest>
+        </con:config>
+      </con:testStep>
+      <con:properties/>
+    </con:testCase>
+    <con:properties/>
+  </con:testSuite>
+  <con:properties/>
+  <con:afterLoadScript/>
+  <con:wssContainer/>
+  <con:oAuth2ProfileContainer/>
+  <con:oAuth1ProfileContainer/>
+  <con:sensitiveInformation/>
+</con:soapui-project>

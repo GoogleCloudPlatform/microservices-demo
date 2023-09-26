@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="LoadTest-1.0-SNAPSHOT">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/integration-tests/java-tests/target/LoadTest-1.0-SNAPSHOT.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

@@ -55,7 +55,7 @@ pipeline {
     stage ('Build BTQ') {
       steps {
         script {
-          env.CURRENT_VERSION = "1.0.${BUILD_NUMBER}"
+          env.CURRENT_VERSION = "1-0-${BUILD_NUMBER}"
           def parallelLabs = [:]
           //List of all the images name 
           env.TOKEN= "${params.SL_TOKEN}" == "" ? "${env.DEV_INTEGRATION_SL_TOKEN}"  : "${params.SL_TOKEN}"
@@ -65,9 +65,9 @@ pipeline {
           services_list.each { service ->
             parallelLabs["${service}"] = {
               def AGENT_URL = getParamForService(service)
-              build(job: 'BTQ-BUILD', parameters: [string(name: 'SERVICE', value: "${service}"), string(name:'TAG' , value:"${env.CURRENT_VERSION}"), 
-              string(name:'BRANCH' , value:"${params.BRANCH}"),string(name:'BUILD_NAME' , value:"${env.BUILD_NAME}"), 
-              string(name:'SL_TOKEN' , value:"${env.TOKEN}"), string(name:'AGENT_URL' , value:AGENT_URL[0]), string(name:'AGENT_URL_SLCI' , value:AGENT_URL[1])])
+              build(job: 'BTQ-BUILD', parameters: [string(name: 'SERVICE', value: "${service}"), string(name:'TAG' , value:"${env.CURRENT_VERSION}"),
+                                                   string(name:'BRANCH' , value:"${params.BRANCH}"),string(name:'BUILD_NAME' , value:"${env.BUILD_NAME}"),
+                                                   string(name:'SL_TOKEN' , value:"${env.TOKEN}"), string(name:'AGENT_URL' , value:AGENT_URL[0]), string(name:'AGENT_URL_SLCI' , value:AGENT_URL[1])])
             }
           }
           parallel parallelLabs
@@ -110,7 +110,9 @@ pipeline {
           def jobs_list = ["BTQ-java-tests(Junit without testNG)" ,"BTQ-java-tests(Junit without testNG)-gradle" , 
           "BTQ-python-tests(Pytest framework)" , "BTQ-nodejs-tests(Mocha framework)" , "BTQ-dotnet-tests(MS-test framework)" , 
           "BTQ-nodejs-tests(Jest framework)" , "BTQ-python-tests(Robot framework)" , "BTQ-dotnet-tests(NUnit-test framework)" , 
-          "BTQ-java-tests(Junit support-testNG)", "BTQ-postman-tests"]
+          "BTQ-java-tests(Junit support-testNG)", "BTQ-postman-tests","BTQ-java-tests(Cucumber framework)" ,"BTQ-java-tests-SoapUi-framework" ,
+          "BTQ-nodejs-tests-Cypress-framework"]
+
           jobs_list.each { job ->
             parallelLabs["${job}"] = {
               build(job:"${job}", parameters: [string(name: 'BRANCH', value: "${params.BRANCH}"),string(name: 'SL_LABID', value: "${env.LAB_ID}") , string(name:'SL_TOKEN' , value:"${env.TOKEN}") ,string(name:'MACHINE_DNS1' , value:"${env.MACHINE_DNS}")])
@@ -139,18 +141,18 @@ pipeline {
   }
 }
 
-  def getParamForService(service) {
-    switch (service) {
-        case "adservice":
-          return [params.JAVA_AGENT_URL,""]
-        case "cartservice":
-          return [params.DOTNET_AGENT_URL,""]
-        case ["checkoutservice","frontend","productcatalogservice","shippingservice"]:
-          return [params.GO_AGENT_URL,params.GO_SLCI_AGENT_URL]
-        case ["emailservice","recommendationservice"]:
-          return [params.PYTHON_AGENT_URL,""]
-        case ["currencyservice","paymentservice"]:
-          return [params.NODE_AGENT_URL,""]
+def getParamForService(service) {
+  switch (service) {
+    case "adservice":
+      return [params.JAVA_AGENT_URL,""]
+    case "cartservice":
+      return [params.DOTNET_AGENT_URL,""]
+    case ["checkoutservice","frontend","productcatalogservice","shippingservice"]:
+      return [params.GO_AGENT_URL,params.GO_SLCI_AGENT_URL]
+    case ["emailservice","recommendationservice"]:
+      return [params.PYTHON_AGENT_URL,""]
+    case ["currencyservice","paymentservice"]:
+      return [params.NODE_AGENT_URL,""]
 
-    }
+  }
 }

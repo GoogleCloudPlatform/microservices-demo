@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="your-artifact-id-1.0-SNAPSHOT">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/integration-tests/support-testNG/target/your-artifact-id-1.0-SNAPSHOT.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>
