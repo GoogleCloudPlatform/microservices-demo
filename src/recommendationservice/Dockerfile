@@ -15,10 +15,6 @@ RUN apt-get -qq update \
 COPY requirements.txt .
 RUN pip install -r requirements.txt
 RUN pip install ${AGENT_URL}
-WORKDIR /recommendationservice
-COPY . .
-RUN sl-python config --appname recommendationservice --branchname ${BRANCH} --buildname ${BUILD_NAME} --workspacepath ./ --token ${SEALIGHTS_TOKEN} --exclude "*grpc*"
-RUN sl-python scan --scm none --token ${SEALIGHTS_TOKEN}
 
 FROM builder
 
@@ -28,7 +24,9 @@ ENV PYTHONUNBUFFERED=1
 COPY --from=builder /usr/local/lib/python3.10/ /usr/local/lib/python3.10/
 WORKDIR /recommendationservice
 COPY . .
-COPY --from=builder /recommendationservice/buildSessionId.txt .
+RUN sl-python config --appname recommendationservice --branchname ${BRANCH} --buildname ${BUILD_NAME} --workspacepath ./ --token ${SEALIGHTS_TOKEN} --exclude "*grpc*"
+RUN sl-python scan --scm none --token ${SEALIGHTS_TOKEN}
+#COPY --from=builder /recommendationservice/buildSessionId.txt .
 RUN export SL_BUILD_SESSION_ID=`cat buildSessionId.txt`
 ENV PORT "8080"
 EXPOSE 8080
