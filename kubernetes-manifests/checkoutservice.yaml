@@ -30,7 +30,7 @@ spec:
       containers:
         - name: server
           image: checkoutservice
-          imagePullPolicy: Always
+          imagePullPolicy: IfNotPresent
           ports:
           - containerPort: 5050
           readinessProbe:
@@ -67,10 +67,10 @@ spec:
             value: "25"
           resources:
             requests:
-              cpu: 100m
+              cpu: 70m
               memory: 64Mi
             limits:
-              cpu: 200m
+              cpu: 70m
               memory: 128Mi
 ---
 apiVersion: v1

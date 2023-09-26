@@ -30,7 +30,7 @@ spec:
       containers:
       - name: server
         image: shippingservice
-        imagePullPolicy: Always
+        imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 50051
         env:
@@ -52,10 +52,10 @@ spec:
             command: ["/bin/grpc_health_probe", "-addr=:50051"]
         resources:
           requests:
-            cpu: 100m
+            cpu: 50m
             memory: 64Mi
           limits:
-            cpu: 200m
+            cpu: 50m
             memory: 128Mi
 ---
 apiVersion: v1

@@ -12,13 +12,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-apiVersion: skaffold/v1beta2
+apiVersion: skaffold/v2beta26
 kind: Config
+metadata:
+  name: app
 build:
   artifacts:
-  # image tags are relative; to specify an image repo (e.g. GCR), you
-  # must provide a "default repo" using one of the methods described 
-  # here:
+  # image tags are relative; to specify an image repo, you must provide a 
+  # "default repo" using one of the methods described here:
   # https://skaffold.dev/docs/concepts/#image-repository-handling
   - image: emailservice
     context: src/emailservice
@@ -38,28 +39,39 @@ build:
     context: src/cartservice
   - image: frontend
     context: src/frontend
-  - image: loadgenerator
-    context: src/loadgenerator
   - image: adservice
     context: src/adservice
   tagPolicy:
     gitCommit: {}
 deploy:
+  statusCheckDeadlineSeconds: 1200
   kubectl:
     manifests:
-    - ./kubernetes-manifests/**.yaml
-profiles:
-# "gcb" profile allows building and pushing the images
-# on Google Container Builder without requiring docker
-# installed on the developer machine. However, note that
-# since GCB does not cache the builds, each build will
-# start from scratch and therefore take a long time.
-#
-# This is not used by default. To use it, run:
-#     skaffold run -p gcb
-- name: gcb
-  build:
-    googleCloudBuild:
-      diskSizeGb: 300
-      machineType: N1_HIGHCPU_32
-      timeout: 4000s
+      - ./kubernetes-manifests/adservice.yaml
+      - ./kubernetes-manifests/cartservice.yaml
+      - ./kubernetes-manifests/checkoutservice.yaml
+      - ./kubernetes-manifests/currencyservice.yaml
+      - ./kubernetes-manifests/emailservice.yaml
+      - ./kubernetes-manifests/frontend.yaml
+      - ./kubernetes-manifests/paymentservice.yaml
+      - ./kubernetes-manifests/productcatalogservice.yaml
+      - ./kubernetes-manifests/recommendationservice.yaml
+      - ./kubernetes-manifests/redis.yaml
+      - ./kubernetes-manifests/shippingservice.yaml
+
+---
+
+apiVersion: skaffold/v2beta26
+kind: Config
+metadata:
+  name: loadgenerator
+requires:
+  - configs: [app]
+build:
+  artifacts:
+  - image: loadgenerator
+    context: src/loadgenerator
+deploy:
+  kubectl:
+    manifests:
+      - ./kubernetes-manifests/loadgenerator.yaml

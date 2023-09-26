@@ -36,7 +36,7 @@ spec:
         ports:
         - containerPort: 8089
         image: loadgenerator
-        imagePullPolicy: Always
+        imagePullPolicy: IfNotPresent
         env:
         - name: FRONTEND_ADDR
           value: "frontend:80"
@@ -44,11 +44,11 @@ spec:
           value: "10"
         resources:
           requests:
-            cpu: 300m
-            memory: 256Mi
+            cpu: 70m
+            memory: 128Mi
           limits:
-            cpu: 500m
-            memory: 512Mi
+            cpu: 70m
+            memory: 128Mi
 ---
 apiVersion: v1
 kind: Service

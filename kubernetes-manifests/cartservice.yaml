@@ -31,7 +31,7 @@ spec:
       containers:
       - name: server
         image: cartservice
-        imagePullPolicy: Always
+        imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 7070
         env:
@@ -71,10 +71,10 @@ spec:
           value: "true"
         resources:
           requests:
-            cpu: 200m
+            cpu: 70m
             memory: 64Mi
           limits:
-            cpu: 300m
+            cpu: 70m
             memory: 128Mi
         readinessProbe:
           initialDelaySeconds: 15

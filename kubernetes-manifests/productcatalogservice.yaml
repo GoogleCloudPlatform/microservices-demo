@@ -31,7 +31,7 @@ spec:
       containers:
       - name: server
         image: productcatalogservice
-        imagePullPolicy: Always
+        imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 3550
         env:
@@ -52,10 +52,10 @@ spec:
             command: ["/bin/grpc_health_probe", "-addr=:3550"]
         resources:
           requests:
-            cpu: 100m
+            cpu: 50m
             memory: 64Mi
           limits:
-            cpu: 200m
+            cpu: 50m
             memory: 128Mi
 ---
 apiVersion: v1

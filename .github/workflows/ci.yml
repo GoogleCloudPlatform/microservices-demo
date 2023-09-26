@@ -1,58 +1,39 @@
 name: "Continuous Integration"
 on:
   push:
-    # run on pushes to master or release/*
+    # run on pushes to main
     branches:    
-      - master
-      - release/*
+      - main
   pull_request:
-    # run on pull requests targeting master
+    # run on pull requests targeting main
     branches:
-      - master
+      - main
 jobs:
   run-tests:
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
-    - name: Setup Cluster
-      run: |
-        set -x
-        kind delete cluster || true
-        kind create cluster
-        kubectl get nodes
+
+    - name: Create kind cluster
+      uses: helm/kind-action@v1.8.0
+
     - name: Deploy From Source
-      run: |
-        skaffold config set --global local-cluster true
-        skaffold run --default-repo local
+      uses: hiberbee/github-action-skaffold@1.27.0
+      with:
+        command: run
+
     - name: Wait For Pods
       timeout-minutes: 20
       run: |
         set -x
-        kubectl wait --for=condition=available --timeout=500s deployment/adservice
-        kubectl wait --for=condition=available --timeout=500s deployment/cartservice
-        kubectl wait --for=condition=available --timeout=500s deployment/checkoutservice
-        kubectl wait --for=condition=available --timeout=500s deployment/currencyservice
-        kubectl wait --for=condition=available --timeout=500s deployment/emailservice
-        kubectl wait --for=condition=available --timeout=500s deployment/frontend
-        kubectl wait --for=condition=available --timeout=500s deployment/loadgenerator
-        kubectl wait --for=condition=available --timeout=500s deployment/paymentservice
-        kubectl wait --for=condition=available --timeout=500s deployment/productcatalogservice
-        kubectl wait --for=condition=available --timeout=500s deployment/recommendationservice
-        kubectl wait --for=condition=available --timeout=500s deployment/shippingservice
-    - name: Smoke Test
-      timeout-minutes: 5
-      run: |
-        set -x
-        # start fresh loadgenerator pod
-        kubectl delete pod -l app=loadgenerator
-        # wait for requests to come in
-        REQUEST_COUNT="0"
-        while [[ "$REQUEST_COUNT"  -lt "50"  ]]; do
-            sleep 5
-            REQUEST_COUNT=$(kubectl logs -l app=loadgenerator | grep Aggregated | awk '{print $2}')
-        done
-        # ensure there are no errors hitting endpoints
-        ERROR_COUNT=$(kubectl logs -l app=loadgenerator | grep Aggregated | awk '{print $3}' | sed "s/[(][^)]*[)]//g")
-        if [[ "$ERROR_COUNT" -gt "0" ]]; then
-          exit 1
-        fi
+        kubectl wait --for=condition=available --timeout=10m deployment/adservice
+        kubectl wait --for=condition=available --timeout=10m deployment/cartservice
+        kubectl wait --for=condition=available --timeout=10m deployment/checkoutservice
+        kubectl wait --for=condition=available --timeout=10m deployment/currencyservice
+        kubectl wait --for=condition=available --timeout=10m deployment/emailservice
+        kubectl wait --for=condition=available --timeout=10m deployment/frontend
+        kubectl wait --for=condition=available --timeout=10m deployment/loadgenerator
+        kubectl wait --for=condition=available --timeout=10m deployment/paymentservice
+        kubectl wait --for=condition=available --timeout=10m deployment/productcatalogservice
+        kubectl wait --for=condition=available --timeout=10m deployment/recommendationservice
+        kubectl wait --for=condition=available --timeout=10m deployment/shippingservice

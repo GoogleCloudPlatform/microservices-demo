@@ -31,7 +31,7 @@ spec:
       containers:
       - name: server
         image: recommendationservice
-        imagePullPolicy: Always
+        imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 8080
         readinessProbe:
@@ -56,11 +56,11 @@ spec:
           # value: "http://zipkin.default:9411/api/v2/spans"
         resources:
           requests:
-            cpu: 100m
-            memory: 220Mi
+            cpu: 70m
+            memory: 128Mi
           limits:
-            cpu: 200m
-            memory: 450Mi
+            cpu: 70m
+            memory: 256Mi
 ---
 apiVersion: v1
 kind: Service

@@ -30,7 +30,7 @@ spec:
       containers:
       - name: redis
         image: redis:alpine
-        imagePullPolicy: Always
+        imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 6379
         readinessProbe:
@@ -47,7 +47,7 @@ spec:
         resources:
           limits:
             memory: 256Mi
-            cpu: 125m
+            cpu: 70m
           requests:
             cpu: 70m
             memory: 200Mi

@@ -31,7 +31,7 @@ spec:
       containers:
         - name: server
           image: adservice
-          imagePullPolicy: Always
+          imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 9555
           env:
@@ -52,9 +52,9 @@ spec:
           resources:
             requests:
               cpu: 200m
-              memory: 180Mi
+              memory: 300Mi
             limits:
-              cpu: 300m
+              cpu: 200m
               memory: 300Mi
           readinessProbe:
             initialDelaySeconds: 60

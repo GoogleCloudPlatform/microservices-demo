@@ -31,7 +31,7 @@ spec:
       containers:
       - name: server
         image: emailservice
-        imagePullPolicy: Always
+        imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 8080
         env:
@@ -54,10 +54,10 @@ spec:
             command: ["/bin/grpc_health_probe", "-addr=:8080"]
         resources:
           requests:
-            cpu: 100m
+            cpu: 70m
             memory: 64Mi
           limits:
-            cpu: 200m
+            cpu: 70m
             memory: 128Mi
 ---
 apiVersion: v1

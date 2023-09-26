@@ -31,7 +31,7 @@ spec:
       containers:
       - name: server
         image: currencyservice
-        imagePullPolicy: Always
+        imagePullPolicy: IfNotPresent
         ports:
         - name: grpc
           containerPort: 7000
@@ -53,10 +53,10 @@ spec:
             command: ["/bin/grpc_health_probe", "-addr=:7000"]
         resources:
           requests:
-            cpu: 100m
+            cpu: 70m
             memory: 64Mi
           limits:
-            cpu: 200m
+            cpu: 70m
             memory: 128Mi
 ---
 apiVersion: v1
