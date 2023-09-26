@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites name="sealights-excersise" tests="6">
+  <testsuite id="0" hostname="http://dev-wahbi-branch-1.0.306.dev.sealights.co" package="" name="check if server is running" tests="1" timestamp="2023-09-26T07:19:55.230" time="1.991" failures="0" errors="0">
+    <properties>
+      <property name="machine_dns" value="http://dev-Wahbi-branch-1.0.306.dev.sealights.co:8081"/>
+    </properties>
+    <testcase classname="->check if server is running" name="Status test" time="1.991"/>
+  </testsuite>
+  <testsuite id="1" hostname="http://dev-wahbi-branch-1.0.306.dev.sealights.co" package="" name="get product" tests="1" timestamp="2023-09-26T07:19:57.221" time="0.172" failures="0" errors="0">
+    <properties>
+      <property name="machine_dns" value="http://dev-Wahbi-branch-1.0.306.dev.sealights.co:8081"/>
+    </properties>
+    <testcase classname="->get product" name="Status test" time="0.172"/>
+  </testsuite>
+  <testsuite id="2" hostname="http://dev-wahbi-branch-1.0.306.dev.sealights.co" package="" name="get product (bad request)" tests="1" timestamp="2023-09-26T07:19:57.393" time="0.115" failures="0" errors="0">
+    <properties>
+      <property name="machine_dns" value="http://dev-Wahbi-branch-1.0.306.dev.sealights.co:8081"/>
+    </properties>
+    <testcase classname="->get product (bad request)" name="Status test" time="0.115"/>
+  </testsuite>
+  <testsuite id="3" hostname="http://dev-wahbi-branch-1.0.306.dev.sealights.co" package="" name="set currency" tests="1" timestamp="2023-09-26T07:19:57.508" time="0.277" failures="0" errors="0">
+    <properties>
+      <property name="machine_dns" value="http://dev-Wahbi-branch-1.0.306.dev.sealights.co:8081"/>
+    </properties>
+    <testcase classname="->set currency" name="Status test" time="0.277"/>
+  </testsuite>
+  <testsuite id="4" hostname="http://dev-wahbi-branch-1.0.306.dev.sealights.co" package="" name="add product to cart" tests="1" timestamp="2023-09-26T07:19:57.785" time="0.487" failures="0" errors="0">
+    <properties>
+      <property name="machine_dns" value="http://dev-Wahbi-branch-1.0.306.dev.sealights.co:8081"/>
+    </properties>
+    <testcase classname="->add product to cart" name="Status test" time="0.487"/>
+  </testsuite>
+  <testsuite id="5" hostname="http://dev-wahbi-branch-1.0.306.dev.sealights.co" package="" name="empty cart" tests="1" timestamp="2023-09-26T07:19:58.272" time="0.287" failures="0" errors="0">
+    <properties>
+      <property name="machine_dns" value="http://dev-Wahbi-branch-1.0.306.dev.sealights.co:8081"/>
+    </properties>
+    <testcase classname="->empty cart" name="Status test" time="0.287"/>
+  </testsuite>
+</testsuites>
