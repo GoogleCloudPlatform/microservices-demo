@@ -138,6 +138,7 @@ pipeline {
     }
   }
 }
+}
 
 def getParamForService(service) {
   switch (service) {
