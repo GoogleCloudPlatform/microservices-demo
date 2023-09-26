@@ -110,7 +110,7 @@ pipeline {
           def jobs_list = ["BTQ-java-tests(Junit without testNG)" ,"BTQ-java-tests(Junit without testNG)-gradle" , 
           "BTQ-python-tests(Pytest framework)" , "BTQ-nodejs-tests(Mocha framework)" , "BTQ-dotnet-tests(MS-test framework)" , 
           "BTQ-nodejs-tests(Jest framework)" , "BTQ-python-tests(Robot framework)" , "BTQ-dotnet-tests(NUnit-test framework)" , 
-          "BTQ-java-tests(Junit support-testNG)", "BTQ-postman-tests","BTQ-java-tests(Cucumber framework)" ,"BTQ-java-tests-SoapUi-framework" ,
+          "BTQ-java-tests(Junit support-testNG)", "BTQ-postman-tests","BTQ-java-tests(Cucumber-framework-java)" ,"BTQ-java-tests-SoapUi-framework" ,
           "BTQ-nodejs-tests-Cypress-framework"]
 
           jobs_list.each { job ->
