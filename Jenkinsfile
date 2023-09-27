@@ -145,7 +145,7 @@ pipeline {
     stage('Run Tests sequential') {
       steps {
         script {
-          sleep time: 120, unit: 'SECONDS'
+          sleep time: 121, unit: 'SECONDS'
           // env.machine_dns = "http://dev-${env.IDENTIFIER}.dev.sealights.co:8081"
           def jobs_list = [
             "BTQ-java-tests(Junit without testNG)",
