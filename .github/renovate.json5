@@ -25,7 +25,8 @@
   "kubernetes": {
     "fileMatch": ["\\.yaml$"],
     "ignorePaths": [
-      "kubernetes-manifests/**"
+      "release/**",
+      "kustomize/base/**"
     ]
   },
   // Dependency Dashboard should be excluded from SLO calculation.
