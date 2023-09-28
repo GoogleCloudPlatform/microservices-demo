@@ -163,7 +163,7 @@ pipeline {
             "BTQ-python-tests(Robot framework)",
             "BTQ-dotnet-tests(NUnit-test framework)",
             "BTQ-java-tests(Junit support-testNG)",
-            "BTQ-java-tests(Cucumber-framework-java)",
+            "BTQ-nodejs-tests-Cypress-framework",
             "BTQ-java-tests-SoapUi-framework",
             "BTQ-java-tests(Junit without testNG)-gradle",
             "BTQ-nodejs-tests-Cypress-framework" ,
