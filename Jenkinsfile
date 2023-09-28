@@ -23,6 +23,7 @@ pipeline {
 
 
   parameters {
+    choice(name: 'TEST_TYPE', choices: ['Tests parallel', 'Tests sequential'], description: 'Choose test type')
     string(name: 'LATEST', defaultValue: '', description: 'latest tag')
     string(name: 'BRANCH', defaultValue: 'ahmad-branch', description: 'Branch to clone (ahmad-branch)')
     string(name: 'JOB_NAME', defaultValue: '', description: 'tests job name ')
@@ -110,39 +111,45 @@ pipeline {
       }
     }
 
-//    stage ('Run Tests parallel') {
-//      steps {
-//        script {
-//          sleep time: 120, unit: 'SECONDS'
-//          //env.machine_dns = "http://dev-${env.IDENTIFIER}.dev.sealights.co:8081"
-//          def parallelLabs = [:]
-//          //List of all the jobs:
-//          def jobs_list = [
-//            "BTQ-java-tests(Junit without testNG)" ,
-//            "BTQ-python-tests(Pytest framework)" ,
-//            "BTQ-nodejs-tests(Mocha framework)" ,
-//            "BTQ-dotnet-tests(MS-test framework)" ,
-//            "BTQ-nodejs-tests(Jest framework)" ,
-//            "BTQ-python-tests(Robot framework)" ,
-//            "BTQ-dotnet-tests(NUnit-test framework)" ,
-//            "BTQ-java-tests(Junit support-testNG)" ,
-//            "BTQ-java-tests(Cucumber framework)" ,
-//            "BTQ-java-tests-SoapUi-framework" ,
-//            "BTQ-java-tests(Junit without testNG)-gradle" ,
-//            "BTQ-nodejs-tests-Cypress-framework"]
-//
-//          jobs_list.each { job ->
-//            parallelLabs["${job}"] = {
-//              build(job:"${job}", parameters: [string(name: 'BRANCH', value: "${params.BRANCH}"),string(name: 'SL_LABID', value: "${env.LAB_ID}") , string(name:'SL_TOKEN' , value:"${env.TOKEN}") ,string(name:'MACHINE_DNS1' , value:"${env.MACHINE_DNS}")])
-//            }
-//          }
-//          parallel parallelLabs
-//        }
-//      }
-//    }
+    stage ('Run Tests parallel') {
+      when {
+        expression { params.TEST_TYPE == 'Tests parallel' }
+      }
+      steps {
+        script {
+          sleep time: 120, unit: 'SECONDS'
+          //env.machine_dns = "http://dev-${env.IDENTIFIER}.dev.sealights.co:8081"
+          def parallelLabs = [:]
+          //List of all the jobs:
+          def jobs_list = [
+            "BTQ-java-tests(Junit without testNG)" ,
+            "BTQ-python-tests(Pytest framework)" ,
+            "BTQ-nodejs-tests(Mocha framework)" ,
+            "BTQ-dotnet-tests(MS-test framework)" ,
+            "BTQ-nodejs-tests(Jest framework)" ,
+            "BTQ-python-tests(Robot framework)" ,
+            "BTQ-dotnet-tests(NUnit-test framework)" ,
+            "BTQ-java-tests(Junit support-testNG)" ,
+            "BTQ-java-tests(Cucumber framework)" ,
+            "BTQ-java-tests-SoapUi-framework" ,
+            "BTQ-java-tests(Junit without testNG)-gradle" ,
+            "BTQ-nodejs-tests-Cypress-framework"]
+
+          jobs_list.each { job ->
+            parallelLabs["${job}"] = {
+              build(job:"${job}", parameters: [string(name: 'BRANCH', value: "${params.BRANCH}"),string(name: 'SL_LABID', value: "${env.LAB_ID}") , string(name:'SL_TOKEN' , value:"${env.TOKEN}") ,string(name:'MACHINE_DNS1' , value:"${env.MACHINE_DNS}")])
+            }
+          }
+          parallel parallelLabs
+        }
+      }
+    }
 
 
     stage('Run Tests sequential') {
+      when {
+        expression { params.TEST_TYPE == 'Tests sequential' }
+      }
       steps {
         script {
           sleep time: 121, unit: 'SECONDS'
