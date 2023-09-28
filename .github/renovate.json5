@@ -35,9 +35,12 @@
   ],
   "packageRules": [
     // Label PRs based on the languages they contain
+    // category ids are listed at https://docs.renovatebot.com/modules/manager/
     {"matchCategories": ["python"], "addLabels": ["lang: python"]},
     {"matchCategories": ["java"], "addLabels": ["lang: java"]},
     {"matchCategories": ["golang"], "addLabels": ["lang: go"]},
+    {"matchCategories": ["js"], "addLabels": ["lang: nodejs"]},
+    {"matchCategories": ["dotnet"], "addLabels": ["lang: dotnet"]},
     {"matchCategories": ["docker"], "pinDigests": true},
     {
       "matchUpdateTypes": ["minor", "patch", "digest"],
