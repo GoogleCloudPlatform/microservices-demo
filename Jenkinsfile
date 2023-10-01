@@ -122,18 +122,19 @@ pipeline {
           def parallelLabs = [:]
           //List of all the jobs:
           def jobs_list = [
-            "BTQ-java-tests(Junit without testNG)" ,
-            "BTQ-python-tests(Pytest framework)" ,
-            "BTQ-nodejs-tests(Mocha framework)" ,
-            "BTQ-dotnet-tests(MS-test framework)" ,
-            "BTQ-nodejs-tests(Jest framework)" ,
-            "BTQ-python-tests(Robot framework)" ,
-            "BTQ-dotnet-tests(NUnit-test framework)" ,
-            "BTQ-java-tests(Junit support-testNG)" ,
-            "BTQ-nodejs-tests-Cypress-framework" ,
-            "BTQ-java-tests-SoapUi-framework" ,
-            "BTQ-java-tests(Junit without testNG)-gradle" ,
-            "BTQ-nodejs-tests-Cypress-framework"]
+            "BTQ-java-tests(Junit without testNG)",
+            "BTQ-python-tests(Pytest framework)",
+            "BTQ-nodejs-tests(Mocha framework)",
+            "BTQ-dotnet-tests(MS-test framework)",
+            "BTQ-nodejs-tests(Jest framework)",
+            "BTQ-python-tests(Robot framework)",
+            "BTQ-dotnet-tests(NUnit-test framework)",
+            "BTQ-java-tests(Junit support-testNG)",
+            "BTQ-nodejs-tests-Cypress-framework",
+            "BTQ-java-tests-SoapUi-framework",
+            "BTQ-java-tests(Junit without testNG)-gradle",
+            "BTQ-postman-tests"
+          ]
 
           jobs_list.each { job ->
             parallelLabs["${job}"] = {
@@ -166,7 +167,6 @@ pipeline {
             "BTQ-nodejs-tests-Cypress-framework",
             "BTQ-java-tests-SoapUi-framework",
             "BTQ-java-tests(Junit without testNG)-gradle",
-            "BTQ-nodejs-tests-Cypress-framework" ,
             "BTQ-postman-tests"
           ]
 
