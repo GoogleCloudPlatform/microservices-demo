@@ -1,2 +1,2 @@
-import 'SL.Cypress.Plugin/dist/code-coverage/support';
+import 'sealights-cypress-plugin/support';
 import "./commands.js"
