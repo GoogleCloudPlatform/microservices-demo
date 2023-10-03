@@ -13,6 +13,5 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "SL.Cypress.Plugin": "github:kristijanstefanoski/SL.Cypress.Plugin#latest"
   }
 }
