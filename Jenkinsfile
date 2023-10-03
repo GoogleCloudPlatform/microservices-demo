@@ -117,7 +117,7 @@ pipeline {
       }
       steps {
         script {
-          sleep time: 120, unit: 'SECONDS'
+          sleep time: 150, unit: 'SECONDS'
           //env.machine_dns = "http://dev-${env.IDENTIFIER}.dev.sealights.co:8081"
           def parallelLabs = [:]
           //List of all the jobs:
@@ -154,7 +154,7 @@ pipeline {
       }
       steps {
         script {
-          sleep time: 121, unit: 'SECONDS'
+          sleep time: 150, unit: 'SECONDS'
           // env.machine_dns = "http://dev-${env.IDENTIFIER}.dev.sealights.co:8081"
           def jobs_list = [
             "BTQ-java-tests(Junit without testNG)",
