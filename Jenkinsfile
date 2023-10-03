@@ -23,7 +23,7 @@ pipeline {
 
 
   parameters {
-    choice(name: 'TEST_TYPE', choices: ['Tests sequential', 'Tests parallel'], description: 'Choose test type')
+    choice(name: 'TEST_TYPE', choices: ['Tests parallel','Tests sequential' ], description: 'Choose test type')
     string(name: 'LATEST', defaultValue: '', description: 'latest tag')
     string(name: 'BRANCH', defaultValue: 'ahmad-branch', description: 'Branch to clone (ahmad-branch)')
     string(name: 'JOB_NAME', defaultValue: '', description: 'tests job name ')
