@@ -22,7 +22,7 @@ resource "google_redis_instance" "redis-cart" {
   # if var.memorystore is true then the resource is enabled
   count          = var.memorystore ? 1 : 0
 
-  redis_version  = "REDIS_6_X"
+  redis_version  = "REDIS_7_0"
   project        = var.gcp_project_id
 
   depends_on = [
