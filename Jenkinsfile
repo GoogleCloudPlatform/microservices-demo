@@ -147,12 +147,12 @@ pipeline {
       }
     }
 
-    stage('All Tests IN One Image'){
+    stage('All Tests IN One Image') {
       when {
         expression { params.TEST_TYPE == 'All Tests IN One Image' }
       }
-      steps{
-        script{
+      steps {
+        script {
           sleep time: 150, unit: 'SECONDS'
           build(job: "All-In-Image", parameters: [
             string(name: 'BRANCH', value: "${params.BRANCH}"),
@@ -163,6 +163,7 @@ pipeline {
 
         }
       }
+    }
 
 
     stage('Run Tests sequential') {
