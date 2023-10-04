@@ -156,14 +156,13 @@ pipeline {
           sleep time: 150, unit: 'SECONDS'
           build(job: "All-In-Image", parameters: [
             string(name: 'BRANCH', value: "${params.BRANCH}"),
-            string(name: 'SL_LABID', value: "${env.LAB_ID}"),
-            string(name: 'SL_TOKEN', value: "${env.TOKEN}"),
-            string(name: 'machine_dns', value: "${env.MACHINE_DNS}")
+            string(name: 'SL_LABID', value: "${params.SL_LABID}"),
+            string(name: 'SL_TOKEN', value: "${params.SL_TOKEN}"),
+            string(name: 'machine_dns', value: "${params.MACHINE_DNS}")
           ])
 
         }
       }
-    }
 
 
     stage('Run Tests sequential') {
