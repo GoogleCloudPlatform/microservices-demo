@@ -147,6 +147,24 @@ pipeline {
       }
     }
 
+    stage('All Tests IN One Image'){
+      when {
+        expression { params.TEST_TYPE == 'All Tests IN One Image' }
+      }
+      steps{
+        script{
+          sleep time: 150, unit: 'SECONDS'
+          build(job: "All-In-Image", parameters: [
+            string(name: 'BRANCH', value: "${params.BRANCH}"),
+            string(name: 'SL_LABID', value: "${env.LAB_ID}"),
+            string(name: 'SL_TOKEN', value: "${env.TOKEN}"),
+            string(name: 'machine_dns', value: "${env.MACHINE_DNS}")
+          ])
+
+        }
+      }
+    }
+
 
     stage('Run Tests sequential') {
       when {
@@ -185,23 +203,7 @@ pipeline {
     }
   }
 
-  stage('All Tests IN One Image'){
-    when {
-      expression { params.TEST_TYPE == 'All Tests IN One Image' }
-    }
-    steps{
-      script{
-        sleep time: 150, unit: 'SECONDS'
-        build(job: "All-In-Image", parameters: [
-          string(name: 'BRANCH', value: "${params.BRANCH}"),
-          string(name: 'SL_LABID', value: "${env.LAB_ID}"),
-          string(name: 'SL_TOKEN', value: "${env.TOKEN}"),
-          string(name: 'machine_dns', value: "${env.MACHINE_DNS}")
-        ])
 
-      }
-    }
-  }
 
   post {
     success {
