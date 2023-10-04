@@ -23,7 +23,7 @@ pipeline {
 
 
   parameters {
-    choice(name: 'TEST_TYPE', choices: ['Tests parallel','Tests sequential' ], description: 'Choose test type')
+    choice(name: 'TEST_TYPE', choices: ['Tests parallel','Tests sequential' , 'All Tests IN One Image' ], description: 'Choose test type')
     string(name: 'LATEST', defaultValue: '', description: 'latest tag')
     string(name: 'BRANCH', defaultValue: 'ahmad-branch', description: 'Branch to clone (ahmad-branch)')
     string(name: 'JOB_NAME', defaultValue: '', description: 'tests job name ')
@@ -181,6 +181,24 @@ pipeline {
             sleep time: 60, unit: 'SECONDS'
           }
         }
+      }
+    }
+  }
+
+  stage('All Tests IN One Image'){
+    when {
+      expression { params.TEST_TYPE == 'All Tests IN One Image' }
+    }
+    steps{
+      script{
+        sleep time: 150, unit: 'SECONDS'
+        build(job: "All-In-Image", parameters: [
+          string(name: 'BRANCH', value: "${params.BRANCH}"),
+          string(name: 'SL_LABID', value: "${env.LAB_ID}"),
+          string(name: 'SL_TOKEN', value: "${env.TOKEN}"),
+          string(name: 'machine_dns', value: "${env.MACHINE_DNS}")
+        ])
+
       }
     }
   }
