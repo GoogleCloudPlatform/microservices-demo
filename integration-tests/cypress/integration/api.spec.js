@@ -1,5 +1,5 @@
 describe('Api Tests', () => {
-  const BASE_URL = 'http://10.2.10.50:8081';
+  const BASE_URL = 'http://10.2.11.97:8081';
 
   it('should return 200 for index page', () => {
     cy.request({
