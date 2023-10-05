@@ -117,7 +117,7 @@ function generateProject(){
 
 suffix=ms
 
-# This is only needed if you tests fail alot because of overlaping runs of the
+# This is only needed if you tests fail alot because of overlapping runs of the
 # same set of tests.
 section_open "Generate random test project"
     generateProject PROJECT "$suffix" "$BA"
@@ -184,8 +184,8 @@ section_open "Testing Google Kubernetes Engine cluster does NOT exist"
     evalTest 'gcloud container clusters describe online-boutique --format="value(name)" --region $REGION' "EXPECTERROR"
 section_close
 
-# This is only needed if you tests fail alot because of overlaping runs of the
-# same set of tests. Really don't do this if you don't want to severly irritate
+# This is only needed if you tests fail alot because of overlapping runs of the
+# same set of tests. Really don't do this if you don't want to severely irritate
 # @tpryan
 section_open "Delete Test Project"
     gcloud projects delete $PROJECT -q
