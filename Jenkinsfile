@@ -188,7 +188,7 @@ pipeline {
             "BTQ-nodejs-tests-Cypress-framework",
             "BTQ-java-tests-SoapUi-framework",
             "BTQ-java-tests(Junit without testNG)-gradle",
-            "BTQ-postman-tests" ,
+            "BTQ-postman-tests",
             "BTQ-dotnet-tests(XUnit-test-CARTSERVICE)"
           ]
 
