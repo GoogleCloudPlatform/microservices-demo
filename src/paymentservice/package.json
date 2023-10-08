@@ -18,7 +18,7 @@
     "@opentelemetry/instrumentation-grpc": "0.43.0",
     "@opentelemetry/sdk-trace-base": "1.17.0",
     "@opentelemetry/sdk-node": "0.43.0",
-    "pino": "8.15.1",
+    "pino": "8.15.3",
     "simple-card-validator": "^1.1.0",
     "uuid": "^9.0.0"
   }
