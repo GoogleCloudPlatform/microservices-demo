@@ -88,7 +88,7 @@ pipeline {
           env.MACHINE_DNS = "http://dev-${env.IDENTIFIER}.dev.sealights.co:8081"
           env.LAB_ID = sealights.create_lab_id(
             token: "${env.TOKEN}",
-            machine: "https://extce.sealights.co",
+            machine: "https:dev-integration.dev.sealights.co",
             app: "BTQ",
             branch: "${params.BUILD_BRANCH}",
             test_env: "${env.IDENTIFIER}",
