@@ -90,7 +90,7 @@ pipeline {
           env.LAB_ID = sealights.create_lab_id(
             token: "${env.TOKEN}",
             machine: "https://dev-integration.dev.sealights.co",
-            app: "BTQ",
+            app: "${params.APP_NAME}",
             branch: "${params.BUILD_BRANCH}",
             test_env: "${env.IDENTIFIER}",
             lab_alias: "${env.IDENTIFIER}",
@@ -218,6 +218,7 @@ pipeline {
         slackSend channel: "#btq-ci", tokenCredentialId: "slack_sldevops", color: "good", message: "BTQ-CI build ${env.CURRENT_VERSION} for branch ${BRANCH_NAME} finished with status ${currentBuild.currentResult} (<${env.BUILD_URL}|Open> and TearDownBoutiqeEnvironment)"
 
         build(job: "changed", parameters: [
+
           string(name: 'APP_NAME', value: "${params.APP_NAME}"),
           string(name: 'BRANCH', value: "${params.BRANCH}"),
           chois(name: 'TEST_TYPE', choices: ['Tests parallel'], description: 'Choose test type'),
