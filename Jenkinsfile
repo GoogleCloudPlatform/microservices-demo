@@ -25,6 +25,7 @@ pipeline {
   parameters {
     choice(name: 'TEST_TYPE', choices: ['Tests parallel','Tests sequential','All Tests IN One Image'], description: 'Choose test type')
     string(name: 'LATEST', defaultValue: '', description: 'latest tag')
+    string(name: 'APP_NAME', defaultValue: 'ahmad-BTQ', description: 'name of the app (integration build)')
     string(name: 'BRANCH', defaultValue: 'ahmad-branch', description: 'Branch to clone (ahmad-branch)')
     string(name: 'JOB_NAME', defaultValue: '', description: 'tests job name ')
     string(name: 'BUILD_BRANCH', defaultValue: 'ahmad-branch', description: 'Branch to Build images that have the creational LAB_ID (send to ahmad branch to build)')
@@ -215,6 +216,26 @@ pipeline {
       script {
         build(job: 'TearDownBoutiqeEnvironment', parameters: [string(name: 'ENV_TYPE', value: "DEV"), string(name:'IDENTIFIER' , value:"${env.IDENTIFIER}")])
         slackSend channel: "#btq-ci", tokenCredentialId: "slack_sldevops", color: "good", message: "BTQ-CI build ${env.CURRENT_VERSION} for branch ${BRANCH_NAME} finished with status ${currentBuild.currentResult} (<${env.BUILD_URL}|Open> and TearDownBoutiqeEnvironment)"
+
+        build(job: "changed", parameters: [
+          string(name: 'APP_NAME', value: "${params.APP_NAME}"),
+          string(name: 'BRANCH', value: "${params.BRANCH}"),
+          chois(name: 'TEST_TYPE', choices: ['Tests parallel'], description: 'Choose test type'),
+
+          string(name: 'BUILD_BRANCH', value: "${params.BUILD_BRANCH}"),
+
+          string(name: 'SL_LABID', value: "${env.LAB_ID}"),
+          string(name: 'SL_TOKEN', value: "${env.TOKEN}"),
+
+
+          string(name: 'JAVA_AGENT_URL',value: "${params.JAVA_AGENT_URL}"),
+          string(name: 'DOTNET_AGENT_URL', value: "${params.DOTNET_AGENT_URL}"),
+          string(name: 'NODE_AGENT_URL', value: "${params.NODE_AGENT_URL}"),
+          string(name: 'GO_AGENT_URL', value: "${params.GO_AGENT_URL}"),
+          string(name: 'GO_SLCI_AGENT_URL', value: "${params.GO_SLCI_AGENT_URL}"),
+          string(name: 'PYTHON_AGENT_URL', value: "${params.PYTHON_AGENT_URL}")
+        ])
+
       }
     }
     failure {
@@ -230,6 +251,8 @@ pipeline {
       }
     }
   }
+
+
 }
 
 def getParamForService(service) {
