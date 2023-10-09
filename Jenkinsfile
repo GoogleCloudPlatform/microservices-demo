@@ -232,7 +232,7 @@ pipeline {
           string(name: 'GO_AGENT_URL', value: "${params.GO_AGENT_URL}"),
           string(name: 'GO_SLCI_AGENT_URL', value: "${params.GO_SLCI_AGENT_URL}"),
           string(name: 'PYTHON_AGENT_URL', value: "${params.PYTHON_AGENT_URL}"),
-          choice(name: 'TEST_TYPE', value:'Tests parallel')
+          string(name: 'TEST_TYPE', value:'Tests parallel')
         ])
 
       }
