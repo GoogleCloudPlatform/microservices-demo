@@ -221,7 +221,7 @@ pipeline {
 
           string(name: 'APP_NAME', value: "${params.APP_NAME}"),
           string(name: 'BRANCH', value: "${params.BRANCH}"),
-          choice(name: 'TEST_TYPE', choices: 'Tests parallel' ),
+          choice(name: 'TEST_TYPE', value:'Tests parallel'),
 
           string(name: 'BUILD_BRANCH', value: "${params.BUILD_BRANCH}"),
 
