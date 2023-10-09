@@ -19,7 +19,7 @@
     "@opentelemetry/instrumentation-grpc": "0.43.0",
     "@opentelemetry/sdk-trace-base": "1.17.0",
     "@opentelemetry/sdk-node": "0.43.0",
-    "pino": "8.15.3",
+    "pino": "8.16.0",
     "xml2js": "0.6.2"
   }
 }
