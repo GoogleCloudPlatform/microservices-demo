@@ -152,8 +152,8 @@ pipeline {
             "BTQ-java-tests-SoapUi-framework",
             "BTQ-java-tests(Junit without testNG)-gradle",
             "BTQ-postman-tests",
-            "BTQ-java-tests(Cucumber-framework-java)",
-            "BTQ-dotnet-tests(XUnit-test-CARTSERVICE)"
+            "BTQ-java-tests(Cucumber-framework-java)"
+
           ]
 
           jobs_list.each { job ->
@@ -190,8 +190,8 @@ pipeline {
             "BTQ-java-tests-SoapUi-framework",
             "BTQ-java-tests(Junit without testNG)-gradle",
             "BTQ-postman-tests",
-            "BTQ-java-tests(Cucumber-framework-java)",
-            "BTQ-dotnet-tests(XUnit-test-CARTSERVICE)"
+            "BTQ-java-tests(Cucumber-framework-java)"
+
           ]
 
           jobs_list.each { job ->
