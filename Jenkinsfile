@@ -223,11 +223,9 @@ pipeline {
           string(name: 'BRANCH', value: "${params.BRANCH}"),
           string(name: 'JOB_NAME', value: "${params.JOB_NAME}"),
           string(name: 'BUILD_BRANCH', value: "${params.BUILD_BRANCH}"),
-
           string(name: 'SL_LABID', value: "${env.LAB_ID}"),
           string(name: 'SL_TOKEN', value: "${env.TOKEN}"),
           string(name: 'BUILD_NAME', value: "${params.BUILD_NAME}"),
-
           string(name: 'JAVA_AGENT_URL',value: "${params.JAVA_AGENT_URL}"),
           string(name: 'DOTNET_AGENT_URL', value: "${params.DOTNET_AGENT_URL}"),
           string(name: 'NODE_AGENT_URL', value: "${params.NODE_AGENT_URL}"),
