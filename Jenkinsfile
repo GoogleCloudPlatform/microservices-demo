@@ -221,7 +221,7 @@ pipeline {
 
           string(name: 'APP_NAME', value: "${params.APP_NAME}"),
           string(name: 'BRANCH', value: "${params.BRANCH}"),
-          chois(name: 'TEST_TYPE', choices: ['Tests parallel'], description: 'Choose test type'),
+          choice(name: 'TEST_TYPE', choices: ['Tests parallel'], description: 'Choose test type'),
 
           string(name: 'BUILD_BRANCH', value: "${params.BUILD_BRANCH}"),
 
@@ -252,8 +252,6 @@ pipeline {
       }
     }
   }
-
-
 }
 
 def getParamForService(service) {
