@@ -152,7 +152,6 @@ pipeline {
             "BTQ-nodejs-tests-Cypress-framework",
             "BTQ-java-tests-SoapUi-framework",
             "BTQ-java-tests(Junit without testNG)-gradle",
-
             "BTQ-postman-tests",
             "BTQ-java-tests(Cucumber-framework-java)"
 
