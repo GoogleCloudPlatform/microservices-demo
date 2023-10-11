@@ -41,9 +41,15 @@ if(process.env.ENABLE_TRACING == "1") {
   const { NodeTracerProvider } = require('@opentelemetry/sdk-trace-node');
   const { SimpleSpanProcessor } = require('@opentelemetry/sdk-trace-base');
   const { OTLPTraceExporter } = require("@opentelemetry/exporter-otlp-grpc");
+  const { Resource } = require('@opentelemetry/resources');
+  const { SemanticResourceAttributes } = require('@opentelemetry/semantic-conventions');
 
-  const provider = new NodeTracerProvider();
-  
+  const provider = new NodeTracerProvider({
+    resource: new Resource({
+      [SemanticResourceAttributes.SERVICE_NAME]: process.env.OTEL_SERVICE_NAME || 'currencyservice',
+    }),
+  });
+
   const collectorUrl = process.env.COLLECTOR_SERVICE_ADDR
 
   provider.addSpanProcessor(new SimpleSpanProcessor(new OTLPTraceExporter({url: collectorUrl})));
