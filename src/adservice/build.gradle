@@ -45,7 +45,7 @@ dependencies {
 
         runtimeOnly "com.fasterxml.jackson.core:jackson-core:${jacksonCoreVersion}",
                 "com.fasterxml.jackson.core:jackson-databind:${jacksonDatabindVersion}",
-                "io.netty:netty-tcnative-boringssl-static:2.0.61.Final"
+                "io.netty:netty-tcnative-boringssl-static:2.0.62.Final"
     }
 }
 
