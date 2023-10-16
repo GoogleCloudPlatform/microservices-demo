@@ -23,7 +23,7 @@ gcloud redis instances create redis-cart \
     --size=1 \
     --region=${REGION} \
     --zone=${ZONE} \
-    --redis-version=redis_6_x
+    --redis-version=redis_7_0
 ```
 
 _Note: You can also find in this repository the Terraform script to provision the Memorystore (Redis) instance alongside the GKE cluster, more information [here](/terraform)._

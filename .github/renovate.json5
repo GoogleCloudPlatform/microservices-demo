@@ -1,0 +1,70 @@
+{
+  "extends": [
+    "config:recommended"
+  ],
+  "pip-compile": {
+    "enabled": true,
+    "fileMatch": ["(^|/)requirements\\.in$"]
+  },
+  // pip-compile handles requirements.txt updates.
+  "pip_requirements": {
+    "enabled": false
+  },
+  "constraints": {
+    "python": "~=3.11.0"
+  },
+  "prConcurrentLimit":10,
+  "stabilityDays":7,
+  "vulnerabilityAlerts":{
+     "labels":[
+       "type:security"
+     ],
+     "stabilityDays":0
+  },
+  "labels": ["dependencies"],
+  "kubernetes": {
+    "fileMatch": ["\\.yaml$"],
+    "ignorePaths": [
+      "release/**",
+      "kustomize/base/**"
+    ]
+  },
+  // Dependency Dashboard should be excluded from SLO calculation.
+  "dependencyDashboardLabels": [
+    "type: process",
+  ],
+  "packageRules": [
+    // Label PRs based on the languages they contain
+    // category ids are listed at https://docs.renovatebot.com/modules/manager/
+    {"matchCategories": ["python"], "addLabels": ["lang: python"]},
+    {"matchCategories": ["java"], "addLabels": ["lang: java"]},
+    {"matchCategories": ["golang"], "addLabels": ["lang: go"]},
+    {"matchCategories": ["js"], "addLabels": ["lang: nodejs"]},
+    {"matchCategories": ["dotnet"], "addLabels": ["lang: dotnet"]},
+    {"matchCategories": ["docker"], "pinDigests": true},
+    {
+      "matchUpdateTypes": ["minor", "patch", "digest"],
+      "automerge": true
+    },
+    {
+      "matchDepTypes": ["devDependencies"],
+      "automerge": true
+    },
+    // OpenTelemetry has tight version coupling.
+    // For go, js, and dotnet, there are 'monorepo:opentelemetry-$LANG' presets already included.
+    {
+      "description": "python otel instrumentation libraries are currently pre-release",
+      "groupName": "opentelemetry",
+      "matchPackagePrefixes": ["opentelemetry-instrumentation"],
+      "ignoreUnstable": false,
+      "matchDatasources": ["pypi"]
+    },
+    {
+      "description": "group all OTel deps, as they have tight version coupling",
+      "groupName": "opentelemetry",
+      "matchPackagePrefixes": ["opentelemetry-"],
+      "matchDatasources": ["pypi"]
+    }
+  ],
+  "platformAutomerge":true
+}
