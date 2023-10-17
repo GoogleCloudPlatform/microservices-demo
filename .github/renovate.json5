@@ -52,9 +52,9 @@
       "matchDepTypes": ["devDependencies"],
       "automerge": true
     },
-    // OpenTelemetry
+    // OpenTelemetry: include pre-release versions of python instrumentation
+    // packages. These packages are tightly coupled with otel api and sdk.
     {
-      "description": "python otel instrumentation libraries are currently pre-release",
       "matchPackagePrefixes": ["opentelemetry-instrumentation"],
       "ignoreUnstable": false,
       "matchDatasources": ["pypi"]
