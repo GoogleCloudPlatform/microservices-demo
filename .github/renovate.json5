@@ -1,7 +1,10 @@
 {
   "extends": [
-    "config:recommended"
+    "config:recommended",
   ],
+  // Run once a week, outside typical office hours.
+  // TZ is UTC unless specified.
+  "schedule": [ "after 10pm on Tuesday" ],
   "pip-compile": {
     "enabled": true,
     "fileMatch": ["(^|/)requirements\\.in$"]
@@ -13,7 +16,6 @@
   "constraints": {
     "python": "~=3.11.0"
   },
-  "prConcurrentLimit":10,
   "stabilityDays":7,
   "vulnerabilityAlerts":{
      "labels":[
@@ -41,7 +43,6 @@
     {"matchCategories": ["golang"], "addLabels": ["lang: go"]},
     {"matchCategories": ["js"], "addLabels": ["lang: nodejs"]},
     {"matchCategories": ["dotnet"], "addLabels": ["lang: dotnet"]},
-    {"matchCategories": ["docker"], "pinDigests": true},
     {
       "matchUpdateTypes": ["minor", "patch", "digest"],
       "automerge": true
@@ -50,21 +51,51 @@
       "matchDepTypes": ["devDependencies"],
       "automerge": true
     },
-    // OpenTelemetry has tight version coupling.
-    // For go, js, and dotnet, there are 'monorepo:opentelemetry-$LANG' presets already included.
+    // OpenTelemetry: include pre-release versions of python instrumentation
+    // packages. These packages are tightly coupled with otel api and sdk.
     {
-      "description": "python otel instrumentation libraries are currently pre-release",
-      "groupName": "opentelemetry",
       "matchPackagePrefixes": ["opentelemetry-instrumentation"],
       "ignoreUnstable": false,
       "matchDatasources": ["pypi"]
     },
+    // Group PRs by "category" - usually language.
     {
-      "description": "group all OTel deps, as they have tight version coupling",
-      "groupName": "opentelemetry",
-      "matchPackagePrefixes": ["opentelemetry-"],
-      "matchDatasources": ["pypi"]
-    }
+      "matchCategories": ["python"],
+      "matchUpdateTypes": ["minor", "patch", "digest"],
+      "groupName": "python",
+      "automerge": true
+    },
+    {
+      "matchCategories": ["java"],
+      "matchUpdateTypes": ["minor", "patch", "digest"],
+      "groupName": "java",
+      "automerge": true
+    },
+    {
+      "matchCategories": ["golang"],
+      "matchUpdateTypes": ["minor", "patch", "digest"],
+      "groupName": "golang",
+      "automerge": true
+    },
+    {
+      "matchCategories": ["js"],
+      "matchUpdateTypes": ["minor", "patch", "digest"],
+      "groupName": "nodejs",
+      "automerge": true
+    },
+    {
+      "matchCategories": ["dotnet"],
+      "matchUpdateTypes": ["minor", "patch", "digest"],
+      "groupName": "dotnet",
+      "automerge": true
+    },
+    {
+      "matchCategories": ["docker"],
+      "matchUpdateTypes": ["minor", "patch", "digest"],
+      "groupName": "docker",
+      "pinDigests": true,
+      "automerge": true
+    },
   ],
   "platformAutomerge":true
 }
