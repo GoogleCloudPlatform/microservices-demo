@@ -1,7 +1,6 @@
 {
   "extends": [
     "config:recommended",
-    ":approveMajorUpdates",
   ],
   // Run once a week, outside typical office hours.
   // TZ is UTC unless specified.
