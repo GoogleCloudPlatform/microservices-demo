@@ -37,6 +37,8 @@ pipeline {
     string(name: 'GO_AGENT_URL', defaultValue: 'https://agents.sealights.co/slgoagent/latest/slgoagent-linux-amd64.tar.gz', description: 'use different go agent')
     string(name: 'GO_SLCI_AGENT_URL', defaultValue: 'https://agents.sealights.co/slcli/latest/slcli-linux-amd64.tar.gz', description: 'use different slci go agent')
     string(name: 'PYTHON_AGENT_URL', defaultValue: 'sealights-python-agent', description: 'use different python agent')
+    string(name: 'MACHINE', defaultValue: 'https://dev-integration.dev.sealights.co', description: 'machine env')
+
   }
 
   environment {
@@ -89,7 +91,7 @@ pipeline {
           env.MACHINE_DNS = "http://dev-${env.IDENTIFIER}.dev.sealights.co:8081"
           env.LAB_ID = sealights.create_lab_id(
             token: "${env.TOKEN}",
-            machine: "https://dev-integration.dev.sealights.co",
+            machine: "${params.MACHINE}",
             app: "${params.APP_NAME}",
             branch: "${params.BUILD_BRANCH}",
             test_env: "${env.IDENTIFIER}",
@@ -152,7 +154,6 @@ pipeline {
             "BTQ-nodejs-tests-Cypress-framework",
             "BTQ-java-tests-SoapUi-framework",
             "BTQ-java-tests(Junit without testNG)-gradle",
-
             "BTQ-postman-tests",
             "BTQ-java-tests(Cucumber-framework-java)"
 
