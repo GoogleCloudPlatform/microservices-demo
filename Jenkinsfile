@@ -20,7 +20,8 @@ pipeline {
     }
   }
   options {
-    buildDiscarder(logRotator(30))
+    buildDiscarder logRotator(numToKeepStr: '30')
+    timestamps()
   }
   parameters {
     choice(name: 'TEST_TYPE', choices: ['Tests parallel','Tests sequential','All Tests IN One Image'], description: 'Choose test type')
