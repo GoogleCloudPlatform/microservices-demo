@@ -28,7 +28,7 @@ RUN apt-get update && \
             curl \
             unzip
 
-ARG SPLUNK_OTEL_VERSION=1.0.2
+ARG SPLUNK_OTEL_VERSION=1.1.0
 ENV OTEL_DOTNET_AUTO_HOME=/.splunk-otel-dotnet
 ADD https://github.com/signalfx/splunk-otel-dotnet/releases/download/v${SPLUNK_OTEL_VERSION}/splunk-otel-dotnet-install.sh ./
 RUN chmod +x ./splunk-otel-dotnet-install.sh && \
