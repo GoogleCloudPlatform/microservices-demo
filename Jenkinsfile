@@ -19,9 +19,9 @@ pipeline {
       defaultContainer 'shell'
     }
   }
-
-
-
+  options {
+    buildDiscarder(logRotator(30))
+  }
   parameters {
     choice(name: 'TEST_TYPE', choices: ['Tests parallel','Tests sequential','All Tests IN One Image'], description: 'Choose test type')
     string(name: 'LATEST', defaultValue: '', description: 'latest tag')
