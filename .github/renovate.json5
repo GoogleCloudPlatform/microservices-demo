@@ -4,7 +4,7 @@
   ],
   // Rate limits, to protect maintainers (and CI) from PR floods.
   "prHourlyLimit": 10,
-  "prConcurrentLimit": 30,
+  "prConcurrentLimit": 10,
   // Run once a week, outside typical office hours.
   // TZ is UTC unless specified.
   "schedule": [ "after 10pm on Tuesday" ],
