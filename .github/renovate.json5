@@ -2,6 +2,9 @@
   "extends": [
     "config:recommended",
   ],
+  // Rate limits, to protect maintainers (and CI) from PR floods.
+  "prHourlyLimit": 10,
+  "prConcurrentLimit": 10,
   // Run once a week, outside typical office hours.
   // TZ is UTC unless specified.
   "schedule": [ "after 10pm on Tuesday" ],
@@ -44,7 +47,7 @@
     {"matchCategories": ["js"], "addLabels": ["lang: nodejs"]},
     {"matchCategories": ["dotnet"], "addLabels": ["lang: dotnet"]},
     {
-      "matchUpdateTypes": ["minor", "patch", "digest"],
+      "matchUpdateTypes": ["minor", "patch", "digest", "lockFileMaintenance"],
       "automerge": true
     },
     {
@@ -61,37 +64,37 @@
     // Group PRs by "category" - usually language.
     {
       "matchCategories": ["python"],
-      "matchUpdateTypes": ["minor", "patch", "digest"],
+      "matchUpdateTypes": ["minor", "patch", "digest", "lockFileMaintenance"],
       "groupName": "python",
       "automerge": true
     },
     {
       "matchCategories": ["java"],
-      "matchUpdateTypes": ["minor", "patch", "digest"],
+      "matchUpdateTypes": ["minor", "patch", "digest", "lockFileMaintenance"],
       "groupName": "java",
       "automerge": true
     },
     {
       "matchCategories": ["golang"],
-      "matchUpdateTypes": ["minor", "patch", "digest"],
+      "matchUpdateTypes": ["minor", "patch", "digest", "lockFileMaintenance"],
       "groupName": "golang",
       "automerge": true
     },
     {
       "matchCategories": ["js"],
-      "matchUpdateTypes": ["minor", "patch", "digest"],
+      "matchUpdateTypes": ["minor", "patch", "digest", "lockFileMaintenance"],
       "groupName": "nodejs",
       "automerge": true
     },
     {
       "matchCategories": ["dotnet"],
-      "matchUpdateTypes": ["minor", "patch", "digest"],
+      "matchUpdateTypes": ["minor", "patch", "digest", "lockFileMaintenance"],
       "groupName": "dotnet",
       "automerge": true
     },
     {
       "matchCategories": ["docker"],
-      "matchUpdateTypes": ["minor", "patch", "digest"],
+      "matchUpdateTypes": ["minor", "patch", "digest", "lockFileMaintenance"],
       "groupName": "docker",
       "pinDigests": true,
       "automerge": true
