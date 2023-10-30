@@ -8,11 +8,11 @@ backoff==2.2.1
     # via
     #   opentelemetry-exporter-otlp-proto-common
     #   opentelemetry-exporter-otlp-proto-grpc
-cachetools==5.3.1
+cachetools==5.3.2
     # via google-auth
 certifi==2023.7.22
     # via requests
-charset-normalizer==3.2.0
+charset-normalizer==3.3.1
     # via requests
 deprecated==1.2.14
     # via
@@ -23,9 +23,9 @@ google-api-core[grpc]==2.12.0
     #   -r requirements.in
     #   google-api-python-client
     #   google-cloud-trace
-google-api-python-client==2.100.0
+google-api-python-client==2.105.0
     # via google-cloud-profiler
-google-auth==2.23.0
+google-auth==2.23.3
     # via
     #   google-api-core
     #   google-api-python-client
@@ -37,9 +37,9 @@ google-auth-httplib2==0.1.1
     #   google-cloud-profiler
 google-cloud-profiler==4.1.0
     # via -r requirements.in
-google-cloud-trace==1.11.2
+google-cloud-trace==1.11.3
     # via -r requirements.in
-googleapis-common-protos==1.60.0
+googleapis-common-protos==1.61.0
     # via
     #   google-api-core
     #   grpcio-status
@@ -53,7 +53,7 @@ grpcio==1.59.0
     #   opentelemetry-exporter-otlp-proto-grpc
 grpcio-health-checking==1.59.0
     # via -r requirements.in
-grpcio-status==1.58.0
+grpcio-status==1.59.0
     # via google-api-core
 httplib2==0.22.0
     # via
@@ -61,7 +61,7 @@ httplib2==0.22.0
     #   google-auth-httplib2
 idna==3.4
     # via requests
-importlib-metadata==6.0.1
+importlib-metadata==6.8.0
     # via opentelemetry-api
 jinja2==3.1.2
     # via -r requirements.in
@@ -101,7 +101,7 @@ opentelemetry-semantic-conventions==0.41b0
     #   opentelemetry-sdk
 proto-plus==1.22.3
     # via google-cloud-trace
-protobuf==4.24.3
+protobuf==4.24.4
     # via
     #   google-api-core
     #   google-cloud-profiler
@@ -132,10 +132,8 @@ typing-extensions==4.8.0
     # via opentelemetry-sdk
 uritemplate==4.1.1
     # via google-api-python-client
-urllib3==1.26.18
-    # via
-    #   google-auth
-    #   requests
+urllib3==2.0.7
+    # via requests
 wrapt==1.15.0
     # via
     #   deprecated
