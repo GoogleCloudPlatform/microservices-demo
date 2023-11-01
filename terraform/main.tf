@@ -49,6 +49,10 @@ resource "google_container_cluster" "my_cluster" {
   ip_allocation_policy {
   }
 
+  # Avoid setting deletion_protection to false
+  # until you're ready (and certain you want) to destroy the cluster.
+  # deletion_protection = false
+
   depends_on = [
     module.enable_google_apis
   ]
