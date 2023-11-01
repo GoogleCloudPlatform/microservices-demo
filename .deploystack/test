@@ -172,6 +172,9 @@ section_open "Testing Online Boutique's front-end is working"
     evalTest 'curl -s -o /dev/null -w "%{http_code}" $ENDPOINT' "200"
 section_close
 
+# Uncomment the line: "deletion_protection = false"
+sed -i "s/# deletion_protection/deletion_protection/g" main.tf
+
 terraform -chdir="$DIR" destroy -auto-approve \
     -var gcp_project_id="${PROJECT}" \
     -var name="${NAME}" \
