@@ -78,6 +78,13 @@ To remove the individual resources created for by Terraform without deleting the
 
 1. Navigate to the `terraform/` directory.
 
+1. Set `deletion_protection` to `false` for the `google_container_cluster` resource (GKE cluster).
+
+   ```bash
+   # Uncomment the line: "deletion_protection = false"
+   sed -i "s/# deletion_protection/deletion_protection/g" main.tf
+   ```
+
 1. Run the following command:
 
    ```bash
