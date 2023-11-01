@@ -159,30 +159,30 @@ pipeline {
       }
     }
 
-//    stage('Run changed'){
-//      steps{
-//        script{
-//          build(job: "changed", parameters: [
-//
-//            string(name: 'APP_NAME', value: "${params.APP_NAME}"),
-//            string(name: 'BRANCH', value: "${params.BRANCH}"),
-//            string(name: 'JOB_NAME', value: "${params.JOB_NAME}"),
-//            string(name: 'BUILD_BRANCH', value: "${params.BUILD_BRANCH}"),
-//            string(name: 'SL_LABID', value: "${env.LAB_ID}"),
-//            string(name: 'SL_TOKEN', value: "${env.TOKEN}"),
-//            string(name: 'BUILD_NAME', value: "${params.BUILD_NAME}"),
-//            string(name: 'JAVA_AGENT_URL',value: "${params.JAVA_AGENT_URL}"),
-//            string(name: 'DOTNET_AGENT_URL', value: "${params.DOTNET_AGENT_URL}"),
-//            string(name: 'NODE_AGENT_URL', value: "${params.NODE_AGENT_URL}"),
-//            string(name: 'GO_AGENT_URL', value: "${params.GO_AGENT_URL}"),
-//            string(name: 'GO_SLCI_AGENT_URL', value: "${params.GO_SLCI_AGENT_URL}"),
-//            string(name: 'PYTHON_AGENT_URL', value: "${params.PYTHON_AGENT_URL}"),
-//            string(name: 'TEST_TYPE', value:'All Tests IN One Image')
-//          ])
-//
-//        }
-//      }
-//    }
+    stage('Run changed'){
+      steps{
+        script{
+          build(job: "changed", parameters: [
+
+            string(name: 'APP_NAME', value: "${params.APP_NAME}"),
+            string(name: 'BRANCH', value: "${params.BRANCH}"),
+            string(name: 'JOB_NAME', value: "${params.JOB_NAME}"),
+            string(name: 'BUILD_BRANCH', value: "${params.BUILD_BRANCH}"),
+            string(name: 'SL_LABID', value: "${env.LAB_ID}"),
+            string(name: 'SL_TOKEN', value: "${env.TOKEN}"),
+            string(name: 'BUILD_NAME', value: "${params.BUILD_NAME}"),
+            string(name: 'JAVA_AGENT_URL',value: "${params.JAVA_AGENT_URL}"),
+            string(name: 'DOTNET_AGENT_URL', value: "${params.DOTNET_AGENT_URL}"),
+            string(name: 'NODE_AGENT_URL', value: "${params.NODE_AGENT_URL}"),
+            string(name: 'GO_AGENT_URL', value: "${params.GO_AGENT_URL}"),
+            string(name: 'GO_SLCI_AGENT_URL', value: "${params.GO_SLCI_AGENT_URL}"),
+            string(name: 'PYTHON_AGENT_URL', value: "${params.PYTHON_AGENT_URL}"),
+            string(name: 'TEST_TYPE', value:'All Tests IN One Image')
+          ])
+
+        }
+      }
+    }
   }
 
   post {
