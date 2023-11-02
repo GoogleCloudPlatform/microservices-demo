@@ -83,6 +83,9 @@ To remove the individual resources created for by Terraform without deleting the
    ```bash
    # Uncomment the line: "deletion_protection = false"
    sed -i "s/# deletion_protection/deletion_protection/g" main.tf
+
+   # Re-apply the Terraform to update the state
+   terraform apply
    ```
 
 1. Run the following command:
