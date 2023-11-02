@@ -173,7 +173,7 @@ section_open "Testing Online Boutique's front-end is working"
 section_close
 
 # Uncomment the line: "deletion_protection = false"
-sed -i "s/# deletion_protection/deletion_protection/g" main.tf
+sed -i "s/# deletion_protection/deletion_protection/g" ${DIR}/main.tf
 
 terraform -chdir="$DIR" destroy -auto-approve \
     -var gcp_project_id="${PROJECT}" \
