@@ -153,6 +153,18 @@ pipeline {
                 string(name: 'SL_TOKEN', value: "${env.TOKEN}"),
                 string(name: 'MACHINE_DNS', value: "${env.MACHINE_DNS}")
               ])
+
+              stage ('Run API-Tests') {
+                steps {
+                  script {
+                    build(job: "ApiTests", parameters: [
+                      string(name: 'BRANCH', value: "${params.BRANCH}"),
+                      string(name: 'APP_NAME', value: "${params.APP_NAME}")
+                    ])
+                  }
+                }
+              }
+
             }
           }
         }
@@ -180,6 +192,17 @@ pipeline {
             string(name: 'TEST_TYPE', value:'All Tests IN One Image')
           ])
 
+        }
+      }
+    }
+
+    stage ('Run API-Tests') {
+      steps {
+        script {
+          build(job: "ApiTests", parameters: [
+            string(name: 'BRANCH', value: "${params.BRANCH}"),
+            string(name: 'APP_NAME', value: "${params.APP_NAME}")
+          ])
         }
       }
     }
