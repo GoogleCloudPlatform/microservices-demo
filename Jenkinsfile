@@ -154,10 +154,10 @@ pipeline {
                 string(name: 'MACHINE_DNS', value: "${env.MACHINE_DNS}")
               ])
 
-                build(job: "ApiTests", parameters: [
-                  string(name: 'BRANCH', value: "${params.BRANCH}"),
-                  string(name: 'APP_NAME', value: "${params.APP_NAME}")
-                ])
+              build(job: "ApiTests", parameters: [
+                string(name: 'BRANCH', value: "${params.BRANCH}"),
+                string(name: 'APP_NAME', value: "${params.APP_NAME}")
+              ])
 
 
             }
