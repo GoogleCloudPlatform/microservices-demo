@@ -39,7 +39,7 @@ pipeline {
                                         NODE_AGENT_URL:'slnodejs',
                                         GO_AGENT_URL:'https://agents.sealights.co/slgoagent/latest/slgoagent-linux-amd64.tar.gz',
                                         GO_SLCI_AGENT_URL:'https://agents.sealights.co/slcli/latest/slcli-linux-amd64.tar.gz',
-                                        PYTHON_AGENT_URL:sealights-python-agent]
+                                        PYTHON_AGENT_URL:'sealights-python-agent']
 
   environment {
     DEV_INTEGRATION_SL_TOKEN = secrets.get_secret("mgmt/btq_token", "us-west-2")
