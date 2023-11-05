@@ -57,7 +57,7 @@ pipeline {
       steps {
         script {
 
-          def MapUrl =new HashMap()
+          def MapUrl = new HashMap()
           MapUrl.put('JAVA_AGENT_URL', "https://storage.googleapis.com/cloud-profiler/java/latest/profiler_java_agent_alpine.tar.gz")
           MapUrl.put('DOTNET_AGENT_URL', "https://agents.sealights.co/dotnetcore/latest/sealights-dotnet-agent-alpine-self-contained.tar.gz")
           MapUrl.put('NODE_AGENT_URL', "slnodejs")
