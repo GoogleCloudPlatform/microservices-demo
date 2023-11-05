@@ -1,4 +1,4 @@
-@Library('main-shared-library') _
+@Library('main-shared-library@ahmad-branch') _
 pipeline {
   agent {
     kubernetes {
@@ -51,22 +51,14 @@ pipeline {
     stage ('Build BTQ') {
       steps {
         script {
-          env.CURRENT_VERSION = "1-0-${BUILD_NUMBER}"
-          def parallelLabs = [:]
-          //List of all the images name
-          env.TOKEN= "${params.SL_TOKEN}" == "" ? "${env.DEV_INTEGRATION_SL_TOKEN}"  : "${params.SL_TOKEN}"
-          def services_list = ["adservice","cartservice","checkoutservice", "currencyservice","emailservice","frontend","paymentservice","productcatalogservice","recommendationservice","shippingservice"]
-          //def special_services = ["cartservice"].
-          env.BUILD_NAME= "${params.BUILD_NAME}" == "" ? "${params.BRANCH}-${env.CURRENT_VERSION}" : "${params.BUILD_NAME}"
-          services_list.each { service ->
-            parallelLabs["${service}"] = {
-              def AGENT_URL = getParamForService(service)
-              build(job: 'BTQ-BUILD', parameters: [string(name: 'SERVICE', value: "${service}"), string(name:'TAG' , value:"${env.CURRENT_VERSION}"),
-                                                   string(name:'BRANCH' , value:"${params.BRANCH}"),string(name:'BUILD_NAME' , value:"${env.BUILD_NAME}"),
-                                                   string(name:'SL_TOKEN' , value:"${env.TOKEN}"), string(name:'AGENT_URL' , value:AGENT_URL[0]), string(name:'AGENT_URL_SLCI' , value:AGENT_URL[1])])
-            }
-          }
-          parallel parallelLabs
+            sealights.build_btq(
+              sl_token : params.SL_TOKEN,
+              dev_integraion_sl_token : env.DEV_INTEGRATION_SL_TOKEN,
+              buld_name : params.BUILD_NAME,
+              branch : params.BRANCH,
+              build_name : params.BUILD_NAME,
+
+            )
         }
       }
     }
@@ -191,7 +183,6 @@ pipeline {
             string(name: 'PYTHON_AGENT_URL', value: "${params.PYTHON_AGENT_URL}"),
             string(name: 'TEST_TYPE', value:'All Tests IN One Image')
           ])
-
         }
       }
     }
