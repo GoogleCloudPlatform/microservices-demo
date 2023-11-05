@@ -34,6 +34,9 @@ The recommended way to [install ASM](https://cloud.google.com/service-mesh/docs/
 # Enable ASM and Fleet APIs
 gcloud services enable mesh.googleapis.com --project ${PROJECT_ID}
 
+# Enable ASM on the project's Fleet
+gcloud container fleet mesh enable --project ${PROJECT_ID}
+
 # Register GKE cluster with Fleet
 gcloud container fleet memberships register ${CLUSTER_NAME} \
     --gke-cluster ${ZONE}/${CLUSTER_NAME} \
