@@ -56,7 +56,6 @@ pipeline {
     stage ('Build BTQ') {
       steps {
         script {
-
           def MapUrl = new HashMap()
           MapUrl.put('JAVA_AGENT_URL', "https://storage.googleapis.com/cloud-profiler/java/latest/profiler_java_agent_alpine.tar.gz")
           MapUrl.put('DOTNET_AGENT_URL', "https://agents.sealights.co/dotnetcore/latest/sealights-dotnet-agent-alpine-self-contained.tar.gz")
@@ -64,15 +63,6 @@ pipeline {
           MapUrl.put('GO_AGENT_URL', "https://agents.sealights.co/slgoagent/latest/slgoagent-linux-amd64.tar.gz")
           MapUrl.put('GO_SLCI_AGENT_URL', "https://agents.sealights.co/slcli/latest/slcli-linux-amd64.tar.gz")
           MapUrl.put('PYTHON_AGENT_URL', "sealights-python-agent")
-
-          // Now you can access the properties in MapUrl
-          def javaAgentUrl = MapUrl.JAVA_AGENT_URL
-          def dotnetAgentUrl = MapUrl.DOTNET_AGENT_URL
-          def nodeAgentUrl = MapUrl.NODE_AGENT_URL
-
-          echo "Java Agent URL: ${javaAgentUrl}"
-          echo "Dotnet Agent URL: ${dotnetAgentUrl}"
-          echo "Node Agent URL: ${nodeAgentUrl}"
 
             boutique.build_btq(
               sl_token : params.SL_TOKEN,
