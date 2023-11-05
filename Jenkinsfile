@@ -78,24 +78,13 @@ pipeline {
     stage ('Spin-Up BTQ') {
       steps {
         script{
-          env.IDENTIFIER = "${params.BRANCH}-${env.CURRENT_VERSION}"
-          env.MACHINE_DNS = "http://dev-${env.IDENTIFIER}.dev.sealights.co:8081"
-          env.LAB_ID = sealights.create_lab_id(
-            token: "${env.TOKEN}",
-            machine: "https://dev-integration.dev.sealights.co",
-            app: "${params.APP_NAME}",
-            branch: "${params.BUILD_BRANCH}",
-            test_env: "${env.IDENTIFIER}",
-            lab_alias: "${env.IDENTIFIER}",
-            cdOnly: true,
+          boutique.SpinUpBoutiqeEnvironment(
+            branch : params.BRANCH,
+            app_name: params.APP_NAME,
+            build_branch : params.BUILD_BRANCH,
+            java_agent_url: params.JAVA_AGENT_URL,
+            dotnet_agent_url:params.DOTNET_AGENT_URL
           )
-
-          build(job: 'SpinUpBoutiqeEnvironment', parameters: [string(name: 'ENV_TYPE', value: "DEV"),
-                                                              string(name:'IDENTIFIER' , value:"${env.IDENTIFIER}") ,string(name:'CUSTOM_EC2_INSTANCE_TYPE' , value:"t3a.large"),
-                                                              string(name:'GIT_BRANCH' , value:"${params.BRANCH}"),string(name:'BTQ_LAB_ID' , value:"${env.LAB_ID}"),string(name:'BTQ_TOKEN' , value:"${env.TOKEN}"),
-                                                              string(name:'BTQ_VERSION' , value:"${env.CURRENT_VERSION}"),string(name:'BUILD_NAME' , value:"${env.BUILD_NAME}"),
-                                                              string(name:'JAVA_AGENT_URL' , value: "${params.JAVA_AGENT_URL}"),string(name:'DOTNET_AGENT_URL' , value: "${params.DOTNET_AGENT_URL}"),
-                                                              string(name:'SL_BRANCH' , value:"${params.BRANCH}")])
         }
       }
     }
