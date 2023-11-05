@@ -65,6 +65,15 @@ pipeline {
           MapUrl.put('GO_SLCI_AGENT_URL', "https://agents.sealights.co/slcli/latest/slcli-linux-amd64.tar.gz")
           MapUrl.put('PYTHON_AGENT_URL', "sealights-python-agent")
 
+          // Now you can access the properties in MapUrl
+          def javaAgentUrl = MapUrl.JAVA_AGENT_URL
+          def dotnetAgentUrl = MapUrl.DOTNET_AGENT_URL
+          def nodeAgentUrl = MapUrl.NODE_AGENT_URL
+
+          echo "Java Agent URL: ${javaAgentUrl}"
+          echo "Dotnet Agent URL: ${dotnetAgentUrl}"
+          echo "Node Agent URL: ${nodeAgentUrl}"
+
             boutique.build_btq(
               sl_token : params.SL_TOKEN,
               dev_integraion_sl_token : env.DEV_INTEGRATION_SL_TOKEN,
