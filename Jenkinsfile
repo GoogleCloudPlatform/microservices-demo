@@ -36,13 +36,7 @@ pipeline {
     choice(name: 'TEST_TYPE', choices: ['All Tests IN One Image','Tests sequential','Tests parallel'], description: 'Choose test type')
   }
 
-  def MapUrl = new HashMap()
-  MapUrl.put('JAVA_AGENT_URL', 'https://storage.googleapis.com/cloud-profiler/java/latest/profiler_java_agent_alpine.tar.gz')
-  MapUrl.put('DOTNET_AGENT_URL', 'https://agents.sealights.co/dotnetcore/latest/sealights-dotnet-agent-alpine-self-contained.tar.gz')
-  MapUrl.put('NODE_AGENT_URL', 'slnodejs')
-  MapUrl.put('GO_AGENT_URL', 'https://agents.sealights.co/slgoagent/latest/slgoagent-linux-amd64.tar.gz')
-  MapUrl.put('GO_SLCI_AGENT_URL', 'https://agents.sealights.co/slcli/latest/slcli-linux-amd64.tar.gz')
-  MapUrl.put('PYTHON_AGENT_URL', 'sealights-python-agent')
+
 
 
   environment {
@@ -60,6 +54,13 @@ pipeline {
       }
     }
 
+    env.MapUrl = new HashMap()
+    MapUrl.put('JAVA_AGENT_URL', 'https://storage.googleapis.com/cloud-profiler/java/latest/profiler_java_agent_alpine.tar.gz')
+    MapUrl.put('DOTNET_AGENT_URL', 'https://agents.sealights.co/dotnetcore/latest/sealights-dotnet-agent-alpine-self-contained.tar.gz')
+    MapUrl.put('NODE_AGENT_URL', 'slnodejs')
+    MapUrl.put('GO_AGENT_URL', 'https://agents.sealights.co/slgoagent/latest/slgoagent-linux-amd64.tar.gz')
+    MapUrl.put('GO_SLCI_AGENT_URL', 'https://agents.sealights.co/slcli/latest/slcli-linux-amd64.tar.gz')
+    MapUrl.put('PYTHON_AGENT_URL', 'sealights-python-agent')
 
 
     //Build parallel images
@@ -73,7 +74,7 @@ pipeline {
               dev_integraion_sl_token : env.DEV_INTEGRATION_SL_TOKEN,
               build_name : params.BUILD_NAME,
               branch : params.BRANCH,
-              mapurl : MapUrl
+              mapurl : env.MapUrl
             )
         }
       }
@@ -128,7 +129,7 @@ pipeline {
             dev_integraion_sl_token : env.DEV_INTEGRATION_SL_TOKEN,
             build_name : params.BUILD_NAME,
             branch : params.BRANCH,
-            mapurl : MapUrl
+            mapurl : env.MapUrl
           )
           boutique.SpinUpBoutiqeEnvironment(
             branch : params.BRANCH,
