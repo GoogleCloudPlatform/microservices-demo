@@ -51,7 +51,7 @@ pipeline {
     stage ('Build BTQ') {
       steps {
         script {
-            sealights.build_btq(
+            boutique.build_btq(
               sl_token : params.SL_TOKEN,
               dev_integraion_sl_token : "${env.DEV_INTEGRATION_SL_TOKEN}",
               build_name : "${params.BUILD_NAME}",
