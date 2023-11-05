@@ -99,7 +99,7 @@ pipeline {
     stage ('Run Tests') {
       steps {
         script {
-          catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
+
             if (params.TEST_TYPE == 'Tests parallel') {
               sleep time: 150, unit: 'SECONDS'
               //env.machine_dns = "http://dev-${env.IDENTIFIER}.dev.sealights.co:8081"
@@ -152,15 +152,20 @@ pipeline {
                   string(name: 'SL_TOKEN', value: "${env.TOKEN}"),
                   string(name: 'MACHINE_DNS', value: "${env.MACHINE_DNS}")
                 ])
-
-                build(job: "StableApiTests", parameters: [
-                  string(name: 'BRANCH', value: "${params.BRANCH}"),
-                  string(name: 'APP_NAME', value: "${params.APP_NAME}")
-                ])
-
-
               }
             }
+        }
+      }
+    }
+
+    stage('Run Api-Tests Before Changes'){
+      steps{
+        script{
+          catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
+            build(job: "StableApiTests", parameters: [
+              string(name: 'BRANCH', value: "${params.BRANCH}"),
+              string(name: 'APP_NAME', value: "${params.APP_NAME}")
+            ])
           }
         }
       }
@@ -191,7 +196,7 @@ pipeline {
       }
     }
 
-    stage ('Run API-Tests') {
+    stage ('Run API-Tests After Changes') {
       steps {
         script {
           catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
