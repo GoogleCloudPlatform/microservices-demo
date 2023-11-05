@@ -99,7 +99,7 @@ pipeline {
     stage ('Run Tests') {
       steps {
         script {
-          catchError(buildResult: 'SUCCESS', stageResult: 'SUCCESS') {
+          catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
             if (params.TEST_TYPE == 'Tests parallel') {
               sleep time: 150, unit: 'SECONDS'
               //env.machine_dns = "http://dev-${env.IDENTIFIER}.dev.sealights.co:8081"
