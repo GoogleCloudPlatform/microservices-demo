@@ -22,6 +22,8 @@ pipeline {
   parameters {
     string(name: 'APP_NAME', defaultValue: 'ahmad-BTQ', description: 'name of the app (integration build)')
     string(name: 'BRANCH', defaultValue: 'ahmad-branch', description: 'Branch to clone (ahmad-branch)')
+    string(name: 'CHANGED_BRANCH', defaultValue: 'changed', description: 'Branch to clone (ahmad-branch)')
+    string(name: 'BRANCH', defaultValue: 'ahmad-branch', description: 'Branch to clone (ahmad-branch)')
     string(name: 'BUILD_BRANCH', defaultValue: 'ahmad-branch', description: 'Branch to Build images that have the creational LAB_ID (send to ahmad branch to build)')
     string(name: 'SL_TOKEN', defaultValue: '', description: 'sl-token')
     string(name: 'BUILD_NAME', defaultValue: '', description: 'build name')
@@ -45,8 +47,9 @@ pipeline {
     stage('Clone Repository') {
       steps {
         script {
-          // Clone the repository with the specified branch
-          git branch: params.BRANCH, url: 'https://github.com/Sealights/microservices-demo.git'
+         boutique.clone_repo(
+           branch : params.BRANCH
+         )
         }
       }
     }
@@ -103,12 +106,10 @@ pipeline {
     stage('Run Api-Tests Before Changes'){
       steps{
         script{
-          catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
-            build(job: "StableApiTests", parameters: [
-              string(name: 'BRANCH', value: "${params.BRANCH}"),
-              string(name: 'APP_NAME', value: "${params.APP_NAME}")
-            ])
-          }
+          boutique.run_api_tests_before_changes(
+            branch : params.BRANCH,
+            app_name: params.APP_NAME
+          )
         }
       }
     }
@@ -116,23 +117,28 @@ pipeline {
     stage('Run changed'){
       steps{
         script{
-          build(job: "changed", parameters: [
 
-            string(name: 'APP_NAME', value: "${params.APP_NAME}"),
-            string(name: 'BRANCH', value: "${params.BRANCH}"),
-            string(name: 'JOB_NAME', value: "${params.JOB_NAME}"),
-            string(name: 'BUILD_BRANCH', value: "${params.BUILD_BRANCH}"),
-            string(name: 'SL_LABID', value: "${env.LAB_ID}"),
-            string(name: 'SL_TOKEN', value: "${env.TOKEN}"),
-            string(name: 'BUILD_NAME', value: "${params.BUILD_NAME}"),
-            string(name: 'JAVA_AGENT_URL',value: "${params.JAVA_AGENT_URL}"),
-            string(name: 'DOTNET_AGENT_URL', value: "${params.DOTNET_AGENT_URL}"),
-            string(name: 'NODE_AGENT_URL', value: "${params.NODE_AGENT_URL}"),
-            string(name: 'GO_AGENT_URL', value: "${params.GO_AGENT_URL}"),
-            string(name: 'GO_SLCI_AGENT_URL', value: "${params.GO_SLCI_AGENT_URL}"),
-            string(name: 'PYTHON_AGENT_URL', value: "${params.PYTHON_AGENT_URL}"),
-            string(name: 'TEST_TYPE', value:'All Tests IN One Image')
-          ])
+          boutique.clone_repo(
+            branch : params.CHANGED_BRANCH
+          )
+          boutique.build_btq(
+            sl_token : params.SL_TOKEN,
+            dev_integraion_sl_token : env.DEV_INTEGRATION_SL_TOKEN,
+            build_name : params.BUILD_NAME,
+            branch : params.BRANCH,
+            mapurl : MapUrl
+          )
+          boutique.SpinUpBoutiqeEnvironment(
+            branch : params.BRANCH,
+            app_name: params.APP_NAME,
+            build_branch : params.BUILD_BRANCH,
+            java_agent_url: params.JAVA_AGENT_URL,
+            dotnet_agent_url:params.DOTNET_AGENT_URL
+          )
+          boutique.run_tests(
+            branch : params.BRANCH,
+            test_type :params.TEST_TYPE
+          )
         }
       }
     }
@@ -140,12 +146,10 @@ pipeline {
     stage ('Run API-Tests After Changes') {
       steps {
         script {
-          catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
-            build(job: "ApiTests", parameters: [
-              string(name: 'BRANCH', value: "${params.BRANCH}"),
-              string(name: 'APP_NAME', value: "${params.APP_NAME}")
-            ])
-          }
+          boutique.run_api_tests_after_changes(
+            branch : params.BRANCH,
+            app_name: params.APP_NAME
+          )
         }
       }
     }
