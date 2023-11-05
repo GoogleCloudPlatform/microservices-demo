@@ -52,7 +52,7 @@ pipeline {
       steps {
         script {
             boutique.build_btq(
-              sl_token : params.SL_TOKEN,
+              sl_token : ${params.SL_TOKEN},
               dev_integraion_sl_token : ${env.DEV_INTEGRATION_SL_TOKEN},
               build_name : ${params.BUILD_NAME},
               branch : ${params.BRANCH}
