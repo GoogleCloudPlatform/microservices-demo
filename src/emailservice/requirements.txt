@@ -12,7 +12,7 @@ cachetools==5.3.2
     # via google-auth
 certifi==2023.7.22
     # via requests
-charset-normalizer==3.3.1
+charset-normalizer==3.3.2
     # via requests
 deprecated==1.2.14
     # via
@@ -23,9 +23,9 @@ google-api-core[grpc]==2.12.0
     #   -r requirements.in
     #   google-api-python-client
     #   google-cloud-trace
-google-api-python-client==2.105.0
+google-api-python-client==2.106.0
     # via google-cloud-profiler
-google-auth==2.23.3
+google-auth==2.23.4
     # via
     #   google-api-core
     #   google-api-python-client
@@ -101,7 +101,7 @@ opentelemetry-semantic-conventions==0.41b0
     #   opentelemetry-sdk
 proto-plus==1.22.3
     # via google-cloud-trace
-protobuf==4.24.4
+protobuf==4.25.0
     # via
     #   google-api-core
     #   google-cloud-profiler
