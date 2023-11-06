@@ -58,12 +58,12 @@ pipeline {
       steps {
         script {
           def MapUrl = new HashMap()
-          MapUrl.put('JAVA_AGENT_URL', 'https://storage.googleapis.com/cloud-profiler/java/latest/profiler_java_agent_alpine.tar.gz')
-          MapUrl.put('DOTNET_AGENT_URL', 'https://agents.sealights.co/dotnetcore/latest/sealights-dotnet-agent-alpine-self-contained.tar.gz')
-          MapUrl.put('NODE_AGENT_URL', 'slnodejs')
-          MapUrl.put('GO_AGENT_URL', 'https://agents.sealights.co/slgoagent/latest/slgoagent-linux-amd64.tar.gz')
-          MapUrl.put('GO_SLCI_AGENT_URL', 'https://agents.sealights.co/slcli/latest/slcli-linux-amd64.tar.gz')
-          MapUrl.put('PYTHON_AGENT_URL', 'sealights-python-agent')
+          MapUrl.put('JAVA_AGENT_URL', "${params.JAVA_AGENT_URL}")
+          MapUrl.put('DOTNET_AGENT_URL', "${params.DOTNET_AGENT_URL}")
+          MapUrl.put('NODE_AGENT_URL', "${params.NODE_AGENT_URL}")
+          MapUrl.put('GO_AGENT_URL', "${params.GO_AGENT_URL}")
+          MapUrl.put('GO_SLCI_AGENT_URL', "${params.GO_SLCI_AGENT_URL}")
+          MapUrl.put('PYTHON_AGENT_URL', "${params.PYTHON_AGENT_URL}")
 
           boutique.build_btq(
             sl_token: params.SL_TOKEN,
