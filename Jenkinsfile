@@ -39,6 +39,14 @@ pipeline {
 
   environment {
     DEV_INTEGRATION_SL_TOKEN = secrets.get_secret("mgmt/btq_token", "us-west-2")
+      MapUrl = [ // Define the hashmap directly in the environment block
+                 JAVA_AGENT_URL: 'https://storage.googleapis.com/cloud-profiler/java/latest/profiler_java_agent_alpine.tar.gz',
+                 DOTNET_AGENT_URL: 'https://agents.sealights.co/dotnetcore/latest/sealights-dotnet-agent-alpine-self-contained.tar.gz',
+                 NODE_AGENT_URL: 'slnodejs',
+                 GO_AGENT_URL: 'https://agents.sealights.co/slgoagent/latest/slgoagent-linux-amd64.tar.gz',
+                 GO_SLCI_AGENT_URL: 'https://agents.sealights.co/slcli/latest/slcli-linux-amd64.tar.gz',
+                 PYTHON_AGENT_URL: 'sealights-python-agent'
+      ]
   }
 
   stages {
@@ -55,17 +63,12 @@ pipeline {
 
 
 
+
     //Build parallel images
     stage('Build BTQ') {
       steps {
         script {
-          env.MapUrl = new HashMap()
-          env.MapUrl.put('JAVA_AGENT_URL', 'https://storage.googleapis.com/cloud-profiler/java/latest/profiler_java_agent_alpine.tar.gz')
-          env.MapUrl.put('DOTNET_AGENT_URL', 'https://agents.sealights.co/dotnetcore/latest/sealights-dotnet-agent-alpine-self-contained.tar.gz')
-          env.MapUrl.put('NODE_AGENT_URL', 'slnodejs')
-          env.MapUrl.put('GO_AGENT_URL', 'https://agents.sealights.co/slgoagent/latest/slgoagent-linux-amd64.tar.gz')
-          env.MapUrl.put('GO_SLCI_AGENT_URL', 'https://agents.sealights.co/slcli/latest/slcli-linux-amd64.tar.gz')
-          env.MapUrl.put('PYTHON_AGENT_URL', 'sealights-python-agent')
+
 
           boutique.build_btq(
             sl_token: params.SL_TOKEN,
@@ -117,8 +120,6 @@ pipeline {
     stage('Changed - Clone Repository') {
       steps {
         script {
-
-
           boutique.clone_repo(
             branch: params.CHANGED_BRANCH
           )
