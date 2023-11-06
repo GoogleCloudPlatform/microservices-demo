@@ -57,19 +57,20 @@ pipeline {
     stage('Build BTQ') {
       steps {
         script {
-          env.MapUrl = new HashMap()
-          env.MapUrl.put(JAVA_AGENT_URL, "${params.JAVA_AGENT_URL}")
-          env.MapUrl.put(DOTNET_AGENT_URL, "${params.DOTNET_AGENT_URL}")
-          env.MapUrl.put(NODE_AGENT_URL, "${params.NODE_AGENT_URL}")
-          env.MapUrl.put(GO_AGENT_URL, "${params.GO_AGENT_URL}")
-          env.MapUrl.put(GO_SLCI_AGENT_URL, "${params.GO_SLCI_AGENT_URL}")
-          env.MapUrl.put(PYTHON_AGENT_URL, "${params.PYTHON_AGENT_URL}")
+          def MapUrl = new HashMap()
+          MapUrl.put('JAVA_AGENT_URL', 'https://storage.googleapis.com/cloud-profiler/java/latest/profiler_java_agent_alpine.tar.gz')
+          MapUrl.put('DOTNET_AGENT_URL', 'https://agents.sealights.co/dotnetcore/latest/sealights-dotnet-agent-alpine-self-contained.tar.gz')
+          MapUrl.put('NODE_AGENT_URL', 'slnodejs')
+          MapUrl.put('GO_AGENT_URL', 'https://agents.sealights.co/slgoagent/latest/slgoagent-linux-amd64.tar.gz')
+          MapUrl.put('GO_SLCI_AGENT_URL', 'https://agents.sealights.co/slcli/latest/slcli-linux-amd64.tar.gz')
+          MapUrl.put('PYTHON_AGENT_URL', 'sealights-python-agent')
+
           boutique.build_btq(
             sl_token: params.SL_TOKEN,
             dev_integraion_sl_token: env.DEV_INTEGRATION_SL_TOKEN,
             build_name: params.BUILD_NAME,
             branch: params.BRANCH,
-            mapurl: env.MapUrl
+            mapurl: MapUrl
           )
         }
       }
@@ -126,12 +127,20 @@ pipeline {
     stage('Changed Build BTQ') {
       steps {
         script {
+          def MapUrl = new HashMap()
+          MapUrl.put('JAVA_AGENT_URL', 'https://storage.googleapis.com/cloud-profiler/java/latest/profiler_java_agent_alpine.tar.gz')
+          MapUrl.put('DOTNET_AGENT_URL', 'https://agents.sealights.co/dotnetcore/latest/sealights-dotnet-agent-alpine-self-contained.tar.gz')
+          MapUrl.put('NODE_AGENT_URL', 'slnodejs')
+          MapUrl.put('GO_AGENT_URL', 'https://agents.sealights.co/slgoagent/latest/slgoagent-linux-amd64.tar.gz')
+          MapUrl.put('GO_SLCI_AGENT_URL', 'https://agents.sealights.co/slcli/latest/slcli-linux-amd64.tar.gz')
+          MapUrl.put('PYTHON_AGENT_URL', 'sealights-python-agent')
+
           boutique.build_btq(
             sl_token: params.SL_TOKEN,
             dev_integraion_sl_token: env.DEV_INTEGRATION_SL_TOKEN,
             build_name: params.BUILD_NAME,
             branch: params.BRANCH,
-            mapurl: env.MapUrl
+            mapurl: MapUrl
           )
         }
       }
@@ -164,38 +173,38 @@ pipeline {
     }
 
 
-      stage('Run API-Tests After Changes') {
-        steps {
-          script {
-            boutique.run_api_tests_after_changes(
-              branch: params.BRANCH,
-              app_name: params.APP_NAME
-            )
-          }
-        }
-      }
-    }
-
-    post {
-      success {
+    stage('Run API-Tests After Changes') {
+      steps {
         script {
-          build(job: 'TearDownBoutiqeEnvironment', parameters: [string(name: 'ENV_TYPE', value: "DEV"), string(name: 'IDENTIFIER', value: "${env.IDENTIFIER}")])
-          slackSend channel: "#btq-ci", tokenCredentialId: "slack_sldevops", color: "good", message: "BTQ-CI build ${env.CURRENT_VERSION} for branch ${BRANCH_NAME} finished with status ${currentBuild.currentResult} (<${env.BUILD_URL}|Open> and TearDownBoutiqeEnvironment)"
-        }
-      }
-      failure {
-        script {
-          sts.set_assume_role([
-            env       : "dev",
-            account_id: "159616352881",
-            role_name : "CD-TF-Role"
-          ])
-          def env_instance_id = sh(returnStdout: true, script: "aws ec2 --region eu-west-1 describe-instances --filters 'Name=tag:Name,Values=EUW-ALLINONE-DEV-${env.IDENTIFIER}' 'Name=instance-state-name,Values=running' | jq -r '.Reservations[].Instances[].InstanceId'")
-          sh "aws ec2 --region eu-west-1 stop-instances --instance-ids ${env_instance_id}"
-          slackSend channel: "#btq-ci", tokenCredentialId: "slack_sldevops", color: "danger", message: "BTQ-CI build ${env.CURRENT_VERSION} for branch ${BRANCH_NAME} finished with status ${currentBuild.currentResult} (<${env.BUILD_URL}|Open>) and TearDownBoutiqeEnvironment"
+          boutique.run_api_tests_after_changes(
+            branch: params.BRANCH,
+            app_name: params.APP_NAME
+          )
         }
       }
     }
   }
+
+  post {
+    success {
+      script {
+        build(job: 'TearDownBoutiqeEnvironment', parameters: [string(name: 'ENV_TYPE', value: "DEV"), string(name: 'IDENTIFIER', value: "${env.IDENTIFIER}")])
+        slackSend channel: "#btq-ci", tokenCredentialId: "slack_sldevops", color: "good", message: "BTQ-CI build ${env.CURRENT_VERSION} for branch ${BRANCH_NAME} finished with status ${currentBuild.currentResult} (<${env.BUILD_URL}|Open> and TearDownBoutiqeEnvironment)"
+      }
+    }
+    failure {
+      script {
+        sts.set_assume_role([
+          env       : "dev",
+          account_id: "159616352881",
+          role_name : "CD-TF-Role"
+        ])
+        def env_instance_id = sh(returnStdout: true, script: "aws ec2 --region eu-west-1 describe-instances --filters 'Name=tag:Name,Values=EUW-ALLINONE-DEV-${env.IDENTIFIER}' 'Name=instance-state-name,Values=running' | jq -r '.Reservations[].Instances[].InstanceId'")
+        sh "aws ec2 --region eu-west-1 stop-instances --instance-ids ${env_instance_id}"
+        slackSend channel: "#btq-ci", tokenCredentialId: "slack_sldevops", color: "danger", message: "BTQ-CI build ${env.CURRENT_VERSION} for branch ${BRANCH_NAME} finished with status ${currentBuild.currentResult} (<${env.BUILD_URL}|Open>) and TearDownBoutiqeEnvironment"
+      }
+    }
+  }
+}
 
 
