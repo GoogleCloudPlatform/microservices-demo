@@ -80,6 +80,7 @@ pipeline {
       steps {
         script {
           boutique.SpinUpBoutiqeEnvironment(
+            IDENTIFIER : "${params.branch}-${env.CURRENT_VERSION}",
             branch: params.BRANCH,
             app_name: params.APP_NAME,
             build_branch: params.BUILD_BRANCH,
@@ -155,6 +156,7 @@ pipeline {
       steps {
         script {
           boutique.SpinUpBoutiqeEnvironment(
+            IDENTIFIER = "${params.CHANGED_BRANCH}-${env.CURRENT_VERSION}",
             branch: params.CHANGED_BRANCH,
             git_branch : params.CHANGED_BRANCH,
             app_name: params.APP_NAME,
@@ -194,20 +196,22 @@ pipeline {
   post {
     success {
       script {
-        build(job: 'TearDownBoutiqeEnvironment', parameters: [string(name: 'ENV_TYPE', value: "DEV"), string(name: 'IDENTIFIER', value: "${env.IDENTIFIER}")])
-        slackSend channel: "#btq-ci", tokenCredentialId: "slack_sldevops", color: "good", message: "BTQ-CI build ${env.CURRENT_VERSION} for branch ${BRANCH_NAME} finished with status ${currentBuild.currentResult} (<${env.BUILD_URL}|Open> and TearDownBoutiqeEnvironment)"
+        boutique.success_btq(
+          IDENTIFIER : "${params.branch}-${env.CURRENT_VERSION}"
+        )
+        boutique.success_btq(
+          IDENTIFIER : "${params.CHANGED_BRANCH}-${env.CURRENT_VERSION}"
+        )
       }
     }
     failure {
       script {
-        sts.set_assume_role([
-          env       : "dev",
-          account_id: "159616352881",
-          role_name : "CD-TF-Role"
-        ])
-        def env_instance_id = sh(returnStdout: true, script: "aws ec2 --region eu-west-1 describe-instances --filters 'Name=tag:Name,Values=EUW-ALLINONE-DEV-${env.IDENTIFIER}' 'Name=instance-state-name,Values=running' | jq -r '.Reservations[].Instances[].InstanceId'")
-        sh "aws ec2 --region eu-west-1 stop-instances --instance-ids ${env_instance_id}"
-        slackSend channel: "#btq-ci", tokenCredentialId: "slack_sldevops", color: "danger", message: "BTQ-CI build ${env.CURRENT_VERSION} for branch ${BRANCH_NAME} finished with status ${currentBuild.currentResult} (<${env.BUILD_URL}|Open>) and TearDownBoutiqeEnvironment"
+        failure_btq(
+          IDENTIFIER : "${params.branch}-${env.CURRENT_VERSION}"
+        )
+        failure_btq(
+          IDENTIFIER : "${params.CHANGED_BRANCH}-${env.CURRENT_VERSION}"
+        )
       }
     }
   }
