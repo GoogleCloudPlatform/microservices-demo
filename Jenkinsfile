@@ -206,10 +206,10 @@ pipeline {
     }
     failure {
       script {
-        failure_btq(
+        boutique.failure_btq(
           IDENTIFIER : "${params.branch}-${env.CURRENT_VERSION}"
         )
-        failure_btq(
+        boutique.failure_btq(
           IDENTIFIER : "${params.CHANGED_BRANCH}-${env.CURRENT_VERSION}"
         )
       }
