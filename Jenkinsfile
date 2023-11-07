@@ -114,6 +114,7 @@ pipeline {
       }
     }
 
+
     stage('Changed - Clone Repository') {
       steps {
         script {
@@ -155,7 +156,7 @@ pipeline {
             branch: params.BRANCH,
             git_branch : params.CHANGED_BRANCH,
             app_name: params.APP_NAME,
-            build_branch: params.BUILD_BRANCH,
+            build_branch: params.CHANGED_BRANCH,
             java_agent_url: params.JAVA_AGENT_URL,
             dotnet_agent_url: params.DOTNET_AGENT_URL,
             sl_branch : params.BRANCH
