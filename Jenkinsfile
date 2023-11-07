@@ -79,8 +79,9 @@ pipeline {
     stage('Spin-Up BTQ') {
       steps {
         script {
+          def IDENTIFIER= "${params.BRANCH}-${env.CURRENT_VERSION}"
           boutique.SpinUpBoutiqeEnvironment(
-            IDENTIFIER : params.BRANCH-env.CURRENT_VERSION,
+            IDENTIFIER : IDENTIFIER,
             branch: params.BRANCH,
             app_name: params.APP_NAME,
             build_branch: params.BUILD_BRANCH,
@@ -155,8 +156,10 @@ pipeline {
     stage('Changed Spin-Up BTQ') {
       steps {
         script {
+          def IDENTIFIER= "${params.CHANGED_BRANCH}-${env.CURRENT_VERSION}"
+
           boutique.SpinUpBoutiqeEnvironment(
-            IDENTIFIER = ${params.CHANGED_BRANCH}-${env.CURRENT_VERSION},
+            IDENTIFIER : IDENTIFIER,
             branch: params.CHANGED_BRANCH,
             git_branch : params.CHANGED_BRANCH,
             app_name: params.APP_NAME,
