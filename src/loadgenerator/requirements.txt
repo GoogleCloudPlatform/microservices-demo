@@ -4,7 +4,7 @@
 #
 #    pip-compile --output-file=requirements.txt requirements.in
 #
-blinker==1.6.3
+blinker==1.7.0
     # via flask
 brotli==1.1.0
     # via geventhttpclient
@@ -12,7 +12,7 @@ certifi==2023.7.22
     # via
     #   geventhttpclient
     #   requests
-charset-normalizer==3.3.1
+charset-normalizer==3.3.2
     # via requests
 click==8.1.7
     # via flask
@@ -41,7 +41,7 @@ itsdangerous==2.1.2
     # via flask
 jinja2==3.1.2
     # via flask
-locust==2.17.0
+locust==2.18.0
     # via -r requirements.in
 markupsafe==2.1.3
     # via
@@ -59,8 +59,6 @@ roundrobin==0.0.4
     # via locust
 six==1.16.0
     # via geventhttpclient
-typing-extensions==4.8.0
-    # via locust
 urllib3==2.0.7
     # via requests
 werkzeug==3.0.1
