@@ -80,7 +80,7 @@ pipeline {
       steps {
         script {
           boutique.SpinUpBoutiqeEnvironment(
-            IDENTIFIER : "${params.branch}-${env.CURRENT_VERSION}",
+            IDENTIFIER : ${params.branch}-${env.CURRENT_VERSION},
             branch: params.BRANCH,
             app_name: params.APP_NAME,
             build_branch: params.BUILD_BRANCH,
@@ -156,7 +156,7 @@ pipeline {
       steps {
         script {
           boutique.SpinUpBoutiqeEnvironment(
-            IDENTIFIER = "${params.CHANGED_BRANCH}-${env.CURRENT_VERSION}",
+            IDENTIFIER = ${params.CHANGED_BRANCH}-${env.CURRENT_VERSION},
             branch: params.CHANGED_BRANCH,
             git_branch : params.CHANGED_BRANCH,
             app_name: params.APP_NAME,
