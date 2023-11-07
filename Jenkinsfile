@@ -149,14 +149,16 @@ pipeline {
       }
     }
 
+
+
     stage('Changed Spin-Up BTQ') {
       steps {
         script {
           boutique.SpinUpBoutiqeEnvironment(
-            branch: params.BRANCH,
+            branch: params.CHANGED_BRANCH,
             git_branch : params.CHANGED_BRANCH,
             app_name: params.APP_NAME,
-            build_branch: params.CHANGED_BRANCH,
+            build_branch: params.BRANCH,
             java_agent_url: params.JAVA_AGENT_URL,
             dotnet_agent_url: params.DOTNET_AGENT_URL,
             sl_branch : params.BRANCH
