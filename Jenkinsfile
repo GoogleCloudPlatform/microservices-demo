@@ -199,21 +199,25 @@ pipeline {
   post {
     success {
       script {
+        env.IDENTIFIER1= "${params.BRANCH}-${env.CURRENT_VERSION}"
+        env.IDENTIFIER2= "${params.CHANGED_BRANCH}-${env.CURRENT_VERSION}"
+
         boutique.success_btq(
-          IDENTIFIER : "${params.branch}-${env.CURRENT_VERSION}"
+          IDENTIFIER : env.IDENTIFIER1
         )
         boutique.success_btq(
-          IDENTIFIER : "${params.CHANGED_BRANCH}-${env.CURRENT_VERSION}"
+          IDENTIFIER : env.IDENTIFIER2
         )
       }
     }
     failure {
       script {
+
         boutique.failure_btq(
-          IDENTIFIER : "${params.branch}-${env.CURRENT_VERSION}"
+          IDENTIFIER : env.IDENTIFIER1
         )
         boutique.failure_btq(
-          IDENTIFIER : "${params.CHANGED_BRANCH}-${env.CURRENT_VERSION}"
+          IDENTIFIER : env.IDENTIFIER2
         )
       }
     }
