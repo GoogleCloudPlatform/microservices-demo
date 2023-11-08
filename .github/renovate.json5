@@ -1,13 +1,8 @@
 {
   "extends": [
-    "config:recommended",
+    "github>GoogleCloudPlatform/kubernetes-engine-samples//.github/renovate-configs/dee-platform-ops.json5",
+    "schedule:earlyMondays",
   ],
-  // Rate limits, to protect maintainers (and CI) from PR floods.
-  "prHourlyLimit": 10,
-  "prConcurrentLimit": 10,
-  // Run once a week, outside typical office hours.
-  // TZ is UTC unless specified.
-  "schedule": [ "after 10pm on Tuesday" ],
   "pip-compile": {
     "enabled": true,
     "fileMatch": ["(^|/)requirements\\.in$"]
@@ -19,14 +14,6 @@
   "constraints": {
     "python": "~=3.11.0"
   },
-  "stabilityDays":7,
-  "vulnerabilityAlerts":{
-     "labels":[
-       "type:security"
-     ],
-     "stabilityDays":0
-  },
-  "labels": ["dependencies"],
   "kubernetes": {
     "fileMatch": ["\\.yaml$"],
     "ignorePaths": [
@@ -34,71 +21,4 @@
       "kustomize/base/**"
     ]
   },
-  // Dependency Dashboard should be excluded from SLO calculation.
-  "dependencyDashboardLabels": [
-    "type: process",
-  ],
-  "packageRules": [
-    // Label PRs based on the languages they contain
-    // category ids are listed at https://docs.renovatebot.com/modules/manager/
-    {"matchCategories": ["python"], "addLabels": ["lang: python"]},
-    {"matchCategories": ["java"], "addLabels": ["lang: java"]},
-    {"matchCategories": ["golang"], "addLabels": ["lang: go"]},
-    {"matchCategories": ["js"], "addLabels": ["lang: nodejs"]},
-    {"matchCategories": ["dotnet"], "addLabels": ["lang: dotnet"]},
-    {
-      "matchUpdateTypes": ["minor", "patch", "digest", "lockFileMaintenance"],
-      "automerge": true
-    },
-    {
-      "matchDepTypes": ["devDependencies"],
-      "automerge": true
-    },
-    // OpenTelemetry: include pre-release versions of python instrumentation
-    // packages. These packages are tightly coupled with otel api and sdk.
-    {
-      "matchPackagePrefixes": ["opentelemetry-instrumentation"],
-      "ignoreUnstable": false,
-      "matchDatasources": ["pypi"]
-    },
-    // Group PRs by "category" - usually language.
-    {
-      "matchCategories": ["python"],
-      "matchUpdateTypes": ["minor", "patch", "digest", "lockFileMaintenance"],
-      "groupName": "python",
-      "automerge": true
-    },
-    {
-      "matchCategories": ["java"],
-      "matchUpdateTypes": ["minor", "patch", "digest", "lockFileMaintenance"],
-      "groupName": "java",
-      "automerge": true
-    },
-    {
-      "matchCategories": ["golang"],
-      "matchUpdateTypes": ["minor", "patch", "digest", "lockFileMaintenance"],
-      "groupName": "golang",
-      "automerge": true
-    },
-    {
-      "matchCategories": ["js"],
-      "matchUpdateTypes": ["minor", "patch", "digest", "lockFileMaintenance"],
-      "groupName": "nodejs",
-      "automerge": true
-    },
-    {
-      "matchCategories": ["dotnet"],
-      "matchUpdateTypes": ["minor", "patch", "digest", "lockFileMaintenance"],
-      "groupName": "dotnet",
-      "automerge": true
-    },
-    {
-      "matchCategories": ["docker"],
-      "matchUpdateTypes": ["minor", "patch", "digest", "lockFileMaintenance"],
-      "groupName": "docker",
-      "pinDigests": true,
-      "automerge": true
-    },
-  ],
-  "platformAutomerge":true
 }
