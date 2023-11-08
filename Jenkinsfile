@@ -13,7 +13,7 @@ pipeline {
         kaniko_cpu_request   : "2",
         kaniko_memory_limit  : "6000Mi",
         kaniko_cpu_limit     : "5",
-        node_selector        : "jenkins"
+        node_selector        : "nightly"
       ])
       defaultContainer 'shell'
     }
