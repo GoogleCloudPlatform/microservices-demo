@@ -22,7 +22,7 @@ google-api-core==2.12.0
     # via
     #   -r requirements.in
     #   google-api-python-client
-google-api-python-client==2.106.0
+google-api-python-client==2.107.0
     # via google-cloud-profiler
 google-auth==2.23.4
     # via
@@ -44,7 +44,7 @@ grpcio==1.59.2
     # via
     #   grpcio-health-checking
     #   opentelemetry-exporter-otlp-proto-grpc
-grpcio-health-checking==1.59.0
+grpcio-health-checking==1.59.2
     # via -r requirements.in
 httplib2==0.22.0
     # via
@@ -118,7 +118,7 @@ uritemplate==4.1.1
     # via google-api-python-client
 urllib3==2.0.7
     # via requests
-wrapt==1.15.0
+wrapt==1.16.0
     # via
     #   deprecated
     #   opentelemetry-instrumentation
