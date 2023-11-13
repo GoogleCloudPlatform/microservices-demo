@@ -15,10 +15,10 @@
  */
 
 if(process.env.DISABLE_PROFILER) {
-  console.log("Profiler disabled.")
+  logger.info("Profiler disabled.")
 }
 else {
-  console.log("Profiler enabled.")
+  logger.info("Profiler enabled.")
   require('@google-cloud/profiler').start({
     serviceContext: {
       service: 'currencyservice',
@@ -29,18 +29,18 @@ else {
 
 
 if(process.env.DISABLE_TRACING) {
-  console.log("Tracing disabled.")
+  logger.info("Tracing disabled.")
 }
 else {
-  console.log("Tracing enabled.")
+  logger.info("Tracing enabled.")
   require('@google-cloud/trace-agent').start();
 }
 
 if(process.env.DISABLE_DEBUGGER) {
-  console.log("Debugger disabled.")
+  logger.info("Debugger disabled.")
 }
 else {
-  console.log("Debugger enabled.")
+  logger.info("Debugger enabled.")
   require('@google-cloud/debug-agent').start({
     serviceContext: {
       service: 'currencyservice',
