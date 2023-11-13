@@ -51,8 +51,15 @@ If you’re using this demo, please **★Star** this repository to show your int
    ```
 
    Substitute `<PROJECT_ID>` with the ID of your Google Cloud project.
+  
+4. Confirm the services have been enabled for your project.
 
-4. Create a GKE cluster and get the credentials for it.
+   ```sh
+   gcloud services list --enabled --project=${PROJECT_ID}
+   ```
+
+
+5. Create a GKE cluster and get the credentials for it.
 
    ```sh
    gcloud container clusters create-auto online-boutique \
@@ -61,13 +68,13 @@ If you’re using this demo, please **★Star** this repository to show your int
 
    Creating the cluster may take a few minutes.
 
-5. Deploy Online Boutique to the cluster.
+6. Deploy Online Boutique to the cluster.
 
    ```sh
    kubectl apply -f ./release/kubernetes-manifests.yaml
    ```
 
-6. Wait for the pods to be ready.
+7. Wait for the pods to be ready.
 
    ```sh
    kubectl get pods
@@ -91,7 +98,7 @@ If you’re using this demo, please **★Star** this repository to show your int
    shippingservice-6ccc89f8fd-v686r         1/1     Running   0          2m58s
    ```
 
-7. Access the web frontend in a browser using the frontend's external IP.
+8. Access the web frontend in a browser using the frontend's external IP.
 
    ```sh
    kubectl get service frontend-external | awk '{print $4}'
@@ -99,7 +106,7 @@ If you’re using this demo, please **★Star** this repository to show your int
 
    Visit `http://EXTERNAL_IP` in a web browser to access your instance of Online Boutique.
 
-8. Once you are done with it, delete the GKE cluster.
+9. Once you are done with it, delete the GKE cluster.
 
    ```sh
    gcloud container clusters delete online-boutique \
