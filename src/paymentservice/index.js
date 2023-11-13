@@ -62,6 +62,11 @@ const PROTO_PATH = path.join(__dirname, '/proto/');
 const server = new HipsterShopServer(PROTO_PATH, PORT);
 
 const pino = require('pino');
-const logger = pino({});
+const logger = pino({
+  name: 'paymentservice-server',
+  messageKey: 'message',
+  changeLevelName: 'severity',
+  useLevelLabels: true
+});
 
 server.listen();
