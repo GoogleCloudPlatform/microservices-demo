@@ -15,10 +15,10 @@
  */
 
 if(process.env.DISABLE_PROFILER) {
-  console.log("Profiler disabled.")
+  logger.info("Profiler disabled.")
 }
 else {
-  console.log("Profiler enabled.")
+  logger.info("Profiler enabled.")
   require('@google-cloud/profiler').start({
     serviceContext: {
       service: 'currencyservice',
@@ -37,7 +37,7 @@ registerInstrumentations({
 });
 
 if(process.env.ENABLE_TRACING == "1") {
-  console.log("Tracing enabled.")
+  logger.info("Tracing enabled.")
   const { NodeTracerProvider } = require('@opentelemetry/sdk-trace-node');
   const { SimpleSpanProcessor } = require('@opentelemetry/sdk-trace-base');
   const { OTLPTraceExporter } = require("@opentelemetry/exporter-otlp-grpc");
@@ -56,7 +56,7 @@ if(process.env.ENABLE_TRACING == "1") {
   provider.register();
 }
 else {
-  console.log("Tracing disabled.")
+  logger.info("Tracing disabled.")
 }
 
 const path = require('path');
