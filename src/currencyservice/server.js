@@ -14,6 +14,17 @@
  * limitations under the License.
  */
 
+const pino = require('pino');
+const logger = pino({
+  name: 'currencyservice-server',
+  messageKey: 'message',
+  formatters: {
+    level (logLevelString, logLevelNum) {
+      return { severity: logLevelString }
+    }
+  }
+});
+
 if(process.env.DISABLE_PROFILER) {
   logger.info("Profiler disabled.")
 }
@@ -61,7 +72,6 @@ else {
 
 const path = require('path');
 const grpc = require('@grpc/grpc-js');
-const pino = require('pino');
 const protoLoader = require('@grpc/proto-loader');
 
 const MAIN_PROTO_PATH = path.join(__dirname, './proto/demo.proto');
@@ -71,16 +81,6 @@ const PORT = process.env.PORT;
 
 const shopProto = _loadProto(MAIN_PROTO_PATH).hipstershop;
 const healthProto = _loadProto(HEALTH_PROTO_PATH).grpc.health.v1;
-
-const logger = pino({
-  name: 'currencyservice-server',
-  messageKey: 'message',
-  formatters: {
-    level (logLevelString, logLevelNum) {
-      return { severity: logLevelString }
-    }
-  }
-});
 
 /**
  * Helper function that loads a protobuf file.
