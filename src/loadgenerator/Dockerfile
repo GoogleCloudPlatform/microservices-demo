@@ -12,11 +12,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+<<<<<<< HEAD
 FROM python:3.11.6-slim@sha256:e932b9a0f25c306d542fc69133d24b872a6a264810e300b553e7ecd027599ca5 as base
+=======
+FROM python:3.11.1-slim as base
+>>>>>>> 62b5938 (Fix code to support ARM on M1/M2)
 
 FROM base as builder
 
 COPY requirements.txt .
+
+RUN apt-get update && apt-get install -y \
+    gcc \
+    python3-dev
 
 RUN pip install --prefix="/install" -r requirements.txt
 

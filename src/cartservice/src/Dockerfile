@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Copyright 2021 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -31,6 +32,17 @@ RUN dotnet publish cartservice.csproj \
 
 # https://mcr.microsoft.com/product/dotnet/runtime-deps
 FROM mcr.microsoft.com/dotnet/runtime-deps:8.0.0-alpine3.18-amd64@sha256:ebf0aba83039e9931572187de805925a3e2860f0f505dfd8097313ff5fc269b5
+=======
+FROM mcr.microsoft.com/dotnet/sdk:7.0.306 as builder
+WORKDIR /app
+COPY cartservice.csproj .
+RUN dotnet restore cartservice.csproj -r linux-musl-arm64
+COPY . .
+RUN dotnet publish cartservice.csproj -p:PublishSingleFile=true -r linux-musl-arm64 --self-contained true -p:PublishTrimmed=True -p:TrimMode=Link -c release -o /cartservice --no-restore
+
+# https://mcr.microsoft.com/v2/dotnet/runtime-deps/tags/list
+FROM mcr.microsoft.com/dotnet/runtime-deps:7.0.9-alpine3.18-arm64v8
+>>>>>>> 62b5938 (Fix code to support ARM on M1/M2)
 
 WORKDIR /app
 COPY --from=builder /cartservice .
