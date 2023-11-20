@@ -106,7 +106,9 @@ If you’re using this demo, please **★Star** this repository to show your int
 
    Visit `http://EXTERNAL_IP` in a web browser to access your instance of Online Boutique.
 
-9. Once you are done with it, delete the GKE cluster.
+9. Congrats! You've deployed the default Online Boutique. To deploy a different variation of Online Boutique (e.g., with Google Cloud Operations tracing, Istio, etc.), see [Deploy Online Boutique variations with Kustomize](#deploy-online-boutique-variations-with-kustomize).
+
+10. Once you are done with it, delete the GKE cluster.
 
    ```sh
    gcloud container clusters delete online-boutique \
