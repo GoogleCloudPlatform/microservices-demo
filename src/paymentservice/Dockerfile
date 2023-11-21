@@ -12,11 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-<<<<<<< HEAD
-FROM node:20.8.0-alpine@sha256:37750e51d61bef92165b2e29a77da4277ba0777258446b7a9c99511f119db096 as base
-=======
+
 FROM node:20.5.0-alpine as base
->>>>>>> 62b5938 (Fix code to support ARM on M1/M2)
 
 FROM base as builder
 

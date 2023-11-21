@@ -12,11 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-<<<<<<< HEAD
-FROM golang:1.21.3-alpine@sha256:926f7f7e1ab8509b4e91d5ec6d5916ebb45155b0c8920291ba9f361d65385806 as builder
-=======
 FROM arm64v8/golang:1.20.7-alpine as builder
->>>>>>> 62b5938 (Fix code to support ARM on M1/M2)
 RUN apk add --no-cache ca-certificates git
 RUN apk add build-base
 WORKDIR /src
