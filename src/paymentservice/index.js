@@ -16,6 +16,7 @@
 
 'use strict';
 
+const logger = require('./shared/logger')
 
 if(process.env.DISABLE_PROFILER) {
   logger.info("Profiler disabled.")
@@ -68,16 +69,5 @@ const PORT = process.env['PORT'];
 const PROTO_PATH = path.join(__dirname, '/proto/');
 
 const server = new HipsterShopServer(PROTO_PATH, PORT);
-
-const pino = require('pino');
-const logger = pino({
-  name: 'paymentservice-server',
-  messageKey: 'message',
-  formatters: {
-    level (logLevelString, logLevelNum) {
-      return { severity: logLevelString }
-    }
-  }
-});
 
 server.listen();
