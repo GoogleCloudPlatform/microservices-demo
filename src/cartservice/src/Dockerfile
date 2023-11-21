@@ -1,5 +1,5 @@
 
-FROM mcr.microsoft.com/dotnet/sdk:7.0.306 as builder
+FROM mcr.microsoft.com/dotnet/runtime-deps:7.0.9-alpine3.18-arm64v8
 WORKDIR /app
 COPY cartservice.csproj .
 RUN dotnet restore cartservice.csproj -r linux-musl-arm64
