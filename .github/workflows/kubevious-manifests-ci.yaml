@@ -37,26 +37,26 @@ jobs:
 
       - name: Validate kubernetes-manifests
         id: kubernetes-manifests-validation
-        uses: kubevious/cli@v1.0.59
+        uses: kubevious/cli@v1.0.60
         with:
           manifests: kubernetes-manifests
           skip_rules: container-latest-image
 
       - name: Validate helm-chart
         id: helm-chart-validation
-        uses: kubevious/cli@v1.0.59
+        uses: kubevious/cli@v1.0.60
         with:
           manifests: helm-chart
 
       - name: Validate istio-manifests
         id: istio-manifests-validation
-        uses: kubevious/cli@v1.0.59
+        uses: kubevious/cli@v1.0.60
         with:
           manifests: istio-manifests https://github.com/istio/istio/raw/master/manifests/charts/base/crds/crd-all.gen.yaml
 
       - name: Validate kustomize
         id: kustomize-validation
-        uses: kubevious/cli@v1.0.59
+        uses: kubevious/cli@v1.0.60
         with:
           manifests: kustomize
           skip_rules: container-latest-image
