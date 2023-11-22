@@ -18,7 +18,7 @@ const protoLoader = require('@grpc/proto-loader');
 
 const charge = require('./charge');
 
-const logger = require('./shared/logger')
+const logger = require('./logger')
 
 class HipsterShopServer {
   constructor(protoRoot, port = HipsterShopServer.PORT) {

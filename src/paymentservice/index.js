@@ -16,7 +16,7 @@
 
 'use strict';
 
-const logger = require('./shared/logger')
+const logger = require('./logger')
 
 if(process.env.DISABLE_PROFILER) {
   logger.info("Profiler disabled.")
