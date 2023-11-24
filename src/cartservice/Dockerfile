@@ -1,4 +1,4 @@
-ARG NET_VERSION=7.0
+ARG NET_VERSION=8.0
 FROM mcr.microsoft.com/dotnet/sdk:${NET_VERSION} as builder
 
 WORKDIR /app
@@ -14,7 +14,7 @@ FROM mcr.microsoft.com/dotnet/aspnet:${NET_VERSION}
 RUN apt-get update
 RUN apt-get -y dist-upgrade
 
-ARG GRPC_HEALTH_PROBE_VERSION=v0.4.11
+ARG GRPC_HEALTH_PROBE_VERSION=v0.4.22
 ADD https://github.com/grpc-ecosystem/grpc-health-probe/releases/download/${GRPC_HEALTH_PROBE_VERSION}/grpc_health_probe-linux-amd64 /bin/grpc_health_probe
 RUN chmod +x /bin/grpc_health_probe
 

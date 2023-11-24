@@ -21,10 +21,10 @@ using CommandLine;
 using Grpc.Core;
 using StackExchange.Redis;
 
-namespace cartservice
+namespace cartservice;
+
+class Program
 {
-  class Program
-  {
     const string CART_SERVICE_ADDRESS = "LISTEN_ADDR";
     const string REDIS_ADDRESS = "REDIS_ADDR";
     const string CART_SERVICE_PORT = "PORT";
@@ -33,170 +33,169 @@ namespace cartservice
     [Verb("start", HelpText = "Starts the server listening on provided port")]
     class ServerOptions
     {
-      [Option('h', "hostname", HelpText = "The ip on which the server is running. If not provided, LISTEN_ADDR environment variable value will be used. If not defined, localhost is used")]
-      public string Host { get; set; }
+        [Option('h', "hostname", HelpText = "The ip on which the server is running. If not provided, LISTEN_ADDR environment variable value will be used. If not defined, localhost is used")]
+        public string Host { get; set; }
 
-      [Option('p', "port", HelpText = "The port on for running the server")]
-      public int Port { get; set; }
+        [Option('p', "port", HelpText = "The port on for running the server")]
+        public int Port { get; set; }
 
-      [Option('r', "redis", HelpText = "The ip of redis cache")]
-      public string Redis { get; set; }
+        [Option('r', "redis", HelpText = "The ip of redis cache")]
+        public string Redis { get; set; }
     }
 
 
     static object StartServer(string host, int port, ICartStore cartStore)
     {
-      // Run the server in a separate thread and make the main thread busy waiting.
-      // The busy wait is because when we run in a container, we can't use techniques such as waiting on user input (Console.Readline())
-      Task serverTask = Task.Run(async () =>
-      {
-        try
+        // Run the server in a separate thread and make the main thread busy waiting.
+        // The busy wait is because when we run in a container, we can't use techniques such as waiting on user input (Console.Readline())
+        Task serverTask = Task.Run(async () =>
         {
-          await cartStore.InitializeAsync();
+            try
+            {
+                await cartStore.InitializeAsync();
 
-          Console.WriteLine($"Trying to start a grpc server at  {host}:{port}");
-          Server server = new Server
-          {
-            Services =
-                  {
-                            // Cart Service Endpoint
-                             Hipstershop.CartService.BindService(new CartServiceImpl(cartStore)),
+                Console.WriteLine($"Trying to start a grpc server at  {host}:{port}");
+                Server server = new Server
+                {
+                    Services =
+                    {
+                        // Cart Service Endpoint
+                        Hipstershop.CartService.BindService(new CartServiceImpl(cartStore)),
 
-                             // Health Endpoint
-                             Grpc.Health.V1.Health.BindService(new HealthImpl(cartStore))
-                  },
-            Ports = { new ServerPort(host, port, ServerCredentials.Insecure) }
-          };
+                        // Health Endpoint
+                        Grpc.Health.V1.Health.BindService(new HealthImpl(cartStore))
+                    },
+                    Ports = { new ServerPort(host, port, ServerCredentials.Insecure) }
+                };
 
-          Console.WriteLine($"Cart server is listening at {host}:{port}");
-          server.Start();
+                Console.WriteLine($"Cart server is listening at {host}:{port}");
+                server.Start();
 
-          Console.WriteLine("Initialization completed");
+                Console.WriteLine("Initialization completed");
 
-          // Keep the server up and running
-          while (true)
-          {
-            Thread.Sleep(TimeSpan.FromMinutes(10));
-          }
-        }
-        catch (Exception ex)
-        {
-          Console.WriteLine(ex);
-        }
-      });
+                // Keep the server up and running
+                while (true)
+                {
+                    Thread.Sleep(TimeSpan.FromMinutes(10));
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+            }
+        });
 
-      return Task.WaitAny(new[] { serverTask });
+        return Task.WaitAny(new[] { serverTask });
     }
 
     static void Main(string[] args)
     {
-      if (args.Length == 0)
-      {
-        Console.WriteLine("Invalid number of arguments supplied");
-        Environment.Exit(-1);
-      }
+        if (args.Length == 0)
+        {
+            Console.WriteLine("Invalid number of arguments supplied");
+            Environment.Exit(-1);
+        }
 
-      switch (args[0])
-      {
-        case "start":
-          Parser.Default.ParseArguments<ServerOptions>(args).MapResult(
-              (ServerOptions options) =>
-              {
-                var redis = NewRedisConnection(options.Redis);
-                Console.WriteLine($"Started as process with id {System.Diagnostics.Process.GetCurrentProcess().Id}");
+        switch (args[0])
+        {
+            case "start":
+                Parser.Default.ParseArguments<ServerOptions>(args).MapResult(
+                    (ServerOptions options) =>
+                    {
+                        var redis = NewRedisConnection(options.Redis);
+                        Console.WriteLine($"Started as process with id {System.Diagnostics.Process.GetCurrentProcess().Id}");
 
-                // Set hostname/ip address
-                string hostname = options.Host;
-                if (string.IsNullOrEmpty(hostname))
-                {
-                  Console.WriteLine($"Reading host address from {CART_SERVICE_ADDRESS} environment variable");
-                  hostname = Environment.GetEnvironmentVariable(CART_SERVICE_ADDRESS);
-                  if (string.IsNullOrEmpty(hostname))
-                  {
-                    Console.WriteLine($"Environment variable {CART_SERVICE_ADDRESS} was not set. Setting the host to 0.0.0.0");
-                    hostname = "0.0.0.0";
-                  }
-                }
+                        // Set hostname/ip address
+                        string hostname = options.Host;
+                        if (string.IsNullOrEmpty(hostname))
+                        {
+                            Console.WriteLine($"Reading host address from {CART_SERVICE_ADDRESS} environment variable");
+                            hostname = Environment.GetEnvironmentVariable(CART_SERVICE_ADDRESS);
+                            if (string.IsNullOrEmpty(hostname))
+                            {
+                                Console.WriteLine($"Environment variable {CART_SERVICE_ADDRESS} was not set. Setting the host to 0.0.0.0");
+                                hostname = "0.0.0.0";
+                            }
+                        }
 
-                // Set the port
-                int port = options.Port;
-                if (options.Port <= 0)
-                {
-                  Console.WriteLine($"Reading cart service port from {CART_SERVICE_PORT} environment variable");
-                  string portStr = Environment.GetEnvironmentVariable(CART_SERVICE_PORT);
-                  if (string.IsNullOrEmpty(portStr))
-                  {
-                    Console.WriteLine($"{CART_SERVICE_PORT} environment variable was not set. Setting the port to 8080");
-                    port = 8080;
-                  }
-                  else
-                  {
-                    port = int.Parse(portStr);
-                  }
-                }
+                        // Set the port
+                        int port = options.Port;
+                        if (options.Port <= 0)
+                        {
+                            Console.WriteLine($"Reading cart service port from {CART_SERVICE_PORT} environment variable");
+                            string portStr = Environment.GetEnvironmentVariable(CART_SERVICE_PORT);
+                            if (string.IsNullOrEmpty(portStr))
+                            {
+                                Console.WriteLine($"{CART_SERVICE_PORT} environment variable was not set. Setting the port to 8080");
+                                port = 8080;
+                            }
+                            else
+                            {
+                                port = int.Parse(portStr);
+                            }
+                        }
 
-                // Set redis cache host (hostname+port)
-                ICartStore cartStore;
+                        // Set redis cache host (hostname+port)
+                        ICartStore cartStore;
 
-                // Redis was specified via command line or environment variable
-                // If you want to start cart store using local cache in process, you can replace the following line with this:
-                // cartStore = new LocalCartStore();
-                cartStore = new RedisCartStore(redis);
+                        // Redis was specified via command line or environment variable
+                        // If you want to start cart store using local cache in process, you can replace the following line with this:
+                        // cartStore = new LocalCartStore();
+                        cartStore = new RedisCartStore(redis);
 
-                return StartServer(hostname, port, cartStore);
-              },
-              errs => 1);
-          break;
-        default:
-          Console.WriteLine("Invalid command");
-          break;
-      }
+                        return StartServer(hostname, port, cartStore);
+                    },
+                    errs => 1);
+                break;
+            default:
+                Console.WriteLine("Invalid command");
+                break;
+        }
     }
 
     private static ConnectionMultiplexer NewRedisConnection(string address)
     {
-      address = ReadRedisAddress(address);
-      var connectionString = $"{address},ssl=false,allowAdmin=true,connectRetry=5";
-      var redisConnectionOptions = ConfigurationOptions.Parse(connectionString);
+        address = ReadRedisAddress(address);
+        var connectionString = $"{address},ssl=false,allowAdmin=true,connectRetry=5";
+        var redisConnectionOptions = ConfigurationOptions.Parse(connectionString);
 
-      // Try to reconnect if first retry failed (up to 5 times with exponential backoff)
-      redisConnectionOptions.ConnectRetry = REDIS_RETRY_NUM;
-      redisConnectionOptions.ReconnectRetryPolicy = new ExponentialRetry(100);
+        // Try to reconnect if first retry failed (up to 5 times with exponential backoff)
+        redisConnectionOptions.ConnectRetry = REDIS_RETRY_NUM;
+        redisConnectionOptions.ReconnectRetryPolicy = new ExponentialRetry(100);
 
-      redisConnectionOptions.KeepAlive = 180;
+        redisConnectionOptions.KeepAlive = 180;
 
-      Console.WriteLine("Connecting to Redis: " + connectionString);
-      var redis = ConnectionMultiplexer.Connect(redisConnectionOptions);
+        Console.WriteLine("Connecting to Redis: " + connectionString);
+        var redis = ConnectionMultiplexer.Connect(redisConnectionOptions);
 
-      // redis.InternalError += (o, e) => { Console.WriteLine(e.Exception); };
+        // redis.InternalError += (o, e) => { Console.WriteLine(e.Exception); };
 
-      if (redis == null)
-      {
-        Console.WriteLine("Wasn't able to connect to redis");
+        if (redis == null)
+        {
+            Console.WriteLine("Wasn't able to connect to redis");
 
-        // We weren't able to connect to redis despite 5 retries with exponential backoff
-        throw new ApplicationException("Wasn't able to connect to redis");
-      }
+            // We weren't able to connect to redis despite 5 retries with exponential backoff
+            throw new ApplicationException("Wasn't able to connect to redis");
+        }
 
-      Console.WriteLine("Successfully connected to Redis");
-      return redis;
+        Console.WriteLine("Successfully connected to Redis");
+        return redis;
     }
 
     private static string ReadRedisAddress(string address)
     {
-      if (!string.IsNullOrEmpty(address))
-      {
-        return address;
-      }
+        if (!string.IsNullOrEmpty(address))
+        {
+            return address;
+        }
 
-      Console.WriteLine($"Reading redis cache address from environment variable {REDIS_ADDRESS}");
-      string redis = Environment.GetEnvironmentVariable(REDIS_ADDRESS);
-      if (!string.IsNullOrEmpty(redis))
-      {
-        return redis;
-      }
+        Console.WriteLine($"Reading redis cache address from environment variable {REDIS_ADDRESS}");
+        string redis = Environment.GetEnvironmentVariable(REDIS_ADDRESS);
+        if (!string.IsNullOrEmpty(redis))
+        {
+            return redis;
+        }
 
-      return null;
+        return null;
     }
-  }
 }

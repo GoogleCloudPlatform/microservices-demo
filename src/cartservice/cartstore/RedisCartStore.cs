@@ -21,10 +21,10 @@ using Google.Protobuf;
 using Grpc.Core;
 using StackExchange.Redis;
 
-namespace cartservice.cartstore
+namespace cartservice.cartstore;
+
+public class RedisCartStore : ICartStore
 {
-  public class RedisCartStore : ICartStore
-  {
     private const string CART_FIELD_NAME = "cart";
 
     private readonly byte[] emptyCartBytes;
@@ -40,156 +40,155 @@ namespace cartservice.cartstore
 
     public RedisCartStore(ConnectionMultiplexer connection)
     {
-      // Serialize empty cart into byte array.
-      var cart = new Hipstershop.Cart();
-      emptyCartBytes = cart.ToByteArray();
+        // Serialize empty cart into byte array.
+        var cart = new Hipstershop.Cart();
+        emptyCartBytes = cart.ToByteArray();
 
-      _random = Random.Shared;
-      _dbCache = new DatabaseCache(connection);
+        _random = Random.Shared;
+        _dbCache = new DatabaseCache(connection);
     }
 
     public Task InitializeAsync()
     {
-      return Task.CompletedTask;
+        return Task.CompletedTask;
     }
 
     public async Task AddItemAsync(string userId, string productId, int quantity)
     {
-      Console.WriteLine($"AddItemAsync called with userId={userId}, productId={productId}, quantity={quantity}");
-      if (!UserId.IsValid(userId))
-      {
-        throw new ArgumentException(nameof(userId));
-      }
-
-      try
-      {
-        var db = _dbCache.Get();
-
-        // Access the cart from the cache
-        var value = await db.HashGetAsync(userId, CART_FIELD_NAME);
-
-        Hipstershop.Cart cart;
-        if (value.IsNull)
+        Console.WriteLine($"AddItemAsync called with userId={userId}, productId={productId}, quantity={quantity}");
+        if (!UserId.IsValid(userId))
         {
-          cart = new Hipstershop.Cart();
-          cart.UserId = userId;
-          cart.Items.Add(new Hipstershop.CartItem { ProductId = productId, Quantity = quantity });
-        }
-        else
-        {
-          cart = Hipstershop.Cart.Parser.ParseFrom(value);
-          var existingItem = cart.Items.SingleOrDefault(i => i.ProductId == productId);
-          if (existingItem == null)
-          {
-            cart.Items.Add(new Hipstershop.CartItem { ProductId = productId, Quantity = quantity });
-          }
-          else
-          {
-            existingItem.Quantity += quantity;
-          }
+            throw new ArgumentException(nameof(userId));
         }
 
-        await db.HashSetAsync(userId, new[] { new HashEntry(CART_FIELD_NAME, cart.ToByteArray()) });
+        try
+        {
+            var db = _dbCache.Get();
 
-        // Attempt to access "external database" some percentage of the time
-        await ConditionallyMockExternalResourceAccess("Cart.DbQuery.GetCart");
-      }
-      catch (Exception ex)
-      {
-        throw new RpcException(new Grpc.Core.Status(StatusCode.FailedPrecondition, $"Can't access cart storage. {ex}"));
-      }
+            // Access the cart from the cache
+            var value = await db.HashGetAsync(userId, CART_FIELD_NAME);
+
+            Hipstershop.Cart cart;
+            if (value.IsNull)
+            {
+                cart = new Hipstershop.Cart();
+                cart.UserId = userId;
+                cart.Items.Add(new Hipstershop.CartItem { ProductId = productId, Quantity = quantity });
+            }
+            else
+            {
+                cart = Hipstershop.Cart.Parser.ParseFrom(value);
+                var existingItem = cart.Items.SingleOrDefault(i => i.ProductId == productId);
+                if (existingItem == null)
+                {
+                    cart.Items.Add(new Hipstershop.CartItem { ProductId = productId, Quantity = quantity });
+                }
+                else
+                {
+                    existingItem.Quantity += quantity;
+                }
+            }
+
+            await db.HashSetAsync(userId, new[] { new HashEntry(CART_FIELD_NAME, cart.ToByteArray()) });
+
+            // Attempt to access "external database" some percentage of the time
+            await ConditionallyMockExternalResourceAccess("Cart.DbQuery.GetCart");
+        }
+        catch (Exception ex)
+        {
+            throw new RpcException(new Grpc.Core.Status(StatusCode.FailedPrecondition, $"Can't access cart storage. {ex}"));
+        }
     }
 
     public async Task EmptyCartAsync(string userId)
     {
-      Console.WriteLine($"EmptyCartAsync called with userId={userId}");
-      if (!UserId.IsValid(userId))
-      {
-        throw new ArgumentException(nameof(userId));
-      }
+        Console.WriteLine($"EmptyCartAsync called with userId={userId}");
+        if (!UserId.IsValid(userId))
+        {
+            throw new ArgumentException(nameof(userId));
+        }
 
-      try
-      {
-        var db = _dbCache.Get();
+        try
+        {
+            var db = _dbCache.Get();
 
-        // Update the cache with empty cart for given user
-        await db.HashSetAsync(userId, new[] { new HashEntry(CART_FIELD_NAME, emptyCartBytes) });
-      }
-      catch (Exception ex)
-      {
-        throw new RpcException(new Grpc.Core.Status(StatusCode.FailedPrecondition, $"Can't access cart storage. {ex}"));
-      }
+            // Update the cache with empty cart for given user
+            await db.HashSetAsync(userId, new[] { new HashEntry(CART_FIELD_NAME, emptyCartBytes) });
+        }
+        catch (Exception ex)
+        {
+            throw new RpcException(new Grpc.Core.Status(StatusCode.FailedPrecondition, $"Can't access cart storage. {ex}"));
+        }
     }
 
     public async Task<Hipstershop.Cart> GetCartAsync(string userId)
     {
-      Console.WriteLine($"GetCartAsync called with userId={userId}");
-      if (!UserId.IsValid(userId))
-      {
-        throw new ArgumentException(nameof(userId));
-      }
-
-      try
-      {
-        var db = _dbCache.Get();
-
-        // Access the cart from the cache
-        var value = await db.HashGetAsync(userId, CART_FIELD_NAME);
-
-        if (!value.IsNull)
+        Console.WriteLine($"GetCartAsync called with userId={userId}");
+        if (!UserId.IsValid(userId))
         {
-          // Attempt to access "external database" some percentage of the time. This happens after
-          // our redis call to represent some kind fo "cache miss" or secondary call that is not
-          // in the redis cache.
-          await ConditionallyMockExternalResourceAccess("Cart.DbQuery.GetCart");
-
-          return Hipstershop.Cart.Parser.ParseFrom(value);
+            throw new ArgumentException(nameof(userId));
         }
 
-        // We decided to return empty cart in cases when user wasn't in the cache before
-        return new Hipstershop.Cart();
-      }
-      catch (Exception ex)
-      {
-        throw new RpcException(new Grpc.Core.Status(StatusCode.FailedPrecondition, $"Can't access cart storage. {ex}"));
-      }
+        try
+        {
+            var db = _dbCache.Get();
+
+            // Access the cart from the cache
+            var value = await db.HashGetAsync(userId, CART_FIELD_NAME);
+
+            if (!value.IsNull)
+            {
+                // Attempt to access "external database" some percentage of the time. This happens after
+                // our redis call to represent some kind fo "cache miss" or secondary call that is not
+                // in the redis cache.
+                await ConditionallyMockExternalResourceAccess("Cart.DbQuery.GetCart");
+
+                return Hipstershop.Cart.Parser.ParseFrom(value);
+            }
+
+            // We decided to return empty cart in cases when user wasn't in the cache before
+            return new Hipstershop.Cart();
+        }
+        catch (Exception ex)
+        {
+            throw new RpcException(new Grpc.Core.Status(StatusCode.FailedPrecondition, $"Can't access cart storage. {ex}"));
+        }
     }
 
     public bool Ping()
     {
-      try
-      {
-        var db = _dbCache.ByPassBlocking();
-        var res = db.Ping();
-        return res != TimeSpan.Zero;
-      }
-      catch (Exception)
-      {
-        return false;
-      }
+        try
+        {
+            var db = _dbCache.ByPassBlocking();
+            var res = db.Ping();
+            return res != TimeSpan.Zero;
+        }
+        catch (Exception)
+        {
+            return false;
+        }
     }
 
     private async Task<bool> ConditionallyMockExternalResourceAccess(string operation)
     {
-      if (_random.NextDouble() >= EXTERNAL_DB_ACCESS_RATE)
-      {
-        return false;
-      }
+        if (_random.NextDouble() >= EXTERNAL_DB_ACCESS_RATE)
+        {
+            return false;
+        }
 
-      using var activity = ActivitySourceUtil.ActivitySource.StartActivity(operation, ActivityKind.Client);
+        using var activity = ActivitySourceUtil.ActivitySource.StartActivity(operation, ActivityKind.Client);
 
-      activity?.SetTag("db.system", "postgres");
-      activity?.SetTag("db.type", "postgres");
-      activity?.SetTag("peer.service", EXTERNAL_DB_NAME + ":98321");
+        activity?.SetTag("db.system", "postgres");
+        activity?.SetTag("db.type", "postgres");
+        activity?.SetTag("peer.service", EXTERNAL_DB_NAME + ":98321");
 
-      if (_random.NextDouble() < EXTERNAL_DB_ERROR_RATE)
-      {
-          activity?.SetStatus(ActivityStatusCode.Error);
-      }
+        if (_random.NextDouble() < EXTERNAL_DB_ERROR_RATE)
+        {
+            activity?.SetStatus(ActivityStatusCode.Error);
+        }
 
-      await Task.Delay(_random.Next(0, EXTERNAL_DB_MAX_DURATION_MILLIS));
+        await Task.Delay(_random.Next(0, EXTERNAL_DB_MAX_DURATION_MILLIS));
 
-      return true;
+        return true;
     }
-  }
 }
