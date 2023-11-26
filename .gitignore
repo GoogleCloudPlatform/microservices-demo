@@ -18,3 +18,9 @@ pkg/
 .terraform.lock.hcl
 *.tfvars
 release/wi-kubernetes-manifests.yaml
+output
+.vscode
+.DS_Store
+.idea
+**/*.tgz
+**/charts/*/charts
