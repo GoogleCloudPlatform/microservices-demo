@@ -192,8 +192,7 @@ func (fe *frontendServer) productHandler(w http.ResponseWriter, r *http.Request)
 	// Fetch packaging info (weight/dimensions) of the product
 	// The packaging service is an optional microservice you can run as part of a Duet AI demo.
 	packagingInfo := PackagingInfo{}
-	isPackagingServiceConfigured := os.Getenv("PACKAGING_SERVICE_URL") != ""
-	if isPackagingServiceConfigured {
+	if isPackagingServiceConfigured() {
 		packagingInfo, err = httpGetPackagingInfo(id)
 		if err != nil {
 			fmt.Println("Failed to obtain product's packaging info:", err)
@@ -216,7 +215,7 @@ func (fe *frontendServer) productHandler(w http.ResponseWriter, r *http.Request)
 		"deploymentDetails":            deploymentDetailsMap,
 		"frontendMessage":              frontendMessage,
 		"packagingInfo":                packagingInfo,
-		"isPackagingServiceConfigured": isPackagingServiceConfigured,
+		"isPackagingServiceConfigured": isPackagingServiceConfigured(),
 	}); err != nil {
 		log.Println(err)
 	}

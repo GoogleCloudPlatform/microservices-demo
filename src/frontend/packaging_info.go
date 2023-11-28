@@ -34,6 +34,10 @@ type PackagingInfo struct {
 	Depth  float32 `json:"depth"`
 }
 
+func isPackagingServiceConfigured() bool {
+	return os.Getenv("PACKAGING_SERVICE_URL") != ""
+}
+
 func httpGetPackagingInfo(productId string) (PackagingInfo, error) {
 	// Make the GET request
 	url := os.Getenv("PACKAGING_SERVICE_URL") + productId
