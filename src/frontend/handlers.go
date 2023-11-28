@@ -537,13 +537,13 @@ type PackagingInfo struct {
 	Weight string `json:"weight"`
 	Width  string `json:"width"`
 	Height string `json:"height"`
-	Depth  int    `json:"depth"`
+	Depth  string `json:"depth"`
 }
 
 func httpGetPackagingInfo(productId string) (PackagingInfo, error) {
 	// Make the GET request
 	url := "https://nim.emuxo.com/duet-ai-demo/packages/" + productId + ".json"
-	fmt.Sprintf("Requesting packaging info from URL: %s", url)
+	fmt.Println("Requesting packaging info from URL: %s", url)
 	resp, err := http.Get(url)
 	if err != nil {
 		return PackagingInfo{}, err
