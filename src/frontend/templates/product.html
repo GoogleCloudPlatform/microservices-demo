@@ -38,9 +38,9 @@
           <div class="product-packaging">
             <h3>Packaging</h3>
             <span>Weight: {{ $.packagingInfo.weight }}lb</span>
-            <span>Width: 34cm</span>
-            <span>Height: 14cm</span>
-            <span>Depth: 10cm</span>
+            <span>Width: {{ $.packagingInfo.width }}cm</span>
+            <span>Height: {{ $.packagingInfo.height }}cm</span>
+            <span>Depth: {{ $.packagingInfo.depth }}cm</span>
           </div>
 
           <form method="POST" action="/cart">
