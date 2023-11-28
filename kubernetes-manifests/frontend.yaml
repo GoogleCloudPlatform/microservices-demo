@@ -88,6 +88,8 @@ spec:
           #   value: "true"
           # - name: FRONTEND_MESSAGE
           #   value: "Replace this with a message you want to display on all pages."
+          - name: PACKAGING_SERVICE_URL
+            value: "" # This value should look like "http://123.456.789/"
           resources:
             requests:
               cpu: 100m

@@ -192,27 +192,33 @@ func (fe *frontendServer) productHandler(w http.ResponseWriter, r *http.Request)
 	}{p, price}
 
 	// Fetch packaging info (weight/dimensions) of the product
-	packagingInfo, err := httpGetPackagingInfo(id)
-	if err != nil {
-		fmt.Println("Failed to obtain product's packaging info:", err)
+	// The packaging service is an optional microservice you can run as part of a Duet AI demo.
+	packagingInfo := PackagingInfo{}
+	isPackagingServiceConfigured := os.Getenv("PACKAGING_SERVICE_URL") != ""
+	if isPackagingServiceConfigured {
+		packagingInfo, err = httpGetPackagingInfo(id)
+		if err != nil {
+			fmt.Println("Failed to obtain product's packaging info:", err)
+		}
 	}
 
 	if err := templates.ExecuteTemplate(w, "product", map[string]interface{}{
-		"session_id":        sessionID(r),
-		"request_id":        r.Context().Value(ctxKeyRequestID{}),
-		"ad":                fe.chooseAd(r.Context(), p.Categories, log),
-		"user_currency":     currentCurrency(r),
-		"show_currency":     true,
-		"currencies":        currencies,
-		"product":           product,
-		"recommendations":   recommendations,
-		"cart_size":         cartSize(cart),
-		"platform_css":      plat.css,
-		"platform_name":     plat.provider,
-		"is_cymbal_brand":   isCymbalBrand,
-		"deploymentDetails": deploymentDetailsMap,
-		"frontendMessage":   frontendMessage,
-		"packagingInfo":     packagingInfo,
+		"session_id":                   sessionID(r),
+		"request_id":                   r.Context().Value(ctxKeyRequestID{}),
+		"ad":                           fe.chooseAd(r.Context(), p.Categories, log),
+		"user_currency":                currentCurrency(r),
+		"show_currency":                true,
+		"currencies":                   currencies,
+		"product":                      product,
+		"recommendations":              recommendations,
+		"cart_size":                    cartSize(cart),
+		"platform_css":                 plat.css,
+		"platform_name":                plat.provider,
+		"is_cymbal_brand":              isCymbalBrand,
+		"deploymentDetails":            deploymentDetailsMap,
+		"frontendMessage":              frontendMessage,
+		"packagingInfo":                packagingInfo,
+		"isPackagingServiceConfigured": isPackagingServiceConfigured,
 	}); err != nil {
 		log.Println(err)
 	}
@@ -542,7 +548,7 @@ type PackagingInfo struct {
 
 func httpGetPackagingInfo(productId string) (PackagingInfo, error) {
 	// Make the GET request
-	url := "https://nim.emuxo.com/duet-ai-demo/packages/" + productId
+	url := os.Getenv("PACKAGING_SERVICE_URL") + productId
 	fmt.Println("Requesting packaging info from URL: ", url)
 	resp, err := http.Get(url)
 	if err != nil {
