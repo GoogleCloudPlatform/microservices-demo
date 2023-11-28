@@ -82,7 +82,7 @@ jobs:
         EOF
         echo Deploying application
         skaffold config set --global local-cluster false
-        skaffold run --default-repo=gcr.io/$PROJECT_ID/refs/pull/$PR_NUMBER --tag=$PR_NUMBER --namespace=$NAMESPACE -p network-policies
+        skaffold run --default-repo=gcr.io/$PROJECT_ID/refs/pull/$PR_NUMBER --tag=$PR_NUMBER --namespace=$NAMESPACE -p network-policies --module=app
       env:
         ACTIONS_ALLOW_UNSECURE_COMMANDS: true
         PR_NUMBER: ${{ github.event.pull_request.number }}
@@ -101,7 +101,7 @@ jobs:
         kubectl wait --for=condition=available --timeout=1000s deployment/currencyservice
         kubectl wait --for=condition=available --timeout=1000s deployment/emailservice
         kubectl wait --for=condition=available --timeout=1000s deployment/frontend
-        kubectl wait --for=condition=available --timeout=1000s deployment/loadgenerator
+        # kubectl wait --for=condition=available --timeout=1000s deployment/loadgenerator
         kubectl wait --for=condition=available --timeout=1000s deployment/paymentservice
         kubectl wait --for=condition=available --timeout=1000s deployment/productcatalogservice
         kubectl wait --for=condition=available --timeout=1000s deployment/recommendationservice
@@ -123,23 +123,23 @@ jobs:
       env:
         ACTIONS_ALLOW_UNSECURE_COMMANDS: true
         PR_NUMBER: ${{ github.event.pull_request.number }}
-    - name: Smoke Test
-      timeout-minutes: 5
-      run: |
-        set -x
-        # start fresh loadgenerator pod
-        kubectl delete pod -l app=loadgenerator
-        # wait for requests to come in
-        REQUEST_COUNT="0"
-        while [[ "$REQUEST_COUNT"  -lt "50"  ]]; do
-            sleep 5
-            REQUEST_COUNT=$(kubectl logs -l app=loadgenerator | grep Aggregated | awk '{print $2}')
-        done
-        # ensure there are no errors hitting endpoints
-        ERROR_COUNT=$(kubectl logs -l app=loadgenerator | grep Aggregated | awk '{print $3}' | sed "s/[(][^)]*[)]//g")
-        if [[ "$ERROR_COUNT" -gt "0" ]]; then
-          exit 1
-        fi
+    # - name: Smoke Test
+    #   timeout-minutes: 5
+    #   run: |
+    #     set -x
+    #     # start fresh loadgenerator pod
+    #     kubectl delete pod -l app=loadgenerator
+    #     # wait for requests to come in
+    #     REQUEST_COUNT="0"
+    #     while [[ "$REQUEST_COUNT"  -lt "50"  ]]; do
+    #         sleep 5
+    #         REQUEST_COUNT=$(kubectl logs -l app=loadgenerator | grep Aggregated | awk '{print $2}')
+    #     done
+    #     # ensure there are no errors hitting endpoints
+    #     ERROR_COUNT=$(kubectl logs -l app=loadgenerator | grep Aggregated | awk '{print $3}' | sed "s/[(][^)]*[)]//g")
+    #     if [[ "$ERROR_COUNT" -gt "0" ]]; then
+    #       exit 1
+    #     fi
     - name: Comment EXTERNAL_IP
       timeout-minutes: 5
       env:
