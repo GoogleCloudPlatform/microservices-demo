@@ -542,7 +542,7 @@ type PackagingInfo struct {
 
 func httpGetPackagingInfo(productId string) (PackagingInfo, error) {
 	// Make the GET request
-	url := "https://nim.emuxo.com/duet-ai-demo/packages/" + productId
+	url := "https://nim.emuxo.com/duet-ai-demo/packages/" + productId + ".json"
 	resp, err := http.Get(url)
 	if err != nil {
 		return PackagingInfo{}, err
