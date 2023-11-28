@@ -35,6 +35,14 @@
           <p class="product-price">{{ renderMoney $.product.Price }}</p>
           <p>{{ $.product.Item.Description }}</p>
 
+          <div class="product-packaging">
+            <h3>Packaging</h3>
+            <span>Weight: {{ $.packagingInfo.weight }}lb</span>
+            <span>Width: 34cm</span>
+            <span>Height: 14cm</span>
+            <span>Depth: 10cm</span>
+          </div>
+
           <form method="POST" action="/cart">
             <input type="hidden" name="product_id" value="{{$.product.Item.Id}}" />
             <div class="product-quantity-dropdown">

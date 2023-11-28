@@ -16,8 +16,10 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"html/template"
+	"io/ioutil"
 	"math/rand"
 	"net"
 	"net/http"
@@ -189,6 +191,12 @@ func (fe *frontendServer) productHandler(w http.ResponseWriter, r *http.Request)
 		Price *pb.Money
 	}{p, price}
 
+	// Fetch packaging info (weight/dimensions) of the product
+	packagingInfo, err := httpGetPackagingInfo(id)
+	if err != nil {
+		fmt.Println("Failed to obtain product's packaging info:", err)
+	}
+
 	if err := templates.ExecuteTemplate(w, "product", map[string]interface{}{
 		"session_id":        sessionID(r),
 		"request_id":        r.Context().Value(ctxKeyRequestID{}),
@@ -204,6 +212,7 @@ func (fe *frontendServer) productHandler(w http.ResponseWriter, r *http.Request)
 		"is_cymbal_brand":   isCymbalBrand,
 		"deploymentDetails": deploymentDetailsMap,
 		"frontendMessage":   frontendMessage,
+		"packagingInfo":     packagingInfo,
 	}); err != nil {
 		log.Println(err)
 	}
@@ -522,4 +531,41 @@ func stringinSlice(slice []string, val string) bool {
 		}
 	}
 	return false
+}
+
+type PackagingInfo struct {
+	weight string `json:"weight"`
+	width  string `json:"width"`
+	height string `json:"height"`
+	depth  int    `json:"depth"`
+}
+
+func httpGetPackagingInfo(productId string) (PackagingInfo, error) {
+	// Make the GET request
+	url := "https://nim.emuxo.com/duet-ai-demo/packages/" + productId
+	resp, err := http.Get(url)
+	if err != nil {
+		return PackagingInfo{}, err
+	}
+	defer resp.Body.Close()
+
+	// Check the response status code
+	if resp.StatusCode != http.StatusOK {
+		return PackagingInfo{}, fmt.Errorf("Unexpected status code: %d", resp.StatusCode)
+	}
+
+	// Read the JSON response body
+	responseBody, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return PackagingInfo{}, err
+	}
+
+	// Decode the JSON response into a Post struct
+	var packagingInfo PackagingInfo
+	err = json.Unmarshal(responseBody, &packagingInfo)
+	if err != nil {
+		return PackagingInfo{}, err
+	}
+
+	return packagingInfo, nil
 }
