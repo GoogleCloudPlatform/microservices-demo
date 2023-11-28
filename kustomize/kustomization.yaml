@@ -18,6 +18,7 @@ resources:
 - base
 components:
 # - components/cymbal-branding
+# - components/duet-ai-demo
 # - components/google-cloud-operations
 # - components/memorystore
 # - components/network-policies
