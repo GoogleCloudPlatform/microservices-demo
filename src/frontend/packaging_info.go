@@ -44,27 +44,27 @@ func httpGetPackagingInfo(productId string) (*PackagingInfo, error) {
 	fmt.Println("Requesting packaging info from URL: ", url)
 	resp, err := http.Get(url)
 	if err != nil {
-		return PackagingInfo{}, err
+		return nil, err
 	}
 	defer resp.Body.Close()
 
 	// Check the response status code
 	if resp.StatusCode != http.StatusOK {
-		return PackagingInfo{}, fmt.Errorf("Unexpected status code: %d", resp.StatusCode)
+		return nil, fmt.Errorf("Unexpected status code: %d", resp.StatusCode)
 	}
 
 	// Read the JSON response body
 	responseBody, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		return PackagingInfo{}, err
+		return nil, err
 	}
 
 	// Decode the JSON response into a PackagingInfo struct
 	var packagingInfo PackagingInfo
 	err = json.Unmarshal(responseBody, &packagingInfo)
 	if err != nil {
-		return PackagingInfo{}, err
+		return nil, err
 	}
 
-	return packagingInfo, nil
+	return &packagingInfo, nil
 }
