@@ -38,7 +38,7 @@ func isPackagingServiceConfigured() bool {
 	return os.Getenv("PACKAGING_SERVICE_URL") != ""
 }
 
-func httpGetPackagingInfo(productId string) (PackagingInfo, error) {
+func httpGetPackagingInfo(productId string) (*PackagingInfo, error) {
 	// Make the GET request
 	url := os.Getenv("PACKAGING_SERVICE_URL") + productId
 	fmt.Println("Requesting packaging info from URL: ", url)
