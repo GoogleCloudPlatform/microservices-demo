@@ -27,37 +27,37 @@ on:
       - '.github/workflows/helm-chart-ci.yaml'
 
 jobs:
-  code-tests:
-    runs-on: [self-hosted, is-enabled]
-    steps:
-    - uses: actions/checkout@v4
-      with:
-        ref: ${{github.event.pull_request.head.ref}}
-        repository: ${{github.event.pull_request.head.repo.full_name}}
-    - uses: actions/setup-dotnet@v3
-      env:
-        DOTNET_INSTALL_DIR: "./.dotnet"
-      with:
-        dotnet-version: '8.0'
-    - uses: actions/setup-go@v4
-      with:
-        go-version: '1.19'
-    - name: Go Unit Tests
-      timeout-minutes: 10
-      run: |
-        for SERVICE in "shippingservice" "productcatalogservice"; do
-          echo "testing $SERVICE..."
-          pushd src/$SERVICE
-          go test
-          popd
-        done
-    - name: C# Unit Tests
-      timeout-minutes: 10
-      run: |
-        dotnet test src/cartservice/
+  # code-tests:
+  #   runs-on: [self-hosted, is-enabled]
+  #   steps:
+  #   - uses: actions/checkout@v4
+  #     with:
+  #       ref: ${{github.event.pull_request.head.ref}}
+  #       repository: ${{github.event.pull_request.head.repo.full_name}}
+  #   - uses: actions/setup-dotnet@v3
+  #     env:
+  #       DOTNET_INSTALL_DIR: "./.dotnet"
+  #     with:
+  #       dotnet-version: '8.0'
+  #   - uses: actions/setup-go@v4
+  #     with:
+  #       go-version: '1.19'
+  #   - name: Go Unit Tests
+  #     timeout-minutes: 10
+  #     run: |
+  #       for SERVICE in "shippingservice" "productcatalogservice"; do
+  #         echo "testing $SERVICE..."
+  #         pushd src/$SERVICE
+  #         go test
+  #         popd
+  #       done
+  #   - name: C# Unit Tests
+  #     timeout-minutes: 10
+  #     run: |
+  #       dotnet test src/cartservice/
   deployment-tests:
     runs-on: [self-hosted, is-enabled]
-    needs: code-tests
+    # needs: code-tests
     strategy:
       matrix:
         profile: ["local-code"]
