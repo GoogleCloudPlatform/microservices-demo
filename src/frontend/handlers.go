@@ -190,7 +190,7 @@ func (fe *frontendServer) productHandler(w http.ResponseWriter, r *http.Request)
 	}{p, price}
 
 	// Fetch packaging info (weight/dimensions) of the product
-	// The packaging service is an optional microservice you can run as part of a Duet AI demo.
+	// The packaging service is an optional microservice you can run as part of a Google Cloud demo.
 	packagingInfo := PackagingInfo{}
 	if isPackagingServiceConfigured() {
 		packagingInfo, err = httpGetPackagingInfo(id)
