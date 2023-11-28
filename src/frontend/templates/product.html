@@ -35,6 +35,7 @@
           <p class="product-price">{{ renderMoney $.product.Price }}</p>
           <p>{{ $.product.Item.Description }}</p>
 
+          {{ if $.isPackagingServiceConfigured }}
           <div class="product-packaging">
             <h3>Packaging</h3>
             <span>
@@ -50,6 +51,7 @@
               Depth: {{ if $.packagingInfo.Depth }}{{ $.packagingInfo.Depth }}cm{{ else }}n/a{{ end }}
             </span>
           </div>
+          {{ end }}
 
           <form method="POST" action="/cart">
             <input type="hidden" name="product_id" value="{{$.product.Item.Id}}" />
