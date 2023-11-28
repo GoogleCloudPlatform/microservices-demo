@@ -27,37 +27,37 @@ on:
       - '.github/workflows/helm-chart-ci.yaml'
 
 jobs:
-  # code-tests:
-  #   runs-on: [self-hosted, is-enabled]
-  #   steps:
-  #   - uses: actions/checkout@v4
-  #     with:
-  #       ref: ${{github.event.pull_request.head.ref}}
-  #       repository: ${{github.event.pull_request.head.repo.full_name}}
-  #   - uses: actions/setup-dotnet@v3
-  #     env:
-  #       DOTNET_INSTALL_DIR: "./.dotnet"
-  #     with:
-  #       dotnet-version: '8.0'
-  #   - uses: actions/setup-go@v4
-  #     with:
-  #       go-version: '1.19'
-  #   - name: Go Unit Tests
-  #     timeout-minutes: 10
-  #     run: |
-  #       for SERVICE in "shippingservice" "productcatalogservice"; do
-  #         echo "testing $SERVICE..."
-  #         pushd src/$SERVICE
-  #         go test
-  #         popd
-  #       done
-  #   - name: C# Unit Tests
-  #     timeout-minutes: 10
-  #     run: |
-  #       dotnet test src/cartservice/
+  code-tests:
+    runs-on: [self-hosted, is-enabled]
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        ref: ${{github.event.pull_request.head.ref}}
+        repository: ${{github.event.pull_request.head.repo.full_name}}
+    - uses: actions/setup-dotnet@v3
+      env:
+        DOTNET_INSTALL_DIR: "./.dotnet"
+      with:
+        dotnet-version: '8.0'
+    - uses: actions/setup-go@v4
+      with:
+        go-version: '1.19'
+    - name: Go Unit Tests
+      timeout-minutes: 10
+      run: |
+        for SERVICE in "shippingservice" "productcatalogservice"; do
+          echo "testing $SERVICE..."
+          pushd src/$SERVICE
+          go test
+          popd
+        done
+    - name: C# Unit Tests
+      timeout-minutes: 10
+      run: |
+        dotnet test src/cartservice/
   deployment-tests:
     runs-on: [self-hosted, is-enabled]
-    # needs: code-tests
+    needs: code-tests
     strategy:
       matrix:
         profile: ["local-code"]
@@ -82,7 +82,7 @@ jobs:
         EOF
         echo Deploying application
         skaffold config set --global local-cluster false
-        skaffold run --default-repo=gcr.io/$PROJECT_ID/refs/pull/$PR_NUMBER --tag=$PR_NUMBER --namespace=$NAMESPACE -p network-policies --module=app
+        skaffold run --default-repo=gcr.io/$PROJECT_ID/refs/pull/$PR_NUMBER --tag=$PR_NUMBER --namespace=$NAMESPACE -p network-policies
       env:
         ACTIONS_ALLOW_UNSECURE_COMMANDS: true
         PR_NUMBER: ${{ github.event.pull_request.number }}
@@ -101,7 +101,7 @@ jobs:
         kubectl wait --for=condition=available --timeout=1000s deployment/currencyservice
         kubectl wait --for=condition=available --timeout=1000s deployment/emailservice
         kubectl wait --for=condition=available --timeout=1000s deployment/frontend
-        # kubectl wait --for=condition=available --timeout=1000s deployment/loadgenerator
+        kubectl wait --for=condition=available --timeout=1000s deployment/loadgenerator
         kubectl wait --for=condition=available --timeout=1000s deployment/paymentservice
         kubectl wait --for=condition=available --timeout=1000s deployment/productcatalogservice
         kubectl wait --for=condition=available --timeout=1000s deployment/recommendationservice
@@ -123,23 +123,23 @@ jobs:
       env:
         ACTIONS_ALLOW_UNSECURE_COMMANDS: true
         PR_NUMBER: ${{ github.event.pull_request.number }}
-    # - name: Smoke Test
-    #   timeout-minutes: 5
-    #   run: |
-    #     set -x
-    #     # start fresh loadgenerator pod
-    #     kubectl delete pod -l app=loadgenerator
-    #     # wait for requests to come in
-    #     REQUEST_COUNT="0"
-    #     while [[ "$REQUEST_COUNT"  -lt "50"  ]]; do
-    #         sleep 5
-    #         REQUEST_COUNT=$(kubectl logs -l app=loadgenerator | grep Aggregated | awk '{print $2}')
-    #     done
-    #     # ensure there are no errors hitting endpoints
-    #     ERROR_COUNT=$(kubectl logs -l app=loadgenerator | grep Aggregated | awk '{print $3}' | sed "s/[(][^)]*[)]//g")
-    #     if [[ "$ERROR_COUNT" -gt "0" ]]; then
-    #       exit 1
-    #     fi
+    - name: Smoke Test
+      timeout-minutes: 5
+      run: |
+        set -x
+        # start fresh loadgenerator pod
+        kubectl delete pod -l app=loadgenerator
+        # wait for requests to come in
+        REQUEST_COUNT="0"
+        while [[ "$REQUEST_COUNT"  -lt "50"  ]]; do
+            sleep 5
+            REQUEST_COUNT=$(kubectl logs -l app=loadgenerator | grep Aggregated | awk '{print $2}')
+        done
+        # ensure there are no errors hitting endpoints
+        ERROR_COUNT=$(kubectl logs -l app=loadgenerator | grep Aggregated | awk '{print $3}' | sed "s/[(][^)]*[)]//g")
+        if [[ "$ERROR_COUNT" -gt "0" ]]; then
+          exit 1
+        fi
     - name: Comment EXTERNAL_IP
       timeout-minutes: 5
       env:
