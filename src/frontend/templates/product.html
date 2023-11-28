@@ -35,7 +35,7 @@
           <p class="product-price">{{ renderMoney $.product.Price }}</p>
           <p>{{ $.product.Item.Description }}</p>
 
-          {{ if $.isPackagingServiceConfigured }}
+          {{ if $.packagingInfo }}
           <div class="product-packaging">
             <h3>Packaging</h3>
             <span>
