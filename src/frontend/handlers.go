@@ -534,10 +534,10 @@ func stringinSlice(slice []string, val string) bool {
 }
 
 type PackagingInfo struct {
-	weight string `json:"weight"`
-	width  string `json:"width"`
-	height string `json:"height"`
-	depth  int    `json:"depth"`
+	Weight string `json:"weight"`
+	Width  string `json:"width"`
+	Height string `json:"height"`
+	Depth  int    `json:"depth"`
 }
 
 func httpGetPackagingInfo(productId string) (PackagingInfo, error) {
