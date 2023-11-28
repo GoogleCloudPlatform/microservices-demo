@@ -59,7 +59,7 @@ func httpGetPackagingInfo(productId string) (PackagingInfo, error) {
 		return PackagingInfo{}, err
 	}
 
-	// Decode the JSON response into a Post struct
+	// Decode the JSON response into a PackagingInfo struct
 	var packagingInfo PackagingInfo
 	err = json.Unmarshal(responseBody, &packagingInfo)
 	if err != nil {
