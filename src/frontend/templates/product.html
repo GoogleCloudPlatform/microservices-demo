@@ -37,7 +37,9 @@
 
           <div class="product-packaging">
             <h3>Packaging</h3>
-            <span>Weight: {{ $.packagingInfo.Weight }}lb</span>
+            <span>
+              Weight: {{ if $.packagingInfo.Weight }}{{ $.packagingInfo.Weight }}lb{{ else }}n/a{{ end }}
+            </span>
             <span>Width: {{ $.packagingInfo.Width }}cm</span>
             <span>Height: {{ $.packagingInfo.Height }}cm</span>
             <span>Depth: {{ $.packagingInfo.Depth }}cm</span>
