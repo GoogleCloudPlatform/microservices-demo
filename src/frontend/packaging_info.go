@@ -49,7 +49,7 @@ func isPackagingServiceConfigured() bool {
 
 func httpGetPackagingInfo(productId string) (*PackagingInfo, error) {
 	// Make the GET request
-	url := packagingServiceUrl + productId
+	url := packagingServiceUrl + "/" + productId
 	fmt.Println("Requesting packaging info from URL: ", url)
 	resp, err := http.Get(url)
 	if err != nil {
