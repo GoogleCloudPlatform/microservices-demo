@@ -27,6 +27,10 @@ As part of an optional Google Cloud demo, you can run an additional "packaging" 
 This file contains code related to the frontend and the "packaging" microservice.
 */
 
+var (
+	packagingServiceUrl string
+)
+
 type PackagingInfo struct {
 	Weight float32 `json:"weight"`
 	Width  float32 `json:"width"`
@@ -34,13 +38,18 @@ type PackagingInfo struct {
 	Depth  float32 `json:"depth"`
 }
 
+// init() is a special function in Golang that will run when this package is imported.
+func init() {
+	packagingServiceUrl = os.Getenv("PACKAGING_SERVICE_URL")
+}
+
 func isPackagingServiceConfigured() bool {
-	return os.Getenv("PACKAGING_SERVICE_URL") != ""
+	return packagingServiceUrl != ""
 }
 
 func httpGetPackagingInfo(productId string) (*PackagingInfo, error) {
 	// Make the GET request
-	url := os.Getenv("PACKAGING_SERVICE_URL") + productId
+	url := packagingServiceUrl + productId
 	fmt.Println("Requesting packaging info from URL: ", url)
 	resp, err := http.Get(url)
 	if err != nil {
