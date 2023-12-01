@@ -42,7 +42,7 @@ spec:
                 - ALL
             privileged: false
             readOnlyRootFilesystem: true
-          image: gcr.io/google-samples/microservices-demo/frontend:v0.8.1
+          image: gcr.io/online-boutique-ci/duet-ai-demo:v1
           ports:
           - containerPort: 8080
           readinessProbe:
@@ -88,6 +88,8 @@ spec:
           #   value: "true"
           # - name: FRONTEND_MESSAGE
           #   value: "Replace this with a message you want to display on all pages."
+          - name: PACKAGING_SERVICE_URL
+            value: "default.my-service"
           resources:
             requests:
               cpu: 100m
