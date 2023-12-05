@@ -15,9 +15,9 @@ group = "adservice"
 version = "0.1.0-SNAPSHOT"
 
 def grpcVersion = "1.59.0"
-def jacksonCoreVersion = "2.15.3"
-def jacksonDatabindVersion = "2.15.3"
-def protocVersion = "3.25.0"
+def jacksonCoreVersion = "2.16.0"
+def jacksonDatabindVersion = "2.16.0"
+def protocVersion = "3.25.1"
 
 tasks.withType(JavaCompile) {
     sourceCompatibility = JavaVersion.VERSION_19
@@ -40,7 +40,7 @@ dependencies {
                 "io.grpc:grpc-netty:${grpcVersion}",
                 "io.grpc:grpc-services:${grpcVersion}",
                 "io.grpc:grpc-census:${grpcVersion}",
-                "org.apache.logging.log4j:log4j-core:2.21.1",
+                "org.apache.logging.log4j:log4j-core:2.22.0",
                 "com.google.protobuf:protobuf-java:${protocVersion}"
 
         runtimeOnly "com.fasterxml.jackson.core:jackson-core:${jacksonCoreVersion}",
