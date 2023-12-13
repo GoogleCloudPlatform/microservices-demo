@@ -189,6 +189,16 @@ func (fe *frontendServer) productHandler(w http.ResponseWriter, r *http.Request)
 		Price *pb.Money
 	}{p, price}
 
+	// Fetch packaging info (weight/dimensions) of the product
+	// The packaging service is an optional microservice you can run as part of a Google Cloud demo.
+	var packagingInfo *PackagingInfo = nil
+	if isPackagingServiceConfigured() {
+		packagingInfo, err = httpGetPackagingInfo(id)
+		if err != nil {
+			fmt.Println("Failed to obtain product's packaging info:", err)
+		}
+	}
+
 	if err := templates.ExecuteTemplate(w, "product", map[string]interface{}{
 		"session_id":        sessionID(r),
 		"request_id":        r.Context().Value(ctxKeyRequestID{}),
@@ -204,6 +214,7 @@ func (fe *frontendServer) productHandler(w http.ResponseWriter, r *http.Request)
 		"is_cymbal_brand":   isCymbalBrand,
 		"deploymentDetails": deploymentDetailsMap,
 		"frontendMessage":   frontendMessage,
+		"packagingInfo":     packagingInfo,
 	}); err != nil {
 		log.Println(err)
 	}
