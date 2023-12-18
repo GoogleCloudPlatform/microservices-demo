@@ -68,7 +68,7 @@ spec:
           readOnlyRootFilesystem: true
         args:
         - --config=/conf/collector-gateway-config.yaml
-        image: otel/opentelemetry-collector-contrib:0.90.1@sha256:68e281e285f6ded5ec9da245ad68cd3cd963d5d55c329cf3fd3167ca7b51894a
+        image: otel/opentelemetry-collector-contrib:0.91.0@sha256:894dea0499cdcf083e30bd5352ef5c8f6ed2a4a928b1d3f995b7571b41eb9f08
         volumeMounts:
         - name: collector-gateway-config
           mountPath: /conf
