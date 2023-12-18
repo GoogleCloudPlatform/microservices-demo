@@ -14,7 +14,7 @@ description = 'Ad Service'
 group = "adservice"
 version = "0.1.0-SNAPSHOT"
 
-def grpcVersion = "1.59.1"
+def grpcVersion = "1.60.0"
 def jacksonCoreVersion = "2.16.0"
 def jacksonDatabindVersion = "2.16.0"
 def protocVersion = "3.25.1"
