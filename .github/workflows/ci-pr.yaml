@@ -33,7 +33,7 @@ jobs:
     - uses: actions/checkout@v4
       with:
         ref: ${{github.event.pull_request.head.sha}}
-    - uses: actions/setup-dotnet@v3
+    - uses: actions/setup-dotnet@v4
       env:
         DOTNET_INSTALL_DIR: "./.dotnet"
       with:
