@@ -32,12 +32,12 @@ jobs:
     runs-on: [self-hosted, is-enabled]
     steps:
     - uses: actions/checkout@v4
-    - uses: actions/setup-dotnet@v3
+    - uses: actions/setup-dotnet@v4
       env:
         DOTNET_INSTALL_DIR: "./.dotnet"
       with:
         dotnet-version: '8.0'
-    - uses: actions/setup-go@v4
+    - uses: actions/setup-go@v5
       with:
         go-version: '1.19'
     - name: Go Unit Tests
