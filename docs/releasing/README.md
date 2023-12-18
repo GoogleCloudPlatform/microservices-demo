@@ -14,12 +14,14 @@ This document walks through the process of creating a new release of Online Bout
 
    - `TAG` - This is the new version (e.g., `v0.3.5`).
    - `REPO_PREFIX` - This is the Docker repository.
+   - `PROJECT_ID` - This is the Google Cloud project in which Google Cloud Build will be used to remotely build microservice Docker images.
 
    **Example:**
-   
+
    ```
    export TAG=v0.3.5
    export REPO_PREFIX=gcr.io/google-samples/microservices-demo
+   export PROJECT_ID=google-samples
    ```
 
 5. Run `./docs/releasing/make-release.sh`.

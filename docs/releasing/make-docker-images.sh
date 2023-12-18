@@ -24,6 +24,7 @@ log() { echo "$1" >&2; }
 
 TAG="${TAG:?TAG env variable must be specified}"
 REPO_PREFIX="${REPO_PREFIX:?REPO_PREFIX env variable must be specified}"
+PROJECT_ID="${PROJECT_ID:?PROJECT_ID env variable must be specified e.g. google-samples}"
 
 while IFS= read -d $'\0' -r dir; do
     # build image
@@ -37,11 +38,8 @@ while IFS= read -d $'\0' -r dir; do
     image="${REPO_PREFIX}/$svcname:$TAG"
     (
         cd "${builddir}"
-        log "Building: ${image}"
-        docker build --pull -t "${image}" .
-
-        log "Pushing: ${image}"
-        docker push "${image}"
+        log "Building (and pushing) image on Google Cloud Build: ${image}"
+        gcloud builds submit --project=${PROJECT_ID} --tag=${image}
     )
 done < <(find "${REPO_ROOT}/src" -mindepth 1 -maxdepth 1 -type d -print0)
 
