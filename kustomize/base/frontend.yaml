@@ -42,7 +42,7 @@ spec:
                 - ALL
             privileged: false
             readOnlyRootFilesystem: true
-          image: gcr.io/google-samples/microservices-demo/frontend:v0.8.1
+          image: gcr.io/google-samples/microservices-demo/frontend:v0.9.0
           ports:
           - containerPort: 8080
           readinessProbe:
@@ -88,6 +88,9 @@ spec:
           #   value: "true"
           # - name: FRONTEND_MESSAGE
           #   value: "Replace this with a message you want to display on all pages."
+          # As part of an optional Google Cloud demo, you can run an optional microservice called the "packaging service".
+          # - name: PACKAGING_SERVICE_URL
+          #   value: "" # This value would look like "http://123.123.123"
           resources:
             requests:
               cpu: 100m
