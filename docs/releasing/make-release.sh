@@ -30,6 +30,7 @@ fail() { log "$1"; exit 1; }
 
 TAG="${TAG:?TAG env variable must be specified}"
 REPO_PREFIX="${REPO_PREFIX:?REPO_PREFIX env variable must be specified e.g. gcr.io\/google-samples\/microservices-demo}"
+PROJECT_ID="${PROJECT_ID:?PROJECT_ID env variable must be specified e.g. google-samples}"
 
 if [[ "$TAG" != v* ]]; then
     fail "\$TAG must start with 'v', e.g. v0.1.0 (got: $TAG)"
