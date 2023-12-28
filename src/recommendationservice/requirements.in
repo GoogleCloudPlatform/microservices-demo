@@ -5,5 +5,5 @@ python-json-logger==2.0.7
 requests==2.31.0
 rsa==4.9
 opentelemetry-distro==0.41b0
-opentelemetry-instrumentation-grpc==0.42b0
-opentelemetry-exporter-otlp-proto-grpc==1.21.0
+opentelemetry-instrumentation-grpc==0.43b0
+opentelemetry-exporter-otlp-proto-grpc==1.22.0
