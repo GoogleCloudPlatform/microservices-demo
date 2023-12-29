@@ -64,6 +64,7 @@ deploy:
 # This is not used by default. To use it, run:
 #     skaffold run -p gcb
 profiles:
+<<<<<<< HEAD
   - name: gcb
     build:
       googleCloudBuild:
@@ -89,6 +90,33 @@ profiles:
       - op: add
         path: /manifests/kustomize/paths/1
         value: kustomize/components/network-policies
+=======
+- name: gcb
+  build:
+    googleCloudBuild:
+      diskSizeGb: 300
+      machineType: N1_HIGHCPU_32
+      timeout: 4000s
+# "debug" profile replaces the default Dockerfile in cartservice with Dockerfile.debug,
+# which enables debugging via skaffold.
+#
+# This profile is used by default when running skaffold debug.
+- name: debug
+  activation:
+  - command: debug
+  patches:
+  - op: replace
+    path: /build/artifacts/7/docker/dockerfile
+    value: Dockerfile.debug
+# The "network-policies" profile is not used by default.
+# You can use it in isolation or in combination with other profiles:
+#     skaffold run -p network-policies, debug
+- name: network-policies
+  patches:
+  - op: add
+    path: /manifests/kustomize/paths/1
+    value: kustomize/components/network-policies
+>>>>>>> 80bea9bfd97bec107361d4663e207aa8d3f312c6
 ---
 apiVersion: skaffold/v3
 kind: Config
@@ -109,3 +137,10 @@ manifests:
     - ./kubernetes-manifests/loadgenerator.yaml
 deploy:
   kubectl: {}
+profiles:
+- name: gcb
+  build:
+    googleCloudBuild:
+      diskSizeGb: 300
+      machineType: N1_HIGHCPU_32
+      timeout: 4000s
