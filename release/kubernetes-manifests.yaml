@@ -47,7 +47,7 @@ spec:
               - ALL
           privileged: false
           readOnlyRootFilesystem: true
-        image: gcr.io/google-samples/microservices-demo/emailservice:v0.8.1
+        image: gcr.io/google-samples/microservices-demo/emailservice:v0.9.0
         ports:
         - containerPort: 8080
         env:
@@ -112,7 +112,7 @@ spec:
                 - ALL
             privileged: false
             readOnlyRootFilesystem: true
-          image: gcr.io/google-samples/microservices-demo/checkoutservice:v0.8.1
+          image: gcr.io/google-samples/microservices-demo/checkoutservice:v0.9.0
           ports:
           - containerPort: 5050
           readinessProbe:
@@ -186,7 +186,7 @@ spec:
               - ALL
           privileged: false
           readOnlyRootFilesystem: true
-        image: gcr.io/google-samples/microservices-demo/recommendationservice:v0.8.1
+        image: gcr.io/google-samples/microservices-demo/recommendationservice:v0.9.0
         ports:
         - containerPort: 8080
         readinessProbe:
@@ -255,7 +255,7 @@ spec:
                 - ALL
             privileged: false
             readOnlyRootFilesystem: true
-          image: gcr.io/google-samples/microservices-demo/frontend:v0.8.1
+          image: gcr.io/google-samples/microservices-demo/frontend:v0.9.0
           ports:
           - containerPort: 8080
           readinessProbe:
@@ -301,6 +301,9 @@ spec:
           #   value: "true"
           # - name: FRONTEND_MESSAGE
           #   value: "Replace this with a message you want to display on all pages."
+          # As part of an optional Google Cloud demo, you can run an optional microservice called the "packaging service".
+          # - name: PACKAGING_SERVICE_URL
+          #   value: "" # This value would look like "http://123.123.123"
           resources:
             requests:
               cpu: 100m
@@ -364,7 +367,7 @@ spec:
               - ALL
           privileged: false
           readOnlyRootFilesystem: true
-        image: gcr.io/google-samples/microservices-demo/paymentservice:v0.8.1
+        image: gcr.io/google-samples/microservices-demo/paymentservice:v0.9.0
         ports:
         - containerPort: 50051
         env:
@@ -428,7 +431,7 @@ spec:
               - ALL
           privileged: false
           readOnlyRootFilesystem: true
-        image: gcr.io/google-samples/microservices-demo/productcatalogservice:v0.8.1
+        image: gcr.io/google-samples/microservices-demo/productcatalogservice:v0.9.0
         ports:
         - containerPort: 3550
         env:
@@ -492,7 +495,7 @@ spec:
               - ALL
           privileged: false
           readOnlyRootFilesystem: true
-        image: gcr.io/google-samples/microservices-demo/cartservice:v0.8.1
+        image: gcr.io/google-samples/microservices-demo/cartservice:v0.9.0
         ports:
         - containerPort: 7070
         env:
@@ -584,7 +587,7 @@ spec:
               - ALL
           privileged: false
           readOnlyRootFilesystem: true
-        image: gcr.io/google-samples/microservices-demo/loadgenerator:v0.8.1
+        image: gcr.io/google-samples/microservices-demo/loadgenerator:v0.9.0
         env:
         - name: FRONTEND_ADDR
           value: "frontend:80"
@@ -627,7 +630,7 @@ spec:
               - ALL
           privileged: false
           readOnlyRootFilesystem: true
-        image: gcr.io/google-samples/microservices-demo/currencyservice:v0.8.1
+        image: gcr.io/google-samples/microservices-demo/currencyservice:v0.9.0
         ports:
         - name: grpc
           containerPort: 7000
@@ -691,7 +694,7 @@ spec:
               - ALL
           privileged: false
           readOnlyRootFilesystem: true
-        image: gcr.io/google-samples/microservices-demo/shippingservice:v0.8.1
+        image: gcr.io/google-samples/microservices-demo/shippingservice:v0.9.0
         ports:
         - containerPort: 50051
         env:
@@ -821,7 +824,7 @@ spec:
               - ALL
           privileged: false
           readOnlyRootFilesystem: true
-        image: gcr.io/google-samples/microservices-demo/adservice:v0.8.1
+        image: gcr.io/google-samples/microservices-demo/adservice:v0.9.0
         ports:
         - containerPort: 9555
         env:

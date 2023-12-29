@@ -32,14 +32,13 @@ jobs:
     steps:
     - uses: actions/checkout@v4
       with:
-        ref: ${{github.event.pull_request.head.ref}}
-        repository: ${{github.event.pull_request.head.repo.full_name}}
-    - uses: actions/setup-dotnet@v3
+        ref: ${{github.event.pull_request.head.sha}}
+    - uses: actions/setup-dotnet@v4
       env:
         DOTNET_INSTALL_DIR: "./.dotnet"
       with:
         dotnet-version: '8.0'
-    - uses: actions/setup-go@v4
+    - uses: actions/setup-go@v5
       with:
         go-version: '1.19'
     - name: Go Unit Tests
@@ -65,8 +64,7 @@ jobs:
     steps:
     - uses: actions/checkout@v4
       with:
-        ref: ${{github.event.pull_request.head.ref}}
-        repository: ${{github.event.pull_request.head.repo.full_name}}
+        ref: ${{github.event.pull_request.head.sha}}
     - name: Build + Deploy PR images to GKE
       timeout-minutes: 20
       run: |
