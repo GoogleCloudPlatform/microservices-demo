@@ -1,0 +1,15 @@
+apiVersion: security.istio.io/v1
+kind: AuthorizationPolicy
+metadata:
+  namespace: hipster-app
+  name: redis-cart-authorizationp-policy
+spec:
+  selector:
+    matchLabels:
+      app: redis-cart
+  action: ALLOW
+  rules:
+    - from:
+        - source:
+            # namespaces: ["hipster-app"]
+            principals: ["cluster.local/ns/hipster-app/sa/cartservice"]

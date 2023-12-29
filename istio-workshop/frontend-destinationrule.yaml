@@ -1,0 +1,14 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: DestinationRule
+metadata:
+  name: frontend-destination-rule
+spec:
+  host: frontend
+  subsets:
+    - name: v1
+    - name: v2
+      labels:
+        version: v2
+  # trafficPolicy:
+  # loadBalancer:
+  #   simple: RANDOM

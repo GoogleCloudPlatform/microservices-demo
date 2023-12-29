@@ -1,0 +1,19 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: frontend-split
+spec:
+  hosts:
+    - app.test
+  gateways:
+    - app-gateway
+  http:
+    - route:
+        - destination:
+            host: frontend
+            subset: v1
+          weight: 50
+        - destination:
+            host: frontend
+            subset: v2
+          weight: 50
