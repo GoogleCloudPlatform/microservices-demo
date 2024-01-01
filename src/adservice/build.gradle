@@ -14,9 +14,9 @@ description = 'Ad Service'
 group = "adservice"
 version = "0.1.0-SNAPSHOT"
 
-def grpcVersion = "1.60.0"
-def jacksonCoreVersion = "2.16.0"
-def jacksonDatabindVersion = "2.16.0"
+def grpcVersion = "1.60.1"
+def jacksonCoreVersion = "2.16.1"
+def jacksonDatabindVersion = "2.16.1"
 def protocVersion = "3.25.1"
 
 tasks.withType(JavaCompile) {
@@ -40,7 +40,7 @@ dependencies {
                 "io.grpc:grpc-netty:${grpcVersion}",
                 "io.grpc:grpc-services:${grpcVersion}",
                 "io.grpc:grpc-census:${grpcVersion}",
-                "org.apache.logging.log4j:log4j-core:2.22.0",
+                "org.apache.logging.log4j:log4j-core:2.22.1",
                 "com.google.protobuf:protobuf-java:${protocVersion}"
 
         runtimeOnly "com.fasterxml.jackson.core:jackson-core:${jacksonCoreVersion}",
@@ -67,7 +67,7 @@ protobuf {
 }
 
 googleJavaFormat {
-    toolVersion '1.18.1'
+    toolVersion '1.19.1'
 }
 
 // Inform IDEs like IntelliJ IDEA, Eclipse or NetBeans about the generated code.
