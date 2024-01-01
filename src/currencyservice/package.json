@@ -21,7 +21,7 @@
     "@opentelemetry/semantic-conventions": "1.19.0",
     "@opentelemetry/sdk-trace-base": "1.19.0",
     "@opentelemetry/sdk-node": "0.46.0",
-    "pino": "8.17.1",
+    "pino": "8.17.2",
     "xml2js": "0.6.2"
   }
 }
