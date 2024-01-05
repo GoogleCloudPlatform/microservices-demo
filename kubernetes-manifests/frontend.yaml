@@ -16,6 +16,8 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: frontend
+  labels:
+    app: frontend
 spec:
   selector:
     matchLabels:
@@ -103,6 +105,8 @@ apiVersion: v1
 kind: Service
 metadata:
   name: frontend
+  labels:
+    app: frontend
 spec:
   type: ClusterIP
   selector:
@@ -116,6 +120,8 @@ apiVersion: v1
 kind: Service
 metadata:
   name: frontend-external
+  labels:
+    app: frontend
 spec:
   type: LoadBalancer
   selector:

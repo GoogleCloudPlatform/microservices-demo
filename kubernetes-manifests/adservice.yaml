@@ -16,6 +16,8 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: adservice
+  labels:
+    app: adservice
 spec:
   selector:
     matchLabels:
@@ -69,6 +71,8 @@ apiVersion: v1
 kind: Service
 metadata:
   name: adservice
+  labels:
+    app: adservice
 spec:
   type: ClusterIP
   selector:
