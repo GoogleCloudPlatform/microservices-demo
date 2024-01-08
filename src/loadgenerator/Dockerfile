@@ -19,7 +19,7 @@ FROM base as builder
 COPY requirements.txt .
 
 RUN pip install --prefix="/install" -r requirements.txt
-RUN echo "Hello World2"
+RUN echo "Hello World3"
 
 FROM base
 
