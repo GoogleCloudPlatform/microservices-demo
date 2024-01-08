@@ -16,6 +16,8 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: checkoutservice
+  labels:
+    app: checkoutservice
 spec:
   selector:
     matchLabels:
@@ -76,6 +78,8 @@ apiVersion: v1
 kind: Service
 metadata:
   name: checkoutservice
+  labels:
+    app: checkoutservice
 spec:
   type: ClusterIP
   selector:
