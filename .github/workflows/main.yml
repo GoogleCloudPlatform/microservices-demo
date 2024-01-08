@@ -15,7 +15,7 @@ jobs:
       run: echo ${{ secrets.GCR_KEY }} | base64 -d > /tmp/gcr-key.json && gcloud auth activate-service-account --key-file=/tmp/gcr-key.json
     - name: Build and Push Docker Images to GCR
       run: |
-        GCR_PROJECT_ID=My First Project
+        GCR_PROJECT_ID="My First Project"
         services=( $(find src/* -type f -name Dockerfile -exec dirname {} \;) )
         for service in "${services[@]}"; do
           image_name="gcr.io/${GCR_PROJECT_ID}/${service#src/}:latest"
