@@ -22,8 +22,7 @@ jobs:
           image_name="gcr.io/${GCR_PROJECT_ID}/${service#src/}:latest"
 
           # Authenticate Docker within the loop
-          echo ${{ secrets.GCR_KEY }} | base64 -d > /tmp/gcr-key.json
-          gcloud auth activate-service-account --key-file=/tmp/gcr-key.json
+          echo ${{ secrets.GCR_KEY }} | base64 -d > /tmp/gcr-key.json && gcloud auth activate-service-account --key-file=/tmp/gcr-key.json
           
           docker buildx build -t $image_name --push $service
         done
