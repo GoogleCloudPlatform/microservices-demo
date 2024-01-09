@@ -12,10 +12,14 @@ jobs:
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v1
     - name: Authenticate with GCR
-      run: echo ${{ secrets.GCR_KEY }} | base64 -d > /tmp/gcr-key.json && gcloud auth activate-service-account --key-file=/tmp/gcr-key.json && gcloud auth configure-docker
+      run: echo ${{ secrets.GCR_KEY }} | base64 -d > /tmp/gcr-key.json && gcloud auth activate-service-account --key-file=/tmp/gcr-key.json
+    - name: docker auth
+      run: |
+        gcloud auth configure-docker \
+        us-central1-docker.pkg.dev
     - name: Build and Push Docker Images to GCR
       run: |
-        GCR_PROJECT_ID="alien-segment-410723"
+        GCR_PROJECT_ID="alien-segment-41072"
         services=( $(find src/* -type f -name Dockerfile -exec dirname {} \;) )
         for service in "${services[@]}"; do
           image_name="gcr.io/${GCR_PROJECT_ID}/${service#src/}:latest"
