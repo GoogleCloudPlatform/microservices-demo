@@ -23,6 +23,5 @@ jobs:
         for service in "${services[@]}"; do
           image_name="${LOCATION}-docker.pkg.dev/${GCR_PROJECT_ID}/${REPOSITORY}/${service#src/}:latest"
           sudo docker buildx build -t $image_name --push $service
-          sudo docker tag $image_name ${LOCATION}/${GCR_PROJECT_ID}/${REPOSITORY}/${service#src/}:latest
           sudo docker push $image_name
         done
