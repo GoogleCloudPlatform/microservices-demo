@@ -24,7 +24,7 @@ jobs:
           
           # Docker login inside the loop
           echo ${{ secrets.GCR_KEY }} | base64 -d > /tmp/gcr-key.json && gcloud auth activate-service-account service-account@alien-segment-410723.iam.gserviceaccount.com --key-file=/tmp/gcr-key.json 
-          sudo docker buildx build -t $image_name
+          sudo docker buildx build -t $image_name --push $service
           sudo docker tag $image_name ${LOCATION}/${GCR_PROJECT_ID}/${REPOSITORY}/${service#src/}:latest
           sudo docker push $image_name
         done
