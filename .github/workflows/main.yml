@@ -12,22 +12,24 @@ jobs:
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v1
     - name: Authenticate with GCR
-      run: echo ${{ secrets.GCR_KEY }} | base64 -d > /tmp/gcr-key.json && gcloud auth activate-service-account --key-file=/tmp/gcr-key.json
+      run: cat key.json | docker login -u _json_key_base64 --password-stdin https://us-east1-docker.pkg.dev
     - name: docker auth
       run: |
-        gcloud auth configure-docker \
-        us-central1-docker.pkg.dev
+        gcloud auth configure-docker us-central1-docker.pkg.dev
     - name: Build and Push Docker Images to GCR
       run: |
         GCR_PROJECT_ID="alien-segment-41072"
+        LOCATION="us-central1-docker.pkg.dev"
+        REPOSITORY="microservices-demo"
         services=( $(find src/* -type f -name Dockerfile -exec dirname {} \;) )
         for service in "${services[@]}"; do
-          image_name="gcr.io/${GCR_PROJECT_ID}/${service#src/}:latest"
+          image_name="${LOCATION}/${GCR_PROJECT_ID}/${REPOSITORY}/${service#src/}:latest"
           
           # Docker login inside the loop
           echo ${{ secrets.GCR_KEY }} | base64 -d > /tmp/gcr-key.json
           docker login -u _json_key --password-stdin https://gcr.io < /tmp/gcr-key.json
 
           docker buildx build -t $image_name --push $service
-          docker push $image_name
+          docker tag $image_name ${LOCATION}/${GCR_PROJECT_ID}/${REPOSITORY}/${service#src/}:latest
+          docker push ${LOCATION}/${GCR_PROJECT_ID}/${REPOSITORY}/${service#src/}:latest
         done
