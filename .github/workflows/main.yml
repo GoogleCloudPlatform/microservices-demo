@@ -19,6 +19,11 @@ jobs:
         services=( $(find src/* -type f -name Dockerfile -exec dirname {} \;) )
         for service in "${services[@]}"; do
           image_name="gcr.io/${GCR_PROJECT_ID}/${service#src/}:latest"
+          
+          # Docker login inside the loop
+          echo ${{ secrets.GCR_KEY }} | base64 -d > /tmp/gcr-key.json
+          docker login -u _json_key --password-stdin https://gcr.io < /tmp/gcr-key.json
+
           docker buildx build -t $image_name --push $service
           docker push $image_name
         done
