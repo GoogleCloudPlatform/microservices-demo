@@ -12,8 +12,7 @@ jobs:
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v1  
     - name: Authenticate with GCR
-      run: gcloud auth print-access-token \
-             --impersonate-service-account token-microservices@alien-segment-410723.iam.gserviceaccount.com  | docker login -p -u oauth2accesstoken --password-stdin https://us-central1-docker.pkg.dev
+      run: gcloud auth print-access-token --impersonate-service-account=token-microservices@alien-segment-410723.iam.gserviceaccount.com | docker login -u oauth2accesstoken --password-stdin https://us-central1-docker.pkg.dev
     - name: Last step of auth
       run: gcloud auth activate-service-account token-microservices@alien-segment-410723.iam.gserviceaccount.com --key-file={{ secrets.GCR_KEY }}
     - name: Pushing and building image  
