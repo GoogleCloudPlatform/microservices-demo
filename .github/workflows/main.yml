@@ -12,7 +12,7 @@ jobs:
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v1
     - name: Authenticate with GCR
-      run: cat key.json | docker login -u _json_key_base64 --password-stdin https://us-east1-docker.pkg.dev
+      run:  cat ${{ secrets.GCR_KEY }} | docker login -u _json_key_base64 --password-stdin https://us-east1-docker.pkg.dev
     - name: docker auth
       run: |
         gcloud auth configure-docker us-central1-docker.pkg.dev
