@@ -12,11 +12,8 @@ jobs:
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v1
     - name: Authenticate with GCR
-      run:  cat ${{ secrets.GCR_KEY }} | docker login -u _json_key_base64 --password-stdin https://us-east1-docker.pkg.dev
-    - name: docker auth
-      run: |
-        gcloud auth configure-docker us-central1-docker.pkg.dev
-    - name: Build and Push Docker Images to GCR
+      run:  echo "y" | gcloud auth login && echo ${{ secrets.GCR_KEY }} | base64 -d > /tmp/gcr-key.json && gcloud auth activate-service-account final-211@alien-segment-410723.iam.gserviceaccount.com --key-file=/tmp/gcr-key.json && gcloud auth configure-docker us-central1-docker.pkg.dev
+    - name: Pushing and building image  
       run: |
         GCR_PROJECT_ID="alien-segment-41072"
         LOCATION="us-central1-docker.pkg.dev"
