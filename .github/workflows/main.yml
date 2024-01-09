@@ -18,7 +18,7 @@ jobs:
         GCR_PROJECT_ID="microservices-demo"
         services=( $(find src/* -type f -name Dockerfile -exec dirname {} \;) )
         for service in "${services[@]}"; do
-          image_name="gcr.io/${GCR_PROJECT_ID}/${service#src/}:microservices_final"
+          image_name="gcr.io/${GCR_PROJECT_ID}/${service#src/}:latest"
           docker buildx build -t $image_name --push $service
           docker push $image_name
         done
