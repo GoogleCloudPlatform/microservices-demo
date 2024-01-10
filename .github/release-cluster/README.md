@@ -1,6 +1,6 @@
-# onlineboutique.dev manifests
+# cymbal-shops.retail.cymbal.dev manifests
 
-This directory contains extra deploy manifests for configuring Online Boutique solution on GKE for onlineboutique.dev.
+This directory contains extra deploy manifests for configuring Online Boutique solution on GKE for cymbal-shops.retail.cymbal.dev.
 
 _Note: before moving forward, the Online Boutique apps should already be deployed [on the online-boutique-release GKE cluster](/docs/releasing#10-deploy-releasekubernetes-manifestsyaml-to-our-online-boutique-release-gke-cluster)._
 

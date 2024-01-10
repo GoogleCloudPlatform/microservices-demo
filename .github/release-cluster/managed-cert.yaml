@@ -4,4 +4,4 @@ metadata:
   name: online-boutique-certificate
 spec:
   domains:
-    - onlineboutique.dev
+    - cymbal-shops.retail.cymbal.dev

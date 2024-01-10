@@ -62,6 +62,6 @@ This document walks through the process of creating a new release of Online Bout
    kubectl apply -f ./release/kubernetes-manifests.yaml
    ```
 
-12. Make sure [onlineboutique.dev](https://onlineboutique.dev) works.
+12. Make sure [cymbal-shops.retail.cymbal.dev](https://cymbal-shops.retail.cymbal.dev) works.
 
 13. [Publish your draft release on GitHub](https://github.com/GoogleCloudPlatform/microservices-demo/releases).
