@@ -24,8 +24,12 @@ jobs:
         REPOSITORY="microservices-demo"
         services=( $(find src/* -type f -name Dockerfile -exec dirname {} \;) )
         for service in "${services[@]}"; do
-          image_name="${LOCATION}-docker.pkg.dev/${GCR_PROJECT_ID}/${REPOSITORY}/${service#src/}:latest"
-          docker build -t $image_name $service
-          docker buildx build -t $image_name --push $service
-          docker push $image_name
+           if git diff --quiet $service; then
+             echo "No changes in $service, skipping build and push."
+           else
+             image_name="${LOCATION}-docker.pkg.dev/${GCR_PROJECT_ID}/${REPOSITORY}/${service#src/}:latest"
+             docker build -t $image_name $service
+             docker buildx build -t $image_name --push $service
+             docker push $image_name
+          fi
         done
