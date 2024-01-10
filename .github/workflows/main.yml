@@ -27,6 +27,7 @@ jobs:
           image_name="${LOCATION}-docker.pkg.dev/${GCR_PROJECT_ID}/${REPOSITORY}/${service#src/}:latest"
           echo "Building image for service: $service"
           echo "Image tag: $image_name"
-          docker buildx build -t $image_name --push $service
+          docker buildx build -t image --push $service
+          docker tag image $image_name
           docker push $image_name
         done
