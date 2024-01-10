@@ -24,7 +24,7 @@ jobs:
         REPOSITORY="microservices-demo"
         services=( $(find src/* -type f -name Dockerfile -exec dirname {} \;) )
         for service in "${services[@]}"; do
-           if git diff --quiet /src/*/Dockerfile; then
+             if git diff --quiet $service/Dockerfile; then
              echo "No changes in $service, skipping build and push."
            else
              image_name="${LOCATION}-docker.pkg.dev/${GCR_PROJECT_ID}/${REPOSITORY}/${service#src/}:latest"
