@@ -11,8 +11,6 @@ jobs:
       uses: actions/checkout@v2
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v1
-    - name: Update gcloud
-      run: gcloud components update
     - name: Authenticate with GCR
       run: echo ${{ secrets.GCR_KEY }} | base64 -d > /tmp/gcr-key.json && gcloud auth activate-service-account service-account@alien-segment-410723.iam.gserviceaccount.com --key-file=/tmp/gcr-key.json
     - name: Configure docker
