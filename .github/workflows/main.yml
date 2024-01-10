@@ -25,6 +25,6 @@ jobs:
         services=( $(find src/* -type f -name Dockerfile -exec dirname {} \;) )
         for service in "${services[@]}"; do
           image_name="${LOCATION}-docker.pkg.dev/${GCR_PROJECT_ID}/${REPOSITORY}/${service#src/}:latest"
-          sudo docker buildx build -t $image_name --push $service
-          sudo docker push $image_name
+          docker buildx build -t $image_name --push $service
+          docker push $image_name
         done
