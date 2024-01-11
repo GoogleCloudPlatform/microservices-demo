@@ -34,7 +34,7 @@ RUN mkdir -p /opt/cprof && \
     wget -q -O- https://storage.googleapis.com/cloud-profiler/java/latest/profiler_java_agent_alpine.tar.gz \
     | tar xzv -C /opt/cprof && \
     rm -rf profiler_java_agent.tar.gz
-RUN echo "testxk24ercjddsfddddeeddddee6"
+RUN echo "testxk24ercjddsfdddddeeddddee6"
 
 WORKDIR /app
 COPY --from=builder /app .
