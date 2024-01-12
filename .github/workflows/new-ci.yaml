@@ -14,7 +14,7 @@
 
 name: "Continuous Integration - Melih/Release"
 on:
-  push:
+  workflow_dispatch:
     # run on pushes to melih branch
     branches:
       - melih
@@ -50,7 +50,7 @@ jobs:
             docker push docker.io/melihekmekci/$SERVICE:$IMAGE_TAG
             cd ../..
             done
-          git checkout main
+
           cd helm-chart/templates
           sed -i '' "s|image:.*|image: docker.io/melihekmekci/adservice:$IMAGE_TAG|" adservice.yaml
           sed -i '' "s|image:.*|image: docker.io/melihekmekci/cartservice:$IMAGE_TAG|" cartservice.yaml
@@ -72,5 +72,5 @@ jobs:
           git add paymentservice.yaml
           git add productcatalogservice.yaml
           git commit -m "Update deployments"
-          git push origin main
+          git push
           
