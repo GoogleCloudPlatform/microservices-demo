@@ -45,7 +45,7 @@ jobs:
           for SERVICE in $SERVICES; do
             echo "Building and pushing $SERVICE..."
             cd src/$SERVICE
-            IMAGE_TAG="${{ github.repository }}-${{ github.ref_name }}-${{ github.sha }}-${{ github.run_number }}"
+            IMAGE_TAG="${{ github.repository }}-${{ github.run_number }}"
             docker build -t melihekmekci/$SERVICE:$IMAGE_TAG .
             docker push melihekmekci/$SERVICE$IMAGE_TAG:
             cd ../..
