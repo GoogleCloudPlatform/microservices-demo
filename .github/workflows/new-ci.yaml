@@ -49,27 +49,28 @@ jobs:
             docker build -t docker.io/melihekmekci/$SERVICE:$IMAGE_TAG .
             docker push docker.io/melihekmekci/$SERVICE:$IMAGE_TAG
             cd ../..
-            git checkout main
-            cd helm-chart/templates
-            sed -i '' "s|image:.*|image: docker.io/melihekmekci/adservice:$IMAGE_TAG|" adservice.yaml
-            sed -i '' "s|image:.*|image: docker.io/melihekmekci/cartservice:$IMAGE_TAG|" cartservice.yaml
-            sed -i '' "s|image:.*|image: docker.io/melihekmekci/checkoutservice:$IMAGE_TAG|" checkoutservice.yaml
-            sed -i '' "s|image:.*|image: docker.io/melihekmekci/currenyservice:$IMAGE_TAG|" currencyservice.yaml
-            sed -i '' "s|image:.*|image: docker.io/melihekmekci/emailservice:$IMAGE_TAG|" emailservice.yaml
-            sed -i '' "s|image:.*|image: docker.io/melihekmekci/frontend:$IMAGE_TAG|" frontend.yaml
-            sed -i '' "s|image:.*|image: docker.io/melihekmekci/loadgenerator:$IMAGE_TAG|" loadgenerator.yaml
-            sed -i '' "s|image:.*|image: docker.io/melihekmekci/paymentservice:$IMAGE_TAG|" paymentservice.yaml
-            sed -i '' "s|image:.*|image: docker.io/melihekmekci/productcatalogservice:$IMAGE_TAG|" productcatalogservice.yaml
+            done
+          git checkout main
+          cd helm-chart/templates
+          sed -i '' "s|image:.*|image: docker.io/melihekmekci/adservice:$IMAGE_TAG|" adservice.yaml
+          sed -i '' "s|image:.*|image: docker.io/melihekmekci/cartservice:$IMAGE_TAG|" cartservice.yaml
+          sed -i '' "s|image:.*|image: docker.io/melihekmekci/checkoutservice:$IMAGE_TAG|" checkoutservice.yaml
+          sed -i '' "s|image:.*|image: docker.io/melihekmekci/currenyservice:$IMAGE_TAG|" currencyservice.yaml
+          sed -i '' "s|image:.*|image: docker.io/melihekmekci/emailservice:$IMAGE_TAG|" emailservice.yaml
+          sed -i '' "s|image:.*|image: docker.io/melihekmekci/frontend:$IMAGE_TAG|" frontend.yaml
+          sed -i '' "s|image:.*|image: docker.io/melihekmekci/loadgenerator:$IMAGE_TAG|" loadgenerator.yaml
+          sed -i '' "s|image:.*|image: docker.io/melihekmekci/paymentservice:$IMAGE_TAG|" paymentservice.yaml
+          sed -i '' "s|image:.*|image: docker.io/melihekmekci/productcatalogservice:$IMAGE_TAG|" productcatalogservice.yaml
 
-            git add adservice.yaml
-            git add cartservice.yaml
-            git add checkoutservice.yaml
-            git add currencyservice.yaml
-            git add emailservice.yaml
-            git add frontend.yaml
-            git add loadgenerator.yaml
-            git add paymentservice.yaml
-            git add productcatalogservice.yaml
-            git commit -m "Update deployments"
-            git push origin main
-          done
+          git add adservice.yaml
+          git add cartservice.yaml
+          git add checkoutservice.yaml
+          git add currencyservice.yaml
+          git add emailservice.yaml
+          git add frontend.yaml
+          git add loadgenerator.yaml
+          git add paymentservice.yaml
+          git add productcatalogservice.yaml
+          git commit -m "Update deployments"
+          git push origin main
+          
