@@ -49,7 +49,7 @@ jobs:
             docker build -t docker.io/melihekmekci/$SERVICE:$IMAGE_TAG .
             docker push docker.io/melihekmekci/$SERVICE:$IMAGE_TAG
             cd ../..
-            git checkout melih2
+            git checkout main
             cd helm-chart/templates
             sed -i '' "s|image:.*|image: docker.io/melihekmekci/adservice:$IMAGE_TAG|" adservice.yaml
             sed -i '' "s|image:.*|image: docker.io/melihekmekci/cartservice:$IMAGE_TAG|" cartservice.yaml
