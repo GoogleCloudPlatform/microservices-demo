@@ -41,7 +41,7 @@ jobs:
       # Example of building and pushing the adservice Docker image
       - name: Build and Push Docker Images
         run: |
-          SERVICES="adservice cartservice checkoutservice currencyservice emailservice frontend loadgenerator paymentservice productcatalogservice recommendationservice shippingservice"
+          SERVICES="adservice checkoutservice currencyservice emailservice frontend loadgenerator paymentservice productcatalogservice recommendationservice shippingservice"
           for SERVICE in $SERVICES; do
             echo "Building and pushing $SERVICE..."
             cd src/$SERVICE
