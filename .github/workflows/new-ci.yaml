@@ -46,7 +46,7 @@ jobs:
             echo "Building and pushing $SERVICE..."
             cd src/$SERVICE
             IMAGE_TAG="${{ github.run_number }}"
-            docker build -t melihekmekci/$SERVICE:$IMAGE_TAG .
-            docker push melihekmekci/$SERVICE:$IMAGE_TAG:
+            docker build -t docker.io/melihekmekci/$SERVICE:$IMAGE_TAG .
+            docker push docker.io/melihekmekci/$SERVICE:$IMAGE_TAG
             cd ../..
           done
