@@ -71,5 +71,5 @@ jobs:
             git add paymentservice.yaml
             git add productcatalogservice.yaml
             git commit -m "Update deployments"
-            git push
+            git push origin main
           done
