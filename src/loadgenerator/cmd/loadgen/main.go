@@ -19,7 +19,7 @@ func main() {
 	fmt.Printf("Starting load generator with %d users targeting %s\n", *userCount, *baseURL)
 
 	rand.Seed(time.Now().UnixNano())
-	config := config.ReadConfig()
+	config := config.SetConfig(*baseURL)
 
 	userBehavior := &behavior.UserBehavior{}
 	behaviorExecutor := behavior.NewBehaviorExecutor(userBehavior)

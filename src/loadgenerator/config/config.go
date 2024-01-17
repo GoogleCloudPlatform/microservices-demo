@@ -4,6 +4,8 @@ import (
 	"github.com/go-resty/resty/v2"
 )
 
+var config *Config
+
 type Config struct {
 	ProductIDs    []string
 	CurrencyCodes []string
@@ -13,8 +15,8 @@ type Config struct {
 	HostName      string
 }
 
-func ReadConfig() *Config {
-	return &Config{
+func SetConfig(baseURL string) *Config {
+	config = &Config{
 		ProductIDs: []string{
 			"0PUK6V6EV0",
 			"1YMWWN1N4O",
@@ -29,8 +31,14 @@ func ReadConfig() *Config {
 		CurrencyCodes: []string{"EUR", "USD", "JPY", "CAD"},
 		Choices:       []int{1, 2, 3, 4, 5, 10},
 		MaxWaitTime:   10,
-		Client:        resty.New().SetBaseURL("http://example.com"), // TODO: replace with flag
+		Client:        resty.New().SetBaseURL(baseURL),
 	}
+
+	return config
+}
+
+func ReadConfig() *Config {
+	return config
 }
 
 func GetHttpClient() *resty.Client {
