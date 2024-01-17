@@ -5,6 +5,7 @@ import "github.com/MahmoudMahfouz/microservices-demo/src/loadgenerator/internal/
 type UserBehavior struct {
 }
 
+// GetWeightedTasks returns a slice of tasks.WeightedTask representing the weighted tasks for user behavior.
 func (ub *UserBehavior) GetWeightedTasks() []tasks.WeightedTask {
 	return []tasks.WeightedTask{
 		{Task: &tasks.Index{}, Weight: 1, Name: "Index"},

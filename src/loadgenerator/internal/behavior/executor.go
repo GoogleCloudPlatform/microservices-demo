@@ -15,6 +15,8 @@ func NewBehaviorExecutor(behavior Behavior) *BehaviorExecutor {
 	return &BehaviorExecutor{Behavior: behavior}
 }
 
+// ExecuteRandomTask selects a random task based on the weights defined in the behavior and executes it.
+// It returns the name of the executed task and any error encountered during task execution.
 func (be *BehaviorExecutor) ExecuteRandomTask() (string, error) {
 	weightedTasks := be.Behavior.GetWeightedTasks()
 	totalWeight := 0

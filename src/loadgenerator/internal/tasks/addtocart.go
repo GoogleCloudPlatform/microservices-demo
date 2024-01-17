@@ -11,6 +11,10 @@ type AddToCart struct {
 	Quantity  int    `json:"quantity"`
 }
 
+// Perform executes the AddToCart task by randomly selecting a quantity and a product ID,
+// and then making an HTTP GET request to retrieve the product information.
+// It then adds the selected product to the cart by making an HTTP POST request to the cart endpoint.
+// Returns an error if any of the operations fail.
 func (t *AddToCart) Perform() error {
 	quantity, err := random.ChoiceInt(config.GetConfig().Quantity)
 	if err != nil {

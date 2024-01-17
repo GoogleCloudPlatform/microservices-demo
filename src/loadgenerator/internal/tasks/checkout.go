@@ -19,6 +19,11 @@ type Checkout struct {
 	CreditCardCVV             string `json:"credit_card_cvv"`
 }
 
+// Perform executes the checkout process.
+// It randomly selects a quantity and a product ID from the configuration.
+// Then it adds the selected product to the cart and performs the checkout process.
+// Finally, it sends a POST request to the "/cart/checkout" endpoint with the checkout information.
+// Returns an error if any error occurs during the process.
 func (t *Checkout) Perform() error {
 	logrus.Debugf("Checkout.Perform()")
 	quantity, err := random.ChoiceInt(config.GetConfig().Quantity)

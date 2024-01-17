@@ -10,6 +10,9 @@ type SetCurrency struct {
 	CurrencyCode string `json:"currency_code"`
 }
 
+// Perform performs the task of setting a random currency code.
+// It chooses a random currency code from the configuration and sends a POST request to the "/setCurrency" endpoint.
+// Returns an error if there is any issue in choosing the currency code or sending the request.
 func (t *SetCurrency) Perform() error {
 	logrus.Debugf("SetCurrency.Perform()")
 	currency, err := random.ChoiceString(config.GetConfig().CurrencyCodes)

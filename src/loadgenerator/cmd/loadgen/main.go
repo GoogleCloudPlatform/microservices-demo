@@ -28,9 +28,11 @@ func main() {
 	rand.Seed(time.Now().UnixNano())
 	config := config.SetConfig(*baseURL)
 
+	// More behavior types can be added here + internal/behavior/XYZ.go
 	userBehavior := &behavior.UserBehavior{}
 	behaviorExecutor := behavior.NewBehaviorExecutor(userBehavior)
 
+	// This loop starts a goroutine for each user, which will run forever
 	for i := 0; i < *userCount; i++ {
 		go func(userNo int) {
 			for {
