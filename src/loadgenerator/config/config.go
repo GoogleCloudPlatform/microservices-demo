@@ -1,9 +1,16 @@
 package config
 
+import (
+	"github.com/go-resty/resty/v2"
+)
+
 type Config struct {
 	ProductIDs    []string
 	CurrencyCodes []string
+	Choices       []int
 	MaxWaitTime   int
+	Client        *resty.Client
+	HostName      string
 }
 
 func ReadConfig() *Config {
@@ -20,6 +27,12 @@ func ReadConfig() *Config {
 			"OLJCESPC7Z",
 		},
 		CurrencyCodes: []string{"EUR", "USD", "JPY", "CAD"},
+		Choices:       []int{1, 2, 3, 4, 5, 10},
 		MaxWaitTime:   10,
+		Client:        resty.New().SetBaseURL("http://example.com"), // TODO: replace with flag
 	}
+}
+
+func GetHttpClient() *resty.Client {
+	return ReadConfig().Client
 }
