@@ -8,5 +8,6 @@ type Task interface {
 // WeightedTask is a replacement for TaskSet
 type WeightedTask struct {
 	Task   Task
+	Name   string
 	Weight int
 }

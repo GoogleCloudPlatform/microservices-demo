@@ -3,6 +3,7 @@ package tasks
 import (
 	"github.com/MahmoudMahfouz/microservices-demo/src/loadgenerator/config"
 	"github.com/MahmoudMahfouz/microservices-demo/src/loadgenerator/pkg/utils/random"
+	"github.com/sirupsen/logrus"
 )
 
 type SetCurrency struct {
@@ -10,6 +11,7 @@ type SetCurrency struct {
 }
 
 func (t *SetCurrency) Perform() error {
+	logrus.Debugf("SetCurrency.Perform()")
 	currency, err := random.ChoiceString(config.ReadConfig().CurrencyCodes)
 	if err != nil {
 		return err

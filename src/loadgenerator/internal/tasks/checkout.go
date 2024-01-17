@@ -1,6 +1,9 @@
 package tasks
 
-import "github.com/MahmoudMahfouz/microservices-demo/src/loadgenerator/config"
+import (
+	"github.com/MahmoudMahfouz/microservices-demo/src/loadgenerator/config"
+	"github.com/sirupsen/logrus"
+)
 
 type Checkout struct {
 	Email                     string `json:"email"`
@@ -16,6 +19,7 @@ type Checkout struct {
 }
 
 func (t *Checkout) Perform() error {
+	logrus.Debugf("Checkout.Perform()")
 	addToCart := AddToCart{}
 	err := addToCart.Perform()
 	if err != nil {

@@ -20,7 +20,7 @@ func ChoiceString(slice []string) (string, error) {
 	logs.WithFields(logs.Fields{
 		"type":  "string",
 		"index": index,
-	}).Debug("Random choice made from string slice")
+	}).Trace("Random choice made from string slice")
 	return slice[index], nil
 }
 
@@ -37,6 +37,6 @@ func ChoiceInt(slice []int) (int, error) {
 	logs.WithFields(logs.Fields{
 		"type":  "integer",
 		"index": index,
-	}).Debug("Random choice made from integer slice")
+	}).Trace("Random choice made from integer slice")
 	return slice[index], nil
 }

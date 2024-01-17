@@ -3,6 +3,8 @@ package behavior
 import (
 	"errors"
 	"math/rand"
+
+	"github.com/sirupsen/logrus"
 )
 
 type BehaviorExecutor struct {
@@ -13,7 +15,7 @@ func NewBehaviorExecutor(behavior Behavior) *BehaviorExecutor {
 	return &BehaviorExecutor{Behavior: behavior}
 }
 
-func (be *BehaviorExecutor) ExecuteRandomTask() error {
+func (be *BehaviorExecutor) ExecuteRandomTask() (string, error) {
 	weightedTasks := be.Behavior.GetWeightedTasks()
 	totalWeight := 0
 	for _, wt := range weightedTasks {
@@ -24,8 +26,13 @@ func (be *BehaviorExecutor) ExecuteRandomTask() error {
 	for _, wt := range weightedTasks {
 		choice -= wt.Weight
 		if choice < 0 {
-			return wt.Task.Perform()
+			logrus.Debugf("Executing task: %s", wt.Name)
+			err := wt.Task.Perform()
+			if err != nil {
+				return "", err
+			}
+			return wt.Name, nil
 		}
 	}
-	return errors.New("no task executed")
+	return "", errors.New("no task executed")
 }

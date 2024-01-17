@@ -2,6 +2,7 @@ package config
 
 import (
 	"github.com/go-resty/resty/v2"
+	"github.com/sirupsen/logrus"
 )
 
 var config *Config
@@ -34,6 +35,7 @@ func SetConfig(baseURL string) *Config {
 		Client:        resty.New().SetBaseURL(baseURL),
 	}
 
+	logrus.Info("Setting config done")
 	return config
 }
 
