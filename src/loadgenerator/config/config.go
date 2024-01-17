@@ -10,7 +10,7 @@ var config *Config
 type Config struct {
 	ProductIDs    []string
 	CurrencyCodes []string
-	Choices       []int
+	Quantity      []int
 	MaxWaitTime   int
 	Client        *resty.Client
 	HostName      string
@@ -30,7 +30,7 @@ func SetConfig(baseURL string) *Config {
 			"OLJCESPC7Z",
 		},
 		CurrencyCodes: []string{"EUR", "USD", "JPY", "CAD"},
-		Choices:       []int{1, 2, 3, 4, 5, 10},
+		Quantity:      []int{1, 2, 3, 4, 5, 10},
 		MaxWaitTime:   10,
 		Client:        resty.New().SetBaseURL(baseURL),
 	}
@@ -39,10 +39,10 @@ func SetConfig(baseURL string) *Config {
 	return config
 }
 
-func ReadConfig() *Config {
+func GetConfig() *Config {
 	return config
 }
 
 func GetHttpClient() *resty.Client {
-	return ReadConfig().Client
+	return config.Client
 }

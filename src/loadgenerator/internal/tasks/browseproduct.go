@@ -10,7 +10,7 @@ type BrowseProduct struct{}
 
 func (t *BrowseProduct) Perform() error {
 	logrus.Debugf("BrowseProduct.Perform()")
-	product, err := random.ChoiceString(config.ReadConfig().ProductIDs)
+	product, err := random.ChoiceString(config.GetConfig().ProductIDs)
 	if err != nil {
 		return err
 	}

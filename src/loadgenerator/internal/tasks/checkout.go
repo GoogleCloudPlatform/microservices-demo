@@ -2,6 +2,7 @@ package tasks
 
 import (
 	"github.com/MahmoudMahfouz/microservices-demo/src/loadgenerator/config"
+	"github.com/MahmoudMahfouz/microservices-demo/src/loadgenerator/pkg/utils/random"
 	"github.com/sirupsen/logrus"
 )
 
@@ -20,8 +21,21 @@ type Checkout struct {
 
 func (t *Checkout) Perform() error {
 	logrus.Debugf("Checkout.Perform()")
-	addToCart := AddToCart{}
-	err := addToCart.Perform()
+	quantity, err := random.ChoiceInt(config.GetConfig().Quantity)
+	if err != nil {
+		return err
+	}
+
+	product, err := random.ChoiceString(config.GetConfig().ProductIDs)
+	if err != nil {
+		return err
+	}
+
+	data := AddToCart{
+		ProductID: product,
+		Quantity:  quantity,
+	}
+	err = data.Perform()
 	if err != nil {
 		return err
 	}

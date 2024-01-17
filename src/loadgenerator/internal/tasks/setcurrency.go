@@ -12,7 +12,7 @@ type SetCurrency struct {
 
 func (t *SetCurrency) Perform() error {
 	logrus.Debugf("SetCurrency.Perform()")
-	currency, err := random.ChoiceString(config.ReadConfig().CurrencyCodes)
+	currency, err := random.ChoiceString(config.GetConfig().CurrencyCodes)
 	if err != nil {
 		return err
 	}

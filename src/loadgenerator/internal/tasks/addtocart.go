@@ -12,12 +12,12 @@ type AddToCart struct {
 }
 
 func (t *AddToCart) Perform() error {
-	choice, err := random.ChoiceInt(config.ReadConfig().Choices)
+	quantity, err := random.ChoiceInt(config.GetConfig().Quantity)
 	if err != nil {
 		return err
 	}
 
-	product, err := random.ChoiceString(config.ReadConfig().ProductIDs)
+	product, err := random.ChoiceString(config.GetConfig().ProductIDs)
 	if err != nil {
 		return err
 	}
@@ -31,7 +31,7 @@ func (t *AddToCart) Perform() error {
 
 	data := AddToCart{
 		ProductID: product,
-		Quantity:  choice,
+		Quantity:  quantity,
 	}
 	_, err = config.GetHttpClient().R().SetBody(data).Post("/cart")
 	if err != nil {
