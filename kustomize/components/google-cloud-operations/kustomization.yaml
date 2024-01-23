@@ -32,6 +32,8 @@ patches:
               env:
               - name: COLLECTOR_SERVICE_ADDR
                 value: "opentelemetrycollector:4317"
+              - name: OTEL_SERVICE_NAME
+                value: "checkoutservice"
               - name: ENABLE_TRACING
                 value: "1"
               - name: ENABLE_PROFILER
@@ -50,6 +52,8 @@ patches:
               env:
               - name: COLLECTOR_SERVICE_ADDR
                 value: "opentelemetrycollector:4317"
+              - name: OTEL_SERVICE_NAME
+                value: "currencyservice"
               - name: ENABLE_TRACING
                 value: "1"
               - name: DISABLE_PROFILER
@@ -68,6 +72,8 @@ patches:
               env:
               - name: COLLECTOR_SERVICE_ADDR
                 value: "opentelemetrycollector:4317"
+              - name: OTEL_SERVICE_NAME
+                value: "emailservice"
               - name: ENABLE_TRACING
                 value: "1"
               - name: DISABLE_PROFILER
@@ -88,6 +94,8 @@ patches:
                 value: "1"
               - name: COLLECTOR_SERVICE_ADDR
                 value: "opentelemetrycollector:4317"
+              - name: OTEL_SERVICE_NAME
+                value: "frontend"
               - name: ENABLE_PROFILER
                 value: "1"
 # paymentservice - tracing, profiler
@@ -104,6 +112,8 @@ patches:
               env:
               - name: COLLECTOR_SERVICE_ADDR
                 value: "opentelemetrycollector:4317"
+              - name: OTEL_SERVICE_NAME
+                value: "paymentservice"
               - name: ENABLE_TRACING
                 value: "1"
               - name: DISABLE_PROFILER
@@ -122,6 +132,8 @@ patches:
               env:
               - name: COLLECTOR_SERVICE_ADDR
                 value: "opentelemetrycollector:4317"
+              - name: OTEL_SERVICE_NAME
+                value: "productcatalogservice"
               - name: ENABLE_TRACING
                 value: "1"
               - name: DISABLE_PROFILER
@@ -140,6 +152,8 @@ patches:
               env:
               - name: COLLECTOR_SERVICE_ADDR
                 value: "opentelemetrycollector:4317"
+              - name: OTEL_SERVICE_NAME
+                value: "recommendationservice"
               - name: ENABLE_TRACING
                 value: "1"
               - name: DISABLE_PROFILER
