@@ -3,7 +3,7 @@ name: Docker Build and Push to GCR
 on:
   push:
     paths:
-      - 'src/**/Dockerfile'
+      - 'src/**'
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
