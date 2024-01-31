@@ -1,24 +1,36 @@
+name: Build, Push to GCR, and Deploy to GKE
 
-name: Docker Build and Push to GCR
 on:
   push:
     paths:
       - 'src/**'
+
+env:
+  GC_PROJECT_ID: "alien-segment-410723"
+  GKE_CLUSTER: cluster1    # cluster name
+  GKE_ZONE: us-central1   # cluster zone
+
 jobs:
-  build-and-push:
+  build-push-deploy:
     runs-on: ubuntu-latest
+
     steps:
     - name: Checkout Repository
       uses: actions/checkout@v2
+
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v1
-    - name: Authenticate with GCR
+
+    - name: Authenticate with GC
       run: echo ${{ secrets.GCR_KEY }} | base64 -d > /tmp/gcr-key.json && gcloud auth activate-service-account service-account@alien-segment-410723.iam.gserviceaccount.com --key-file=/tmp/gcr-key.json
+
     - name: Configure docker
       run: gcloud auth configure-docker us-central1-docker.pkg.dev
+
     - name: Gcloud docker login
       run: gcloud auth print-access-token | docker login -u oauth2accesstoken --password-stdin https://us-central1-docker.pkg.dev
-    - name: Pushing and building image  
+
+    - name: Building and Pushing image
       run: |
         GCR_PROJECT_ID="alien-segment-410723"
         LOCATION="us-central1"
@@ -30,3 +42,12 @@ jobs:
           docker buildx build -t $image_name --push $service
           docker push $image_name
         done
+   
+    - name: Kubernetes context added (GKE)
+      run: gcloud container clusters get-credentials ${{ env.GKE_CLUSTER }} --region ${{ env.GKE_ZONE }} --project ${{ env.GC_PROJECT_ID }}
+ 
+    
+    - name: Deploying to GKE
+      run: |  
+        kubectl apply -f release/kubernetes-manifests.yml
+        kubectl get pods
