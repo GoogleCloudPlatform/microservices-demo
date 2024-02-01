@@ -42,7 +42,17 @@ jobs:
           docker buildx build -t $image_name --push $service
           docker push $image_name
         done
-   
+
+        
+    - name: Install gke-gcloud-auth-plugin
+      run: |
+        gcloud components install kubectl
+        gcloud components install kubectl-gke
+
+    - name: Verify gke-gcloud-auth-plugin installation
+      run: |
+        gcloud components list
+
     - name: Kubernetes context added (GKE)
       run: gcloud container clusters get-credentials ${{ env.GKE_CLUSTER }} --region ${{ env.GKE_ZONE }} --project ${{ env.GC_PROJECT_ID }}
  
