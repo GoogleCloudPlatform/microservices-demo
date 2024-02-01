@@ -46,12 +46,8 @@ jobs:
         
     - name: Install gke-gcloud-auth-plugin
       run: |
-        sudo apt-get install google-cloud-sdk-gke-gcloud-auth-plugin
-
+        gcloud components install gke-gcloud-auth-plugin
   
-    - name: Verify gke-gcloud-auth-plugin installation
-      run: |
-        gke-gcloud-auth-plugin --version 
 
     - name: Kubernetes context added (GKE)
       run: gcloud container clusters get-credentials ${{ env.GKE_CLUSTER }} --region ${{ env.GKE_ZONE }} --project ${{ env.GC_PROJECT_ID }}
