@@ -49,5 +49,5 @@ jobs:
     
     - name: Deploying to GKE
       run: |  
-        kubectl apply -f release/kubernetes-manifests.yml
+        kubectl apply -f release/kubernetes-manifests.yaml
         kubectl get pods
