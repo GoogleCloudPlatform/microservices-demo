@@ -10,12 +10,6 @@ terraform {
   }
 }
 
-resource "google_service_account" "default" {
-  account_id   = "service-account-id"
-  display_name = "Service Account"
-}
-
-
 # VPC and Subnets
 resource "google_compute_network" "my_vpc" {
   name                    = var.network_name
@@ -47,20 +41,21 @@ resource "google_container_cluster" "my_gke_cluster" {
 resource "google_container_node_pool" "primary_preemptible_nodes" {
   name       = "my-node-pool"
   location   = "us-central1"
-  cluster    = google_container_cluster.primary.name
+  cluster    = google_container_cluster.my_gke_cluster
   node_count = 1
 
   node_config {
     preemptible  = true
-    machine_type = ""
+    machine_type = "e2-medium"
 
     # Google recommends custom service accounts that have cloud-platform scope and permissions granted via IAM Roles.
-    service_account = "service-account@alien-segment-410723.iam.gserviceaccount.com"
+    service_account = "token-microservices@alien-segment-410723.iam.gserviceaccount.com"
     oauth_scopes    = [
       "https://www.googleapis.com/auth/cloud-platform"
     ]
   }
 }
+
 
 
 

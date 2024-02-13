@@ -1,5 +1,6 @@
 variable "project" {
-  description = "alien-segment-410723"
+  description = "Project"
+  default = "alien-segment-410723"
 }
 
 variable "region" {
@@ -13,8 +14,8 @@ variable "zones" {
 }
 
 variable "network_name" {
-  description = "Name of the VPC network"
-  default     = "default"
+  description = "Name of the VPC network" 
+  default     = "microservices-vpc"
 }
 
 variable "subnet_cidr" {
@@ -34,10 +35,10 @@ variable "prod_subnet_name" {
 
 variable "gke_cluster_name" {
   description = "Name of the GKE cluster"
-  default     = "cluster1"
+  default     = "microservices-cluster"
 }
 
 variable "artifact_registry_repo_name" {
   description = "Name of the Artifact Registry"
-  default     = "microservices-demo"
+  default     = "microservices-demo-final"
 }
