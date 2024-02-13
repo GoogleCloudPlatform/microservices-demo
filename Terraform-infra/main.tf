@@ -55,7 +55,12 @@ resource "google_container_node_pool" "primary_preemptible_nodes" {
     ]
   }
 }
-
+resource "google_artifact_registry_repository" "microservices-demo-final" {
+  location      = "us-central1"
+  repository_id = "microservices-demo-final"
+  description   = "docker repository for my GKE images"
+  format        = "DOCKER"
+}
 
 
 
