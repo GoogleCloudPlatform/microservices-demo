@@ -47,7 +47,7 @@ adService:
   name: adservice
   resources:
     requests:
-      cpu: 200m
+      cpu: 100m
       memory: 180Mi
     limits:
       cpu: 300m
@@ -58,7 +58,7 @@ cartService:
   name: cartservice
   resources:
     requests:
-      cpu: 200m
+      cpu: 100m
       memory: 64Mi
     limits:
       cpu: 300m
@@ -128,7 +128,7 @@ loadGenerator:
   checkFrontendInitContainer: true
   resources:
     requests:
-      cpu: 300m
+      cpu: 100m
       memory: 256Mi
     limits:
       cpu: 500m
