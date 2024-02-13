@@ -3,7 +3,7 @@
 # Declare variables to be passed into your templates.
 
 images:
-  repository: us-central1-docker.pkg.dev/alien-segment-410723/microservices-demo
+  repository: us-east5-docker.pkg.dev/alien-segment-410723/microservices-demo
   # Overrides the image tag whose default is the chart appVersion.
   tag: ""
 
