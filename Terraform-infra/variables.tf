@@ -4,13 +4,13 @@ variable "project" {
 }
 
 variable "region" {
-  description = "us-central1"
-  default     = "us-central1"
+  description = "us-east4"
+  default     = "us-east4"
 }
 
 variable "zones" {
   description = "List of GCP zones for the resources"
-  default     = ["us-central1-a", "us-central1-b", "us-central1-c"]
+  default     = ["us-east4-a", "us-east4-b", "us-east4-c"]
 }
 
 variable "network_name" {

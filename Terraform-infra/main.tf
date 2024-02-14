@@ -40,13 +40,13 @@ resource "google_container_cluster" "my_gke_cluster" {
 
 resource "google_container_node_pool" "primary_preemptible_nodes" {
   name       = "my-node-pool"
-  location   = "us-central1"
+  location   = "us-east4"
   cluster    = google_container_cluster.my_gke_cluster.id
   node_count = 1
 
   node_config {
     preemptible  = true
-    machine_type = "e2-medium"
+    machine_type = "e2-custom-8-10240"
 
     # Google recommends custom service accounts that have cloud-platform scope and permissions granted via IAM Roles.
     service_account = "token-microservices@alien-segment-410723.iam.gserviceaccount.com"
@@ -56,9 +56,9 @@ resource "google_container_node_pool" "primary_preemptible_nodes" {
   }
 }
 resource "google_artifact_registry_repository" "microservices-demo-final" {
-  location      = "us-central1"
+  location      = "us-east4"
   repository_id = "microservices-demo-final"
-  description   = "docker repository for my GKE images"
+  description   = "docker repository for my GKE"
   format        = "DOCKER"
 }
 
