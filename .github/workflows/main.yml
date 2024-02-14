@@ -8,7 +8,7 @@ on:
 env:
   GC_PROJECT_ID: "alien-segment-410723"
   GKE_CLUSTER: microservices-cluster    # cluster name
-  GKE_ZONE: us-east5   # cluster zone
+  GKE_ZONE: us-east4   # cluster zone
 
 jobs:
   build-push-deploy:
@@ -28,12 +28,12 @@ jobs:
       run: gcloud auth configure-docker us-central1-docker.pkg.dev
 
     - name: Gcloud docker login
-      run: gcloud auth print-access-token | docker login -u oauth2accesstoken --password-stdin https://us-east5-docker.pkg.dev
+      run: gcloud auth print-access-token | docker login -u oauth2accesstoken --password-stdin https://us-east4-docker.pkg.dev
 
     - name: Building and Pushing image
       run: |
         GCR_PROJECT_ID="alien-segment-410723"
-        LOCATION="us-east5"
+        LOCATION="us-east4"
         REPOSITORY="microservices-demo-final"
         services=( $(find src/* -type f -name Dockerfile -exec dirname {} \;) )
         for service in "${services[@]}"; do
