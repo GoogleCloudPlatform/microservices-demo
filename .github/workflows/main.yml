@@ -63,22 +63,3 @@ jobs:
         helm upgrade onlineboutique oci://us-docker.pkg.dev/online-boutique-ci/charts/onlineboutique \
           --install \
 
-  terraform-init-and-apply:
-    runs-on: ubuntu-latest
-    if: |
-      github.event_name == 'push' &&
-      github.event_path == 'Terraform-infra/**'
-
-    steps:
-    - name: Checkout Repository
-      uses: actions/checkout@v2
-
-    - name: Terraform Init
-      working-directory: Terraform-infra
-      run: terraform init
-
-    - name: Terraform Apply
-      working-directory: Terraform-infra
-      run: terraform apply -auto-approve
-
-  
