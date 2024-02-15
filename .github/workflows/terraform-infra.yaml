@@ -10,12 +10,7 @@ jobs:
     name: 'Terraform'
     runs-on: ubuntu-latest
     environment: production
-
-    defaults:
-      run:
-        shell: bash
-        #Inform a working directory if .tf files are not in root folder
-        working-directory: ./Terraform-infra 
+        
     steps:
 
       - name: Checkout code
@@ -30,12 +25,12 @@ jobs:
          cli_config_credentials_token: ${{ secrets.GCR_KEY }}
 
       - name: Terraform Init
-        run: terraform init
+        run: cd Terraform-infra | terraform init
         env:
           GOOGLE_CREDENTIALS: ${{ secrets.GCR_KEY }} 
 
       - name: Terraform Apply
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-        run: terraform apply -auto-approve
+        run: cd Terraform-infra | terraform apply -auto-approve
         env:
           GOOGLE_CREDENTIALS: ${{ secrets.GCR_KEY }}
