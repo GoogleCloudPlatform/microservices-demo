@@ -18,7 +18,7 @@ If you’re using this demo, please **★Star** this repository to show your int
 **Note to Googlers (Google employees):** Please fill out the form at [go/microservices-demo](http://go/microservices-demo).
 
 ## Screenshots
-
+AAA
 | Home Page                                                                                                         | Checkout Screen                                                                                                    |
 | ----------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
 | [![Screenshot of store homepage](/docs/img/online-boutique-frontend-1.png)](/docs/img/online-boutique-frontend-1.png) | [![Screenshot of checkout screen](/docs/img/online-boutique-frontend-2.png)](/docs/img/online-boutique-frontend-2.png) |
