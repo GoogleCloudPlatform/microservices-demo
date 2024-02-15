@@ -25,7 +25,7 @@ jobs:
         run: |
            pwd
            ls
-           terraform init -chdir=Terraform-infra
+           terraform init -target=./Terraform-infra/main.tf -target=./Terraform-infra/variables.tf
            
         env:
           GOOGLE_CREDENTIALS: ${{ secrets.GCR_KEY }}
