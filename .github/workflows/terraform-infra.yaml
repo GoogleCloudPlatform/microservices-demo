@@ -3,14 +3,20 @@ name: Terraform Apply
 on:
   push:
     paths:
-      - 'main.tf'
+      - 'Terraform-infra/**'
 
 jobs:
   terraform:
     name: 'Terraform'
     runs-on: ubuntu-latest
     environment: production
-
+    
+    defaults:
+      run:
+        shell: bash
+        #Inform a working directory if .tf files are not in root folder
+        working-directory: ./Terraform-infra 
+        
     steps:
 
       - name: Checkout code
@@ -24,7 +30,8 @@ jobs:
       - name: Terraform Init
         run: |
            pwd
-           ls
+           ls 
+           
            terraform init 
            
         env:
