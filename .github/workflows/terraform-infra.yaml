@@ -25,13 +25,13 @@ jobs:
         run: |
            pwd
            ls
-           terraform init
+           terraform init -chdir=Terraform-infra
            
         env:
           GOOGLE_CREDENTIALS: ${{ secrets.GCR_KEY }}
 
       - name: Terraform Apply
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-        run: terraform apply -auto-approve
+        run: terraform apply -auto-approve -chdir=Terraform-infra
         env:
           GOOGLE_CREDENTIALS: ${{ secrets.GCR_KEY }}
