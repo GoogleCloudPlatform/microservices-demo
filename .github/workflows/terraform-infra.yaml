@@ -1,0 +1,23 @@
+name: Terraform Apply
+
+on:
+  push:
+    paths:
+      - 'Terraform-infra/**'
+
+jobs:
+  terraform_apply:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v1
+      
+      - name: Terraform Init and Apply
+        run: |
+          cd Terraform-infra
+          terraform init -input=false
+          terraform apply -auto-approve
