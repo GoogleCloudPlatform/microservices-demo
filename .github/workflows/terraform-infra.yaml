@@ -29,12 +29,12 @@ jobs:
          cli_config_credentials_token: ${{ secrets.GCR_KEY }}
 
       - name: Terraform Init
-        run: cd Terraform-infra | terraform init
+        run: cd Terraform-infra && terraform init
         env:
           GOOGLE_CREDENTIALS: ${{ secrets.GCR_KEY }} 
 
       - name: Terraform Apply
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-        run: cd Terraform-infra | terraform apply -auto-approve
+        run: cd Terraform-infra && terraform apply -auto-approve
         env:
           GOOGLE_CREDENTIALS: ${{ secrets.GCR_KEY }}
