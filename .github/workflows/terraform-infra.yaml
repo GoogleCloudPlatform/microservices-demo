@@ -31,7 +31,7 @@ jobs:
       - name: Terraform Init
         run: terraform init
         env:
-          GOOGLE_CREDENTIALS: ${{ secrets.GCR_KEY }} 
+          GOOGLE_CREDENTIALS: credentials = "${file("${{ secrets.GCR_KEY }}")}" 
 
       - name: Terraform Apply
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
