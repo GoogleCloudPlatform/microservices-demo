@@ -3,7 +3,7 @@ name: Terraform Apply
 on:
   push:
     paths:
-      - 'Terraform-infra/**'
+      - 'main.tf'
 
 jobs:
   terraform:
