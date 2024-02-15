@@ -10,17 +10,21 @@ jobs:
     name: 'Terraform'
     runs-on: ubuntu-latest
     environment: production
-        
+    defaults:
+        run:
+           shell: bash
+           #Inform a working directory if .tf files are not in root folder
+           working-directory: ./Terraform-infra 
     steps:
 
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
     
       - name: Authenticate with GC
         run: echo ${{ secrets.GCR_KEY }} | base64 -d > /tmp/gcr-key.json && gcloud auth activate-service-account service-account@alien-segment-410723.iam.gserviceaccount.com --key-file=/tmp/gcr-key.json
       
       - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v2
+        uses: hashicorp/setup-terraform@v1
         with:
          cli_config_credentials_token: ${{ secrets.GCR_KEY }}
 
