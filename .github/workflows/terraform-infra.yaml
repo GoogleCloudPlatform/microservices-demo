@@ -18,7 +18,7 @@ jobs:
     steps:
 
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v2
     
       - name: Authenticate with GC
         run: echo ${{ secrets.GCR_KEY }} | base64 -d > /tmp/gcr-key.json && gcloud auth activate-service-account service-account@alien-segment-410723.iam.gserviceaccount.com --key-file=/tmp/gcr-key.json
@@ -29,12 +29,12 @@ jobs:
          cli_config_credentials_token: ${{ secrets.GCR_KEY }}
 
       - name: Terraform Init
-        run: cd ./Terraform-infra && terraform init
+        run: terraform init
         env:
           GOOGLE_CREDENTIALS: ${{ secrets.GCR_KEY }} 
 
       - name: Terraform Apply
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-        run: ./cd Terraform-infra && terraform apply -auto-approve
+        run: terraform apply -auto-approve
         env:
           GOOGLE_CREDENTIALS: ${{ secrets.GCR_KEY }}
