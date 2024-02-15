@@ -26,7 +26,11 @@ jobs:
          cli_config_credentials_token: ${{ secrets.GCR_KEY }}
 
       - name: Terraform Init
-        run: terraform init
+        run: |
+           pwd
+           ls
+           terraform init
+           
         env:
           GOOGLE_CREDENTIALS: ${{ secrets.GCR_KEY }}
 
