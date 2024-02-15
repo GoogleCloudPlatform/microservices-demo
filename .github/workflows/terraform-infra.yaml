@@ -21,11 +21,15 @@ jobs:
 
       - name: Checkout code
         uses: actions/checkout@v2
+        
+      - name: Decrypt GCR_KEY
+        run: |
+          echo "${{ secrets.GCR_KEY }}" | base64 -d > /tmp/gcr-key.json
     
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v1
         with:
-         cli_config_credentials_token: ${{ secrets.GCR_KEY }}
+         cli_config_credentials_token: /tmp/gcr-key.json
 
       - name: Terraform Init
         run: |
@@ -35,10 +39,10 @@ jobs:
            terraform init 
            
         env:
-          GOOGLE_CREDENTIALS: ${{ secrets.GCR_KEY }}
+          GOOGLE_CREDENTIALS:  /tmp/gcr-key.json
 
       - name: Terraform Apply
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
         run: terraform apply -auto-approve 
         env:
-          GOOGLE_CREDENTIALS: ${{ secrets.GCR_KEY }}
+          GOOGLE_CREDENTIALS:  /tmp/gcr-key.json
