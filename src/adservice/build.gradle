@@ -40,7 +40,7 @@ dependencies {
                 "io.grpc:grpc-netty:${grpcVersion}",
                 "io.grpc:grpc-services:${grpcVersion}",
                 "io.grpc:grpc-census:${grpcVersion}",
-                "org.apache.logging.log4j:log4j-core:2.22.1",
+                "org.apache.logging.log4j:log4j-core:2.23.0",
                 "com.google.protobuf:protobuf-java:${protocVersion}"
 
         runtimeOnly "com.fasterxml.jackson.core:jackson-core:${jacksonCoreVersion}",
@@ -67,7 +67,7 @@ protobuf {
 }
 
 googleJavaFormat {
-    toolVersion '1.19.2'
+    toolVersion '1.20.0'
 }
 
 // Inform IDEs like IntelliJ IDEA, Eclipse or NetBeans about the generated code.
