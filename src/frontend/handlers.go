@@ -421,6 +421,14 @@ func (fe *frontendServer) logoutHandler(w http.ResponseWriter, r *http.Request) 
 }
 
 func chatBotHandler(w http.ResponseWriter, r *http.Request) {
+	type message struct {
+		Message string `json:"message"`
+	}
+	
+	type Response struct {
+		Message string `json:"message"`
+	}
+
 	json.NewEncoder(w).Encode(Response{Message: fmt.Sprintf("Bot Response: Foobar!")})
 
 	w.WriteHeader(http.StatusOK)
