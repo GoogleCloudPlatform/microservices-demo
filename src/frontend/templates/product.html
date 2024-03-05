@@ -80,6 +80,10 @@
   <div class="ad">
    {{ with $.ad }}{{ template "text_ad" . }}{{ end }}
   </div>
+
+  <div>
+    {{ template "bot" .}}
+  </div>
 </main>
 {{ template "footer" . }}
 {{ end }}

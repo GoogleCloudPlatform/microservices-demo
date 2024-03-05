@@ -16,6 +16,7 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"html/template"
 	"math/rand"
@@ -417,6 +418,12 @@ func (fe *frontendServer) logoutHandler(w http.ResponseWriter, r *http.Request) 
 	}
 	w.Header().Set("Location", "/")
 	w.WriteHeader(http.StatusFound)
+}
+
+func chatBotHandler(w http.ResponseWriter, r *http.Request) {
+	json.NewEncoder(w).Encode(Response{Message: fmt.Sprintf("Bot Response: Foobar!")})
+
+	w.WriteHeader(http.StatusOK)
 }
 
 func (fe *frontendServer) setCurrencyHandler(w http.ResponseWriter, r *http.Request) {
