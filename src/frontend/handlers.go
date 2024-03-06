@@ -445,7 +445,7 @@ func chatBotHandler(w http.ResponseWriter, r *http.Request) {
 
 	var response LLMResponse
 
-	url := "http://shoppingassistantservice.svc.cluster.local/?prompt=" + url2.QueryEscape(prompt.Message)
+	url := "http://shoppingassistantservice.default.svc.cluster.local/?prompt=" + url2.QueryEscape(prompt.Message)
 	req, err := http.NewRequest(http.MethodGet, url, nil)
 	if err != nil {
 		renderHTTPError(log, r, w, errors.Wrap(err, "failed to create request"), http.StatusInternalServerError)
