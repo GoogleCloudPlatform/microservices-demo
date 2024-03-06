@@ -31,7 +31,7 @@ def create_app():
         
         llm = ChatGoogleGenerativeAI(model="gemini-pro")
         response = llm.invoke(prompt)
-        
+
         return "Hello, World!" + prompt
 
     return app
@@ -40,4 +40,4 @@ def create_app():
 if __name__ == "__main__":
     # Create an instance of flask server when called directly
     app = create_app()
-    app.run()
+    app.run(host="localhost", port=8080)
