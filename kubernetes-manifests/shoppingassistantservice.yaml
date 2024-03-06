@@ -44,6 +44,9 @@ spec:
           privileged: false
           readOnlyRootFilesystem: true
         image: shoppingassistantservice
+        ports:
+        - name: http
+          containerPort: 8080
         resources:
           requests:
             cpu: 100m
@@ -64,4 +67,5 @@ spec:
     app: shoppingassistantservice
   ports:
   - name: http
-    port: 8080
+    port: 80
+    targetPort: 8080
