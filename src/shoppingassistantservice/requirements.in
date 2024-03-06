@@ -1,14 +1,2 @@
-click==8.0.4
-google-generativeai==0.4.0
-grpcio==1.48.2
-grpcio-tools==1.48.2
-importlib-metadata==4.8.3
+flask==3.0.2
 langchain-google-genai==0.0.9
-logger==1.4
-pep517==0.12.0
-pip-tools==6.4.0
-protobuf==3.19.6
-six==1.16.0
-tomli==1.2.3
-typing_extensions==4.1.1
-zipp==3.6.0
