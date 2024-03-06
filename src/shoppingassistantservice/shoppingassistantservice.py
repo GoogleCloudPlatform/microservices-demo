@@ -14,18 +14,24 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from urllib.parse import unquote
+
 from langchain_google_genai import ChatGoogleGenerativeAI
 
 from flask import Flask
 from flask import request
+
 def create_app():
     app = Flask(__name__)
 
     @app.route("/", methods=['GET'])
     def hello():
         prompt = request.args.get('prompt')
+        prompt = unquote(prompt)
+        
         llm = ChatGoogleGenerativeAI(model="gemini-pro")
         response = llm.invoke(prompt)
+        
         return "Hello, World!" + prompt
 
     return app
