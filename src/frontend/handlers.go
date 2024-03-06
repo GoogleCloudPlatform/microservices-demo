@@ -19,9 +19,11 @@ import (
 	"encoding/json"
 	"fmt"
 	"html/template"
+	"io"
 	"math/rand"
 	"net"
 	"net/http"
+	url2 "net/url"
 	"os"
 	"strconv"
 	"strings"
@@ -424,12 +426,53 @@ func chatBotHandler(w http.ResponseWriter, r *http.Request) {
 	type message struct {
 		Message string `json:"message"`
 	}
-	
+
 	type Response struct {
 		Message string `json:"message"`
 	}
 
-	json.NewEncoder(w).Encode(Response{Message: fmt.Sprintf("Bot Response: Foobar!")})
+	type LLMResponse struct {
+		GeneratedText string         `json:"generated_text"`
+		Details       map[string]any `json:"details"`
+	}
+
+	// get the message from the request
+	var prompt message
+	if err := json.NewDecoder(r.Body).Decode(&prompt); err != nil {
+		log.WithField("error", err).Warn("failed to decode request")
+		return
+	}
+
+	var response LLMResponse
+
+	url := "http://shoppingassistantservice.svc.cluster.local/?prompt=" + url2.QueryEscape(prompt.Message)
+	req, err := http.NewRequest(http.MethodGet, url, nil)
+	if err != nil {
+		renderHTTPError(log, r, w, errors.Wrap(err, "failed to create request"), http.StatusInternalServerError)
+		return
+	}
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Accept", "application/json")
+	res, err := http.DefaultClient.Do(req)
+	if err != nil {
+		renderHTTPError(log, r, w, errors.Wrap(err, "failed to send request"), http.StatusInternalServerError)
+		return
+	}
+
+	body, err := io.ReadAll(res.Body)
+	if err != nil {
+		renderHTTPError(log, r, w, errors.Wrap(err, "failed to read response"), http.StatusInternalServerError)
+		return
+	}
+
+	err = json.Unmarshal(body, &response)
+	if err != nil {
+		renderHTTPError(log, r, w, errors.Wrap(err, "failed to unmarshal body"), http.StatusInternalServerError)
+		return
+	}
+
+	// respond with the same message
+	json.NewEncoder(w).Encode(Response{Message: fmt.Sprintf("Bot Response: %s", response.GeneratedText)})
 
 	w.WriteHeader(http.StatusOK)
 }
