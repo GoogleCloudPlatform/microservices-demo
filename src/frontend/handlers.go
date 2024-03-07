@@ -472,7 +472,7 @@ func chatBotHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// respond with the same message
-	json.NewEncoder(w).Encode(Response{Message: fmt.Sprintf("Bot Response: %s", response.Content)})
+	json.NewEncoder(w).Encode(Response{Message: response.Content})
 
 	w.WriteHeader(http.StatusOK)
 }
