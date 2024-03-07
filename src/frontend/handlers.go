@@ -432,8 +432,8 @@ func chatBotHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	type LLMResponse struct {
-		GeneratedText string         `json:"generated_text"`
-		Details       map[string]any `json:"details"`
+		Content string         `json:"content"`
+		Details map[string]any `json:"details"`
 	}
 
 	// get the message from the request
@@ -472,7 +472,7 @@ func chatBotHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// respond with the same message
-	json.NewEncoder(w).Encode(Response{Message: fmt.Sprintf("Bot Response: %s", response.GeneratedText)})
+	json.NewEncoder(w).Encode(Response{Message: fmt.Sprintf("Bot Response: %s", response.Content)})
 
 	w.WriteHeader(http.StatusOK)
 }
