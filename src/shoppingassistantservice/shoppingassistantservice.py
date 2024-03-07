@@ -14,19 +14,22 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from urllib.parse import unquote
 from langchain_google_genai import ChatGoogleGenerativeAI
+from flask import Flask, jsonify, request
 
-from flask import Flask
-from flask import request
 def create_app():
     app = Flask(__name__)
 
     @app.route("/", methods=['GET'])
-    def hello():
+    def talkToGemini():
         prompt = request.args.get('prompt')
+        prompt = unquote(prompt)
         llm = ChatGoogleGenerativeAI(model="gemini-pro")
         response = llm.invoke(prompt)
-        return "Hello, World!" + prompt
+        data = {}
+        data['content'] = response.content
+        return data
 
     return app
 
@@ -34,4 +37,4 @@ def create_app():
 if __name__ == "__main__":
     # Create an instance of flask server when called directly
     app = create_app()
-    app.run()
+    app.run(host='0.0.0.0', port=8080)
