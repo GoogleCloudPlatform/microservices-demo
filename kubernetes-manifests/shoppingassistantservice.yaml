@@ -47,6 +47,9 @@ spec:
         ports:
         - name: http
           containerPort: 8080
+        env:
+        - name: GOOGLE_API_KEY
+          value: "Your AI studio key here"
         resources:
           requests:
             cpu: 100m

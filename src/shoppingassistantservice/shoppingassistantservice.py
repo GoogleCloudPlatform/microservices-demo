@@ -22,7 +22,7 @@ def create_app():
     app = Flask(__name__)
 
     @app.route("/", methods=['GET'])
-    def hello():
+    def talkToGemini():
         prompt = request.args.get('prompt')
         prompt = unquote(prompt)
         llm = ChatGoogleGenerativeAI(model="gemini-pro")
