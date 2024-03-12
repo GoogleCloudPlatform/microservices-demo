@@ -21,7 +21,7 @@ from flask import Flask, jsonify, request
 def create_app():
     app = Flask(__name__)
 
-    @app.route("/", methods=['GET'])
+    @app.route("/", methods=['POST'])
     def talkToGemini():
         prompt = request.args.get('prompt')
         prompt = unquote(prompt)
