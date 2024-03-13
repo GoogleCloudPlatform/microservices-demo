@@ -86,7 +86,7 @@ jobs:
         PR_NUMBER: ${{ github.event.pull_request.number }}
         PROJECT_ID: "online-boutique-ci"
         PR_CLUSTER: "prs-gke-cluster"
-        REGION: "us-central1-a"
+        REGION: "us-central1"
     - name: Wait For Pods
       timeout-minutes: 20
       run: |
