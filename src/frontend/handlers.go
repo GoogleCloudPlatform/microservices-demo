@@ -23,7 +23,6 @@ import (
 	"math/rand"
 	"net"
 	"net/http"
-	url2 "net/url"
 	"os"
 	"strconv"
 	"strings"
@@ -425,6 +424,7 @@ func (fe *frontendServer) logoutHandler(w http.ResponseWriter, r *http.Request) 
 func chatBotHandler(w http.ResponseWriter, r *http.Request) {
 	type message struct {
 		Message string `json:"message"`
+		image   string `json:"image"`
 	}
 
 	type Response struct {
@@ -443,11 +443,13 @@ func chatBotHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	fmt.Printf("%+v\n", r.Body)
+
 	var response LLMResponse
 
-	url := "http://shoppingassistantservice.default.svc.cluster.local/?prompt=" + url2.QueryEscape(prompt.Message)
+	url := "http://shoppingassistantservice.default.svc.cluster.local/"
 	//TODO: pass base64 image as body for request
-	req, err := http.NewRequest(http.MethodPost, url, nil)
+	req, err := http.NewRequest(http.MethodPost, url, r.Body)
 	if err != nil {
 		renderHTTPError(log, r, w, errors.Wrap(err, "failed to create request"), http.StatusInternalServerError)
 		return
@@ -465,6 +467,9 @@ func chatBotHandler(w http.ResponseWriter, r *http.Request) {
 		renderHTTPError(log, r, w, errors.Wrap(err, "failed to read response"), http.StatusInternalServerError)
 		return
 	}
+
+	fmt.Printf("%+v\n", body)
+	fmt.Printf("%+v\n", res)
 
 	err = json.Unmarshal(body, &response)
 	if err != nil {

@@ -27,11 +27,24 @@
     </div>
     <div class="bot-input">
       <input id="bot-input-text" type="text" class="bot-input-text" placeholder="Type your message here...">
+      <input type="file" onchange="getBase64()">
       <button id="bot-input-button" class="bot-input-button">Send</button>
     </div>
   </div>
 </div>
 <script>
+  var image;
+  function getBase64 ()  {
+    var file = document.querySelector('input[type=file]')['files'][0];
+    var reader = new FileReader();
+    var baseString;
+    reader.onloadend = function () {
+      baseString = reader.result;
+      console.log(baseString);
+    };
+    reader.readAsDataURL(file);
+  }
+
   const bot = document.getElementById("bot");
   const chatModal = document.getElementById("chat-modal");
   const botMessages = document.getElementById("bot-messages");
@@ -78,8 +91,10 @@
       },
       body: JSON.stringify({
         message: message,
+        image: image
       }),
     });
+
     const responseJson = await response.json();
 
     const botMessage = document.createElement("p");
