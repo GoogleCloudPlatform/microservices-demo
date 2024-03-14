@@ -422,11 +422,7 @@ func (fe *frontendServer) logoutHandler(w http.ResponseWriter, r *http.Request) 
 }
 
 func chatBotHandler(w http.ResponseWriter, r *http.Request) {
-	type message struct {
-		Message string `json:"message"`
-		image   string `json:"image"`
-	}
-
+	log := r.Context().Value(ctxKeyLog{}).(logrus.FieldLogger)
 	type Response struct {
 		Message string `json:"message"`
 	}
@@ -435,15 +431,6 @@ func chatBotHandler(w http.ResponseWriter, r *http.Request) {
 		Content string         `json:"content"`
 		Details map[string]any `json:"details"`
 	}
-
-	// get the message from the request
-	var prompt message
-	if err := json.NewDecoder(r.Body).Decode(&prompt); err != nil {
-		log.WithField("error", err).Warn("failed to decode request")
-		return
-	}
-
-	fmt.Printf("%+v\n", r.Body)
 
 	var response LLMResponse
 

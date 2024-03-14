@@ -24,21 +24,25 @@ def create_app():
 
     @app.route("/", methods=['POST'])
     def talkToGemini():
-        prompt = request.data['message']
+        prompt = request.json['message']
         prompt = unquote(prompt)
-        llm = ChatGoogleGenerativeAI(model="gemini-pro-vision")
 
-        message = HumanMessage(
-            content=[
-                {
-                    "type": "text",
-                    "text": prompt,
-                },
-                {"type": "image_url", "image_url": request.data['image']},
-            ]
-        )
+        if request.json.get('image') is None:
+            llm = ChatGoogleGenerativeAI(model="gemini-pro")
+            response = llm.invoke(prompt)
+        else:
+            llm = ChatGoogleGenerativeAI(model="gemini-pro-vision")
+            message = HumanMessage(
+                content=[
+                    {
+                        "type": "text",
+                        "text": prompt,
+                    },
+                    {"type": "image_url", "image_url": request.json['image']},
+                ]
+            )
+            response = llm.invoke([message])
 
-        response = llm.invoke([message])
         data = {}
         data['content'] = response.content
         return data

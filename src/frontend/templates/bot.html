@@ -41,6 +41,7 @@
     reader.onloadend = function () {
       baseString = reader.result;
       console.log(baseString);
+      image = baseString;
     };
     reader.readAsDataURL(file);
   }
@@ -66,6 +67,9 @@
   }
 
   async function handleButtonClick() {
+    if(!botinput.value || !botinput.value.trim){
+      return;
+    }
     botMessages.classList.add("loading");
     console.log("bot button clicked");
     const message = botinput.value;
