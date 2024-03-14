@@ -4,10 +4,18 @@
 #
 #    pip-compile --output-file=requirements.txt requirements.in
 #
+aiohttp==3.9.3
+    # via
+    #   langchain
+    #   langchain-community
+aiosignal==1.3.1
+    # via aiohttp
 annotated-types==0.6.0
     # via pydantic
 anyio==4.3.0
     # via langchain-core
+attrs==23.2.0
+    # via aiohttp
 blinker==1.7.0
     # via flask
 cachetools==5.3.3
@@ -18,8 +26,16 @@ charset-normalizer==3.3.2
     # via requests
 click==8.1.7
     # via flask
+dataclasses-json==0.6.4
+    # via
+    #   langchain
+    #   langchain-community
 flask==3.0.2
     # via -r requirements.in
+frozenlist==1.4.1
+    # via
+    #   aiohttp
+    #   aiosignal
 google-ai-generativelanguage==0.4.0
     # via google-generativeai
 google-api-core[grpc]==2.17.1
@@ -36,6 +52,8 @@ googleapis-common-protos==1.63.0
     # via
     #   google-api-core
     #   grpcio-status
+greenlet==3.0.3
+    # via sqlalchemy
 grpcio==1.62.1
     # via
     #   google-api-core
@@ -46,28 +64,58 @@ idna==3.6
     # via
     #   anyio
     #   requests
+    #   yarl
 itsdangerous==2.1.2
     # via flask
 jinja2==3.1.3
     # via flask
 jsonpatch==1.33
-    # via langchain-core
+    # via
+    #   langchain
+    #   langchain-core
 jsonpointer==2.4
     # via jsonpatch
+langchain==0.1.12
+    # via -r requirements.in
+langchain-community==0.0.28
+    # via langchain
 langchain-core==0.1.31
-    # via langchain-google-genai
+    # via
+    #   langchain
+    #   langchain-community
+    #   langchain-google-genai
+    #   langchain-text-splitters
 langchain-google-genai==0.0.11
     # via -r requirements.in
-langsmith==0.1.24
-    # via langchain-core
+langchain-text-splitters==0.0.1
+    # via langchain
+langsmith==0.1.25
+    # via
+    #   langchain
+    #   langchain-community
+    #   langchain-core
 markupsafe==2.1.5
     # via
     #   jinja2
     #   werkzeug
+marshmallow==3.21.1
+    # via dataclasses-json
+multidict==6.0.5
+    # via
+    #   aiohttp
+    #   yarl
+mypy-extensions==1.0.0
+    # via typing-inspect
+numpy==1.26.4
+    # via
+    #   langchain
+    #   langchain-community
 orjson==3.9.15
     # via langsmith
 packaging==23.2
-    # via langchain-core
+    # via
+    #   langchain-core
+    #   marshmallow
 pillow==10.2.0
     # via -r requirements.in
 proto-plus==1.23.0
@@ -89,23 +137,36 @@ pyasn1-modules==0.3.0
 pydantic==2.6.4
     # via
     #   google-generativeai
+    #   langchain
     #   langchain-core
     #   langsmith
 pydantic-core==2.16.3
     # via pydantic
 pyyaml==6.0.1
-    # via langchain-core
+    # via
+    #   langchain
+    #   langchain-community
+    #   langchain-core
 requests==2.31.0
     # via
     #   google-api-core
+    #   langchain
+    #   langchain-community
     #   langchain-core
     #   langsmith
 rsa==4.9
     # via google-auth
 sniffio==1.3.1
     # via anyio
+sqlalchemy==2.0.28
+    # via
+    #   langchain
+    #   langchain-community
 tenacity==8.2.3
-    # via langchain-core
+    # via
+    #   langchain
+    #   langchain-community
+    #   langchain-core
 tqdm==4.66.2
     # via google-generativeai
 typing-extensions==4.10.0
@@ -113,7 +174,13 @@ typing-extensions==4.10.0
     #   google-generativeai
     #   pydantic
     #   pydantic-core
+    #   sqlalchemy
+    #   typing-inspect
+typing-inspect==0.9.0
+    # via dataclasses-json
 urllib3==2.2.1
     # via requests
 werkzeug==3.0.1
     # via flask
+yarl==1.9.4
+    # via aiohttp
