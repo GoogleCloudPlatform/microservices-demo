@@ -26,6 +26,7 @@ ALLOYDB_SECRET_NAME=alloydb-secret
 gcloud services enable alloydb.googleapis.com
 gcloud services enable servicenetworking.googleapis.com
 gcloud services enable secretmanager.googleapis.com
+gcloud services enable aiplatform.googleapis.com
 
 # Set our DB credentials behind the secret
 echo $PGPASSWORD | gcloud secrets create ${ALLOYDB_SECRET_NAME} --data-file=-

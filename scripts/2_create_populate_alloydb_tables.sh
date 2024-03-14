@@ -19,7 +19,7 @@ psql -h ${ALLOYDB_PRIMARY_IP} -U postgres -c "CREATE DATABASE ${ALLOYDB_CARTS_DA
 psql -h ${ALLOYDB_PRIMARY_IP} -U postgres -d ${ALLOYDB_CARTS_DATABASE_NAME} -c "CREATE TABLE ${ALLOYDB_CARTS_TABLE_NAME} (userId text, productId text, quantity int, PRIMARY KEY(userId, productId))"
 psql -h ${ALLOYDB_PRIMARY_IP} -U postgres -d ${ALLOYDB_CARTS_DATABASE_NAME} -c "CREATE INDEX cartItemsByUserId ON ${ALLOYDB_CARTS_TABLE_NAME}(userId)"
 
-# Create products database and table
+# Create products database, table, and extensions
 psql -h ${ALLOYDB_PRIMARY_IP} -U postgres -c "CREATE DATABASE ${ALLOYDB_PRODUCTS_DATABASE_NAME}"
 psql -h ${ALLOYDB_PRIMARY_IP} -U postgres -d ${ALLOYDB_PRODUCTS_DATABASE_NAME} -c "CREATE EXTENSION IF NOT EXISTS vector"
 psql -h ${ALLOYDB_PRIMARY_IP} -U postgres -d ${ALLOYDB_PRODUCTS_DATABASE_NAME} -c "CREATE EXTENSION IF NOT EXISTS google_ml_integration CASCADE;"
@@ -31,4 +31,5 @@ python3 ./generate_sql_from_products.py > products.sql
 psql -h ${ALLOYDB_PRIMARY_IP} -U postgres -d ${ALLOYDB_PRODUCTS_DATABASE_NAME} -f products.sql
 rm products.sql
 
+# Generate vector embeddings
 psql -h ${ALLOYDB_PRIMARY_IP} -U postgres -d ${ALLOYDB_PRODUCTS_DATABASE_NAME} -c "UPDATE ${ALLOYDB_PRODUCTS_TABLE_NAME} SET product_embedding = embedding('textembedding-gecko@003', description), embed_model='textembedding-gecko@003';"
