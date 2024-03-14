@@ -28,12 +28,13 @@ resources:
  - shoppingassistantservice.yaml
  - redis.yaml
  - shippingservice.yaml
-# components:
+components:
 # - ../kustomize/components/cymbal-branding
 # - ../kustomize/components/google-cloud-operations
 # - ../kustomize/components/memorystore
 # - ../kustomize/components/network-policies
-# - ../kustomize/components/service-accounts
+ - ../kustomize/components/service-accounts # @TODO: enabled for the Next demo
+ - ../kustomize/components/alloydb # @TODO: enabled for the Next demo
 # - ../kustomize/components/spanner
 # - ../kustomize/components/container-images-tag
 # - ../kustomize/components/container-images-tag-suffix
