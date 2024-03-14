@@ -5,6 +5,7 @@ set -x
 
 # Replace me
 PROJECT_ID=<project_id>
+PROJECT_NUMBER=<project_number>
 PGPASSWORD=<password>
 
 # Set sensible defaults
@@ -79,6 +80,8 @@ gcloud iam service-accounts create ${ALLOYDB_USER_GSA_NAME} \
 
 gcloud projects add-iam-policy-binding ${PROJECT_ID} --member=serviceAccount:${ALLOYDB_USER_GSA_ID} --role=roles/alloydb.client
 gcloud projects add-iam-policy-binding ${PROJECT_ID} --member=serviceAccount:${ALLOYDB_USER_GSA_ID} --role=roles/secretmanager.secretAccessor
+gcloud projects add-iam-policy-binding ${PROJECT_ID} --member=service-${PROJECT_NUMBER}@gcp-sa-alloydb.iam.gserviceaccount.com --role=roles/aiplatform.user
+
 
 gcloud iam service-accounts add-iam-policy-binding ${ALLOYDB_USER_GSA_ID} \
     --member "serviceAccount:${PROJECT_ID}.svc.id.goog[default/${CARTSERVICE_KSA_NAME}]" \
