@@ -45,11 +45,11 @@ module "enable_google_apis" {
 
 # Google Cloud Storage for storing Terraform state (.tfstate).
 resource "google_storage_bucket" "terraform_state_storage_bucket" {
-  name          = "cicd-terraform-state"
-  location      = "us"
-  storage_class = "STANDARD"
-  force_destroy = false
-  public_access_prevention = "enforced"
+  name                        = "cicd-terraform-state"
+  location                    = "us"
+  storage_class               = "STANDARD"
+  force_destroy               = false
+  public_access_prevention    = "enforced"
   uniform_bucket_level_access = true
   versioning {
     enabled = true
