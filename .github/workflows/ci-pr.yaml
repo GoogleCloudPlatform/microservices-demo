@@ -71,7 +71,7 @@ jobs:
         NAMESPACE="pr${PR_NUMBER}"
         echo "::set-env name=NAMESPACE::$NAMESPACE"
 
-        gcloud container clusters get-credentials $PR_CLUSTER --zone $ZONE --project $PROJECT_ID
+        gcloud container clusters get-credentials $PR_CLUSTER --region $REGION --project $PROJECT_ID
         cat <<EOF | kubectl apply -f -
         apiVersion: v1
         kind: Namespace
@@ -85,8 +85,8 @@ jobs:
         ACTIONS_ALLOW_UNSECURE_COMMANDS: true
         PR_NUMBER: ${{ github.event.pull_request.number }}
         PROJECT_ID: "online-boutique-ci"
-        PR_CLUSTER: "online-boutique-prs"
-        ZONE: "us-central1-c"
+        PR_CLUSTER: "prs-gke-cluster"
+        REGION: "us-central1"
     - name: Wait For Pods
       timeout-minutes: 20
       run: |
