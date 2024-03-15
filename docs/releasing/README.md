@@ -76,4 +76,4 @@ This document walks through the process of creating a new release of Online Bout
     git push origin ${MAJOR_TAG} # Push the new tag to origin
     ```
 
-15. [Publish your draft release on GitHub](https://github.com/GoogleCloudPlatform/microservices-demo/releases).
+14. [Publish your draft release on GitHub](https://github.com/GoogleCloudPlatform/microservices-demo/releases).
