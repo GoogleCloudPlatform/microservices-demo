@@ -32,15 +32,15 @@ patches:
               - name: REDIS_ADDR
                 $patch: delete
               - name: ALLOYDB_PRIMARY_IP
-                value: 10.39.0.2
+                value: ALLOYDB_PRIMARY_IP_VAL
               - name: ALLOYDB_DATABASE_NAME
-                value: carts
+                value: ALLOYDB_DATABASE_NAME_VAL
               - name: ALLOYDB_TABLE_NAME
-                value: cart_items
+                value: ALLOYDB_TABLE_NAME_VAL
               - name: ALLOYDB_SECRET_NAME
-                value: alloydb-secret
+                value: ALLOYDB_SECRET_NAME_VAL
               - name: PROJECT_ID
-                value: cooking-with-duet-6
+                value: PROJECT_ID_VAL
 # cartservice - add the GSA annotation for the cartservice KSA
 - patch: |-
     apiVersion: v1
@@ -48,14 +48,7 @@ patches:
     metadata:
       name: cartservice
       annotations:
-        iam.gke.io/gcp-service-account: alloydb-user-sa@cooking-with-duet-6.iam.gserviceaccount.com
-- patch: |-
-    apiVersion: v1
-    kind: ServiceAccount
-    metadata:
-      name: shoppingassistantservice
-      annotations:
-        iam.gke.io/gcp-service-account: alloydb-user-sa@cooking-with-duet-6.iam.gserviceaccount.com
+        iam.gke.io/gcp-service-account: ALLOYDB_USER_GSA_ID
 # redis - remove the redis-cart Deployment
 - patch: |-
     apiVersion: apps/v1
