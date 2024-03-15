@@ -59,6 +59,7 @@ jobs:
       timeout-minutes: 10
       run: |
         dotnet test src/cartservice/
+
   deployment-tests:
     runs-on: [self-hosted, is-enabled]
     needs: code-tests
