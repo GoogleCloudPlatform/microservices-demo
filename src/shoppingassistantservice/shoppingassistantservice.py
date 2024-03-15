@@ -17,29 +17,20 @@
 import os
 from urllib.parse import unquote
 from langchain_core.messages import HumanMessage
-from langchain_google_genai import ChatGoogleGenerativeAI
-from flask import Flask, jsonify, request
-from langchain_community.retrievers import (
-    GoogleVertexAIMultiTurnSearchRetriever,
-    GoogleVertexAISearchRetriever,
-)
-from langchain.vectorstores.pgvector import PGVector
+from langchain_google_genai import ChatGoogleGenerativeAI, GoogleGenerativeAIEmbeddings
+from flask import Flask, request
 from langchain.prompts import PromptTemplate
+from langchain.chains import RetrievalQA
 
+from langchain_google_alloydb_pg import AlloyDBEngine, AlloyDBVectorStore
 
-#Establish connection
-CONNECTION_STRING = PGVector.connection_string_from_db_params(
-    driver=os.environ.get("PGVECTOR_DRIVER", "psycopg2"),
-    host=os.environ.get("PGVECTOR_HOST", "localhost"),
-    port=int(os.environ.get("PGVECTOR_PORT", "5432")),
-    database=os.environ.get("PGVECTOR_DATABASE", "onlineboutique-instance"),
-    user=os.environ.get("PGVECTOR_USER", "postgres"),
-    password=os.environ.get("PGVECTOR_PASSWORD", "admin"),
+engine = AlloyDBEngine.from_instance("cooking-with-duet-6", "us-central1", "onlineboutique-cluster", "onlineboutique-instance", "products")
+vectorstore = AlloyDBVectorStore.create_sync(
+    engine=engine,
+    table_name="catalog_items",
+    embedding_service=GoogleGenerativeAIEmbeddings(model="models/textembedding-gecko@003")
 )
-db = PGVector(
-    collection_name="catalog_items",
-    connection_string=CONNECTION_STRING,
-)
+
 
 def create_app():
     app = Flask(__name__)
@@ -63,8 +54,8 @@ def create_app():
 
             chain_type_kwargs = {"prompt": augmented_prompt}
 
-            #llm = ChatGoogleGenerativeAI(model="gemini-pro")
-            retriever = db.as_retriever()
+            llm = ChatGoogleGenerativeAI(model="gemini-pro")
+            retriever = vectorstore.as_retriever()
 
             qa = RetrievalQA.from_chain_type(
                 llm=llm,
