@@ -26,6 +26,11 @@ on:
       - 'helm-chart/**'
       - '.github/workflows/helm-chart-ci.yaml'
 
+# Ensure this workflow only runs for the most recent commit of a pull-request
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 jobs:
   code-tests:
     runs-on: [self-hosted, is-enabled]
@@ -54,6 +59,7 @@ jobs:
       timeout-minutes: 10
       run: |
         dotnet test src/cartservice/
+
   deployment-tests:
     runs-on: [self-hosted, is-enabled]
     needs: code-tests
