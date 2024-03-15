@@ -40,6 +40,9 @@ import (
 	"go.opentelemetry.io/otel/propagation"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 	"google.golang.org/grpc"
+
+	"cloud.google.com/go/alloydbconn"
+	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 var (
@@ -112,6 +115,84 @@ func main() {
 			}
 		}
 	}()
+
+	// TODO
+	instURI := "10.107.0.2"
+	user := "postgres"
+	pass := "thisispassword"
+	dbname := "products"
+	tableName := "catalog_items"
+	// First initialize the dialer. alloydbconn.NewDialer accepts additional
+	// options to configure credentials, timeouts, etc.
+	//
+	// For details, see:
+	// https://pkg.go.dev/cloud.google.com/go/alloydbconn#Option
+	d, err := alloydbconn.NewDialer(context.Background())
+	if err != nil {
+		log.Printf("failed to init Dialer: %v", err)
+		return
+	}
+	// The cleanup function will stop the dialer's background refresh
+	// goroutines. Call it when you're done with your database connection to
+	// avoid a goroutine leak.
+	cleanup := func() error { return d.Close() }
+	defer cleanup()
+
+	dsn := fmt.Sprintf(
+		// sslmode is disabled, because the Dialer will handle the SSL
+		// connection instead.
+		"user=%s password=%s dbname=%s sslmode=disable",
+		user, pass, dbname,
+	)
+
+	// Prefer pgxpool for applications.
+	// For more information, see:
+	// https://github.com/jackc/pgx/wiki/Getting-started-with-pgx#using-a-connection-pool
+	config, err := pgxpool.ParseConfig(dsn)
+	if err != nil {
+		log.Printf("failed to parse pgx config: %v", err)
+		return
+	}
+
+	// Tell pgx to use alloydbconn.Dialer to connect to the instance.
+	config.ConnConfig.DialFunc = func(ctx context.Context, _ string, _ string) (net.Conn, error) {
+		return d.Dial(ctx, instURI)
+	}
+
+	// Establish the connection.
+	dbpool, connErr := pgxpool.NewWithConfig(context.Background(), config)
+	if connErr != nil {
+		log.Printf("failed to connect: %s", connErr)
+		return
+	}
+	defer dbpool.Close()
+
+	query := "SELECT * FROM " + tableName
+
+	// Use the connection pool to execute the query
+	rows, err := dbpool.Query(context.Background(), query)
+	if err != nil {
+		log.Printf("Error executing query: %s", err)
+		return
+	}
+	defer rows.Close()
+
+	// Process the rows
+	for rows.Next() {
+		var column1 string
+		var column2 int
+		// ... add more variables for your columns
+
+		err = rows.Scan(&column1, &column2 /* ... more columns */)
+		if err != nil {
+			log.Printf("Error scanning row:", err)
+			return
+		}
+
+		// Handle the data in each row
+		fmt.Println(column1, column2 /* ... more columns */)
+	}
+	// TODO END
 
 	if os.Getenv("PORT") != "" {
 		port = os.Getenv("PORT")
