@@ -117,7 +117,11 @@ func main() {
 	}()
 
 	// TODO
-	instURI := "10.107.0.2"
+	projectID := "obourgeois-sandbox-13"
+	region := "us-central1"
+	dbCluster := "onlineboutique-cluster"
+	dbInstance := "onlineboutique-instance"
+	instURI := fmt.Sprintf("projects/%s/locations/%s/clusters/%s/instances/%s", projectID, region, dbCluster, dbInstance)
 	user := "postgres"
 	pass := "thisispassword"
 	dbname := "products"
@@ -179,18 +183,18 @@ func main() {
 
 	// Process the rows
 	for rows.Next() {
-		var column1 string
-		var column2 int
-		// ... add more variables for your columns
+		var id string
+		var name string
+		// ... add more
 
-		err = rows.Scan(&column1, &column2 /* ... more columns */)
+		err = rows.Scan(&id, &name /* ... more columns */)
 		if err != nil {
 			log.Printf("Error scanning row:", err)
 			return
 		}
 
 		// Handle the data in each row
-		fmt.Println(column1, column2 /* ... more columns */)
+		fmt.Println(id, name /* ... more columns */)
 	}
 	// TODO END
 
