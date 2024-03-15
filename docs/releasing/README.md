@@ -66,14 +66,14 @@ This document walks through the process of creating a new release of Online Bout
 
 13. Update the relevant major tag (`v1`).
 
-    ```
-    export MAJOR_TAG=v0 # Edit this as needed (to v1/v2/v3/etc)
-    git checkout release/${TAG}
-    git pull
-    git push --delete origin ${MAJOR_TAG} # Delete the remote tag (if it exists)
-    git tag --delete ${MAJOR_TAG} # Delete the local tag (if it exists)
-    git tag -a ${MAJOR_TAG} -m "Updating ${MAJOR_TAG} to its most recent release: ${TAG}"
-    git push origin ${MAJOR_TAG} # Push the new tag to origin
-    ```
+  ```
+  export MAJOR_TAG=v0 # Edit this as needed (to v1/v2/v3/etc)
+  git checkout release/${TAG}
+  git pull
+  git push --delete origin ${MAJOR_TAG} # Delete the remote tag (if it exists)
+  git tag --delete ${MAJOR_TAG} # Delete the local tag (if it exists)
+  git tag -a ${MAJOR_TAG} -m "Updating ${MAJOR_TAG} to its most recent release: ${TAG}"
+  git push origin ${MAJOR_TAG} # Push the new tag to origin
+  ```
 
 14. [Publish your draft release on GitHub](https://github.com/GoogleCloudPlatform/microservices-demo/releases).
