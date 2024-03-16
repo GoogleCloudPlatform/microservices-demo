@@ -42,14 +42,18 @@ spec:
             drop:
               - ALL
           privileged: false
-          readOnlyRootFilesystem: true
+          readOnlyRootFilesystem: false
         image: shoppingassistantservice
         ports:
         - name: http
           containerPort: 8080
         env:
         - name: GOOGLE_API_KEY
+<<<<<<< Updated upstream
           value: "Your AI studio key here"
+=======
+          value: "YOUR_API_KEY"
+>>>>>>> Stashed changes
         resources:
           requests:
             cpu: 100m

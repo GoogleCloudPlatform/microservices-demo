@@ -17,11 +17,37 @@
 import os
 from urllib.parse import unquote
 from langchain_core.messages import HumanMessage
+<<<<<<< Updated upstream
 from langchain_google_genai import ChatGoogleGenerativeAI
 from flask import Flask, jsonify, request
 from langchain_community.retrievers import (
     GoogleVertexAIMultiTurnSearchRetriever,
     GoogleVertexAISearchRetriever,
+=======
+from langchain_google_genai import ChatGoogleGenerativeAI, GoogleGenerativeAIEmbeddings
+from flask import Flask, request
+from langchain.prompts import PromptTemplate
+from langchain.chains import RetrievalQA
+
+from langchain_google_alloydb_pg import AlloyDBEngine, AlloyDBVectorStore
+
+engine = AlloyDBEngine.from_instance(
+    project_id="cooking-with-duet-6",
+    region="us-central1",
+    cluster="onlineboutique-cluster",
+    instance="onlineboutique-instance",
+    database="products",
+    user="postgres",
+    password="admin"
+)
+vectorstore = AlloyDBVectorStore.create_sync(
+    engine=engine,
+    table_name="catalog_items",
+    embedding_service=GoogleGenerativeAIEmbeddings(model="models/embedding-001"),
+    id_column="id",
+    content_column="description",
+    embedding_column="product_embedding"
+>>>>>>> Stashed changes
 )
 from langchain.vectorstores.pgvector import PGVector
 from langchain.prompts import PromptTemplate
@@ -74,7 +100,11 @@ def create_app():
                 verbose=True
             )
 
-            response = qa.run(prompt)
+            response = qa.invoke([prompt])
+            print(response)
+            data = {}
+            data['content'] = response['result']
+            return data
         else:
             llm = ChatGoogleGenerativeAI(model="gemini-pro-vision")
             message = HumanMessage(
@@ -87,10 +117,9 @@ def create_app():
                 ]
             )
             response = llm.invoke([message])
-
-        data = {}
-        data['content'] = response.content
-        return data
+            data = {}
+            data['content'] = response.content
+            return data
 
     return app
 

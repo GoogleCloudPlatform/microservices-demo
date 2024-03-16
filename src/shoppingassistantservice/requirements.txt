@@ -6,6 +6,10 @@
 #
 aiohttp==3.9.3
     # via
+<<<<<<< Updated upstream
+=======
+    #   google-cloud-alloydb-connector
+>>>>>>> Stashed changes
     #   langchain
     #   langchain-community
 aiosignal==1.3.1
@@ -14,6 +18,13 @@ annotated-types==0.6.0
     # via pydantic
 anyio==4.3.0
     # via langchain-core
+<<<<<<< Updated upstream
+=======
+async-timeout==4.0.3
+    # via asyncpg
+asyncpg==0.29.0
+    # via google-cloud-alloydb-connector
+>>>>>>> Stashed changes
 attrs==23.2.0
     # via aiohttp
 blinker==1.7.0
@@ -22,10 +33,20 @@ cachetools==5.3.3
     # via google-auth
 certifi==2024.2.2
     # via requests
+<<<<<<< Updated upstream
+=======
+cffi==1.16.0
+    # via cryptography
+>>>>>>> Stashed changes
 charset-normalizer==3.3.2
     # via requests
 click==8.1.7
     # via flask
+<<<<<<< Updated upstream
+=======
+cryptography==42.0.5
+    # via google-cloud-alloydb-connector
+>>>>>>> Stashed changes
 dataclasses-json==0.6.4
     # via
     #   langchain
@@ -45,7 +66,14 @@ google-api-core[grpc]==2.17.1
 google-auth==2.28.2
     # via
     #   google-api-core
+<<<<<<< Updated upstream
     #   google-generativeai
+=======
+    #   google-cloud-alloydb-connector
+    #   google-generativeai
+google-cloud-alloydb-connector[asyncpg]==0.4.1
+    # via langchain-google-alloydb-pg
+>>>>>>> Stashed changes
 google-generativeai==0.4.1
     # via langchain-google-genai
 googleapis-common-protos==1.63.0
@@ -78,6 +106,7 @@ jsonpointer==2.4
 langchain==0.1.12
     # via -r requirements.in
 langchain-community==0.0.28
+<<<<<<< Updated upstream
     # via langchain
 langchain-core==0.1.31
     # via
@@ -85,11 +114,29 @@ langchain-core==0.1.31
     #   langchain-community
     #   langchain-google-genai
     #   langchain-text-splitters
+=======
+    # via
+    #   langchain
+    #   langchain-google-alloydb-pg
+langchain-core==0.1.32
+    # via
+    #   langchain
+    #   langchain-community
+    #   langchain-google-alloydb-pg
+    #   langchain-google-genai
+    #   langchain-text-splitters
+langchain-google-alloydb-pg==0.1.0
+    # via -r requirements.in
+>>>>>>> Stashed changes
 langchain-google-genai==0.0.11
     # via -r requirements.in
 langchain-text-splitters==0.0.1
     # via langchain
+<<<<<<< Updated upstream
 langsmith==0.1.25
+=======
+langsmith==0.1.26
+>>>>>>> Stashed changes
     # via
     #   langchain
     #   langchain-community
@@ -110,12 +157,22 @@ numpy==1.26.4
     # via
     #   langchain
     #   langchain-community
+<<<<<<< Updated upstream
+=======
+    #   langchain-google-alloydb-pg
+    #   pgvector
+>>>>>>> Stashed changes
 orjson==3.9.15
     # via langsmith
 packaging==23.2
     # via
     #   langchain-core
     #   marshmallow
+<<<<<<< Updated upstream
+=======
+pgvector==0.2.5
+    # via langchain-google-alloydb-pg
+>>>>>>> Stashed changes
 pillow==10.2.0
     # via -r requirements.in
 proto-plus==1.23.0
@@ -124,6 +181,10 @@ protobuf==4.25.3
     # via
     #   google-ai-generativelanguage
     #   google-api-core
+<<<<<<< Updated upstream
+=======
+    #   google-cloud-alloydb-connector
+>>>>>>> Stashed changes
     #   google-generativeai
     #   googleapis-common-protos
     #   grpcio-status
@@ -134,6 +195,11 @@ pyasn1==0.5.1
     #   rsa
 pyasn1-modules==0.3.0
     # via google-auth
+<<<<<<< Updated upstream
+=======
+pycparser==2.21
+    # via cffi
+>>>>>>> Stashed changes
 pydantic==2.6.4
     # via
     #   google-generativeai
@@ -150,6 +216,10 @@ pyyaml==6.0.1
 requests==2.31.0
     # via
     #   google-api-core
+<<<<<<< Updated upstream
+=======
+    #   google-cloud-alloydb-connector
+>>>>>>> Stashed changes
     #   langchain
     #   langchain-community
     #   langchain-core
@@ -162,6 +232,10 @@ sqlalchemy==2.0.28
     # via
     #   langchain
     #   langchain-community
+<<<<<<< Updated upstream
+=======
+    #   langchain-google-alloydb-pg
+>>>>>>> Stashed changes
 tenacity==8.2.3
     # via
     #   langchain
