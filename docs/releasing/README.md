@@ -64,7 +64,7 @@ This document walks through the process of creating a new release of Online Bout
 
 12. Make sure [cymbal-shops.retail.cymbal.dev](https://cymbal-shops.retail.cymbal.dev) works.
 
-13. Update the relevant major tag (`v1`).
+13. Update the relevant major tag (for example, `v1`).
 
   ```
   export MAJOR_TAG=v0 # Edit this as needed (to v1/v2/v3/etc)
