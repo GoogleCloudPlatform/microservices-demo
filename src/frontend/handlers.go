@@ -409,6 +409,29 @@ func (fe *frontendServer) placeOrderHandler(w http.ResponseWriter, r *http.Reque
 	}
 }
 
+func (fe *frontendServer) assistantHandler(w http.ResponseWriter, r *http.Request) {
+	currencies, err := fe.getCurrencies(r.Context())
+	if err != nil {
+		renderHTTPError(log, r, w, errors.Wrap(err, "could not retrieve currencies"), http.StatusInternalServerError)
+		return
+	}
+
+	if err := templates.ExecuteTemplate(w, "assistant", map[string]interface{}{
+		"session_id":        sessionID(r),
+		"request_id":        r.Context().Value(ctxKeyRequestID{}),
+		"user_currency":     currentCurrency(r),
+		"show_currency":     false,
+		"currencies":        currencies,
+		"platform_css":      plat.css,
+		"platform_name":     plat.provider,
+		"is_cymbal_brand":   isCymbalBrand,
+		"deploymentDetails": deploymentDetailsMap,
+		"frontendMessage":   frontendMessage,
+	}); err != nil {
+		log.Println(err)
+	}
+}
+
 func (fe *frontendServer) logoutHandler(w http.ResponseWriter, r *http.Request) {
 	log := r.Context().Value(ctxKeyLog{}).(logrus.FieldLogger)
 	log.Debug("logging out")
@@ -434,7 +457,8 @@ func chatBotHandler(w http.ResponseWriter, r *http.Request) {
 
 	var response LLMResponse
 
-	url := "http://shoppingassistantservice.default.svc.cluster.local/"
+	//url := "http://shoppingassistantservice.default.svc.cluster.local/"
+	url := "http://localhost:8082/"
 	//TODO: pass base64 image as body for request
 	req, err := http.NewRequest(http.MethodPost, url, r.Body)
 	if err != nil {
