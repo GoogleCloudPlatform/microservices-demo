@@ -38,7 +38,7 @@ patches:
               - name: ALLOYDB_TABLE_NAME
                 value: ALLOYDB_TABLE_NAME_VAL
               - name: ALLOYDB_SECRET_NAME
-                value: alloydb-secret
+                value: ALLOYDB_SECRET_NAME_VAL
               - name: PROJECT_ID
                 value: PROJECT_ID_VAL
 # cartservice - add the GSA annotation for the cartservice KSA
