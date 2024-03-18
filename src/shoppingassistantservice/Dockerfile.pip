@@ -1,0 +1,11 @@
+FROM python:3.11-alpine
+
+RUN apk add --no-cache wget g++ build-base gcc python3-dev linux-headers
+
+COPY requirements.in .
+
+RUN pip install -U pip pip-tools
+RUN pip-compile --output-file=requirements.txt requirements.in
+RUN pip install -r requirements.txt
+
+ENTRYPOINT ["cat", "requirements.txt"]

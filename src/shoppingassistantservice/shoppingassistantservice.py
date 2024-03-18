@@ -14,22 +14,92 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import os
 from urllib.parse import unquote
-from langchain_google_genai import ChatGoogleGenerativeAI
-from flask import Flask, jsonify, request
+from langchain_core.messages import HumanMessage
+from langchain_google_genai import ChatGoogleGenerativeAI, GoogleGenerativeAIEmbeddings
+from flask import Flask, request
+from langchain.prompts import PromptTemplate
+from langchain.chains import RetrievalQA
+
+from langchain_google_alloydb_pg import AlloyDBEngine, AlloyDBVectorStore
+
+engine = AlloyDBEngine.from_instance(
+    project_id="cooking-with-duet-6",
+    region="us-central1",
+    cluster="onlineboutique-cluster",
+    instance="onlineboutique-instance",
+    database="products",
+    user="postgres",
+    password="admin"
+)
+vectorstore = AlloyDBVectorStore.create_sync(
+    engine=engine,
+    table_name="catalog_items",
+    embedding_service=GoogleGenerativeAIEmbeddings(model="models/embedding-001"),
+    id_column="id",
+    content_column="description",
+    embedding_column="product_embedding"
+)
+
 
 def create_app():
     app = Flask(__name__)
 
-    @app.route("/", methods=['GET'])
+    @app.route("/", methods=['POST'])
     def talkToGemini():
-        prompt = request.args.get('prompt')
+        prompt = request.json['message']
         prompt = unquote(prompt)
+
+        #Decsription prompt:
+        #Send in the image, ask for a description of the room, search for relevant products
+        llm_vision = ChatGoogleGenerativeAI(model="gemini-pro-vision")
         llm = ChatGoogleGenerativeAI(model="gemini-pro")
-        response = llm.invoke(prompt)
+        message = HumanMessage(
+            content=[
+                {
+                    "type": "text",
+                    "text": "You are a professional interior designer, give me a detailed decsription of the style of the room in this image",
+                },
+                {"type": "image_url", "image_url": request.json['image']},
+            ]
+        )
+        response = llm_vision.invoke([message])
+        print("Description step:")
+        print(response)
+        description_response = response.content
+
+        #Interior design prompt prompt:
+        #Using the recommendations from the first prompt, query a list of
+        # relevant items to show to the user
+        design_prompt_template = f""" Find products from our catalog that
+        match the following design style: {description_response}
+
+        Here's some additional input on what the client wants: {prompt}
+
+                {{context}}
+
+                Answer:"""
+        augmented_design_prompt = PromptTemplate(
+            template=design_prompt_template, input_variables=["context"]
+        )
+
+        design_chain_type_kwargs = {"prompt": augmented_design_prompt}
+
+        retriever = vectorstore.as_retriever()
+        qa = RetrievalQA.from_chain_type(
+            llm=llm,
+            chain_type="stuff",
+            retriever=retriever,
+            chain_type_kwargs=design_chain_type_kwargs,
+            verbose=True
+        )
+        response = qa.invoke([prompt])
+        print("Description retrieval step:")
+        print(response)
         data = {}
-        data['content'] = response.content
-        return data
+        data['content'] = response['result']
+        return data;
 
     return app
 
