@@ -49,7 +49,7 @@ spec:
           containerPort: 8080
         env:
         - name: GOOGLE_API_KEY
-          value: "AIzaSyDDp5qI9KfISKWWNakPCp-s7-vC7tO7NEQ"
+          value: "YOUR_API_KEY"
         resources:
           requests:
             cpu: 100m
