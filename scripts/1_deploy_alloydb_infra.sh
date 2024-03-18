@@ -4,9 +4,11 @@ set -e
 set -x
 
 # Replace me
-PROJECT_ID=cooking-with-duet-6
-PROJECT_NUMBER=925071387448
-PGPASSWORD=admin
+PROJECT_ID=<project_id>
+PROJECT_NUMBER=<project_number>
+PGPASSWORD=<password>
+
+# Set sensible defaults
 REGION=us-central1
 USE_GKE_GCLOUD_AUTH_PLUGIN=True
 ALLOYDB_NETWORK=default
