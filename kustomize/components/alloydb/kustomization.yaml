@@ -36,7 +36,7 @@ patches:
               - name: ALLOYDB_DATABASE_NAME
                 value: ALLOYDB_DATABASE_NAME_VAL
               - name: ALLOYDB_TABLE_NAME
-                value: cart_items
+                value: ALLOYDB_TABLE_NAME_VAL
               - name: ALLOYDB_SECRET_NAME
                 value: alloydb-secret
               - name: PROJECT_ID
