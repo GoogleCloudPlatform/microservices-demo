@@ -24,11 +24,22 @@ from langchain.chains import RetrievalQA
 
 from langchain_google_alloydb_pg import AlloyDBEngine, AlloyDBVectorStore
 
-engine = AlloyDBEngine.from_instance("cooking-with-duet-6", "us-central1", "onlineboutique-cluster", "onlineboutique-instance", "products")
+engine = AlloyDBEngine.from_instance(
+    project_id="cooking-with-duet-6",
+    region="us-central1",
+    cluster="onlineboutique-cluster",
+    instance="onlineboutique-instance",
+    database="products",
+    user="postgres",
+    password="admin"
+)
 vectorstore = AlloyDBVectorStore.create_sync(
     engine=engine,
     table_name="catalog_items",
-    embedding_service=GoogleGenerativeAIEmbeddings(model="models/textembedding-gecko@003")
+    embedding_service=GoogleGenerativeAIEmbeddings(model="models/embedding-001"),
+    id_column="id",
+    content_column="description",
+    embedding_column="product_embedding"
 )
 
 
@@ -40,48 +51,55 @@ def create_app():
         prompt = request.json['message']
         prompt = unquote(prompt)
 
-        if request.json.get('image') is None:
-            #Prepare the prompt template:
-            prompt_template = """ You are a customer assistant for an online store called Online Boutique. You are here to help our customers find the most relevant products to their questions. Try to provide links to the products when you are sure. If you do not know what to say, please say that clearly to t he customer instead of making something up.
+        #Decsription prompt:
+        #Send in the image, ask for a description of the room, search for relevant products
+        llm_vision = ChatGoogleGenerativeAI(model="gemini-pro-vision")
+        llm = ChatGoogleGenerativeAI(model="gemini-pro")
+        message = HumanMessage(
+            content=[
+                {
+                    "type": "text",
+                    "text": "You are a professional interior designer, give me a detailed decsription of the style of the room in this image",
+                },
+                {"type": "image_url", "image_url": request.json['image']},
+            ]
+        )
+        response = llm_vision.invoke([message])
+        print("Description step:")
+        print(response)
+        description_response = response.content
 
-                    {context}
+        #Interior design prompt prompt:
+        #Using the recommendations from the first prompt, query a list of
+        # relevant items to show to the user
+        design_prompt_template = f""" Find products from our catalog that
+        match the following design style: {description_response}
 
-                    Question: {question}
-                    Answer:"""
-            augmented_prompt = PromptTemplate(
-                template=prompt_template, input_variables=["context", "question"]
-            )
+        Here's some additional input on what the client wants: {prompt}
 
-            chain_type_kwargs = {"prompt": augmented_prompt}
+                {{context}}
 
-            llm = ChatGoogleGenerativeAI(model="gemini-pro")
-            retriever = vectorstore.as_retriever()
+                Answer:"""
+        augmented_design_prompt = PromptTemplate(
+            template=design_prompt_template, input_variables=["context"]
+        )
 
-            qa = RetrievalQA.from_chain_type(
-                llm=llm,
-                chain_type="stuff",
-                retriever=retriever,
-                chain_type_kwargs=chain_type_kwargs,
-                verbose=True
-            )
+        design_chain_type_kwargs = {"prompt": augmented_design_prompt}
 
-            response = qa.run(prompt)
-        else:
-            llm = ChatGoogleGenerativeAI(model="gemini-pro-vision")
-            message = HumanMessage(
-                content=[
-                    {
-                        "type": "text",
-                        "text": prompt,
-                    },
-                    {"type": "image_url", "image_url": request.json['image']},
-                ]
-            )
-            response = llm.invoke([message])
-
+        retriever = vectorstore.as_retriever()
+        qa = RetrievalQA.from_chain_type(
+            llm=llm,
+            chain_type="stuff",
+            retriever=retriever,
+            chain_type_kwargs=design_chain_type_kwargs,
+            verbose=True
+        )
+        response = qa.invoke([prompt])
+        print("Description retrieval step:")
+        print(response)
         data = {}
-        data['content'] = response.content
-        return data
+        data['content'] = response['result']
+        return data;
 
     return app
 
