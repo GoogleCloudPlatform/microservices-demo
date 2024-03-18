@@ -17,13 +17,6 @@
 import os
 from urllib.parse import unquote
 from langchain_core.messages import HumanMessage
-<<<<<<< Updated upstream
-from langchain_google_genai import ChatGoogleGenerativeAI
-from flask import Flask, jsonify, request
-from langchain_community.retrievers import (
-    GoogleVertexAIMultiTurnSearchRetriever,
-    GoogleVertexAISearchRetriever,
-=======
 from langchain_google_genai import ChatGoogleGenerativeAI, GoogleGenerativeAIEmbeddings
 from flask import Flask, request
 from langchain.prompts import PromptTemplate
@@ -47,7 +40,6 @@ vectorstore = AlloyDBVectorStore.create_sync(
     id_column="id",
     content_column="description",
     embedding_column="product_embedding"
->>>>>>> Stashed changes
 )
 from langchain.vectorstores.pgvector import PGVector
 from langchain.prompts import PromptTemplate
