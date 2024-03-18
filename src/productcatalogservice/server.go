@@ -40,6 +40,9 @@ import (
 	"go.opentelemetry.io/otel/propagation"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 	"google.golang.org/grpc"
+
+	"cloud.google.com/go/alloydbconn"
+	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 var (
@@ -112,6 +115,77 @@ func main() {
 			}
 		}
 	}()
+
+	// TODO
+	projectID := "obourgeois-sandbox-13"
+	region := "us-central1"
+	dbCluster := "onlineboutique-cluster"
+	dbInstance := "onlineboutique-instance"
+	instURI := fmt.Sprintf("projects/%s/locations/%s/clusters/%s/instances/%s", projectID, region, dbCluster, dbInstance)
+	user := "postgres"
+	pass := "thisispassword"
+	dbname := "products"
+	tableName := "catalog_items"
+
+	fmt.Println("instURI:", instURI)
+
+	dialer, err := alloydbconn.NewDialer(context.Background())
+	if err != nil {
+		log.Printf("failed to init Dialer: %v", err)
+		return
+	}
+	cleanup := func() error { return dialer.Close() }
+	defer cleanup()
+
+	dsn := fmt.Sprintf(
+		"user=%s password=%s dbname=%s sslmode=disable",
+		user, pass, dbname,
+	)
+	fmt.Println("DSN:", dsn)
+
+	pgconfig, err := pgxpool.ParseConfig(dsn)
+	if err != nil {
+		log.Printf("failed to parse pgx config: %v", err)
+		return
+	}
+
+	pgconfig.ConnConfig.DialFunc = func(ctx context.Context, _ string, _ string) (net.Conn, error) {
+		return dialer.Dial(ctx, instURI)
+	}
+
+	dbpool, connErr := pgxpool.NewWithConfig(context.Background(), pgconfig)
+	if connErr != nil {
+		log.Printf("failed to connect: %s", connErr)
+		return
+	}
+	defer dbpool.Close()
+
+	query := "SELECT * FROM " + tableName
+	rows, err := dbpool.Query(context.Background(), query)
+	if err != nil {
+		log.Printf("Error executing query: %s", err)
+		return
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var id string
+		var name string
+		var description string
+		var picture string
+		var price_usd_currency_code string
+		var price_usd_units int
+		var price_usd_nanos int
+		var categories string
+		err = rows.Scan(&id, &name, &description, &picture, &price_usd_currency_code, &price_usd_units, &price_usd_nanos, &categories)
+		if err != nil {
+			log.Printf("Error scanning row:", err)
+			return
+		}
+
+		fmt.Println(id, name /* ... */)
+	}
+	// TODO END
 
 	if os.Getenv("PORT") != "" {
 		port = os.Getenv("PORT")
