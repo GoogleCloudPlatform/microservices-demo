@@ -20,7 +20,11 @@ ALLOYDB_TABLE_NAME=cart_items
 ALLOYDB_USER_GSA_NAME=alloydb-user-sa
 ALLOYDB_USER_GSA_ID=${ALLOYDB_USER_GSA_NAME}@${PROJECT_ID}.iam.gserviceaccount.com
 CARTSERVICE_KSA_NAME=cartservice
+SHOPPINGASSISTANTSERVICE_KSA_NAME=shoppingassistantservice
 ALLOYDB_SECRET_NAME=alloydb-secret
+gcloud iam service-accounts add-iam-policy-binding ${ALLOYDB_USER_GSA_ID} \
+        --member "serviceAccount:${PROJECT_ID}.svc.id.goog[default/${SHOPPINGASSISTANTSERVICE_KSA_NAME}]" \
+        --role roles/iam.workloadIdentityUser
 
 # Enable services
 gcloud services enable alloydb.googleapis.com
@@ -55,7 +59,7 @@ gcloud alloydb instances create ${ALLOYDB_INSTANCE_NAME} \
     --region=${REGION} \
     --cpu-count=4 \
     --instance-type=PRIMARY
-    
+
 gcloud alloydb instances create ${ALLOYDB_INSTANCE_NAME}-replica \
     --cluster=${ALLOYDB_CLUSTER_NAME} \
     --region=${REGION} \
@@ -87,3 +91,7 @@ gcloud projects add-iam-policy-binding ${PROJECT_ID} --member=service-${PROJECT_
 gcloud iam service-accounts add-iam-policy-binding ${ALLOYDB_USER_GSA_ID} \
     --member "serviceAccount:${PROJECT_ID}.svc.id.goog[default/${CARTSERVICE_KSA_NAME}]" \
     --role roles/iam.workloadIdentityUser
+
+gcloud iam service-accounts add-iam-policy-binding ${ALLOYDB_USER_GSA_ID} \
+        --member "serviceAccount:${PROJECT_ID}.svc.id.goog[default/${SHOPPINGASSISTANTSERVICE_KSA_NAME}]" \
+        --role roles/iam.workloadIdentityUser
