@@ -40,7 +40,7 @@ patches:
               - name: ALLOYDB_SECRET_NAME
                 value: alloydb-secret
               - name: PROJECT_ID
-                value: cooking-with-duet-6
+                value: PROJECT_ID_VAL
 # cartservice - add the GSA annotation for the cartservice KSA
 - patch: |-
     apiVersion: v1
