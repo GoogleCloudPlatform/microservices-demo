@@ -171,8 +171,13 @@ func main() {
 	for rows.Next() {
 		var id string
 		var name string
-
-		err = rows.Scan(&id, &name /* ... */)
+		var description string
+		var picture string
+		var price_usd_currency_code string
+		var price_usd_units int
+		var price_usd_nanos int
+		var categories string
+		err = rows.Scan(&id, &name, &description, &picture, &price_usd_currency_code, &price_usd_units, &price_usd_nanos, &categories)
 		if err != nil {
 			log.Printf("Error scanning row:", err)
 			return
