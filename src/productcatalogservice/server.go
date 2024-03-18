@@ -126,45 +126,34 @@ func main() {
 	pass := "thisispassword"
 	dbname := "products"
 	tableName := "catalog_items"
-	// First initialize the dialer. alloydbconn.NewDialer accepts additional
-	// options to configure credentials, timeouts, etc.
-	//
-	// For details, see:
-	// https://pkg.go.dev/cloud.google.com/go/alloydbconn#Option
-	d, err := alloydbconn.NewDialer(context.Background())
+
+	fmt.Println("instURI:", instURI)
+
+	dialer, err := alloydbconn.NewDialer(context.Background())
 	if err != nil {
 		log.Printf("failed to init Dialer: %v", err)
 		return
 	}
-	// The cleanup function will stop the dialer's background refresh
-	// goroutines. Call it when you're done with your database connection to
-	// avoid a goroutine leak.
-	cleanup := func() error { return d.Close() }
+	cleanup := func() error { return dialer.Close() }
 	defer cleanup()
 
 	dsn := fmt.Sprintf(
-		// sslmode is disabled, because the Dialer will handle the SSL
-		// connection instead.
 		"user=%s password=%s dbname=%s sslmode=disable",
 		user, pass, dbname,
 	)
+	fmt.Println("DSN:", dsn)
 
-	// Prefer pgxpool for applications.
-	// For more information, see:
-	// https://github.com/jackc/pgx/wiki/Getting-started-with-pgx#using-a-connection-pool
-	config, err := pgxpool.ParseConfig(dsn)
+	pgconfig, err := pgxpool.ParseConfig(dsn)
 	if err != nil {
 		log.Printf("failed to parse pgx config: %v", err)
 		return
 	}
 
-	// Tell pgx to use alloydbconn.Dialer to connect to the instance.
-	config.ConnConfig.DialFunc = func(ctx context.Context, _ string, _ string) (net.Conn, error) {
-		return d.Dial(ctx, instURI)
+	pgconfig.ConnConfig.DialFunc = func(ctx context.Context, _ string, _ string) (net.Conn, error) {
+		return dialer.Dial(ctx, instURI)
 	}
 
-	// Establish the connection.
-	dbpool, connErr := pgxpool.NewWithConfig(context.Background(), config)
+	dbpool, connErr := pgxpool.NewWithConfig(context.Background(), pgconfig)
 	if connErr != nil {
 		log.Printf("failed to connect: %s", connErr)
 		return
@@ -172,8 +161,6 @@ func main() {
 	defer dbpool.Close()
 
 	query := "SELECT * FROM " + tableName
-
-	// Use the connection pool to execute the query
 	rows, err := dbpool.Query(context.Background(), query)
 	if err != nil {
 		log.Printf("Error executing query: %s", err)
@@ -181,20 +168,17 @@ func main() {
 	}
 	defer rows.Close()
 
-	// Process the rows
 	for rows.Next() {
 		var id string
 		var name string
-		// ... add more
 
-		err = rows.Scan(&id, &name /* ... more columns */)
+		err = rows.Scan(&id, &name /* ... */)
 		if err != nil {
 			log.Printf("Error scanning row:", err)
 			return
 		}
 
-		// Handle the data in each row
-		fmt.Println(id, name /* ... more columns */)
+		fmt.Println(id, name /* ... */)
 	}
 	// TODO END
 
