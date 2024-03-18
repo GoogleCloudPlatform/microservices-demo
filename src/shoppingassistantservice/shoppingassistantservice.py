@@ -24,40 +24,13 @@ from langchain.chains import RetrievalQA
 
 from langchain_google_alloydb_pg import AlloyDBEngine, AlloyDBVectorStore
 
-engine = AlloyDBEngine.from_instance(
-    project_id="cooking-with-duet-6",
-    region="us-central1",
-    cluster="onlineboutique-cluster",
-    instance="onlineboutique-instance",
-    database="products",
-    user="postgres",
-    password="admin"
-)
+engine = AlloyDBEngine.from_instance("cooking-with-duet-6", "us-central1", "onlineboutique-cluster", "onlineboutique-instance", "products")
 vectorstore = AlloyDBVectorStore.create_sync(
     engine=engine,
     table_name="catalog_items",
-    embedding_service=GoogleGenerativeAIEmbeddings(model="models/embedding-001"),
-    id_column="id",
-    content_column="description",
-    embedding_column="product_embedding"
+    embedding_service=GoogleGenerativeAIEmbeddings(model="models/textembedding-gecko@003")
 )
-from langchain.vectorstores.pgvector import PGVector
-from langchain.prompts import PromptTemplate
 
-
-#Establish connection
-CONNECTION_STRING = PGVector.connection_string_from_db_params(
-    driver=os.environ.get("PGVECTOR_DRIVER", "psycopg2"),
-    host=os.environ.get("PGVECTOR_HOST", "localhost"),
-    port=int(os.environ.get("PGVECTOR_PORT", "5432")),
-    database=os.environ.get("PGVECTOR_DATABASE", "onlineboutique-instance"),
-    user=os.environ.get("PGVECTOR_USER", "postgres"),
-    password=os.environ.get("PGVECTOR_PASSWORD", "admin"),
-)
-db = PGVector(
-    collection_name="catalog_items",
-    connection_string=CONNECTION_STRING,
-)
 
 def create_app():
     app = Flask(__name__)
@@ -81,8 +54,8 @@ def create_app():
 
             chain_type_kwargs = {"prompt": augmented_prompt}
 
-            #llm = ChatGoogleGenerativeAI(model="gemini-pro")
-            retriever = db.as_retriever()
+            llm = ChatGoogleGenerativeAI(model="gemini-pro")
+            retriever = vectorstore.as_retriever()
 
             qa = RetrievalQA.from_chain_type(
                 llm=llm,
@@ -92,11 +65,7 @@ def create_app():
                 verbose=True
             )
 
-            response = qa.invoke([prompt])
-            print(response)
-            data = {}
-            data['content'] = response['result']
-            return data
+            response = qa.run(prompt)
         else:
             llm = ChatGoogleGenerativeAI(model="gemini-pro-vision")
             message = HumanMessage(
@@ -109,9 +78,10 @@ def create_app():
                 ]
             )
             response = llm.invoke([message])
-            data = {}
-            data['content'] = response.content
-            return data
+
+        data = {}
+        data['content'] = response.content
+        return data
 
     return app
 
