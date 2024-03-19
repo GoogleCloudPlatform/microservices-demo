@@ -78,7 +78,7 @@
   position: absolute;
   right: 0;
   border-radius: 16px;
-  right-margin: 16px;
+  margin-right: 16px;
   height: 150px;
 }
 
@@ -113,6 +113,14 @@ button[disabled]{
   font-size: 48px;
   color: #ccc;
   animation: typing 1s infinite;
+}
+
+.bot-products-div {
+  margin-left: 32px;
+}
+
+.bot-product {
+  display: block;
 }
 
 @keyframes typing {

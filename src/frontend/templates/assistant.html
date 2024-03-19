@@ -45,6 +45,17 @@
     reader.readAsDataURL(file);
   }
 
+  function extractIdsFromString(message) {
+    const idPattern = /\[([a-zA-Z0-9-]+)\]/g;
+    const matches = message.matchAll(idPattern);
+    const ids = [];
+    for (const match of matches) {
+      ids.push(match[1]);
+    }
+
+    return ids;
+  }
+
   const chatModal = document.getElementById("chat-modal");
   const botMessages = document.getElementById("bot-messages");
   const botbutton = document.getElementById("bot-input-button");
@@ -102,21 +113,37 @@
     });
 
     const responseJson = await response.json();
+    console.log(responseJson);
+
+    const extractedIds = extractIdsFromString(responseJson.message);
+    console.log(extractedIds);
 
     const botMessage = document.createElement("p");
     const botMessageSpan = document.createElement("span");
-    botMessageSpan.innerText = responseJson.message;
+    botMessageSpan.innerText = responseJson.message.replace(/\n+\[.*/g, "");
     botMessageSpan.classList.add("bot-message-text");
     botMessage.classList.add("bot-message");
     botMessage.appendChild(botMessageSpan);
     botMessages.appendChild(botMessage);
+
+    if (extractedIds.length > 0) {
+      const botProductsDiv = document.createElement("div");
+      botProductsDiv.classList.add("bot-products-div");
+      for (const id of extractedIds) {
+        const botProduct = document.createElement("span");
+        botProduct.classList.add("bot-product");
+        botProduct.innerText = "https://localhost/products/" + id;
+        botProductsDiv.appendChild(botProduct);
+      }
+      botMessages.appendChild(botProductsDiv)
+    }
+
     botMessages.scrollTo(0, botMessages.scrollHeight);
 
     botbutton.disabled = false;
     botinput.disabled = false;
     botinput.focus();
     botMessages.classList.remove("loading");
-    console.log(responseJson);
   }
 
   main();
