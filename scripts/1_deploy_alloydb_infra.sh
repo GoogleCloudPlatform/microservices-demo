@@ -67,6 +67,11 @@ gcloud alloydb instances create ${ALLOYDB_INSTANCE_NAME}-replica \
     --instance-type=READ_POOL \
     --read-pool-node-count=2
 
+gcloud beta alloydb instances update ${ALLOYDB_INSTANCE_NAME} \
+    --cluster=${ALLOYDB_CLUSTER_NAME} \
+    --region=${REGION} \
+    --assign-inbound-public-ip=ASSIGN_IPV4
+
 # Fetch the primary and read IPs
 ALLOYDB_PRIMARY_IP=`gcloud alloydb instances list --region=${REGION} --cluster=${ALLOYDB_CLUSTER_NAME} --filter="INSTANCE_TYPE:PRIMARY" --format=flattened | sed -nE "s/ipAddress:\s*(.*)/\1/p"`
 ALLOYDB_READ_IP=`gcloud alloydb instances list --region=${REGION} --cluster=${ALLOYDB_CLUSTER_NAME} --filter="INSTANCE_TYPE:READ_POOL" --format=flattened | sed -nE "s/ipAddress:\s*(.*)/\1/p"`
@@ -85,7 +90,7 @@ gcloud iam service-accounts create ${ALLOYDB_USER_GSA_NAME} \
 
 gcloud projects add-iam-policy-binding ${PROJECT_ID} --member=serviceAccount:${ALLOYDB_USER_GSA_ID} --role=roles/alloydb.client
 gcloud projects add-iam-policy-binding ${PROJECT_ID} --member=serviceAccount:${ALLOYDB_USER_GSA_ID} --role=roles/secretmanager.secretAccessor
-gcloud projects add-iam-policy-binding ${PROJECT_ID} --member=service-${PROJECT_NUMBER}@gcp-sa-alloydb.iam.gserviceaccount.com --role=roles/aiplatform.user
+gcloud projects add-iam-policy-binding ${PROJECT_ID} --member=serviceAccount:service-${PROJECT_NUMBER}@gcp-sa-alloydb.iam.gserviceaccount.com --role=roles/aiplatform.user
 
 
 gcloud iam service-accounts add-iam-policy-binding ${ALLOYDB_USER_GSA_ID} \
