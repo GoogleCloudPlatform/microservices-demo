@@ -69,49 +69,41 @@ def create_app():
         print(response)
         description_response = response.content
 
+        docs = vectorstore.similarity_search(description_response)
+        print(f"Vector search:: {description_response}")
+        print(f"Retrieved documents: {len(docs)}")
+        relevant_docs = ""
+        for doc in docs:
+            doc_details = doc.to_json()
+            print(f"Adding document to prompt context: {doc_details}")
+            relevant_docs += doc.page_content + ", "
 
+        design_response = llm.invoke(
+            f"""
+            You are an interior designer that works for Online Boutique. You are
+             tasked with providing recommendations to a customer on what they
+             should add to a given room from our catalog.
 
-        #Interior design prompt:
-        #Using the recommendations from the first prompt, query a list of
-        # relevant items to show to the user
-        design_prompt_template = f""" Find products from our catalog that
-        match the following design style. If we don't have a product that
-        matches this style, tell the client clearly that we don't have anything
-        and repeat the style of the room back to the customer using the following
-        description
-        : {description_response}
+            This is the description of the room: {description_response}
+            Here are a list of products that are relevant to it: {relevant_docs}
 
-                Use the following context to formulate your answer: {{context}}
-                Question: {{question}}
+            Specifically, this is what the customer has asked for, see if you
+            can accommodate it: {prompt}
 
-                Answer:"""
-        augmented_design_prompt = PromptTemplate(
-            template=design_prompt_template, input_variables=["context", "question"]
+            Start by repeating a brief description of the room's design to the
+            customer, then provide your recommendations.
+            Do your best to pick the most relevant item out of the list of
+            products provided, but if none of them seem relevant, then say that
+            instead of inventing a new product.
+
+            If you are aware of any links to the product pages, please include
+            those in the response.
+            """
         )
 
-        design_chain_type_kwargs = {"prompt": augmented_design_prompt}
-
-        retriever = vectorstore.as_retriever()
-
-        # docs = vectorstore.similarity_search(prompt)
-        # print(f"Query: {prompt}")
-        # print(f"Retrieved documents: {len(docs)}")
-        # for doc in docs:
-        #     doc_details = doc.to_json()
-        #     print(doc_details)
-
-        qa = RetrievalQA.from_chain_type(
-            llm=llm,
-            retriever=retriever,
-            chain_type_kwargs=design_chain_type_kwargs,
-            verbose=True
-        )
-        response = qa.invoke([prompt])
-        print("Description retrieval step:")
-        print(response)
         data = {}
-        data['content'] = response['result']
-        return data;
+        data['content'] = design_response.content
+        return data
 
     return app
 
