@@ -68,6 +68,20 @@
   color: white;
 }
 
+.user-image-div {
+  position: relative;
+  width: 100%;
+  height: 150px;
+}
+
+.user-image {
+  position: absolute;
+  right: 0;
+  border-radius: 16px;
+  right-margin: 16px;
+  height: 150px;
+}
+
 .bot-input-button {
   display: inline-block;
   border: solid 1px var(--blue);

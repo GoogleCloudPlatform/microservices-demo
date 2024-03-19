@@ -70,11 +70,19 @@
     console.log("message: " + message);
     const usermessage = document.createElement("p");
     const userMessageSpan = document.createElement("span");
+    const imageDivElement = document.createElement("div");
+    imageDivElement.classList.add("user-image-div")
+    const imageElement = document.createElement("img");
+    imageElement.src = image;
+    imageElement.classList.add("user-image");
+    imageElement.onerror = function() { this.style.display = 'none'; }; // Hide on error
     userMessageSpan.innerText = message;
     userMessageSpan.classList.add("user-message-text");
     usermessage.classList.add("user-message");
     usermessage.appendChild(userMessageSpan);
     botMessages.appendChild(usermessage);
+    imageDivElement.appendChild(imageElement);
+    botMessages.appendChild(imageDivElement);
     botMessages.scrollTo(0, botMessages.scrollHeight);
     botinput.value = "";
 
