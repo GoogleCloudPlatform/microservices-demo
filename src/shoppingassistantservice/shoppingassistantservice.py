@@ -77,9 +77,11 @@ def create_app():
         design_prompt_template = f""" Find products from our catalog that
         match the following design style. If we don't have a product that
         matches this style, tell the client clearly that we don't have anything
+        and repeat the style of the room back to the customer using the following
+        description
         : {description_response}
 
-                {{context}}
+                Use the following context to formulate your answer: {{context}}
                 Question: {{question}}
 
                 Answer:"""
