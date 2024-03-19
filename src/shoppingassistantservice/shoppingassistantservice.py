@@ -39,7 +39,8 @@ vectorstore = AlloyDBVectorStore.create_sync(
     embedding_service=GoogleGenerativeAIEmbeddings(model="models/embedding-001"),
     id_column="id",
     content_column="description",
-    embedding_column="product_embedding"
+    embedding_column="product_embedding",
+    metadata_columns=["id", "name", "categories"]
 )
 
 
@@ -69,37 +70,45 @@ def create_app():
         print(response)
         description_response = response.content
 
-        #Interior design prompt prompt:
-        #Using the recommendations from the first prompt, query a list of
-        # relevant items to show to the user
-        design_prompt_template = f""" Find products from our catalog that
-        match the following design style: {description_response}
+        docs = vectorstore.similarity_search(description_response)
+        print(f"Vector search:: {description_response}")
+        print(f"Retrieved documents: {len(docs)}")
+        relevant_docs = ""
+        for doc in docs:
+            doc_details = doc.to_json()
+            print(f"Adding document to prompt context: {doc_details}")
+            relevant_docs += str(doc_details) + ", "
 
-        Here's some additional input on what the client wants: {prompt}
+        print("This is what relevant_docs looks like at the end" + relevant_docs)
 
-                {{context}}
+        design_response = llm.invoke(
+            f"""
+            You are an interior designer that works for Online Boutique. You are
+             tasked with providing recommendations to a customer on what they
+             should add to a given room from our catalog.
 
-                Answer:"""
-        augmented_design_prompt = PromptTemplate(
-            template=design_prompt_template, input_variables=["context"]
+            This is the description of the room: {description_response}
+            Here are a list of products that are relevant to it: {relevant_docs}
+
+            Specifically, this is what the customer has asked for, see if you
+            can accommodate it: {prompt}
+
+            Start by repeating a brief description of the room's design to the
+            customer, then provide your recommendations.
+            Do your best to pick the most relevant item out of the list of
+            products provided, but if none of them seem relevant, then say that
+            instead of inventing a new product.
+
+            At the end of the response, add a list of the IDs of the relevant
+            products in the following format for the top 3 results:
+
+            [<first product ID>], [<second product ID>], [<third product ID>]
+            """
         )
 
-        design_chain_type_kwargs = {"prompt": augmented_design_prompt}
-
-        retriever = vectorstore.as_retriever()
-        qa = RetrievalQA.from_chain_type(
-            llm=llm,
-            chain_type="stuff",
-            retriever=retriever,
-            chain_type_kwargs=design_chain_type_kwargs,
-            verbose=True
-        )
-        response = qa.invoke([prompt])
-        print("Description retrieval step:")
-        print(response)
         data = {}
-        data['content'] = response['result']
-        return data;
+        data['content'] = design_response.content
+        return data
 
     return app
 
