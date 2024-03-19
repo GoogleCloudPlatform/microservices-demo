@@ -69,27 +69,37 @@ def create_app():
         print(response)
         description_response = response.content
 
-        #Interior design prompt prompt:
+
+
+        #Interior design prompt:
         #Using the recommendations from the first prompt, query a list of
         # relevant items to show to the user
         design_prompt_template = f""" Find products from our catalog that
-        match the following design style: {description_response}
-
-        Here's some additional input on what the client wants: {prompt}
+        match the following design style. If we don't have a product that
+        matches this style, tell the client clearly that we don't have anything
+        : {description_response}
 
                 {{context}}
+                Question: {{question}}
 
                 Answer:"""
         augmented_design_prompt = PromptTemplate(
-            template=design_prompt_template, input_variables=["context"]
+            template=design_prompt_template, input_variables=["context", "question"]
         )
 
         design_chain_type_kwargs = {"prompt": augmented_design_prompt}
 
         retriever = vectorstore.as_retriever()
+
+        # docs = vectorstore.similarity_search(prompt)
+        # print(f"Query: {prompt}")
+        # print(f"Retrieved documents: {len(docs)}")
+        # for doc in docs:
+        #     doc_details = doc.to_json()
+        #     print(doc_details)
+
         qa = RetrievalQA.from_chain_type(
             llm=llm,
-            chain_type="stuff",
             retriever=retriever,
             chain_type_kwargs=design_chain_type_kwargs,
             verbose=True
