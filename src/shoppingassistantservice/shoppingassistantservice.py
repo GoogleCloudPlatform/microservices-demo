@@ -39,7 +39,8 @@ vectorstore = AlloyDBVectorStore.create_sync(
     embedding_service=GoogleGenerativeAIEmbeddings(model="models/embedding-001"),
     id_column="id",
     content_column="description",
-    embedding_column="product_embedding"
+    embedding_column="product_embedding",
+    metadata_columns=["id", "name", "categories"]
 )
 
 
@@ -76,7 +77,9 @@ def create_app():
         for doc in docs:
             doc_details = doc.to_json()
             print(f"Adding document to prompt context: {doc_details}")
-            relevant_docs += doc.page_content + ", "
+            relevant_docs += str(doc_details) + ", "
+
+        print("This is what relevant_docs looks like at the end" + relevant_docs)
 
         design_response = llm.invoke(
             f"""
@@ -96,8 +99,10 @@ def create_app():
             products provided, but if none of them seem relevant, then say that
             instead of inventing a new product.
 
-            If you are aware of any links to the product pages, please include
-            those in the response.
+            At the end of the response, add a list of the IDs of the relevant
+            products in the following format for the top 3 results:
+
+            [<first product ID>], [<second product ID>], [<third product ID>]
             """
         )
 
