@@ -478,9 +478,8 @@ func chatBotHandler(w http.ResponseWriter, r *http.Request) {
 
 	var response LLMResponse
 
-	//url := "http://shoppingassistantservice.default.svc.cluster.local/"
-	url := "http://localhost:8082/"
-	//TODO: pass base64 image as body for request
+	url := "http://shoppingassistantservice.default.svc.cluster.local/"
+
 	req, err := http.NewRequest(http.MethodPost, url, r.Body)
 	if err != nil {
 		renderHTTPError(log, r, w, errors.Wrap(err, "failed to create request"), http.StatusInternalServerError)
