@@ -14,13 +14,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import os
 from urllib.parse import unquote
 from langchain_core.messages import HumanMessage
 from langchain_google_genai import ChatGoogleGenerativeAI, GoogleGenerativeAIEmbeddings
 from flask import Flask, request
-from langchain.prompts import PromptTemplate
-from langchain.chains import RetrievalQA
 
 from langchain_google_alloydb_pg import AlloyDBEngine, AlloyDBVectorStore
 
@@ -49,6 +46,7 @@ def create_app():
 
     @app.route("/", methods=['POST'])
     def talkToGemini():
+        print("Beginning RAG call")
         prompt = request.json['message']
         prompt = unquote(prompt)
 
@@ -70,19 +68,26 @@ def create_app():
         print(response)
         description_response = response.content
 
-        docs = vectorstore.similarity_search(description_response)
-        print(f"Vector search:: {description_response}")
+        vector_search_prompt = f"""
+            This is the user's request: {prompt}
+            Find the most relevant items for that prompt, while matching style
+            of the room described here: {description_response}
+        """
+        print(vector_search_prompt)
+
+        docs = vectorstore.similarity_search(vector_search_prompt)
+        print(f"Vector search: {description_response}")
         print(f"Retrieved documents: {len(docs)}")
         relevant_docs = ""
         for doc in docs:
             doc_details = doc.to_json()
-            print(f"Adding document to prompt context: {doc_details}")
+            print(f"Adding relevant document to prompt context: {doc_details}")
             relevant_docs += str(doc_details) + ", "
 
-        print("This is what relevant_docs looks like at the end" + relevant_docs)
+        print("Relevant docs:")
+        print(relevant_docs)
 
-        design_response = llm.invoke(
-            f"""
+        design_prompt = f"""
             You are an interior designer that works for Online Boutique. You are
              tasked with providing recommendations to a customer on what they
              should add to a given room from our catalog.
@@ -104,6 +109,11 @@ def create_app():
 
             [<first product ID>], [<second product ID>], [<third product ID>]
             """
+
+        print("Final design prompt: ")
+        print(design_prompt)
+        design_response = llm.invoke(
+            design_prompt
         )
 
         data = {}
