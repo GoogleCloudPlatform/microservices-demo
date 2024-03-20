@@ -48,14 +48,15 @@ patches:
     metadata:
       name: cartservice
       annotations:
-        iam.gke.io/gcp-service-account: alloydb-user-sa@cooking-with-duet-6.iam.gserviceaccount.com
+        iam.gke.io/gcp-service-account: ALLOYDB_USER_GSA_ID
+# shoppingassistantservice - add the GSA annotation for the shoppingassistantservice KSA
 - patch: |-
     apiVersion: v1
     kind: ServiceAccount
     metadata:
       name: shoppingassistantservice
       annotations:
-        iam.gke.io/gcp-service-account: ALLOYDB_USER_GSA_ID```
+        iam.gke.io/gcp-service-account: ALLOYDB_USER_GSA_ID
 # redis - remove the redis-cart Deployment
 - patch: |-
     apiVersion: apps/v1

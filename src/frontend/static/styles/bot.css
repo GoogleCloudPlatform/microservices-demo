@@ -21,7 +21,7 @@
 
 .bot-messages {
   overflow: auto;
-  height: 85%;
+  height: calc(100% - 100px);
   scroll-snap-align: end;
 }
 
@@ -32,6 +32,12 @@
   margin-right: 20%;
   border-radius: 16px;
   background-color: white;
+  min-height: 55px;
+}
+
+.bot-message-loading {
+  -webkit-mask:linear-gradient(-60deg,#000 30%,#0005,#000 70%) right/300% 100%;
+  animation: shimmer 1.5s infinite;
 }
 
 .user-message {
@@ -68,6 +74,20 @@
   color: white;
 }
 
+.user-image-div {
+  position: relative;
+  width: 100%;
+  height: 150px;
+}
+
+.user-image {
+  position: absolute;
+  right: 0;
+  border-radius: 16px;
+  margin-right: 16px;
+  height: 150px;
+}
+
 .bot-input-button {
   display: inline-block;
   border: solid 1px var(--blue);
@@ -87,18 +107,31 @@ button[disabled]{
   color: #666666;
 }
 
-.bot-messages.loading {
-  position: relative;
+.bot-products {
+  margin-left: 16px;
+  margin-right: 20%;
 }
 
-.bot-messages.loading:after {
-  content: "...";
-  position: absolute;
-  left: 50%;
-  top: 95%;
-  font-size: 48px;
-  color: #ccc;
-  animation: typing 1s infinite;
+.bot-product {
+  height: 150px;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  border-radius: 16px;
+  background-color: white;
+  color: black;
+}
+
+.bot-product-img {
+  height: 150px;
+  border-top-left-radius: 16px;
+  border-bottom-left-radius: 16px;
+  margin-right: 16px;
+}
+
+.bot-product-description {
+  float: right;
+  width: calc(100% - 180px);
 }
 
 @keyframes typing {

@@ -45,6 +45,17 @@
     reader.readAsDataURL(file);
   }
 
+  function extractIdsFromString(message) {
+    const idPattern = /\[([a-zA-Z0-9-]+)\]/g;
+    const matches = message.matchAll(idPattern);
+    const ids = [];
+    for (const match of matches) {
+      ids.push(match[1]);
+    }
+
+    return ids;
+  }
+
   const chatModal = document.getElementById("chat-modal");
   const botMessages = document.getElementById("bot-messages");
   const botbutton = document.getElementById("bot-input-button");
@@ -64,23 +75,40 @@
     if(!botinput.value || !botinput.value.trim){
       return;
     }
-    botMessages.classList.add("loading");
     console.log("bot button clicked");
     const message = botinput.value;
     console.log("message: " + message);
     const usermessage = document.createElement("p");
     const userMessageSpan = document.createElement("span");
+    const imageDivElement = document.createElement("div");
+    imageDivElement.classList.add("user-image-div")
+    const imageElement = document.createElement("img");
+    imageElement.src = image;
+    imageElement.classList.add("user-image");
+    imageElement.onerror = function() { this.style.display = 'none'; };
     userMessageSpan.innerText = message;
     userMessageSpan.classList.add("user-message-text");
     usermessage.classList.add("user-message");
     usermessage.appendChild(userMessageSpan);
     botMessages.appendChild(usermessage);
+    imageDivElement.appendChild(imageElement);
+    botMessages.appendChild(imageDivElement);
     botMessages.scrollTo(0, botMessages.scrollHeight);
     botinput.value = "";
 
     botbutton.disabled = true;
     botinput.disabled = true;
     console.log("bot is typing");
+
+    const botMessage = document.createElement("p");
+    botMessage.classList.add("bot-message-loading");
+    const botMessageSpan = document.createElement("span");
+    botMessageSpan.innerText = ""
+    botMessageSpan.classList.add("bot-message-text");
+    botMessage.classList.add("bot-message");
+    botMessage.appendChild(botMessageSpan);
+    botMessages.appendChild(botMessage);
+    botMessages.scrollTo(0, botMessages.scrollHeight);
 
     const response = await fetch("/bot", {
       method: "POST",
@@ -94,21 +122,55 @@
     });
 
     const responseJson = await response.json();
+    console.log(responseJson);
 
-    const botMessage = document.createElement("p");
-    const botMessageSpan = document.createElement("span");
-    botMessageSpan.innerText = responseJson.message;
-    botMessageSpan.classList.add("bot-message-text");
-    botMessage.classList.add("bot-message");
-    botMessage.appendChild(botMessageSpan);
-    botMessages.appendChild(botMessage);
+    const extractedIds = extractIdsFromString(responseJson.message);
+    console.log(extractedIds);
+
+    botMessageSpan.innerText = responseJson.message.replace(/\n+[-*\d][\S\s]*/g, "");
+    botMessage.classList.remove("bot-message-loading");
+
+    if (extractedIds.length > 0) {
+      const botProductsDiv = document.createElement("div");
+      botProductsDiv.classList.add("bot-products");
+      for (const id of extractedIds) {
+        const productResponse = await fetch("/product-meta/" + id, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+        const product = await productResponse.json();
+
+        const botProductDiv = document.createElement("a");
+        botProductDiv.classList.add("bot-product");
+        botProductDiv.href = "/product/" + id;
+
+        const botProductImg = document.createElement("img");
+        botProductImg.src = product["picture"];
+        botProductImg.classList.add("bot-product-img");
+        botProductImg.onerror = function() { this.style.display = 'none'; };
+        botProductDiv.appendChild(botProductImg);
+
+        const botProductDescription = document.createElement("div");
+        botProductDescription.classList.add("bot-product-description");
+        let productDescription = product["description"];
+        if (productDescription.length > 350) { // Shorten descriptions that are too long
+          productDescription = productDescription.substring(0, 330) + '...';
+        }
+        botProductDescription.innerHTML = "<b>" + product["name"] + "</b><br>" + productDescription;
+        botProductDiv.appendChild(botProductDescription);
+
+        botProductsDiv.appendChild(botProductDiv);
+      }
+      botMessages.appendChild(botProductsDiv)
+    }
+
     botMessages.scrollTo(0, botMessages.scrollHeight);
 
     botbutton.disabled = false;
     botinput.disabled = false;
     botinput.focus();
-    botMessages.classList.remove("loading");
-    console.log(responseJson);
   }
 
   main();
