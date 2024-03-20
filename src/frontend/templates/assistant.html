@@ -120,7 +120,8 @@
 
     const botMessage = document.createElement("p");
     const botMessageSpan = document.createElement("span");
-    botMessageSpan.innerText = responseJson.message.replace(/\n+\[.*/g, "");
+    // botMessageSpan.innerText = responseJson.message.replace(/\n+\[.*/g, ""); // Keep list
+    botMessageSpan.innerText = responseJson.message.replace(/\n+[-*\d][\S\s]*/g, ""); // Hide list
     botMessageSpan.classList.add("bot-message-text");
     botMessage.classList.add("bot-message");
     botMessage.appendChild(botMessageSpan);
@@ -128,7 +129,7 @@
 
     if (extractedIds.length > 0) {
       const botProductsDiv = document.createElement("div");
-      botProductsDiv.classList.add("bot-products-div");
+      botProductsDiv.classList.add("bot-products");
       for (const id of extractedIds) {
         const productResponse = await fetch("/product-meta/" + id, {
           method: "GET",
@@ -138,11 +139,26 @@
         });
         const product = await productResponse.json();
 
-        const botProduct = document.createElement("img");
-        botProduct.src = product["picture"];
-        botProduct.classList.add("bot-product");
-        botProduct.onerror = function() { this.style.display = 'none'; };
-        botProductsDiv.appendChild(botProduct);
+        const botProductDiv = document.createElement("a");
+        botProductDiv.classList.add("bot-product");
+        botProductDiv.href = "/product/" + id;
+
+        const botProductImg = document.createElement("img");
+        botProductImg.src = product["picture"];
+        botProductImg.classList.add("bot-product-img");
+        botProductImg.onerror = function() { this.style.display = 'none'; };
+        botProductDiv.appendChild(botProductImg);
+
+        const botProductDescription = document.createElement("div");
+        botProductDescription.classList.add("bot-product-description");
+        let productDescription = product["description"];
+        if (productDescription.length > 350) { // Shorten descriptions that are too long
+          productDescription = productDescription.substring(0, 330) + '...';
+        }
+        botProductDescription.innerHTML = "<b>" + product["name"] + "</b><br>" + productDescription;
+        botProductDiv.appendChild(botProductDescription);
+
+        botProductsDiv.appendChild(botProductDiv);
       }
       botMessages.appendChild(botProductsDiv)
     }

@@ -115,15 +115,31 @@ button[disabled]{
   animation: typing 1s infinite;
 }
 
-.bot-products-div {
+.bot-products {
   margin-left: 16px;
-  height: 150px;
+  margin-right: 20%;
 }
 
 .bot-product {
   height: 150px;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
   border-radius: 16px;
+  background-color: white;
+  color: black;
+}
+
+.bot-product-img {
+  height: 150px;
+  border-top-left-radius: 16px;
+  border-bottom-left-radius: 16px;
   margin-right: 16px;
+}
+
+.bot-product-description {
+  float: right;
+  width: calc(100% - 180px);
 }
 
 @keyframes typing {
