@@ -465,7 +465,7 @@ func (fe *frontendServer) getProductByID(w http.ResponseWriter, r *http.Request)
 	w.WriteHeader(http.StatusOK)
 }
 
-func chatBotHandler(w http.ResponseWriter, r *http.Request) {
+func (fe *frontendServer) chatBotHandler(w http.ResponseWriter, r *http.Request) {
 	log := r.Context().Value(ctxKeyLog{}).(logrus.FieldLogger)
 	type Response struct {
 		Message string `json:"message"`
@@ -478,8 +478,7 @@ func chatBotHandler(w http.ResponseWriter, r *http.Request) {
 
 	var response LLMResponse
 
-	url := "http://shoppingassistantservice.default.svc.cluster.local/"
-
+	url := "http://" + fe.shoppingAssistantSvcAddr
 	req, err := http.NewRequest(http.MethodPost, url, r.Body)
 	if err != nil {
 		renderHTTPError(log, r, w, errors.Wrap(err, "failed to create request"), http.StatusInternalServerError)
