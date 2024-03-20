@@ -150,6 +150,7 @@ func main() {
 	r.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir("./static/"))))
 	r.HandleFunc("/robots.txt", func(w http.ResponseWriter, _ *http.Request) { fmt.Fprint(w, "User-agent: *\nDisallow: /") })
 	r.HandleFunc("/_healthz", func(w http.ResponseWriter, _ *http.Request) { fmt.Fprint(w, "ok") })
+	r.HandleFunc("/product-meta/{ids}", svc.getProductByID).Methods(http.MethodGet)
 	r.HandleFunc("/bot", chatBotHandler).Methods(http.MethodPost)
 
 	var handler http.Handler = r

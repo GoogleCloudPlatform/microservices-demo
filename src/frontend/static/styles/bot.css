@@ -116,11 +116,14 @@ button[disabled]{
 }
 
 .bot-products-div {
-  margin-left: 32px;
+  margin-left: 16px;
+  height: 150px;
 }
 
 .bot-product {
-  display: block;
+  height: 150px;
+  border-radius: 16px;
+  margin-right: 16px;
 }
 
 @keyframes typing {
