@@ -21,7 +21,7 @@
 
 .bot-messages {
   overflow: auto;
-  height: 85%;
+  height: calc(100% - 100px);
   scroll-snap-align: end;
 }
 
@@ -32,6 +32,12 @@
   margin-right: 20%;
   border-radius: 16px;
   background-color: white;
+  min-height: 55px;
+}
+
+.bot-message-loading {
+  -webkit-mask:linear-gradient(-60deg,#000 30%,#0005,#000 70%) right/300% 100%;
+  animation: shimmer 1.5s infinite;
 }
 
 .user-message {
@@ -99,20 +105,6 @@ button[disabled]{
   border: 1px solid #999999;
   background-color: #cccccc;
   color: #666666;
-}
-
-.bot-messages.loading {
-  position: relative;
-}
-
-.bot-messages.loading:after {
-  content: "...";
-  position: absolute;
-  left: 50%;
-  top: 95%;
-  font-size: 48px;
-  color: #ccc;
-  animation: typing 1s infinite;
 }
 
 .bot-products {

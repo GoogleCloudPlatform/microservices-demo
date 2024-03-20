@@ -75,7 +75,6 @@
     if(!botinput.value || !botinput.value.trim){
       return;
     }
-    botMessages.classList.add("loading");
     console.log("bot button clicked");
     const message = botinput.value;
     console.log("message: " + message);
@@ -101,6 +100,16 @@
     botinput.disabled = true;
     console.log("bot is typing");
 
+    const botMessage = document.createElement("p");
+    botMessage.classList.add("bot-message-loading");
+    const botMessageSpan = document.createElement("span");
+    botMessageSpan.innerText = ""
+    botMessageSpan.classList.add("bot-message-text");
+    botMessage.classList.add("bot-message");
+    botMessage.appendChild(botMessageSpan);
+    botMessages.appendChild(botMessage);
+    botMessages.scrollTo(0, botMessages.scrollHeight);
+
     const response = await fetch("/bot", {
       method: "POST",
       headers: {
@@ -118,14 +127,8 @@
     const extractedIds = extractIdsFromString(responseJson.message);
     console.log(extractedIds);
 
-    const botMessage = document.createElement("p");
-    const botMessageSpan = document.createElement("span");
-    // botMessageSpan.innerText = responseJson.message.replace(/\n+\[.*/g, ""); // Keep list
-    botMessageSpan.innerText = responseJson.message.replace(/\n+[-*\d][\S\s]*/g, ""); // Hide list
-    botMessageSpan.classList.add("bot-message-text");
-    botMessage.classList.add("bot-message");
-    botMessage.appendChild(botMessageSpan);
-    botMessages.appendChild(botMessage);
+    botMessageSpan.innerText = responseJson.message.replace(/\n+[-*\d][\S\s]*/g, "");
+    botMessage.classList.remove("bot-message-loading");
 
     if (extractedIds.length > 0) {
       const botProductsDiv = document.createElement("div");
@@ -168,7 +171,6 @@
     botbutton.disabled = false;
     botinput.disabled = false;
     botinput.focus();
-    botMessages.classList.remove("loading");
   }
 
   main();
