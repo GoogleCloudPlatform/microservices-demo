@@ -1,4 +1,4 @@
-// Copyright 2018 Google LLC
+// Copyright 2024 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,6 +15,7 @@
 package validator
 
 import (
+	"errors"
 	"fmt"
 
 	"github.com/go-playground/validator/v10"
@@ -27,6 +28,10 @@ var validate *validator.Validate
 // benefit of caching struct info and validations.
 func init() {
 	validate = validator.New(validator.WithRequiredStructEnabled())
+}
+
+type Payload interface {
+	Validate() error
 }
 
 type AddToCartPayload struct {
@@ -51,46 +56,28 @@ type SetCurrencyPayload struct {
 	Currency string `validate:"required,iso4217"`
 }
 
+// Implementations of the 'Payload' interface.
 func (ad *AddToCartPayload) Validate() error {
-	err := validate.Struct(ad)
-	if err == nil {
-		return nil
-	}
-	validationErr, ok := err.(validator.ValidationErrors)
-	if !ok {
-		return err
-	}
-	return errorResponse(validationErr)
+	return validate.Struct(ad)
 }
 
 func (po *PlaceOrderPayload) Validate() error {
-	err := validate.Struct(po)
-	if err == nil {
-		return nil
-	}
-	validationErr, ok := err.(validator.ValidationErrors)
-	if !ok {
-		return err
-	}
-	return errorResponse(validationErr)
+	return validate.Struct(po)
 }
 
 func (sc *SetCurrencyPayload) Validate() error {
-	err := validate.Struct(sc)
-	if err == nil {
-		return nil
-	}
-	validationErr, ok := err.(validator.ValidationErrors)
-	if !ok {
-		return err
-	}
-	return errorResponse(validationErr)
+	return validate.Struct(sc)
 }
 
-func errorResponse(validationErr validator.ValidationErrors) error {
+// Reusable error response function.
+func ValidationErrorResponse(err error) error {
+	validationErrs, ok := err.(validator.ValidationErrors)
+	if !ok {
+		return errors.New("invalid validation error format")
+	}
 	var msg string
-	for _, err := range validationErr {
-		msg += fmt.Sprintf("the %s in your request is invalid.\n", err.Field())
+	for _, err := range validationErrs {
+		msg += fmt.Sprintf("Field '%s' is invalid: %s\n", err.Field(), err.Tag())
 	}
 	return fmt.Errorf(msg)
 }

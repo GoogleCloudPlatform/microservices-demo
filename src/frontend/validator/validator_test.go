@@ -1,4 +1,4 @@
-// Copyright 2018 Google LLC
+// Copyright 2024 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -171,7 +171,7 @@ func TestSetCurrencyFailsValidation(t *testing.T) {
 		currency string
 	}{
 		{"invalid currency", "ABC"},
-		{"invalid currency symbol", "$"},
+		{"invalid currency (symbol)", "$"},
 		{"invalid (no currency)", ""},
 	}
 	for _, tt := range tests {

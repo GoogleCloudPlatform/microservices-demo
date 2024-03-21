@@ -230,7 +230,7 @@ func (fe *frontendServer) addToCartHandler(w http.ResponseWriter, r *http.Reques
 		ProductID: productID,
 	}
 	if err := payload.Validate(); err != nil {
-		renderHTTPError(log, r, w, err, http.StatusUnprocessableEntity)
+		renderHTTPError(log, r, w, validator.ValidationErrorResponse(err), http.StatusUnprocessableEntity)
 		return
 	}
 	log.WithField("product", payload.ProductID).WithField("quantity", payload.Quantity).Debug("adding to cart")
@@ -368,7 +368,7 @@ func (fe *frontendServer) placeOrderHandler(w http.ResponseWriter, r *http.Reque
 		CcCVV:         ccCVV,
 	}
 	if err := payload.Validate(); err != nil {
-		renderHTTPError(log, r, w, err, http.StatusUnprocessableEntity)
+		renderHTTPError(log, r, w, validator.ValidationErrorResponse(err), http.StatusUnprocessableEntity)
 		return
 	}
 
@@ -446,7 +446,7 @@ func (fe *frontendServer) setCurrencyHandler(w http.ResponseWriter, r *http.Requ
 	cur := r.FormValue("currency_code")
 	payload := validator.SetCurrencyPayload{Currency: cur}
 	if err := payload.Validate(); err != nil {
-		renderHTTPError(log, r, w, err, http.StatusUnprocessableEntity)
+		renderHTTPError(log, r, w, validator.ValidationErrorResponse(err), http.StatusUnprocessableEntity)
 		return
 	}
 	log.WithField("curr.new", payload.Currency).WithField("curr.old", currentCurrency(r)).
