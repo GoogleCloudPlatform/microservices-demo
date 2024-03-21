@@ -1,9 +1,9 @@
 google-api-core==2.17.1
 google-cloud-profiler==4.1.0
-grpcio-health-checking==1.60.1
+grpcio-health-checking==1.62.1
 python-json-logger==2.0.7
 requests==2.31.0
 rsa==4.9
 opentelemetry-distro==0.41b0
-opentelemetry-instrumentation-grpc==0.43b0
-opentelemetry-exporter-otlp-proto-grpc==1.22.0
+opentelemetry-instrumentation-grpc==0.44b0
+opentelemetry-exporter-otlp-proto-grpc==1.23.0
