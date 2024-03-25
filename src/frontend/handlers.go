@@ -32,6 +32,7 @@ import (
 
 	pb "github.com/GoogleCloudPlatform/microservices-demo/src/frontend/genproto"
 	"github.com/GoogleCloudPlatform/microservices-demo/src/frontend/money"
+	"github.com/GoogleCloudPlatform/microservices-demo/src/frontend/validator"
 )
 
 type platformDetails struct {
@@ -224,19 +225,23 @@ func (fe *frontendServer) addToCartHandler(w http.ResponseWriter, r *http.Reques
 	log := r.Context().Value(ctxKeyLog{}).(logrus.FieldLogger)
 	quantity, _ := strconv.ParseUint(r.FormValue("quantity"), 10, 32)
 	productID := r.FormValue("product_id")
-	if productID == "" || quantity == 0 {
-		renderHTTPError(log, r, w, errors.New("invalid form input"), http.StatusBadRequest)
+	payload := validator.AddToCartPayload{
+		Quantity:  quantity,
+		ProductID: productID,
+	}
+	if err := payload.Validate(); err != nil {
+		renderHTTPError(log, r, w, validator.ValidationErrorResponse(err), http.StatusUnprocessableEntity)
 		return
 	}
-	log.WithField("product", productID).WithField("quantity", quantity).Debug("adding to cart")
+	log.WithField("product", payload.ProductID).WithField("quantity", payload.Quantity).Debug("adding to cart")
 
-	p, err := fe.getProduct(r.Context(), productID)
+	p, err := fe.getProduct(r.Context(), payload.ProductID)
 	if err != nil {
 		renderHTTPError(log, r, w, errors.Wrap(err, "could not retrieve product"), http.StatusInternalServerError)
 		return
 	}
 
-	if err := fe.insertCart(r.Context(), sessionID(r), p.GetId(), int32(quantity)); err != nil {
+	if err := fe.insertCart(r.Context(), sessionID(r), p.GetId(), int32(payload.Quantity)); err != nil {
 		renderHTTPError(log, r, w, errors.Wrap(err, "failed to add to cart"), http.StatusInternalServerError)
 		return
 	}
@@ -350,22 +355,39 @@ func (fe *frontendServer) placeOrderHandler(w http.ResponseWriter, r *http.Reque
 		ccCVV, _      = strconv.ParseInt(r.FormValue("credit_card_cvv"), 10, 32)
 	)
 
+	payload := validator.PlaceOrderPayload{
+		Email:         email,
+		StreetAddress: streetAddress,
+		ZipCode:       zipCode,
+		City:          city,
+		State:         state,
+		Country:       country,
+		CcNumber:      ccNumber,
+		CcMonth:       ccMonth,
+		CcYear:        ccYear,
+		CcCVV:         ccCVV,
+	}
+	if err := payload.Validate(); err != nil {
+		renderHTTPError(log, r, w, validator.ValidationErrorResponse(err), http.StatusUnprocessableEntity)
+		return
+	}
+
 	order, err := pb.NewCheckoutServiceClient(fe.checkoutSvcConn).
 		PlaceOrder(r.Context(), &pb.PlaceOrderRequest{
-			Email: email,
+			Email: payload.Email,
 			CreditCard: &pb.CreditCardInfo{
-				CreditCardNumber:          ccNumber,
-				CreditCardExpirationMonth: int32(ccMonth),
-				CreditCardExpirationYear:  int32(ccYear),
-				CreditCardCvv:             int32(ccCVV)},
+				CreditCardNumber:          payload.CcNumber,
+				CreditCardExpirationMonth: int32(payload.CcMonth),
+				CreditCardExpirationYear:  int32(payload.CcYear),
+				CreditCardCvv:             int32(payload.CcCVV)},
 			UserId:       sessionID(r),
 			UserCurrency: currentCurrency(r),
 			Address: &pb.Address{
-				StreetAddress: streetAddress,
-				City:          city,
-				State:         state,
-				ZipCode:       int32(zipCode),
-				Country:       country},
+				StreetAddress: payload.StreetAddress,
+				City:          payload.City,
+				State:         payload.State,
+				ZipCode:       int32(payload.ZipCode),
+				Country:       payload.Country},
 		})
 	if err != nil {
 		renderHTTPError(log, r, w, errors.Wrap(err, "failed to complete the order"), http.StatusInternalServerError)
@@ -422,13 +444,18 @@ func (fe *frontendServer) logoutHandler(w http.ResponseWriter, r *http.Request) 
 func (fe *frontendServer) setCurrencyHandler(w http.ResponseWriter, r *http.Request) {
 	log := r.Context().Value(ctxKeyLog{}).(logrus.FieldLogger)
 	cur := r.FormValue("currency_code")
-	log.WithField("curr.new", cur).WithField("curr.old", currentCurrency(r)).
+	payload := validator.SetCurrencyPayload{Currency: cur}
+	if err := payload.Validate(); err != nil {
+		renderHTTPError(log, r, w, validator.ValidationErrorResponse(err), http.StatusUnprocessableEntity)
+		return
+	}
+	log.WithField("curr.new", payload.Currency).WithField("curr.old", currentCurrency(r)).
 		Debug("setting currency")
 
-	if cur != "" {
+	if payload.Currency != "" {
 		http.SetCookie(w, &http.Cookie{
 			Name:   cookieCurrency,
-			Value:  cur,
+			Value:  payload.Currency,
 			MaxAge: cookieMaxAge,
 		})
 	}
