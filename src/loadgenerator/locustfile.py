@@ -50,7 +50,7 @@ def addToCart(l):
     l.client.get("/product/" + product)
     l.client.post("/cart", {
         'product_id': product,
-        'quantity': random.randint(1,100)})
+        'quantity': random.randint(1,10)})
     
 def empty_cart(l):
     l.client.post('/cart/empty')
