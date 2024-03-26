@@ -76,6 +76,7 @@ zope-event==5.0
     # via gevent
 zope-interface==6.2
     # via gevent
-
+faker==23.2.1
+    # via faker
 # The following packages are considered to be unsafe in a requirements file:
 # setuptools

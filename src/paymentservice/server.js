@@ -45,6 +45,9 @@ class HipsterShopServer {
       callback(null, response);
     } catch (err) {
       console.warn(err);
+      if (!(err instanceof Error)) {
+        err = new Error(`An error occurred: ${err}`)
+      }
       callback(err);
     }
   }
