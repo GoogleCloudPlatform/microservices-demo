@@ -108,3 +108,52 @@
 .cart-checkout-form .cymbal-button-primary {
     margin-top: 36px;
 }
+
+.days {
+  width: 1000px;
+}
+
+.day {
+  width: 120px;
+  height: 230px;
+  background-color: #efeff6;
+  padding:10px;
+  float:left;
+  margin-right:7px;
+  margin-bottom:5px;
+}
+
+.datelabel {
+  margin-bottom: 15px;
+}
+
+.timeslot {
+  background-color: #00c09d;
+  width: auto;
+  color: white;
+  height: 36px;
+  padding:7px;
+  margin-top: 5px;
+  font-size: 14px;
+  border-radius: 3px;
+  vertical-align: center;
+  text-align:center;
+}
+
+.timeslot:hover {
+  background-color: #2CA893;
+  cursor: pointer;
+}
+
+.timeslot-container {
+  border-top: solid 1px rgba(154, 160, 166, 0.5);
+  height:280px;
+  width: 700px;
+  padding-bottom: 24px;
+  padding-top: 24px;
+  margin-top: 20px;
+}
+
+.opening-hours-table tr td:first-child {
+    font-weight:bold;
+}

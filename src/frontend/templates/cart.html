@@ -16,13 +16,13 @@
 
 {{ define "cart" }}
     {{ template "header" . }}
-    
+
     <div {{ with $.platform_css }} class="{{.}}" {{ end }}>
         <span class="platform-flag">
-            {{$.platform_name}}
+            Demo
         </span>
     </div>
-    
+
     <main role="main" class="cart-sections">
 
         {{ if eq (len $.items) 0 }}
@@ -86,8 +86,8 @@
                     {{ end }}
 
                     <div class="row cart-summary-shipping-row">
-                        <div class="col pl-md-0">Shipping</div>
-                        <div class="col pr-md-0 text-right">{{ renderMoney .shipping_cost }}</div>
+                        <div class="col pl-md-0">Pick Up time selected</div>
+                        <div class="col pr-md-0 text-right">Friday 10:30 am</div>
                     </div>
 
                     <div class="row cart-summary-total-row">
@@ -102,109 +102,155 @@
                     <form class="cart-checkout-form" action="/cart/checkout" method="POST">
 
                         <div class="row">
-                            <div class="col">
-                                <h3>Shipping Address</h3>
-                            </div>
+                          <h3>Available pick up slots</h3>
                         </div>
 
-                        <div class="form-row">
-                            <div class="col cymbal-form-field">
-                                <label for="email">E-mail Address</label>
-                                <input type="email" id="email"
-                                    name="email" value="someone@example.com" required>
+                        <div style="border-top: solid 1px rgba(154, 160, 166, 0.5);
+                              height:280px;
+                              width: 700px;
+                              margin-top: 20px;
+                              padding-bottom: 24px;
+                              padding-top: 24px;">
+                          <div class="days">
+                            <div class="day">
+                              <div class="datelabel">
+                                <strong>Friday</strong>
+                                <br/>August 23</div>
+                              <div class="timeslot">9:00am</div>
+                              <div class="timeslot">9:30am</div>
+                              <div class="timeslot">10:00am</div>
                             </div>
+                            <div class="day">
+                              <div class="datelabel"><strong>Saturday</strong><br/>August 24</div>
+                              <div class="timeslot">10:30pm</div>
+                            </div>
+                            <div class="day">
+                              <div class="datelabel"><strong>Sunday</strong><br/>August 25</div>
+                              <div class="timeslot">10:30pm</div>
+                            </div>
+                            <div class="day">
+                              <div class="datelabel"><strong>Monday</strong><br/>August 26</div>
+                              <div class="timeslot">10:30pm</div>
+                            </div>
+                            <div class="day">
+                              <div class="datelabel"><strong>Monday</strong><br/>August 26</div>
+                              <div class="timeslot">10:30pm</div>
+                            </div>
+                          </div>
                         </div>
 
-                        <div class="form-row">
-                            <div class="col cymbal-form-field">
-                                <label for="street_address">Street Address</label>
-                                <input type="text" name="street_address"
-                                    id="street_address" value="1600 Amphitheatre Parkway" required>
-                            </div>
+                      <div class="row">
+                        <div class="col">
+                          <h3 class="payment-method-heading">Payment Method</h3>
                         </div>
+                      </div>
 
-                        <div class="form-row">
-                            <div class="col cymbal-form-field">
-                                <label for="zip_code">Zip Code</label>
-                                <input type="text"
-                                    name="zip_code" id="zip_code" value="94043" required pattern="\d{4,5}">
-                            </div>
+                      <div class="form-row">
+                        <div class="col cymbal-form-field">
+                          <label for="credit_card_number">Credit Card Number</label>
+                          <input type="text" id="credit_card_number"
+                                 name="credit_card_number"
+                                 placeholder="0000-0000-0000-0000"
+                                 value="4432-8015-6152-0454"
+                                 required pattern="\d{4}-\d{4}-\d{4}-\d{4}">
                         </div>
+                      </div>
 
-                        <div class="form-row">
-                            <div class="col cymbal-form-field">
-                                <label for="city">City</label>
-                                <input type="text" name="city" id="city"
-                                    value="Mountain View" required>
-                                </div>
-                            </div>
-
-                        <div class="form-row">
-                            <div class="col-md-5 cymbal-form-field">
-                                <label for="state">State</label>
-                                <input type="text" name="state" id="state"
-                                    value="CA" required>
-                            </div>
-                            <div class="col-md-7 cymbal-form-field">
-                                <label for="country">Country</label>
-                                <input type="text" id="country"
-                                    placeholder="Country Name"
-                                    name="country" value="United States" required>
-                            </div>
+                      <div class="form-row">
+                        <div class="col-md-5 cymbal-form-field">
+                          <label for="credit_card_expiration_month">Month</label>
+                          <select name="credit_card_expiration_month" id="credit_card_expiration_month">
+                            <option value="1">January</option>
+                            <option value="2">February</option>
+                            <option value="3">March</option>
+                            <option value="4">April</option>
+                            <option value="5">May</option>
+                            <option value="6">June</option>
+                            <option value="7">July</option>
+                            <option value="8">August</option>
+                            <option value="9">September</option>
+                            <option value="10">October</option>
+                            <option value="11">November</option>
+                            <option value="12">January</option>
+                          </select>
+                          <img src="/static/icons/Hipster_DownArrow.svg" alt="" class="cymbal-dropdown-chevron">
                         </div>
+                        <div class="col-md-4 cymbal-form-field">
+                          <label for="credit_card_expiration_year">Year</label>
+                          <select name="credit_card_expiration_year" id="credit_card_expiration_year">
+                            {{ range $i, $y := $.expiration_years}}<option value="{{$y}}"
+                                                                           {{if eq $i 1 -}}
+                                                                           selected="selected"
+                                                                           {{- end}}
+                          >{{$y}}</option>{{end}}
+                          </select>
+                          <img src="/static/icons/Hipster_DownArrow.svg" alt="" class="cymbal-dropdown-chevron">
+                        </div>
+                        <div class="col-md-3 cymbal-form-field">
+                          <label for="credit_card_cvv">CVV</label>
+                          <input type="password" id="credit_card_cvv"
+                                 name="credit_card_cvv" value="672" required pattern="\d{3}">
+                        </div>
+                      </div>
 
                         <div class="row">
-                            <div class="col">
-                                <h3 class="payment-method-heading">Payment Method</h3>
+                            <div style="
+                              margin-left: 100px">
+                                <h3 class="payment-method-heading">Store Hours</h3>
                             </div>
                         </div>
 
-                        <div class="form-row">
-                            <div class="col cymbal-form-field">
-                                <label for="credit_card_number">Credit Card Number</label>
-                                <input type="text" id="credit_card_number"
-                                    name="credit_card_number"
-                                    placeholder="0000-0000-0000-0000"
-                                    value="4432-8015-6152-0454"
-                                    required pattern="\d{4}-\d{4}-\d{4}-\d{4}">
-                            </div>
-                        </div>
-
-                        <div class="form-row">
-                            <div class="col-md-5 cymbal-form-field">
-                                <label for="credit_card_expiration_month">Month</label>
-                                <select name="credit_card_expiration_month" id="credit_card_expiration_month">
-                                    <option value="1">January</option>
-                                    <option value="2">February</option>
-                                    <option value="3">March</option>
-                                    <option value="4">April</option>
-                                    <option value="5">May</option>
-                                    <option value="6">June</option>
-                                    <option value="7">July</option>
-                                    <option value="8">August</option>
-                                    <option value="9">September</option>
-                                    <option value="10">October</option>
-                                    <option value="11">November</option>
-                                    <option value="12">January</option>
-                                </select>
-                                <img src="/static/icons/Hipster_DownArrow.svg" alt="" class="cymbal-dropdown-chevron">
-                            </div>
-                            <div class="col-md-4 cymbal-form-field">
-                                    <label for="credit_card_expiration_year">Year</label>
-                                    <select name="credit_card_expiration_year" id="credit_card_expiration_year">
-                                    {{ range $i, $y := $.expiration_years}}<option value="{{$y}}"
-                                        {{if eq $i 1 -}}
-                                            selected="selected"
-                                        {{- end}}
-                                    >{{$y}}</option>{{end}}
-                                    </select>
-                                    <img src="/static/icons/Hipster_DownArrow.svg" alt="" class="cymbal-dropdown-chevron">
-                                </div>
-                            <div class="col-md-3 cymbal-form-field">
-                                <label for="credit_card_cvv">CVV</label>
-                                <input type="password" id="credit_card_cvv"
-                                    name="credit_card_cvv" value="672" required pattern="\d{3}">
-                            </div>
+                        <div class="form-row" style="border-top: solid 1px rgba(154, 160, 166, 0.5);
+                              height:280px;
+                              width: 700px;
+                              margin-left: 350px;
+                              margin-top: 20px;
+                              padding-bottom: 24px;
+                              padding-top: 24px;">
+                          <table class="opening-hours-table">
+                            <tr id="Monday" itemprop="openingHours" title="Open Monday at 9am to 6pm">
+                              <td>Monday</td>
+                              <td class="opens">09:00</td>
+                              <td>-</td>
+                              <td class="closes">18:00</td>
+                            </tr>
+                            <tr id="Tuesday" itemprop="openingHours" title="Open Tuesday at 9am to 6pm">
+                              <td>Tuesday</td>
+                              <td class="opens">09:00</td>
+                              <td>-</td>
+                              <td class="closes">18:00</td>
+                            </tr>
+                            <tr id="Wednesday" itemprop="openingHours" title="Open Wednesday at 9am to 6pm">
+                              <td>Wednesday</td>
+                              <td class="opens">09:00</td>
+                              <td>-</td>
+                              <td class="closes">18:00</td>
+                            </tr>
+                            <tr id="Thursday" itemprop="openingHours" title="Open Thursday at 9am to 8pm">
+                              <td>Thursday</td>
+                              <td class="opens">09:00</td>
+                              <td>-</td>
+                              <td class="closes">20:00</td>
+                            </tr>
+                            <tr id="Friday" itemprop="openingHours" title="Open Friday at 9am to 6pm">
+                              <td>Friday</td>
+                              <td class="opens">09:00</td>
+                              <td>-</td>
+                              <td class="closes">18:00</td>
+                            </tr>
+                            <tr id="Saturday" itemprop="openingHours" title="Open Saturday at 10am to 6pm">
+                              <td>Saturday</td>
+                              <td class="opens">10:00</td>
+                              <td>-</td>
+                              <td class="closes">18:00</td>
+                            </tr>
+                            <tr id="Sunday" itemprop="openingHours" title="Open Sunday at 11am to 4pm">
+                              <td>Sunday</td>
+                              <td class="opens">11:00</td>
+                              <td>-</td>
+                              <td class="closes">16:00</td>
+                            </tr>
+                          </table>
                         </div>
 
                         <div class="form-row justify-content-center">
