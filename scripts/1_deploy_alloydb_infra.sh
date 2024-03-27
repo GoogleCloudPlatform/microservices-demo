@@ -22,9 +22,6 @@ ALLOYDB_USER_GSA_ID=${ALLOYDB_USER_GSA_NAME}@${PROJECT_ID}.iam.gserviceaccount.c
 CARTSERVICE_KSA_NAME=cartservice
 SHOPPINGASSISTANTSERVICE_KSA_NAME=shoppingassistantservice
 ALLOYDB_SECRET_NAME=alloydb-secret
-gcloud iam service-accounts add-iam-policy-binding ${ALLOYDB_USER_GSA_ID} \
-        --member "serviceAccount:${PROJECT_ID}.svc.id.goog[default/${SHOPPINGASSISTANTSERVICE_KSA_NAME}]" \
-        --role roles/iam.workloadIdentityUser
 
 # Enable services
 gcloud services enable alloydb.googleapis.com
@@ -84,14 +81,13 @@ sed -i "s/ALLOYDB_DATABASE_NAME_VAL/${ALLOYDB_DATABASE_NAME}/g" kustomize/compon
 sed -i "s/ALLOYDB_TABLE_NAME_VAL/${ALLOYDB_TABLE_NAME}/g" kustomize/components/alloydb/kustomization.yaml
 sed -i "s/ALLOYDB_SECRET_NAME_VAL/${ALLOYDB_SECRET_NAME}/g" kustomize/components/alloydb/kustomization.yaml
 
-# Create service account for the cart service
+# Create service account for the cart and shopping assistant services
 gcloud iam service-accounts create ${ALLOYDB_USER_GSA_NAME} \
     --display-name=${ALLOYDB_USER_GSA_NAME}
 
 gcloud projects add-iam-policy-binding ${PROJECT_ID} --member=serviceAccount:${ALLOYDB_USER_GSA_ID} --role=roles/alloydb.client
 gcloud projects add-iam-policy-binding ${PROJECT_ID} --member=serviceAccount:${ALLOYDB_USER_GSA_ID} --role=roles/secretmanager.secretAccessor
 gcloud projects add-iam-policy-binding ${PROJECT_ID} --member=serviceAccount:service-${PROJECT_NUMBER}@gcp-sa-alloydb.iam.gserviceaccount.com --role=roles/aiplatform.user
-
 
 gcloud iam service-accounts add-iam-policy-binding ${ALLOYDB_USER_GSA_ID} \
     --member "serviceAccount:${PROJECT_ID}.svc.id.goog[default/${CARTSERVICE_KSA_NAME}]" \
