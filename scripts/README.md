@@ -1,5 +1,7 @@
 # Demo set-up instructions
 
+> Note: Make sure you have the `owner` role to the Google Cloud project you want to deploy this to, else you will be unable to enable certain APIs or modify certain VPC rules that are needed for this demo.
+
 1. Enable the GKE and AR APIs.
     ```sh
     gcloud services enable container.googleapis.com
