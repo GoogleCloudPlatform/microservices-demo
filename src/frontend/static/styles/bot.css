@@ -61,10 +61,14 @@
   background-color: white;
 }
 
+.bot-input-file-button {
+  padding-top: 5px;
+}
+
 .bot-input-text {
   border: none;
   border-bottom: 1px solid #9AA0A6;
-  padding: 0 16px 8px 16px;
+  padding: 0 0 8px 16px;
   outline: none;
   color: #1E2021;
   width: -webkit-fill-available;
