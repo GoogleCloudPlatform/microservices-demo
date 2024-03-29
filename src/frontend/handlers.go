@@ -444,7 +444,28 @@ func (fe *frontendServer) logoutHandler(w http.ResponseWriter, r *http.Request) 
 	w.WriteHeader(http.StatusFound)
 }
 
-func chatBotHandler(w http.ResponseWriter, r *http.Request) {
+func (fe *frontendServer) getProductByID(w http.ResponseWriter, r *http.Request) {
+	id := mux.Vars(r)["ids"]
+	if id == "" {
+		return
+	}
+
+	p, err := fe.getProduct(r.Context(), id)
+	if err != nil {
+		return
+	}
+
+	jsonData, err := json.Marshal(p)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	w.Write(jsonData)
+	w.WriteHeader(http.StatusOK)
+}
+
+func (fe *frontendServer) chatBotHandler(w http.ResponseWriter, r *http.Request) {
 	log := r.Context().Value(ctxKeyLog{}).(logrus.FieldLogger)
 	type Response struct {
 		Message string `json:"message"`
@@ -457,9 +478,7 @@ func chatBotHandler(w http.ResponseWriter, r *http.Request) {
 
 	var response LLMResponse
 
-	//url := "http://shoppingassistantservice.default.svc.cluster.local/"
-	url := "http://localhost:8082/"
-	//TODO: pass base64 image as body for request
+	url := "http://" + fe.shoppingAssistantSvcAddr
 	req, err := http.NewRequest(http.MethodPost, url, r.Body)
 	if err != nil {
 		renderHTTPError(log, r, w, errors.Wrap(err, "failed to create request"), http.StatusInternalServerError)
