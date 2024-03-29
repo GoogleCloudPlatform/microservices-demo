@@ -51,7 +51,7 @@ def create_app():
         prompt = unquote(prompt)
 
         #Decsription prompt:
-        #Send in the image, ask for a description of the room, search for relevant products
+        #Send in the image, ask for a description of the room
         llm_vision = ChatGoogleGenerativeAI(model="gemini-pro-vision")
         llm = ChatGoogleGenerativeAI(model="gemini-pro")
         message = HumanMessage(
@@ -68,6 +68,7 @@ def create_app():
         print(response)
         description_response = response.content
 
+        #Vector search for relevant products using user prompt and description
         vector_search_prompt = f"""
             This is the user's request: {prompt}
             Find the most relevant items for that prompt, while matching style
@@ -78,6 +79,7 @@ def create_app():
         docs = vectorstore.similarity_search(vector_search_prompt)
         print(f"Vector search: {description_response}")
         print(f"Retrieved documents: {len(docs)}")
+        #Prepare relevant documents for inclusion in final prompt
         relevant_docs = ""
         for doc in docs:
             doc_details = doc.to_json()
@@ -87,6 +89,8 @@ def create_app():
         print("Relevant docs:")
         print(relevant_docs)
 
+        #Pass the retrieved documents, description and prompt into Gemini for a
+        #final, fully informed prompt
         design_prompt = f"""
             You are an interior designer that works for Online Boutique. You are
              tasked with providing recommendations to a customer on what they
