@@ -1,4 +1,4 @@
-# Demo set-up instructions
+# AlloyDB / RAG demo set-up instructions
 
 > Note: Make sure you have the `owner` role to the Google Cloud project you want to deploy this to, else you will be unable to enable certain APIs or modify certain VPC rules that are needed for this demo.
 

@@ -15,8 +15,10 @@ ALLOYDB_NETWORK=default
 ALLOYDB_SERVICE_NAME=onlineboutique-network-range
 ALLOYDB_CLUSTER_NAME=onlineboutique-cluster
 ALLOYDB_INSTANCE_NAME=onlineboutique-instance
-ALLOYDB_DATABASE_NAME=carts
-ALLOYDB_TABLE_NAME=cart_items
+ALLOYDB_CARTS_DATABASE_NAME=carts
+ALLOYDB_CARTS_TABLE_NAME=cart_items
+ALLOYDB_PRODUCTS_DATABASE_NAME=products
+ALLOYDB_PRODUCTS_TABLE_NAME=catalog_items
 ALLOYDB_USER_GSA_NAME=alloydb-user-sa
 ALLOYDB_USER_GSA_ID=${ALLOYDB_USER_GSA_NAME}@${PROJECT_ID}.iam.gserviceaccount.com
 CARTSERVICE_KSA_NAME=cartservice
@@ -78,17 +80,17 @@ ALLOYDB_READ_IP=`gcloud alloydb instances list --region=${REGION} --cluster=${AL
 sed -i "s/PROJECT_ID_VAL/${PROJECT_ID}/g" kustomize/components/alloydb/kustomization.yaml
 sed -i "s/ALLOYDB_PRIMARY_IP_VAL/${ALLOYDB_PRIMARY_IP}/g" kustomize/components/alloydb/kustomization.yaml
 sed -i "s/ALLOYDB_USER_GSA_ID/${ALLOYDB_USER_GSA_ID}/g" kustomize/components/alloydb/kustomization.yaml
-sed -i "s/ALLOYDB_DATABASE_NAME_VAL/${ALLOYDB_DATABASE_NAME}/g" kustomize/components/alloydb/kustomization.yaml
-sed -i "s/ALLOYDB_TABLE_NAME_VAL/${ALLOYDB_TABLE_NAME}/g" kustomize/components/alloydb/kustomization.yaml
+sed -i "s/ALLOYDB_DATABASE_NAME_VAL/${ALLOYDB_CARTS_DATABASE_NAME}/g" kustomize/components/alloydb/kustomization.yaml
+sed -i "s/ALLOYDB_TABLE_NAME_VAL/${ALLOYDB_CARTS_TABLE_NAME}/g" kustomize/components/alloydb/kustomization.yaml
 sed -i "s/ALLOYDB_SECRET_NAME_VAL/${ALLOYDB_SECRET_NAME}/g" kustomize/components/alloydb/kustomization.yaml
 
 # Substitute environment values (kubernetes-manifests/shoppingassistantservice.yaml)
 sed -i "s/PROJECT_ID_VAL/${PROJECT_ID}/g" kubernetes-manifests/shoppingassistantservice.yaml
-sed -i "/REGION_VAL/${REGION}/g" kubernetes-manifests/shoppingassistantservice.yaml
+sed -i "s/REGION_VAL/${REGION}/g" kubernetes-manifests/shoppingassistantservice.yaml
 sed -i "s/ALLOYDB_CLUSTER_NAME_VAL/${ALLOYDB_CLUSTER_NAME}/g" kubernetes-manifests/shoppingassistantservice.yaml
 sed -i "s/ALLOYDB_INSTANCE_NAME_VAL/${ALLOYDB_INSTANCE_NAME}/g" kubernetes-manifests/shoppingassistantservice.yaml
-sed -i "s/ALLOYDB_DATABASE_NAME_VAL/${ALLOYDB_DATABASE_NAME}/g" kubernetes-manifests/shoppingassistantservice.yaml
-sed -i "s/ALLOYDB_TABLE_NAME_VAL/${ALLOYDB_TABLE_NAME}/g" kubernetes-manifests/shoppingassistantservice.yaml
+sed -i "s/ALLOYDB_DATABASE_NAME_VAL/${ALLOYDB_PRODUCTS_DATABASE_NAME}/g" kubernetes-manifests/shoppingassistantservice.yaml
+sed -i "s/ALLOYDB_TABLE_NAME_VAL/${ALLOYDB_PRODUCTS_TABLE_NAME}/g" kubernetes-manifests/shoppingassistantservice.yaml
 sed -i "s/ALLOYDB_SECRET_NAME_VAL/${ALLOYDB_SECRET_NAME}/g" kubernetes-manifests/shoppingassistantservice.yaml
 
 # Create service account for the cart and shopping assistant services
