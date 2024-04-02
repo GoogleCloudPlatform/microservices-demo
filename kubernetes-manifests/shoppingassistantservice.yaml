@@ -49,7 +49,21 @@ spec:
           containerPort: 8080
         env:
         - name: GOOGLE_API_KEY
-          value: "YOUR_API_KEY"
+          value: GOOGLE_API_KEY_VAL
+        - name: ALLOYDB_CLUSTER_NAME
+          value: ALLOYDB_CLUSTER_NAME_VAL
+        - name: ALLOYDB_INSTANCE_NAME
+          value: ALLOYDB_INSTANCE_NAME_VAL
+        - name: ALLOYDB_DATABASE_NAME
+          value: ALLOYDB_DATABASE_NAME_VAL
+        - name: ALLOYDB_TABLE_NAME
+          value: ALLOYDB_TABLE_NAME_VAL
+        - name: ALLOYDB_SECRET_NAME
+          value: ALLOYDB_SECRET_NAME_VAL
+        - name: PROJECT_ID
+          value: PROJECT_ID_VAL
+        - name: REGION_ID
+          value: REGION_ID_VAL
         resources:
           requests:
             cpu: 100m

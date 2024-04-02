@@ -85,14 +85,9 @@
 
 1. Create an API key in the [Credentials page](https://pantheon.corp.google.com/apis/credentials) with permissions for "Generative Language API", and make note of the secret key.
 
-1. Paste this secret key in the shopping assistant service envs.
+1. Paste this secret key in the shopping assistant service envs, replacing `GOOGLE_API_KEY_VAL`.
     ```sh
     vim kubernetes-manifests/shoppingassistantservice.yaml
-    ```
-
-1. Replace placeholder hardcoded variables in the shopping assistant service source (likely just the project ID).
-    ```sh
-    vim src/shoppingassistantservice/shoppingassistantservice.py
     ```
 
 1. Replace the `products.json` file with the updated one.

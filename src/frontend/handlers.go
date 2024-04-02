@@ -42,10 +42,11 @@ type platformDetails struct {
 }
 
 var (
-	frontendMessage = strings.TrimSpace(os.Getenv("FRONTEND_MESSAGE"))
-	isCymbalBrand   = "true" == strings.ToLower(os.Getenv("CYMBAL_BRANDING"))
-	templates       = template.Must(template.New("").
-			Funcs(template.FuncMap{
+	frontendMessage  = strings.TrimSpace(os.Getenv("FRONTEND_MESSAGE"))
+	isCymbalBrand    = "true" == strings.ToLower(os.Getenv("CYMBAL_BRANDING"))
+	assistantEnabled = "true" == strings.ToLower(os.Getenv("ENABLE_ASSISTANT"))
+	templates        = template.Must(template.New("").
+				Funcs(template.FuncMap{
 			"renderMoney":        renderMoney,
 			"renderCurrencyLogo": renderCurrencyLogo,
 		}).ParseGlob("templates/*.html"))
@@ -118,6 +119,7 @@ func (fe *frontendServer) homeHandler(w http.ResponseWriter, r *http.Request) {
 		"platform_css":      plat.css,
 		"platform_name":     plat.provider,
 		"is_cymbal_brand":   isCymbalBrand,
+		"assistant_enabled": assistantEnabled,
 		"deploymentDetails": deploymentDetailsMap,
 		"frontendMessage":   frontendMessage,
 	}); err != nil {
@@ -214,6 +216,7 @@ func (fe *frontendServer) productHandler(w http.ResponseWriter, r *http.Request)
 		"platform_css":      plat.css,
 		"platform_name":     plat.provider,
 		"is_cymbal_brand":   isCymbalBrand,
+		"assistant_enabled": assistantEnabled,
 		"deploymentDetails": deploymentDetailsMap,
 		"frontendMessage":   frontendMessage,
 		"packagingInfo":     packagingInfo,
@@ -328,6 +331,7 @@ func (fe *frontendServer) viewCartHandler(w http.ResponseWriter, r *http.Request
 		"platform_css":      plat.css,
 		"platform_name":     plat.provider,
 		"is_cymbal_brand":   isCymbalBrand,
+		"assistant_enabled": assistantEnabled,
 		"deploymentDetails": deploymentDetailsMap,
 		"frontendMessage":   frontendMessage,
 	}); err != nil {
@@ -402,6 +406,7 @@ func (fe *frontendServer) placeOrderHandler(w http.ResponseWriter, r *http.Reque
 		"platform_css":      plat.css,
 		"platform_name":     plat.provider,
 		"is_cymbal_brand":   isCymbalBrand,
+		"assistant_enabled": assistantEnabled,
 		"deploymentDetails": deploymentDetailsMap,
 		"frontendMessage":   frontendMessage,
 	}); err != nil {
@@ -425,6 +430,7 @@ func (fe *frontendServer) assistantHandler(w http.ResponseWriter, r *http.Reques
 		"platform_css":      plat.css,
 		"platform_name":     plat.provider,
 		"is_cymbal_brand":   isCymbalBrand,
+		"assistant_enabled": assistantEnabled,
 		"deploymentDetails": deploymentDetailsMap,
 		"frontendMessage":   frontendMessage,
 	}); err != nil {
@@ -558,6 +564,7 @@ func renderHTTPError(log logrus.FieldLogger, r *http.Request, w http.ResponseWri
 		"status_code":       code,
 		"status":            http.StatusText(code),
 		"is_cymbal_brand":   isCymbalBrand,
+		"assistant_enabled": assistantEnabled,
 		"deploymentDetails": deploymentDetailsMap,
 		"frontendMessage":   frontendMessage,
 	}); templateErr != nil {

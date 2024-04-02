@@ -14,6 +14,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import os
+
+from google.cloud import secretmanager_v1
 from urllib.parse import unquote
 from langchain_core.messages import HumanMessage
 from langchain_google_genai import ChatGoogleGenerativeAI, GoogleGenerativeAIEmbeddings
@@ -21,25 +24,39 @@ from flask import Flask, request
 
 from langchain_google_alloydb_pg import AlloyDBEngine, AlloyDBVectorStore
 
+PROJECT_ID = os.environ["PROJECT_ID"]
+REGION = os.environ["REGION"]
+ALLOYDB_DATABASE_NAME = os.environ["ALLOYDB_DATABASE_NAME"]
+ALLOYDB_TABLE_NAME = os.environ["ALLOYDB_TABLE_NAME"]
+ALLOYDB_CLUSTER_NAME = os.environ["ALLOYDB_CLUSTER_NAME"]
+ALLOYDB_INSTANCE_NAME = os.environ["ALLOYDB_INSTANCE_NAME"]
+ALLOYDB_SECRET_NAME = os.environ["ALLOYDB_SECRET_NAME"]
+
+secret_manager_client = secretmanager_v1.SecretManagerServiceClient()
+secret_name = "projects/{}/secrets/{}".format(PROJECT_ID, ALLOYDB_SECRET_NAME)
+secret_request = secretmanager_v1.GetSecretRequest(name=secret_name)
+secret_response = secret_manager_client.get_secret(request=secret_request)
+PGPASSWORD = secret_response.payload.data.decode("UTF-8")
+
 engine = AlloyDBEngine.from_instance(
-    project_id="cooking-with-duet-6",
-    region="us-central1",
-    cluster="onlineboutique-cluster",
-    instance="onlineboutique-instance",
-    database="products",
+    project_id=PROJECT_ID,
+    region=REGION,
+    cluster=ALLOYDB_CLUSTER_NAME,
+    instance=ALLOYDB_INSTANCE_NAME,
+    database=ALLOYDB_DATABASE_NAME,
     user="postgres",
-    password="admin"
+    password=PGPASSWORD
 )
+
 vectorstore = AlloyDBVectorStore.create_sync(
     engine=engine,
-    table_name="catalog_items",
+    table_name=ALLOYDB_TABLE_NAME,
     embedding_service=GoogleGenerativeAIEmbeddings(model="models/embedding-001"),
     id_column="id",
     content_column="description",
     embedding_column="product_embedding",
     metadata_columns=["id", "name", "categories"]
 )
-
 
 def create_app():
     app = Flask(__name__)
@@ -125,7 +142,6 @@ def create_app():
         return data
 
     return app
-
 
 if __name__ == "__main__":
     # Create an instance of flask server when called directly

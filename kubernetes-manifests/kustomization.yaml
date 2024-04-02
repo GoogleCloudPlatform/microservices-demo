@@ -29,7 +29,7 @@ resources:
  - redis.yaml
  - shippingservice.yaml
 components:
-# - ../kustomize/components/cymbal-branding
+ - ../kustomize/components/cymbal-branding # @TODO: enabled for the Next demo
 # - ../kustomize/components/google-cloud-operations
 # - ../kustomize/components/memorystore
 # - ../kustomize/components/network-policies
