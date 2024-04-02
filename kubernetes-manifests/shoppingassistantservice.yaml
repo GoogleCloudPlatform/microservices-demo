@@ -62,8 +62,8 @@ spec:
           value: ALLOYDB_SECRET_NAME_VAL
         - name: PROJECT_ID
           value: PROJECT_ID_VAL
-        - name: REGION_ID
-          value: REGION_ID_VAL
+        - name: REGION
+          value: REGION_VAL
         resources:
           requests:
             cpu: 100m
