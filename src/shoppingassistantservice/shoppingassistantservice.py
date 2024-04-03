@@ -41,7 +41,7 @@ ALLOYDB_SECRET_NAME = os.environ["ALLOYDB_SECRET_NAME"]
 # secret_response = secret_manager_client.get_secret_version(request=secret_request)
 # print(secret_response)
 # PGPASSWORD = secret_response.payload.data.decode("UTF-8")
-PGPASSWORD = "thisissecret"
+PGPASSWORD = "thisispassword"
 
 engine = AlloyDBEngine.from_instance(
     project_id=PROJECT_ID,
