@@ -15,22 +15,19 @@
 apiVersion: kustomize.config.k8s.io/v1alpha1
 kind: Component
 patches:
-
-
-
-# redis - remove the shoppingassistant Deployment
+# shoppingassistantservice - remove Deployment
 - patch: |-
     apiVersion: apps/v1
     kind: Deployment
     metadata:
-      name: shoppingassistant
+      name: shoppingassistantservice
     $patch: delete
-# redis - remove the shoppingassistant Service
+# shoppingassistantservice - remove Service
 - patch: |-
     apiVersion: v1
     kind: Service
     metadata:
-      name: shoppingassistant
+      name: shoppingassistantservice
     $patch: delete
 # frontend - set ENABLE_ASSISTANT to false
 - patch: |-
