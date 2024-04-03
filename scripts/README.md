@@ -95,6 +95,22 @@
     vim src/productcatalogservice/products.json
     ```
 
+1. Change the commented-out components in `kubernetes-manifests/kustomization.yaml` to look like this:
+    ```yaml
+    components:
+     - ../kustomize/components/cymbal-branding # remove comment
+    # - ../kustomize/components/google-cloud-operations
+    # - ../kustomize/components/memorystore
+    # - ../kustomize/components/network-policies
+     - ../kustomize/components/service-accounts # remove comment
+     - ../kustomize/components/alloydb # remove comment
+    # - ../kustomize/components/spanner
+    # - ../kustomize/components/container-images-tag
+    # - ../kustomize/components/container-images-tag-suffix
+    # - ../kustomize/components/container-images-registry
+    # - ../kustomize/components/disable-shopping-assistant # add comment
+    ```
+
 1. Deploy to the GKE cluster.
     ```
     skaffold run --default-repo=us-central1-docker.pkg.dev/<PROJECT_ID>/images
