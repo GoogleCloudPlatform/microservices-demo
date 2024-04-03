@@ -90,8 +90,8 @@ spec:
             value: "0"
           # - name: CYMBAL_BRANDING
           #   value: "true"
-          # - name: ENABLE_ASSISTANT
-          #   value: "true"
+          - name: ENABLE_ASSISTANT
+            value: "true"
           # - name: FRONTEND_MESSAGE
           #   value: "Replace this with a message you want to display on all pages."
           # As part of an optional Google Cloud demo, you can run an optional microservice called the "packaging service".
