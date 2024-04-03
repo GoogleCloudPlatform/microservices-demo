@@ -38,9 +38,10 @@ secret_name = secret_manager_client.secret_version_path(project=PROJECT_ID, secr
 print(secret_name)
 secret_request = secretmanager_v1.GetSecretVersionRequest(name=secret_name)
 print(secret_request)
-secret_response = secret_manager_client.get_secret_version(request=secret_request)
+secret_response = secret_manager_client.access_secret_version(request=secret_request)
 print(secret_response)
 PGPASSWORD = secret_response.payload.data.decode("UTF-8")
+print(PGPASSWORD)
 # PGPASSWORD = "thisispassword"
 
 engine = AlloyDBEngine.from_instance(
