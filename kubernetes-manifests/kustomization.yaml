@@ -33,9 +33,10 @@ components:
 # - ../kustomize/components/google-cloud-operations
 # - ../kustomize/components/memorystore
 # - ../kustomize/components/network-policies
- - ../kustomize/components/service-accounts # @TODO: enabled for the Next demo
- - ../kustomize/components/alloydb # @TODO: enabled for the Next demo
+# - ../kustomize/components/service-accounts
+# - ../kustomize/components/alloydb
 # - ../kustomize/components/spanner
 # - ../kustomize/components/container-images-tag
 # - ../kustomize/components/container-images-tag-suffix
 # - ../kustomize/components/container-images-registry
+ - ../kustomize/components/disable-shopping-assistant

@@ -195,3 +195,7 @@ cartDatabase:
     endpointAddress: ""
     endpointPort: ""
     certificate: ""
+
+shoppingassistantservice:
+  create: false
+  name: shoppingassistantservice

@@ -82,9 +82,11 @@
                     </div>
                     {{ end }}
 
+                    {{ if $.assistant_enabled }}
                     <a href="/assistant" class="cart-link">
                       <img src="/static/icons/Hipster_WandIcon.svg" style="width: 22px; height: 22px;" alt="Assistant icon" class="logo" title="Assistant" />
                     </a>
+                    {{ end }}
 
                     <a href="/cart" class="cart-link">
                         <img src="/static/icons/Hipster_CartIcon.svg" alt="Cart icon" class="logo" title="Cart" />

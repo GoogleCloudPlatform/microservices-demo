@@ -1,4 +1,4 @@
-# Demo set-up instructions
+# AlloyDB / RAG demo set-up instructions
 
 > Note: Make sure you have the `owner` role to the Google Cloud project you want to deploy this to, else you will be unable to enable certain APIs or modify certain VPC rules that are needed for this demo.
 
@@ -85,19 +85,30 @@
 
 1. Create an API key in the [Credentials page](https://pantheon.corp.google.com/apis/credentials) with permissions for "Generative Language API", and make note of the secret key.
 
-1. Paste this secret key in the shopping assistant service envs.
+1. Paste this secret key in the shopping assistant service envs, replacing `GOOGLE_API_KEY_VAL`.
     ```sh
     vim kubernetes-manifests/shoppingassistantservice.yaml
-    ```
-
-1. Replace placeholder hardcoded variables in the shopping assistant service source (likely just the project ID).
-    ```sh
-    vim src/shoppingassistantservice/shoppingassistantservice.py
     ```
 
 1. Replace the `products.json` file with the updated one.
     ```sh
     vim src/productcatalogservice/products.json
+    ```
+
+1. Change the commented-out components in `kubernetes-manifests/kustomization.yaml` to look like this:
+    ```yaml
+    components:
+     - ../kustomize/components/cymbal-branding # remove comment
+    # - ../kustomize/components/google-cloud-operations
+    # - ../kustomize/components/memorystore
+    # - ../kustomize/components/network-policies
+     - ../kustomize/components/service-accounts # remove comment
+     - ../kustomize/components/alloydb # remove comment
+    # - ../kustomize/components/spanner
+    # - ../kustomize/components/container-images-tag
+    # - ../kustomize/components/container-images-tag-suffix
+    # - ../kustomize/components/container-images-registry
+    # - ../kustomize/components/disable-shopping-assistant # add comment
     ```
 
 1. Deploy to the GKE cluster.

@@ -212,61 +212,6 @@ spec:
             cpu: 200m
             memory: 450Mi
 ---
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: shoppingassistantservice
-spec:
-  selector:
-    matchLabels:
-      app: shoppingassistantservice
-  template:
-    metadata:
-      labels:
-        app: shoppingassistantservice
-    spec:
-      serviceAccountName: default
-      terminationGracePeriodSeconds: 5
-      securityContext:
-        fsGroup: 1000
-        runAsGroup: 1000
-        runAsNonRoot: true
-        runAsUser: 1000
-      containers:
-      - name: server
-        securityContext:
-          allowPrivilegeEscalation: false
-          capabilities:
-            drop:
-            - ALL
-          privileged: false
-          readOnlyRootFilesystem: true
-        image: northamerica-northeast1-docker.pkg.dev/cooking-with-duet-6/local-images/shoppingassistantservice:v0.9.3
-        ports:
-        - containerPort: 8080
-        readinessProbe:
-          periodSeconds: 5
-          grpc:
-            port: 8080
-        livenessProbe:
-          periodSeconds: 5
-          grpc:
-            port: 8080
-        env:
-        - name: PORT
-          value: "8080"
-        - name: PRODUCT_CATALOG_SERVICE_ADDR
-          value: "productcatalogservice:3550"
-        - name: DISABLE_PROFILER
-          value: "1"
-        resources:
-          requests:
-            cpu: 100m
-            memory: 220Mi
-          limits:
-            cpu: 200m
-            memory: 450Mi
----
 apiVersion: v1
 kind: Service
 metadata:
@@ -275,19 +220,6 @@ spec:
   type: ClusterIP
   selector:
     app: recommendationservice
-  ports:
-  - name: grpc
-    port: 8080
-    targetPort: 8080
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: shoppingassistantservice
-spec:
-  type: ClusterIP
-  selector:
-    app: shoppingassistantservice
   ports:
   - name: grpc
     port: 8080
@@ -353,8 +285,6 @@ spec:
             value: "cartservice:7070"
           - name: RECOMMENDATION_SERVICE_ADDR
             value: "recommendationservice:8080"
-          - name: SHOPPING_ASSISTANT_SERVICE_ADDR
-            value: "shoppingassistantservice:8080"
           - name: SHIPPING_SERVICE_ADDR
             value: "shippingservice:50051"
           - name: CHECKOUT_SERVICE_ADDR

@@ -297,6 +297,11 @@ main {
     height: calc(100vh - 91px);
     overflow-y: scroll;
   }
+
+  .px-10-percent {
+    padding-left: 10%;
+    padding-right: 10%;
+  }
 }
 
 .home-mobile-hero-banner {
@@ -371,6 +376,8 @@ similar to that of the hot-products-row.
   padding-left: 9%;
   padding-right: 9%;
   background-color: #570D2E;
+  width: 100%;
+  margin: 0;
 }
 
 /* Ad */
