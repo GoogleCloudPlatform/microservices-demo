@@ -32,16 +32,16 @@ ALLOYDB_CLUSTER_NAME = os.environ["ALLOYDB_CLUSTER_NAME"]
 ALLOYDB_INSTANCE_NAME = os.environ["ALLOYDB_INSTANCE_NAME"]
 ALLOYDB_SECRET_NAME = os.environ["ALLOYDB_SECRET_NAME"]
 
-# secret_manager_client = secretmanager_v1.SecretManagerServiceClient()
-# # secret_name = "projects/{}/secrets/{}".format(PROJECT_ID, ALLOYDB_SECRET_NAME)
-# secret_name = secret_manager_client.secret_version_path(project=PROJECT_ID, secret=ALLOYDB_SECRET_NAME, secret_version="latest")
-# print(secret_name)
-# secret_request = secretmanager_v1.GetSecretVersionRequest(name=secret_name)
-# print(secret_request)
-# secret_response = secret_manager_client.get_secret_version(request=secret_request)
-# print(secret_response)
-# PGPASSWORD = secret_response.payload.data.decode("UTF-8")
-PGPASSWORD = "thisispassword"
+secret_manager_client = secretmanager_v1.SecretManagerServiceClient()
+# secret_name = "projects/{}/secrets/{}".format(PROJECT_ID, ALLOYDB_SECRET_NAME)
+secret_name = secret_manager_client.secret_version_path(project=PROJECT_ID, secret=ALLOYDB_SECRET_NAME, secret_version="latest")
+print(secret_name)
+secret_request = secretmanager_v1.GetSecretVersionRequest(name=secret_name)
+print(secret_request)
+secret_response = secret_manager_client.get_secret_version(request=secret_request)
+print(secret_response)
+PGPASSWORD = secret_response.payload.data.decode("UTF-8")
+# PGPASSWORD = "thisispassword"
 
 engine = AlloyDBEngine.from_instance(
     project_id=PROJECT_ID,
