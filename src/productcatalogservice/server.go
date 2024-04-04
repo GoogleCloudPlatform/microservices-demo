@@ -160,7 +160,7 @@ func main() {
 	}
 	defer dbpool.Close()
 
-	query := "SELECT id, name, description, picture, price_usd_currency_code, price_used_units, price_usd_nanos, categories FROM " + tableName
+	query := "SELECT id, name, description, picture, price_usd_currency_code, price_usd_units, price_usd_nanos, categories FROM " + tableName
 	rows, err := dbpool.Query(context.Background(), query)
 	if err != nil {
 		log.Printf("Error executing query: %s", err)
