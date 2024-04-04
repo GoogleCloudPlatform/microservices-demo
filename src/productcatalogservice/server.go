@@ -177,7 +177,9 @@ func main() {
 		var price_usd_units int
 		var price_usd_nanos int
 		var categories string
-		err = rows.Scan(&id, &name, &description, &picture, &price_usd_currency_code, &price_usd_units, &price_usd_nanos, &categories)
+		var product_embedding [768]int
+		var embed_model string
+		err = rows.Scan(&id, &name, &description, &picture, &price_usd_currency_code, &price_usd_units, &price_usd_nanos, &categories, &product_embedding, &embed_model)
 		if err != nil {
 			log.Printf("Error scanning row:", err)
 			return
