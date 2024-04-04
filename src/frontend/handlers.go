@@ -42,10 +42,11 @@ type platformDetails struct {
 }
 
 var (
-	frontendMessage = strings.TrimSpace(os.Getenv("FRONTEND_MESSAGE"))
-	isCymbalBrand   = "true" == strings.ToLower(os.Getenv("CYMBAL_BRANDING"))
-	templates       = template.Must(template.New("").
-			Funcs(template.FuncMap{
+	frontendMessage  = strings.TrimSpace(os.Getenv("FRONTEND_MESSAGE"))
+	isCymbalBrand    = "true" == strings.ToLower(os.Getenv("CYMBAL_BRANDING"))
+	assistantEnabled = "true" == strings.ToLower(os.Getenv("ENABLE_ASSISTANT"))
+	templates        = template.Must(template.New("").
+				Funcs(template.FuncMap{
 			"renderMoney":        renderMoney,
 			"renderCurrencyLogo": renderCurrencyLogo,
 		}).ParseGlob("templates/*.html"))
@@ -118,6 +119,7 @@ func (fe *frontendServer) homeHandler(w http.ResponseWriter, r *http.Request) {
 		"platform_css":      plat.css,
 		"platform_name":     plat.provider,
 		"is_cymbal_brand":   isCymbalBrand,
+		"assistant_enabled": assistantEnabled,
 		"deploymentDetails": deploymentDetailsMap,
 		"frontendMessage":   frontendMessage,
 	}); err != nil {
@@ -214,6 +216,7 @@ func (fe *frontendServer) productHandler(w http.ResponseWriter, r *http.Request)
 		"platform_css":      plat.css,
 		"platform_name":     plat.provider,
 		"is_cymbal_brand":   isCymbalBrand,
+		"assistant_enabled": assistantEnabled,
 		"deploymentDetails": deploymentDetailsMap,
 		"frontendMessage":   frontendMessage,
 		"packagingInfo":     packagingInfo,
@@ -328,6 +331,7 @@ func (fe *frontendServer) viewCartHandler(w http.ResponseWriter, r *http.Request
 		"platform_css":      plat.css,
 		"platform_name":     plat.provider,
 		"is_cymbal_brand":   isCymbalBrand,
+		"assistant_enabled": assistantEnabled,
 		"deploymentDetails": deploymentDetailsMap,
 		"frontendMessage":   frontendMessage,
 	}); err != nil {
@@ -402,6 +406,31 @@ func (fe *frontendServer) placeOrderHandler(w http.ResponseWriter, r *http.Reque
 		"platform_css":      plat.css,
 		"platform_name":     plat.provider,
 		"is_cymbal_brand":   isCymbalBrand,
+		"assistant_enabled": assistantEnabled,
+		"deploymentDetails": deploymentDetailsMap,
+		"frontendMessage":   frontendMessage,
+	}); err != nil {
+		log.Println(err)
+	}
+}
+
+func (fe *frontendServer) assistantHandler(w http.ResponseWriter, r *http.Request) {
+	currencies, err := fe.getCurrencies(r.Context())
+	if err != nil {
+		renderHTTPError(log, r, w, errors.Wrap(err, "could not retrieve currencies"), http.StatusInternalServerError)
+		return
+	}
+
+	if err := templates.ExecuteTemplate(w, "assistant", map[string]interface{}{
+		"session_id":        sessionID(r),
+		"request_id":        r.Context().Value(ctxKeyRequestID{}),
+		"user_currency":     currentCurrency(r),
+		"show_currency":     false,
+		"currencies":        currencies,
+		"platform_css":      plat.css,
+		"platform_name":     plat.provider,
+		"is_cymbal_brand":   isCymbalBrand,
+		"assistant_enabled": assistantEnabled,
 		"deploymentDetails": deploymentDetailsMap,
 		"frontendMessage":   frontendMessage,
 	}); err != nil {
@@ -421,7 +450,28 @@ func (fe *frontendServer) logoutHandler(w http.ResponseWriter, r *http.Request) 
 	w.WriteHeader(http.StatusFound)
 }
 
-func chatBotHandler(w http.ResponseWriter, r *http.Request) {
+func (fe *frontendServer) getProductByID(w http.ResponseWriter, r *http.Request) {
+	id := mux.Vars(r)["ids"]
+	if id == "" {
+		return
+	}
+
+	p, err := fe.getProduct(r.Context(), id)
+	if err != nil {
+		return
+	}
+
+	jsonData, err := json.Marshal(p)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	w.Write(jsonData)
+	w.WriteHeader(http.StatusOK)
+}
+
+func (fe *frontendServer) chatBotHandler(w http.ResponseWriter, r *http.Request) {
 	log := r.Context().Value(ctxKeyLog{}).(logrus.FieldLogger)
 	type Response struct {
 		Message string `json:"message"`
@@ -434,8 +484,7 @@ func chatBotHandler(w http.ResponseWriter, r *http.Request) {
 
 	var response LLMResponse
 
-	url := "http://shoppingassistantservice.default.svc.cluster.local/"
-	//TODO: pass base64 image as body for request
+	url := "http://" + fe.shoppingAssistantSvcAddr
 	req, err := http.NewRequest(http.MethodPost, url, r.Body)
 	if err != nil {
 		renderHTTPError(log, r, w, errors.Wrap(err, "failed to create request"), http.StatusInternalServerError)
@@ -515,6 +564,7 @@ func renderHTTPError(log logrus.FieldLogger, r *http.Request, w http.ResponseWri
 		"status_code":       code,
 		"status":            http.StatusText(code),
 		"is_cymbal_brand":   isCymbalBrand,
+		"assistant_enabled": assistantEnabled,
 		"deploymentDetails": deploymentDetailsMap,
 		"frontendMessage":   frontendMessage,
 	}); templateErr != nil {

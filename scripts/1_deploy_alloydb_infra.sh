@@ -15,20 +15,20 @@ ALLOYDB_NETWORK=default
 ALLOYDB_SERVICE_NAME=onlineboutique-network-range
 ALLOYDB_CLUSTER_NAME=onlineboutique-cluster
 ALLOYDB_INSTANCE_NAME=onlineboutique-instance
-ALLOYDB_DATABASE_NAME=carts
-ALLOYDB_TABLE_NAME=cart_items
+ALLOYDB_CARTS_DATABASE_NAME=carts
+ALLOYDB_CARTS_TABLE_NAME=cart_items
+ALLOYDB_PRODUCTS_DATABASE_NAME=products
+ALLOYDB_PRODUCTS_TABLE_NAME=catalog_items
 ALLOYDB_USER_GSA_NAME=alloydb-user-sa
 ALLOYDB_USER_GSA_ID=${ALLOYDB_USER_GSA_NAME}@${PROJECT_ID}.iam.gserviceaccount.com
 ALLOYDB_SECRET_NAME=alloydb-secret
-gcloud iam service-accounts add-iam-policy-binding ${ALLOYDB_USER_GSA_ID} \
-        --member "serviceAccount:${PROJECT_ID}.svc.id.goog[default/${SHOPPINGASSISTANTSERVICE_KSA_NAME}]" \
-        --role roles/iam.workloadIdentityUser
 
 # Enable services
 gcloud services enable alloydb.googleapis.com
 gcloud services enable servicenetworking.googleapis.com
 gcloud services enable secretmanager.googleapis.com
 gcloud services enable aiplatform.googleapis.com
+gcloud services enable generativelanguage.googleapis.com
 
 # Set our DB credentials behind the secret
 echo $PGPASSWORD | gcloud secrets create ${ALLOYDB_SECRET_NAME} --data-file=-
@@ -65,19 +65,33 @@ gcloud alloydb instances create ${ALLOYDB_INSTANCE_NAME}-replica \
     --instance-type=READ_POOL \
     --read-pool-node-count=2
 
+gcloud beta alloydb instances update ${ALLOYDB_INSTANCE_NAME} \
+    --cluster=${ALLOYDB_CLUSTER_NAME} \
+    --region=${REGION} \
+    --assign-inbound-public-ip=ASSIGN_IPV4
+
 # Fetch the primary and read IPs
 ALLOYDB_PRIMARY_IP=`gcloud alloydb instances list --region=${REGION} --cluster=${ALLOYDB_CLUSTER_NAME} --filter="INSTANCE_TYPE:PRIMARY" --format=flattened | sed -nE "s/ipAddress:\s*(.*)/\1/p"`
 ALLOYDB_READ_IP=`gcloud alloydb instances list --region=${REGION} --cluster=${ALLOYDB_CLUSTER_NAME} --filter="INSTANCE_TYPE:READ_POOL" --format=flattened | sed -nE "s/ipAddress:\s*(.*)/\1/p"`
 
-# Substitute environment values
+# Substitute environment values (alloydb/kustomization.yaml)
 sed -i "s/PROJECT_ID_VAL/${PROJECT_ID}/g" kustomize/components/alloydb/kustomization.yaml
 sed -i "s/ALLOYDB_PRIMARY_IP_VAL/${ALLOYDB_PRIMARY_IP}/g" kustomize/components/alloydb/kustomization.yaml
 sed -i "s/ALLOYDB_USER_GSA_ID/${ALLOYDB_USER_GSA_ID}/g" kustomize/components/alloydb/kustomization.yaml
-sed -i "s/ALLOYDB_DATABASE_NAME_VAL/${ALLOYDB_DATABASE_NAME}/g" kustomize/components/alloydb/kustomization.yaml
-sed -i "s/ALLOYDB_TABLE_NAME_VAL/${ALLOYDB_TABLE_NAME}/g" kustomize/components/alloydb/kustomization.yaml
+sed -i "s/ALLOYDB_DATABASE_NAME_VAL/${ALLOYDB_CARTS_DATABASE_NAME}/g" kustomize/components/alloydb/kustomization.yaml
+sed -i "s/ALLOYDB_TABLE_NAME_VAL/${ALLOYDB_CARTS_TABLE_NAME}/g" kustomize/components/alloydb/kustomization.yaml
 sed -i "s/ALLOYDB_SECRET_NAME_VAL/${ALLOYDB_SECRET_NAME}/g" kustomize/components/alloydb/kustomization.yaml
 
-# Create a GSA with AlloyDB and GenAI roles
+# Substitute environment values (kubernetes-manifests/shoppingassistantservice.yaml)
+sed -i "s/PROJECT_ID_VAL/${PROJECT_ID}/g" kubernetes-manifests/shoppingassistantservice.yaml
+sed -i "s/REGION_VAL/${REGION}/g" kubernetes-manifests/shoppingassistantservice.yaml
+sed -i "s/ALLOYDB_CLUSTER_NAME_VAL/${ALLOYDB_CLUSTER_NAME}/g" kubernetes-manifests/shoppingassistantservice.yaml
+sed -i "s/ALLOYDB_INSTANCE_NAME_VAL/${ALLOYDB_INSTANCE_NAME}/g" kubernetes-manifests/shoppingassistantservice.yaml
+sed -i "s/ALLOYDB_DATABASE_NAME_VAL/${ALLOYDB_PRODUCTS_DATABASE_NAME}/g" kubernetes-manifests/shoppingassistantservice.yaml
+sed -i "s/ALLOYDB_TABLE_NAME_VAL/${ALLOYDB_PRODUCTS_TABLE_NAME}/g" kubernetes-manifests/shoppingassistantservice.yaml
+sed -i "s/ALLOYDB_SECRET_NAME_VAL/${ALLOYDB_SECRET_NAME}/g" kubernetes-manifests/shoppingassistantservice.yaml
+
+# Create service account for the cart and shopping assistant services
 gcloud iam service-accounts create ${ALLOYDB_USER_GSA_NAME} \
     --display-name=${ALLOYDB_USER_GSA_NAME}
 
@@ -88,6 +102,8 @@ gcloud projects add-iam-policy-binding ${PROJECT_ID} --member=serviceAccount:${A
 gcloud projects add-iam-policy-binding ${PROJECT_ID} --member=service-${PROJECT_NUMBER}@gcp-sa-alloydb.iam.gserviceaccount.com --role=roles/aiplatform.user
 
 # Add bindings to the Online Boutique services that need it
+gcloud projects add-iam-policy-binding ${PROJECT_ID} --member=serviceAccount:service-${PROJECT_NUMBER}@gcp-sa-alloydb.iam.gserviceaccount.com --role=roles/aiplatform.user
+
 gcloud iam service-accounts add-iam-policy-binding ${ALLOYDB_USER_GSA_ID} \
     --member "serviceAccount:${PROJECT_ID}.svc.id.goog[default/cartservice]" \
     --role roles/iam.workloadIdentityUser
