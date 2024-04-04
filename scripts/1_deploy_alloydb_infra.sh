@@ -76,10 +76,15 @@ ALLOYDB_READ_IP=`gcloud alloydb instances list --region=${REGION} --cluster=${AL
 
 # Substitute environment values (alloydb/kustomization.yaml)
 sed -i "s/PROJECT_ID_VAL/${PROJECT_ID}/g" kustomize/components/alloydb/kustomization.yaml
+sed -i "s/REGION_VAL/${REGION}/g" kustomize/components/alloydb/kustomization.yaml
 sed -i "s/ALLOYDB_PRIMARY_IP_VAL/${ALLOYDB_PRIMARY_IP}/g" kustomize/components/alloydb/kustomization.yaml
 sed -i "s/ALLOYDB_USER_GSA_ID/${ALLOYDB_USER_GSA_ID}/g" kustomize/components/alloydb/kustomization.yaml
-sed -i "s/ALLOYDB_DATABASE_NAME_VAL/${ALLOYDB_CARTS_DATABASE_NAME}/g" kustomize/components/alloydb/kustomization.yaml
-sed -i "s/ALLOYDB_TABLE_NAME_VAL/${ALLOYDB_CARTS_TABLE_NAME}/g" kustomize/components/alloydb/kustomization.yaml
+sed -i "s/ALLOYDB_CLUSTER_NAME_VAL/${ALLOYDB_CLUSTER_NAME}/g" kustomize/components/alloydb/kustomization.yaml
+sed -i "s/ALLOYDB_INSTANCE_NAME_VAL/${ALLOYDB_INSTANCE_NAME}/g" kustomize/components/alloydb/kustomization.yaml
+sed -i "s/ALLOYDB_CARTS_DATABASE_NAME_VAL/${ALLOYDB_CARTS_DATABASE_NAME}/g" kustomize/components/alloydb/kustomization.yaml
+sed -i "s/ALLOYDB_CARTS_TABLE_NAME_VAL/${ALLOYDB_CARTS_TABLE_NAME}/g" kustomize/components/alloydb/kustomization.yaml
+sed -i "s/ALLOYDB_PRODUCTS_DATABASE_NAME_VAL/${ALLOYDB_PRODUCTS_DATABASE_NAME}/g" kustomize/components/alloydb/kustomization.yaml
+sed -i "s/ALLOYDB_PRODUCTS_TABLE_NAME_VAL/${ALLOYDB_PRODUCTS_TABLE_NAME}/g" kustomize/components/alloydb/kustomization.yaml
 sed -i "s/ALLOYDB_SECRET_NAME_VAL/${ALLOYDB_SECRET_NAME}/g" kustomize/components/alloydb/kustomization.yaml
 
 # Substitute environment values (kubernetes-manifests/shoppingassistantservice.yaml)

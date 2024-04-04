@@ -117,17 +117,16 @@ func main() {
 	}()
 
 	// TODO
-	projectID := "obourgeois-sandbox-13"
-	region := "us-central1"
-	dbCluster := "onlineboutique-cluster"
-	dbInstance := "onlineboutique-instance"
-	instURI := fmt.Sprintf("projects/%s/locations/%s/clusters/%s/instances/%s", projectID, region, dbCluster, dbInstance)
-	user := "postgres"
-	pass := "thisispassword"
-	dbname := "products"
-	tableName := "catalog_items"
+	projectID := os.Getenv("PROJECT_ID")
+	region := os.Getenv("REGION")
+	pgClusterName := os.Getenv("ALLOYDB_CLUSTER_NAME")
+	pgInstanceName := os.Getenv("ALLOYDB_INSTANCE_NAME")
+	pgInstanceURI := fmt.Sprintf("projects/%s/locations/%s/clusters/%s/instances/%s", projectID, region, pgClusterName, pgInstanceName)
+	pgDatabaseName := os.Getenv("ALLOYDB_DATABASE_NAME")
+	pgTableName := os.Getenv("ALLOYDB_TABLE_NAME")
+	pgPassword := "thisispassword"
 
-	fmt.Println("instURI:", instURI)
+	fmt.Println("instURI:", pgInstanceURI)
 
 	dialer, err := alloydbconn.NewDialer(context.Background())
 	if err != nil {
@@ -139,7 +138,7 @@ func main() {
 
 	dsn := fmt.Sprintf(
 		"user=%s password=%s dbname=%s sslmode=disable",
-		user, pass, dbname,
+		"postgres", pgPassword, pgDatabaseName,
 	)
 	fmt.Println("DSN:", dsn)
 
@@ -150,7 +149,7 @@ func main() {
 	}
 
 	pgconfig.ConnConfig.DialFunc = func(ctx context.Context, _ string, _ string) (net.Conn, error) {
-		return dialer.Dial(ctx, instURI)
+		return dialer.Dial(ctx, pgInstanceURI)
 	}
 
 	dbpool, connErr := pgxpool.NewWithConfig(context.Background(), pgconfig)
@@ -160,7 +159,7 @@ func main() {
 	}
 	defer dbpool.Close()
 
-	query := "SELECT id, name, description, picture, price_usd_currency_code, price_usd_units, price_usd_nanos, categories FROM " + tableName
+	query := "SELECT id, name, description, picture, price_usd_currency_code, price_usd_units, price_usd_nanos, categories FROM " + pgTableName
 	rows, err := dbpool.Query(context.Background(), query)
 	if err != nil {
 		log.Printf("Error executing query: %s", err)
