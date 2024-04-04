@@ -127,7 +127,7 @@
     const extractedIds = extractIdsFromString(responseJson.message);
     console.log(extractedIds);
 
-    botMessageSpan.innerText = responseJson.message.replace(/\n+[-*\d][\S\s]*/g, "");
+    botMessageSpan.innerText = responseJson.message;
     botMessage.classList.remove("bot-message-loading");
 
     if (extractedIds.length > 0) {
