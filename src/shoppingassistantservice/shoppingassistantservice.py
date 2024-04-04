@@ -64,8 +64,7 @@ def create_app():
 
     @app.route("/", methods=['POST'])
     def talkToGemini():
-        prompt = request.json['message']
-        prompt = unquote(prompt)
+        prompt = unquote(request.json['message'])
         llm = ChatGoogleGenerativeAI(model="gemini-pro-vision")
 
         message = HumanMessage(
@@ -79,8 +78,7 @@ def create_app():
         )
 
         response = llm.invoke([message])
-        data = {}
-        data['content'] = response.content
+        data = {'content': response.content}
         return data
 
     return app
