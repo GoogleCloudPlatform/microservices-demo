@@ -160,7 +160,7 @@ func main() {
 	}
 	defer dbpool.Close()
 
-	query := "SELECT * FROM " + tableName
+	query := "SELECT id, name, description, picture, price_usd_currency_code, price_used_units, price_usd_nanos, categories FROM " + tableName
 	rows, err := dbpool.Query(context.Background(), query)
 	if err != nil {
 		log.Printf("Error executing query: %s", err)
@@ -177,9 +177,7 @@ func main() {
 		var price_usd_units int
 		var price_usd_nanos int
 		var categories string
-		var product_embedding [768]float64
-		var embed_model string
-		err = rows.Scan(&id, &name, &description, &picture, &price_usd_currency_code, &price_usd_units, &price_usd_nanos, &categories, &product_embedding, &embed_model)
+		err = rows.Scan(&id, &name, &description, &picture, &price_usd_currency_code, &price_usd_units, &price_usd_nanos, &categories)
 		if err != nil {
 			log.Printf("Error scanning row:", err)
 			return
