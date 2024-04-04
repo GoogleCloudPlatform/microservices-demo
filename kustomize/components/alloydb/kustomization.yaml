@@ -54,7 +54,7 @@ patches:
     apiVersion: apps/v1
     kind: Deployment
     metadata:
-      name: cartservice
+      name: productcatalogservice
     spec:
       template:
         spec:
