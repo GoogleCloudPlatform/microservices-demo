@@ -32,12 +32,12 @@ func loadCatalog(catalog *pb.ListProductsResponse) error {
 	catalogMutex.Lock()
 	defer catalogMutex.Unlock()
 
-	// If the ALLOYDB_CLUSTER_NAME env is set, then we load from AlloyDB
 	if os.Getenv("ALLOYDB_CLUSTER_NAME") != "" {
+		log.Info("Loading catalog from AlloyDB...")
 		return loadCatalogFromAlloyDB(catalog)
 	}
 
-	// Else, we load from the local file
+	log.Info("Loading catalog from local products.json file...")
 	return loadCatalogFromLocalFile(catalog)
 }
 
@@ -105,6 +105,7 @@ func loadCatalogFromAlloyDB(catalog *pb.ListProductsResponse) error {
 	for rows.Next() {
 		product := &pb.Product{}
 		product.PriceUsd = &pb.Money{}
+
 		var categories string
 		err = rows.Scan(&product.Id, &product.Name, &product.Description,
 			&product.Picture, &product.PriceUsd.CurrencyCode, &product.PriceUsd.Units,
@@ -114,7 +115,7 @@ func loadCatalogFromAlloyDB(catalog *pb.ListProductsResponse) error {
 		}
 		categories = strings.ToLower(categories)
 		product.Categories = strings.Split(categories, ",")
-		fmt.Println(product.Id, product.Name, product.Categories[0] /* ... */)
+
 		catalog.Products = append(catalog.Products, product)
 	}
 
