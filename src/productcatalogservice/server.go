@@ -15,7 +15,6 @@
 package main
 
 import (
-	"bytes"
 	"context"
 	"flag"
 	"fmt"
@@ -31,7 +30,6 @@ import (
 	healthpb "google.golang.org/grpc/health/grpc_health_v1"
 
 	"cloud.google.com/go/profiler"
-	"github.com/golang/protobuf/jsonpb"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
@@ -40,9 +38,6 @@ import (
 	"go.opentelemetry.io/otel/propagation"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 	"google.golang.org/grpc"
-
-	"cloud.google.com/go/alloydbconn"
-	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 var (
@@ -116,76 +111,6 @@ func main() {
 		}
 	}()
 
-	// TODO
-	projectID := os.Getenv("PROJECT_ID")
-	region := os.Getenv("REGION")
-	pgClusterName := os.Getenv("ALLOYDB_CLUSTER_NAME")
-	pgInstanceName := os.Getenv("ALLOYDB_INSTANCE_NAME")
-	pgInstanceURI := fmt.Sprintf("projects/%s/locations/%s/clusters/%s/instances/%s", projectID, region, pgClusterName, pgInstanceName)
-	pgDatabaseName := os.Getenv("ALLOYDB_DATABASE_NAME")
-	pgTableName := os.Getenv("ALLOYDB_TABLE_NAME")
-	pgPassword := "thisispassword"
-
-	fmt.Println("instURI:", pgInstanceURI)
-
-	dialer, err := alloydbconn.NewDialer(context.Background())
-	if err != nil {
-		log.Printf("failed to init Dialer: %v", err)
-		return
-	}
-	cleanup := func() error { return dialer.Close() }
-	defer cleanup()
-
-	dsn := fmt.Sprintf(
-		"user=%s password=%s dbname=%s sslmode=disable",
-		"postgres", pgPassword, pgDatabaseName,
-	)
-	fmt.Println("DSN:", dsn)
-
-	pgconfig, err := pgxpool.ParseConfig(dsn)
-	if err != nil {
-		log.Printf("failed to parse pgx config: %v", err)
-		return
-	}
-
-	pgconfig.ConnConfig.DialFunc = func(ctx context.Context, _ string, _ string) (net.Conn, error) {
-		return dialer.Dial(ctx, pgInstanceURI)
-	}
-
-	dbpool, connErr := pgxpool.NewWithConfig(context.Background(), pgconfig)
-	if connErr != nil {
-		log.Printf("failed to connect: %s", connErr)
-		return
-	}
-	defer dbpool.Close()
-
-	query := "SELECT id, name, description, picture, price_usd_currency_code, price_usd_units, price_usd_nanos, categories FROM " + pgTableName
-	rows, err := dbpool.Query(context.Background(), query)
-	if err != nil {
-		log.Printf("Error executing query: %s", err)
-		return
-	}
-	defer rows.Close()
-
-	for rows.Next() {
-		var id string
-		var name string
-		var description string
-		var picture string
-		var price_usd_currency_code string
-		var price_usd_units int
-		var price_usd_nanos int
-		var categories string
-		err = rows.Scan(&id, &name, &description, &picture, &price_usd_currency_code, &price_usd_units, &price_usd_nanos, &categories)
-		if err != nil {
-			log.Printf("Error scanning row:", err)
-			return
-		}
-
-		fmt.Println(id, name /* ... */)
-	}
-	// TODO END
-
 	if os.Getenv("PORT") != "" {
 		port = os.Getenv("PORT")
 	}
@@ -210,7 +135,7 @@ func run(port string) string {
 		grpc.StreamInterceptor(otelgrpc.StreamServerInterceptor()))
 
 	svc := &productCatalog{}
-	err = readCatalogFile(&svc.catalog)
+	err = loadCatalog(&svc.catalog)
 	if err != nil {
 		log.Warnf("could not parse product catalog")
 	}
@@ -289,23 +214,4 @@ func mustConnGRPC(ctx context.Context, conn **grpc.ClientConn, addr string) {
 	if err != nil {
 		panic(errors.Wrapf(err, "grpc: failed to connect %s", addr))
 	}
-}
-
-func readCatalogFile(catalog *pb.ListProductsResponse) error {
-	catalogMutex.Lock()
-	defer catalogMutex.Unlock()
-
-	catalogJSON, err := os.ReadFile("products.json")
-	if err != nil {
-		log.Fatalf("failed to open product catalog json file: %v", err)
-		return err
-	}
-
-	if err := jsonpb.Unmarshal(bytes.NewReader(catalogJSON), catalog); err != nil {
-		log.Warnf("failed to parse the catalog JSON: %v", err)
-		return err
-	}
-
-	log.Info("successfully parsed product catalog json")
-	return nil
 }
