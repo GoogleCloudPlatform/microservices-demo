@@ -107,8 +107,9 @@ func loadCatalogFromAlloyDB(catalog *pb.ListProductsResponse) error {
 	}
 	defer rows.Close()
 
+	catalog.Products = catalog.Products[:0]
 	for rows.Next() {
-		product := pb.Product{}
+		product := &pb.Product{}
 		var categories string
 		err = rows.Scan(&product.Id, &product.Name, &product.Description,
 			&product.Picture, &product.PriceUsd.CurrencyCode, &product.PriceUsd.Units,
@@ -119,6 +120,7 @@ func loadCatalogFromAlloyDB(catalog *pb.ListProductsResponse) error {
 		categories = strings.ToLower(categories)
 		product.Categories = strings.Split(categories, ",")
 		fmt.Println(product.Id, product.Name, product.Categories[0] /* ... */)
+		catalog.Products = append(catalog.Products, product)
 	}
 
 	return nil
