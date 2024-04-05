@@ -34,17 +34,11 @@ func loadCatalog(catalog *pb.ListProductsResponse) error {
 
 	// If the ALLOYDB_CLUSTER_NAME env is set, then we load from AlloyDB
 	if os.Getenv("ALLOYDB_CLUSTER_NAME") != "" {
-		if err := loadCatalogFromAlloyDB(catalog); err != nil {
-			return err
-		}
+		return loadCatalogFromAlloyDB(catalog)
 	}
 
 	// Else, we load from the local file
-	if err := loadCatalogFromLocalFile(catalog); err != nil {
-		return err
-	}
-
-	return nil
+	return loadCatalogFromLocalFile(catalog)
 }
 
 func loadCatalogFromLocalFile(catalog *pb.ListProductsResponse) error {
