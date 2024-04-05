@@ -23,6 +23,8 @@ import (
 	"strings"
 
 	"cloud.google.com/go/alloydbconn"
+	secretmanager "cloud.google.com/go/secretmanager/apiv1"
+	"cloud.google.com/go/secretmanager/apiv1/secretmanagerpb"
 	pb "github.com/GoogleCloudPlatform/microservices-demo/src/productcatalogservice/genproto"
 	"github.com/golang/protobuf/jsonpb"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -57,15 +59,40 @@ func loadCatalogFromLocalFile(catalog *pb.ListProductsResponse) error {
 	return nil
 }
 
+func getSecretPayload(project, secret, version string) (string, error) {
+	ctx := context.Background()
+	client, err := secretmanager.NewClient(ctx)
+	if err != nil {
+		return "", err
+	}
+	defer client.Close()
+
+	req := &secretmanagerpb.AccessSecretVersionRequest{
+		Name: fmt.Sprintf("projects/%s/secrets/%s/versions/%s", project, secret, version),
+	}
+
+	// Call the API.
+	result, err := client.AccessSecretVersion(ctx, req)
+	if err != nil {
+		return "", err
+	}
+
+	return string(result.Payload.Data), nil
+}
+
 func loadCatalogFromAlloyDB(catalog *pb.ListProductsResponse) error {
 	projectID := os.Getenv("PROJECT_ID")
 	region := os.Getenv("REGION")
 	pgClusterName := os.Getenv("ALLOYDB_CLUSTER_NAME")
 	pgInstanceName := os.Getenv("ALLOYDB_INSTANCE_NAME")
-	pgInstanceURI := fmt.Sprintf("projects/%s/locations/%s/clusters/%s/instances/%s", projectID, region, pgClusterName, pgInstanceName)
 	pgDatabaseName := os.Getenv("ALLOYDB_DATABASE_NAME")
 	pgTableName := os.Getenv("ALLOYDB_TABLE_NAME")
-	pgPassword := "thisispassword"
+	pgSecretName := os.Getenv("ALLOYDB_SECRET_NAME")
+
+	pgPassword, err := getSecretPayload(projectID, pgSecretName, "latest")
+	if err != nil {
+		return err
+	}
 
 	dialer, err := alloydbconn.NewDialer(context.Background())
 	if err != nil {
@@ -84,6 +111,7 @@ func loadCatalogFromAlloyDB(catalog *pb.ListProductsResponse) error {
 		return err
 	}
 
+	pgInstanceURI := fmt.Sprintf("projects/%s/locations/%s/clusters/%s/instances/%s", projectID, region, pgClusterName, pgInstanceName)
 	config.ConnConfig.DialFunc = func(ctx context.Context, _ string, _ string) (net.Conn, error) {
 		return dialer.Dial(ctx, pgInstanceURI)
 	}
