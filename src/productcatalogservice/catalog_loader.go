@@ -110,6 +110,7 @@ func loadCatalogFromAlloyDB(catalog *pb.ListProductsResponse) error {
 	catalog.Products = catalog.Products[:0]
 	for rows.Next() {
 		product := &pb.Product{}
+		product.PriceUsd = &pb.Money{}
 		var categories string
 		err = rows.Scan(&product.Id, &product.Name, &product.Description,
 			&product.Picture, &product.PriceUsd.CurrencyCode, &product.PriceUsd.Units,
