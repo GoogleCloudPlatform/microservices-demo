@@ -5,12 +5,12 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Grpc.AspNetCore" Version="2.61.0" />
-    <PackageReference Include="Grpc.HealthCheck" Version="2.61.0" />
+    <PackageReference Include="Grpc.AspNetCore" Version="2.62.0" />
+    <PackageReference Include="Grpc.HealthCheck" Version="2.62.0" />
     <PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="8.0.3" />
     <PackageReference Include="Google.Cloud.Spanner.Data" Version="4.6.0" />
     <PackageReference Include="Npgsql" Version="8.0.2" />
-    <PackageReference Include="Google.Cloud.SecretManager.V1" Version="2.2.0" />
+    <PackageReference Include="Google.Cloud.SecretManager.V1" Version="2.3.0" />
   </ItemGroup>
 
   <ItemGroup>
