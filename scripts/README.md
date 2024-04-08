@@ -2,7 +2,7 @@
 
 > Note: Make sure you have the `owner` role to the Google Cloud project you want to deploy this to, else you will be unable to enable certain APIs or modify certain VPC rules that are needed for this demo.
 
-1. Enable the GKE and AR APIs.
+1. Enable the Google Kubernetes Engine (GKE) and Artifact Registry (AR) APIs.
     ```sh
     gcloud services enable container.googleapis.com
     gcloud services enable artifactregistry.googleapis.com
