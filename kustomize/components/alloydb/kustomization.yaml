@@ -34,9 +34,9 @@ patches:
               - name: ALLOYDB_PRIMARY_IP
                 value: ALLOYDB_PRIMARY_IP_VAL
               - name: ALLOYDB_DATABASE_NAME
-                value: ALLOYDB_DATABASE_NAME_VAL
+                value: ALLOYDB_CARTS_DATABASE_NAME
               - name: ALLOYDB_TABLE_NAME
-                value: ALLOYDB_TABLE_NAME_VAL
+                value: ALLOYDB_CARTS_TABLE_NAME_VAL
               - name: ALLOYDB_SECRET_NAME
                 value: ALLOYDB_SECRET_NAME_VAL
               - name: PROJECT_ID
@@ -47,6 +47,48 @@ patches:
     kind: ServiceAccount
     metadata:
       name: cartservice
+      annotations:
+        iam.gke.io/gcp-service-account: ALLOYDB_USER_GSA_ID
+# productcatalogservice - replace ALLOYDB environments
+- patch: |-
+    apiVersion: apps/v1
+    kind: Deployment
+    metadata:
+      name: productcatalogservice
+    spec:
+      template:
+        spec:
+          containers:
+            - name: server
+              env:
+              - name: ALLOYDB_CLUSTER_NAME
+                value: ALLOYDB_CLUSTER_NAME_VAL
+              - name: ALLOYDB_INSTANCE_NAME
+                value: ALLOYDB_INSTANCE_NAME_VAL
+              - name: ALLOYDB_DATABASE_NAME
+                value: ALLOYDB_PRODUCTS_DATABASE_NAME_VAL
+              - name: ALLOYDB_TABLE_NAME
+                value: ALLOYDB_PRODUCTS_TABLE_NAME_VAL
+              - name: ALLOYDB_SECRET_NAME
+                value: ALLOYDB_SECRET_NAME_VAL
+              - name: PROJECT_ID
+                value: PROJECT_ID_VAL
+              - name: REGION
+                value: REGION_VAL
+# productcatalogservice - add the GSA annotation for the productcatalogservice KSA
+- patch: |-
+    apiVersion: v1
+    kind: ServiceAccount
+    metadata:
+      name: productcatalogservice
+      annotations:
+        iam.gke.io/gcp-service-account: ALLOYDB_USER_GSA_ID
+# shoppingassistantservice - add the GSA annotation for the shoppingassistantservice KSA
+- patch: |-
+    apiVersion: v1
+    kind: ServiceAccount
+    metadata:
+      name: shoppingassistantservice
       annotations:
         iam.gke.io/gcp-service-account: ALLOYDB_USER_GSA_ID
 # redis - remove the redis-cart Deployment
