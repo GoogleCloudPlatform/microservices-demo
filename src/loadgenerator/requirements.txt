@@ -18,9 +18,9 @@ click==8.1.7
     # via flask
 configargparse==1.7
     # via locust
-faker==24.3.0
+faker==24.4.0
     # via -r requirements.in
-flask==3.0.2
+flask==3.0.3
     # via
     #   flask-cors
     #   flask-login
@@ -67,7 +67,7 @@ six==1.16.0
     #   python-dateutil
 urllib3==2.2.1
     # via requests
-werkzeug==3.0.1
+werkzeug==3.0.2
     # via
     #   flask
     #   flask-login
