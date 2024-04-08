@@ -27,7 +27,7 @@
 
 steps:
 - id: 'Deploy application to cluster'
-  name: 'gcr.io/k8s-skaffold/skaffold:v2.10.1'
+  name: 'gcr.io/k8s-skaffold/skaffold:v2.11.0'
   entrypoint: 'bash'
   args:
   - '-c'
