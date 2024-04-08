@@ -26,6 +26,11 @@ on:
       - 'helm-chart/**'
       - '.github/workflows/helm-chart-ci.yaml'
 
+# Ensure this workflow only runs for the most recent commit of a pull-request
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 jobs:
   code-tests:
     runs-on: [self-hosted, is-enabled]
@@ -44,9 +49,9 @@ jobs:
     - name: Go Unit Tests
       timeout-minutes: 10
       run: |
-        for SERVICE in "shippingservice" "productcatalogservice"; do
-          echo "testing $SERVICE..."
-          pushd src/$SERVICE
+        for GO_PACKAGE in "shippingservice" "productcatalogservice" "frontend/validator"; do
+          echo "Testing $GO_PACKAGE..."
+          pushd src/$GO_PACKAGE
           go test
           popd
         done
@@ -54,6 +59,7 @@ jobs:
       timeout-minutes: 10
       run: |
         dotnet test src/cartservice/
+
   deployment-tests:
     runs-on: [self-hosted, is-enabled]
     needs: code-tests
@@ -71,7 +77,7 @@ jobs:
         NAMESPACE="pr${PR_NUMBER}"
         echo "::set-env name=NAMESPACE::$NAMESPACE"
 
-        gcloud container clusters get-credentials $PR_CLUSTER --zone $ZONE --project $PROJECT_ID
+        gcloud container clusters get-credentials $PR_CLUSTER --region $REGION --project $PROJECT_ID
         cat <<EOF | kubectl apply -f -
         apiVersion: v1
         kind: Namespace
@@ -85,8 +91,8 @@ jobs:
         ACTIONS_ALLOW_UNSECURE_COMMANDS: true
         PR_NUMBER: ${{ github.event.pull_request.number }}
         PROJECT_ID: "online-boutique-ci"
-        PR_CLUSTER: "online-boutique-prs"
-        ZONE: "us-central1-c"
+        PR_CLUSTER: "prs-gke-cluster"
+        REGION: "us-central1"
     - name: Wait For Pods
       timeout-minutes: 20
       run: |

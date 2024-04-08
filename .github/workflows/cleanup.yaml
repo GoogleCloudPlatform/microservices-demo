@@ -34,11 +34,11 @@ jobs:
         timeout-minutes: 20
         run: |
           gcloud container clusters get-credentials $PR_CLUSTER \
-              --zone $ZONE --project $PROJECT_ID
+              --region $REGION --project $PROJECT_ID
           NAMESPACE="pr${PR_NUMBER}"
           kubectl delete namespace $NAMESPACE
         env:
           PROJECT_ID: "online-boutique-ci"
-          PR_CLUSTER: "online-boutique-prs"
-          ZONE: "us-central1-c"
+          PR_CLUSTER: "prs-gke-cluster"
+          REGION: "us-central1"
           PR_NUMBER: ${{ github.event.number }}
