@@ -90,11 +90,6 @@
     vim kubernetes-manifests/shoppingassistantservice.yaml
     ```
 
-1. Replace the `products.json` file with the updated one.
-    ```sh
-    vim src/productcatalogservice/products.json
-    ```
-
 1. Change the commented-out components in `kubernetes-manifests/kustomization.yaml` to look like this:
     ```yaml
     components:
