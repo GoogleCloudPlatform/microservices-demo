@@ -1,4 +1,8 @@
-# AlloyDB / RAG demo set-up instructions
+# Shopping Assistant with RAG & AlloyDB
+
+This demo adds a new service to Online Boutique called `shoppingassistantservice`, which, alongside an Alloy-DB backed products catalog, adds a RAG-featured AI assistant to the frontned experience, which helps users suggest new products for their room decor.
+
+## Set-up instructions
 
 > Note: Make sure you have the `owner` role to the Google Cloud project you want to deploy this to, else you will be unable to enable certain APIs or modify certain VPC rules that are needed for this demo.
 
@@ -21,11 +25,10 @@
         --location=us-central1
     ```
 
-1. Clone the `microservices-demo` repository locally and checkout the `next-24` branch.
+1. Clone the `microservices-demo` repository locally.
     ```sh
     git clone https://github.com/GoogleCloudPlatform/microservices-demo \
-        && cd microservices-demo/ \
-        && git checkout next-24
+        && cd microservices-demo/
     ```
 
 1. Context into the right project and GKE cluster.
@@ -38,7 +41,7 @@
 
 1. Replace the placeholder variables into infra script #1 and run it. If it asks about policy bindings, select the option for "None".
     ```sh
-    vim scripts/1_deploy_alloydb_infra.sh
+    vim kustomize/components/shopping-assistant/scripts/1_deploy_alloydb_infra.sh
     ./scripts/1_deploy_alloydb_infra.sh
     ```
 
@@ -73,9 +76,14 @@
     chmod +x generate_sql_from_products.py
     ```
 
+    > Note: You can find the files at the following places:
+    > - kustomize/components/shopping-assistant/scripts/2_create_populate_alloydb_tables.sh
+    > - kustomize/components/shopping-assistant/scripts/generate_sql_from_products.py
+    > - src/productcatalogservice/products.json
+
 1. Run script #2 in the VM. If it asks for a postgres password, it should be the same that you set in script #1 earlier.
     ```sh
-    ./scripts/2_create_populate_alloydb_tables.sh
+    ./2_create_populate_alloydb_tables.sh
     ```
 
 1. Exit SSH
