@@ -1,21 +1,40 @@
-<p align="center">
+<!-- <p align="center">
 <img src="/src/frontend/static/icons/Hipster_HeroLogoMaroon.svg" width="300" alt="Online Boutique" />
-</p>
-
+</p> -->
 ![Continuous Integration](https://github.com/GoogleCloudPlatform/microservices-demo/workflows/Continuous%20Integration%20-%20Main/Release/badge.svg)
 
 **Online Boutique** is a cloud-first microservices demo application.  The application is a
-web-based e-commerce app where users can browse items,
-add them to the cart, and purchase them.
+web-based e-commerce app where users can browse items, add them to the cart, and purchase them.
 
-Google uses this application to demonstrate the use of technologies like
-Kubernetes, GKE, Istio, Stackdriver, and gRPC. This application
-works on any Kubernetes cluster, like Google
-Kubernetes Engine (GKE). It’s **easy to deploy with little to no configuration**.
+Google uses this application to demonstrate how developers can modernize enterprise applications using Google Cloud products, including: [Google Kubernetes Engine (GKE)](https://cloud.google.com/kubernetes-engine), [Anthos Service Mesh (ASM)](https://cloud.google.com/service-mesh), [gRPC](https://grpc.io/), [Cloud Operations](https://cloud.google.com/products/operations), [Spanner](https://cloud.google.com/spanner), [Memorystore](https://cloud.google.com/memorystore), [AlloyDB](https://cloud.google.com/alloydb), and [Gemini](https://ai.google.dev/). This application works on any Kubernetes cluster.
 
 If you’re using this demo, please **★Star** this repository to show your interest!
 
-**Note to Googlers (Google employees):** Please fill out the form at [go/microservices-demo](http://go/microservices-demo).
+**Note to Googlers:** Please fill out the form at [go/microservices-demo](http://go/microservices-demo).
+
+## Architecture
+
+**Online Boutique** is composed of 11 microservices written in different
+languages that talk to each other over gRPC.
+
+[![Architecture of
+microservices](/docs/img/architecture-diagram.png)](/docs/img/architecture-diagram.png)
+
+Find **Protocol Buffers Descriptions** at the [`./protos` directory](/protos).
+
+| Service                                              | Language      | Description                                                                                                                       |
+| ---------------------------------------------------- | ------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| [frontend](/src/frontend)                           | Go            | Exposes an HTTP server to serve the website. Does not require signup/login and generates session IDs for all users automatically. |
+| [cartservice](/src/cartservice)                     | C#            | Stores the items in the user's shopping cart in Redis and retrieves it.                                                           |
+| [productcatalogservice](/src/productcatalogservice) | Go            | Provides the list of products from a JSON file and ability to search products and get individual products.                        |
+| [currencyservice](/src/currencyservice)             | Node.js       | Converts one money amount to another currency. Uses real values fetched from European Central Bank. It's the highest QPS service. |
+| [paymentservice](/src/paymentservice)               | Node.js       | Charges the given credit card info (mock) with the given amount and returns a transaction ID.                                     |
+| [shippingservice](/src/shippingservice)             | Go            | Gives shipping cost estimates based on the shopping cart. Ships items to the given address (mock)                                 |
+| [emailservice](/src/emailservice)                   | Python        | Sends users an order confirmation email (mock).                                                                                   |
+| [checkoutservice](/src/checkoutservice)             | Go            | Retrieves user cart, prepares order and orchestrates the payment, shipping and the email notification.                            |
+| [recommendationservice](/src/recommendationservice) | Python        | Recommends other products based on what's given in the cart.                                                                      |
+| [adservice](/src/adservice)                         | Java          | Provides text ads based on given context words.                                                                                   |
+| [loadgenerator](/src/loadgenerator)                 | Python/Locust | Continuously sends requests imitating realistic user shopping flows to the frontend.                                              |
 
 ## Screenshots
 
@@ -46,15 +65,8 @@ If you’re using this demo, please **★Star** this repository to show your int
    ```
 
    Substitute `<PROJECT_ID>` with the ID of your Google Cloud project.
-  
-4. Confirm the services have been enabled for your project.
 
-   ```sh
-   gcloud services list --enabled --project=${PROJECT_ID}
-   ```
-
-
-5. Create a GKE cluster and get the credentials for it.
+4. Create a GKE cluster and get the credentials for it.
 
    ```sh
    gcloud container clusters create-auto online-boutique \
@@ -63,13 +75,13 @@ If you’re using this demo, please **★Star** this repository to show your int
 
    Creating the cluster may take a few minutes.
 
-6. Deploy Online Boutique to the cluster.
+5. Deploy Online Boutique to the cluster.
 
    ```sh
    kubectl apply -f ./release/kubernetes-manifests.yaml
    ```
 
-7. Wait for the pods to be ready.
+6. Wait for the pods to be ready.
 
    ```sh
    kubectl get pods
@@ -93,7 +105,7 @@ If you’re using this demo, please **★Star** this repository to show your int
    shippingservice-6ccc89f8fd-v686r         1/1     Running   0          2m58s
    ```
 
-8. Access the web frontend in a browser using the frontend's external IP.
+7. Access the web frontend in a browser using the frontend's external IP.
 
    ```sh
    kubectl get service frontend-external | awk '{print $4}'
@@ -101,9 +113,9 @@ If you’re using this demo, please **★Star** this repository to show your int
 
    Visit `http://EXTERNAL_IP` in a web browser to access your instance of Online Boutique.
 
-9. Congrats! You've deployed the default Online Boutique. To deploy a different variation of Online Boutique (e.g., with Google Cloud Operations tracing, Istio, etc.), see [Deploy Online Boutique variations with Kustomize](#deploy-online-boutique-variations-with-kustomize).
+8. Congrats! You've deployed the default Online Boutique. To deploy a different variation of Online Boutique (e.g., with Google Cloud Operations tracing, Istio, etc.), see [Deploy Online Boutique variations with Kustomize](#deploy-online-boutique-variations-with-kustomize).
 
-10. Once you are done with it, delete the GKE cluster.
+9. Once you are done with it, delete the GKE cluster.
 
    ```sh
    gcloud container clusters delete online-boutique \
@@ -112,68 +124,17 @@ If you’re using this demo, please **★Star** this repository to show your int
 
    Deleting the cluster may take a few minutes.
 
-## Use Terraform to provision a GKE cluster and deploy Online Boutique
+## Additional deployment options
 
-The [`/terraform` folder](/terraform) contains instructions for using [Terraform](https://www.terraform.io/intro) to replicate the steps from [**Quickstart (GKE)**](#quickstart-gke) above.
+- **Terraform**: [See these instructions](/terraform) to learn how to deploy Online Boutique using [Terraform](https://www.terraform.io/intro).
+- **Istio / Anthos Service Mesh**: [See these instructions](/kustomize/components/service-mesh-istio/README.md) to deploy Online Boutique alongside an Istio-backed service mesh.
+- **Non-GKE clusters (Minikube, Kind, etc)**: See the [Development guide](/docs/development-guide.md) to learn how you can deploy Online Boutique on non-GKE clusters.
+- **AI assistant using Gemini**: [See these instructions](/kustomize/components/shopping-assistant/README.md) to deploy a Gemini-powered AI assistant that suggests products to purchase based on an image.
+- **And more**: The [`/kustomize` directory](/kustomize) contains instructions for customizing the deployment of Online Boutique with other variations.
 
-## Other deployment variations
+## Documentation
 
-- **Istio/Anthos Service Mesh**: [See these instructions.](/kustomize/components/service-mesh-istio/README.md)
-- **non-GKE clusters (Minikube, Kind)**: see the [Development Guide](/docs/development-guide.md)
-
-## Deploy Online Boutique variations with Kustomize
-
-The [`/kustomize` folder](/kustomize) contains instructions for customizing the deployment of Online Boutique with different variations such as:
-* integrating with [Google Cloud Operations](/kustomize/components/google-cloud-operations/)
-* replacing the in-cluster Redis cache with [Google Cloud Memorystore (Redis)](/kustomize/components/memorystore), [AlloyDB](/kustomize/components/alloydb) or [Google Cloud Spanner](/kustomize/components/spanner)
-* etc.
-
-## Architecture
-
-**Online Boutique** is composed of 11 microservices written in different
-languages that talk to each other over gRPC.
-
-[![Architecture of
-microservices](/docs/img/architecture-diagram.png)](/docs/img/architecture-diagram.png)
-
-Find **Protocol Buffers Descriptions** at the [`./protos` directory](/protos).
-
-| Service                                              | Language      | Description                                                                                                                       |
-| ---------------------------------------------------- | ------------- | --------------------------------------------------------------------------------------------------------------------------------- |
-| [frontend](/src/frontend)                           | Go            | Exposes an HTTP server to serve the website. Does not require signup/login and generates session IDs for all users automatically. |
-| [cartservice](/src/cartservice)                     | C#            | Stores the items in the user's shopping cart in Redis and retrieves it.                                                           |
-| [productcatalogservice](/src/productcatalogservice) | Go            | Provides the list of products from a JSON file and ability to search products and get individual products.                        |
-| [currencyservice](/src/currencyservice)             | Node.js       | Converts one money amount to another currency. Uses real values fetched from European Central Bank. It's the highest QPS service. |
-| [paymentservice](/src/paymentservice)               | Node.js       | Charges the given credit card info (mock) with the given amount and returns a transaction ID.                                     |
-| [shippingservice](/src/shippingservice)             | Go            | Gives shipping cost estimates based on the shopping cart. Ships items to the given address (mock)                                 |
-| [emailservice](/src/emailservice)                   | Python        | Sends users an order confirmation email (mock).                                                                                   |
-| [checkoutservice](/src/checkoutservice)             | Go            | Retrieves user cart, prepares order and orchestrates the payment, shipping and the email notification.                            |
-| [recommendationservice](/src/recommendationservice) | Python        | Recommends other products based on what's given in the cart.                                                                      |
-| [adservice](/src/adservice)                         | Java          | Provides text ads based on given context words.                                                                                   |
-| [loadgenerator](/src/loadgenerator)                 | Python/Locust | Continuously sends requests imitating realistic user shopping flows to the frontend.                                              |
-
-## Features
-
-- **[Kubernetes](https://kubernetes.io)/[GKE](https://cloud.google.com/kubernetes-engine/):**
-  The app is designed to run on Kubernetes (both locally on "Docker for
-  Desktop", as well as on the cloud with GKE).
-- **[gRPC](https://grpc.io):** Microservices use a high volume of gRPC calls to
-  communicate to each other.
-- **[Istio](https://istio.io):** Application works on Istio service mesh.
-- **[Cloud Operations (Stackdriver)](https://cloud.google.com/products/operations):** Many services
-  are instrumented with **Profiling** and **Tracing**. In
-  addition to these, using Istio enables features like Request/Response
-  **Metrics** and **Context Graph** out of the box. When it is running out of
-  Google Cloud, this code path remains inactive.
-- **[Skaffold](https://skaffold.dev):** Application
-  is deployed to Kubernetes with a single command using Skaffold.
-- **Synthetic Load Generation:** The application demo comes with a background
-  job that creates realistic usage patterns on the website using
-  [Locust](https://locust.io/) load generator.
-
-## Development
-
-See the [Development guide](/docs/development-guide.md) to learn how to run and develop this app locally.
+- [Development](/docs/development-guide.md) to learn how to run and develop this app locally.
 
 ## Demos featuring Online Boutique
 
@@ -200,7 +161,3 @@ See the [Development guide](/docs/development-guide.md) to learn how to run and 
   - [Introduction to Service Management with Istio](https://www.youtube.com/watch?v=wCJrdKdD6UM&feature=youtu.be&t=586)
 - [Google Cloud Next'18 London – Keynote](https://youtu.be/nIq2pkNcfEI?t=3071)
   showing Stackdriver Incident Response Management
-
----
-
-This is not an official Google project.
