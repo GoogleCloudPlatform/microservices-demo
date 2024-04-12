@@ -107,7 +107,7 @@ func (fe *frontendServer) homeHandler(w http.ResponseWriter, r *http.Request) {
 	plat = platformDetails{}
 	plat.setPlatformDetails(strings.ToLower(env))
 
-	if err := templates.ExecuteTemplate(w, "home", injectDefaultData(r, map[string]interface{}{
+	if err := templates.ExecuteTemplate(w, "home", injectCommonTemplateData(r, map[string]interface{}{
 		"show_currency": true,
 		"currencies":    currencies,
 		"products":      ps,
@@ -195,7 +195,7 @@ func (fe *frontendServer) productHandler(w http.ResponseWriter, r *http.Request)
 		}
 	}
 
-	if err := templates.ExecuteTemplate(w, "product", injectDefaultData(r, map[string]interface{}{
+	if err := templates.ExecuteTemplate(w, "product", injectCommonTemplateData(r, map[string]interface{}{
 		"ad":              fe.chooseAd(r.Context(), p.Categories, log),
 		"show_currency":   true,
 		"currencies":      currencies,
@@ -303,7 +303,7 @@ func (fe *frontendServer) viewCartHandler(w http.ResponseWriter, r *http.Request
 	totalPrice = money.Must(money.Sum(totalPrice, *shippingCost))
 	year := time.Now().Year()
 
-	if err := templates.ExecuteTemplate(w, "cart", injectDefaultData(r, map[string]interface{}{
+	if err := templates.ExecuteTemplate(w, "cart", injectCommonTemplateData(r, map[string]interface{}{
 		"currencies":       currencies,
 		"recommendations":  recommendations,
 		"cart_size":        cartSize(cart),
@@ -389,7 +389,7 @@ func (fe *frontendServer) placeOrderHandler(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
-	if err := templates.ExecuteTemplate(w, "order", injectDefaultData(r, map[string]interface{}{
+	if err := templates.ExecuteTemplate(w, "order", injectCommonTemplateData(r, map[string]interface{}{
 		"show_currency":   false,
 		"currencies":      currencies,
 		"order":           order.GetOrder(),
@@ -407,7 +407,7 @@ func (fe *frontendServer) assistantHandler(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	if err := templates.ExecuteTemplate(w, "assistant", injectDefaultData(r, map[string]interface{}{
+	if err := templates.ExecuteTemplate(w, "assistant", injectCommonTemplateData(r, map[string]interface{}{
 		"show_currency": false,
 		"currencies":    currencies,
 	})); err != nil {
@@ -539,7 +539,7 @@ func renderHTTPError(log logrus.FieldLogger, r *http.Request, w http.ResponseWri
 
 	w.WriteHeader(code)
 
-	if templateErr := templates.ExecuteTemplate(w, "error", injectDefaultData(r, map[string]interface{}{
+	if templateErr := templates.ExecuteTemplate(w, "error", injectCommonTemplateData(r, map[string]interface{}{
 		"error":       errMsg,
 		"status_code": code,
 		"status":      http.StatusText(code),
@@ -548,7 +548,7 @@ func renderHTTPError(log logrus.FieldLogger, r *http.Request, w http.ResponseWri
 	}
 }
 
-func injectDefaultData(r *http.Request, payload map[string]interface{}) map[string]interface{} {
+func injectCommonTemplateData(r *http.Request, payload map[string]interface{}) map[string]interface{} {
 	data := map[string]interface{}{
 		"session_id":        sessionID(r),
 		"request_id":        r.Context().Value(ctxKeyRequestID{}),
