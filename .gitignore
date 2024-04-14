@@ -25,4 +25,10 @@ node_modules/
 obj/
 pkg/
 release/wi-kubernetes-manifests.yaml
+output
+.vscode
+.DS_Store
+.idea
+**/*.tgz
+**/charts/*/charts
 vendor/

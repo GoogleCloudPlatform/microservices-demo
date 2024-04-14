@@ -3,9 +3,9 @@
 # Declare variables to be passed into your templates.
 
 images:
-  repository: gcr.io/google-samples/microservices-demo
+  repository: ""
   # Overrides the image tag whose default is the chart appVersion.
-  tag: ""
+  tag: "v1"
 
 serviceAccounts:
   # Specifies whether service accounts should be created.
@@ -47,10 +47,10 @@ adService:
   name: adservice
   resources:
     requests:
-      cpu: 200m
+      cpu: 100m
       memory: 180Mi
     limits:
-      cpu: 300m
+      cpu: 100m
       memory: 300Mi
 
 cartService:
@@ -58,10 +58,10 @@ cartService:
   name: cartservice
   resources:
     requests:
-      cpu: 200m
+      cpu: 100m
       memory: 64Mi
     limits:
-      cpu: 300m
+      cpu: 100m
       memory: 128Mi
 
 checkoutService:
@@ -69,10 +69,10 @@ checkoutService:
   name: checkoutservice
   resources:
     requests:
-      cpu: 100m
+      cpu: 50m
       memory: 64Mi
     limits:
-      cpu: 200m
+      cpu: 50m
       memory: 128Mi
 
 currencyService:
@@ -80,10 +80,10 @@ currencyService:
   name: currencyservice
   resources:
     requests:
-      cpu: 100m
+      cpu: 50m
       memory: 64Mi
     limits:
-      cpu: 200m
+      cpu: 50m
       memory: 128Mi
 
 emailService:
@@ -91,29 +91,27 @@ emailService:
   name: emailservice
   resources:
     requests:
-      cpu: 100m
+      cpu: 50m
       memory: 64Mi
     limits:
-      cpu: 200m
+      cpu: 50m
       memory: 128Mi
 
 frontend:
   create: true
   name: frontend
-  externalService: true
+  externalService: false
   cymbalBranding: false
   # One of: local, gcp, aws, azure, onprem, alibaba. When not set, defaults to "local" unless running in GKE, otherwise auto-sets to gcp.
   platform: local
   singleSharedSession: false
   virtualService:
-    create: false
+    create: true
     hosts:
-    - "*"
+    - "app.test"
     gateway:
-      name: asm-ingressgateway
-      namespace: asm-ingress
-      labelKey: asm
-      labelValue: ingressgateway
+      name: app-gateway
+      namespace: istio-system
   resources:
     requests:
       cpu: 100m
@@ -123,15 +121,15 @@ frontend:
       memory: 128Mi
 
 loadGenerator:
-  create: true
+  create: false
   name: loadgenerator
   checkFrontendInitContainer: true
   resources:
     requests:
-      cpu: 300m
+      cpu: 150m
       memory: 256Mi
     limits:
-      cpu: 500m
+      cpu: 150m
       memory: 512Mi
 
 paymentService:
@@ -139,10 +137,10 @@ paymentService:
   name: paymentservice
   resources:
     requests:
-      cpu: 100m
+      cpu: 50m
       memory: 64Mi
     limits:
-      cpu: 200m
+      cpu: 50m
       memory: 128Mi
 
 productCatalogService:
@@ -152,10 +150,10 @@ productCatalogService:
   extraLatency: ""
   resources:
     requests:
-      cpu: 100m
+      cpu: 50m
       memory: 64Mi
     limits:
-      cpu: 200m
+      cpu: 50m
       memory: 128Mi
 
 recommendationService:
@@ -163,10 +161,10 @@ recommendationService:
   name: recommendationservice
   resources:
     requests:
-      cpu: 100m
+      cpu: 50m
       memory: 220Mi
     limits:
-      cpu: 200m
+      cpu: 50m
       memory: 450Mi
 
 shippingService:
@@ -174,10 +172,10 @@ shippingService:
   name: shippingservice
   resources:
     requests:
-      cpu: 100m
+      cpu: 50m
       memory: 64Mi
     limits:
-      cpu: 200m
+      cpu: 50m
       memory: 128Mi
 
 cartDatabase:

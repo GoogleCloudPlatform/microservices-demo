@@ -12,13 +12,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-FROM python:3.12.2-slim@sha256:5dc6f84b5e97bfb0c90abfb7c55f3cacc2cb6687c8f920b64a833a2219875997 as base
+
+FROM python:3.10.8-slim as base
 
 FROM base as builder
 
 RUN apt-get -qq update \
     && apt-get install -y --no-install-recommends \
-        wget g++ \
+    wget g++ \
     && rm -rf /var/lib/apt/lists/*
 
 # get packages
@@ -33,7 +34,7 @@ ENV PYTHONUNBUFFERED=1
 WORKDIR /recommendationservice
 
 # Grab packages from builder
-COPY --from=builder /usr/local/lib/python3.12/ /usr/local/lib/python3.12/
+COPY --from=builder /usr/local/lib/python3.10/ /usr/local/lib/python3.10/
 
 # Add the application
 COPY . .

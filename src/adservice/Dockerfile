@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-FROM eclipse-temurin:21@sha256:1f64d3e6c88850f2d88982c561954683803e1dec8894e85cda1d1df89de93454 as builder
+FROM eclipse-temurin:19 as builder
 
 WORKDIR /app
 
@@ -25,15 +25,17 @@ COPY . .
 RUN chmod +x gradlew
 RUN ./gradlew installDist
 
-FROM eclipse-temurin:21.0.2_13-jre-alpine@sha256:6f78a61a2aa1e6907dda2da3eb791d44ef3d18e36aee1d1bdaa3543bd44cff4b
 
-RUN apk add --no-cache ca-certificates
+FROM eclipse-temurin:19.0.1_10-jre
+
+RUN #apk add --no-cache ca-certificates
+RUN apt-get update && apt-get install -y ca-certificates
 
 # Download Stackdriver Profiler Java agent
-RUN mkdir -p /opt/cprof && \
-    wget -q -O- https://storage.googleapis.com/cloud-profiler/java/latest/profiler_java_agent_alpine.tar.gz \
-    | tar xzv -C /opt/cprof && \
-    rm -rf profiler_java_agent.tar.gz
+#RUN mkdir -p /opt/cprof && \
+#    wget -q -O- https://storage.googleapis.com/cloud-profiler/java/latest/profiler_java_agent.tar.gz \
+#    | tar xzv -C /opt/cprof && \
+#    rm -rf profiler_java_agent.tar.gz
 
 WORKDIR /app
 COPY --from=builder /app .

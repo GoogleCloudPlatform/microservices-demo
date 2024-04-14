@@ -1,0 +1,8 @@
+apiVersion: security.istio.io/v1beta1
+kind: PeerAuthentication
+metadata:
+  name: default
+  namespace: hipster-app
+spec:
+  mtls:
+    mode: PERMISSIVE
