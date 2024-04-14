@@ -1,8 +1,8 @@
----
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: frontend-v2
+  namespace: hipster-app
 spec:
   selector:
     matchLabels:
@@ -18,7 +18,7 @@ spec:
       serviceAccountName: default
       containers:
         - name: server
-          image: frontend:a1b66c1
+          image: frontend:v1
           ports:
             - containerPort: 8080
           readinessProbe:
@@ -73,5 +73,3 @@ spec:
             limits:
               cpu: 200m
               memory: 128Mi
----
-

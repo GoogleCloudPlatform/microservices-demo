@@ -56,7 +56,7 @@ spec:
         - destination:
             host: grafana
             port:
-              number: 3000
+              number: 3000         
     - match:
         - uri:
             prefix: /argocd

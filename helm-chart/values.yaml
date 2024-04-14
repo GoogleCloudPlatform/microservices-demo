@@ -47,10 +47,10 @@ adService:
   name: adservice
   resources:
     requests:
-      cpu: 200m
+      cpu: 100m
       memory: 180Mi
     limits:
-      cpu: 300m
+      cpu: 100m
       memory: 300Mi
 
 cartService:
@@ -58,10 +58,10 @@ cartService:
   name: cartservice
   resources:
     requests:
-      cpu: 200m
+      cpu: 100m
       memory: 64Mi
     limits:
-      cpu: 300m
+      cpu: 100m
       memory: 128Mi
 
 checkoutService:
@@ -69,10 +69,10 @@ checkoutService:
   name: checkoutservice
   resources:
     requests:
-      cpu: 100m
+      cpu: 50m
       memory: 64Mi
     limits:
-      cpu: 200m
+      cpu: 50m
       memory: 128Mi
 
 currencyService:
@@ -80,10 +80,10 @@ currencyService:
   name: currencyservice
   resources:
     requests:
-      cpu: 100m
+      cpu: 50m
       memory: 64Mi
     limits:
-      cpu: 200m
+      cpu: 50m
       memory: 128Mi
 
 emailService:
@@ -91,10 +91,10 @@ emailService:
   name: emailservice
   resources:
     requests:
-      cpu: 100m
+      cpu: 50m
       memory: 64Mi
     limits:
-      cpu: 200m
+      cpu: 50m
       memory: 128Mi
 
 frontend:
@@ -110,10 +110,8 @@ frontend:
     hosts:
     - "app.test"
     gateway:
-      name: istio-ingressgateway
+      name: app-gateway
       namespace: istio-system
-      labelKey: asm
-      labelValue: ingressgateway
   resources:
     requests:
       cpu: 100m
@@ -123,15 +121,15 @@ frontend:
       memory: 128Mi
 
 loadGenerator:
-  create: true
+  create: false
   name: loadgenerator
   checkFrontendInitContainer: true
   resources:
     requests:
-      cpu: 300m
+      cpu: 150m
       memory: 256Mi
     limits:
-      cpu: 500m
+      cpu: 150m
       memory: 512Mi
 
 paymentService:
@@ -139,10 +137,10 @@ paymentService:
   name: paymentservice
   resources:
     requests:
-      cpu: 100m
+      cpu: 50m
       memory: 64Mi
     limits:
-      cpu: 200m
+      cpu: 50m
       memory: 128Mi
 
 productCatalogService:
@@ -152,10 +150,10 @@ productCatalogService:
   extraLatency: ""
   resources:
     requests:
-      cpu: 100m
+      cpu: 50m
       memory: 64Mi
     limits:
-      cpu: 200m
+      cpu: 50m
       memory: 128Mi
 
 recommendationService:
@@ -163,10 +161,10 @@ recommendationService:
   name: recommendationservice
   resources:
     requests:
-      cpu: 100m
+      cpu: 50m
       memory: 220Mi
     limits:
-      cpu: 200m
+      cpu: 50m
       memory: 450Mi
 
 shippingService:
@@ -174,10 +172,10 @@ shippingService:
   name: shippingservice
   resources:
     requests:
-      cpu: 100m
+      cpu: 50m
       memory: 64Mi
     limits:
-      cpu: 200m
+      cpu: 50m
       memory: 128Mi
 
 cartDatabase:
