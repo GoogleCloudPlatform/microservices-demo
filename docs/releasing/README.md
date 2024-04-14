@@ -62,6 +62,18 @@ This document walks through the process of creating a new release of Online Bout
    kubectl apply -f ./release/kubernetes-manifests.yaml
    ```
 
-12. Make sure [onlineboutique.dev](https://onlineboutique.dev) works.
+12. Make sure [cymbal-shops.retail.cymbal.dev](https://cymbal-shops.retail.cymbal.dev) works.
 
-13. [Publish your draft release on GitHub](https://github.com/GoogleCloudPlatform/microservices-demo/releases).
+13. Update the relevant major tag (for example, `v1`).
+
+  ```
+  export MAJOR_TAG=v0 # Edit this as needed (to v1/v2/v3/etc)
+  git checkout release/${TAG}
+  git pull
+  git push --delete origin ${MAJOR_TAG} # Delete the remote tag (if it exists)
+  git tag --delete ${MAJOR_TAG} # Delete the local tag (if it exists)
+  git tag -a ${MAJOR_TAG} -m "Updating ${MAJOR_TAG} to its most recent release: ${TAG}"
+  git push origin ${MAJOR_TAG} # Push the new tag to origin
+  ```
+
+14. [Publish your draft release on GitHub](https://github.com/GoogleCloudPlatform/microservices-demo/releases).

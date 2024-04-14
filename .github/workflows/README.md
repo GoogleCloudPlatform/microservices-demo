@@ -4,7 +4,7 @@ This page describes the CI/CD workflows for the Online Boutique app, which run i
 
 ## Infrastructure
 
-The CI/CD pipelines for Online Boutique run in Github Actions, using a pool of two [self-hosted runners]((https://help.github.com/en/actions/automating-your-workflow-with-github-actions/about-self-hosted-runners)). These runners are GCE instances (virtual machines) that, for every open Pull Request in the repo, run the code test pipeline, deploy test pipeline, and (on main) deploy the latest version of the app to [onlineboutique.dev](https://onlineboutique.dev)
+The CI/CD pipelines for Online Boutique run in Github Actions, using a pool of two [self-hosted runners]((https://help.github.com/en/actions/automating-your-workflow-with-github-actions/about-self-hosted-runners)). These runners are GCE instances (virtual machines) that, for every open Pull Request in the repo, run the code test pipeline, deploy test pipeline, and (on main) deploy the latest version of the app to [cymbal-shops.retail.cymbal.dev](https://cymbal-shops.retail.cymbal.dev)
 
 We also host a test GKE cluster, which is where the deploy tests run. Every PR has its own namespace in the cluster.
 

@@ -26,6 +26,7 @@ resources:
 - service-account-productcatalogservice.yaml
 - service-account-recommendationservice.yaml
 - service-account-shippingservice.yaml
+- service-account-shoppingassistantservice.yaml
 patches:
 - target:
     kind: Deployment
@@ -41,6 +42,13 @@ patches:
     - op: replace
       path: /spec/template/spec/serviceAccountName
       value: cartservice
+- target:
+    kind: Deployment
+    name: shoppingassistantservice
+  patch: |-
+    - op: replace
+      path: /spec/template/spec/serviceAccountName
+      value: shoppingassistantservice
 - target:
     kind: Deployment
     name: checkoutservice

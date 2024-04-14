@@ -18,32 +18,34 @@ metadata:
   name: app
 build:
   artifacts:
-    # image tags are relative; to specify an image repo (e.g. GCR), you
-    # must provide a "default repo" using one of the methods described
-    # here:
-    # https://skaffold.dev/docs/concepts/#image-repository-handling
-    - image: emailservice
-      context: src/emailservice
-    - image: productcatalogservice
-      context: src/productcatalogservice
-    - image: recommendationservice
-      context: src/recommendationservice
-    - image: shippingservice
-      context: src/shippingservice
-    - image: checkoutservice
-      context: src/checkoutservice
-    - image: paymentservice
-      context: src/paymentservice
-    - image: currencyservice
-      context: src/currencyservice
-    - image: cartservice
-      context: src/cartservice/src
-      docker:
-        dockerfile: Dockerfile
-    - image: frontend
-      context: src/frontend
-    - image: adservice
-      context: src/adservice
+  # image tags are relative; to specify an image repo (e.g. GCR), you
+  # must provide a "default repo" using one of the methods described
+  # here:
+  # https://skaffold.dev/docs/concepts/#image-repository-handling
+  - image: emailservice
+    context: src/emailservice
+  - image: productcatalogservice
+    context: src/productcatalogservice
+  - image: recommendationservice
+    context: src/recommendationservice
+  - image: shoppingassistantservice
+    context: src/shoppingassistantservice
+  - image: shippingservice
+    context: src/shippingservice
+  - image: checkoutservice
+    context: src/checkoutservice
+  - image: paymentservice
+    context: src/paymentservice
+  - image: currencyservice
+    context: src/currencyservice
+  - image: cartservice
+    context: src/cartservice/src
+    docker:
+      dockerfile: Dockerfile
+  - image: frontend
+    context: src/frontend
+  - image: adservice
+    context: src/adservice
   tagPolicy:
     envTemplate:
       template: "v1"

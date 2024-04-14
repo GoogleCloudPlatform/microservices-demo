@@ -15,7 +15,6 @@
 package main
 
 import (
-	"bytes"
 	"context"
 	"flag"
 	"fmt"
@@ -31,7 +30,6 @@ import (
 	healthpb "google.golang.org/grpc/health/grpc_health_v1"
 
 	"cloud.google.com/go/profiler"
-	"github.com/golang/protobuf/jsonpb"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
@@ -137,7 +135,7 @@ func run(port string) string {
 		grpc.StreamInterceptor(otelgrpc.StreamServerInterceptor()))
 
 	svc := &productCatalog{}
-	err = readCatalogFile(&svc.catalog)
+	err = loadCatalog(&svc.catalog)
 	if err != nil {
 		log.Warnf("could not parse product catalog")
 	}
@@ -216,23 +214,4 @@ func mustConnGRPC(ctx context.Context, conn **grpc.ClientConn, addr string) {
 	if err != nil {
 		panic(errors.Wrapf(err, "grpc: failed to connect %s", addr))
 	}
-}
-
-func readCatalogFile(catalog *pb.ListProductsResponse) error {
-	catalogMutex.Lock()
-	defer catalogMutex.Unlock()
-
-	catalogJSON, err := os.ReadFile("products.json")
-	if err != nil {
-		log.Fatalf("failed to open product catalog json file: %v", err)
-		return err
-	}
-
-	if err := jsonpb.Unmarshal(bytes.NewReader(catalogJSON), catalog); err != nil {
-		log.Warnf("failed to parse the catalog JSON: %v", err)
-		return err
-	}
-
-	log.Info("successfully parsed product catalog json")
-	return nil
 }

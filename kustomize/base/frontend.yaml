@@ -78,6 +78,8 @@ spec:
             value: "checkoutservice:5050"
           - name: AD_SERVICE_ADDR
             value: "adservice:9555"
+          - name: SHOPPING_ASSISTANT_SERVICE_ADDR
+            value: "shoppingassistantservice:80"
           # # ENV_PLATFORM: One of: local, gcp, aws, azure, onprem, alibaba
           # # When not set, defaults to "local" unless running in GKE, otherwies auto-sets to gcp
           # - name: ENV_PLATFORM
@@ -86,6 +88,8 @@ spec:
             value: "0"
           # - name: CYMBAL_BRANDING
           #   value: "true"
+          - name: ENABLE_ASSISTANT
+            value: "true"
           # - name: FRONTEND_MESSAGE
           #   value: "Replace this with a message you want to display on all pages."
           # As part of an optional Google Cloud demo, you can run an optional microservice called the "packaging service".

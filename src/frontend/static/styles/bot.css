@@ -1,0 +1,166 @@
+.chat-modal {
+  width: 100%;
+  height: 85vh;
+  margin-top: 50px;
+  background-color: #EEE;
+  border-radius: 16px;
+  box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
+  overflow: auto;
+  display: block;
+}
+
+@keyframes scale-in {
+  0% {
+    scale: 0;
+  }
+  100% {
+    scale: 1;
+  }
+}
+
+
+.bot-messages {
+  overflow: auto;
+  height: calc(100% - 100px);
+  scroll-snap-align: end;
+}
+
+.bot-message {
+  position: relative;
+  margin: 16px;
+  padding: 16px;
+  margin-right: 20%;
+  border-radius: 16px;
+  background-color: white;
+  min-height: 55px;
+}
+
+.bot-message-loading {
+  -webkit-mask:linear-gradient(-60deg,#000 30%,#0005,#000 70%) right/300% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+.user-message {
+  position: relative;
+  margin: 16px;
+  margin-left: 20%;
+  padding: 16px;
+  border-radius: 16px;
+  background-color: var(--blue);
+}
+
+.bot-input {
+  display: flex;
+  position: absolute;
+  bottom: 0;
+  width: -webkit-fill-available;
+  margin: 16px;
+  margin-right: 32px;
+  padding: 16px;
+  border-radius: 16px;
+  background-color: white;
+}
+
+.bot-input-file-button {
+  padding-top: 5px;
+}
+
+.bot-input-text {
+  border: none;
+  border-bottom: 1px solid #9AA0A6;
+  padding: 0 0 8px 16px;
+  outline: none;
+  color: #1E2021;
+  width: -webkit-fill-available;
+}
+
+.user-message-text {
+  color: white;
+}
+
+.user-image-div {
+  position: relative;
+  width: 100%;
+  height: 150px;
+}
+
+.user-image {
+  position: absolute;
+  right: 0;
+  border-radius: 16px;
+  margin-right: 16px;
+  height: 150px;
+}
+
+.bot-input-button {
+  display: inline-block;
+  border: solid 1px var(--blue);
+  padding: 8px 16px;
+  outline: none;
+  font-size: 14px;
+  border-radius: 22px;
+  cursor: pointer;
+  background-color: var(--blue);
+  color: white;
+}
+
+.bot-input-button:disabled,
+button[disabled]{
+  border: 1px solid #999999;
+  background-color: #cccccc;
+  color: #666666;
+}
+
+.bot-products {
+  margin-left: 16px;
+  margin-right: 20%;
+}
+
+.bot-product {
+  height: 150px;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  border-radius: 16px;
+  background-color: white;
+  color: black;
+}
+
+.bot-product-img {
+  height: 150px;
+  border-top-left-radius: 16px;
+  border-bottom-left-radius: 16px;
+  margin-right: 16px;
+}
+
+.bot-product-description {
+  float: right;
+  width: calc(100% - 180px);
+}
+
+@keyframes typing {
+  0% {
+    opacity: 0;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+.shimmer {
+  color: grey;
+  display:inline-block;
+  -webkit-mask:linear-gradient(-60deg,#000 30%,#0005,#000 70%) right/300% 100%;
+  background-repeat: no-repeat;
+  animation: shimmer 2.5s infinite;
+  font-size: 50px;
+  max-width:200px;
+  filter: invert(21%) sepia(100%) saturate(7414%) hue-rotate(210deg) brightness(50%) contrast(117%);
+}
+
+@keyframes shimmer {
+  100% {-webkit-mask-position:left}
+}
