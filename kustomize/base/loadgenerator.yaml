@@ -15,6 +15,8 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: loadgenerator
+  labels:
+    app: loadgenerator
 spec:
   selector:
     matchLabels:
@@ -27,7 +29,7 @@ spec:
       annotations:
         sidecar.istio.io/rewriteAppHTTPProbers: "true"
     spec:
-      serviceAccountName: default
+      serviceAccountName: loadgenerator
       terminationGracePeriodSeconds: 5
       restartPolicy: Always
       securityContext:
@@ -80,3 +82,8 @@ spec:
           limits:
             cpu: 500m
             memory: 512Mi
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: loadgenerator

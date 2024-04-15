@@ -16,6 +16,8 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: adservice
+  labels:
+    app: adservice
 spec:
   selector:
     matchLabels:
@@ -25,7 +27,7 @@ spec:
       labels:
         app: adservice
     spec:
-      serviceAccountName: default
+      serviceAccountName: adservice
       terminationGracePeriodSeconds: 5
       securityContext:
         fsGroup: 1000
@@ -69,6 +71,8 @@ apiVersion: v1
 kind: Service
 metadata:
   name: adservice
+  labels:
+    app: adservice
 spec:
   type: ClusterIP
   selector:
@@ -77,3 +81,8 @@ spec:
   - name: grpc
     port: 9555
     targetPort: 9555
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: adservice

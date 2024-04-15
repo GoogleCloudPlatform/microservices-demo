@@ -16,6 +16,8 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: productcatalogservice
+  labels:
+    app: productcatalogservice
 spec:
   selector:
     matchLabels:
@@ -25,7 +27,7 @@ spec:
       labels:
         app: productcatalogservice
     spec:
-      serviceAccountName: default
+      serviceAccountName: productcatalogservice
       terminationGracePeriodSeconds: 5
       securityContext:
         fsGroup: 1000
@@ -67,6 +69,8 @@ apiVersion: v1
 kind: Service
 metadata:
   name: productcatalogservice
+  labels:
+    app: productcatalogservice
 spec:
   type: ClusterIP
   selector:
@@ -75,3 +79,8 @@ spec:
   - name: grpc
     port: 3550
     targetPort: 3550
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: productcatalogservice
