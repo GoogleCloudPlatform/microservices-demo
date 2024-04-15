@@ -100,17 +100,17 @@ This demo adds a new service to Online Boutique called `shoppingassistantservice
 
 1. Change the commented-out components in `kubernetes-manifests/kustomization.yaml` to look like this:
     ```yaml
-    components:
+    components: # remove comment
     # - ../kustomize/components/cymbal-branding
     # - ../kustomize/components/google-cloud-operations
     # - ../kustomize/components/memorystore
     # - ../kustomize/components/network-policies
      - ../kustomize/components/alloydb # remove comment
+     - ../kustomize/components/shopping-assistant # remove comment
     # - ../kustomize/components/spanner
     # - ../kustomize/components/container-images-tag
     # - ../kustomize/components/container-images-tag-suffix
     # - ../kustomize/components/container-images-registry
-    # - ../kustomize/components/disable-shopping-assistant # add comment
     ```
 
 1. Deploy to the GKE cluster.
