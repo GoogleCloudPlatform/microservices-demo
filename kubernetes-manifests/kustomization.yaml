@@ -25,7 +25,6 @@ resources:
  - paymentservice.yaml
  - productcatalogservice.yaml
  - recommendationservice.yaml
- - shoppingassistantservice.yaml
  - shippingservice.yaml
 # components:
 # - ../kustomize/components/cymbal-branding

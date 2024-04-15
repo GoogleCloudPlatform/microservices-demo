@@ -95,7 +95,7 @@ This demo adds a new service to Online Boutique called `shoppingassistantservice
 
 1. Paste this secret key in the shopping assistant service envs, replacing `GOOGLE_API_KEY_VAL`.
     ```sh
-    vim kubernetes-manifests/shoppingassistantservice.yaml
+    vim kustomize/components/shopping-assistant/shoppingassistantservice.yaml
     ```
 
 1. Change the commented-out components in `kubernetes-manifests/kustomization.yaml` to look like this:
