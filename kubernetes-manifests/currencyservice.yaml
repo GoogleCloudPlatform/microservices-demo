@@ -27,7 +27,7 @@ spec:
       labels:
         app: currencyservice
     spec:
-      serviceAccountName: default
+      serviceAccountName: currencyservice
       terminationGracePeriodSeconds: 5
       securityContext:
         fsGroup: 1000
@@ -80,3 +80,8 @@ spec:
   - name: grpc
     port: 7000
     targetPort: 7000
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: currencyservice

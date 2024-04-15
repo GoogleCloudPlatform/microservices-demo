@@ -26,14 +26,12 @@ resources:
  - productcatalogservice.yaml
  - recommendationservice.yaml
  - shoppingassistantservice.yaml
- - redis.yaml
  - shippingservice.yaml
 components:
 # - ../kustomize/components/cymbal-branding
 # - ../kustomize/components/google-cloud-operations
 # - ../kustomize/components/memorystore
 # - ../kustomize/components/network-policies
-# - ../kustomize/components/service-accounts
 # - ../kustomize/components/alloydb
 # - ../kustomize/components/spanner
 # - ../kustomize/components/container-images-tag

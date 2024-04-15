@@ -116,7 +116,6 @@ To automate the deployment of Online Boutique integrated with AlloyDB you can le
 
 From the `kustomize/` folder at the root level of this repository, execute these commands:
 ```bash
-kustomize edit add component components/service-accounts
 kustomize edit add component components/alloydb
 ```
 _**Note:** this Kustomize component will also remove the `redis-cart` `Deployment` and `Service` not used anymore._
@@ -128,7 +127,6 @@ kind: Kustomization
 resources:
 - base
 components:
-- components/service-accounts
 - components/alloydb
 ```
 
