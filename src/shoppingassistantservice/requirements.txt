@@ -108,7 +108,7 @@ langchain-core==0.1.43
     #   langchain-text-splitters
 langchain-google-alloydb-pg==0.2.0
     # via -r requirements.in
-langchain-google-genai==0.0.11
+langchain-google-genai==1.0.1
     # via -r requirements.in
 langchain-text-splitters==0.0.1
     # via langchain
