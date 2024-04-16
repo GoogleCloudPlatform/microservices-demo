@@ -4,7 +4,7 @@
 #
 #    pip-compile --output-file=requirements.txt requirements.in
 #
-aiohttp==3.9.3
+aiohttp==3.9.5
     # via
     #   google-cloud-alloydb-connector
     #   langchain
@@ -37,7 +37,7 @@ dataclasses-json==0.6.4
     # via
     #   langchain
     #   langchain-community
-flask==3.0.2
+flask==3.0.3
     # via -r requirements.in
 frozenlist==1.4.1
     # via
@@ -56,7 +56,7 @@ google-auth==2.29.0
     #   google-cloud-alloydb-connector
     #   google-cloud-secret-manager
     #   google-generativeai
-google-cloud-alloydb-connector[asyncpg]==0.4.1
+google-cloud-alloydb-connector[asyncpg]==1.0.0
     # via langchain-google-alloydb-pg
 google-cloud-secret-manager==2.19.0
     # via -r requirements.in
@@ -79,7 +79,7 @@ grpcio==1.62.1
     #   grpcio-status
 grpcio-status==1.62.1
     # via google-api-core
-idna==3.6
+idna==3.7
     # via
     #   requests
     #   yarl
@@ -93,26 +93,26 @@ jsonpatch==1.33
     #   langchain-core
 jsonpointer==2.4
     # via jsonpatch
-langchain==0.1.12
+langchain==0.1.14
     # via -r requirements.in
-langchain-community==0.0.31
+langchain-community==0.0.33
     # via
     #   langchain
     #   langchain-google-alloydb-pg
-langchain-core==0.1.38
+langchain-core==0.1.43
     # via
     #   langchain
     #   langchain-community
     #   langchain-google-alloydb-pg
     #   langchain-google-genai
     #   langchain-text-splitters
-langchain-google-alloydb-pg==0.1.0
+langchain-google-alloydb-pg==0.2.0
     # via -r requirements.in
 langchain-google-genai==0.0.11
     # via -r requirements.in
 langchain-text-splitters==0.0.1
     # via langchain
-langsmith==0.1.38
+langsmith==0.1.48
     # via
     #   langchain
     #   langchain-community
@@ -135,7 +135,7 @@ numpy==1.26.4
     #   langchain-community
     #   langchain-google-alloydb-pg
     #   pgvector
-orjson==3.10.0
+orjson==3.10.1
     # via langsmith
 packaging==23.2
     # via
@@ -169,13 +169,13 @@ pyasn1-modules==0.4.0
     # via google-auth
 pycparser==2.22
     # via cffi
-pydantic==2.6.4
+pydantic==2.7.0
     # via
     #   google-generativeai
     #   langchain
     #   langchain-core
     #   langsmith
-pydantic-core==2.16.3
+pydantic-core==2.18.1
     # via pydantic
 pyyaml==6.0.1
     # via
@@ -188,7 +188,6 @@ requests==2.31.0
     #   google-cloud-alloydb-connector
     #   langchain
     #   langchain-community
-    #   langchain-core
     #   langsmith
 rsa==4.9
     # via google-auth
@@ -204,7 +203,7 @@ tenacity==8.2.3
     #   langchain-core
 tqdm==4.66.2
     # via google-generativeai
-typing-extensions==4.10.0
+typing-extensions==4.11.0
     # via
     #   google-generativeai
     #   pydantic
