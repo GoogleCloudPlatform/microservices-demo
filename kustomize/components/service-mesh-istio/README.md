@@ -91,7 +91,6 @@ Once the service mesh and namespace injection are configured, you can then deplo
 
 From the `kustomize/` folder at the root level of this repository, execute these commands:
 ```bash
-kustomize edit add component components/service-accounts
 kustomize edit add component components/service-mesh-istio
 ```
 
@@ -102,7 +101,6 @@ kind: Kustomization
 resources:
 - base
 components:
-- components/service-accounts
 - components/service-mesh-istio
 ```
 

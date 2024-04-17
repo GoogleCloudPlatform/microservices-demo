@@ -16,6 +16,8 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: shippingservice
+  labels:
+    app: shippingservice
 spec:
   selector:
     matchLabels:
@@ -25,7 +27,7 @@ spec:
       labels:
         app: shippingservice
     spec:
-      serviceAccountName: default
+      serviceAccountName: shippingservice
       securityContext:
         fsGroup: 1000
         runAsGroup: 1000
@@ -67,6 +69,8 @@ apiVersion: v1
 kind: Service
 metadata:
   name: shippingservice
+  labels:
+    app: shippingservice
 spec:
   type: ClusterIP
   selector:
@@ -75,3 +79,8 @@ spec:
   - name: grpc
     port: 50051
     targetPort: 50051
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: shippingservice

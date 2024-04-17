@@ -20,5 +20,4 @@ components:
 - ../../components/cymbal-branding
 - ../../components/google-cloud-operations
 - ../../components/network-policies
-- ../../components/service-accounts
 - ../../components/service-mesh-istio

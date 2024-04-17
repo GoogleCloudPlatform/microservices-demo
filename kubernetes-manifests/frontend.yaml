@@ -29,7 +29,7 @@ spec:
       annotations:
         sidecar.istio.io/rewriteAppHTTPProbers: "true"
     spec:
-      serviceAccountName: default
+      serviceAccountName: frontend
       securityContext:
         fsGroup: 1000
         runAsGroup: 1000
@@ -90,8 +90,8 @@ spec:
             value: "0"
           # - name: CYMBAL_BRANDING
           #   value: "true"
-          - name: ENABLE_ASSISTANT
-            value: "true"
+          # - name: ENABLE_ASSISTANT
+          #   value: "true"
           # - name: FRONTEND_MESSAGE
           #   value: "Replace this with a message you want to display on all pages."
           # As part of an optional Google Cloud demo, you can run an optional microservice called the "packaging service".
@@ -134,3 +134,8 @@ spec:
   - name: http
     port: 80
     targetPort: 8080
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: frontend

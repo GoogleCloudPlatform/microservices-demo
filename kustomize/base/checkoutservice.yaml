@@ -16,6 +16,8 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: checkoutservice
+  labels:
+    app: checkoutservice
 spec:
   selector:
     matchLabels:
@@ -25,7 +27,7 @@ spec:
       labels:
         app: checkoutservice
     spec:
-      serviceAccountName: default
+      serviceAccountName: checkoutservice
       securityContext:
         fsGroup: 1000
         runAsGroup: 1000
@@ -76,6 +78,8 @@ apiVersion: v1
 kind: Service
 metadata:
   name: checkoutservice
+  labels:
+    app: checkoutservice
 spec:
   type: ClusterIP
   selector:
@@ -84,3 +88,8 @@ spec:
   - name: grpc
     port: 5050
     targetPort: 5050
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: checkoutservice

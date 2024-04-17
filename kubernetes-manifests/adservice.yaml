@@ -27,7 +27,7 @@ spec:
       labels:
         app: adservice
     spec:
-      serviceAccountName: default
+      serviceAccountName: adservice
       terminationGracePeriodSeconds: 5
       securityContext:
         fsGroup: 1000
@@ -81,3 +81,8 @@ spec:
   - name: grpc
     port: 9555
     targetPort: 9555
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: adservice
