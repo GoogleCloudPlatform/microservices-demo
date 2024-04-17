@@ -42,7 +42,7 @@ spec:
         - /bin/sh
         - -exc
         - |
-          MAX_RETRIES=3
+          MAX_RETRIES=12
           RETRY_INTERVAL=10
           for i in $(seq 1 $MAX_RETRIES); do
             echo "Attempt $i: Pinging frontend: ${FRONTEND_ADDR}..."
