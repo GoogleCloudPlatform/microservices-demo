@@ -48,12 +48,14 @@ Find **Protocol Buffers Descriptions** at the [`./protos` directory](/protos).
    - [Google Cloud project](https://cloud.google.com/resource-manager/docs/creating-managing-projects#creating_a_project).
    - Shell environment with `gcloud`, `git`, and `kubectl`.
 
-2. Clone the repository.
+2. Clone the latest major version.
 
    ```sh
-   git clone https://github.com/GoogleCloudPlatform/microservices-demo
+   git clone --depth 1 --branch v0 https://github.com/GoogleCloudPlatform/microservices-demo.git
    cd microservices-demo/
    ```
+
+   The `--depth 1` argument skips downloading git history.
 
 3. Set the Google Cloud project and region and ensure the Google Kubernetes Engine API is enabled.
 
