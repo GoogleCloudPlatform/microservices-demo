@@ -68,7 +68,7 @@ google-cloud-alloydb-connector[asyncpg]==1.0.0
     # via langchain-google-alloydb-pg
 google-cloud-secret-manager==2.19.0
     # via -r requirements.in
-google-generativeai==0.5.1
+google-generativeai==0.5.2
     # via langchain-google-genai
 googleapis-common-protos[grpc]==1.63.0
     # via
@@ -79,13 +79,13 @@ greenlet==3.0.3
     # via sqlalchemy
 grpc-google-iam-v1==0.13.0
     # via google-cloud-secret-manager
-grpcio==1.62.1
+grpcio==1.62.2
     # via
     #   google-api-core
     #   googleapis-common-protos
     #   grpc-google-iam-v1
     #   grpcio-status
-grpcio-status==1.62.1
+grpcio-status==1.62.2
     # via google-api-core
 httplib2==0.22.0
     # via
@@ -107,11 +107,11 @@ jsonpointer==2.4
     # via jsonpatch
 langchain==0.1.16
     # via -r requirements.in
-langchain-community==0.0.33
+langchain-community==0.0.34
     # via
     #   langchain
     #   langchain-google-alloydb-pg
-langchain-core==0.1.43
+langchain-core==0.1.45
     # via
     #   langchain
     #   langchain-community
@@ -124,7 +124,7 @@ langchain-google-genai==1.0.2
     # via -r requirements.in
 langchain-text-splitters==0.0.1
     # via langchain
-langsmith==0.1.48
+langsmith==0.1.49
     # via
     #   langchain
     #   langchain-community
