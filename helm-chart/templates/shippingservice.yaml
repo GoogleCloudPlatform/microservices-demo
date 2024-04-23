@@ -18,6 +18,8 @@ kind: Deployment
 metadata:
   name: {{ .Values.shippingService.name }}
   namespace: {{ .Release.Namespace }}
+  labels:
+    app: {{ .Values.shippingService.name }}
 spec:
   selector:
     matchLabels:
@@ -75,6 +77,8 @@ kind: Service
 metadata:
   name: {{ .Values.shippingService.name }}
   namespace: {{ .Release.Namespace }}
+  labels:
+    app: {{ .Values.shippingService.name }}
 spec:
   type: ClusterIP
   selector:

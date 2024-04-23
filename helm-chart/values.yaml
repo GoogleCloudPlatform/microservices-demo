@@ -9,7 +9,7 @@ images:
 
 serviceAccounts:
   # Specifies whether service accounts should be created.
-  create: false
+  create: true
   # Annotations to add to the service accounts.
   annotations: {}
   # Annotations to add only for the cartservice app. This allows to follow the least privilege principle where only cartservice needs to connect to external database for example via Workload Identity.
@@ -195,3 +195,9 @@ cartDatabase:
     endpointAddress: ""
     endpointPort: ""
     certificate: ""
+
+# @TODO: This service is not currently available in Helm.
+# https://github.com/GoogleCloudPlatform/microservices-demo/tree/main/kustomize/components/shopping-assistant
+shoppingAssistantService:
+  create: false
+  name: shoppingassistantservice
