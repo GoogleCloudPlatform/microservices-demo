@@ -32,6 +32,8 @@ kind: Deployment
 metadata:
   name: {{ .Values.frontend.name }}
   namespace: {{ .Release.Namespace }}
+  labels:
+    app: {{ .Values.frontend.name }}
 spec:
   selector:
     matchLabels:
@@ -102,6 +104,8 @@ spec:
             value: "{{ .Values.checkoutService.name }}:5050"
           - name: AD_SERVICE_ADDR
             value: "{{ .Values.adService.name }}:9555"
+          - name: SHOPPING_ASSISTANT_SERVICE_ADDR
+            value: "{{ .Values.shoppingAssistantService.name }}:80"
           - name: ENV_PLATFORM
             value: {{ .Values.frontend.platform | quote }}
           {{- if .Values.opentelemetryCollector.create }}
@@ -120,6 +124,8 @@ spec:
           {{- end }}
           - name: CYMBAL_BRANDING
             value: {{ .Values.frontend.cymbalBranding | quote }}
+          - name: ENABLE_ASSISTANT
+            value: {{ .Values.shoppingAssistantService.create | quote }}
           - name: ENABLE_SINGLE_SHARED_SESSION
             value: {{ .Values.frontend.singleSharedSession | quote }}
           resources:
@@ -130,6 +136,8 @@ kind: Service
 metadata:
   name: {{ .Values.frontend.name }}
   namespace: {{ .Release.Namespace }}
+  labels:
+    app: {{ .Values.frontend.name }}
 spec:
   type: ClusterIP
   selector:
