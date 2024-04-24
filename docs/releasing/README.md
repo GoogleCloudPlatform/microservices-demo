@@ -74,6 +74,13 @@ Once the release notes are published, you should then replace the version of the
    kubectl apply -f ./release/kubernetes-manifests.yaml
    ```
 
+3. Remove unnecessary objects:
+
+   ```sh
+   kubectl delete service frontend-external
+   kubectl delete deployment loadgenerator
+   ```
+
 3. Make sure [cymbal-shops.retail.cymbal.dev](https://cymbal-shops.retail.cymbal.dev) works.
 
 ## Update major tags
