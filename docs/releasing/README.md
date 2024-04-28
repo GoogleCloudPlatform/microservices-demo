@@ -2,71 +2,92 @@
 
 This document walks through the process of creating a new release of Online Boutique.
 
-## Creating a new release
+## Prerequisites for tagging a release
 
-1. Decide on the next release version number using [semantic versioning](https://semver.org/), based on the [commits since the previous release](https://github.com/GoogleCloudPlatform/microservices-demo/commits/main).
+1. Choose the logical [next release tag](https://github.com/GoogleCloudPlatform/bank-of-anthos/releases), using [semantic versioning](https://semver.org/): `vX.Y.Z`.
 
-2. Open a new terminal.
+   If this release includes significant feature changes, update the minor version (`Y`). Otherwise, for bug-fix releases or standard quarterly release, update the patch version `Z`).
 
-3. Make sure you have `gsed` installed. If not, `brew install gnu-sed`.
+2. Ensure that the following commands are in your `PATH`:
+   - `gsed` (found in the `gnu-sed` Brew package for macOS, or by symlinking `sed` for Linux)
+   - `gcloud`
+   - `helm`
 
-4. Set the following environment variables:
+3. Make sure that your `gcloud` is authenticated:
 
-   - `TAG` - This is the new version (e.g., `v0.3.5`).
-   - `REPO_PREFIX` - This is the Docker repository.
-   - `PROJECT_ID` - This is the Google Cloud project in which Google Cloud Build will be used to remotely build microservice Docker images.
-
-   **Example:**
-
-   ```
-   export TAG=v0.3.5
-   export REPO_PREFIX=gcr.io/google-samples/microservices-demo
-   export PROJECT_ID=google-samples
+   ```sh
+   gcloud auth login
+   gcloud auth configure-docker us-central1-docker.pkg.dev
    ```
 
-5. Run `./docs/releasing/make-release.sh`.
+## Create and tag the new release
 
-   - Make sure you run `./docs/releasing/make-release.sh` from this project's root directory — **not** from inside the `docs/releasing/` directory.
-   - This script:
-     1. uses `make-docker-images.sh` to build and push a Docker image for each microservice to the previously specified repository.
-     1. uses `make-release-artifacts.sh` to regenerates (and update the image $TAGS) YAML file at `./release/kubernetes-manifests.yaml` and `./kustomize/base/`.
-     1. runs `git tag` and pushes a new branch (e.g., `release/v0.3.5`) with the changes to `./release/kubernetes-manifests.yaml`.
+Run the `make-release.sh` script found inside the `docs/releasing/` directory:
 
-6. Make sure the new Docker images were created and pushed.
+```sh
+# assuming you are inside the root path of the bank-of-anthos repository
+export TAG=vX.Y.Z # This is the new version (e.g. `v0.3.5`)
+export REPO_PREFIX=gcr.io/google-samples/microservices-demo # This is the Docker repository for tagged images
+export PROJECT_ID=google-samples # This is the Google Cloud project for the release CI
+./docs/releasing/make-release.sh
+```
 
-   - Go through [our Container Registry repository](https://pantheon.corp.google.com/gcr/images/google-samples/global/microservices-demo?project=google-samples).
-   - Make sure a Docker image was created for each microservice (with the new version tag).
+This script does the following:
+1. Uses `make-docker-images.sh` to build and push a Docker image for each microservice to the previously specified repository.
+2. Uses `make-release-artifacts.sh` to regenerates (and update the image $TAGS) YAML file at `./release/kubernetes-manifests.yaml` and `./kustomize/base/`.
+3. Runs `git tag` and pushes a new branch (e.g., `release/v0.3.5`) with the changes to `./release/kubernetes-manifests.yaml`.
 
-7. [Draft a new release on GitHub](https://github.com/GoogleCloudPlatform/microservices-demo/releases).
+You can then browse the [Container Registry repository](https://pantheon.corp.google.com/gcr/images/google-samples/global/microservices-demo?project=google-samples) to make sure a Docker image was created for each microservice (with the new version tag).
 
-   - Summarize the [commits since the previous release](https://github.com/GoogleCloudPlatform/microservices-demo/commits/main).
-   - See previous releases for inspiration on release notes.
+## Create the PR
 
-8. Create a new pull-request.
+Now that the release branch has been created, you can find it in the [list of branches](https://github.com/GoogleCloudPlatform/microservices-demo/branches) and create a pull request targeting `main` (the default branch).
 
-   - When you ran `make-release.sh`, it created a new branch (e.g., `release/v0.3.5`).
-   - Include the new release draft in the pull-request description for reviewers to see.
+This process is going to trigger multiple CI checks as well as stage the release onto a temporary cluster. Once the PR has been approved and all checks are successfully passing, you can then merge the branch. Make sure to include the release draft (see next section) in the pull-request description for reviewers to see.
 
-9. Once your pull-request is approved, merge it.
+Once reviewed and you're ready to merge, make sure to not delete the release branch or the tags during that process.
 
-10. Connect to our [online-boutique-release GKE cluster](https://pantheon.corp.google.com/kubernetes/clusters/details/us-central1-c/online-boutique-release/details?project=online-boutique-ci).
+## Add notes to the release
 
-   ```
+Once the PR has been fully merged, you are ready to create a new release for the newly created [tag](https://github.com/GoogleCloudPlatform/microservices-demo/tags).
+- Click the breadcrumbs on the row of the latest tag that was created in the [tags](https://github.com/GoogleCloudPlatform/microservices-demo/tags) page
+- Select the `Create release` option
+
+The release notes should contain a brief description of the changes since the previous release (like bug fixed and new features). For inspiration, you can look at the list of [releases](https://github.com/GoogleCloudPlatform/microservices-demo/releases).
+
+> ***Note:*** No assets need to be uploaded. They are picked up automatically from the tagged revision
+
+## Deploy on the production environment
+
+Once the release notes are published, you should then replace the version of the production environment to the newly published version.
+
+1. Connect to the [online-boutique-release GKE cluster](https://pantheon.corp.google.com/kubernetes/clusters/details/us-central1-c/online-boutique-release/details?project=online-boutique-ci):
+
+   ```sh
    gcloud container clusters get-credentials online-boutique-release \
      --zone us-central1-c --project online-boutique-ci
    ```
 
-11. Deploy `release/kubernetes-manifests.yaml` to our [online-boutique-release GKE cluster](https://pantheon.corp.google.com/kubernetes/clusters/details/us-central1-c/online-boutique-release/details?project=online-boutique-ci).
+2. Deploy `release/kubernetes-manifests.yaml` to it:
 
-   ```
+   ```sh
    kubectl apply -f ./release/kubernetes-manifests.yaml
    ```
 
-12. Make sure [cymbal-shops.retail.cymbal.dev](https://cymbal-shops.retail.cymbal.dev) works.
+3. Remove unnecessary objects:
 
-13. Update the relevant major tag (for example, `v1`).
+   ```sh
+   kubectl delete service frontend-external
+   kubectl delete deployment loadgenerator
+   ```
 
-  ```
+3. Make sure [cymbal-shops.retail.cymbal.dev](https://cymbal-shops.retail.cymbal.dev) works.
+
+## Update major tags
+
+1. Update the relevant major tag (for example, `v1`):
+
+  ```sh
   export MAJOR_TAG=v0 # Edit this as needed (to v1/v2/v3/etc)
   git checkout release/${TAG}
   git pull
@@ -76,4 +97,6 @@ This document walks through the process of creating a new release of Online Bout
   git push origin ${MAJOR_TAG} # Push the new tag to origin
   ```
 
-14. [Publish your draft release on GitHub](https://github.com/GoogleCloudPlatform/microservices-demo/releases).
+## Announce the new release internally
+
+Once the new release is out, you can now announce it via [g/online-boutique-announce](https://groups.google.com/a/google.com/g/online-boutique-announce).

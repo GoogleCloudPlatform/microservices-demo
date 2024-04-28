@@ -32,6 +32,8 @@ kind: Deployment
 metadata:
   name: {{ .Values.checkoutService.name }}
   namespace: {{ .Release.Namespace }}
+  labels:
+    app: {{ .Values.checkoutService.name }}
 spec:
   selector:
     matchLabels:
@@ -110,6 +112,8 @@ kind: Service
 metadata:
   name: {{ .Values.checkoutService.name }}
   namespace: {{ .Release.Namespace }}
+  labels:
+    app: {{ .Values.checkoutService.name }}
 spec:
   type: ClusterIP
   selector:
