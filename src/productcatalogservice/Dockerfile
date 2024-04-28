@@ -13,8 +13,6 @@
 # limitations under the License.
 
 FROM golang:1.22.2-alpine@sha256:cdc86d9f363e8786845bea2040312b4efa321b828acdeb26f393faa864d887b0 AS builder
-RUN apk add --no-cache ca-certificates git
-RUN apk add build-base
 
 WORKDIR /src
 # restore dependencies
