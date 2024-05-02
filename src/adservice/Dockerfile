@@ -29,11 +29,12 @@ FROM eclipse-temurin:21.0.2_13-jre-alpine@sha256:6f78a61a2aa1e6907dda2da3eb791d4
 
 RUN apk add --no-cache ca-certificates
 
+# @TODO: https://github.com/GoogleCloudPlatform/microservices-demo/issues/2517
 # Download Stackdriver Profiler Java agent
-RUN mkdir -p /opt/cprof && \
-    wget -q -O- https://storage.googleapis.com/cloud-profiler/java/latest/profiler_java_agent_alpine.tar.gz \
-    | tar xzv -C /opt/cprof && \
-    rm -rf profiler_java_agent.tar.gz
+# RUN mkdir -p /opt/cprof && \
+#     wget -q -O- https://storage.googleapis.com/cloud-profiler/java/latest/profiler_java_agent_alpine.tar.gz \
+#     | tar xzv -C /opt/cprof && \
+#     rm -rf profiler_java_agent.tar.gz
 
 WORKDIR /app
 COPY --from=builder /app .
