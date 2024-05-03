@@ -19,7 +19,7 @@ asyncpg==0.29.0
     # via google-cloud-alloydb-connector
 attrs==23.2.0
     # via aiohttp
-blinker==1.7.0
+blinker==1.8.1
     # via flask
 cachetools==5.3.3
     # via google-auth
@@ -33,7 +33,7 @@ click==8.1.7
     # via flask
 cryptography==42.0.5
     # via google-cloud-alloydb-connector
-dataclasses-json==0.6.4
+dataclasses-json==0.6.5
     # via
     #   langchain
     #   langchain-community
@@ -45,13 +45,13 @@ frozenlist==1.4.1
     #   aiosignal
 google-ai-generativelanguage==0.6.2
     # via google-generativeai
-google-api-core[grpc]==2.18.0
+google-api-core[grpc]==2.19.0
     # via
     #   google-ai-generativelanguage
     #   google-api-python-client
     #   google-cloud-secret-manager
     #   google-generativeai
-google-api-python-client==2.126.0
+google-api-python-client==2.127.0
     # via google-generativeai
 google-auth==2.29.0
     # via
@@ -66,7 +66,7 @@ google-auth-httplib2==0.2.0
     # via google-api-python-client
 google-cloud-alloydb-connector[asyncpg]==1.0.0
     # via langchain-google-alloydb-pg
-google-cloud-secret-manager==2.19.0
+google-cloud-secret-manager==2.20.0
     # via -r requirements.in
 google-generativeai==0.5.2
     # via langchain-google-genai
@@ -79,7 +79,7 @@ greenlet==3.0.3
     # via sqlalchemy
 grpc-google-iam-v1==0.13.0
     # via google-cloud-secret-manager
-grpcio==1.62.2
+grpcio==1.63.0
     # via
     #   google-api-core
     #   googleapis-common-protos
@@ -107,11 +107,11 @@ jsonpointer==2.4
     # via jsonpatch
 langchain==0.1.16
     # via -r requirements.in
-langchain-community==0.0.34
+langchain-community==0.0.36
     # via
     #   langchain
     #   langchain-google-alloydb-pg
-langchain-core==0.1.45
+langchain-core==0.1.49
     # via
     #   langchain
     #   langchain-community
@@ -124,7 +124,7 @@ langchain-google-genai==1.0.2
     # via -r requirements.in
 langchain-text-splitters==0.0.1
     # via langchain
-langsmith==0.1.49
+langsmith==0.1.53
     # via
     #   langchain
     #   langchain-community
@@ -133,7 +133,7 @@ markupsafe==2.1.5
     # via
     #   jinja2
     #   werkzeug
-marshmallow==3.21.1
+marshmallow==3.21.2
     # via dataclasses-json
 multidict==6.0.5
     # via
@@ -147,7 +147,7 @@ numpy==1.26.4
     #   langchain-community
     #   langchain-google-alloydb-pg
     #   pgvector
-orjson==3.10.1
+orjson==3.10.2
     # via langsmith
 packaging==23.2
     # via
@@ -181,13 +181,13 @@ pyasn1-modules==0.4.0
     # via google-auth
 pycparser==2.22
     # via cffi
-pydantic==2.7.0
+pydantic==2.7.1
     # via
     #   google-generativeai
     #   langchain
     #   langchain-core
     #   langsmith
-pydantic-core==2.18.1
+pydantic-core==2.18.2
     # via pydantic
 pyparsing==3.1.2
     # via httplib2
