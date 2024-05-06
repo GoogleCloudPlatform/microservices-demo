@@ -10,8 +10,8 @@
     <PackageReference Include="Grpc.Net.Client" Version="2.62.0" />
     <PackageReference Include="Microsoft.AspNetCore.TestHost" Version="8.0.4" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.9.0" />
-    <PackageReference Include="xunit" Version="2.7.1" />
-    <PackageReference Include="xunit.runner.visualstudio" Version="2.5.8" />
+    <PackageReference Include="xunit" Version="2.8.0" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.8.0" />
   </ItemGroup>
 
   <ItemGroup>
