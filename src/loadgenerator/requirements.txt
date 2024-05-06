@@ -67,7 +67,7 @@ urllib3==2.2.1
     # via
     #   geventhttpclient
     #   requests
-werkzeug==3.0.2
+werkzeug==3.0.3
     # via
     #   flask
     #   flask-login
