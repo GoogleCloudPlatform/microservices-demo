@@ -97,7 +97,7 @@ idna==3.7
     #   yarl
 itsdangerous==2.2.0
     # via flask
-jinja2==3.1.3
+jinja2==3.1.4
     # via flask
 jsonpatch==1.33
     # via
