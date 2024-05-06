@@ -230,7 +230,7 @@ uritemplate==4.1.1
     # via google-api-python-client
 urllib3==2.2.1
     # via requests
-werkzeug==3.0.2
+werkzeug==3.0.3
     # via flask
 yarl==1.9.4
     # via aiohttp
