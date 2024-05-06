@@ -215,7 +215,7 @@ tenacity==8.2.3
     #   langchain
     #   langchain-community
     #   langchain-core
-tqdm==4.66.2
+tqdm==4.66.3
     # via google-generativeai
 typing-extensions==4.11.0
     # via
