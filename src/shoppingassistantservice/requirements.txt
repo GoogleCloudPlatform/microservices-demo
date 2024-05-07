@@ -19,7 +19,7 @@ asyncpg==0.29.0
     # via google-cloud-alloydb-connector
 attrs==23.2.0
     # via aiohttp
-blinker==1.8.1
+blinker==1.8.2
     # via flask
 cachetools==5.3.3
     # via google-auth
@@ -31,7 +31,7 @@ charset-normalizer==3.3.2
     # via requests
 click==8.1.7
     # via flask
-cryptography==42.0.5
+cryptography==42.0.7
     # via google-cloud-alloydb-connector
 dataclasses-json==0.6.5
     # via
@@ -107,11 +107,11 @@ jsonpointer==2.4
     # via jsonpatch
 langchain==0.1.16
     # via -r requirements.in
-langchain-community==0.0.36
+langchain-community==0.0.37
     # via
     #   langchain
     #   langchain-google-alloydb-pg
-langchain-core==0.1.49
+langchain-core==0.1.51
     # via
     #   langchain
     #   langchain-community
@@ -120,11 +120,11 @@ langchain-core==0.1.49
     #   langchain-text-splitters
 langchain-google-alloydb-pg==0.2.0
     # via -r requirements.in
-langchain-google-genai==1.0.2
+langchain-google-genai==1.0.3
     # via -r requirements.in
 langchain-text-splitters==0.0.1
     # via langchain
-langsmith==0.1.53
+langsmith==0.1.54
     # via
     #   langchain
     #   langchain-community
@@ -147,7 +147,7 @@ numpy==1.26.4
     #   langchain-community
     #   langchain-google-alloydb-pg
     #   pgvector
-orjson==3.10.2
+orjson==3.10.3
     # via langsmith
 packaging==23.2
     # via
@@ -205,7 +205,7 @@ requests==2.31.0
     #   langsmith
 rsa==4.9
     # via google-auth
-sqlalchemy==2.0.29
+sqlalchemy==2.0.30
     # via
     #   langchain
     #   langchain-community
@@ -215,7 +215,7 @@ tenacity==8.2.3
     #   langchain
     #   langchain-community
     #   langchain-core
-tqdm==4.66.3
+tqdm==4.66.4
     # via google-generativeai
 typing-extensions==4.11.0
     # via

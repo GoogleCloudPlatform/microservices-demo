@@ -4,7 +4,7 @@
 #
 #    pip-compile --output-file=requirements.txt requirements.in
 #
-blinker==1.8.1
+blinker==1.8.2
     # via flask
 brotli==1.1.0
     # via geventhttpclient
@@ -18,14 +18,14 @@ click==8.1.7
     # via flask
 configargparse==1.7
     # via locust
-faker==24.14.0
+faker==24.14.1
     # via -r requirements.in
 flask==3.0.3
     # via
     #   flask-cors
     #   flask-login
     #   locust
-flask-cors==4.0.0
+flask-cors==4.0.1
     # via locust
 flask-login==0.6.3
     # via locust
