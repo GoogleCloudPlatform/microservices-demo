@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-FROM eclipse-temurin:21@sha256:fe90fc98e067d7708811aec14fa60a4b81127d3dc7387aecc4c446c2c30c1277 as builder
+FROM eclipse-temurin:21@sha256:17f4e7fc9aedb22147ff7271b1fac98a5b0e5daf003183610b466fbcce17095a as builder
 
 WORKDIR /app
 
@@ -25,15 +25,16 @@ COPY . .
 RUN chmod +x gradlew
 RUN ./gradlew installDist
 
-FROM eclipse-temurin:21.0.2_13-jre-alpine@sha256:6f78a61a2aa1e6907dda2da3eb791d44ef3d18e36aee1d1bdaa3543bd44cff4b
+FROM eclipse-temurin:21.0.3_9-jre-alpine@sha256:23467b3e42617ca197f43f58bc5fb03ca4cb059d68acd49c67128bfded132d67
 
 RUN apk add --no-cache ca-certificates
 
+# @TODO: https://github.com/GoogleCloudPlatform/microservices-demo/issues/2517
 # Download Stackdriver Profiler Java agent
-RUN mkdir -p /opt/cprof && \
-    wget -q -O- https://storage.googleapis.com/cloud-profiler/java/latest/profiler_java_agent_alpine.tar.gz \
-    | tar xzv -C /opt/cprof && \
-    rm -rf profiler_java_agent.tar.gz
+# RUN mkdir -p /opt/cprof && \
+#     wget -q -O- https://storage.googleapis.com/cloud-profiler/java/latest/profiler_java_agent_alpine.tar.gz \
+#     | tar xzv -C /opt/cprof && \
+#     rm -rf profiler_java_agent.tar.gz
 
 WORKDIR /app
 COPY --from=builder /app .
