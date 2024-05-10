@@ -51,8 +51,8 @@ spec:
           value: "9555"
         resources:
           requests:
-            cpu: 200m
-            memory: 180Mi
+            cpu: 60m
+            memory: 80Mi
           limits:
             cpu: 300m
             memory: 300Mi

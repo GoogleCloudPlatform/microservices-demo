@@ -59,8 +59,8 @@ spec:
             port: 50051
         resources:
           requests:
-            cpu: 100m
-            memory: 64Mi
+            cpu: 10m
+            memory: 10Mi
           limits:
             cpu: 200m
             memory: 128Mi
