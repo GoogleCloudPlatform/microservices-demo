@@ -88,8 +88,8 @@ spec:
             cpu: 10m
             memory: 200Mi
           limits:
-            cpu: 500m
-            memory: 512Mi
+            cpu: 30m
+            memory: 220Mi
 ---
 apiVersion: v1
 kind: ServiceAccount
