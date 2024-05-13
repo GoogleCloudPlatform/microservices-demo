@@ -33,7 +33,7 @@ click==8.1.7
     # via flask
 cryptography==42.0.7
     # via google-cloud-alloydb-connector
-dataclasses-json==0.6.5
+dataclasses-json==0.6.6
     # via
     #   langchain
     #   langchain-community
@@ -51,7 +51,7 @@ google-api-core[grpc]==2.19.0
     #   google-api-python-client
     #   google-cloud-secret-manager
     #   google-generativeai
-google-api-python-client==2.127.0
+google-api-python-client==2.129.0
     # via google-generativeai
 google-auth==2.29.0
     # via
@@ -64,7 +64,7 @@ google-auth==2.29.0
     #   google-generativeai
 google-auth-httplib2==0.2.0
     # via google-api-python-client
-google-cloud-alloydb-connector[asyncpg]==1.0.0
+google-cloud-alloydb-connector[asyncpg]==1.1.0
     # via langchain-google-alloydb-pg
 google-cloud-secret-manager==2.20.0
     # via -r requirements.in
@@ -105,26 +105,26 @@ jsonpatch==1.33
     #   langchain-core
 jsonpointer==2.4
     # via jsonpatch
-langchain==0.1.16
+langchain==0.1.17
     # via -r requirements.in
-langchain-community==0.0.37
+langchain-community==0.0.38
     # via
     #   langchain
     #   langchain-google-alloydb-pg
-langchain-core==0.1.51
+langchain-core==0.1.52
     # via
     #   langchain
     #   langchain-community
     #   langchain-google-alloydb-pg
     #   langchain-google-genai
     #   langchain-text-splitters
-langchain-google-alloydb-pg==0.2.0
+langchain-google-alloydb-pg==0.2.2
     # via -r requirements.in
 langchain-google-genai==1.0.3
     # via -r requirements.in
 langchain-text-splitters==0.0.1
     # via langchain
-langsmith==0.1.54
+langsmith==0.1.57
     # via
     #   langchain
     #   langchain-community
@@ -205,12 +205,12 @@ requests==2.31.0
     #   langsmith
 rsa==4.9
     # via google-auth
-sqlalchemy==2.0.30
+sqlalchemy[asyncio]==2.0.30
     # via
     #   langchain
     #   langchain-community
     #   langchain-google-alloydb-pg
-tenacity==8.2.3
+tenacity==8.3.0
     # via
     #   langchain
     #   langchain-community
