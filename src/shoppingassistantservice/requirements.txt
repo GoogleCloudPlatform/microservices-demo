@@ -196,7 +196,7 @@ pyyaml==6.0.1
     #   langchain
     #   langchain-community
     #   langchain-core
-requests==2.31.0
+requests==2.32.0
     # via
     #   google-api-core
     #   google-cloud-alloydb-connector
