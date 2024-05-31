@@ -12,19 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-FROM python:3.12.3-slim@sha256:afc139a0a640942491ec481ad8dda10f2c5b753f5c969393b12480155fe15a63 as base
+# FROM python:3.9.19-alpine as base
+FROM locustio/locust:2.27.0 as base
 
-FROM base as builder
-
-COPY requirements.txt .
-
-RUN pip install --prefix="/install" -r requirements.txt
-
-FROM base
+RUN pip3 install faker==25.2.0
 
 WORKDIR /loadgen
-
-COPY --from=builder /install /usr/local
 
 # Add application code.
 COPY locustfile.py .
