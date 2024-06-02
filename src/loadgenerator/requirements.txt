@@ -18,7 +18,7 @@ click==8.1.7
     # via flask
 configargparse==1.7
     # via locust
-faker==25.0.1
+faker==25.2.0
     # via -r requirements.in
 flask==3.0.3
     # via
@@ -43,7 +43,7 @@ itsdangerous==2.2.0
     # via flask
 jinja2==3.1.4
     # via flask
-locust==2.26.0
+locust==2.27.0
     # via -r requirements.in
 markupsafe==2.1.5
     # via
@@ -57,9 +57,7 @@ python-dateutil==2.9.0.post0
     # via faker
 pyzmq==26.0.3
     # via locust
-requests==2.31.0
-    # via locust
-roundrobin==0.0.4
+requests==2.32.2
     # via locust
 six==1.16.0
     # via python-dateutil
@@ -74,7 +72,7 @@ werkzeug==3.0.3
     #   locust
 zope-event==5.0
     # via gevent
-zope-interface==6.3
+zope-interface==6.4.post2
     # via gevent
 
 # The following packages are considered to be unsafe in a requirements file:
