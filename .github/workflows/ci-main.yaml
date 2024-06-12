@@ -1,0 +1,121 @@
+# Copyright 2020 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+name: "Continuous Integration - Main/Release"
+on:
+  push:
+    # run on pushes to main or release/*
+    branches:
+      - main
+      - release/*
+    paths-ignore:
+      - '**/README.md'
+      - 'kustomize/**'
+      - '.github/workflows/kustomize-build-ci.yaml'
+      - 'terraform/**'
+      - '.github/workflows/terraform-validate-ci.yaml'
+      - 'helm-chart/**'
+      - '.github/workflows/helm-chart-ci.yaml'
+jobs:
+  code-tests:
+    runs-on: [self-hosted, is-enabled]
+    steps:
+    - uses: actions/checkout@v4
+    - uses: actions/setup-dotnet@v4
+      env:
+        DOTNET_INSTALL_DIR: "./.dotnet"
+      with:
+        dotnet-version: '8.0'
+    - uses: actions/setup-go@v5
+      with:
+        go-version: '1.22'
+    - name: Go Unit Tests
+      timeout-minutes: 10
+      run: |
+        for SERVICE in "shippingservice" "productcatalogservice"; do
+          echo "testing $SERVICE..."
+          pushd src/$SERVICE
+          go test
+          popd
+        done
+    - name: C# Unit Tests
+      timeout-minutes: 10
+      run: |
+        dotnet test src/cartservice/
+  deployment-tests:
+    runs-on: [self-hosted, is-enabled]
+    needs: code-tests
+    strategy:
+      matrix:
+        profile: ["local-code"]
+      fail-fast: true
+    steps:
+    - uses: actions/checkout@v4
+    - name: Build + Deploy PR images to GKE
+      timeout-minutes: 20
+      run: |
+        PR_NUMBER=$(echo $GITHUB_REF | awk 'BEGIN { FS = "/" } ; { print $3 }')
+        NAMESPACE="pr${PR_NUMBER}"
+        echo "::set-env name=NAMESPACE::$NAMESPACE"
+        echo "::set-env name=PR_NUMBER::$PR_NUMBER"
+
+        gcloud container clusters get-credentials $PR_CLUSTER --region $REGION --project $PROJECT_ID
+        cat <<EOF | kubectl apply -f -
+        apiVersion: v1
+        kind: Namespace
+        metadata:
+          name: $NAMESPACE
+        EOF
+        echo Deploying application
+        skaffold config set --global local-cluster false
+        skaffold run --default-repo=gcr.io/$PROJECT_ID/$GITHUB_REF --tag=$GITHUB_SHA --namespace=$NAMESPACE -p network-policies
+      env:
+        ACTIONS_ALLOW_UNSECURE_COMMANDS: true
+        PROJECT_ID: "online-boutique-ci"
+        PR_CLUSTER: "prs-gke-cluster"
+        REGION: "us-central1"
+    - name: Wait For Pods
+      timeout-minutes: 20
+      run: |
+        set -x
+        kubectl config set-context --current --namespace=$NAMESPACE
+        kubectl wait --for=condition=available --timeout=1000s deployment/redis-cart
+        kubectl wait --for=condition=available --timeout=1000s deployment/adservice
+        kubectl wait --for=condition=available --timeout=1000s deployment/cartservice
+        kubectl wait --for=condition=available --timeout=1000s deployment/checkoutservice
+        kubectl wait --for=condition=available --timeout=1000s deployment/currencyservice
+        kubectl wait --for=condition=available --timeout=1000s deployment/emailservice
+        kubectl wait --for=condition=available --timeout=1000s deployment/frontend
+        kubectl wait --for=condition=available --timeout=1000s deployment/loadgenerator
+        kubectl wait --for=condition=available --timeout=1000s deployment/paymentservice
+        kubectl wait --for=condition=available --timeout=1000s deployment/productcatalogservice
+        kubectl wait --for=condition=available --timeout=1000s deployment/recommendationservice
+        kubectl wait --for=condition=available --timeout=1000s deployment/shippingservice
+    - name: Smoke Test
+      timeout-minutes: 5
+      run: |
+        set -x
+        # start fresh loadgenerator pod
+        kubectl delete pod -l app=loadgenerator
+        # wait for requests to come in
+        REQUEST_COUNT="0"
+        while [[ "$REQUEST_COUNT"  -lt "50"  ]]; do
+            sleep 5
+            REQUEST_COUNT=$(kubectl logs -l app=loadgenerator | grep Aggregated | awk '{print $2}')
+        done
+        # ensure there are no errors hitting endpoints
+        ERROR_COUNT=$(kubectl logs -l app=loadgenerator | grep Aggregated | awk '{print $3}' | sed "s/[(][^)]*[)]//g")
+        if [[ "$ERROR_COUNT" -gt "0" ]]; then
+          exit 1
+        fi

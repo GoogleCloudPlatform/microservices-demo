@@ -1,0 +1,24 @@
+{
+  "extends": [
+    "github>GoogleCloudPlatform/kubernetes-engine-samples//.github/renovate-configs/dee-platform-ops.json5",
+    "schedule:earlyMondays",
+  ],
+  "pip-compile": {
+    "enabled": true,
+    "fileMatch": ["(^|/)requirements\\.in$"]
+  },
+  // pip-compile handles requirements.txt updates.
+  "pip_requirements": {
+    "enabled": false
+  },
+  "constraints": {
+    "python": "~=3.11.0"
+  },
+  "kubernetes": {
+    "fileMatch": ["\\.yaml$"],
+    "ignorePaths": [
+      "release/**",
+      "kustomize/base/**"
+    ]
+  },
+}

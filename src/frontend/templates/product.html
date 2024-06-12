@@ -1,0 +1,86 @@
+<!--
+ Copyright 2020 Google LLC
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+-->
+
+{{ define "product" }}
+{{ template "header" . }}
+<div {{ with $.platform_css }} class="{{.}}" {{ end }}>
+  <span class="platform-flag">
+    {{$.platform_name}}
+  </span>
+</div>
+
+<main role="main">
+  <div class="h-product container">
+    <div class="row">
+      <div class="col-md-6">
+        <img class="product-image" alt="" src="{{$.product.Item.Picture}}" />
+      </div>
+      <div class="product-info col-md-5">
+        <div class="product-wrapper">
+
+          <h2>{{ $.product.Item.Name }}</h2>
+          <p class="product-price">{{ renderMoney $.product.Price }}</p>
+          <p>{{ $.product.Item.Description }}</p>
+
+          {{ if $.packagingInfo }}
+          <div class="product-packaging">
+            <h3>Packaging</h3>
+            <span>
+              Weight: {{ if $.packagingInfo.Weight }}{{ $.packagingInfo.Weight }}lb{{ else }}n/a{{ end }}
+            </span>
+            <span>
+              Width: {{ if $.packagingInfo.Width }}{{ $.packagingInfo.Width }}cm{{ else }}n/a{{ end }}
+            </span>
+            <span>
+              Height: {{ if $.packagingInfo.Height }}{{ $.packagingInfo.Height }}cm{{ else }}n/a{{ end }}
+            </span>
+            <span>
+              Depth: {{ if $.packagingInfo.Depth }}{{ $.packagingInfo.Depth }}cm{{ else }}n/a{{ end }}
+            </span>
+          </div>
+          {{ end }}
+
+          <form method="POST" action="/cart">
+            <input type="hidden" name="product_id" value="{{$.product.Item.Id}}" />
+            <div class="product-quantity-dropdown">
+              <select name="quantity" id="quantity">
+                <option>1</option>
+                <option>2</option>
+                <option>3</option>
+                <option>4</option>
+                <option>5</option>
+                <option>10</option>
+              </select>
+              <img src="/static/icons/Hipster_DownArrow.svg" alt="">
+            </div>
+            <button type="submit" class="cymbal-button-primary">Add To Cart</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div>
+    {{ if $.recommendations}}
+      {{ template "recommendations" $.recommendations }}
+    {{ end }}
+  </div>
+  <div class="ad">
+   {{ with $.ad }}{{ template "text_ad" . }}{{ end }}
+  </div>
+
+</main>
+{{ template "footer" . }}
+{{ end }}

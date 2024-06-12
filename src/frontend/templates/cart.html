@@ -1,0 +1,233 @@
+<!--
+ Copyright 2020 Google LLC
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+-->
+
+{{ define "cart" }}
+    {{ template "header" . }}
+    
+    <div {{ with $.platform_css }} class="{{.}}" {{ end }}>
+        <span class="platform-flag">
+            {{$.platform_name}}
+        </span>
+    </div>
+    
+    <main role="main" class="cart-sections">
+
+        {{ if eq (len $.items) 0 }}
+        <section class="empty-cart-section">
+            <h3>Your shopping cart is empty!</h3>
+            <p>Items you add to your shopping cart will appear here.</p>
+            <a class="cymbal-button-primary" href="/" role="button">Continue Shopping</a>
+        </section>
+        {{ else }}
+        <section class="container">
+            <div class="row">
+
+                <div class="col-lg-6 col-xl-5 offset-xl-1 cart-summary-section">
+
+                    <div class="row mb-3 py-2">
+                        <div class="col-4 pl-md-0">
+                            <h3>Cart ({{ $.cart_size }})</h3>
+                        </div>
+                        <div class="col-8 pr-md-0 text-right">
+                            <form method="POST" action="/cart/empty">
+                                <button class="cymbal-button-secondary cart-summary-empty-cart-button" type="submit">
+                                    Empty Cart
+                                </button>
+                                <a class="cymbal-button-primary" href="/" role="button">
+                                    Continue Shopping
+                                </a>
+                            </form>
+                        </div>
+                    </div>
+
+                    {{ range $.items }}
+                    <div class="row cart-summary-item-row">
+                        <div class="col-md-4 pl-md-0">
+                            <a href="/product/{{.Item.Id}}">
+                                <img class="img-fluid" alt="" src="{{.Item.Picture}}" />
+                            </a>
+                        </div>
+                        <div class="col-md-8 pr-md-0">
+                            <div class="row">
+                                <div class="col">
+                                    <h4>{{ .Item.Name }}</h4>
+                                </div>
+                            </div>
+                            <div class="row cart-summary-item-row-item-id-row">
+                                <div class="col">
+                                    SKU #{{ .Item.Id }}
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col">
+                                    Quantity: {{ .Quantity }}
+                                </div>
+                                <div class="col pr-md-0 text-right">
+                                    <strong>
+                                        {{ renderMoney .Price }}
+                                    </strong>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {{ end }}
+
+                    <div class="row cart-summary-shipping-row">
+                        <div class="col pl-md-0">Shipping</div>
+                        <div class="col pr-md-0 text-right">{{ renderMoney .shipping_cost }}</div>
+                    </div>
+
+                    <div class="row cart-summary-total-row">
+                        <div class="col pl-md-0">Total</div>
+                        <div class="col pr-md-0 text-right">{{ renderMoney .total_cost }}</div>
+                    </div>
+
+                </div>
+
+                <div class="col-lg-5 offset-lg-1 col-xl-4">
+
+                    <form class="cart-checkout-form" action="/cart/checkout" method="POST">
+
+                        <div class="row">
+                            <div class="col">
+                                <h3>Shipping Address</h3>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="col cymbal-form-field">
+                                <label for="email">E-mail Address</label>
+                                <input type="email" id="email"
+                                    name="email" value="someone@example.com" required>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="col cymbal-form-field">
+                                <label for="street_address">Street Address</label>
+                                <input type="text" name="street_address"
+                                    id="street_address" value="1600 Amphitheatre Parkway" required>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="col cymbal-form-field">
+                                <label for="zip_code">Zip Code</label>
+                                <input type="text"
+                                    name="zip_code" id="zip_code" value="94043" required pattern="\d{4,5}">
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="col cymbal-form-field">
+                                <label for="city">City</label>
+                                <input type="text" name="city" id="city"
+                                    value="Mountain View" required>
+                                </div>
+                            </div>
+
+                        <div class="form-row">
+                            <div class="col-md-5 cymbal-form-field">
+                                <label for="state">State</label>
+                                <input type="text" name="state" id="state"
+                                    value="CA" required>
+                            </div>
+                            <div class="col-md-7 cymbal-form-field">
+                                <label for="country">Country</label>
+                                <input type="text" id="country"
+                                    placeholder="Country Name"
+                                    name="country" value="United States" required>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col">
+                                <h3 class="payment-method-heading">Payment Method</h3>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="col cymbal-form-field">
+                                <label for="credit_card_number">Credit Card Number</label>
+                                <input type="text" id="credit_card_number"
+                                    name="credit_card_number"
+                                    placeholder="0000000000000000"
+                                    value="4432801561520454"
+                                    required pattern="\d{16}">
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="col-md-5 cymbal-form-field">
+                                <label for="credit_card_expiration_month">Month</label>
+                                <select name="credit_card_expiration_month" id="credit_card_expiration_month">
+                                    <option value="1">January</option>
+                                    <option value="2">February</option>
+                                    <option value="3">March</option>
+                                    <option value="4">April</option>
+                                    <option value="5">May</option>
+                                    <option value="6">June</option>
+                                    <option value="7">July</option>
+                                    <option value="8">August</option>
+                                    <option value="9">September</option>
+                                    <option value="10">October</option>
+                                    <option value="11">November</option>
+                                    <option value="12">January</option>
+                                </select>
+                                <img src="/static/icons/Hipster_DownArrow.svg" alt="" class="cymbal-dropdown-chevron">
+                            </div>
+                            <div class="col-md-4 cymbal-form-field">
+                                    <label for="credit_card_expiration_year">Year</label>
+                                    <select name="credit_card_expiration_year" id="credit_card_expiration_year">
+                                    {{ range $i, $y := $.expiration_years}}<option value="{{$y}}"
+                                        {{if eq $i 1 -}}
+                                            selected="selected"
+                                        {{- end}}
+                                    >{{$y}}</option>{{end}}
+                                    </select>
+                                    <img src="/static/icons/Hipster_DownArrow.svg" alt="" class="cymbal-dropdown-chevron">
+                                </div>
+                            <div class="col-md-3 cymbal-form-field">
+                                <label for="credit_card_cvv">CVV</label>
+                                <input type="password" id="credit_card_cvv"
+                                    name="credit_card_cvv" value="672" required pattern="\d{3}">
+                            </div>
+                        </div>
+
+                        <div class="form-row justify-content-center">
+                            <div class="col text-center">
+                                <button class="cymbal-button-primary" type="submit">
+                                    Place Order
+                                </button>
+                            </div>
+                        </div>
+
+                    </form>
+
+                </div>
+
+            </div>
+        </section>
+        {{ end }} <!-- end if $.items -->
+
+    </main>
+
+    {{ if $.recommendations }}
+        {{ template "recommendations" $.recommendations }}
+    {{ end }}
+
+    {{ template "footer" . }}
+    {{ end }}

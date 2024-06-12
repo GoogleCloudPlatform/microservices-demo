@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   inkscape:version="1.0 (4035a4f, 2020-05-01)"
+   sodipodi:docname="Hipster_DownArrow.svg"
+   version="1.1"
+   viewBox="0 0 10 6"
+   data-name="Layer 1"
+   id="Layer_1">
+  <metadata
+     id="metadata1241">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <sodipodi:namedview
+     inkscape:current-layer="g1805"
+     inkscape:window-maximized="0"
+     inkscape:window-y="432"
+     inkscape:window-x="453"
+     inkscape:cy="7.8920446"
+     inkscape:cx="9.2114456"
+     inkscape:zoom="27.4"
+     showgrid="false"
+     id="namedview1239"
+     inkscape:window-height="815"
+     inkscape:window-width="1338"
+     inkscape:pageshadow="2"
+     inkscape:pageopacity="0"
+     guidetolerance="10"
+     gridtolerance="10"
+     objecttolerance="10"
+     borderopacity="1"
+     bordercolor="#666666"
+     pagecolor="#ffffff" />
+  <defs
+     id="defs1232">
+    <style
+       id="style1230">.cls-1{fill:#605f64}</style>
+  </defs>
+  <title
+     id="title1234">Hipster</title>
+  <g
+     style="opacity:1"
+     id="g1805">
+    <path
+       sodipodi:nodetypes="cccc"
+       id="path1841"
+       d="M 0.04897564,0.08494176 5.0087697,6.0165613 9.9685637,0.08494176 Z"
+       style="fill:#5c6063;stroke:none;stroke-width:0.08082460000000000px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;fill-opacity:1" />
+  </g>
+</svg>

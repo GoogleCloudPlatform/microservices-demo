@@ -1,0 +1,207 @@
+#! /bin/bash
+# Copyright 2021 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# DEPLOYSTACK - this file is a test script that is used by DeployStack's
+# testing rig to make sure that the Terraform script installs and uninstalls
+# cleanly
+
+# DON'T REMOVE FROM test script.
+
+CYAN='\033[0;36m'
+BCYAN='\033[1;36m'
+NC='\033[0m' # No Color
+DIVIDER=$(printf %"$(tput cols)"s | tr " " "*")
+DIVIDER+="\n"
+
+function get_project_id() {
+    local __resultvar=$1
+    VALUE=$(gcloud config get-value project | xargs)
+    eval $__resultvar="'$VALUE'"
+}
+
+function get_project_number() {
+    local __resultvar=$1
+    local PRO=$2
+    VALUE=$(gcloud projects list --filter="project_id=$PRO" --format="value(PROJECT_NUMBER)" | xargs)
+    eval $__resultvar="'$VALUE'"
+}
+
+# DISPLAY HELPERS
+
+function section_open() {
+    section_description=$1
+    printf "$DIVIDER"
+    printf "${CYAN}$section_description${NC} \n"
+    printf "$DIVIDER"
+}
+
+function section_close() {
+    printf "$DIVIDER"
+    printf "${CYAN}$section_description ${BCYAN}- done${NC}\n"
+    printf "\n\n"
+}
+
+function evalTest() {
+    local command=$1
+    local expected=$2
+
+    local ERR=""
+    got=$(eval $command 2>errFile)
+    ERR=$(<errFile)
+
+    if [ ${#ERR} -gt 0 ]; then
+        if [ "$expected" = "EXPECTERROR" ]; then
+            printf "ok \n"
+            return
+        fi
+
+        printf "expecting no error, got error='$ERR'   \n"
+        exit 1
+    fi
+
+    if [ "$got" != "$expected" ]; then
+        printf "expecting: '$expected' got: '$got'  \n"
+        exit 1
+    fi
+
+    printf "$expected is ok\n"
+}
+
+function generateProject(){
+    local __resultvar
+    local __STACKSUFFIX
+    local __BA
+    local __RANDOMSUFFIX
+    local __DATELABEL
+    local PROJECTID
+    local current
+
+
+    __resultvar=$1
+    __STACKSUFFIX=$2
+    __BA=$3
+    __RANDOMSUFFIX=$(
+        LC_ALL=C tr -dc 'a-z0-9' </dev/urandom | head -c 8
+        echo
+    )
+    __DATELABEL=$(date +%F)
+    PROJECTID=ds-test-$__STACKSUFFIX-$__RANDOMSUFFIX
+    current=$(gcloud config list account --format "value(core.account)")
+    # shellcheck disable=SC2034
+    GOOGLE_APPLICATION_CREDENTIALS=.deploystack/creds.json
+
+    gcloud projects create "$PROJECTID" --labels="deploystack-disposable-test-project=$__DATELABEL" --folder="155265971980"
+    
+    gcloud auth activate-service-account --project="$PROJECTID" --key-file=.deploystack/creds.json -q
+    gcloud config set account test-runner@ds-tester-helper.iam.gserviceaccount.com -q
+
+    gcloud beta billing projects link "$PROJECTID" --billing-account="$__BA" -q
+    gcloud config set account "$current" -q
+    eval "$__resultvar"="'$PROJECTID'"
+    
+}
+
+# END DON'T REMOVE FROM test script.
+
+suffix=ms
+
+# This is only needed if you tests fail alot because of overlapping runs of the
+# same set of tests.
+section_open "Generate random test project"
+    generateProject PROJECT "$suffix" "$BA"
+section_close
+
+# We need to force the use of gke-gcloud-auth-plugin (for GKE authentication)
+# if we're using kubectl 1.25 or lower.
+export USE_GKE_GCLOUD_AUTH_PLUGIN=True
+
+DIR="terraform"
+gcloud services enable cloudresourcemanager.googleapis.com --project=$PROJECT
+REGION="us-central1"
+NAME="online-boutique"
+NAMESPACE="default"
+FILEPATH_MANIFEST="../kustomize/"
+MEMORYSTORE="false"
+
+gcloud config set project ${PROJECT}
+
+terraform -chdir="$DIR" init
+terraform -chdir="$DIR" apply -auto-approve \
+    -var gcp_project_id="${PROJECT}" \
+    -var name="${NAME}" \
+    -var region="${REGION}" \
+    -var namespace="${NAMESPACE}"  \
+    -var filepath_manifest="${FILEPATH_MANIFEST}" \
+    -var memorystore="${MEMORYSTORE}"
+
+section_open "Testing Google Kubernetes Engine cluster exists"
+    evalTest 'gcloud container clusters describe online-boutique --format="value(name)" --region $REGION' "online-boutique"
+section_close
+
+section_open "Testing Online Boutique's services are running"
+    evalTest "kubectl get deployment adservice --no-headers -o=name 2> /dev/null"  "deployment.apps/adservice"
+    evalTest "kubectl get deployment cartservice --no-headers -o=name 2> /dev/null"  "deployment.apps/cartservice"
+    evalTest "kubectl get deployment checkoutservice --no-headers -o=name 2> /dev/null"  "deployment.apps/checkoutservice"
+    evalTest "kubectl get deployment currencyservice --no-headers -o=name 2> /dev/null"  "deployment.apps/currencyservice"
+    evalTest "kubectl get deployment emailservice --no-headers -o=name 2> /dev/null"  "deployment.apps/emailservice"
+    evalTest "kubectl get deployment loadgenerator --no-headers -o=name 2> /dev/null"  "deployment.apps/loadgenerator"
+    evalTest "kubectl get deployment paymentservice --no-headers -o=name 2> /dev/null"  "deployment.apps/paymentservice"
+    evalTest "kubectl get deployment productcatalogservice --no-headers -o=name 2> /dev/null"  "deployment.apps/productcatalogservice"
+    evalTest "kubectl get deployment recommendationservice --no-headers -o=name 2> /dev/null"  "deployment.apps/recommendationservice"
+    evalTest "kubectl get deployment redis-cart --no-headers -o=name 2> /dev/null"  "deployment.apps/redis-cart"
+    evalTest "kubectl get deployment shippingservice --no-headers -o=name 2> /dev/null"  "deployment.apps/shippingservice"
+section_close
+
+sleep 120
+
+ENDPOINT=$( kubectl get service frontend-external --no-headers 2> /dev/null | awk '{print $4}')
+
+section_open "Testing Online Boutique's front-end is working"
+    evalTest 'curl -s -o /dev/null -w "%{http_code}" $ENDPOINT' "200"
+section_close
+
+# Uncomment the line: "deletion_protection = false"
+sed -i "s/# deletion_protection/deletion_protection/g" ${DIR}/main.tf
+terraform -chdir="$DIR" apply -auto-approve \
+    -var gcp_project_id="${PROJECT}" \
+    -var name="${NAME}" \
+    -var region="${REGION}" \
+    -var namespace="${NAMESPACE}"  \
+    -var filepath_manifest="${FILEPATH_MANIFEST}" \
+    -var memorystore="${MEMORYSTORE}"
+
+terraform -chdir="$DIR" destroy -auto-approve \
+    -var gcp_project_id="${PROJECT}" \
+    -var name="${NAME}" \
+    -var region="${REGION}" \
+    -var namespace="${NAMESPACE}"  \
+    -var filepath_manifest="${FILEPATH_MANIFEST}" \
+    -var memorystore="${MEMORYSTORE}"
+
+section_open "Testing Google Kubernetes Engine cluster does NOT exist"
+    evalTest 'gcloud container clusters describe online-boutique --format="value(name)" --region $REGION' "EXPECTERROR"
+section_close
+
+# This is only needed if you tests fail alot because of overlapping runs of the
+# same set of tests. Really don't do this if you don't want to severely irritate
+# @tpryan
+section_open "Delete Test Project"
+    gcloud projects delete $PROJECT -q
+section_close
+
+printf "$DIVIDER"
+printf "CONGRATS!!!!!!! \n"
+printf "You got the end the of your test with everything working. \n"
+printf "$DIVIDER"

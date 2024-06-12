@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   inkscape:version="1.0 (4035a4f, 2020-05-01)"
+   height="11.002236"
+   width="10.434605"
+   sodipodi:docname="Hipster_CartIcon.svg"
+   version="1.1"
+   viewBox="0 0 10.434605 11.002236"
+   data-name="Layer 1"
+   id="Layer_1">
+  <metadata
+     id="metadata1201">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title>Hipster</dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <sodipodi:namedview
+     inkscape:current-layer="g1196"
+     inkscape:window-maximized="0"
+     inkscape:window-y="25"
+     inkscape:window-x="625"
+     inkscape:cy="-0.89051508"
+     inkscape:cx="22.434662"
+     inkscape:zoom="20.841972"
+     fit-margin-bottom="0"
+     fit-margin-right="0"
+     fit-margin-left="0"
+     fit-margin-top="0"
+     showgrid="false"
+     id="namedview1199"
+     inkscape:window-height="1387"
+     inkscape:window-width="1935"
+     inkscape:pageshadow="2"
+     inkscape:pageopacity="0"
+     guidetolerance="10"
+     gridtolerance="10"
+     objecttolerance="10"
+     borderopacity="1"
+     bordercolor="#666666"
+     pagecolor="#ffffff" />
+  <defs
+     id="defs1188">
+    <style
+       id="style1186">.cls-1{fill:#b4b2bb}</style>
+  </defs>
+  <title
+     id="title1190">Hipster</title>
+  <g
+     transform="translate(-4.4609375,-5.5)"
+     id="g1196">
+    <path
+       sodipodi:nodetypes="ccccccsccccccccccccccccccssssssss"
+       d="m 4.4609375,5.5 v 1.0996094 h 1.0996094 l 2,4.1699216 -0.75,1.34961 c -0.083803,0.164211 -0.1291659,0.346898 -0.1308594,0.53125 0,0.607513 0.4920962,1.099609 1.0996094,1.099609 H 14.380859 V 12.650391 H 8 c -0.081192,0.0058 -0.1505985,-0.05923 -0.1503906,-0.140625 v -0.06055 l 0.4902344,-0.898438 h 4.0996092 c 0.414076,0.01348 0.800604,-0.207156 1,-0.570312 l 1.456089,-4.4008431 -8.1260108,0.019984 v 0 L 6.25,5.5 Z M 7.1729534,7.576157 13.673828,7.54223 12.681641,10.603516 8.5214844,10.589846 Z m 0.5868122,6.724624 c -0.9800635,0 -1.4702693,1.184027 -0.7773437,1.876953 0.6929255,0.692925 1.8769531,0.20272 1.8769531,-0.777343 0,-0.607513 -0.4920962,-1.09961 -1.0996094,-1.09961 z m 5.5000004,0 c -0.980063,0 -1.470269,1.184027 -0.777344,1.876953 0.692926,0.692925 1.876953,0.20272 1.876953,-0.777343 0,-0.607513 -0.492096,-1.09961 -1.099609,-1.09961 z"
+       id="path1192" />
+  </g>
+</svg>

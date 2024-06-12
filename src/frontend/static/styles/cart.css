@@ -1,0 +1,110 @@
+/**
+ * Copyright 2020 Google LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+.cart-sections {
+    padding-bottom: 120px;
+    padding-top: 56px;
+    background-color: #F9F9F9;
+}
+
+.cart-sections h3 {
+    font-size: 36px;
+    font-weight: normal;
+}
+
+.cart-sections a.cymbal-button-primary:hover {
+    text-decoration: none;
+    color: white;
+}
+
+/* Empty Cart Section */
+
+.empty-cart-section {
+    max-width: 458px;
+    margin: auto;
+    text-align: center;
+}
+
+.empty-cart-section a {
+    display: inline-block; /* So margin-top works. */
+    margin-top: 32px;
+}
+
+.empty-cart-section a:hover {
+    color: white;
+    text-decoration: none;
+}
+
+/*  Cart Summary Section */
+
+.cart-summary-empty-cart-button {
+    margin-right: 10px;
+}
+
+.cart-summary-item-row,
+.cart-summary-shipping-row,
+.cart-summary-total-row {
+    padding-bottom: 24px;
+    padding-top: 24px;
+    border-top: solid 1px rgba(154, 160, 166, 0.5);
+}
+
+.cart-summary-item-row img {
+    border-radius: 20% 0 20% 20%;
+}
+
+.cart-summary-item-row-item-id-row {
+    font-size: 12px;
+    color: #5C6063;
+}
+
+.cart-summary-item-row h4 {
+    font-size: 18px;
+    font-weight: normal;
+}
+
+/* Stick item quantity and cost to the bottom (for wider screens). */
+@media (min-width: 768px) {
+    .cart-summary-item-row .row:last-child {
+        position: absolute;
+        bottom: 0px;
+        width: 100%;
+    }
+}
+
+/* Item cost (price). */
+.cart-summary-item-row .row:last-child strong {
+    font-weight: 500;
+}
+
+.cart-summary-total-row {
+    font-size: 28px;
+}
+
+/* Cart Checkout Form */
+
+.cart-checkout-form h3 {
+    margin-bottom: 0;
+}
+
+.payment-method-heading {
+    margin-top: 36px;
+}
+
+/* "Place Order" button */
+.cart-checkout-form .cymbal-button-primary {
+    margin-top: 36px;
+}

@@ -1,0 +1,4 @@
+Congrats!
+You have successfully provisioned a GKE (Google Kubernetes Engine) cluster and
+deployed Online Boutique's 11 microservices, which includes a load generator.
+

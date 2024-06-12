@@ -1,0 +1,99 @@
+# Copyright 2022 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+apiVersion: kustomize.config.k8s.io/v1alpha1
+kind: Component
+patches:
+# cartservice - replace REDIS_ADDR by ALLOYDB_PRIMARY_IP for the cartservice Deployment
+# Potentially later we'll factor in splitting traffic to primary/read pool, but for now
+# we'll just manage the primary instance
+- patch: |-
+    apiVersion: apps/v1
+    kind: Deployment
+    metadata:
+      name: cartservice
+    spec:
+      template:
+        spec:
+          containers:
+            - name: server
+              env:
+              - name: REDIS_ADDR
+                $patch: delete
+              - name: ALLOYDB_PRIMARY_IP
+                value: ALLOYDB_PRIMARY_IP_VAL
+              - name: ALLOYDB_DATABASE_NAME
+                value: ALLOYDB_CARTS_DATABASE_NAME
+              - name: ALLOYDB_TABLE_NAME
+                value: ALLOYDB_CARTS_TABLE_NAME_VAL
+              - name: ALLOYDB_SECRET_NAME
+                value: ALLOYDB_SECRET_NAME_VAL
+              - name: PROJECT_ID
+                value: PROJECT_ID_VAL
+# cartservice - add the GSA annotation for the cartservice KSA
+- patch: |-
+    apiVersion: v1
+    kind: ServiceAccount
+    metadata:
+      name: cartservice
+      annotations:
+        iam.gke.io/gcp-service-account: ALLOYDB_USER_GSA_ID
+# productcatalogservice - replace ALLOYDB environments
+- patch: |-
+    apiVersion: apps/v1
+    kind: Deployment
+    metadata:
+      name: productcatalogservice
+    spec:
+      template:
+        spec:
+          containers:
+            - name: server
+              env:
+              - name: ALLOYDB_CLUSTER_NAME
+                value: ALLOYDB_CLUSTER_NAME_VAL
+              - name: ALLOYDB_INSTANCE_NAME
+                value: ALLOYDB_INSTANCE_NAME_VAL
+              - name: ALLOYDB_DATABASE_NAME
+                value: ALLOYDB_PRODUCTS_DATABASE_NAME_VAL
+              - name: ALLOYDB_TABLE_NAME
+                value: ALLOYDB_PRODUCTS_TABLE_NAME_VAL
+              - name: ALLOYDB_SECRET_NAME
+                value: ALLOYDB_SECRET_NAME_VAL
+              - name: PROJECT_ID
+                value: PROJECT_ID_VAL
+              - name: REGION
+                value: REGION_VAL
+# productcatalogservice - add the GSA annotation for the productcatalogservice KSA
+- patch: |-
+    apiVersion: v1
+    kind: ServiceAccount
+    metadata:
+      name: productcatalogservice
+      annotations:
+        iam.gke.io/gcp-service-account: ALLOYDB_USER_GSA_ID
+# redis - remove the redis-cart Deployment
+- patch: |-
+    apiVersion: apps/v1
+    kind: Deployment
+    metadata:
+      name: redis-cart
+    $patch: delete
+# redis - remove the redis-cart Service
+- patch: |-
+    apiVersion: v1
+    kind: Service
+    metadata:
+      name: redis-cart
+    $patch: delete

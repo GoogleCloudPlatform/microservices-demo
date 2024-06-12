@@ -1,0 +1,15 @@
+# The fields inside this deploystack.yaml file are documented in https://github.com/GoogleCloudPlatform/deploystack.
+
+title: Microservices Demo (Online Boutique)
+name: microservices-demo
+duration: 5
+collect_project: true
+collect_region: true
+region_type: compute
+region_default: us-central1
+hard_settings:
+  filepath_manifest: ../kustomize/
+  memorystore: "false"
+  name: online-boutique
+  namespace: default
+documentation_link: https://cloud.google.com/shell/docs/cloud-shell-tutorials/deploystack/microservices-demo

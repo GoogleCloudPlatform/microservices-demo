@@ -1,0 +1,126 @@
+# Copyright 2022 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: opentelemetrycollector
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: opentelemetrycollector
+  template:
+    metadata:
+      labels:
+        app: opentelemetrycollector
+    spec:
+      securityContext:
+        fsGroup: 1000
+        runAsGroup: 1000
+        runAsNonRoot: true
+        runAsUser: 1000
+      # Init container retrieves the current cloud project id from the metadata server
+      # and inserts it into the collector config template
+      # https://cloud.google.com/compute/docs/storing-retrieving-metadata
+      initContainers:
+      - name: otel-gateway-init
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+              - ALL
+          privileged: false
+          readOnlyRootFilesystem: true
+        image: busybox:latest@sha256:9ae97d36d26566ff84e8893c64a6dc4fe8ca6d1144bf5b87b2b85a32def253c7
+        command:
+        - '/bin/sh'
+        - '-c'
+        - |
+           sed "s/{{PROJECT_ID}}/$(curl -H 'Metadata-Flavor: Google' http://metadata.google.internal/computeMetadata/v1/project/project-id)/" /template/collector-gateway-config-template.yaml >> /conf/collector-gateway-config.yaml
+        volumeMounts:
+        - name: collector-gateway-config-template
+          mountPath: /template
+        - name: collector-gateway-config
+          mountPath: /conf
+      containers:
+      # This gateway container will receive traces and metrics from each microservice
+      # and forward it to GCP
+      - name: otel-gateway
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+              - ALL
+          privileged: false
+          readOnlyRootFilesystem: true
+        args:
+        - --config=/conf/collector-gateway-config.yaml
+        image: otel/opentelemetry-collector-contrib:0.101.0@sha256:070f6031c3310b7a6705e2c30bb9db4ad710a72e189f133d7392f38a7a54806d
+        volumeMounts:
+        - name: collector-gateway-config
+          mountPath: /conf
+      volumes:
+      # Simple ConfigMap volume with template file
+      - name: collector-gateway-config-template
+        configMap:
+          items:
+          - key: collector-gateway-config-template.yaml
+            path: collector-gateway-config-template.yaml
+          name: collector-gateway-config-template
+      # Create a volume to store the expanded template (with correct cloud project ID)
+      - name: collector-gateway-config
+        emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: opentelemetrycollector
+spec:
+  ports:
+  - name: grpc-otlp
+    port: 4317
+    protocol: TCP
+    targetPort: 4317
+  selector:
+    app: opentelemetrycollector
+  type: ClusterIP
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: collector-gateway-config-template
+# Open Telemetry Collector config
+# https://opentelemetry.io/docs/collector/configuration/
+data:
+  collector-gateway-config-template.yaml: |
+    receivers:
+      otlp:
+        protocols: 
+          grpc:
+    processors:
+    exporters:
+      googlecloud:
+        project: {{PROJECT_ID}}
+    service:
+      pipelines:
+        traces:
+          receivers: [otlp] # Receive otlp-formatted data from other collector instances
+          processors: []
+          exporters: [googlecloud] # Export traces directly to Google Cloud
+        metrics:
+          receivers: [otlp]
+          processors: []
+          exporters: [googlecloud] # Export metrics to Google Cloud

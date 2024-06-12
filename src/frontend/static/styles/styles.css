@@ -1,0 +1,677 @@
+/**
+ * Copyright 2020 Google LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/* General */
+
+html, body {
+  height: 100%;
+}
+
+body {
+  color: #111111;
+  font-family: 'DM Sans', sans-serif;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Header */
+
+header {
+  background-color: #853B5C;
+  color: white;
+}
+
+/*
+This allows the sub-navbar (white strip containing logo)
+to be as wide as the browser window.
+*/
+header > div:nth-child(2).navbar.sub-navbar {
+  padding-left: 0;
+  padding-right: 0;
+}
+header > div:nth-child(2) > .container {
+  max-width: none;
+}
+
+header .cart-link {
+  position: relative;
+  display: block;
+  margin-left: 25px;
+  display: flex;
+  flex-flow: column;
+  align-items: center;
+  justify-content: center;
+}
+
+header .cart-size-circle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: absolute;
+  top: 24px;
+  left: 11px;
+  width: 16px;
+  height: 16px;
+  font-size: 11px;
+  border-radius: 4px 4px 0 4px;
+  color: white;
+  background-color: #853B5C;
+}
+
+header .navbar {
+  padding-top: 5px;
+  padding-bottom: 5px;
+}
+
+header .h-free-shipping {
+  font-size: 14px;
+}
+
+header .h-controls {
+  display: flex;
+  justify-content: flex-end;
+}
+
+header .h-control {
+  display: flex;
+  align-items: center;
+  font-size: 12px;
+  position: relative;
+  margin-left: 40px;
+  color: #605f64;
+}
+
+header .h-control:first-child {
+  margin-left: 0;
+}
+
+header .h-control input {
+  border: none;
+  padding: 0 31px 0 31px;
+  width: 250px;
+  height: 24px;
+  flex-shrink: 0;
+  background-color: #f2f2f2;
+  display: flex;
+  align-items: center;
+}
+
+header .h-control input:focus {
+  outline: 0;
+  border: 0;
+  box-shadow: 0;
+}
+
+header .icon {
+  width: 20px;
+  height: 20px;
+}
+
+header .icon.search-icon {
+  width: 12px;
+  height: 13px;
+  position: absolute;
+  left: 10px;
+}
+
+/* The currency drop-down. */
+
+header img.currency-icon, header span.currency-icon {
+  position: relative;
+  left: 35px;
+  top: -1px;
+  width: 20px;
+  display: inline-block;
+  height: 20px;
+}
+
+header span.currency-icon {
+  font-size: 16px;
+  text-align: center;
+}
+
+header .h-control select {
+  display: flex;
+  align-items: center;
+  background: transparent;
+  border-radius: 0;
+  border: 1px solid #acacac;
+  width: 130px;
+  height: 40px;
+  flex-shrink: 0;
+  padding: 1px 0 0 45px;
+  font-size: 16px;
+  border-radius: 8px;
+}
+
+header .icon.arrow {
+  position: absolute;
+  right: 25px;
+  width: 10px;
+  height: 5px;
+}
+
+header .h-control::-webkit-input-placeholder {
+  /* Chrome/Opera/Safari */
+  font-size: 12px;
+  color: #605f64;
+}
+
+header .h-control::-moz-placeholder {
+  /* Firefox 19+ */
+  font-size: 12px;
+  color: #605f64;
+}
+
+header .h-control :-ms-input-placeholder {
+  /* IE 10+ */
+  font-size: 12px;
+  color: #605f64;
+}
+
+header .h-control :-moz-placeholder {
+  /* Firefox 18- */
+  font-size: 12px;
+  color: #605f64;
+}
+
+header .navbar.sub-navbar {
+  height: 60px;
+  background-color: white;
+  font-size: 15px;
+  color: #b4b2bb;
+  padding-top: 0;
+  padding-bottom: 0;
+  box-shadow: 0px 0px 4px rgba(0, 0, 0, 0.25);
+  z-index: 1; /* Need this to see the box-shadow on the home page. */
+}
+
+header .navbar.sub-navbar > .container {
+  padding-left: 26px;
+  padding-right: 26px;
+}
+
+header .top-left-logo {
+  height: 40px;
+}
+
+header .top-left-logo-cymbal {
+  height: 30px;
+}
+
+header .navbar.sub-navbar .navbar-brand {
+  padding: 0;
+}
+
+header .navbar.sub-navbar a {
+  color: #b4b2bb;
+}
+
+header .navbar.sub-navbar nav a {
+  margin: 0 10px;
+}
+
+header .navbar.sub-navbar .controls {
+  display: flex;
+  height: 60px;
+}
+
+header .navbar.sub-navbar .controls a img {
+  width: 20px;
+  height: 20px;
+  margin-bottom: 3px;
+}
+
+/* Footer */
+
+footer.py-5 {
+  flex-shrink: 0;
+  padding: 0 !important;
+}
+
+footer .footer-top {
+  padding: 60px 0px;
+  background-color: #570D2E;
+  color: white;
+}
+
+footer .footer-top a {
+  color: white;
+  text-decoration: underline;
+}
+
+/* The <p> containing the session-id. */
+footer .footer-top p:nth-child(3) {
+  margin-top: 56px;
+}
+
+footer .footer-top .footer-social,
+footer .footer-top .footer-app,
+footer .footer-links,
+footer .footer-top .social,
+footer .footer-top .app {
+  display: block;
+  align-items: center;
+}
+
+footer .footer-top .footer-social {
+  padding: 31px;
+}
+
+footer .footer-top .footer-social h4 {
+  margin-bottom: 0;
+}
+
+footer .footer-top .footer-social div {
+  width: 50%;
+}
+
+/* Home */
+
+main {
+  flex: 1 0 auto;
+  background-color: #F9F9F9;
+}
+
+@media (min-width: 992px) {
+  .home .container-fluid {
+    height: calc(100vh - 91px); /* 91px is the height of the top/header bars. */
+  }
+  .home .container-fluid > .row > .col-4 {
+    height: calc(100vh - 91px);
+  }
+  .home .container-fluid > .row > .col-lg-8 {
+    height: calc(100vh - 91px);
+    overflow-y: scroll;
+  }
+
+  .px-10-percent {
+    padding-left: 10%;
+    padding-right: 10%;
+  }
+}
+
+.home-mobile-hero-banner {
+  height: 200px;
+  background: url(/static/images/folded-clothes-on-white-chair-wide.jpg) no-repeat top center;
+  background-size: cover;
+}
+
+.home-desktop-left-image {
+  background: url(/static/images/folded-clothes-on-white-chair.jpg) no-repeat center;
+  background-size: cover;
+}
+
+.hot-products-row h3 {
+  margin-bottom: 32px;
+  margin-top: 56px;
+  font-size: 36px;
+  font-weight: normal;
+}
+
+.hot-products-row {
+  padding-bottom: 70px;
+  padding-left: 10%;
+  padding-right: 10%;
+}
+
+.hot-product-card  {
+  margin-bottom: 52px;
+  padding-left: 16px;
+  padding-right: 16px;
+}
+
+.hot-product-card img {
+  width: 100%;
+  height: auto;
+  border-radius: 20% 0 20% 20%;
+}
+
+.hot-product-card-name {
+  margin-top: 8px;
+  font-size: 18px;
+}
+
+.hot-product-card-price {
+  font-size: 14px;
+}
+
+.hot-product-card > a:first-child {
+  position: relative;
+  display: block;
+}
+
+.hot-product-card-img-overlay {
+  position: absolute;
+  height: 100%;
+  width: 100%;
+  top: 0;
+  left: 0;
+  border-radius: 20% 0 20% 20%;
+  background-color: transparent;
+}
+
+.hot-product-card:hover .hot-product-card-img-overlay {
+  background-color: rgba(71, 0, 29, 0.2);
+}
+
+/*
+This chunk ensures the left/right padding of the footer is
+similar to that of the hot-products-row.
+*/
+.home-desktop-footer-row {
+  padding-left: 9%;
+  padding-right: 9%;
+  background-color: #570D2E;
+  width: 100%;
+  margin: 0;
+}
+
+/* Ad */
+
+.ad {
+  position: relative;
+  background-color: #FF9A9B;
+  font-size: 24px;
+  text-align: center;
+}
+
+/* "Ad" text. */
+.ad strong {
+  position: absolute;
+  top: 6px;
+  left: 12px;
+  font-size: 14px;
+  font-weight: normal;
+}
+
+.ad a {
+  color: black;
+}
+
+/* Product */
+
+.h-product {
+  margin-top: 56px;
+  margin-bottom: 112px;
+  max-width: 1200px;
+  background-color: #F9F9F9;
+}
+
+.h-product > .row {
+  align-items: flex-end;
+}
+
+.h-product .product-image {
+  width: 100%;
+  border-radius: 20% 20% 0 20%;
+}
+
+.h-product .product-price {
+  font-size: 28px;
+}
+
+.h-product .product-info .product-wrapper {
+  margin-left: 15px;
+}
+
+.h-product .product-info h2 {
+  margin-bottom: 16px;
+  margin-top: 16px;
+  font-size: 56px;
+  line-height: 1.14;
+  font-weight: normal;
+  color: #111111;
+}
+
+.h-product .product-packaging {
+  margin: 0 0 15px 0;
+}
+
+.h-product .product-packaging h3 {
+  font-size: 20px;
+}
+
+.h-product .product-packaging span {
+  display: inline-block;
+  margin: 0 10px 0 0;
+}
+
+.h-product .input-group-text,
+.h-product .btn.btn-info {
+  font-size: 18px;
+  line-height: 1.89;
+  letter-spacing: 3.6px;
+  text-align: center;
+  color: #111111;
+  border-radius: 0;
+}
+
+.product-quantity-dropdown {
+  position: relative;
+  width: 100px;
+}
+
+.product-quantity-dropdown select {
+  width: 100%;
+  height: 45px;
+  border: 1px solid #acacac;
+  padding: 10px 16px;
+  border-radius: 8px;
+}
+
+.product-quantity-dropdown img {
+  position: absolute;
+  right: 25px;
+  top: 20px;
+  width: 10px;
+  height: 5px;
+}
+
+.h-product .cymbal-button-primary {
+  margin-top: 16px;
+}
+
+/* Platform Banner */
+
+.local,
+.aws-platform,
+.onprem-platform,
+.azure-platform,
+.alibaba-platform,
+.gcp-platform {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 10px;
+  height: 100vh;
+  color: white;
+  font-size: 24px;
+  z-index: 999;
+}
+
+.aws-platform,
+.aws-platform .platform-flag {
+  background-color: #ff9900;
+}
+
+.onprem-platform,
+.onprem-platform .platform-flag {
+  background-color: #34A853;
+}
+
+.gcp-platform,
+.gcp-platform .platform-flag {
+  background-color: #4285f4;
+}
+
+
+.azure-platform,
+.azure-platform .platform-flag {
+  background-color: #f35426;
+}
+
+.alibaba-platform,
+.alibaba-platform .platform-flag {
+  background-color: #ffC300;
+}
+
+.local,
+.local .platform-flag {
+  background-color: #2c0678;
+}
+
+.platform-flag {
+  position: absolute;
+  top: 98px;
+  left: 0;
+  width: 190px;
+  height: 50px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Recommendation */
+
+.recommendations {
+  background: #F9F9F9;
+  padding-bottom: 55px;
+}
+
+.recommendations .container {
+  max-width: 1174px;
+}
+
+@media (max-width: 992px) {
+  .recommendations .container {
+    max-width: none;
+  }
+}
+
+.recommendations h2 {
+  border-top: solid 1px;
+  padding: 40px 0;
+  font-weight: normal;
+  text-align: center;
+}
+
+.recommendations h5 {
+  margin-top: 8px;
+  font-weight: normal;
+  font-size: 18px;
+}
+
+.recommendations img {
+  height: 100%;
+  width: 100%;
+  border-radius: 20% 0 20% 20%;
+}
+
+select {
+  -webkit-appearance: none;
+  -webkit-border-radius: 0px;
+}
+
+/* Cymbal */
+
+/*
+If we ever decide to create a separate Cymbal CSS library for Cymbal components,
+the rules below could be extracted.
+*/
+
+.cymbal-button-primary, .cymbal-button-secondary {
+  display: inline-block;
+  border: solid 1px #CE0631;
+  padding: 8px 16px;
+  outline: none;
+  font-size: 14px;
+  border-radius: 22px;
+  cursor: pointer;
+}
+
+.cymbal-button-primary:focus, .cymbal-button-secondary:focus {
+  outline: none; /* To override browser (Chrome) default blue outline. */
+}
+
+.cymbal-button-primary {
+  background-color: #CE0631;
+  color: white;
+}
+
+.cymbal-button-primary:active,
+.cymbal-button-primary:focus,
+.cymbal-button-primary:hover {
+  border: solid 1px #7b031d;
+  background-color: #7b031d;
+  box-shadow: 0px 2px 2px 0px rgb(0 0 0 / 30%);
+}
+
+.cymbal-button-primary:active {
+  box-shadow: 0px 3px 6px 0px rgb(0 0 0 / 30%);
+}
+
+.cymbal-button-secondary {
+  background: none;
+  color: #CE0631;
+}
+
+.cymbal-button-secondary:active,
+.cymbal-button-secondary:focus,
+.cymbal-button-secondary:hover {
+  color: #7b031d;
+  border: solid 1px #7b031d;
+}
+
+.cymbal-button-secondary:active {
+  background-color: #f5ccd5;
+}
+
+.cymbal-form-field {
+  position: relative;
+  margin-top: 24px;
+}
+
+.cymbal-form-field label {
+  width: 100%;
+  margin: 0;
+  padding: 8px 16px 0 16px;
+  font-size: 12px;
+  line-height: 1.8em; /* Without this, there might be a 1px gap underneath. */
+  font-weight: normal;
+  border-radius: 4px 4px 0px 0px;
+  color: #5C6063;
+  background-color: white;
+}
+
+.cymbal-form-field input[type='email'],
+.cymbal-form-field input[type='password'],
+.cymbal-form-field select,
+.cymbal-form-field input[type='text'] {
+  width: 100%;
+  border: none;
+  border-bottom: 1px solid #9AA0A6;
+  padding: 0 16px 8px 16px;
+  outline: none;
+  color: #1E2021;
+}
+
+.cymbal-form-field .cymbal-dropdown-chevron {
+  position: absolute;
+  right: 25px;
+  width: 10px;
+  height: 5px;
+}

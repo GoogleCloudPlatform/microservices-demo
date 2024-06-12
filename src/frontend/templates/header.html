@@ -1,0 +1,102 @@
+<!--
+ Copyright 2020 Google LLC
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+-->
+
+{{ define "header" }}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>
+        {{ if $.is_cymbal_brand }}
+        Cymbal Shops
+        {{ else }}
+        Online Boutique
+        {{ end }}
+    </title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-WskhaSGFgHYWDcbwN70/dfYBj47jz9qbsMId/iRN3ewGhXQFZCSftd1LZCfmhktB"
+        crossorigin="anonymous">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Google+Symbols:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet" />
+    <link rel="stylesheet" type="text/css" href="/static/styles/styles.css">
+    <link rel="stylesheet" type="text/css" href="/static/styles/cart.css">
+    <link rel="stylesheet" type="text/css" href="/static/styles/order.css">
+    <link rel="stylesheet" type="text/css" href="/static/styles/bot.css">
+    {{ if $.is_cymbal_brand }}
+    <link rel='shortcut icon' type='image/x-icon' href='/static/favicon-cymbal.ico' />
+    {{ else }}
+    <link rel='shortcut icon' type='image/x-icon' href='/static/favicon.ico' />
+    {{ end }}
+</head>
+
+<body>
+    <header>
+        {{ if $.frontendMessage }}
+        <div class="navbar">
+            <div class="container d-flex justify-content-center">
+                <div class="h-free-shipping">{{ $.frontendMessage }}</div>
+            </div>
+        </div>
+        {{ end }}
+        <div class="navbar sub-navbar">
+            <div class="container d-flex justify-content-between">
+                <a href="/" class="navbar-brand d-flex align-items-center">
+                    {{ if $.is_cymbal_brand }}
+                    <img src="/static/icons/Cymbal_NavLogo.svg" alt="" class="top-left-logo-cymbal" />
+                    {{ else }}
+                    <img src="/static/icons/Hipster_NavLogo.svg" alt="" class="top-left-logo" />
+                    {{ end }}
+                </a>
+                <div class="controls">
+
+                    {{ if $.show_currency }}
+                    <div class="h-controls">
+                        <div class="h-control">
+                            <span class="icon currency-icon"> {{ renderCurrencyLogo $.user_currency}}</span>
+                            <form method="POST" class="controls-form" action="/setCurrency" id="currency_form" >
+                                <select name="currency_code" onchange="document.getElementById('currency_form').submit();">
+                                        {{range $.currencies}}
+                                    <option value="{{.}}" {{if eq . $.user_currency}}selected="selected"{{end}}>{{.}}</option>
+                                    {{end}}
+                                </select>
+                            </form>
+                            <img src="/static/icons/Hipster_DownArrow.svg" alt="" class="icon arrow" />
+                        </div>
+                    </div>
+                    {{ end }}
+
+                    {{ if $.assistant_enabled }}
+                    <a href="/assistant" class="cart-link">
+                      <img src="/static/icons/Hipster_WandIcon.svg" style="width: 22px; height: 22px;" alt="Assistant icon" class="logo" title="Assistant" />
+                    </a>
+                    {{ end }}
+
+                    <a href="/cart" class="cart-link">
+                        <img src="/static/icons/Hipster_CartIcon.svg" alt="Cart icon" class="logo" title="Cart" />
+                        {{ if $.cart_size }}
+                        <span class="cart-size-circle">{{$.cart_size}}</span>
+                        {{ end }}
+                    </a>
+                </div>
+            </div>
+        </div>
+
+    </header>
+    {{end}}
