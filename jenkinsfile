@@ -1,0 +1,62 @@
+pipeline{
+    agent any
+        tools {
+            maven: 'Maven'
+        }
+        environment {
+            PROJECT_ID = 'Microservices-demo'
+            CLUSTER_NAME = 'online-boutique'
+            LOCATION = 'us-central1'
+            CREDENTIALS_ID = 'kubernetes'
+        }
+    stages {
+        stage('Scm Checkout') {
+            steps {
+                checkout scm
+            }
+        }
+        stage('Build') {
+            steps {
+                sh 'mvn clean package'
+            }
+        }
+        stage('Testing') {
+            steps {
+                echo 'Testing....'
+                sh 'mvn test'
+            }
+        }
+        stage('Build docker image') {
+            steps {
+                sh 'whoami'
+                script {
+                    myimage = docker.build("nishashetty18/devops:${env.BUILD_ID}")
+                }
+            }
+        }
+        stage('Push docker image') {
+            steps {
+                script {
+                    echo 'Push Docker Image'
+                    withCredentials([string(credentialsId: 'dockerhub',variable: 'dockerhub')]){
+                        sh "docker login -u nishashetty18 -p ${dockerhub}"
+                    }
+                    myimage.push("${env.BUILD_ID}")
+                }
+            }
+        }
+        stage('Deploy to K8s') {
+            steps {
+                echo "Deployment started"
+                sh 'ls -ltr'
+                sh 'pwd'
+                sh "sed -i's/tagversion/${env.BUILD_ID}/g' kubernetes-manifests.yaml"
+                echo "Start Deployment of kubernetes manifests"
+                step([$class: 'KubernetesEngineBuilder', projectId: env.PROJECT_ID, clusterName: env.CLUSTER_NAME, location: env.location, manifestPattern: 'kubernetes-manifest.yaml'])
+                echo "Deployment finished"
+            }
+        }
+
+    }
+    
+}
