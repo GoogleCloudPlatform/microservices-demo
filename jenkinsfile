@@ -1,8 +1,5 @@
 pipeline{
     agent any
-        tools {
-            maven 'Maven'
-        }
         environment {
             PROJECT_ID = 'Microservices-demo'
             CLUSTER_NAME = 'online-boutique'
@@ -10,9 +7,9 @@ pipeline{
             CREDENTIALS_ID = 'kubernetes'
         }
     stages {
-        stage('Scm Checkout') {
+        stage('Git Checkout') {
             steps {
-                checkout scm
+                git branch: 'latest', url: 'https://github.com/nishashetty18/microservices-demo.git'
             }
         }
         stage('Build') {
