@@ -49,7 +49,7 @@ spec:
               - ALL
           privileged: false
           readOnlyRootFilesystem: true
-        image: gcr.io/google-samples/microservices-demo/currencyservice:v0.10.0
+        image: us-central1-docker.pkg.dev/microservices-demo-426006/my-repo/currencyservice-jen:v1
         ports:
         - name: grpc
           containerPort: 7000
