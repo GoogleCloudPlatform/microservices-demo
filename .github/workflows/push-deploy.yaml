@@ -31,4 +31,4 @@ jobs:
         skaffold build --default-repo=gcr.io/$PROJECT_ID \
                        --tag=$GITHUB_SHA
       env:
-        PROJECT_ID: ${{ secrets.PROJECT_ID }}
+        PROJECT_ID: "online-boutique-ci"
