@@ -49,7 +49,7 @@ build:
   tagPolicy:
     gitCommit: {}
   local:
-    useBuildkit: false
+    useBuildkit: true
 manifests:
   kustomize:
     paths:
