@@ -5,7 +5,7 @@ jinja2==3.1.4
 python-json-logger==2.0.7
 google-cloud-profiler==4.1.0
 google-cloud-trace==1.13.3
-requests==2.31.0
+requests==2.32.2
 opentelemetry-distro==0.41b0
 opentelemetry-instrumentation-grpc==0.46b0
 opentelemetry-exporter-otlp-proto-grpc==1.25.0
