@@ -24,8 +24,8 @@ RUN dotnet publish cartservice.csproj \
     -p:PublishSingleFile=true \
     -a $TARGETARCH \
     --self-contained true \
-    -p:PublishTrimmed=True \
-    -p:TrimMode=Full \
+    -p:PublishTrimmed=true \
+    -p:TrimMode=full \
     -c release \
     -o /cartservice
 
