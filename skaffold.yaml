@@ -50,6 +50,7 @@ build:
   tagPolicy:
     gitCommit: {}
   local:
+    useDockerCLI: true
     useBuildkit: true
 manifests:
   kustomize:
