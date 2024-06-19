@@ -26,8 +26,7 @@ RUN dotnet publish cartservice.csproj \
     -p:PublishTrimmed=true \
     -p:TrimMode=full \
     -c release \
-    -o /cartservice \
-    --no-restore
+    -o /cartservice
 
 # https://mcr.microsoft.com/product/dotnet/runtime-deps
 FROM mcr.microsoft.com/dotnet/runtime-deps:8.0.6-noble-chiseled@sha256:1745aa8e322b6965ea3ec8524b9f9eb128f146c804e32b1fc2272ed07ada4c8e
