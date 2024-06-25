@@ -44,6 +44,9 @@
     {{ else }}
     <link rel='shortcut icon' type='image/x-icon' href='/static/favicon.ico' />
     {{ end }}
+    {{ if $.BaseUrl }}
+    <base href='{{$.BaseUrl}}' />
+    {{ end }}
 </head>
 
 <body>
