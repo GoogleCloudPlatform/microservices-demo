@@ -115,7 +115,7 @@
     botMessages.scrollTo(0, botMessages.scrollHeight);
 
     // Request a response from the Shopping Assistant
-    const response = await fetch("/bot", {
+    const response = await fetch("{{.BaseUrl}}/bot", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -157,7 +157,7 @@
         // Construct main product div
         const botProductDiv = document.createElement("a");
         botProductDiv.classList.add("bot-product");
-        botProductDiv.href = "{{.BaseUrl}}/product/" + id;
+        botProductDiv.href = "/product/" + id;
 
         // Construct product image
         const botProductImg = document.createElement("img");
