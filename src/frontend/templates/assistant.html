@@ -115,7 +115,7 @@
     botMessages.scrollTo(0, botMessages.scrollHeight);
 
     // Request a response from the Shopping Assistant
-    const response = await fetch("{{.BaseUrl}}/bot", {
+    const response = await fetch("{{ $.BaseUrl }}/bot", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -146,7 +146,7 @@
       // For each product...
       for (const id of extractedIds) {
         // Retrieve product metadata from the Product Catalog
-        const productResponse = await fetch("{{.BaseUrl}}/product-meta/" + id, {
+        const productResponse = await fetch("{{ $.BaseUrl }}/product-meta/" + id, {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
