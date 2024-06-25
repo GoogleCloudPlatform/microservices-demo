@@ -173,7 +173,7 @@
         // Construct main product div
         const botProductDiv = document.createElement("a");
         botProductDiv.classList.add("bot-product");
-        botProductDiv.href = "/product/" + id;
+        botProductDiv.href = "{{ $.baseUrl }}/product/" + id;
 
         // Construct product image
         const botProductImg = document.createElement("img");
@@ -198,7 +198,7 @@
       // Render products
       botMessages.appendChild(botProductsDiv)
     }
-    
+
     botMessages.scrollTo(0, botMessages.scrollHeight);
 
     // Re-enable button and input field
