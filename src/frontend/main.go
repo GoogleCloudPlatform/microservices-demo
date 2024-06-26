@@ -42,8 +42,6 @@ const (
 	cookiePrefix    = "shop_"
 	cookieSessionID = cookiePrefix + "session-id"
 	cookieCurrency  = cookiePrefix + "currency"
-
-	baseUrl         = ""
 )
 
 var (
@@ -53,7 +51,10 @@ var (
 		"CAD": true,
 		"JPY": true,
 		"GBP": true,
-		"TRY": true}
+		"TRY": true,
+	}
+
+	baseUrl         = ""
 )
 
 type ctxKeySessionID struct{}
