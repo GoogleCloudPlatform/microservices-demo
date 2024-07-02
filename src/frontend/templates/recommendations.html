@@ -21,7 +21,7 @@
         <div class="col-xl-10 offset-xl-1">
           <h2>You May Also Like</h2>
           <div class="row">
-            {{range . }}
+            {{ range .recommendations }}
             <div class="col-md-3">
               <div>
                 <a href="{{ $.baseUrl }}/product/{{.Id}}">
