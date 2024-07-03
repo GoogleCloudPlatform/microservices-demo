@@ -7,11 +7,12 @@ pipeline {
                   git branch: 'main', url: 'https://github.com/nishashetty18/microservices-demo.git'
             }
         }
-        stage('build adservice') {
+        /*stage('build adservice') {
             steps {
                 script {
                     withDockerRegistry(credentialsId: 'dockerhub', toolName: 'Docker') {
                         dir('/var/lib/jenkins/workspace/microservices-demo/src/adservice') {
+                            
                             sh 'docker build -t nishashetty18/adservice:latest .'
                             sh 'docker push nishashetty18/adservice:latest'
                             sh 'docker rmi nishashetty18/adservice:latest'
@@ -28,6 +29,7 @@ pipeline {
                         dir('/var/lib/jenkins/workspace/microservices-demo/src/adservice') {
                             sh 'docker build -t us-central1-docker.pkg.dev/microservices-demo-426006/my-repo/adservice-jen:v1 .'
                             sh 'docker push us-central1-docker.pkg.dev/microservices-demo-426006/my-repo/adservice-jen:v1'
+                            sh 'docker rmi us-central1-docker.pkg.dev/microservices-demo-426006/my-repo/adservice-jen:v1'
                             
 
                         }
@@ -42,6 +44,7 @@ pipeline {
                         dir('/var/lib/jenkins/workspace/microservices-demo/src/cartservice/src') {
                             sh 'docker build -t us-central1-docker.pkg.dev/microservices-demo-426006/my-repo/cartservice-jen:v1 .'
                             sh 'docker push us-central1-docker.pkg.dev/microservices-demo-426006/my-repo/cartservice-jen:v1'
+                            sh 'docker rmi us-central1-docker.pkg.dev/microservices-demo-426006/my-repo/cartservice-jen:v1'
                             
 
                         }
@@ -56,6 +59,7 @@ pipeline {
                         dir('/var/lib/jenkins/workspace/microservices-demo/src/checkoutservice') {
                             sh 'docker build -t us-central1-docker.pkg.dev/microservices-demo-426006/my-repo/checkoutservice-jen:v1 .'
                             sh 'docker push us-central1-docker.pkg.dev/microservices-demo-426006/my-repo/checkoutservice-jen:v1'
+                            sh 'docker rmi us-central1-docker.pkg.dev/microservices-demo-426006/my-repo/checkoutservice-jen:v1'
                             
 
                         }
@@ -70,6 +74,7 @@ pipeline {
                         dir('/var/lib/jenkins/workspace/microservices-demo/src/currencyservice') {
                             sh 'docker build -t us-central1-docker.pkg.dev/microservices-demo-426006/my-repo/currencyservice-jen:v1 .'
                             sh 'docker push us-central1-docker.pkg.dev/microservices-demo-426006/my-repo/currencyservice-jen:v1'
+                            sh 'docker rmi us-central1-docker.pkg.dev/microservices-demo-426006/my-repo/currencyservice-jen:v1'
                             
 
                         }
@@ -84,6 +89,7 @@ pipeline {
                         dir('/var/lib/jenkins/workspace/microservices-demo/src/emailservice') {
                             sh 'docker build -t us-central1-docker.pkg.dev/microservices-demo-426006/my-repo/emailservice-jen:v1 .'
                             sh 'docker push us-central1-docker.pkg.dev/microservices-demo-426006/my-repo/emailservice-jen:v1'
+                            sh 'docker rmi us-central1-docker.pkg.dev/microservices-demo-426006/my-repo/emailservice-jen:v1'
                             
 
                         }
@@ -98,6 +104,7 @@ pipeline {
                         dir('/var/lib/jenkins/workspace/microservices-demo/src/frontend') {
                             sh 'docker build -t us-central1-docker.pkg.dev/microservices-demo-426006/my-repo/frontend-jen:v1 .'
                             sh 'docker push us-central1-docker.pkg.dev/microservices-demo-426006/my-repo/frontend-jen:v1'
+                            sh 'docker rmi us-central1-docker.pkg.dev/microservices-demo-426006/my-repo/frontend-jen:v1'
                             
 
                         }
@@ -112,6 +119,7 @@ pipeline {
                         dir('/var/lib/jenkins/workspace/microservices-demo/src/loadgenerator') {
                             sh 'docker build -t us-central1-docker.pkg.dev/microservices-demo-426006/my-repo/loadgenerator-jen:v1 .'
                             sh 'docker push us-central1-docker.pkg.dev/microservices-demo-426006/my-repo/loadgenerator-jen:v1'
+                            sh 'docker rmi us-central1-docker.pkg.dev/microservices-demo-426006/my-repo/loadgenerator-jen:v1'
                             
 
                         }
@@ -126,6 +134,7 @@ pipeline {
                         dir('/var/lib/jenkins/workspace/microservices-demo/src/paymentservice') {
                             sh 'docker build -t us-central1-docker.pkg.dev/microservices-demo-426006/my-repo/paymentservice-jen:v1 .'
                             sh 'docker push us-central1-docker.pkg.dev/microservices-demo-426006/my-repo/paymentservice-jen:v1'
+                            sh 'docker rmi us-central1-docker.pkg.dev/microservices-demo-426006/my-repo/paymentservice-jen:v1'
                             
 
                         }
@@ -140,6 +149,7 @@ pipeline {
                         dir('/var/lib/jenkins/workspace/microservices-demo/src/productcatalogservice') {
                             sh 'docker build -t us-central1-docker.pkg.dev/microservices-demo-426006/my-repo/productcatalogservice-jen:v1 .'
                             sh 'docker push us-central1-docker.pkg.dev/microservices-demo-426006/my-repo/productcatalogservice-jen:v1'
+                            sh 'docker rmi us-central1-docker.pkg.dev/microservices-demo-426006/my-repo/productcatalogservice-jen:v1'
                             
 
                         }
@@ -154,6 +164,7 @@ pipeline {
                         dir('/var/lib/jenkins/workspace/microservices-demo/src/recommendationservice') {
                             sh 'docker build -t us-central1-docker.pkg.dev/microservices-demo-426006/my-repo/recommendationservice-jen:v1 .'
                             sh 'docker push us-central1-docker.pkg.dev/microservices-demo-426006/my-repo/recommendationservice-jen:v1'
+                            sh 'docker rmi us-central1-docker.pkg.dev/microservices-demo-426006/my-repo/recommendationservice-jen:v1'
                             
 
                         }
@@ -168,6 +179,7 @@ pipeline {
                         dir('/var/lib/jenkins/workspace/microservices-demo/src/shippingservice') {
                             sh 'docker build -t us-central1-docker.pkg.dev/microservices-demo-426006/my-repo/shippingservice-jen:v1 .'
                             sh 'docker push us-central1-docker.pkg.dev/microservices-demo-426006/my-repo/shippingservice-jen:v1'
+                            sh 'docker rmi us-central1-docker.pkg.dev/microservices-demo-426006/my-repo/shippingservice-jen:v1'
                             
 
                         }
@@ -182,10 +194,26 @@ pipeline {
                         dir('/var/lib/jenkins/workspace/microservices-demo/src/shoppingassistantservice') {
                             sh 'docker build -t us-central1-docker.pkg.dev/microservices-demo-426006/my-repo/shoppingassistantservice-jen:v1 .'
                             sh 'docker push us-central1-docker.pkg.dev/microservices-demo-426006/my-repo/shoppingassistantservice-jen:v1'
+                            sh 'docker rmi us-central1-docker.pkg.dev/microservices-demo-426006/my-repo/shoppingassistantservice-jen:v1'
                         }
                     }
                 }
             }
+        }*/
+        stage('kubernetes') {
+            steps {
+                withKubeConfig(caCertificate: '', clusterName: 'online_boutique', contextName: '', credentialsId: 'kubeconfig', namespace: '', restrictKubeConfigAccess: false, serverUrl: '') {
+                    dir('/var/lib/jenkins/workspace/microservices-demo/release') {
+                        sh 'gcloud container clusters get-credentials online-boutique --zone us-central1-c --project microservices-demo-426006'
+                        sh 'kubectl apply -f kubernetes-manifests.yaml'
+                        sh 'kubectl get pods'
+                        sh 'kubectl get svc'
+                    }
+                } 
+            }
         }
-    }
+    }   
 }
+    
+
+       
