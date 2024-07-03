@@ -1,4 +1,4 @@
-This folder contains the Terraform for some of the infrastructure used by the CICD (continuous integration and continuous delivery/continuous deployment) of this repository.
+This folder contains the Terraform for some of the infrastructure used by the CICD (continuous integration and continuous delivery/continuous deployment) of this repository and production Google Cloud resources.
 
 ## Update this Terraform
 
