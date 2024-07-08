@@ -18,7 +18,7 @@ click==8.1.7
     # via flask
 configargparse==1.7
     # via locust
-faker==25.8.0
+faker==26.0.0
     # via -r requirements.in
 flask==3.0.3
     # via
