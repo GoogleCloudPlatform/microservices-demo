@@ -8,7 +8,7 @@ blinker==1.8.2
     # via flask
 brotli==1.1.0
     # via geventhttpclient
-certifi==2024.6.2
+certifi==2024.7.4
     # via
     #   geventhttpclient
     #   requests
@@ -18,7 +18,7 @@ click==8.1.7
     # via flask
 configargparse==1.7
     # via locust
-faker==25.8.0
+faker==26.0.0
     # via -r requirements.in
 flask==3.0.3
     # via
