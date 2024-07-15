@@ -15,8 +15,8 @@ group = "adservice"
 version = "0.1.0-SNAPSHOT"
 
 def grpcVersion = "1.65.0"
-def jacksonCoreVersion = "2.17.1"
-def jacksonDatabindVersion = "2.17.1"
+def jacksonCoreVersion = "2.17.2"
+def jacksonDatabindVersion = "2.17.2"
 def protocVersion = "3.25.3"
 
 tasks.withType(JavaCompile) {
