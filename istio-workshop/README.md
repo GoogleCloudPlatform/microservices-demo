@@ -23,5 +23,6 @@ helm install onlineboutique . -n hipster-app
 kubectl apply -f addons-ingress.yaml
 kubectl apply -f frontend-v2.yaml
 kubectl apply -f frontend-ingress-gateway.yaml
+kubectl apply -f frontend-virtualservice-split.yaml
 
 ```
