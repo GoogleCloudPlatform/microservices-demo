@@ -77,7 +77,7 @@ jobs:
             --set sidecars.create=true \
             --set serviceAccounts.create=true \
             --set authorizationPolicies.create=true \
-            --set frontend.externalService=false \
+            --set frontend.externalService.create=false \
             --set frontend.virtualService.create=true \
             --set frontend.virtualService.gateway.name=asm-ingressgateway \
             --set frontend.virtualService.gateway.namespace=asm-ingress \
