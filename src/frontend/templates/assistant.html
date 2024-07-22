@@ -1,3 +1,19 @@
+<!--
+ Copyright 2020 Google LLC
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+-->
+
 {{ define "assistant" }}
 
 {{ template "header" . }}
@@ -115,7 +131,7 @@
     botMessages.scrollTo(0, botMessages.scrollHeight);
 
     // Request a response from the Shopping Assistant
-    const response = await fetch("/bot", {
+    const response = await fetch("{{ $.baseUrl }}/bot", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -146,7 +162,7 @@
       // For each product...
       for (const id of extractedIds) {
         // Retrieve product metadata from the Product Catalog
-        const productResponse = await fetch("/product-meta/" + id, {
+        const productResponse = await fetch("{{ $.baseUrl }}/product-meta/" + id, {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
@@ -157,7 +173,7 @@
         // Construct main product div
         const botProductDiv = document.createElement("a");
         botProductDiv.classList.add("bot-product");
-        botProductDiv.href = "/product/" + id;
+        botProductDiv.href = "{{ $.baseUrl }}/product/" + id;
 
         // Construct product image
         const botProductImg = document.createElement("img");
@@ -182,7 +198,7 @@
       // Render products
       botMessages.appendChild(botProductsDiv)
     }
-    
+
     botMessages.scrollTo(0, botMessages.scrollHeight);
 
     // Re-enable button and input field

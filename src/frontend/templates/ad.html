@@ -18,8 +18,8 @@
 <div class="container py-3 px-lg-5 py-lg-5">
     <div role="alert">
         <strong>Ad</strong>
-        <a href="{{.RedirectUrl}}" rel="nofollow noopener noreferrer" target="_blank">
-            {{.Text}}
+        <a href="{{$.baseUrl}}{{.ad.RedirectUrl}}" rel="nofollow noopener noreferrer" target="_blank">
+            {{.ad.Text}}
         </a>
     </div>
 </div>
