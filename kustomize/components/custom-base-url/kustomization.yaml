@@ -1,0 +1,18 @@
+apiVersion: kustomize.config.k8s.io/v1alpha1
+kind: Component
+patches:
+- target:
+    kind: Deployment
+    name: frontend
+  patch: |-
+    - op: add
+      path: /spec/template/spec/containers/0/env/-
+      value:
+        name: BASE_URL
+        value: /online-boutique
+    - op: replace
+      path: /spec/template/spec/containers/0/livenessProbe/httpGet/path
+      value: /online-boutique/_healthz
+    - op: replace
+      path: /spec/template/spec/containers/0/readinessProbe/httpGet/path
+      value: /online-boutique/_healthz
