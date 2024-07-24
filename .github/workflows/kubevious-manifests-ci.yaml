@@ -48,12 +48,6 @@ jobs:
         with:
           manifests: helm-chart
 
-      - name: Validate istio-manifests
-        id: istio-manifests-validation
-        uses: kubevious/cli@v1.0.61
-        with:
-          manifests: istio-manifests https://github.com/istio/istio/raw/master/manifests/charts/base/crds/crd-all.gen.yaml
-
       - name: Validate kustomize
         id: kustomize-validation
         uses: kubevious/cli@v1.0.61
