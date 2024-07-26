@@ -3,9 +3,9 @@ module github.com/GoogleCloudPlatform/microservices-demo/src/productcatalogservi
 go 1.22
 
 require (
-	cloud.google.com/go/alloydbconn v1.11.0
+	cloud.google.com/go/alloydbconn v1.11.1
 	cloud.google.com/go/profiler v0.4.1
-	cloud.google.com/go/secretmanager v1.13.3
+	cloud.google.com/go/secretmanager v1.13.4
 	github.com/golang/protobuf v1.5.4
 	github.com/jackc/pgx/v5 v5.6.0
 	github.com/pkg/errors v0.9.1
@@ -20,13 +20,13 @@ require (
 
 require (
 	cloud.google.com/go v0.115.0 // indirect
-	cloud.google.com/go/alloydb v1.10.2 // indirect
-	cloud.google.com/go/auth v0.6.1 // indirect
+	cloud.google.com/go/alloydb v1.10.4 // indirect
+	cloud.google.com/go/auth v0.7.0 // indirect
 	cloud.google.com/go/auth/oauth2adapt v0.2.2 // indirect
-	cloud.google.com/go/compute v1.27.0 // indirect
-	cloud.google.com/go/compute/metadata v0.3.0 // indirect
-	cloud.google.com/go/iam v1.1.8 // indirect
-	cloud.google.com/go/longrunning v0.5.7 // indirect
+	cloud.google.com/go/compute v1.27.2 // indirect
+	cloud.google.com/go/compute/metadata v0.4.0 // indirect
+	cloud.google.com/go/iam v1.1.10 // indirect
+	cloud.google.com/go/longrunning v0.5.9 // indirect
 	github.com/cenkalti/backoff/v4 v4.3.0 // indirect
 	github.com/felixge/httpsnoop v1.0.4 // indirect
 	github.com/go-logr/logr v1.4.2 // indirect
@@ -53,10 +53,10 @@ require (
 	golang.org/x/sys v0.22.0 // indirect
 	golang.org/x/text v0.16.0 // indirect
 	golang.org/x/time v0.5.0 // indirect
-	google.golang.org/api v0.187.0 // indirect
+	google.golang.org/api v0.188.0 // indirect
 	google.golang.org/appengine v1.6.8 // indirect
-	google.golang.org/genproto v0.0.0-20240624140628-dc46fd24d27d // indirect
+	google.golang.org/genproto v0.0.0-20240708141625-4ad9e859172b // indirect
 	google.golang.org/genproto/googleapis/api v0.0.0-20240701130421-f6361c86f094 // indirect
-	google.golang.org/genproto/googleapis/rpc v0.0.0-20240701130421-f6361c86f094 // indirect
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20240709173604-40e1e62336c5 // indirect
 	google.golang.org/protobuf v1.34.2 // indirect
 )

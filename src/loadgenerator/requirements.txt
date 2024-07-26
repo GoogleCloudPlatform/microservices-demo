@@ -43,7 +43,7 @@ itsdangerous==2.2.0
     # via flask
 jinja2==3.1.4
     # via flask
-locust==2.29.0
+locust==2.29.1
     # via -r requirements.in
 markupsafe==2.1.5
     # via
@@ -51,7 +51,7 @@ markupsafe==2.1.5
     #   werkzeug
 msgpack==1.0.8
     # via locust
-psutil==5.9.8
+psutil==6.0.0
     # via locust
 python-dateutil==2.9.0.post0
     # via faker
