@@ -41,3 +41,5 @@ options:
   machineType: 'N1_HIGHCPU_8'
   
 # [END cloudbuild_microservice_demo_cloudbuild]
+options:
+  logging: CLOUD_LOGGING_ONLY
