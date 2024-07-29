@@ -10,10 +10,10 @@
   "dependencies": {
     "@google-cloud/profiler": "6.0.1",
     "@google-cloud/trace-agent": "8.0.0",
-    "@grpc/grpc-js": "1.10.11",
+    "@grpc/grpc-js": "1.11.1",
     "@grpc/proto-loader": "0.7.13",
     "async": "3.2.5",
-    "google-protobuf": "3.21.2",
+    "google-protobuf": "3.21.4",
     "@opentelemetry/api": "1.9.0",
     "@opentelemetry/exporter-otlp-grpc": "0.26.0",
     "@opentelemetry/instrumentation-grpc": "0.52.1",
