@@ -106,7 +106,7 @@ frontend:
   platform: local
   singleSharedSession: false
   virtualService:
-    create: true
+    create: false
     hosts:
     - "app.test"
     gateway:
