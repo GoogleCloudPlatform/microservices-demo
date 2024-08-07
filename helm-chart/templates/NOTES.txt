@@ -1,4 +1,4 @@
-{{- if and .Values.frontend.create .Values.frontend.externalService }}
+{{- if and .Values.frontend.create .Values.frontend.externalService.create }}
 Note: It may take a few minutes for the LoadBalancer IP to be available.
 
 Watch the status of the frontend IP address with:

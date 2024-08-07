@@ -16,7 +16,7 @@ helm upgrade onlineboutique oci://us-docker.pkg.dev/online-boutique-ci/charts/on
     --install \
     --create-namespace \
     --set images.repository=us-docker.pkg.dev/my-project/containers/onlineboutique \
-    --set frontend.externalService=false \
+    --set frontend.externalService.create=false \
     --set redis.create=false \
     --set cartservice.database.type=spanner \
     --set cartservice.database.connectionString=projects/my-project/instances/onlineboutique/databases/carts \

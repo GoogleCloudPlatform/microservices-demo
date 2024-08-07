@@ -146,13 +146,17 @@ spec:
   - name: http
     port: 80
     targetPort: 8080
-{{- if .Values.frontend.externalService }}
+{{- if .Values.frontend.externalService.create }}
 ---
 apiVersion: v1
 kind: Service
 metadata:
   name: {{ .Values.frontend.name }}-external
   namespace: {{ .Release.Namespace }}
+  {{- with .Values.frontend.externalService.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
 spec:
   type: LoadBalancer
   selector:
@@ -177,7 +181,7 @@ spec:
   - Ingress
   - Egress
   ingress:
-  {{- if .Values.frontend.externalService }}
+  {{- if .Values.frontend.externalService.create }}
   - {}
   {{- else }}
   - from:
@@ -236,7 +240,7 @@ spec:
     matchLabels:
       app: {{ .Values.frontend.name }}
   rules:
-  {{- if .Values.frontend.externalService }}
+  {{- if .Values.frontend.externalService.create }}
   - to:
   {{- else }}
   - from:
