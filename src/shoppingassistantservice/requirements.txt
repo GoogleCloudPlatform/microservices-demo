@@ -6,7 +6,7 @@
 #
 aiohappyeyeballs==2.3.4
     # via aiohttp
-aiohttp==3.10.1
+aiohttp==3.10.2
     # via
     #   google-cloud-alloydb-connector
     #   langchain
