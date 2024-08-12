@@ -18,9 +18,9 @@ set -e
 set -x
 
 # Replace me
-PROJECT_ID=<project_id>
-PROJECT_NUMBER=<project_number>
-PGPASSWORD=<password>
+PROJECT_ID=$PROJECT_ID
+PROJECT_NUMBER=$PROJECT_NUMBER
+PGPASSWORD=$PGPASSWORD
 
 # Set sensible defaults
 REGION=us-central1

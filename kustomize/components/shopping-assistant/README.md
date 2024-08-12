@@ -6,10 +6,19 @@ This demo adds a new service to Online Boutique called `shoppingassistantservice
 
 **Note:** This demo requires a Google Cloud project where you to have the `owner` role, else you may be unable to enable APIs or modify VPC rules that are needed for this demo.
 
+1. Set some environment variables.
+    ```sh
+    export PROJECT_ID=<project_id>
+    export PROJECT_NUMBER=<project_number>
+    export PGPASSWORD=<pgpassword>
+    ```
+
+    **Note**: The project ID and project number of your Google Cloud project can be found in the Console. The PostgreSQL password can be set to anything you want, but make sure to note it down.
+
 1. Change your default Google Cloud project.
     ```sh
     gcloud auth login
-    gcloud config set project <PROJECT_ID>
+    gcloud config set project $PROJECT_ID
     ```
 
 1. Enable the Google Kubernetes Engine (GKE) and Artifact Registry (AR) APIs.
@@ -43,11 +52,12 @@ This demo adds a new service to Online Boutique called `shoppingassistantservice
         && cd microservices-demo/
     ```
 
-1. Replace the placeholder variables into infra script #1 and run it. If it asks about policy bindings, select the option `None`. This may take a few minutes.
+1. Run script #1. If it asks about policy bindings, select the option `None`. This may take a few minutes.
     ```sh
-    nano kustomize/components/shopping-assistant/scripts/1_deploy_alloydb_infra.sh # replace placeholders
     ./kustomize/components/shopping-assistant/scripts/1_deploy_alloydb_infra.sh
     ```
+
+    **Note**: If you are on macOS and use a non-GNU version of `sed`, you may have to tweak the script to use `gsed` instead.
 
 1. Create a Linux VM in Compute Engine (GCE).
     ```sh
@@ -97,20 +107,25 @@ This demo adds a new service to Online Boutique called `shoppingassistantservice
 
 1. Create an API key in the [Credentials page](https://pantheon.corp.google.com/apis/credentials) with permissions for "Generative Language API", and make note of the secret key.
 
-1. Paste this secret key in the shopping assistant service envs, replacing `GOOGLE_API_KEY_VAL`.
+1. Replace the PostgreSQL password placeholder in the shoppingassistant service.
     ```sh
-    nano kustomize/components/shopping-assistant/shoppingassistantservice.yaml
+    sed -i "s/GOOGLE_API_KEY_VAL/${PGPASSWORD}/g" kustomize/components/shopping-assistant/shoppingassistantservice.yaml
     ```
 
-1. Change the commented-out components in `kubernetes-manifests/kustomization.yaml` to look like this:
+1. Edit the root Kustomize file to enable the `alloydb` and `shopping-assistant` components.
+    ```sh
+    nano kubernetes-manifests/kustomization.yaml # make the modifications below
+    ```
+    
     ```yaml
-    components: # remove comment
+    # ...head of the file
+    components: # remove this comment
     # - ../kustomize/components/cymbal-branding
     # - ../kustomize/components/google-cloud-operations
     # - ../kustomize/components/memorystore
     # - ../kustomize/components/network-policies
-     - ../kustomize/components/alloydb # remove comment
-     - ../kustomize/components/shopping-assistant # remove comment
+     - ../kustomize/components/alloydb # remove this comment
+     - ../kustomize/components/shopping-assistant # remove this comment
     # - ../kustomize/components/spanner
     # - ../kustomize/components/container-images-tag
     # - ../kustomize/components/container-images-tag-suffix
@@ -119,7 +134,7 @@ This demo adds a new service to Online Boutique called `shoppingassistantservice
 
 1. Deploy to the GKE cluster.
     ```sh
-    skaffold run --default-repo=us-central1-docker.pkg.dev/<PROJECT_ID>/images
+    skaffold run --default-repo=us-central1-docker.pkg.dev/$PROJECT_ID/images
     ```
 
 1. Wait for all the pods to be up and running. You can then find the external IP and navigate to it.
