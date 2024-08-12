@@ -55,7 +55,7 @@ psutil==6.0.0
     # via locust
 python-dateutil==2.9.0.post0
     # via faker
-pyzmq==26.0.3
+pyzmq==26.1.0
     # via locust
 requests==2.32.3
     # via locust
