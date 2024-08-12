@@ -27,7 +27,7 @@ spec:
       labels:
         app: emailservice
     spec:
-      serviceAccountName: default
+      serviceAccountName: emailservice
       terminationGracePeriodSeconds: 5
       securityContext:
         fsGroup: 1000
@@ -81,3 +81,8 @@ spec:
   - name: grpc
     port: 5000
     targetPort: 8080
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: emailservice

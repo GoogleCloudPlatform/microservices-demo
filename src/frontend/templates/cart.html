@@ -16,20 +16,20 @@
 
 {{ define "cart" }}
     {{ template "header" . }}
-    
+
     <div {{ with $.platform_css }} class="{{.}}" {{ end }}>
         <span class="platform-flag">
             {{$.platform_name}}
         </span>
     </div>
-    
+
     <main role="main" class="cart-sections">
 
         {{ if eq (len $.items) 0 }}
         <section class="empty-cart-section">
             <h3>Your shopping cart is empty!</h3>
             <p>Items you add to your shopping cart will appear here.</p>
-            <a class="cymbal-button-primary" href="/" role="button">Continue Shopping</a>
+            <a class="cymbal-button-primary" href="{{ $.baseUrl }}/" role="button">Continue Shopping</a>
         </section>
         {{ else }}
         <section class="container">
@@ -42,11 +42,11 @@
                             <h3>Cart ({{ $.cart_size }})</h3>
                         </div>
                         <div class="col-8 pr-md-0 text-right">
-                            <form method="POST" action="/cart/empty">
+                            <form method="POST" action="{{ $.baseUrl }}/cart/empty">
                                 <button class="cymbal-button-secondary cart-summary-empty-cart-button" type="submit">
                                     Empty Cart
                                 </button>
-                                <a class="cymbal-button-primary" href="/" role="button">
+                                <a class="cymbal-button-primary" href="{{ $.baseUrl }}/" role="button">
                                     Continue Shopping
                                 </a>
                             </form>
@@ -56,8 +56,8 @@
                     {{ range $.items }}
                     <div class="row cart-summary-item-row">
                         <div class="col-md-4 pl-md-0">
-                            <a href="/product/{{.Item.Id}}">
-                                <img class="img-fluid" alt="" src="{{.Item.Picture}}" />
+                            <a href="{{ $.baseUrl }}/product/{{.Item.Id}}">
+                                <img class="img-fluid" alt="" src="{{ $.baseUrl }}{{.Item.Picture}}" />
                             </a>
                         </div>
                         <div class="col-md-8 pr-md-0">
@@ -99,7 +99,7 @@
 
                 <div class="col-lg-5 offset-lg-1 col-xl-4">
 
-                    <form class="cart-checkout-form" action="/cart/checkout" method="POST">
+                    <form class="cart-checkout-form" action="{{ $.baseUrl }}/cart/checkout" method="POST">
 
                         <div class="row">
                             <div class="col">
@@ -187,7 +187,7 @@
                                     <option value="11">November</option>
                                     <option value="12">January</option>
                                 </select>
-                                <img src="/static/icons/Hipster_DownArrow.svg" alt="" class="cymbal-dropdown-chevron">
+                                <img src="{{ $.baseUrl }}/static/icons/Hipster_DownArrow.svg" alt="" class="cymbal-dropdown-chevron">
                             </div>
                             <div class="col-md-4 cymbal-form-field">
                                     <label for="credit_card_expiration_year">Year</label>
@@ -198,7 +198,7 @@
                                         {{- end}}
                                     >{{$y}}</option>{{end}}
                                     </select>
-                                    <img src="/static/icons/Hipster_DownArrow.svg" alt="" class="cymbal-dropdown-chevron">
+                                    <img src="{{ $.baseUrl }}/static/icons/Hipster_DownArrow.svg" alt="" class="cymbal-dropdown-chevron">
                                 </div>
                             <div class="col-md-3 cymbal-form-field">
                                 <label for="credit_card_cvv">CVV</label>
@@ -226,8 +226,8 @@
     </main>
 
     {{ if $.recommendations }}
-        {{ template "recommendations" $.recommendations }}
+        {{ template "recommendations" $ }}
     {{ end }}
 
     {{ template "footer" . }}
-    {{ end }}
+{{ end }}

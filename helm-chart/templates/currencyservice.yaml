@@ -32,6 +32,8 @@ kind: Deployment
 metadata:
   name: {{ .Values.currencyService.name }}
   namespace: {{ .Release.Namespace }}
+  labels:
+    app: {{ .Values.currencyService.name }}
 spec:
   selector:
     matchLabels:
@@ -100,6 +102,8 @@ kind: Service
 metadata:
   name: {{ .Values.currencyService.name }}
   namespace: {{ .Release.Namespace }}
+  labels:
+    app: {{ .Values.currencyService.name }}
 spec:
   type: ClusterIP
   selector:

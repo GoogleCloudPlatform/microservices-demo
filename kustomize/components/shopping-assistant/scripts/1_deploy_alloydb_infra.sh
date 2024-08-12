@@ -101,14 +101,15 @@ sed -i "s/ALLOYDB_PRODUCTS_DATABASE_NAME_VAL/${ALLOYDB_PRODUCTS_DATABASE_NAME}/g
 sed -i "s/ALLOYDB_PRODUCTS_TABLE_NAME_VAL/${ALLOYDB_PRODUCTS_TABLE_NAME}/g" kustomize/components/alloydb/kustomization.yaml
 sed -i "s/ALLOYDB_SECRET_NAME_VAL/${ALLOYDB_SECRET_NAME}/g" kustomize/components/alloydb/kustomization.yaml
 
-# Substitute environment values (kubernetes-manifests/shoppingassistantservice.yaml)
-sed -i "s/PROJECT_ID_VAL/${PROJECT_ID}/g" kubernetes-manifests/shoppingassistantservice.yaml
-sed -i "s/REGION_VAL/${REGION}/g" kubernetes-manifests/shoppingassistantservice.yaml
-sed -i "s/ALLOYDB_CLUSTER_NAME_VAL/${ALLOYDB_CLUSTER_NAME}/g" kubernetes-manifests/shoppingassistantservice.yaml
-sed -i "s/ALLOYDB_INSTANCE_NAME_VAL/${ALLOYDB_INSTANCE_NAME}/g" kubernetes-manifests/shoppingassistantservice.yaml
-sed -i "s/ALLOYDB_DATABASE_NAME_VAL/${ALLOYDB_PRODUCTS_DATABASE_NAME}/g" kubernetes-manifests/shoppingassistantservice.yaml
-sed -i "s/ALLOYDB_TABLE_NAME_VAL/${ALLOYDB_PRODUCTS_TABLE_NAME}/g" kubernetes-manifests/shoppingassistantservice.yaml
-sed -i "s/ALLOYDB_SECRET_NAME_VAL/${ALLOYDB_SECRET_NAME}/g" kubernetes-manifests/shoppingassistantservice.yaml
+# Substitute environment values (kustomize/components/shopping-assistant/shoppingassistantservice.yaml)
+sed -i "s/PROJECT_ID_VAL/${PROJECT_ID}/g" kustomize/components/shopping-assistant/shoppingassistantservice.yaml
+sed -i "s/REGION_VAL/${REGION}/g" kustomize/components/shopping-assistant/shoppingassistantservice.yaml
+sed -i "s/ALLOYDB_CLUSTER_NAME_VAL/${ALLOYDB_CLUSTER_NAME}/g" kustomize/components/shopping-assistant/shoppingassistantservice.yaml
+sed -i "s/ALLOYDB_INSTANCE_NAME_VAL/${ALLOYDB_INSTANCE_NAME}/g" kustomize/components/shopping-assistant/shoppingassistantservice.yaml
+sed -i "s/ALLOYDB_DATABASE_NAME_VAL/${ALLOYDB_PRODUCTS_DATABASE_NAME}/g" kustomize/components/shopping-assistant/shoppingassistantservice.yaml
+sed -i "s/ALLOYDB_TABLE_NAME_VAL/${ALLOYDB_PRODUCTS_TABLE_NAME}/g" kustomize/components/shopping-assistant/shoppingassistantservice.yaml
+sed -i "s/ALLOYDB_SECRET_NAME_VAL/${ALLOYDB_SECRET_NAME}/g" kustomize/components/shopping-assistant/shoppingassistantservice.yaml
+sed -i "s/ALLOYDB_USER_GSA_ID/${ALLOYDB_USER_GSA_ID}/g" kustomize/components/shopping-assistant/shoppingassistantservice.yaml
 
 # Create service account for the cart and shopping assistant services
 gcloud iam service-accounts create ${ALLOYDB_USER_GSA_NAME} \

@@ -27,7 +27,7 @@ spec:
       labels:
         app: shoppingassistantservice
     spec:
-      serviceAccountName: default
+      serviceAccountName: shoppingassistantservice
       terminationGracePeriodSeconds: 5
       securityContext:
         fsGroup: 1000
@@ -86,3 +86,10 @@ spec:
   - name: http
     port: 80
     targetPort: 8080
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: shoppingassistantservice
+  annotations:
+    iam.gke.io/gcp-service-account: ALLOYDB_USER_GSA_ID

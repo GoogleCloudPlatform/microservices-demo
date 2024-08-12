@@ -82,8 +82,6 @@ Here is the list of the variations available as Kustomize components that you co
 These changes directly affect `cartservice`.
 - [**Secure with Network Policies**](components/network-policies)
   - Deploy fine granular `NetworkPolicies` for Online Boutique.
-- [**Create Kubernetes Service Accounts**](components/service-accounts)
-  - Deploy fine granular `ServiceAccounts` for Online Boutique.
 - [**Update the registry name of the container images**](components/container-images-registry)
 - [**Update the image tag of the container images**](components/container-images-tag)
 - [**Add an image tag suffix to the container images**](components/container-images-tag-suffix)

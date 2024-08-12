@@ -27,7 +27,7 @@ spec:
       labels:
         app: shippingservice
     spec:
-      serviceAccountName: default
+      serviceAccountName: shippingservice
       securityContext:
         fsGroup: 1000
         runAsGroup: 1000
@@ -79,3 +79,8 @@ spec:
   - name: grpc
     port: 50051
     targetPort: 50051
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: shippingservice

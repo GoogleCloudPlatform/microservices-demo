@@ -232,7 +232,7 @@ func (fe *frontendServer) addToCartHandler(w http.ResponseWriter, r *http.Reques
 		renderHTTPError(log, r, w, errors.Wrap(err, "failed to add to cart"), http.StatusInternalServerError)
 		return
 	}
-	w.Header().Set("location", "/cart")
+	w.Header().Set("location", baseUrl + "/cart")
 	w.WriteHeader(http.StatusFound)
 }
 
@@ -244,7 +244,7 @@ func (fe *frontendServer) emptyCartHandler(w http.ResponseWriter, r *http.Reques
 		renderHTTPError(log, r, w, errors.Wrap(err, "failed to empty cart"), http.StatusInternalServerError)
 		return
 	}
-	w.Header().Set("location", "/")
+	w.Header().Set("location", baseUrl + "/")
 	w.WriteHeader(http.StatusFound)
 }
 
@@ -423,7 +423,7 @@ func (fe *frontendServer) logoutHandler(w http.ResponseWriter, r *http.Request) 
 		c.MaxAge = -1
 		http.SetCookie(w, c)
 	}
-	w.Header().Set("Location", "/")
+	w.Header().Set("Location", baseUrl + "/")
 	w.WriteHeader(http.StatusFound)
 }
 
@@ -516,7 +516,7 @@ func (fe *frontendServer) setCurrencyHandler(w http.ResponseWriter, r *http.Requ
 	}
 	referer := r.Header.Get("referer")
 	if referer == "" {
-		referer = "/"
+		referer = baseUrl + "/"
 	}
 	w.Header().Set("Location", referer)
 	w.WriteHeader(http.StatusFound)
@@ -560,6 +560,7 @@ func injectCommonTemplateData(r *http.Request, payload map[string]interface{}) m
 		"deploymentDetails": deploymentDetailsMap,
 		"frontendMessage":   frontendMessage,
 		"currentYear":       time.Now().Year(),
+		"baseUrl":           baseUrl,
 	}
 
 	for k, v := range payload {

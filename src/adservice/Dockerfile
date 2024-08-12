@@ -31,6 +31,7 @@ FROM eclipse-temurin:19.0.1_10-jre
 RUN #apk add --no-cache ca-certificates
 RUN apt-get update && apt-get install -y ca-certificates
 
+# @TODO: https://github.com/GoogleCloudPlatform/microservices-demo/issues/2517
 # Download Stackdriver Profiler Java agent
 #RUN mkdir -p /opt/cprof && \
 #    wget -q -O- https://storage.googleapis.com/cloud-profiler/java/latest/profiler_java_agent.tar.gz \

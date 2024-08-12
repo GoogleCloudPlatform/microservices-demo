@@ -27,7 +27,7 @@ spec:
       labels:
         app: checkoutservice
     spec:
-      serviceAccountName: default
+      serviceAccountName: checkoutservice
       securityContext:
         fsGroup: 1000
         runAsGroup: 1000
@@ -88,3 +88,8 @@ spec:
   - name: grpc
     port: 5050
     targetPort: 5050
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: checkoutservice
