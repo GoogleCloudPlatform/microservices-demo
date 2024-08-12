@@ -137,7 +137,7 @@ func run(port string) string {
 	svc := &productCatalog{}
 	err = loadCatalog(&svc.catalog)
 	if err != nil {
-		log.Warnf("could not parse product catalog")
+		log.Fatalf("could not parse product catalog: %v", err)
 	}
 
 	pb.RegisterProductCatalogServiceServer(srv, svc)

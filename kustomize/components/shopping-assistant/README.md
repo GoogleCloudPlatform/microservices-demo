@@ -1,10 +1,16 @@
 # Shopping Assistant with RAG & AlloyDB
 
-This demo adds a new service to Online Boutique called `shoppingassistantservice`, which, alongside an Alloy-DB backed products catalog, adds a RAG-featured AI assistant to the frontned experience, which helps users suggest new products for their room decor.
+This demo adds a new service to Online Boutique called `shoppingassistantservice` which, alongside an Alloy-DB backed products catalog, adds a RAG-featured AI assistant to the frontned experience, helping users suggest products matching their home decor.
 
-## Set-up instructions
+## Setup instructions
 
-> Note: Make sure you have the `owner` role to the Google Cloud project you want to deploy this to, else you will be unable to enable certain APIs or modify certain VPC rules that are needed for this demo.
+**Note:** This demo requires a Google Cloud project where you to have the `owner` role, else you may be unable to enable APIs or modify VPC rules that are needed for this demo.
+
+1. Change your default Google Cloud project.
+    ```sh
+    gcloud auth login
+    gcloud config set project <PROJECT_ID>
+    ```
 
 1. Enable the Google Kubernetes Engine (GKE) and Artifact Registry (AR) APIs.
     ```sh
@@ -12,13 +18,19 @@ This demo adds a new service to Online Boutique called `shoppingassistantservice
     gcloud services enable artifactregistry.googleapis.com
     ```
 
-1. Create a GKE Autopilot cluster.
+1. Create a GKE Autopilot cluster. This may take a few minutes.
     ```sh
     gcloud container clusters create-auto cymbal-shops \
         --region=us-central1
     ```
 
-1. Create an AR Docker image repository.
+1. Change your Kubernetes context to your newly created GKE cluster.
+    ```sh
+    gcloud container clusters get-credentials cymbal-shops \
+        --region us-central1
+    ```
+
+1. Create an Artifact Registry container image repository.
     ```sh
     gcloud artifacts repositories create images \
         --repository-format=docker \
@@ -31,26 +43,18 @@ This demo adds a new service to Online Boutique called `shoppingassistantservice
         && cd microservices-demo/
     ```
 
-1. Context into the right project and GKE cluster.
+1. Replace the placeholder variables into infra script #1 and run it. If it asks about policy bindings, select the option `None`. This may take a few minutes.
     ```sh
-    gcloud auth login
-    gcloud config set project <PROJECT_ID>
-    gcloud container clusters get-credentials cymbal-shops \
-        --region us-central1
+    nano kustomize/components/shopping-assistant/scripts/1_deploy_alloydb_infra.sh # replace placeholders
+    ./kustomize/components/shopping-assistant/scripts/1_deploy_alloydb_infra.sh
     ```
 
-1. Replace the placeholder variables into infra script #1 and run it. If it asks about policy bindings, select the option for "None".
-    ```sh
-    vim kustomize/components/shopping-assistant/scripts/1_deploy_alloydb_infra.sh
-    ./scripts/1_deploy_alloydb_infra.sh
-    ```
-
-1. Create micro Linux VM on GCP
+1. Create a Linux VM in Compute Engine (GCE).
     ```sh
     gcloud compute instances create gce-linux \
         --zone=us-central1-a \
         --machine-type=e2-micro \
-        --image-family=debian-12-bookworm-v20240312 \
+        --image-family=debian-12 \
         --image-project=debian-cloud 
     ```
 
@@ -60,33 +64,33 @@ This demo adds a new service to Online Boutique called `shoppingassistantservice
         --zone "us-central1-a"
     ```
 
-1. Install the Postgres client and context into the right project.
+1. Install the Postgres client and set your default Google Cloud project.
     ```sh
     sudo apt-get install -y postgresql-client
     gcloud auth login
     gcloud config set project <PROJECT_ID>
     ```
 
-1. Copy script #2, the python script, and the updated products.json to the VM. Make sure the scripts are executable.
+1. Copy script #2, the python script, and the products.json to the VM. Make sure the scripts are executable.
     ```sh
-    vim 2_create_populate_alloydb_tables.sh
-    vim generate_sql_from_products.py
-    vim products.json
+    nano 2_create_populate_alloydb_tables.sh # paste content
+    nano generate_sql_from_products.py # paste content
+    nano products.json # paste content
     chmod +x 2_create_populate_alloydb_tables.sh
     chmod +x generate_sql_from_products.py
     ```
 
-    > Note: You can find the files at the following places:
-    > - kustomize/components/shopping-assistant/scripts/2_create_populate_alloydb_tables.sh
-    > - kustomize/components/shopping-assistant/scripts/generate_sql_from_products.py
-    > - src/productcatalogservice/products.json
+    **Note:** You can find the files at the following places:
+    - `kustomize/components/shopping-assistant/scripts/2_create_populate_alloydb_tables.sh`
+    - `kustomize/components/shopping-assistant/scripts/generate_sql_from_products.py`
+    - `src/productcatalogservice/products.json`
 
-1. Run script #2 in the VM. If it asks for a postgres password, it should be the same that you set in script #1 earlier.
+1. Run script #2 in the VM. If it asks for a postgres password, it should be the same that you set in script #1 earlier. This may take a few minutes.
     ```sh
     ./2_create_populate_alloydb_tables.sh
     ```
 
-1. Exit SSH
+1. Exit SSH.
     ```sh
     exit
     ```
@@ -95,7 +99,7 @@ This demo adds a new service to Online Boutique called `shoppingassistantservice
 
 1. Paste this secret key in the shopping assistant service envs, replacing `GOOGLE_API_KEY_VAL`.
     ```sh
-    vim kustomize/components/shopping-assistant/shoppingassistantservice.yaml
+    nano kustomize/components/shopping-assistant/shoppingassistantservice.yaml
     ```
 
 1. Change the commented-out components in `kubernetes-manifests/kustomization.yaml` to look like this:
@@ -114,7 +118,7 @@ This demo adds a new service to Online Boutique called `shoppingassistantservice
     ```
 
 1. Deploy to the GKE cluster.
-    ```
+    ```sh
     skaffold run --default-repo=us-central1-docker.pkg.dev/<PROJECT_ID>/images
     ```
 
