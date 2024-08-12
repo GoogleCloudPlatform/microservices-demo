@@ -34,7 +34,7 @@ patches:
               - name: ALLOYDB_PRIMARY_IP
                 value: ALLOYDB_PRIMARY_IP_VAL
               - name: ALLOYDB_DATABASE_NAME
-                value: ALLOYDB_CARTS_DATABASE_NAME
+                value: ALLOYDB_CARTS_DATABASE_NAME_VAL
               - name: ALLOYDB_TABLE_NAME
                 value: ALLOYDB_CARTS_TABLE_NAME_VAL
               - name: ALLOYDB_SECRET_NAME
