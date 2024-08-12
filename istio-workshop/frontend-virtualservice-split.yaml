@@ -7,7 +7,7 @@ spec:
   hosts:
     - app.test
   gateways:
-    - app-gateway
+    - istio-system/app-gateway
   http:
     - route:
         - destination:

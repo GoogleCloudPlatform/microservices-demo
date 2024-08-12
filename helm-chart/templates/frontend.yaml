@@ -26,6 +26,7 @@ spec:
     metadata:
       labels:
         app: {{ .Values.frontend.name }}
+        version: {{ .Values.frontend.version }}
       annotations:
         sidecar.istio.io/rewriteAppHTTPProbers: "true"
     spec:

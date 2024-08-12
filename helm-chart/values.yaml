@@ -104,6 +104,7 @@ frontend:
   cymbalBranding: false
   # One of: local, gcp, aws, azure, onprem, alibaba. When not set, defaults to "local" unless running in GKE, otherwise auto-sets to gcp.
   platform: local
+  version: v1
   singleSharedSession: false
   virtualService:
     create: false
