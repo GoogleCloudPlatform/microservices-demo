@@ -42,10 +42,10 @@ resource "google_container_cluster" "my_cluster" {
   name     = var.name
   location = var.region
 
-  # Enabling autopilot for this cluster
+  # Enable autopilot for this cluster
   enable_autopilot = true
 
-  # Setting an empty ip_allocation_policy to allow autopilot cluster to spin up correctly
+  # Set an empty ip_allocation_policy to allow autopilot cluster to spin up correctly
   ip_allocation_policy {
   }
 
