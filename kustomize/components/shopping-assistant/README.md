@@ -107,9 +107,10 @@ This demo adds a new service to Online Boutique called `shoppingassistantservice
 
 1. Create an API key in the [Credentials page](https://pantheon.corp.google.com/apis/credentials) with permissions for "Generative Language API", and make note of the secret key.
 
-1. Replace the PostgreSQL password placeholder in the shoppingassistant service.
+1. Replace the Google API key placeholder in the shoppingassistant service.
     ```sh
-    sed -i "s/GOOGLE_API_KEY_VAL/${PGPASSWORD}/g" kustomize/components/shopping-assistant/shoppingassistantservice.yaml
+    export GOOGLE_API_KEY=<google_api_key>
+    sed -i "s/GOOGLE_API_KEY_VAL/${GOOGLE_API_KEY}/g" kustomize/components/shopping-assistant/shoppingassistantservice.yaml
     ```
 
 1. Edit the root Kustomize file to enable the `alloydb` and `shopping-assistant` components.
