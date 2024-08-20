@@ -109,8 +109,8 @@ This demo adds a new service to Online Boutique called `shoppingassistantservice
 
 1. Replace the Google API key placeholder in the shoppingassistant service.
     ```sh
-    export GOOOGLE_API_KEY=<google_api_key>
-    sed -i "s/GOOGLE_API_KEY_VAL/${GOOOGLE_API_KEY}/g" kustomize/components/shopping-assistant/shoppingassistantservice.yaml
+    export GOOGLE_API_KEY=<google_api_key>
+    sed -i "s/GOOGLE_API_KEY_VAL/${GOOGLE_API_KEY}/g" kustomize/components/shopping-assistant/shoppingassistantservice.yaml
     ```
 
 1. Edit the root Kustomize file to enable the `alloydb` and `shopping-assistant` components.
