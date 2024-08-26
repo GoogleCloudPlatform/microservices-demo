@@ -4,9 +4,11 @@
 #
 #    pip-compile --output-file=requirements.txt requirements.in
 #
-aiohappyeyeballs==2.3.4
+aiofiles==24.1.0
+    # via google-cloud-alloydb-connector
+aiohappyeyeballs==2.4.0
     # via aiohttp
-aiohttp==3.10.2
+aiohttp==3.10.5
     # via
     #   google-cloud-alloydb-connector
     #   langchain
@@ -14,19 +16,24 @@ aiosignal==1.3.1
     # via aiohttp
 annotated-types==0.7.0
     # via pydantic
+anyio==4.4.0
+    # via httpx
 async-timeout==4.0.3
     # via asyncpg
 asyncpg==0.29.0
     # via google-cloud-alloydb-connector
-attrs==24.1.0
+attrs==24.2.0
     # via aiohttp
 blinker==1.8.2
     # via flask
-cachetools==5.4.0
+cachetools==5.5.0
     # via google-auth
 certifi==2024.7.4
-    # via requests
-cffi==1.16.0
+    # via
+    #   httpcore
+    #   httpx
+    #   requests
+cffi==1.17.0
     # via cryptography
 charset-normalizer==3.3.2
     # via requests
@@ -48,9 +55,9 @@ google-api-core[grpc]==2.19.1
     #   google-api-python-client
     #   google-cloud-secret-manager
     #   google-generativeai
-google-api-python-client==2.139.0
+google-api-python-client==2.142.0
     # via google-generativeai
-google-auth==2.32.0
+google-auth==2.34.0
     # via
     #   google-ai-generativelanguage
     #   google-api-core
@@ -61,13 +68,13 @@ google-auth==2.32.0
     #   google-generativeai
 google-auth-httplib2==0.2.0
     # via google-api-python-client
-google-cloud-alloydb-connector[asyncpg]==1.3.0
+google-cloud-alloydb-connector[asyncpg]==1.4.0
     # via langchain-google-alloydb-pg
-google-cloud-secret-manager==2.20.1
+google-cloud-secret-manager==2.20.2
     # via -r requirements.in
 google-generativeai==0.7.2
     # via langchain-google-genai
-googleapis-common-protos[grpc]==1.63.2
+googleapis-common-protos[grpc]==1.64.0
     # via
     #   google-api-core
     #   grpc-google-iam-v1
@@ -76,20 +83,28 @@ greenlet==3.0.3
     # via sqlalchemy
 grpc-google-iam-v1==0.13.1
     # via google-cloud-secret-manager
-grpcio==1.65.4
+grpcio==1.66.0
     # via
     #   google-api-core
     #   googleapis-common-protos
     #   grpc-google-iam-v1
     #   grpcio-status
-grpcio-status==1.62.2
+grpcio-status==1.62.3
     # via google-api-core
+h11==0.14.0
+    # via httpcore
+httpcore==1.0.5
+    # via httpx
 httplib2==0.22.0
     # via
     #   google-api-python-client
     #   google-auth-httplib2
-idna==3.7
+httpx==0.27.0
+    # via langsmith
+idna==3.8
     # via
+    #   anyio
+    #   httpx
     #   requests
     #   yarl
 itsdangerous==2.2.0
@@ -100,9 +115,9 @@ jsonpatch==1.33
     # via langchain-core
 jsonpointer==3.0.0
     # via jsonpatch
-langchain==0.2.11
+langchain==0.2.14
     # via -r requirements.in
-langchain-core==0.2.28
+langchain-core==0.2.35
     # via
     #   langchain
     #   langchain-google-alloydb-pg
@@ -110,11 +125,11 @@ langchain-core==0.2.28
     #   langchain-text-splitters
 langchain-google-alloydb-pg==0.5.0
     # via -r requirements.in
-langchain-google-genai==1.0.8
+langchain-google-genai==1.0.9
     # via -r requirements.in
 langchain-text-splitters==0.2.2
     # via langchain
-langsmith==0.1.96
+langsmith==0.1.104
     # via
     #   langchain
     #   langchain-core
@@ -131,7 +146,7 @@ numpy==1.26.4
     #   langchain
     #   langchain-google-alloydb-pg
     #   pgvector
-orjson==3.10.6
+orjson==3.10.7
     # via langsmith
 packaging==24.1
     # via langchain-core
@@ -171,9 +186,9 @@ pydantic==2.8.2
     #   langsmith
 pydantic-core==2.20.1
     # via pydantic
-pyparsing==3.1.2
+pyparsing==3.1.4
     # via httplib2
-pyyaml==6.0.1
+pyyaml==6.0.2
     # via
     #   langchain
     #   langchain-core
@@ -185,7 +200,11 @@ requests==2.32.3
     #   langsmith
 rsa==4.9
     # via google-auth
-sqlalchemy[asyncio]==2.0.31
+sniffio==1.3.1
+    # via
+    #   anyio
+    #   httpx
+sqlalchemy[asyncio]==2.0.32
     # via
     #   langchain
     #   langchain-google-alloydb-pg
@@ -206,7 +225,7 @@ uritemplate==4.1.1
     # via google-api-python-client
 urllib3==2.2.2
     # via requests
-werkzeug==3.0.3
+werkzeug==3.0.4
     # via flask
 yarl==1.9.4
     # via aiohttp
