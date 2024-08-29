@@ -64,20 +64,23 @@ def initStackdriverProfiling():
   return
 
 class RecommendationService(demo_pb2_grpc.RecommendationServiceServicer):
-    def simulateErrorCheck(self, request, context):
+    def simulateErrorCheck(request, context):
       # check context for percentage env var
-      percent = os.getenv("SIMULATE_FAILURE_PERCENT", 0)
+      percent = float(os.getenv("SIMULATE_FAILURE_PERCENT", 0))
       # roll the dice
-      if (random() * 100 > percent): # not sure if we need a seed, if we have many pods
-        logger.info("Simulating failure")
+      dice = random.random() * 100
+      # logger.info(" = deciding failure: dice = " + str(dice)) + " < percent = " + str(percent) + "%"
+      if (dice < percent): # not sure if we need a seed, if we have many pods
+        # logger.info(" - Simulating failure")
         return True
       else:
+        # logger.info(" + Not simulating failure")
         return False
 
     def ListRecommendations(self, request, context):
         # check if we are simulating an error on this request
-        doError = simulateErrorCheck()
-        if (doError):
+        simError = RecommendationService.simulateErrorCheck(request, context)
+        if (simError):
           context.set_code(grpc.StatusCode.INTERNAL)
           context.set_details("Simulating a service error for availability testing")
           return demo_pb2.ListRecommendationsResponse()
