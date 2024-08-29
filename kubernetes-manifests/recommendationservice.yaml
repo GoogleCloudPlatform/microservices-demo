@@ -61,6 +61,8 @@ spec:
           value: "productcatalogservice:3550"
         - name: DISABLE_PROFILER
           value: "1"
+#        - name: SIMULATE_FAILURE_PERCENT
+#          value: "10"
         resources:
           requests:
             cpu: 100m
