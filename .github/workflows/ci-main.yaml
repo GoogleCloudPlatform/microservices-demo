@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-name: "Continuous Integration - Main/Release"
+name: "CI - Main/Release"
 on:
   push:
     # run on pushes to main or release/*
