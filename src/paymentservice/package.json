@@ -19,7 +19,7 @@
     "@opentelemetry/sdk-trace-base": "1.25.1",
     "@opentelemetry/sdk-node": "0.52.1",
     "@opentelemetry/resources": "1.25.1",
-    "@opentelemetry/semantic-conventions": "1.25.1",
+    "@opentelemetry/semantic-conventions": "1.26.0",
     "pino": "9.3.2",
     "simple-card-validator": "^1.1.0",
     "uuid": "^10.0.0"
