@@ -28,7 +28,7 @@ blinker==1.8.2
     # via flask
 cachetools==5.5.0
     # via google-auth
-certifi==2024.7.4
+certifi==2024.8.30
     # via
     #   httpcore
     #   httpx
@@ -49,13 +49,13 @@ frozenlist==1.4.1
     #   aiosignal
 google-ai-generativelanguage==0.6.6
     # via google-generativeai
-google-api-core[grpc]==2.19.1
+google-api-core[grpc]==2.19.2
     # via
     #   google-ai-generativelanguage
     #   google-api-python-client
     #   google-cloud-secret-manager
     #   google-generativeai
-google-api-python-client==2.142.0
+google-api-python-client==2.143.0
     # via google-generativeai
 google-auth==2.34.0
     # via
@@ -74,7 +74,7 @@ google-cloud-secret-manager==2.20.2
     # via -r requirements.in
 google-generativeai==0.7.2
     # via langchain-google-genai
-googleapis-common-protos[grpc]==1.64.0
+googleapis-common-protos[grpc]==1.65.0
     # via
     #   google-api-core
     #   grpc-google-iam-v1
@@ -83,7 +83,7 @@ greenlet==3.0.3
     # via sqlalchemy
 grpc-google-iam-v1==0.13.1
     # via google-cloud-secret-manager
-grpcio==1.66.0
+grpcio==1.66.1
     # via
     #   google-api-core
     #   googleapis-common-protos
@@ -99,7 +99,7 @@ httplib2==0.22.0
     # via
     #   google-api-python-client
     #   google-auth-httplib2
-httpx==0.27.0
+httpx==0.27.2
     # via langsmith
 idna==3.8
     # via
@@ -117,7 +117,7 @@ jsonpointer==3.0.0
     # via jsonpatch
 langchain==0.2.14
     # via -r requirements.in
-langchain-core==0.2.35
+langchain-core==0.2.37
     # via
     #   langchain
     #   langchain-google-alloydb-pg
@@ -125,11 +125,11 @@ langchain-core==0.2.35
     #   langchain-text-splitters
 langchain-google-alloydb-pg==0.5.0
     # via -r requirements.in
-langchain-google-genai==1.0.9
+langchain-google-genai==1.0.10
     # via -r requirements.in
 langchain-text-splitters==0.2.2
     # via langchain
-langsmith==0.1.104
+langsmith==0.1.108
     # via
     #   langchain
     #   langchain-core
@@ -227,5 +227,5 @@ urllib3==2.2.2
     # via requests
 werkzeug==3.0.4
     # via flask
-yarl==1.9.4
+yarl==1.9.7
     # via aiohttp
