@@ -8,7 +8,7 @@ blinker==1.8.2
     # via flask
 brotli==1.1.0
     # via geventhttpclient
-certifi==2024.7.4
+certifi==2024.8.30
     # via
     #   geventhttpclient
     #   requests
@@ -25,7 +25,7 @@ flask==3.0.3
     #   flask-cors
     #   flask-login
     #   locust
-flask-cors==4.0.1
+flask-cors==5.0.0
     # via locust
 flask-login==0.6.3
     # via locust
@@ -72,7 +72,7 @@ werkzeug==3.0.4
     #   locust
 zope-event==5.0
     # via gevent
-zope-interface==7.0.1
+zope-interface==7.0.3
     # via gevent
 
 # The following packages are considered to be unsafe in a requirements file:
