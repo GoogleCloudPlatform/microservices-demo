@@ -49,8 +49,6 @@ spec:
           value: "http://$(NODE_IP):4318"
         - name: OTEL_SERVICE_NAME
           value: "cartservice"
-        - name: OTEL_RESOURCE_ATTRIBUTES
-          value: "deployment.environment=demo"
         - name: OTEL_DOTNET_AUTO_TRACES_ADDITIONAL_SOURCES
           value: "Cartservice"
         - name: EXTERNAL_DB_NAME
