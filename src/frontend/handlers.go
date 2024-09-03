@@ -280,7 +280,7 @@ func (fe *frontendServer) viewCartHandler(w http.ResponseWriter, r *http.Request
 	}
 	totalPrice = money.Must(money.Sum(totalPrice, *shippingCost))
 
-	log.Info("🌈 ITEMS: %v", items)
+	log.Infof("🌈 ITEMS: %v", items)
 
 	year := time.Now().Year()
 	if err := templates.ExecuteTemplate(w, "cart", map[string]interface{}{

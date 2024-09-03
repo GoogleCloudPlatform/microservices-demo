@@ -1,14 +1,11 @@
-FROM golang:1.20-alpine as builder
+FROM golang:1.22-alpine AS builder
 RUN apk add --no-cache ca-certificates git
 
-ENV PROJECT github.com/signalfx/microservices-demo/src/shippingservice
-WORKDIR /go/src/$PROJECT
-
+WORKDIR /app
 COPY . .
-ENV GO111MODULE on
 RUN go build -o /go/bin/shippingservice .
 
-FROM alpine as release
+FROM alpine AS release
 RUN apk add --no-cache ca-certificates
 RUN GRPC_HEALTH_PROBE_VERSION=v0.2.0 && \
     wget -qO/bin/grpc_health_probe https://github.com/grpc-ecosystem/grpc-health-probe/releases/download/${GRPC_HEALTH_PROBE_VERSION}/grpc_health_probe-linux-amd64 && \

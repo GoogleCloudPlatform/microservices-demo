@@ -42,7 +42,7 @@ func TestServer(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if diff := cmp.Diff(res.Products, parseCatalog(), cmp.Comparer(proto.Equal)); diff != "" {
+	if diff := cmp.Diff(res.Products, parseCatalog(ctx), cmp.Comparer(proto.Equal)); diff != "" {
 		t.Error(diff)
 	}
 
@@ -50,7 +50,7 @@ func TestServer(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if want := parseCatalog()[0]; !proto.Equal(got, want) {
+	if want := parseCatalog(ctx)[0]; !proto.Equal(got, want) {
 		t.Errorf("got %v, want %v", got, want)
 	}
 	_, err = client.GetProduct(ctx, &pb.GetProductRequest{Id: "N/A"})
@@ -62,7 +62,7 @@ func TestServer(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if diff := cmp.Diff(sres.Results, []*pb.Product{parseCatalog()[0]}, cmp.Comparer(proto.Equal)); diff != "" {
+	if diff := cmp.Diff(sres.Results, []*pb.Product{parseCatalog(ctx)[0]}, cmp.Comparer(proto.Equal)); diff != "" {
 		t.Error(diff)
 	}
 }

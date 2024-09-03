@@ -1,14 +1,11 @@
-FROM golang:1.20-alpine as builder
+FROM golang:1.22-alpine AS builder
 RUN apk add --no-cache ca-certificates git
 
-ENV PROJECT github.com/signalfx/microservices-demo/src/frontend
-WORKDIR /go/src/$PROJECT
-
+WORKDIR /app
 COPY . .
-ENV GO111MODULE on
 RUN go build -o /go/bin/frontend .
 
-FROM alpine as release
+FROM alpine AS release
 RUN apk add --no-cache ca-certificates \
     busybox-extras net-tools bind-tools
 WORKDIR /frontend
