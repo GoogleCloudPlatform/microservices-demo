@@ -6,8 +6,9 @@ require (
 	cloud.google.com/go/profiler v0.4.1
 	github.com/golang/protobuf v1.5.4
 	github.com/opentracing/opentracing-go v1.2.0
-	github.com/signalfx/signalfx-go-tracing v1.5.0
-	github.com/sirupsen/logrus v1.4.2
+	github.com/signalfx/signalfx-go-tracing v1.12.0
+	github.com/signalfx/signalfx-go-tracing/contrib/google.golang.org/grpc v1.12.0
+	github.com/sirupsen/logrus v1.9.3
 	golang.org/x/net v0.28.0
 	google.golang.org/grpc v1.66.0
 )
@@ -17,10 +18,6 @@ require (
 	cloud.google.com/go/auth v0.6.0 // indirect
 	cloud.google.com/go/auth/oauth2adapt v0.2.2 // indirect
 	cloud.google.com/go/compute/metadata v0.3.0 // indirect
-	github.com/dropbox/godropbox v0.0.0-20200228041828-52ad444d3502 // indirect
-	github.com/facebookgo/stack v0.0.0-20160209184415-751773369052 // indirect
-	github.com/facebookgo/stackerr v0.0.0-20150612192056-c2fcf88613f4 // indirect
-	github.com/go-kit/kit v0.10.0 // indirect
 	github.com/go-logfmt/logfmt v0.5.0 // indirect
 	github.com/go-logr/logr v1.4.1 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
@@ -31,13 +28,10 @@ require (
 	github.com/googleapis/enterprise-certificate-proxy v0.3.2 // indirect
 	github.com/googleapis/gax-go/v2 v2.12.5 // indirect
 	github.com/josharian/intern v1.0.0 // indirect
-	github.com/juju/errors v0.0.0-20200330140219-3fe23663418f // indirect
-	github.com/konsorten/go-windows-terminal-sequences v1.0.2 // indirect
-	github.com/mailru/easyjson v0.7.6 // indirect
-	github.com/philhofer/fwd v1.0.0 // indirect
+	github.com/mailru/easyjson v0.7.7 // indirect
+	github.com/philhofer/fwd v1.1.1 // indirect
 	github.com/signalfx/golib v2.5.1+incompatible // indirect
-	github.com/smartystreets/goconvey v1.6.4 // indirect
-	github.com/tinylib/msgp v1.1.2 // indirect
+	github.com/tinylib/msgp v1.1.6 // indirect
 	go.opencensus.io v0.24.0 // indirect
 	go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc v0.49.0 // indirect
 	go.opentelemetry.io/otel v1.24.0 // indirect
