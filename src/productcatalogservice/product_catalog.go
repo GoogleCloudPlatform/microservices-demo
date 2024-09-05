@@ -26,6 +26,7 @@ import (
 )
 
 type productCatalog struct {
+	pb.UnimplementedProductCatalogServiceServer
 	catalog pb.ListProductsResponse
 }
 
