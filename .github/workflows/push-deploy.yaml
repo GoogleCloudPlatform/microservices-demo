@@ -28,7 +28,7 @@ jobs:
       run: |
         skaffold config set --global local-cluster false
         # tag with git hash
-        skaffold build --default-repo=gcr.io/$PROJECT_ID \
+        skaffold build --default-repo=us-central1-docker.pkg.dev/$PROJECT_ID \
                        --tag=$GITHUB_SHA
       env:
         PROJECT_ID: "online-boutique-ci"

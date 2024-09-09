@@ -1,6 +1,6 @@
 # Update the container registry of the Online Boutique apps
 
-By default, Online Boutique's services' container images are pulled from a public container registry (`gcr.io/google-samples/microservices-demo`). One best practice is to have these container images in your own private container registry. The Kustomize variation in this folder can help with using your own private container registry.
+By default, Online Boutique's services' container images are pulled from a public container registry (`us-central1-docker.pkg.dev/google-samples/microservices-demo`). One best practice is to have these container images in your own private container registry. The Kustomize variation in this folder can help with using your own private container registry.
 
 ## Change the default container registry via Kustomize
 
@@ -9,7 +9,7 @@ To automate the deployment of Online Boutique integrated with your own container
 From the `kustomize/` folder at the root level of this repository, execute this command:
 
 ```bash
-REGISTRY=my-registry # Example: gcr.io/my-project/my-directory
+REGISTRY=my-registry # Example: us-central1-docker.pkg.dev/my-project/my-directory
 sed -i "s|CONTAINER_IMAGES_REGISTRY|${REGISTRY}|g" components/container-images-registry/kustomization.yaml
 kustomize edit add component components/container-images-registry
 ```

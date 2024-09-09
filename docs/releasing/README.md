@@ -27,7 +27,7 @@ Run the `make-release.sh` script found inside the `docs/releasing/` directory:
 ```sh
 # assuming you are inside the root path of the bank-of-anthos repository
 export TAG=vX.Y.Z # This is the new version (e.g. `v0.3.5`)
-export REPO_PREFIX=gcr.io/google-samples/microservices-demo # This is the Docker repository for tagged images
+export REPO_PREFIX=us-central1-docker.pkg.dev/google-samples/microservices-demo # This is the Docker repository for tagged images
 export PROJECT_ID=google-samples # This is the Google Cloud project for the release CI
 ./docs/releasing/make-release.sh
 ```
