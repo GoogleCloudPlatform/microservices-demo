@@ -33,7 +33,7 @@ certifi==2024.8.30
     #   httpcore
     #   httpx
     #   requests
-cffi==1.17.0
+cffi==1.17.1
     # via cryptography
 charset-normalizer==3.3.2
     # via requests
@@ -55,7 +55,7 @@ google-api-core[grpc]==2.19.2
     #   google-api-python-client
     #   google-cloud-secret-manager
     #   google-generativeai
-google-api-python-client==2.143.0
+google-api-python-client==2.144.0
     # via google-generativeai
 google-auth==2.34.0
     # via
@@ -115,9 +115,9 @@ jsonpatch==1.33
     # via langchain-core
 jsonpointer==3.0.0
     # via jsonpatch
-langchain==0.2.14
+langchain==0.2.15
     # via -r requirements.in
-langchain-core==0.2.37
+langchain-core==0.2.38
     # via
     #   langchain
     #   langchain-google-alloydb-pg
@@ -127,9 +127,9 @@ langchain-google-alloydb-pg==0.5.0
     # via -r requirements.in
 langchain-google-genai==1.0.10
     # via -r requirements.in
-langchain-text-splitters==0.2.2
+langchain-text-splitters==0.2.4
     # via langchain
-langsmith==0.1.108
+langsmith==0.1.116
     # via
     #   langchain
     #   langchain-core
@@ -178,13 +178,13 @@ pyasn1-modules==0.4.0
     # via google-auth
 pycparser==2.22
     # via cffi
-pydantic==2.8.2
+pydantic==2.9.0
     # via
     #   google-generativeai
     #   langchain
     #   langchain-core
     #   langsmith
-pydantic-core==2.20.1
+pydantic-core==2.23.2
     # via pydantic
 pyparsing==3.1.4
     # via httplib2
@@ -204,7 +204,7 @@ sniffio==1.3.1
     # via
     #   anyio
     #   httpx
-sqlalchemy[asyncio]==2.0.32
+sqlalchemy[asyncio]==2.0.34
     # via
     #   langchain
     #   langchain-google-alloydb-pg
@@ -221,11 +221,13 @@ typing-extensions==4.12.2
     #   pydantic
     #   pydantic-core
     #   sqlalchemy
+tzdata==2024.1
+    # via pydantic
 uritemplate==4.1.1
     # via google-api-python-client
 urllib3==2.2.2
     # via requests
 werkzeug==3.0.4
     # via flask
-yarl==1.9.7
+yarl==1.11.0
     # via aiohttp
