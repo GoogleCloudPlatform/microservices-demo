@@ -70,6 +70,7 @@ jobs:
         echo "::set-env name=NAMESPACE::$NAMESPACE"
         echo "::set-env name=PR_NUMBER::$PR_NUMBER"
 
+        yes | gcloud auth configure-docker us-docker.pkg.dev
         gcloud container clusters get-credentials $PR_CLUSTER --region $REGION --project $PROJECT_ID
         cat <<EOF | kubectl apply -f -
         apiVersion: v1
@@ -79,7 +80,7 @@ jobs:
         EOF
         echo Deploying application
         skaffold config set --global local-cluster false
-        skaffold run --default-repo=gcr.io/$PROJECT_ID/$GITHUB_REF --tag=$GITHUB_SHA --namespace=$NAMESPACE -p network-policies
+        skaffold run --default-repo=us-docker.pkg.dev/$PROJECT_ID/$GITHUB_REF --tag=$GITHUB_SHA --namespace=$NAMESPACE -p network-policies
       env:
         ACTIONS_ALLOW_UNSECURE_COMMANDS: true
         PROJECT_ID: "online-boutique-ci"

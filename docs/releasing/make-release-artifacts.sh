@@ -107,7 +107,7 @@ mk_kustomize_base() {
     image="$REPO_PREFIX/$service_name:$TAG"
 
     # Inside redis.yaml, we use the official `redis:alpine` Docker image.
-    # We don't use an image from `gcr.io/google-samples/microservices-demo`.
+    # We don't use an image from `us-central1-docker.pkg.dev/google-samples/microservices-demo`.
     if [[ $service_name == "redis" ]]; then
       continue
     fi

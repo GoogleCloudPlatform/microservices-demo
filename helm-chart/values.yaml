@@ -17,7 +17,7 @@
 # Declare variables to be passed into your templates.
 
 images:
-  repository: gcr.io/google-samples/microservices-demo
+  repository: us-central1-docker.pkg.dev/google-samples/microservices-demo
   # Overrides the image tag whose default is the chart appVersion.
   tag: ""
 

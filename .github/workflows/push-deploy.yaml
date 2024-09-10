@@ -27,8 +27,9 @@ jobs:
       timeout-minutes: 20
       run: |
         skaffold config set --global local-cluster false
+        yes | gcloud auth configure-docker us-docker.pkg.dev
         # tag with git hash
-        skaffold build --default-repo=gcr.io/$PROJECT_ID \
+        skaffold build --default-repo=us-docker.pkg.dev/$PROJECT_ID \
                        --tag=$GITHUB_SHA
       env:
         PROJECT_ID: "online-boutique-ci"

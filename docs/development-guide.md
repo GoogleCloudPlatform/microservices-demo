@@ -30,32 +30,37 @@ This doc explains how to build and run the Online Boutique source code locally u
     ```
 
     ```sh
-    gcloud container clusters create demo --enable-autoupgrade \
-        --enable-autoscaling --min-nodes=3 --max-nodes=10 --num-nodes=5 --zone=us-central1-a
+    gcloud container clusters create-auto demo --region=us-central1
     ```
 
     ```
     kubectl get nodes
     ```
 
-2.  Enable Google Container Registry (GCR) on your GCP project and configure the
-    `docker` CLI to authenticate to GCR:
+2.  Enable Artifact Registry (AR) on your GCP project and configure the
+    `docker` CLI to authenticate to AR:
 
     ```sh
-    gcloud services enable containerregistry.googleapis.com
+    gcloud services enable artifactregistry.googleapis.com
     ```
 
     ```sh
-    gcloud auth configure-docker -q
+    gcloud artifacts repositories create microservices-demo \
+      --repository-format=docker \
+      --location=us \
     ```
 
-3.  In the root of this repository, run `skaffold run --default-repo=gcr.io/[PROJECT_ID]`,
+    ```sh
+    gcloud auth configure-docker -q 
+    ```
+
+3.  In the root of this repository, run `skaffold run --default-repo=us-docker.pkg.dev/[PROJECT_ID]/microservices-demo`,
     where [PROJECT_ID] is your GCP project ID.
 
     This command:
 
     - builds the container images
-    - pushes them to GCR
+    - pushes them to AR
     - applies the `./kubernetes-manifests` deploying the application to
       Kubernetes.
 
@@ -63,7 +68,7 @@ This doc explains how to build and run the Online Boutique source code locally u
     Cloud Shell, you can build the images on Google Cloud Build: [Enable the
     Cloud Build
     API](https://console.cloud.google.com/flows/enableapi?apiid=cloudbuild.googleapis.com),
-    then run `skaffold run -p gcb --default-repo=gcr.io/[PROJECT_ID]` instead.
+    then run `skaffold run -p gcb --default-repo=us-docker.pkg.dev/[PROJECT_ID]/microservices-demo` instead.
 
 4.  Find the IP address of your application, then visit the application on your
     browser to confirm installation.
