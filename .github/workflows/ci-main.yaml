@@ -70,7 +70,7 @@ jobs:
         echo "::set-env name=NAMESPACE::$NAMESPACE"
         echo "::set-env name=PR_NUMBER::$PR_NUMBER"
 
-        gcloud auth configure-docker us-central1-docker.pkg.dev
+        yes | gcloud auth configure-docker us-central1-docker.pkg.dev
         gcloud container clusters get-credentials $PR_CLUSTER --region $REGION --project $PROJECT_ID
         cat <<EOF | kubectl apply -f -
         apiVersion: v1
