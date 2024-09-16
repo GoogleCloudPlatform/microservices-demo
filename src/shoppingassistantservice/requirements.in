@@ -1,6 +1,6 @@
 flask==3.0.3
 langchain-google-genai==1.0.10
-langchain==0.2.15
+langchain==0.2.16
 pillow==10.4.0
-langchain-google-alloydb-pg==0.5.0
+langchain-google-alloydb-pg==0.6.0
 google-cloud-secret-manager==2.20.2

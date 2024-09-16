@@ -18,7 +18,7 @@ click==8.1.7
     # via flask
 configargparse==1.7
     # via locust
-faker==28.1.0
+faker==28.4.1
     # via -r requirements.in
 flask==3.0.3
     # via
@@ -35,9 +35,9 @@ gevent==24.2.1
     #   locust
 geventhttpclient==2.3.1
     # via locust
-greenlet==3.0.3
+greenlet==3.1.0
     # via gevent
-idna==3.8
+idna==3.10
     # via requests
 itsdangerous==2.2.0
     # via flask
@@ -49,7 +49,7 @@ markupsafe==2.1.5
     # via
     #   jinja2
     #   werkzeug
-msgpack==1.0.8
+msgpack==1.1.0
     # via locust
 psutil==6.0.0
     # via locust
@@ -61,7 +61,7 @@ requests==2.32.3
     # via locust
 six==1.16.0
     # via python-dateutil
-urllib3==2.2.2
+urllib3==2.2.3
     # via
     #   geventhttpclient
     #   requests
