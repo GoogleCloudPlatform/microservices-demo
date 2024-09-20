@@ -31,6 +31,8 @@ class HipsterShopServer {
 
     this.server = new grpc.Server();
     this.loadAllProtos(protoRoot);
+
+    logger.info(`HipsterShopServer initiated on port ${Hipster.ShopServer.PORT}`);
   }
 
   /**
