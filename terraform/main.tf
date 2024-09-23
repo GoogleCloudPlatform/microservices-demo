@@ -27,7 +27,7 @@ locals {
 # Enable Google Cloud APIs
 module "enable_google_apis" {
   source  = "terraform-google-modules/project-factory/google//modules/project_services"
-  version = "~> 16.0"
+  version = "~> 17.0"
 
   project_id                  = var.gcp_project_id
   disable_services_on_destroy = false
