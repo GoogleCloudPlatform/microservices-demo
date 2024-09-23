@@ -115,9 +115,9 @@ jsonpatch==1.33
     # via langchain-core
 jsonpointer==3.0.0
     # via jsonpatch
-langchain==0.2.16
+langchain==0.3.0
     # via -r requirements.in
-langchain-core==0.2.40
+langchain-core==0.3.2
     # via
     #   langchain
     #   langchain-google-alloydb-pg
@@ -125,9 +125,9 @@ langchain-core==0.2.40
     #   langchain-text-splitters
 langchain-google-alloydb-pg==0.6.0
     # via -r requirements.in
-langchain-google-genai==1.0.10
+langchain-google-genai==2.0.0
     # via -r requirements.in
-langchain-text-splitters==0.2.4
+langchain-text-splitters==0.3.0
     # via langchain
 langsmith==0.1.120
     # via
@@ -183,6 +183,7 @@ pydantic==2.9.1
     #   google-generativeai
     #   langchain
     #   langchain-core
+    #   langchain-google-genai
     #   langsmith
 pydantic-core==2.23.3
     # via pydantic
