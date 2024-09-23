@@ -101,6 +101,6 @@ Congratulations! You've successfully deployed Online Boutique using Cloud Shell.
 ##### What's next?
 
 Try other deployment options for Online Boutique:
-- **Istio/Anthos Service Mesh**: <walkthrough-editor-open-file filePath="./kustomize/components/service-mesh-istio/README.md">See these instructions</walkthrough-editor-open-file>.
+- **Istio/Cloud Service Mesh**: <walkthrough-editor-open-file filePath="./kustomize/components/service-mesh-istio/README.md">See these instructions</walkthrough-editor-open-file>.
 
 Learn more about the [Cloud Shell](https://cloud.google.com/shell) IDE environment and the [Cloud Code](https://cloud.google.com/code) extension.
