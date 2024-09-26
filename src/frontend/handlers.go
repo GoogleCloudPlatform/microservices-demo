@@ -54,7 +54,7 @@ var (
 	plat platformDetails
 )
 
-var validEnvs = []string{"local", "gcp", "azure", "aws", "onprem", "alibaba"}
+var validEnvs = []string{"local", "gcp", "azure", "aws", "onprem", "alibaba", "Nutanix"}
 
 func (fe *frontendServer) homeHandler(w http.ResponseWriter, r *http.Request) {
 	log := r.Context().Value(ctxKeyLog{}).(logrus.FieldLogger)
@@ -135,6 +135,10 @@ func (plat *platformDetails) setPlatformDetails(env string) {
 	} else if env == "alibaba" {
 		plat.provider = "Alibaba Cloud"
 		plat.css = "alibaba-platform"
+         else if env == "Nutanix" {
+                plat.provider = "Nutanix"
+                plat.css = "Nutanix"
+        }
 	} else {
 		plat.provider = "local"
 		plat.css = "local"
