@@ -135,10 +135,9 @@ func (plat *platformDetails) setPlatformDetails(env string) {
 	} else if env == "alibaba" {
 		plat.provider = "Alibaba Cloud"
 		plat.css = "alibaba-platform"
-         else if env == "Nutanix" {
+         }else if env == "nutanix" {
                 plat.provider = "Nutanix"
-                plat.css = "Nutanix"
-        }
+                plat.css = "nutanix-platform"
 	} else {
 		plat.provider = "local"
 		plat.css = "local"

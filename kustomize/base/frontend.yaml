@@ -44,7 +44,8 @@ spec:
                 - ALL
             privileged: false
             readOnlyRootFilesystem: true
-          image: us-central1-docker.pkg.dev/google-samples/microservices-demo/frontend:v0.10.1
+          #image: us-central1-docker.pkg.dev/google-samples/microservices-demo/frontend:v0.10.1
+          image: pkatira7/microservices-demo-frontend:v0.5.0
           ports:
           - containerPort: 8080
           readinessProbe:
@@ -84,16 +85,16 @@ spec:
             value: "shoppingassistantservice:80"
           # # ENV_PLATFORM: One of: local, gcp, aws, azure, onprem, alibaba
           # # When not set, defaults to "local" unless running in GKE, otherwies auto-sets to gcp
-          # - name: ENV_PLATFORM
-          #   value: "aws"
+          - name: ENV_PLATFORM
+            value: "Nutanix"
           - name: ENABLE_PROFILER
             value: "0"
           # - name: CYMBAL_BRANDING
           #   value: "true"
           # - name: ENABLE_ASSISTANT
           #   value: "true"
-          # - name: FRONTEND_MESSAGE
-          #   value: "Replace this with a message you want to display on all pages."
+          - name: FRONTEND_MESSAGE
+            value: "Running on NKP"
           # As part of an optional Google Cloud demo, you can run an optional microservice called the "packaging service".
           # - name: PACKAGING_SERVICE_URL
           #   value: "" # This value would look like "http://123.123.123"
