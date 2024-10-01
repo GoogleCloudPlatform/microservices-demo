@@ -1,4 +1,4 @@
-google-api-core==2.19.2
+google-api-core==2.20.0
 grpcio-health-checking==1.66.1
 grpcio==1.66.1
 jinja2==3.1.4

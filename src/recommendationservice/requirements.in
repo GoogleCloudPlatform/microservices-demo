@@ -1,4 +1,4 @@
-google-api-core==2.19.2
+google-api-core==2.20.0
 google-cloud-profiler==4.1.0
 grpcio-health-checking==1.66.1
 python-json-logger==2.0.7
