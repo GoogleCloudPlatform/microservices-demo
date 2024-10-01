@@ -6,7 +6,7 @@ require (
 	cloud.google.com/go/profiler v0.4.1
 	github.com/sirupsen/logrus v1.9.3
 	golang.org/x/net v0.29.0
-	google.golang.org/grpc v1.66.2
+	google.golang.org/grpc v1.67.0
 	google.golang.org/protobuf v1.34.2
 )
 

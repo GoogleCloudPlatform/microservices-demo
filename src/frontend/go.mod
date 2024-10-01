@@ -3,7 +3,7 @@ module github.com/GoogleCloudPlatform/microservices-demo/src/frontend
 go 1.23
 
 require (
-	cloud.google.com/go/compute/metadata v0.5.1
+	cloud.google.com/go/compute/metadata v0.5.2
 	cloud.google.com/go/profiler v0.4.1
 	github.com/go-playground/validator/v10 v10.22.1
 	github.com/google/uuid v1.6.0
@@ -15,7 +15,7 @@ require (
 	go.opentelemetry.io/otel v1.30.0
 	go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc v1.30.0
 	go.opentelemetry.io/otel/sdk v1.30.0
-	google.golang.org/grpc v1.66.2
+	google.golang.org/grpc v1.67.0
 	google.golang.org/protobuf v1.34.2
 )
 
