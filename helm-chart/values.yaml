@@ -131,6 +131,15 @@ frontend:
       namespace: asm-ingress
       labelKey: asm
       labelValue: ingressgateway
+  route:
+    # Specifies if a OpenShift route should be created or not.
+    create: false
+    name: frontend-route
+    host: frontend.example.com
+    tls:
+      termination: edge
+      insecureEdgeTerminationPolicy: Redirect
+      destinationCACertificate: ""
   resources:
     requests:
       cpu: 100m

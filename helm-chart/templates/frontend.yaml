@@ -283,3 +283,24 @@ spec:
           number: 80
 {{- end }}
 {{- end }}
+{{- if .Values.frontend.route.create }}
+---
+kind: Route
+apiVersion: route.openshift.io/v1
+metadata:
+  name: {{ .Values.frontend.route.name }}
+  namespace: {{ .Release.Namespace }}
+spec:
+  to:
+    kind: Service
+    name: {{ .Values.frontend.name }}
+  host: {{ .Values.frontend.route.host }}
+  tls:
+    termination: {{ .Values.frontend.route.tls.termination }} # Edge, Passthrough, Reencrypt, InsecureEdge, or Redirect
+    insecureEdgeTerminationPolicy: {{ .Values.frontend.route.tls.insecureEdgeTerminationPolicy }} # None, Allow, Redirect
+    {{- if .Values.frontend.route.tls.destinationCACertificate }}
+    destinationCACertificate: {{ .Values.frontend.route.tls.destinationCACertificate | quote }}
+    {{- end }}
+  port:
+    targetPort: http
+{{- end }}
