@@ -64,6 +64,10 @@ spec:
         seccompProfile:
           type: {{ .Values.seccompProfile.type }}
         {{- end }}
+      {{- if .Values.images.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml .Values.images.imagePullSecrets | nindent 8 }}
+      {{- end }}
       containers:
       - name: server
         securityContext:
@@ -242,6 +246,10 @@ spec:
         seccompProfile:
           type: {{ .Values.seccompProfile.type }}
         {{- end }}
+      {{- if .Values.images.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml .Values.images.imagePullSecrets | nindent 8 }}
+      {{- end }}
       containers:
       - name: redis
         securityContext:
@@ -253,6 +261,8 @@ spec:
           readOnlyRootFilesystem: true
         {{- if .Values.cartDatabase.inClusterRedis.publicRepository }}
         image: redis:alpine@sha256:c35af3bbcef51a62c8bae5a9a563c6f1b60d7ebaea4cb5a3ccbcc157580ae098
+        {{- else if .Values.cartDatabase.inClusterRedis.imageRepository }}
+        image: {{ .Values.cartDatabase.inClusterRedis.imageRepository }}/redis:alpine
         {{- else }}
         image: {{ .Values.images.repository }}/redis:alpine
         {{- end }}

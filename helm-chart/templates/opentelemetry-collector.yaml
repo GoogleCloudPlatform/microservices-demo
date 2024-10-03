@@ -56,6 +56,10 @@ spec:
         seccompProfile:
           type: {{ .Values.seccompProfile.type }}
         {{- end }}
+      {{- if .Values.images.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml .Values.images.imagePullSecrets | nindent 8 }}
+      {{- end }}
       {{- if eq .Values.opentelemetryCollector.projectId "PROJECT_ID" }}
       initContainers:
       # Init container retrieves the current cloud project id from the metadata server
@@ -136,7 +140,7 @@ data:
   collector-gateway-config-template.yaml: |
     receivers:
       otlp:
-        protocols: 
+        protocols:
           grpc:
     processors:
     exporters:
