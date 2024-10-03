@@ -64,6 +64,10 @@ spec:
         seccompProfile:
           type: {{ .Values.seccompProfile.type }}
         {{- end }}
+      {{- if .Values.images.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml .Values.images.imagePullSecrets | nindent 8 }}
+      {{- end }}
       {{- if .Values.loadGenerator.checkFrontendInitContainer }}
       initContainers:
       - command:

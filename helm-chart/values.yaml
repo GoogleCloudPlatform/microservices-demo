@@ -20,6 +20,7 @@ images:
   repository: us-central1-docker.pkg.dev/google-samples/microservices-demo
   # Overrides the image tag whose default is the chart appVersion.
   tag: ""
+  imagePullSecrets: []
 
 serviceAccounts:
   # Specifies whether service accounts should be created.
@@ -206,6 +207,7 @@ cartDatabase:
     name: redis-cart
     # Uses the public redis image from Docker Hub, otherwise will use the images.repository.
     publicRepository: true
+    imageRepository: ''
   externalRedisTlsOrigination:
     enable: false
     name: exernal-redis-tls-origination
