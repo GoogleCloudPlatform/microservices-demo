@@ -8,7 +8,7 @@ aiofiles==24.1.0
     # via google-cloud-alloydb-connector
 aiohappyeyeballs==2.4.3
     # via aiohttp
-aiohttp==3.10.8
+aiohttp==3.10.9
     # via
     #   google-cloud-alloydb-connector
     #   langchain
@@ -35,7 +35,7 @@ certifi==2024.8.30
     #   requests
 cffi==1.17.1
     # via cryptography
-charset-normalizer==3.3.2
+charset-normalizer==3.4.0
     # via requests
 click==8.1.7
     # via flask
@@ -49,13 +49,13 @@ frozenlist==1.4.1
     #   aiosignal
 google-ai-generativelanguage==0.6.6
     # via google-generativeai
-google-api-core[grpc]==2.20.0
+google-api-core[grpc]==2.21.0
     # via
     #   google-ai-generativelanguage
     #   google-api-python-client
     #   google-cloud-secret-manager
     #   google-generativeai
-google-api-python-client==2.147.0
+google-api-python-client==2.149.0
     # via google-generativeai
 google-auth==2.35.0
     # via
@@ -93,7 +93,7 @@ grpcio-status==1.62.3
     # via google-api-core
 h11==0.14.0
     # via httpcore
-httpcore==1.0.5
+httpcore==1.0.6
     # via httpx
 httplib2==0.22.0
     # via
@@ -115,9 +115,9 @@ jsonpatch==1.33
     # via langchain-core
 jsonpointer==3.0.0
     # via jsonpatch
-langchain==0.3.0
+langchain==0.3.2
     # via -r requirements.in
-langchain-core==0.3.7
+langchain-core==0.3.10
     # via
     #   langchain
     #   langchain-google-alloydb-pg
@@ -129,11 +129,11 @@ langchain-google-genai==2.0.0
     # via -r requirements.in
 langchain-text-splitters==0.3.0
     # via langchain
-langsmith==0.1.129
+langsmith==0.1.133
     # via
     #   langchain
     #   langchain-core
-markupsafe==2.1.5
+markupsafe==3.0.1
     # via
     #   jinja2
     #   werkzeug
@@ -150,10 +150,12 @@ orjson==3.10.7
     # via langsmith
 packaging==24.1
     # via langchain-core
-pgvector==0.3.4
+pgvector==0.3.5
     # via langchain-google-alloydb-pg
 pillow==10.4.0
     # via -r requirements.in
+propcache==0.2.0
+    # via yarl
 proto-plus==1.24.0
     # via
     #   google-ai-generativelanguage
@@ -199,6 +201,9 @@ requests==2.32.3
     #   google-cloud-alloydb-connector
     #   langchain
     #   langsmith
+    #   requests-toolbelt
+requests-toolbelt==1.0.0
+    # via langsmith
 rsa==4.9
     # via google-auth
 sniffio==1.3.1
@@ -228,5 +233,5 @@ urllib3==2.2.3
     # via requests
 werkzeug==3.0.4
     # via flask
-yarl==1.13.1
+yarl==1.14.0
     # via aiohttp
