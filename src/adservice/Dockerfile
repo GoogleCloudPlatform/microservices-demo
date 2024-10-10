@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-FROM eclipse-temurin:21@sha256:e538e34d1df871c9b7da571582cdc49538f1eaee1dacbfb317a3e7f54abeebae AS builder
+FROM eclipse-temurin:21@sha256:2f57163ab32eac18066e6151177fc05a99e4f752979d671f963ed9d5e3ef9ff6 AS builder
 
 WORKDIR /app
 
