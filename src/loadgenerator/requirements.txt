@@ -12,7 +12,7 @@ certifi==2024.8.30
     # via
     #   geventhttpclient
     #   requests
-charset-normalizer==3.3.2
+charset-normalizer==3.4.0
     # via requests
 click==8.1.7
     # via flask
@@ -29,7 +29,7 @@ flask-cors==5.0.0
     # via locust
 flask-login==0.6.3
     # via locust
-gevent==24.2.1
+gevent==24.10.1
     # via
     #   geventhttpclient
     #   locust
@@ -43,9 +43,9 @@ itsdangerous==2.2.0
     # via flask
 jinja2==3.1.4
     # via flask
-locust==2.31.6
+locust==2.31.8
     # via -r requirements.in
-markupsafe==2.1.5
+markupsafe==3.0.1
     # via
     #   jinja2
     #   werkzeug
@@ -72,7 +72,7 @@ werkzeug==3.0.4
     #   locust
 zope-event==5.0
     # via gevent
-zope-interface==7.0.3
+zope-interface==7.1.0
     # via gevent
 
 # The following packages are considered to be unsafe in a requirements file:
