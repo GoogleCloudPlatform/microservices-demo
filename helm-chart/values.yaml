@@ -104,7 +104,7 @@ currencyService:
       memory: 128Mi
 
 emailService:
-  create: false
+  create: true
   name: emailservice
   resources:
     requests:
