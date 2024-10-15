@@ -1,0 +1,106 @@
+services:
+  adservice:
+    image: adservice
+    environment:
+      - PORT=9555
+
+  productcatalogservice:
+    image: productcatalogservice
+    environment:
+      - PORT=3550
+      - DISABLE_PROFILER=1
+
+  cartservice:
+    image: cartservice
+    # platform: linux/amd64 # for Apple chip. (enter "arch" into terminal to check the architecture)
+    environment:
+      - REDIS_ADDR=redis-cart:6379
+    depends_on:
+      - redis-cart
+
+  redis-cart:
+    image: redis:6-alpine
+
+  shippingservice:
+    image: shippingservice
+    environment:
+    - PORT=50051
+    - DISABLE_PROFILER=1
+
+  currencyservice:
+    image: currencyservice
+    environment:
+      - PORT=7000
+      - DISABLE_PROFILER=1
+
+  paymentservice:
+    image: paymentservice
+    environment:
+      - PORT=50051
+      - DISABLE_PROFILER=1
+
+  emailservice:
+    image: emailservice
+    environment:
+      - PORT=8080
+      - DISABLE_PROFILER=1
+
+  # Dependencies services
+  recommendationservice:
+    image: recommendationservice
+    environment:
+      - PORT=8080
+      - PRODUCT_CATALOG_SERVICE_ADDR=productcatalogservice:3550
+      - DISABLE_PROFILER=1
+    depends_on:
+      - productcatalogservice
+
+  checkoutservice:
+    image: checkoutservice
+    environment:
+      - PORT=5050
+      - PRODUCT_CATALOG_SERVICE_ADDR=productcatalogservice:3550
+      - SHIPPING_SERVICE_ADDR=shippingservice:50051
+      - PAYMENT_SERVICE_ADDR=paymentservice:50051
+      - EMAIL_SERVICE_ADDR=emailservice:8080
+      - CURRENCY_SERVICE_ADDR=currencyservice:7000
+      - CART_SERVICE_ADDR=cartservice:7070
+    depends_on:
+      - productcatalogservice
+      - shippingservice
+      - paymentservice
+      - emailservice
+      - currencyservice
+      - cartservice
+
+  frontend:
+    image: frontend
+    ports:
+      - "8000:8080"
+    environment:
+      - PORT=8080
+      - PRODUCT_CATALOG_SERVICE_ADDR=productcatalogservice:3550
+      - CURRENCY_SERVICE_ADDR=currencyservice:7000
+      - CART_SERVICE_ADDR=cartservice:7070
+      - RECOMMENDATION_SERVICE_ADDR=recommendationservice:8080
+      - SHIPPING_SERVICE_ADDR=shippingservice:50051
+      - CHECKOUT_SERVICE_ADDR=checkoutservice:5050
+      - AD_SERVICE_ADDR=adservice:9555
+      - ENABLE_PROFILER=0
+      - SHOPPING_ASSISTANT_SERVICE_ADDR=shoppingassistantservice:8080
+    depends_on:
+      - productcatalogservice
+      - currencyservice
+      - cartservice
+      - recommendationservice
+      - shippingservice
+      - checkoutservice
+      - adservice
+
+  loadgenerator:
+    image: loadgenerator
+    # platform: linux/amd64
+    environment:
+      - FRONTEND_ADDR=frontend:8080
+    depends_on:
+      - frontend

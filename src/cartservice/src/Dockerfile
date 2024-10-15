@@ -13,6 +13,9 @@
 # limitations under the License.
 
 # https://mcr.microsoft.com/product/dotnet/sdk
+# For Macbook Apple chip
+# FROM --platform=amd64 mcr.microsoft.com/dotnet/sdk:8.0.302-noble@sha256:bd836d1c4a19860ee61d1202b82561f0c750edb7a635443cb001042b71d79569 as builder
+# ENV DOTNET_EnableWriteXorExecute=0
 FROM mcr.microsoft.com/dotnet/sdk:8.0.402-noble@sha256:96bd4e90b80d82f8e77512ec0893d7ae18b4d2af332b9e68ed575c9842cc175c AS builder
 WORKDIR /app
 COPY cartservice.csproj .
@@ -29,6 +32,7 @@ RUN dotnet publish cartservice.csproj \
     -o /cartservice
 
 # https://mcr.microsoft.com/product/dotnet/runtime-deps
+# FROM --platform=amd64 mcr.microsoft.com/dotnet/runtime-deps:8.0.6-noble-chiseled@sha256:55d6e41f2e7687c597daa4fdca997b07beb3e23b6283729e19bb8ceb272def1a
 FROM mcr.microsoft.com/dotnet/runtime-deps:8.0.8-noble-chiseled@sha256:7c86350773464d70bd15b2804c0e52f6c0f6b27d05d0fc607ff16abeb84dedd0
 
 WORKDIR /app
@@ -38,3 +42,32 @@ ENV DOTNET_EnableDiagnostics=0 \
     ASPNETCORE_HTTP_PORTS=7070
 USER 1000
 ENTRYPOINT ["/app/cartservice"]
+
+
+# For Macbook Apple chip
+# FROM mcr.microsoft.com/dotnet/sdk:8.0 as builder
+# WORKDIR /app
+# COPY cartservice.csproj .
+# RUN dotnet restore cartservice.csproj \
+#     -r linux-musl-arm64
+# COPY . .
+# RUN dotnet publish cartservice.csproj \
+#     -p:PublishSingleFile=true \
+#     -r linux-musl-arm64 \
+#     --self-contained true \
+#     -p:PublishTrimmed=true \
+#     -p:TrimMode=full \
+#     -c release \
+#     -o /cartservice
+
+# # https://mcr.microsoft.com/product/dotnet/runtime-deps
+# FROM mcr.microsoft.com/dotnet/runtime-deps:8.0-alpine3.18-arm64v8
+
+# WORKDIR /app
+# COPY --from=builder /cartservice .
+# EXPOSE 7070
+# ENV DOTNET_EnableDiagnostics=0 \
+#     ASPNETCORE_HTTP_PORTS=7070
+# USER 1000
+# ENTRYPOINT ["/app/cartservice"]
+
