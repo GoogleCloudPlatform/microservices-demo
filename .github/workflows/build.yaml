@@ -4,7 +4,7 @@ on:
     branches:
       - dev
     paths:
-      - "src/currencyservice"
+      - "src/currencyservice/**"
   # pull_request:
   #   paths:
   #     - 'src/currencyservice'
