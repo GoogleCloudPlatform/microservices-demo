@@ -46,7 +46,7 @@ spec:
               - ALL
           privileged: false
           readOnlyRootFilesystem: true
-        image: gcr.io/google-samples/microservices-demo/loadgenerator:v0.9.0
+        image: us-central1-docker.pkg.dev/google-samples/microservices-demo/loadgenerator:v0.9.0
         env:
         - name: FRONTEND_ADDR
           value: "frontend:80"
