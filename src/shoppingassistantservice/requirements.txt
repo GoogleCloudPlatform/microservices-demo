@@ -152,7 +152,7 @@ packaging==24.1
     # via langchain-core
 pgvector==0.3.4
     # via langchain-google-alloydb-pg
-pillow==10.4.0
+pillow==11.0.0
     # via -r requirements.in
 proto-plus==1.24.0
     # via
