@@ -15,7 +15,7 @@ Deploy advanced scenario of Online Boutique:
 helm upgrade onlineboutique oci://us-docker.pkg.dev/online-boutique-ci/charts/onlineboutique \
     --install \
     --create-namespace \
-    --set images.repository=us-docker.pkg.dev/my-project/containers/onlineboutique \
+    --set images.repository=us-docker.pkg.dev/my-project/microservices-demo \
     --set frontend.externalService=false \
     --set redis.create=false \
     --set cartservice.database.type=spanner \

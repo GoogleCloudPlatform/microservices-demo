@@ -56,6 +56,9 @@ seccompProfile:
   enable: false
   type: RuntimeDefault
 
+securityContext:
+  enable: true
+
 adService:
   create: true
   name: adservice
