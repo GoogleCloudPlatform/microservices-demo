@@ -18,7 +18,7 @@
 
 # [START servicemesh_release_istio_manifests_microservices_demo]
 ---
-apiVersion: gateway.networking.k8s.io/v1
+apiVersion: gateway.networking.k8s.io/v1beta1
 kind: Gateway
 metadata:
   name: istio-gateway
@@ -32,7 +32,7 @@ spec:
       namespaces:
         from: Same
 ---
-apiVersion: gateway.networking.k8s.io/v1
+apiVersion: gateway.networking.k8s.io/v1beta1
 kind: HTTPRoute
 metadata:
   name: frontend-route
@@ -47,7 +47,7 @@ spec:
     - name: frontend
       port: 80
 ---
-apiVersion: networking.istio.io/v1
+apiVersion: networking.istio.io/v1alpha3
 kind: ServiceEntry
 metadata:
   name: allow-egress-googleapis
@@ -63,7 +63,7 @@ spec:
     protocol: HTTPS
     name: https
 ---
-apiVersion: networking.istio.io/v1
+apiVersion: networking.istio.io/v1alpha3
 kind: ServiceEntry
 metadata:
   name: allow-egress-google-metadata
@@ -80,7 +80,7 @@ spec:
     name: https
     protocol: HTTPS
 ---
-apiVersion: networking.istio.io/v1
+apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService
 metadata:
   name: frontend
