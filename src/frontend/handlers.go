@@ -56,21 +56,96 @@ var (
 
 var validEnvs = []string{"local", "gcp", "azure", "aws", "onprem", "alibaba"}
 
+// Instrumenting the Frontend Microservice
+// func (fe *frontendServer) homeHandler(w http.ResponseWriter, r *http.Request) {
+// 	log := r.Context().Value(ctxKeyLog{}).(logrus.FieldLogger)
+// 	log.WithField("currency", currentCurrency(r)).Info("home")
+// 	currencies, err := fe.getCurrencies(r.Context())
+// 	if err != nil {
+// 		renderHTTPError(log, r, w, errors.Wrap(err, "could not retrieve currencies"), http.StatusInternalServerError)
+// 		return
+// 	}
+// 	products, err := fe.getProducts(r.Context())
+// 	if err != nil {
+// 		renderHTTPError(log, r, w, errors.Wrap(err, "could not retrieve products"), http.StatusInternalServerError)
+// 		return
+// 	}
+// 	cart, err := fe.getCart(r.Context(), sessionID(r))
+// 	if err != nil {
+// 		renderHTTPError(log, r, w, errors.Wrap(err, "could not retrieve cart"), http.StatusInternalServerError)
+// 		return
+// 	}
+
+// 	type productView struct {
+// 		Item  *pb.Product
+// 		Price *pb.Money
+// 	}
+// 	ps := make([]productView, len(products))
+// 	for i, p := range products {
+// 		price, err := fe.convertCurrency(r.Context(), p.GetPriceUsd(), currentCurrency(r))
+// 		if err != nil {
+// 			renderHTTPError(log, r, w, errors.Wrapf(err, "failed to do currency conversion for product %s", p.GetId()), http.StatusInternalServerError)
+// 			return
+// 		}
+// 		ps[i] = productView{p, price}
+// 	}
+
+// 	// Set ENV_PLATFORM (default to local if not set; use env var if set; otherwise detect GCP, which overrides env)_
+// 	var env = os.Getenv("ENV_PLATFORM")
+// 	// Only override from env variable if set + valid env
+// 	if env == "" || stringinSlice(validEnvs, env) == false {
+// 		fmt.Println("env platform is either empty or invalid")
+// 		env = "local"
+// 	}
+// 	// Autodetect GCP
+// 	addrs, err := net.LookupHost("metadata.google.internal.")
+// 	if err == nil && len(addrs) >= 0 {
+// 		log.Debugf("Detected Google metadata server: %v, setting ENV_PLATFORM to GCP.", addrs)
+// 		env = "gcp"
+// 	}
+
+// 	log.Debugf("ENV_PLATFORM is: %s", env)
+// 	plat = platformDetails{}
+// 	plat.setPlatformDetails(strings.ToLower(env))
+
+// 	if err := templates.ExecuteTemplate(w, "home", injectCommonTemplateData(r, map[string]interface{}{
+// 		"show_currency": true,
+// 		"currencies":    currencies,
+// 		"products":      ps,
+// 		"cart_size":     cartSize(cart),
+// 		"banner_color":  os.Getenv("BANNER_COLOR"), // illustrates canary deployments
+// 		"ad":            fe.chooseAd(r.Context(), []string{}, log),
+// 	})); err != nil {
+// 		log.Error(err)
+// 	}
+// }
+
+// Instrumenting the Frontend Microservice
 func (fe *frontendServer) homeHandler(w http.ResponseWriter, r *http.Request) {
+	// Start timer to measure latency
+	timer := prometheus.NewTimer(requestLatency)
+	defer timer.ObserveDuration()
+
+	// Increment the request rate counter
+	requestRate.Inc()
+
 	log := r.Context().Value(ctxKeyLog{}).(logrus.FieldLogger)
 	log.WithField("currency", currentCurrency(r)).Info("home")
 	currencies, err := fe.getCurrencies(r.Context())
 	if err != nil {
+		errorRate.Inc()
 		renderHTTPError(log, r, w, errors.Wrap(err, "could not retrieve currencies"), http.StatusInternalServerError)
 		return
 	}
 	products, err := fe.getProducts(r.Context())
 	if err != nil {
+		errorRate.Inc()
 		renderHTTPError(log, r, w, errors.Wrap(err, "could not retrieve products"), http.StatusInternalServerError)
 		return
 	}
 	cart, err := fe.getCart(r.Context(), sessionID(r))
 	if err != nil {
+		errorRate.Inc()
 		renderHTTPError(log, r, w, errors.Wrap(err, "could not retrieve cart"), http.StatusInternalServerError)
 		return
 	}
@@ -83,20 +158,18 @@ func (fe *frontendServer) homeHandler(w http.ResponseWriter, r *http.Request) {
 	for i, p := range products {
 		price, err := fe.convertCurrency(r.Context(), p.GetPriceUsd(), currentCurrency(r))
 		if err != nil {
+			errorRate.Inc()
 			renderHTTPError(log, r, w, errors.Wrapf(err, "failed to do currency conversion for product %s", p.GetId()), http.StatusInternalServerError)
 			return
 		}
 		ps[i] = productView{p, price}
 	}
 
-	// Set ENV_PLATFORM (default to local if not set; use env var if set; otherwise detect GCP, which overrides env)_
 	var env = os.Getenv("ENV_PLATFORM")
-	// Only override from env variable if set + valid env
 	if env == "" || stringinSlice(validEnvs, env) == false {
 		fmt.Println("env platform is either empty or invalid")
 		env = "local"
 	}
-	// Autodetect GCP
 	addrs, err := net.LookupHost("metadata.google.internal.")
 	if err == nil && len(addrs) >= 0 {
 		log.Debugf("Detected Google metadata server: %v, setting ENV_PLATFORM to GCP.", addrs)
@@ -112,7 +185,7 @@ func (fe *frontendServer) homeHandler(w http.ResponseWriter, r *http.Request) {
 		"currencies":    currencies,
 		"products":      ps,
 		"cart_size":     cartSize(cart),
-		"banner_color":  os.Getenv("BANNER_COLOR"), // illustrates canary deployments
+		"banner_color":  os.Getenv("BANNER_COLOR"), // Illustrates canary deployments
 		"ad":            fe.chooseAd(r.Context(), []string{}, log),
 	})); err != nil {
 		log.Error(err)
