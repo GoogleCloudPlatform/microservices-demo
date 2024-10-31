@@ -32,6 +32,12 @@ import (
 	"go.opentelemetry.io/otel/propagation"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 	"google.golang.org/grpc"
+
+	// Instrumenting the Frontend Microservice
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promauto"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
+)
 )
 
 const (
@@ -86,6 +92,22 @@ type frontendServer struct {
 
 	shoppingAssistantSvcAddr string
 }
+
+// Instrumenting the Frontend Microservice
+var (
+	requestLatency = promauto.NewHistogram(prometheus.HistogramOpts{
+		Name: "frontend_request_latency_seconds",
+		Help: "Latency of HTTP requests in seconds",
+	})
+	errorRate = promauto.NewCounter(prometheus.CounterOpts{
+		Name: "frontend_error_rate_total",
+		Help: "Total number of errors",
+	})
+	requestRate = promauto.NewCounter(prometheus.CounterOpts{
+		Name: "frontend_request_rate_total",
+		Help: "Total number of HTTP requests",
+	})
+)
 
 func main() {
 	ctx := context.Background()
