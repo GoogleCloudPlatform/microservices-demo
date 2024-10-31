@@ -803,21 +803,41 @@ spec:
   - name: http
     port: 80
     targetPort: 8080
+# ---
+# apiVersion: v1
+# kind: Service
+# metadata:
+#   name: frontend-external
+#   labels:
+#     app: frontend
+# spec:
+#   type: LoadBalancer
+#   selector:
+#     app: frontend
+#   ports:
+#   - name: http
+#     port: 80
+#     targetPort: 8080
 ---
-apiVersion: v1
-kind: Service
+apiVersion: networking.k8s.io/v1
+kind: Ingress
 metadata:
-  name: frontend-external
-  labels:
-    app: frontend
+  name: nginx
+  annotations:
+    kubernetes.io/ingress.class: nginx
 spec:
-  type: LoadBalancer
-  selector:
-    app: frontend
-  ports:
-  - name: http
-    port: 80
-    targetPort: 8080
+  ingressClassName: nginx-example
+  rules:
+  - host: demo.example.com
+  - http:
+      paths:
+      - path: /
+        pathType: ImplementationSpecific
+        backend:
+          service:
+            name: frontend
+            port:
+              number: 80
 ---
 apiVersion: v1
 kind: ServiceAccount
@@ -871,8 +891,12 @@ spec:
           value: "8080"
         - name: PRODUCT_CATALOG_SERVICE_ADDR
           value: "productcatalogservice:3550"
+        - name: DISABLE_TRACING
+        value: "1"
         - name: DISABLE_PROFILER
-          value: "1"
+        value: "1"
+        - name: DISABLE_DEBUGGER
+        value: "1"
         resources:
           requests:
             cpu: 100m
