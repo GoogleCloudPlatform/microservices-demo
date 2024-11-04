@@ -18,7 +18,7 @@ click==8.1.7
     # via flask
 configargparse==1.7
     # via locust
-faker==30.8.0
+faker==30.8.1
     # via -r requirements.in
 flask==3.0.3
     # via
@@ -67,7 +67,7 @@ urllib3==2.2.3
     # via
     #   geventhttpclient
     #   requests
-werkzeug==3.0.6
+werkzeug==3.1.1
     # via
     #   flask
     #   flask-login
