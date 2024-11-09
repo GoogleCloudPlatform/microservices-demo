@@ -1,0 +1,76 @@
+name: Adservice Pipeline
+
+on:
+  push:
+    branches:
+      - release/0.10.1
+  pull_request:
+    branches:
+      - release/0.10.1
+
+env:
+  SERVICE_NAME: 'adservice'
+  SERVICE_PATH: './src/adservice'
+
+jobs:
+  build-and-publish:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+        # Ensure we are checking out the correct branch
+        ref: release/0.10.1
+
+      - name: Set up JDK 11
+        uses: actions/setup-java@v3
+        with:
+          java-version: '11'
+
+      - name: SonarQube Analysis
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_AUTH_TOKEN }}
+          SONAR_SCANNER_HOME: ${{ runner.tool_cache }}/SonarScanner
+        run: |
+          mkdir -p $SONAR_SCANNER_HOME
+          wget -O $SONAR_SCANNER_HOME/sonar-scanner.zip https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-4.6.2.2472-linux.zip
+          unzip $SONAR_SCANNER_HOME/sonar-scanner.zip -d $SONAR_SCANNER_HOME
+          $SONAR_SCANNER_HOME/sonar-scanner-4.6.2.2472-linux/bin/sonar-scanner \
+            -Dsonar.projectKey=microservices-demo-adservice \
+            -Dsonar.projectName="Microservices adservice" \
+            -Dsonar.projectVersion=1.0 \
+            -Dsonar.sources=$SERVICE_PATH \
+            -Dsonar.java.binaries=$SERVICE_PATH/target/classes \
+            -Dsonar.junit.reportPaths=$SERVICE_PATH/target/surefire-reports \
+            -Dsonar.coverage.jacoco.xmlReportPaths=$SERVICE_PATH/target/site/jacoco/jacoco.xml \
+            -Dsonar.login=$SONAR_TOKEN
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_HUB_USERNAME }}
+          password: ${{ secrets.DOCKER_HUB_TOKEN }}
+
+      - name: Build Docker Image
+        run: |
+          docker build -t ${DOCKER_HUB_USERNAME}/${SERVICE_NAME}:${{ github.sha }} $SERVICE_PATH
+
+      - name: Run Trivy Security Scan
+        env:
+          DOCKER_IMAGE_TAG: ${{ github.sha }}
+        run: |
+          docker pull aquasec/trivy:latest
+          docker run --rm -v /var/run/docker.sock:/var/run/docker.sock aquasec/trivy:latest image \
+            ${DOCKER_HUB_USERNAME}/${SERVICE_NAME}:${DOCKER_IMAGE_TAG} --severity HIGH,CRITICAL
+
+      - name: Push Docker Image
+        run: |
+          docker push ${DOCKER_HUB_USERNAME}/${SERVICE_NAME}:${{ github.sha }}
+          docker tag ${DOCKER_HUB_USERNAME}/${SERVICE_NAME}:${{ github.sha }} ${DOCKER_HUB_USERNAME}/${SERVICE_NAME}:latest
+          docker push ${DOCKER_HUB_USERNAME}/${SERVICE_NAME}:latest
+
+      - name: Clean up Workspace
+        run: |
+          rm -rf $SERVICE_PATH
