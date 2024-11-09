@@ -1,0 +1,202 @@
+version: '3.8'
+
+services:
+  # Ad Service (Java)
+  adservice:
+    build:
+      context: ./src/adservice
+      dockerfile: Dockerfile
+    environment:
+      - PORT=9555
+    # restart: unless-stopped
+    networks:
+      - microservices-network
+
+  # Cart Service (.NET)
+  cartservice:
+    build:
+      context: ./src/cartservice/src
+      dockerfile: Dockerfile
+    environment:
+      - ASPNETCORE_HTTP_PORTS=7070
+      - DOTNET_EnableDiagnostics=0
+    user: "1000"  
+    depends_on:
+      - redis
+    # restart: unless-stopped
+    networks:
+      - microservices-network
+
+  # Checkout Service (Go)
+  checkoutservice:
+    build:
+      context: ./src/checkoutservice
+      dockerfile: Dockerfile
+    environment:
+      - PORT=5050
+      - PRODUCT_CATALOG_SERVICE_ADDR=productcatalogservice:3550
+      - SHIPPING_SERVICE_ADDR=shippingservice:50051
+      - PAYMENT_SERVICE_ADDR=paymentservice:50051
+      - EMAIL_SERVICE_ADDR=emailservice:8080
+      - CART_SERVICE_ADDR=cartservice:7070
+      - CURRENCY_SERVICE_ADDR=currencyservice:7000
+      - GOTRACEBACK=single     
+    # restart: unless-stopped
+    networks:
+      - microservices-network
+
+  # Currency Service (Node.js)
+  currencyservice:
+    build:
+      context: ./src/currencyservice
+      dockerfile: Dockerfile
+    environment:
+      - PORT=7000
+      - DISABLE_PROFILER=1
+      - DISABLE_TRACING=1
+      - DISABLE_DEBUGGING=1
+
+    # restart: unless-stopped
+    networks:
+      - microservices-network
+
+  # Email Service (Python)
+  emailservice:
+    build:
+      context: ./src/emailservice
+      dockerfile: Dockerfile
+    environment:
+      - PORT=8080
+      - PYTHONUNBUFFERED=1
+      - ENABLE_PROFILER=1
+      - DISABLE_PROFILER=1
+      - DISABLE_TRACING=1
+    # restart: unless-stopped
+    networks:
+      - microservices-network
+
+  # Frontend Service (Go) 
+  frontend:
+    build:
+      context: ./src/frontend
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"  
+    environment:
+      - PORT=8080
+      - GOTRACEBACK=single
+      - PRODUCT_CATALOG_SERVICE_ADDR=productcatalogservice:3550
+      - CURRENCY_SERVICE_ADDR=currencyservice:7000
+      - CART_SERVICE_ADDR=cartservice:7070
+      - RECOMMENDATION_SERVICE_ADDR=recommendationservice:8080
+      - SHIPPING_SERVICE_ADDR=shippingservice:50051
+      - SHOPPING_ASSISTANT_SERVICE_ADDR=disabled
+      - AD_SERVICE_ADDR=adservice:9555
+      - CHECKOUT_SERVICE_ADDR=checkoutservice:5050  
+    # depends_on:
+    #   - adservice
+    #   - cartservice
+    #   - checkoutservice
+    #   - currencyservice
+    #   - emailservice
+    #   - productcatalogservice
+    #   - recommendationservice
+    #   - shippingservice
+    # restart: unless-stopped
+    networks:
+      - microservices-network
+
+  # Load Generator Service (Python/Locust)
+  loadgenerator:
+    build:
+      context: ./src/loadgenerator
+      dockerfile: Dockerfile
+    environment:
+      - FRONTEND_ADDR=frontend:8080
+      - USERS=10
+    depends_on:
+      - frontend
+    # restart: unless-stopped
+    networks:
+      - microservices-network
+
+  # Payment Service (Node.js)
+  paymentservice:
+    build:
+      context: ./src/paymentservice
+      dockerfile: Dockerfile
+    environment:
+      - PORT=50051
+      - DISABLE_PROFILER=1
+      - DISABLE_TRACING=1
+      - DISABLE_DEBUGGING=1
+    # restart: unless-stopped
+    networks:
+      - microservices-network
+
+  # Product Catalog Service (Go)
+  productcatalogservice:
+    build:
+      context: ./src/productcatalogservice
+      dockerfile: Dockerfile
+    environment:
+      - PORT=3550
+      - GOTRACEBACK=single
+    # restart: unless-stopped
+    networks:
+      - microservices-network
+
+  # Recommendation Service (Python)
+  recommendationservice:
+    build:
+      context: ./src/recommendationservice
+      dockerfile: Dockerfile
+    environment:
+      - PORT=8080
+      - PYTHONUNBUFFERED=1
+      - PRODUCT_CATALOG_SERVICE_ADDR=productcatalogservice:3550
+      - DISABLE_PROFILER=1
+      - DISABLE_TRACING=1
+    # restart: unless-stopped
+    networks:
+      - microservices-network
+
+  # Shipping Service (Go)
+  shippingservice:
+    build:
+      context: ./src/shippingservice
+      dockerfile: Dockerfile
+    environment:
+      - APP_PORT=50051
+      - GOTRACEBACK=single
+    # restart: unless-stopped
+    networks:
+      - microservices-network
+
+  # # Shopping Assistant Service (Python)
+  # shoppingassistantservice:
+  #   build:
+  #     context: ./src/shoppingassistantservice
+  #     dockerfile: Dockerfile
+  #   environment:
+  #     - PORT=8080
+  #     - PYTHONUNBUFFERED=1
+    restart: unless-stopped
+  #   networks:
+  #     - microservices-network
+
+  # Redis for Cart Service
+  redis:
+    image: redis:alpine
+    volumes:
+      - redis-data:/data
+    # restart: unless-stopped
+    networks:
+      - microservices-network
+
+networks:
+  microservices-network:
+    driver: bridge
+
+volumes:
+  redis-data:
