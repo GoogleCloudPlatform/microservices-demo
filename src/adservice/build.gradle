@@ -14,9 +14,9 @@ description = 'Ad Service'
 group = "adservice"
 version = "0.1.0-SNAPSHOT"
 
-def grpcVersion = "1.68.0"
-def jacksonCoreVersion = "2.18.0"
-def jacksonDatabindVersion = "2.18.0"
+def grpcVersion = "1.68.1"
+def jacksonCoreVersion = "2.18.1"
+def jacksonDatabindVersion = "2.18.1"
 def protocVersion = "3.25.5"
 
 tasks.withType(JavaCompile) {
@@ -45,7 +45,7 @@ dependencies {
 
         runtimeOnly "com.fasterxml.jackson.core:jackson-core:${jacksonCoreVersion}",
                 "com.fasterxml.jackson.core:jackson-databind:${jacksonDatabindVersion}",
-                "io.netty:netty-tcnative-boringssl-static:2.0.66.Final"
+                "io.netty:netty-tcnative-boringssl-static:2.0.69.Final"
     }
 }
 
