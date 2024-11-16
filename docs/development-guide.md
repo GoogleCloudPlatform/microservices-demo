@@ -79,28 +79,47 @@ This doc explains how to build and run the Online Boutique source code locally u
 
 ## Option 2 - Local Cluster 
 
-1. Launch a local Kubernetes cluster with one of the following tools:
+### Launching with Minikube
 
-    - To launch **Minikube** (tested with Ubuntu Linux). Please, ensure that the
-       local Kubernetes cluster has at least:
-        - 4 CPUs
-        - 4.0 GiB memory
-        - 32 GB disk space
+1. Launch a **Minikube** cluster (tested with Ubuntu Linux). Please, ensure that the local Kubernetes cluster has at least:
+    - 4 CPUs
+    - 4.0 GiB memory
+    - 32 GB disk space
 
-      ```shell
-      minikube start --cpus=4 --memory 4096 --disk-size 32g
-      ```
+    ```shell
+    minikube start --cpus=4 --memory 4096 --disk-size 32g
+    ```
 
-    - To launch **Docker for Desktop** (tested with Mac/Windows). Go to Preferences:
-        - choose “Enable Kubernetes”,
-        - set CPUs to at least 3, and Memory to at least 6.0 GiB
-        - on the "Disk" tab, set at least 32 GB disk space
+2. Run `kubectl get nodes` to verify you're connected to the respective control plane.
 
-    - To launch a **Kind** cluster:
+3. Apply the Minikube-specific Kubernetes manifest file:
 
-      ```shell
-      kind create cluster
-      ```
+    ```sh
+    kubectl apply -f ./release/minikube-kubernetes-manifests.yaml
+    ```
+
+   The `minikube-kubernetes-manifests.yaml` file includes changes made to ensure compatibility with Minikube:
+   
+   - **Service Type Adjustments**: Services originally defined as `LoadBalancer` have been changed to `NodePort` since Minikube does not natively support `LoadBalancer` services without additional configurations.
+   - **Resource Requests and Limits** (Optional): CPU and memory resource requests and limits have been reduced to align with the typically constrained resource availability in a Minikube environment.
+
+4. Run `kubectl get pods` to verify the Pods are ready and running.
+
+5. Run `kubectl get services` to confirm that the services are up and running.
+
+6. To access the frontend service, you can run the following command, which will open it in your default web browser:
+
+    ```sh
+    minikube service frontend-external
+    ```
+
+### Launching with Kind
+
+1. To launch a **Kind** cluster:
+
+    ```shell
+    kind create cluster
+    ```
 
 2. Run `kubectl get nodes` to verify you're connected to the respective control plane.
 
@@ -114,8 +133,7 @@ This doc explains how to build and run the Online Boutique source code locally u
 
 6. Navigate to `localhost:8080` to access the web frontend.
 
-
 ## Cleanup
 
-If you've deployed the application with `skaffold run` command, you can run
+If you've deployed the application with the `skaffold run` command, you can run
 `skaffold delete` to clean up the deployed resources.
