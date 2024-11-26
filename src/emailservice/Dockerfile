@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-FROM python:3.13.0-alpine@sha256:6fe2f8718e257d8be95f79e3ad3659183f01b0b28fe1d50f5f6e3c54ebbd8f12 AS base
+FROM python:3.12.7-alpine@sha256:b83d5ec7274bee17d2f4bd0bfbb082f156241e4513f0a37c70500e1763b1d90d AS base
 
 FROM base AS builder
 
@@ -33,7 +33,7 @@ ENV ENABLE_PROFILER=1
 WORKDIR /email_server
 
 # Grab packages from builder
-COPY --from=builder /usr/local/lib/python3.13/ /usr/local/lib/python3.13/
+COPY --from=builder /usr/local/lib/python3.12/ /usr/local/lib/python3.12/
 
 # Add the application
 COPY . .
