@@ -16,10 +16,9 @@ FROM python:3.13.0-alpine@sha256:6fe2f8718e257d8be95f79e3ad3659183f01b0b28fe1d50
 
 FROM base AS builder
 
-RUN apt-get -qq update \
-    && apt-get install -y --no-install-recommends \
-        wget g++ \
-    && rm -rf /var/lib/apt/lists/*
+RUN apk update \
+    && apk add --no-cache wget g++ \
+    && rm -rf /var/cache/apk/*
 
 # get packages
 COPY requirements.txt .
@@ -34,7 +33,7 @@ ENV ENABLE_PROFILER=1
 WORKDIR /email_server
 
 # Grab packages from builder
-COPY --from=builder /usr/local/lib/python3.12/ /usr/local/lib/python3.12/
+COPY --from=builder /usr/local/lib/python3.13/ /usr/local/lib/python3.13/
 
 # Add the application
 COPY . .
