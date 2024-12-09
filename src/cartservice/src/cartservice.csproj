@@ -9,7 +9,7 @@
     <PackageReference Include="Grpc.HealthCheck" Version="2.67.0" />
     <PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="9.0.0" />
     <PackageReference Include="Google.Cloud.Spanner.Data" Version="4.6.0" />
-    <PackageReference Include="Npgsql" Version="8.0.6" />
+    <PackageReference Include="Npgsql" Version="9.0.1" />
     <PackageReference Include="Google.Cloud.SecretManager.V1" Version="2.5.0" />
   </ItemGroup>
 
