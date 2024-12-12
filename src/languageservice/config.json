@@ -1,0 +1,13 @@
+{
+  "service": {
+    "port": 3000,
+    "name": "languageservice"
+  },
+  "settings": {
+    "availableLanguages": ["english", "german", "spanish"],
+    "defaults": {
+      "language": "english",
+      "errorText": "Error!"
+    }
+  }
+}
