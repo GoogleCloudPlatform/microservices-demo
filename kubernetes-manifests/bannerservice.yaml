@@ -1,0 +1,66 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bannerservice
+  labels:
+    app: bannerservice
+spec:
+  selector:
+    matchLabels:
+      app: bannerservice
+  template:
+    metadata:
+      labels:
+        app: bannerservice
+    spec:
+      serviceAccountName: bannerservice
+      terminationGracePeriodSeconds: 5
+      securityContext:
+        fsGroup: 1000
+        runAsGroup: 1000
+        runAsNonRoot: true
+        runAsUser: 1000
+      containers:
+      - name: bannerservice
+        image: bannerservice
+        ports:
+        - containerPort: 51234
+        env:
+        - name: PORT
+          value: "51234"
+        # readinessProbe:
+        #   periodSeconds: 5
+        #   grpc:
+        #     port: 51234
+        # livenessProbe:
+        #   periodSeconds: 5
+        #   grpc:
+        #     port: 51234
+        resources:
+          requests:
+            cpu: 100m
+            memory: 128Mi
+          limits:
+            cpu: 200m
+            memory: 256Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: bannerservice
+  labels:
+    app: bannerservice
+spec:
+  type: ClusterIP
+  selector:
+    app: bannerservice
+  ports:
+  - name: grpc
+    port: 51234
+    targetPort: 51234
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: bannerservice
+

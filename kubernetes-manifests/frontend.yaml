@@ -88,6 +88,8 @@ spec:
           #   value: "aws"
           - name: ENABLE_PROFILER
             value: "0"
+          - name: BANNER_SERVICE_ADDR
+            value: "bannerservice:51234"
           # - name: CYMBAL_BRANDING
           #   value: "true"
           # - name: ENABLE_ASSISTANT
