@@ -4,9 +4,9 @@
     "name": "languageservice"
   },
   "settings": {
-    "availableLanguages": ["english", "german", "spanish"],
+    "supportedLanguages": ["en", "de", "es"],
     "defaults": {
-      "language": "english",
+      "language": "en",
       "errorText": "Error!"
     }
   }

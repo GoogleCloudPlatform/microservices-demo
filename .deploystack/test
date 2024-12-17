@@ -162,6 +162,7 @@ section_open "Testing Online Boutique's services are running"
     evalTest "kubectl get deployment recommendationservice --no-headers -o=name 2> /dev/null"  "deployment.apps/recommendationservice"
     evalTest "kubectl get deployment redis-cart --no-headers -o=name 2> /dev/null"  "deployment.apps/redis-cart"
     evalTest "kubectl get deployment shippingservice --no-headers -o=name 2> /dev/null"  "deployment.apps/shippingservice"
+    evalTest "kubectl get deployment languageservice --no-headers -o=name 2> /dev/null"  "deployment.apps/languageservice"
 section_close
 
 sleep 120

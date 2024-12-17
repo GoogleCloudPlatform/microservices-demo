@@ -1,4 +1,6 @@
-# Copyright 2022 Google LLC
+#!/bin/bash -eu
+#
+# Copyright 2018 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,18 +14,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-apiVersion: kustomize.config.k8s.io/v1beta1
-kind: Kustomization
-resources:
-  - adservice.yaml
-  - cartservice.yaml
-  - checkoutservice.yaml
-  - currencyservice.yaml
-  - languageservice.yaml
-  - emailservice.yaml
-  - frontend.yaml
-  - loadgenerator.yaml
-  - paymentservice.yaml
-  - productcatalogservice.yaml
-  - recommendationservice.yaml
-  - shippingservice.yaml
+# [START gke_currencyservice_genproto]
+
+# protos are loaded dynamically for node, simply copies over the proto.
+mkdir -p proto
+cp -r ../../protos/* ./proto
+
+# [END gke_currencyservice_genproto]

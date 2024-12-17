@@ -1,0 +1,72 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: languageservice
+  labels:
+    app: languageservice
+spec:
+  selector:
+    matchLabels:
+      app: languageservice
+  template:
+    metadata:
+      labels:
+        app: languageservice
+    spec:
+      serviceAccountName: languageservice
+      terminationGracePeriodSeconds: 5
+      securityContext:
+        fsGroup: 1000
+        runAsGroup: 1000
+        runAsNonRoot: true
+        runAsUser: 1000
+      containers:
+        - name: server
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            privileged: false
+            readOnlyRootFilesystem: true
+          ports:
+            - name: grpc
+              containerPort: 3000
+          env:
+            - name: PORT
+              value: "3000"
+            - name: DISABLE_PROFILER
+              value: "1"
+          readinessProbe:
+            grpc:
+              port: 3000
+          livenessProbe:
+            grpc:
+              port: 3000
+          resources:
+            requests:
+              cpu: 100m
+              memory: 64Mi
+            limits:
+              cpu: 200m
+              memory: 128Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: languageservice
+  labels:
+    app: languageservice
+spec:
+  type: ClusterIP
+  selector:
+    app: languageservice
+  ports:
+    - name: grpc
+      port: 3000
+      targetPort: 3000
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: languageservice

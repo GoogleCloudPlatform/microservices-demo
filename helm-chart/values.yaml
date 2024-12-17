@@ -103,6 +103,17 @@ currencyService:
       cpu: 200m
       memory: 128Mi
 
+languageService:
+  create: true
+  name: languageservice
+  resources:
+    requests:
+      cpu: 100m
+      memory: 64Mi
+    limits:
+      cpu: 200m
+      memory: 128Mi
+
 emailService:
   create: true
   name: emailservice
@@ -125,7 +136,7 @@ frontend:
   virtualService:
     create: false
     hosts:
-    - "*"
+      - "*"
     gateway:
       name: asm-ingressgateway
       namespace: asm-ingress

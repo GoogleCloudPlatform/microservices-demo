@@ -1,5 +1,6 @@
 {
   "test": {
+<<<<<<< HEAD
     "english": "The test",
     "german": "Der Test",
     "spanish": "La prueba"
@@ -38,5 +39,10 @@
     "english": "Loafers for sale. Buy one, get second one for free",
     "german": "Slipper im Angebot. Kaufen Sie ein Paar, erhalten Sie das zweite Paar kostenlos",
     "spanish": "Zapatos en oferta. Compra un par y el segundo de regalo"
+=======
+    "en": "The test",
+    "de": "Der Test",
+    "es": "La prueba"
+>>>>>>> 9fe97ec21499a8910a4684299fe1ad587dc5a10b
   }
 }
