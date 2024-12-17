@@ -42,6 +42,21 @@ func (fe *frontendServer) getCurrencies(ctx context.Context) ([]string, error) {
 	return out, nil
 }
 
+func (fe *frontendServer) getLanguages(ctx context.Context) ([]string, error) {
+	langs, err := pb.NewLanguageServiceClient(fe.languageSvcConn).
+		GetSupportedLanguages(ctx, &pb.Empty{})
+	if err != nil {
+		return nil, err
+	}
+	var out []string
+	for _, l := range langs.LanguageCodes {
+		if _, ok := whitelistedLanguages[l]; ok {
+			out = append(out, l)
+		}
+	}
+	return out, nil
+}
+
 func (fe *frontendServer) getProducts(ctx context.Context) ([]*pb.Product, error) {
 	resp, err := pb.NewProductCatalogServiceClient(fe.productCatalogSvcConn).
 		ListProducts(ctx, &pb.Empty{})

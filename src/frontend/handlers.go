@@ -50,6 +50,7 @@ var (
 				Funcs(template.FuncMap{
 			"renderMoney":        renderMoney,
 			"renderCurrencyLogo": renderCurrencyLogo,
+			"renderLanguageLogo": renderLanguageLogo,
 		}).ParseGlob("templates/*.html"))
 	plat platformDetails
 )
@@ -62,6 +63,11 @@ func (fe *frontendServer) homeHandler(w http.ResponseWriter, r *http.Request) {
 	currencies, err := fe.getCurrencies(r.Context())
 	if err != nil {
 		renderHTTPError(log, r, w, errors.Wrap(err, "could not retrieve currencies"), http.StatusInternalServerError)
+		return
+	}
+	languages, err := fe.getLanguages(r.Context())
+	if err != nil {
+		renderHTTPError(log, r, w, errors.Wrap(err, "could not retrieve languages"), http.StatusInternalServerError)
 		return
 	}
 	products, err := fe.getProducts(r.Context())
@@ -110,6 +116,7 @@ func (fe *frontendServer) homeHandler(w http.ResponseWriter, r *http.Request) {
 	if err := templates.ExecuteTemplate(w, "home", injectCommonTemplateData(r, map[string]interface{}{
 		"show_currency": true,
 		"currencies":    currencies,
+		"languages":	 languages,
 		"products":      ps,
 		"cart_size":     cartSize(cart),
 		"banner_color":  os.Getenv("BANNER_COLOR"), // illustrates canary deployments
@@ -522,6 +529,33 @@ func (fe *frontendServer) setCurrencyHandler(w http.ResponseWriter, r *http.Requ
 	w.WriteHeader(http.StatusFound)
 }
 
+
+func (fe *frontendServer) setLanguageHandler(w http.ResponseWriter, r *http.Request) {
+	log := r.Context().Value(ctxKeyLog{}).(logrus.FieldLogger)
+	lang := r.FormValue("language_code")
+	payload := validator.SetLanguagePayload{Language: lang}
+	if err := payload.Validate(); err != nil {
+		renderHTTPError(log, r, w, validator.ValidationErrorResponse(err), http.StatusUnprocessableEntity)
+		return
+	}
+	log.WithField("lang.new", payload.Language).WithField("lang.old", currentLanguage(r)).
+		Debug("setting language")
+
+	if payload.Language != "" {
+		http.SetCookie(w, &http.Cookie{
+			Name:   cookieLanguage,
+			Value:  payload.Language,
+			MaxAge: cookieMaxAge,
+		})
+	}
+	referer := r.Header.Get("referer")
+	if referer == "" {
+		referer = baseUrl + "/"
+	}
+	w.Header().Set("Location", referer)
+	w.WriteHeader(http.StatusFound)
+}
+
 // chooseAd queries for advertisements available and randomly chooses one, if
 // available. It ignores the error retrieving the ad since it is not critical.
 func (fe *frontendServer) chooseAd(ctx context.Context, ctxKeys []string, log logrus.FieldLogger) *pb.Ad {
@@ -553,6 +587,7 @@ func injectCommonTemplateData(r *http.Request, payload map[string]interface{}) m
 		"session_id":        sessionID(r),
 		"request_id":        r.Context().Value(ctxKeyRequestID{}),
 		"user_currency":     currentCurrency(r),
+		"user_language":     currentLanguage(r),
 		"platform_css":      plat.css,
 		"platform_name":     plat.provider,
 		"is_cymbal_brand":   isCymbalBrand,
@@ -576,6 +611,14 @@ func currentCurrency(r *http.Request) string {
 		return c.Value
 	}
 	return defaultCurrency
+}
+
+func currentLanguage(r *http.Request) string {
+	c, _ := r.Cookie(cookieLanguage)
+	if c != nil {
+		return c.Value
+	}
+	return defaultLanguage
 }
 
 func sessionID(r *http.Request) string {
@@ -632,4 +675,20 @@ func stringinSlice(slice []string, val string) bool {
 		}
 	}
 	return false
+}
+
+
+func renderLanguageLogo(languageCode string) string {
+	// todo: use languageCode to get flags from language service
+	logos := map[string]string{
+		"en": "English",
+		"de": "Deutsch",
+		"es": "Español",
+	}
+
+	logo := "English" //default
+	if val, ok := logos[languageCode]; ok {
+		logo = val
+	}
+	return logo
 }

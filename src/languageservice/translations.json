@@ -1,7 +1,7 @@
 {
   "test": {
-    "english": "The test",
-    "german": "Der Test",
-    "spanish": "La prueba"
+    "en": "The test",
+    "de": "Der Test",
+    "es": "La prueba"
   }
 }
