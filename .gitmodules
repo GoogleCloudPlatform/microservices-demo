@@ -1,0 +1,3 @@
+[submodule "src/bannerservice"]
+	path = src/bannerservice
+	url = https://github.com/MaximilianSchreff/banner-microservice.git
