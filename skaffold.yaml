@@ -18,34 +18,36 @@ metadata:
   name: app
 build:
   artifacts:
-  # image tags are relative; to specify an image repo (e.g. GCR), you
-  # must provide a "default repo" using one of the methods described
-  # here:
-  # https://skaffold.dev/docs/concepts/#image-repository-handling
-  - image: emailservice
-    context: src/emailservice
-  - image: productcatalogservice
-    context: src/productcatalogservice
-  - image: recommendationservice
-    context: src/recommendationservice
-  - image: shoppingassistantservice
-    context: src/shoppingassistantservice
-  - image: shippingservice
-    context: src/shippingservice
-  - image: checkoutservice
-    context: src/checkoutservice
-  - image: paymentservice
-    context: src/paymentservice
-  - image: currencyservice
-    context: src/currencyservice
-  - image: cartservice
-    context: src/cartservice/src
-    docker:
-      dockerfile: Dockerfile
-  - image: frontend
-    context: src/frontend
-  - image: adservice
-    context: src/adservice
+    # image tags are relative; to specify an image repo (e.g. GCR), you
+    # must provide a "default repo" using one of the methods described
+    # here:
+    # https://skaffold.dev/docs/concepts/#image-repository-handling
+    - image: emailservice
+      context: src/emailservice
+    - image: productcatalogservice
+      context: src/productcatalogservice
+    - image: recommendationservice
+      context: src/recommendationservice
+    - image: shoppingassistantservice
+      context: src/shoppingassistantservice
+    - image: shippingservice
+      context: src/shippingservice
+    - image: checkoutservice
+      context: src/checkoutservice
+    - image: paymentservice
+      context: src/paymentservice
+    - image: currencyservice
+      context: src/currencyservice
+    - image: cartservice
+      context: src/cartservice/src
+      docker:
+        dockerfile: Dockerfile
+    - image: frontend
+      context: src/frontend
+    - image: adservice
+      context: src/adservice
+    - image: languageservice
+      context: src/languageservice
   tagPolicy:
     gitCommit: {}
   local:
@@ -53,7 +55,7 @@ build:
 manifests:
   kustomize:
     paths:
-    - kubernetes-manifests
+      - kubernetes-manifests
 deploy:
   kubectl: {}
 # "gcb" profile allows building and pushing the images
@@ -65,52 +67,52 @@ deploy:
 # This is not used by default. To use it, run:
 #     skaffold run -p gcb
 profiles:
-- name: gcb
-  build:
-    googleCloudBuild:
-      diskSizeGb: 300
-      machineType: N1_HIGHCPU_32
-      timeout: 4000s
-# "debug" profile replaces the default Dockerfile in cartservice with Dockerfile.debug,
-# which enables debugging via skaffold.
-#
-# This profile is used by default when running skaffold debug.
-- name: debug
-  activation:
-  - command: debug
-  patches:
-  - op: replace
-    path: /build/artifacts/7/docker/dockerfile
-    value: Dockerfile.debug
-# The "network-policies" profile is not used by default.
-# You can use it in isolation or in combination with other profiles:
-#     skaffold run -p network-policies, debug
-- name: network-policies
-  patches:
-  - op: add
-    path: /manifests/kustomize/paths/1
-    value: kustomize/components/network-policies
+  - name: gcb
+    build:
+      googleCloudBuild:
+        diskSizeGb: 300
+        machineType: N1_HIGHCPU_32
+        timeout: 4000s
+  # "debug" profile replaces the default Dockerfile in cartservice with Dockerfile.debug,
+  # which enables debugging via skaffold.
+  #
+  # This profile is used by default when running skaffold debug.
+  - name: debug
+    activation:
+      - command: debug
+    patches:
+      - op: replace
+        path: /build/artifacts/7/docker/dockerfile
+        value: Dockerfile.debug
+  # The "network-policies" profile is not used by default.
+  # You can use it in isolation or in combination with other profiles:
+  #     skaffold run -p network-policies, debug
+  - name: network-policies
+    patches:
+      - op: add
+        path: /manifests/kustomize/paths/1
+        value: kustomize/components/network-policies
 ---
 apiVersion: skaffold/v3
 kind: Config
 metadata:
   name: loadgenerator
 requires:
-- configs:
-  - app
+  - configs:
+      - app
 build:
   artifacts:
-  - image: loadgenerator
-    context: src/loadgenerator
+    - image: loadgenerator
+      context: src/loadgenerator
 manifests:
   rawYaml:
-  - ./kubernetes-manifests/loadgenerator.yaml
+    - ./kubernetes-manifests/loadgenerator.yaml
 deploy:
   kubectl: {}
 profiles:
-- name: gcb
-  build:
-    googleCloudBuild:
-      diskSizeGb: 300
-      machineType: N1_HIGHCPU_32
-      timeout: 4000s
+  - name: gcb
+    build:
+      googleCloudBuild:
+        diskSizeGb: 300
+        machineType: N1_HIGHCPU_32
+        timeout: 4000s

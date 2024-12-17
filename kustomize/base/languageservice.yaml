@@ -29,7 +29,6 @@ spec:
                 - ALL
             privileged: false
             readOnlyRootFilesystem: true
-          image: languageservice
           ports:
             - name: express
               containerPort: 3000
