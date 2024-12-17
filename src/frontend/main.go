@@ -37,11 +37,13 @@ import (
 const (
 	port            = "8080"
 	defaultCurrency = "USD"
+	defaultLanguage = "en"
 	cookieMaxAge    = 60 * 60 * 48
 
 	cookiePrefix    = "shop_"
 	cookieSessionID = cookiePrefix + "session-id"
 	cookieCurrency  = cookiePrefix + "currency"
+	cookieLanguage  = cookiePrefix + "language"
 )
 
 var (
@@ -152,6 +154,7 @@ func main() {
 	r.HandleFunc(baseUrl + "/cart", svc.addToCartHandler).Methods(http.MethodPost)
 	r.HandleFunc(baseUrl + "/cart/empty", svc.emptyCartHandler).Methods(http.MethodPost)
 	r.HandleFunc(baseUrl + "/setCurrency", svc.setCurrencyHandler).Methods(http.MethodPost)
+	r.HandleFunc(baseUrl + "/setLanguage", svc.setLanguageHandler).Methods(http.MethodPost)
 	r.HandleFunc(baseUrl + "/logout", svc.logoutHandler).Methods(http.MethodGet)
 	r.HandleFunc(baseUrl + "/cart/checkout", svc.placeOrderHandler).Methods(http.MethodPost)
 	r.HandleFunc(baseUrl + "/assistant", svc.assistantHandler).Methods(http.MethodGet)

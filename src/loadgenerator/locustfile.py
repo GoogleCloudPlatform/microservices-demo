@@ -39,6 +39,11 @@ def setCurrency(l):
     l.client.post("/setCurrency",
         {'currency_code': random.choice(currencies)})
 
+def setLanguage(l):
+    languages = ['en', 'de', 'es']
+    l.client.post("/setLanguage",
+        {'language_code': random.choice(languages)})
+
 def browseProduct(l):
     l.client.get("/product/" + random.choice(products))
 

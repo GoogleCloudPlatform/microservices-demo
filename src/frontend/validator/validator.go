@@ -56,6 +56,10 @@ type SetCurrencyPayload struct {
 	Currency string `validate:"required,iso4217"`
 }
 
+type SetLanguagePayload struct {
+	Language string `validate:"required"`
+}
+
 // Implementations of the 'Payload' interface.
 func (ad *AddToCartPayload) Validate() error {
 	return validate.Struct(ad)
@@ -67,6 +71,10 @@ func (po *PlaceOrderPayload) Validate() error {
 
 func (sc *SetCurrencyPayload) Validate() error {
 	return validate.Struct(sc)
+}
+
+func (sl *SetLanguagePayload) Validate() error {
+	return validate.Struct(sl)
 }
 
 // Reusable error response function.

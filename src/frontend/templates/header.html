@@ -29,12 +29,15 @@
         Online Boutique
         {{ end }}
     </title>
-    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-WskhaSGFgHYWDcbwN70/dfYBj47jz9qbsMId/iRN3ewGhXQFZCSftd1LZCfmhktB"
-        crossorigin="anonymous">
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-WskhaSGFgHYWDcbwN70/dfYBj47jz9qbsMId/iRN3ewGhXQFZCSftd1LZCfmhktB" crossorigin="anonymous">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Google+Symbols:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,700;1,400;1,700&display=swap"
+        rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Google+Symbols:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
+        rel="stylesheet" />
     <link rel="stylesheet" type="text/css" href="{{ $.baseUrl }}/static/styles/styles.css">
     <link rel="stylesheet" type="text/css" href="{{ $.baseUrl }}/static/styles/cart.css">
     <link rel="stylesheet" type="text/css" href="{{ $.baseUrl }}/static/styles/order.css">
@@ -70,10 +73,34 @@
                     <div class="h-controls">
                         <div class="h-control">
                             <span class="icon currency-icon"> {{ renderCurrencyLogo $.user_currency}}</span>
-                            <form method="POST" class="controls-form" action="{{ $.baseUrl }}/setCurrency" id="currency_form" >
-                                <select name="currency_code" onchange="document.getElementById('currency_form').submit();">
-                                        {{range $.currencies}}
-                                    <option value="{{.}}" {{if eq . $.user_currency}}selected="selected"{{end}}>{{.}}</option>
+                            <form method="POST" class="controls-form" action="{{ $.baseUrl }}/setCurrency"
+                                id="currency_form">
+                                <select name="currency_code"
+                                    onchange="document.getElementById('currency_form').submit();">
+                                    {{range $.currencies}}
+                                    <option value="{{.}}" {{if eq . $.user_currency}}selected="selected" {{end}}>{{.}}
+                                    </option>
+                                    {{end}}
+                                </select>
+                            </form>
+                            <img src="{{ $.baseUrl }}/static/icons/Hipster_DownArrow.svg" alt="" class="icon arrow" />
+                        </div>
+                    </div>
+                    {{ end }}
+
+
+                    {{ if $.show_language }}
+                    <div class="h-controls">
+                        <div class="h-control">
+                            <img class="icon currency-icon"
+                                src="{{ $.baseUrl }}/static/icons/languages/{{ $.user_language }}.png" />
+                            <form method="POST" class="controls-form" action="{{ $.baseUrl }}/setLanguage"
+                                id="language_form">
+                                <select name="language_code"
+                                    onchange="document.getElementById('language_form').submit();">
+                                    {{range $.languages}}
+                                    <option value="{{.}}" {{if eq . $.user_language}}selected="selected" {{end}}>{{.}}
+                                    </option>
                                     {{end}}
                                 </select>
                             </form>
@@ -84,12 +111,14 @@
 
                     {{ if $.assistant_enabled }}
                     <a href="{{ $.baseUrl }}/assistant" class="cart-link">
-                      <img src="{{ $.baseUrl }}/static/icons/Hipster_WandIcon.svg" style="width: 22px; height: 22px;" alt="Assistant icon" class="logo" title="Assistant" />
+                        <img src="{{ $.baseUrl }}/static/icons/Hipster_WandIcon.svg" style="width: 22px; height: 22px;"
+                            alt="Assistant icon" class="logo" title="Assistant" />
                     </a>
                     {{ end }}
 
                     <a href="{{ $.baseUrl }}/cart" class="cart-link">
-                        <img src="{{ $.baseUrl }}/static/icons/Hipster_CartIcon.svg" alt="Cart icon" class="logo" title="Cart" />
+                        <img src="{{ $.baseUrl }}/static/icons/Hipster_CartIcon.svg" alt="Cart icon" class="logo"
+                            title="Cart" />
                         {{ if $.cart_size }}
                         <span class="cart-size-circle">{{$.cart_size}}</span>
                         {{ end }}

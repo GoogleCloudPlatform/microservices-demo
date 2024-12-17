@@ -21,6 +21,12 @@ import (
 	pb "github.com/GoogleCloudPlatform/microservices-demo/src/frontend/genproto"
 
 	"github.com/pkg/errors"
+
+	"io/ioutil"
+	"net/http"
+	"encoding/json"
+	"github.com/sirupsen/logrus"
+	"bytes"
 )
 
 const (
@@ -42,16 +48,126 @@ func (fe *frontendServer) getCurrencies(ctx context.Context) ([]string, error) {
 	return out, nil
 }
 
-func (fe *frontendServer) getProducts(ctx context.Context) ([]*pb.Product, error) {
-	resp, err := pb.NewProductCatalogServiceClient(fe.productCatalogSvcConn).
-		ListProducts(ctx, &pb.Empty{})
-	return resp.GetProducts(), err
+func (fe *frontendServer) getLanguages(log logrus.FieldLogger) ([]string, error) {
+	resp, err1 := http.Get("http://languageservice:3000/getSupportedLanguages")
+
+	if err1 != nil {
+		return nil, err1
+	}
+
+	defer resp.Body.Close()
+	respBody, err2 := ioutil.ReadAll(resp.Body)
+
+	if err2 != nil {
+		return nil, err2
+	}
+
+	var body []string
+	json.Unmarshal(respBody, &body)
+
+	return body, nil
 }
 
-func (fe *frontendServer) getProduct(ctx context.Context, id string) (*pb.Product, error) {
+func (fe *frontendServer) getTranslation(translationKey string, languageCode string) (string, error) {
+
+	// url := fmt.Sprintf("http://languageservice:3000/translate?translationKey=%s&targetLanguageCode=%s", translationKey, languageCode)
+
+	// resp, err1 := http.Get(url)
+
+	// if err1 != nil {
+	// 	return "", err1
+	// }
+
+	// defer resp.Body.Close()
+
+	// body, err2 := ioutil.ReadAll(resp.Body)
+	// if err2 != nil {
+	// 	return "", err2
+	// }
+
+	// sb := string(body)
+
+	// return sb, nil
+
+	postBody, err1 := json.Marshal(map[string]string{
+		"translationKey":  translationKey,
+		"targetLanguageCode": languageCode,
+	 })
+
+	 if err1 != nil {
+		return "", err1
+	}
+
+	requestBody := bytes.NewBuffer(postBody)
+
+	resp, err2 := http.Post("http://languageservice:3000/translate", "application/json", requestBody)
+
+	if err2 != nil {
+		return "", err2
+	}
+
+	defer resp.Body.Close()
+
+	body, err3 := ioutil.ReadAll(resp.Body)
+	if err3 != nil {
+		return "", err3
+	}
+
+	sb := string(body)
+
+	return sb, nil
+}
+
+
+func (fe *frontendServer) getProducts(ctx context.Context, langCode string) ([]*pb.Product, error) {
 	resp, err := pb.NewProductCatalogServiceClient(fe.productCatalogSvcConn).
+		ListProducts(ctx, &pb.Empty{})
+	products := resp.GetProducts()
+
+	translatedProducts := make([]*pb.Product, len(products))
+    for i, product := range products {
+  		translatedProducts[i] = product
+
+		nameText, err2 := fe.getTranslation(product.Name, langCode)
+
+		if err2 == nil {
+			translatedProducts[i].Name = nameText
+		}
+	
+		descText, err3 := fe.getTranslation(product.Description, langCode)
+	
+		if err3 == nil {
+			translatedProducts[i].Description = descText
+		}
+    }
+
+    return translatedProducts, err
+}
+
+func (fe *frontendServer) getProduct(ctx context.Context, id string, langCode string) (*pb.Product, error) {
+	product, err1 := pb.NewProductCatalogServiceClient(fe.productCatalogSvcConn).
 		GetProduct(ctx, &pb.GetProductRequest{Id: id})
-	return resp, err
+
+	if err1 != nil {
+		return nil, err1
+	}
+
+	nameText, err2 := fe.getTranslation(product.Name, langCode)
+
+	if err2 != nil {
+		return product, nil
+	}
+
+	descText, err3 := fe.getTranslation(product.Description, langCode)
+
+	if err3 != nil {
+		return product, nil
+	}
+
+	product.Name = nameText
+	product.Description = descText
+
+	return product, nil
 }
 
 func (fe *frontendServer) getCart(ctx context.Context, userID string) ([]*pb.CartItem, error) {
@@ -96,7 +212,7 @@ func (fe *frontendServer) getShippingQuote(ctx context.Context, items []*pb.Cart
 	return localized, errors.Wrap(err, "failed to convert currency for shipping cost")
 }
 
-func (fe *frontendServer) getRecommendations(ctx context.Context, userID string, productIDs []string) ([]*pb.Product, error) {
+func (fe *frontendServer) getRecommendations(ctx context.Context, userID string, productIDs []string, langCode string) ([]*pb.Product, error) {
 	resp, err := pb.NewRecommendationServiceClient(fe.recommendationSvcConn).ListRecommendations(ctx,
 		&pb.ListRecommendationsRequest{UserId: userID, ProductIds: productIDs})
 	if err != nil {
@@ -104,7 +220,7 @@ func (fe *frontendServer) getRecommendations(ctx context.Context, userID string,
 	}
 	out := make([]*pb.Product, len(resp.GetProductIds()))
 	for i, v := range resp.GetProductIds() {
-		p, err := fe.getProduct(ctx, v)
+		p, err := fe.getProduct(ctx, v, langCode)
 		if err != nil {
 			return nil, errors.Wrapf(err, "failed to get recommended product info (#%s)", v)
 		}

@@ -3,5 +3,95 @@
     "en": "The test",
     "de": "Der Test",
     "es": "La prueba"
+  },
+  "prod_name_sg": {
+    "en": "Sunglasses",
+    "de": "Sonnenbrille",
+    "es": "Gafas de sol"
+  },
+  "prod_desc_sg": {
+    "en": "Add a modern touch to your outfits with these sleek aviator sunglasses.",
+    "de": "Modernisieren Sie Ihre Outfits mit dieser schicken Fliegersonnenbrille.",
+    "es": ""
+  },
+  "prod_name_tt": {
+    "en": "Tank Top",
+    "de": "Tank Top",
+    "es": "Camisa"
+  },
+  "prod_desc_tt": {
+    "en": "Perfectly cropped cotton tank, with a scooped neckline.",
+    "de": "",
+    "es": ""
+  },
+  "prod_name_w": {
+    "en": "Watch",
+    "de": "Uhr",
+    "es": "Reloj"
+  },
+  "prod_desc_w": {
+    "en": "This gold-tone stainless steel watch will work with most of your outfits.",
+    "de": "",
+    "es": ""
+  },
+  "prod_name_l": {
+    "en": "Loafers",
+    "de": "",
+    "es": ""
+  },
+  "prod_desc_l": {
+    "en": "A neat addition to your summer wardrobe.",
+    "de": "",
+    "es": ""
+  },
+  "prod_name_hd": {
+    "en": "Hairdryer",
+    "de": "",
+    "es": ""
+  },
+  "prod_desc_hd": {
+    "en": "This lightweight hairdryer has 3 heat and speed settings. It's perfect for travel.",
+    "de": "",
+    "es": ""
+  },
+  "prod_name_ch": {
+    "en": "Candle Holder",
+    "de": "",
+    "es": ""
+  },
+  "prod_desc_ch": {
+    "en": "This small but intricate candle holder is an excellent gift.",
+    "de": "",
+    "es": ""
+  },
+  "prod_name_sps": {
+    "en": "Salt & Pepper Shakers",
+    "de": "",
+    "es": ""
+  },
+  "prod_desc_sps": {
+    "en": "Add some flavor to your kitchen.",
+    "de": "",
+    "es": ""
+  },
+  "prod_name_bgj": {
+    "en": "Bamboo Glass Jar",
+    "de": "",
+    "es": ""
+  },
+  "prod_desc_bgj": {
+    "en": "This bamboo glass jar can hold 57 oz (1.7 l) and is perfect for any kitchen.",
+    "de": "",
+    "es": ""
+  },
+  "prod_name_m": {
+    "en": "Mug",
+    "de": "",
+    "es": ""
+  },
+  "prod_desc_m": {
+    "en": "A simple mug with a mustard interior.",
+    "de": "",
+    "es": ""
   }
 }

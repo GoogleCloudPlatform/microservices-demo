@@ -5,7 +5,7 @@ const { isEmpty, pathOr } = require("ramda");
 
 module.exports = (req, res) => {
   try {
-    const { translationKey, targetLanguageCode } = req;
+    const { translationKey, targetLanguageCode } = req.body;
     const { supportedLanguages, defaults } = settings;
 
     const langCode = supportedLanguages.includes(targetLanguageCode)
