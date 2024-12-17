@@ -16,6 +16,9 @@
 
 package hipstershop;
 
+
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import com.google.common.collect.ImmutableListMultimap;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
@@ -29,6 +32,8 @@ import io.grpc.health.v1.HealthCheckResponse.ServingStatus;
 import io.grpc.services.*;
 import io.grpc.stub.StreamObserver;
 import java.io.IOException;
+import java.net.URI;
+import java.net.http.HttpClient;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -204,6 +209,32 @@ public final class AdService {
 
     // TODO(arbrown) Implement OpenTelemetry stats
 
+  }
+
+  private static String getTranslation(String key){
+    String serverUrl = "http://localhost:3000/translate";
+    try {
+        // Build the URI with query parameters
+        URI uri = URI.create(serverUrl + "?key=" + key + "&language=" + "english");
+
+        // Create an HTTP client
+        HttpClient client = HttpClient.newHttpClient();
+
+        // Create the HTTP GET request
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(uri)
+                .GET()
+                .build();
+
+        // Send the request and get the response
+        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+        // Return the response body as the translation
+        return response.body();
+    } catch (IOException | InterruptedException e) {
+        e.printStackTrace();
+        return "Error occurred while fetching translation";
+    }
   }
 
   private static void initTracing() {
