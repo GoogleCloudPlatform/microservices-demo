@@ -1,6 +1,6 @@
 # Deployment of Google's Online Boutique on local Minikube cluster
 
-This project is a fork of Google's Online Boutique, which is a demo for microservices architecture ([Github](https://github.com/GoogleCloudPlatform/microservices-demo)). As part of the course "Continuous Software Engineering" at Technical University of Berlin, this project is the result of the group work of Ivan Crespo Gadea, Javad Ismayilzada and Philip Morgner. We implemented the languageservice to make Online Boutique's content available in different languages. The functionality is limited to product names and descriptions and ad content. It serves as a demo of the integration of our languageservice microservice. In the frontend, there is a dropdown to select from three different languages, English, German and Spanish. The loadgenerator microservice is enhanced to select different languages as well.
+This project is a fork of Google's Online Boutique, which is a demo for microservices architecture ([Github](https://github.com/GoogleCloudPlatform/microservices-demo)). As part of the course "Continuous Software Engineering" at Technical University of Berlin, this project is the result of the group work of Ivan Crespo Gadea, Javad Ismayilzada and Philip Morgner. We implemented the languageservice to make Online Boutique's content available in different languages. The functionality is limited to product names and descriptions and ad content. It serves as a demo of the integration of our languageservice microservice. In the frontend, there is a dropdown to select from three different languages, English, German and Spanish. The loadgenerator microservice is enhanced to select different languages as well. The default language is English.
 
 ## Prerequisites
 
@@ -150,4 +150,20 @@ kubectl apply -f ./release/kubernetes-manifests.yaml
 
 ```
 minikube service frontend-external
+```
+
+## Start languageservice as standalone service
+
+1. Open terminal and `cd` into languageservice directory
+
+```
+cd microservices-demo/src/languageservice
+```
+
+2. Start the service
+
+   **Note: Use `PORT` env variable to change port it is running on (default: 3000)**
+
+```
+node index.js
 ```
