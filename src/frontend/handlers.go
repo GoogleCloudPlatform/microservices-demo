@@ -120,7 +120,6 @@ func (fe *frontendServer) homeHandler(w http.ResponseWriter, r *http.Request) {
 		"show_language": true,
 		"languages":     languages,
 		"currencies":    currencies,
-		"languages":	 languages,
 		"products":      ps,
 		"cart_size":     cartSize(cart),
 		"banner_color":  os.Getenv("BANNER_COLOR"), // illustrates canary deployments
@@ -593,6 +592,7 @@ func (fe *frontendServer) setLanguageHandler(w http.ResponseWriter, r *http.Requ
 	w.Header().Set("Location", referer)
 	w.WriteHeader(http.StatusFound)
 }
+
 
 // chooseAd queries for advertisements available and randomly chooses one, if
 // available. It ignores the error retrieving the ad since it is not critical.

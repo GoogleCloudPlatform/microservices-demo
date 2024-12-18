@@ -39,6 +39,7 @@ const (
 	defaultCurrency = "USD"
 	defaultLanguage = "en"
 	cookieMaxAge    = 60 * 60 * 48
+
 	cookiePrefix    = "shop_"
 	cookieSessionID = cookiePrefix + "session-id"
 	cookieCurrency  = cookiePrefix + "currency"
@@ -55,12 +56,6 @@ var (
 		"TRY": true,
 	}
 
-	whitelistedLanguages = map[string]bool{
-		"en": true,
-		"de": true,
-		"es": true,
-	}
-
 	baseUrl         = ""
 )
 
@@ -72,9 +67,6 @@ type frontendServer struct {
 
 	currencySvcAddr string
 	currencySvcConn *grpc.ClientConn
-
-	languageSvcAddr string
-	languageSvcConn *grpc.ClientConn
 
 	cartSvcAddr string
 	cartSvcConn *grpc.ClientConn

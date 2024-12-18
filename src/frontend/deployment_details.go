@@ -45,8 +45,6 @@ func loadDeploymentDetails() {
 	podCluster, err := metaServerClient.InstanceAttributeValue("cluster-name")
 	if err != nil {
 		log.Error("Failed to fetch the name of the cluster in which the pod is running", err)
-		time.Sleep(5 * time.Second)
-		loadDeploymentDetails()
 	}
 
 	podZone, err := metaServerClient.Zone()

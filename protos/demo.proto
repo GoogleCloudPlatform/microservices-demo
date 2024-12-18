@@ -260,26 +260,3 @@ message Ad {
     // short advertisement text to display.
     string text = 2;
 }
-
-// -----------------Language service-----------------
-
-service LanguageService {
-    rpc GetSupportedLanguages(Empty) returns (GetSupportedLanguagesResponse) {}
-    rpc Translate(TranslationRequest) returns (TranslationResponse) {}
-}
-
-message TranslationResponse {
-    string language_code = 1;
-
-    string translation_result = 2;
-}
-
-message GetSupportedLanguagesResponse {
-    repeated string language_codes = 1;
-}
-
-message TranslationRequest {
-    string translation_key = 1;
-    
-    string target_language_code = 2;
-}

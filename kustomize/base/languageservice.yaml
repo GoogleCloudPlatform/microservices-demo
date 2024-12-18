@@ -56,11 +56,7 @@ spec:
   selector:
     app: languageservice
   ports:
-<<<<<<< HEAD
-    - name: grpc
-=======
     - name: express
->>>>>>> aa315d45d737d85a3db388ba2aa4a14ad96c370f
       port: 3000
       targetPort: 3000
 ---
