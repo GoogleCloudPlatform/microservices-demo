@@ -46,10 +46,10 @@ build:
     context: src/frontend
   - image: adservice
     context: src/adservice
-  # - image: bannerservice
-  #   context: src/bannerservice
-  #   docker:
-  #     dockerfile: Dockerfile
+  - image: bannerservice
+    context: src/bannerservice
+    docker:
+      dockerfile: Dockerfile
   tagPolicy:
     gitCommit: {}
   local:
@@ -58,8 +58,8 @@ manifests:
   kustomize:
     paths:
     - kubernetes-manifests
-  # rawYaml:
-  # - ./kubernetes-manifests/bannerservice.yaml
+  rawYaml:
+  - kubernetes-manifests/bannerservice.yaml
 deploy:
   kubectl: {}
 # "gcb" profile allows building and pushing the images
@@ -96,51 +96,27 @@ profiles:
   - op: add
     path: /manifests/kustomize/paths/1
     value: kustomize/components/network-policies
----
-apiVersion: skaffold/v3
-kind: Config
-metadata:
-  name: loadgenerator
-requires:
-- configs:
-  - app
-build:
-  artifacts:
-  - image: loadgenerator
-    context: src/loadgenerator
-manifests:
-  rawYaml:
-  - ./kubernetes-manifests/loadgenerator.yaml
-deploy:
-  kubectl: {}
-profiles:
-- name: gcb
-  build:
-    googleCloudBuild:
-      diskSizeGb: 300
-      machineType: N1_HIGHCPU_32
-      timeout: 4000s
----
-apiVersion: skaffold/v3
-kind: Config
-metadata:
-  name: bannerservice
-requires:
-- configs:
-  - app
-build:
-  artifacts:
-  - image: bannerservice
-    context: src/bannerservice
-manifests:
-  rawYaml:
-  - ./kubernetes-manifests/bannerservice.yaml
-deploy:
-  kubectl: {}
-profiles:
-- name: gcb
-  build:
-    googleCloudBuild:
-      diskSizeGb: 300
-      machineType: N1_HIGHCPU_32
-      timeout: 4000s
+# ---
+# apiVersion: skaffold/v3
+# kind: Config
+# metadata:
+#   name: loadgenerator
+# requires:
+# - configs:
+#   - app
+# build:
+#   artifacts:
+#   - image: loadgenerator
+#     context: src/loadgenerator
+# manifests:
+#   rawYaml:
+#   - ./kubernetes-manifests/loadgenerator.yaml
+# deploy:
+#   kubectl: {}
+# profiles:
+# - name: gcb
+#   build:
+#     googleCloudBuild:
+#       diskSizeGb: 300
+#       machineType: N1_HIGHCPU_32
+#       timeout: 4000s
