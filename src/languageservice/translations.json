@@ -12,7 +12,7 @@
   "prod_desc_sg": {
     "en": "Add a modern touch to your outfits with these sleek aviator sunglasses.",
     "de": "Modernisieren Sie Ihre Outfits mit dieser schicken Fliegersonnenbrille.",
-    "es": ""
+    "es": "Añade un toque moderno a tus conjuntos con estas elegantes gafas de sol de aviador."
   },
   "prod_name_tt": {
     "en": "Tank Top",
@@ -21,8 +21,8 @@
   },
   "prod_desc_tt": {
     "en": "Perfectly cropped cotton tank, with a scooped neckline.",
-    "de": "",
-    "es": ""
+    "de": "Perfekt geschnittenes Baumwolltanktop mit Rundhalsausschnitt.",
+    "es": "Camiseta perfectamente recortada, con un escote redondo."
   },
   "prod_name_w": {
     "en": "Watch",
@@ -31,67 +31,102 @@
   },
   "prod_desc_w": {
     "en": "This gold-tone stainless steel watch will work with most of your outfits.",
-    "de": "",
-    "es": ""
+    "de": "Diese goldfarbene Edelstahluhr passt zu den meisten Ihrer Outfits.",
+    "es": "Este reloj de acero inoxidable y de tono dorado combinará con la mayoría de tus conjuntos."
   },
   "prod_name_l": {
     "en": "Loafers",
-    "de": "",
-    "es": ""
+    "de": "Slipper",
+    "es": "Zapatos"
   },
   "prod_desc_l": {
     "en": "A neat addition to your summer wardrobe.",
-    "de": "",
-    "es": ""
+    "de": "Eine ordentliche Ergänzung zu Ihrer Sommergarderobe.",
+    "es": "Una adición elegante a tu armario de verano."
   },
   "prod_name_hd": {
     "en": "Hairdryer",
-    "de": "",
-    "es": ""
+    "de": "Haartrockner",
+    "es": "Secador de pelo"
   },
   "prod_desc_hd": {
     "en": "This lightweight hairdryer has 3 heat and speed settings. It's perfect for travel.",
-    "de": "",
-    "es": ""
+    "de": "Dieser leichte Haartrockner hat 3 Wärme- und Geschwindigkeitseinstellungen. Perfekt für unterwegs.",
+    "es": "Este secador de pelo ligero tiene 3 ajustes de calor y velocidad. Es perfecto para viajar."
   },
   "prod_name_ch": {
     "en": "Candle Holder",
-    "de": "",
-    "es": ""
+    "de": "Kerzenhalter",
+    "es": "Sujeta velas"
   },
   "prod_desc_ch": {
     "en": "This small but intricate candle holder is an excellent gift.",
-    "de": "",
-    "es": ""
+    "de": "Dieser kleine, aber kunstvolle Kerzenhalter ist ein ausgezeichnetes Geschenk.",
+    "es": "Este pequeño pero intrincado sujeta velas es un excelente regalo."
   },
   "prod_name_sps": {
     "en": "Salt & Pepper Shakers",
-    "de": "",
-    "es": ""
+    "de": "Salz- und Pfefferstreuer",
+    "es": "Salero y pimentero"
   },
   "prod_desc_sps": {
     "en": "Add some flavor to your kitchen.",
-    "de": "",
-    "es": ""
+    "de": "Bringen Sie etwas Geschmack in Ihre Küche.",
+    "es": "Añade sabor a tu cocina."
   },
   "prod_name_bgj": {
     "en": "Bamboo Glass Jar",
-    "de": "",
-    "es": ""
+    "de": "Bambusglasbehälter",
+    "es": "Tarro de cristal de bambú"
   },
   "prod_desc_bgj": {
     "en": "This bamboo glass jar can hold 57 oz (1.7 l) and is perfect for any kitchen.",
-    "de": "",
-    "es": ""
+    "de": "Dieser Bambusglasbehälter fasst 57 oz (1,7 l) und ist perfekt für jede Küche.",
+    "es": "Este tarro de cristal de bambú puede contener 57 oz (1,7 l) y es perfecto para cualquier cocina."
   },
   "prod_name_m": {
     "en": "Mug",
-    "de": "",
-    "es": ""
+    "de": "Becher",
+    "es": "Taza"
   },
   "prod_desc_m": {
     "en": "A simple mug with a mustard interior.",
-    "de": "",
-    "es": ""
+    "de": "Ein einfacher Becher mit einem Senf-Innenraum.",
+    "es": "Una taza sencilla con un interior color mostaza."
+  },
+  "adHairdryer":{ 
+    "en": "Hairdryer for sale. 50% off",
+    "de": "Haartrockner im Angebot. 50% Rabatt",
+    "es": "Secador de pelo en oferta. 50% de descuento"
+  },
+  "adTankTop": {
+    "en": "Tank top for sale. 20% off.",
+    "de": "Tanktop im Angebot. 20% Rabatt.",
+    "es": "Camiseta sin mangas en oferta. 20% de descuento."
+  },
+  "Candle holder for sale. 30% off.":{ 
+    "en": "Candle holder for sale. 30% off.",
+    "de": "Kerzenhalter im Angebot. 20% Rabatt.",
+    "es": "Sujeta velas en oferta. 20% de descuento."
+  },
+  "adBambooGlass": {
+    "en": "Bamboo glass jar for sale. 10% off.",
+    "de": "Bambusglasbehälter im Angebot. 10% Rabatt.",
+    "es": "Tarro de cristal de bambú en oferta. 10% de descuento."
+  },
+  "adWatch": {
+    "en": "Watch for sale. Buy one, get second kit for free",
+    "de": "Uhr im Angebot. Kaufen Sie eine, erhalten Sie das zweite Kit kostenlos",
+    "es": "Reloj en oferta. Compra uno y el segundo de regalo"
+  },
+  "adMug": {
+    "en": "Mug for sale. Buy two, get third one for free",
+    "de": "Becher im Angebot. Kaufen Sie zwei, erhalten Sie den dritten kostenlos",
+    "es": "Taza en oferta. Compra dos y la tercera de regalo"
+  },
+  "adLoafers": {
+    "en": "Loafers for sale. Buy one, get second one for free",
+    "de": "Slipper im Angebot. Kaufen Sie ein Paar, erhalten Sie das zweite Paar kostenlos",
+    "es": "Zapatos en oferta. Compra un par y el segundo de regalo"
   }
 }
