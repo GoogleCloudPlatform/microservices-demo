@@ -37,13 +37,12 @@ import (
 const (
 	port            = "8080"
 	defaultCurrency = "USD"
-	defaultLanguage = "English"
+	defaultLanguage = "en"
 	cookieMaxAge    = 60 * 60 * 48
 	cookiePrefix    = "shop_"
 	cookieSessionID = cookiePrefix + "session-id"
 	cookieCurrency  = cookiePrefix + "currency"
 	cookieLanguage  = cookiePrefix + "language"
-
 )
 
 var (

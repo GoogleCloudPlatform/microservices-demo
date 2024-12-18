@@ -184,8 +184,8 @@ spec:
     to:
     - operation:
         paths:
-        - /hipstershop.CurrencyService/Convert
-        - /hipstershop.CurrencyService/GetSupportedCurrencies
+        - /hipstershop.LanguageService/Translate
+        - /hipstershop.LanguageService/GetSupportedLanguages
         methods:
         - POST
         ports:

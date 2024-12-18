@@ -88,10 +88,12 @@
                     </div>
                     {{ end }}
 
+
                     {{ if $.show_language }}
                     <div class="h-controls">
                         <div class="h-control">
-                            <span class="icon language-icon"> {{ renderLanguageLogo $.user_language}}</span>
+                            <img class="icon currency-icon"
+                                src="{{ $.baseUrl }}/static/icons/languages/{{ $.user_language }}.png" />
                             <form method="POST" class="controls-form" action="{{ $.baseUrl }}/setLanguage"
                                 id="language_form">
                                 <select name="language_code"

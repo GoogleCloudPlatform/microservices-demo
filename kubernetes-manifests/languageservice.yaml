@@ -31,19 +31,13 @@ spec:
             readOnlyRootFilesystem: true
           image: languageservice
           ports:
-            - name: grpc
+            - name: express
               containerPort: 3000
           env:
             - name: PORT
               value: "3000"
-            - name: DISABLE_PROFILER
-              value: "1"
-          readinessProbe:
-            grpc:
-              port: 3000
-          livenessProbe:
-            grpc:
-              port: 3000
+            - name: SERVICE_NAME
+              value: languageservice
           resources:
             requests:
               cpu: 100m
@@ -63,7 +57,7 @@ spec:
   selector:
     app: languageservice
   ports:
-    - name: grpc
+    - name: express
       port: 3000
       targetPort: 3000
 ---

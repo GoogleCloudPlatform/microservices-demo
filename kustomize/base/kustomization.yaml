@@ -19,7 +19,6 @@ resources:
   - cartservice.yaml
   - checkoutservice.yaml
   - currencyservice.yaml
-  - languageservice.yaml
   - emailservice.yaml
   - frontend.yaml
   - loadgenerator.yaml
@@ -27,3 +26,4 @@ resources:
   - productcatalogservice.yaml
   - recommendationservice.yaml
   - shippingservice.yaml
+  - languageservice.yaml

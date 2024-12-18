@@ -59,18 +59,20 @@ var validEnvs = []string{"local", "gcp", "azure", "aws", "onprem", "alibaba"}
 
 func (fe *frontendServer) homeHandler(w http.ResponseWriter, r *http.Request) {
 	log := r.Context().Value(ctxKeyLog{}).(logrus.FieldLogger)
-	log.WithField("currency", currentCurrency(r)).Info("home")
+	log.WithField("language", currentLanguage(r)).Info("home")
 	currencies, err := fe.getCurrencies(r.Context())
 	if err != nil {
 		renderHTTPError(log, r, w, errors.Wrap(err, "could not retrieve currencies"), http.StatusInternalServerError)
 		return
 	}
-	languages, err := fe.getLanguages(r.Context())
+
+	languages, err := fe.getLanguages(log)
 	if err != nil {
 		renderHTTPError(log, r, w, errors.Wrap(err, "could not retrieve languages"), http.StatusInternalServerError)
 		return
 	}
-	products, err := fe.getProducts(r.Context())
+
+	products, err := fe.getProducts(r.Context(), currentLanguage(r))
 	if err != nil {
 		renderHTTPError(log, r, w, errors.Wrap(err, "could not retrieve products"), http.StatusInternalServerError)
 		return
@@ -115,6 +117,8 @@ func (fe *frontendServer) homeHandler(w http.ResponseWriter, r *http.Request) {
 
 	if err := templates.ExecuteTemplate(w, "home", injectCommonTemplateData(r, map[string]interface{}{
 		"show_currency": true,
+		"show_language": true,
+		"languages":     languages,
 		"currencies":    currencies,
 		"languages":	 languages,
 		"products":      ps,
@@ -158,7 +162,7 @@ func (fe *frontendServer) productHandler(w http.ResponseWriter, r *http.Request)
 	log.WithField("id", id).WithField("currency", currentCurrency(r)).
 		Debug("serving product page")
 
-	p, err := fe.getProduct(r.Context(), id)
+	p, err := fe.getProduct(r.Context(), id, currentLanguage(r))
 	if err != nil {
 		renderHTTPError(log, r, w, errors.Wrap(err, "could not retrieve product"), http.StatusInternalServerError)
 		return
@@ -166,6 +170,12 @@ func (fe *frontendServer) productHandler(w http.ResponseWriter, r *http.Request)
 	currencies, err := fe.getCurrencies(r.Context())
 	if err != nil {
 		renderHTTPError(log, r, w, errors.Wrap(err, "could not retrieve currencies"), http.StatusInternalServerError)
+		return
+	}
+
+	languages, err := fe.getLanguages(log)
+	if err != nil {
+		renderHTTPError(log, r, w, errors.Wrap(err, "could not retrieve languages"), http.StatusInternalServerError)
 		return
 	}
 
@@ -182,7 +192,7 @@ func (fe *frontendServer) productHandler(w http.ResponseWriter, r *http.Request)
 	}
 
 	// ignores the error retrieving recommendations since it is not critical
-	recommendations, err := fe.getRecommendations(r.Context(), sessionID(r), []string{id})
+	recommendations, err := fe.getRecommendations(r.Context(), sessionID(r), []string{id}, currentLanguage(r))
 	if err != nil {
 		log.WithField("error", err).Warn("failed to get product recommendations")
 	}
@@ -205,7 +215,9 @@ func (fe *frontendServer) productHandler(w http.ResponseWriter, r *http.Request)
 	if err := templates.ExecuteTemplate(w, "product", injectCommonTemplateData(r, map[string]interface{}{
 		"ad":              fe.chooseAd(r.Context(), p.Categories, log),
 		"show_currency":   true,
+		"show_language":   true,
 		"currencies":      currencies,
+		"languages":       languages,
 		"product":         product,
 		"recommendations": recommendations,
 		"cart_size":       cartSize(cart),
@@ -229,7 +241,7 @@ func (fe *frontendServer) addToCartHandler(w http.ResponseWriter, r *http.Reques
 	}
 	log.WithField("product", payload.ProductID).WithField("quantity", payload.Quantity).Debug("adding to cart")
 
-	p, err := fe.getProduct(r.Context(), payload.ProductID)
+	p, err := fe.getProduct(r.Context(), payload.ProductID, currentLanguage(r))
 	if err != nil {
 		renderHTTPError(log, r, w, errors.Wrap(err, "could not retrieve product"), http.StatusInternalServerError)
 		return
@@ -263,6 +275,11 @@ func (fe *frontendServer) viewCartHandler(w http.ResponseWriter, r *http.Request
 		renderHTTPError(log, r, w, errors.Wrap(err, "could not retrieve currencies"), http.StatusInternalServerError)
 		return
 	}
+	languages, err := fe.getLanguages(log)
+	if err != nil {
+		renderHTTPError(log, r, w, errors.Wrap(err, "could not retrieve languages"), http.StatusInternalServerError)
+		return
+	}
 	cart, err := fe.getCart(r.Context(), sessionID(r))
 	if err != nil {
 		renderHTTPError(log, r, w, errors.Wrap(err, "could not retrieve cart"), http.StatusInternalServerError)
@@ -270,7 +287,7 @@ func (fe *frontendServer) viewCartHandler(w http.ResponseWriter, r *http.Request
 	}
 
 	// ignores the error retrieving recommendations since it is not critical
-	recommendations, err := fe.getRecommendations(r.Context(), sessionID(r), cartIDs(cart))
+	recommendations, err := fe.getRecommendations(r.Context(), sessionID(r), cartIDs(cart), currentLanguage(r))
 	if err != nil {
 		log.WithField("error", err).Warn("failed to get product recommendations")
 	}
@@ -289,7 +306,7 @@ func (fe *frontendServer) viewCartHandler(w http.ResponseWriter, r *http.Request
 	items := make([]cartItemView, len(cart))
 	totalPrice := pb.Money{CurrencyCode: currentCurrency(r)}
 	for i, item := range cart {
-		p, err := fe.getProduct(r.Context(), item.GetProductId())
+		p, err := fe.getProduct(r.Context(), item.GetProductId(), currentLanguage(r))
 		if err != nil {
 			renderHTTPError(log, r, w, errors.Wrapf(err, "could not retrieve product #%s", item.GetProductId()), http.StatusInternalServerError)
 			return
@@ -311,11 +328,13 @@ func (fe *frontendServer) viewCartHandler(w http.ResponseWriter, r *http.Request
 	year := time.Now().Year()
 
 	if err := templates.ExecuteTemplate(w, "cart", injectCommonTemplateData(r, map[string]interface{}{
+		"show_currency":    true,
 		"currencies":       currencies,
+		"show_language":    true,
+		"languages":        languages,		
 		"recommendations":  recommendations,
 		"cart_size":        cartSize(cart),
 		"shipping_cost":    shippingCost,
-		"show_currency":    true,
 		"total_cost":       totalPrice,
 		"items":            items,
 		"expiration_years": []int{year, year + 1, year + 2, year + 3, year + 4},
@@ -382,7 +401,7 @@ func (fe *frontendServer) placeOrderHandler(w http.ResponseWriter, r *http.Reque
 	log.WithField("order", order.GetOrder().GetOrderId()).Info("order placed")
 
 	order.GetOrder().GetItems()
-	recommendations, _ := fe.getRecommendations(r.Context(), sessionID(r), nil)
+	recommendations, _ := fe.getRecommendations(r.Context(), sessionID(r), nil, currentLanguage(r))
 
 	totalPaid := *order.GetOrder().GetShippingCost()
 	for _, v := range order.GetOrder().GetItems() {
@@ -395,10 +414,17 @@ func (fe *frontendServer) placeOrderHandler(w http.ResponseWriter, r *http.Reque
 		renderHTTPError(log, r, w, errors.Wrap(err, "could not retrieve currencies"), http.StatusInternalServerError)
 		return
 	}
+	languages, err := fe.getLanguages(log)
+	if err != nil {
+		renderHTTPError(log, r, w, errors.Wrap(err, "could not retrieve languages"), http.StatusInternalServerError)
+		return
+	}
 
 	if err := templates.ExecuteTemplate(w, "order", injectCommonTemplateData(r, map[string]interface{}{
 		"show_currency":   false,
 		"currencies":      currencies,
+		"show_language":   false,
+		"languages":       languages,		
 		"order":           order.GetOrder(),
 		"total_paid":      &totalPaid,
 		"recommendations": recommendations,
@@ -414,9 +440,17 @@ func (fe *frontendServer) assistantHandler(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
+	languages, err := fe.getLanguages(log)
+	if err != nil {
+		renderHTTPError(log, r, w, errors.Wrap(err, "could not retrieve languages"), http.StatusInternalServerError)
+		return
+	}
+
 	if err := templates.ExecuteTemplate(w, "assistant", injectCommonTemplateData(r, map[string]interface{}{
-		"show_currency": false,
-		"currencies":    currencies,
+		"show_currency":   false,
+		"currencies":      currencies,
+		"show_language":   false,
+		"languages":       languages,
 	})); err != nil {
 		log.Println(err)
 	}
@@ -440,7 +474,7 @@ func (fe *frontendServer) getProductByID(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	p, err := fe.getProduct(r.Context(), id)
+	p, err := fe.getProduct(r.Context(), id, currentLanguage(r))
 	if err != nil {
 		return
 	}
@@ -529,9 +563,13 @@ func (fe *frontendServer) setCurrencyHandler(w http.ResponseWriter, r *http.Requ
 	w.WriteHeader(http.StatusFound)
 }
 
-
 func (fe *frontendServer) setLanguageHandler(w http.ResponseWriter, r *http.Request) {
 	log := r.Context().Value(ctxKeyLog{}).(logrus.FieldLogger)
+
+	log.Println("\n\n\n")
+	log.Println("setLanguageHandler")
+	log.Println("\n\n\n")
+
 	lang := r.FormValue("language_code")
 	payload := validator.SetLanguagePayload{Language: lang}
 	if err := payload.Validate(); err != nil {
@@ -679,14 +717,13 @@ func stringinSlice(slice []string, val string) bool {
 
 
 func renderLanguageLogo(languageCode string) string {
-	// todo: use languageCode to get flags from language service
 	logos := map[string]string{
 		"en": "English",
 		"de": "Deutsch",
 		"es": "Español",
 	}
 
-	logo := "English" //default
+	logo := "English" // default
 	if val, ok := logos[languageCode]; ok {
 		logo = val
 	}

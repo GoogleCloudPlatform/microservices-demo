@@ -1,0 +1,11 @@
+{
+  "name": "languageservice",
+  "version": "1.0.0",
+  "description": "simple translation service based on hardcoded translation keys",
+  "main": "index.js",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.21.2",
+    "ramda": "^0.30.1"
+  }
+}

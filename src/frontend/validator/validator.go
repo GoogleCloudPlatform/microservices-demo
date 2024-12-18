@@ -73,11 +73,9 @@ func (sc *SetCurrencyPayload) Validate() error {
 	return validate.Struct(sc)
 }
 
-
-func (sc *SetLanguagePayload) Validate() error {
-	return validate.Struct(sc)
+func (sl *SetLanguagePayload) Validate() error {
+	return validate.Struct(sl)
 }
-
 
 // Reusable error response function.
 func ValidationErrorResponse(err error) error {
