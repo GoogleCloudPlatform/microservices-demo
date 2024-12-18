@@ -19,6 +19,7 @@ import (
 	"time"
 
 	pb "github.com/GoogleCloudPlatform/microservices-demo/src/frontend/genproto"
+	"github.com/GoogleCloudPlatform/microservices-demo/src/frontend/banner_service"
 
 	"github.com/pkg/errors"
 )
@@ -124,4 +125,11 @@ func (fe *frontendServer) getAd(ctx context.Context, ctxKeys []string) ([]*pb.Ad
 		ContextKeys: ctxKeys,
 	})
 	return resp.GetAds(), errors.Wrap(err, "failed to get ads")
+}
+
+func (fe *frontendServer) getCurrentBanner(ctx context.Context, locationCode string) (*bannerpb.GetCurrentBannerResponse, error) {
+	resp, err := bannerpb.NewBannerServiceClient(fe.bannerSvcConn).GetCurrentBanner(ctx, &bannerpb.GetCurrentBannerRequest{
+		Location: locationCode,
+	})
+	return resp, errors.Wrap(err, "failed to get current banner")
 }

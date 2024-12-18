@@ -74,6 +74,12 @@ func (fe *frontendServer) homeHandler(w http.ResponseWriter, r *http.Request) {
 		renderHTTPError(log, r, w, errors.Wrap(err, "could not retrieve cart"), http.StatusInternalServerError)
 		return
 	}
+	bannerResp, err := fe.getCurrentBanner(r.Context(), "DE")
+	if err != nil {
+		renderHTTPError(log, r, w, errors.Wrap(err, "could not retrieve current banner"), http.StatusInternalServerError)
+		return
+	}
+	log.Infof("Banner title received: %s", bannerResp.GetTitle())
 
 	type productView struct {
 		Item  *pb.Product
