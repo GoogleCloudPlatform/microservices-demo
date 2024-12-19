@@ -2,7 +2,7 @@ name: GitHub Actions Demo
 run-name: ${{ github.actor }} is testing out GitHub Actions 🚀
 on: [push]
 jobs:
-  Explore-GitHub-Actions:
+  Deploy-Services-via-Ansible:
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository code
@@ -17,7 +17,7 @@ jobs:
       #   run: ansible-playbook .ansible/main.yaml -i $TARGET_SERVER_IP_ADDR,
       #   env:
       #     TARGET_SERVER_IP_ADDR: ${{ secrets.TARGET_SERVER_IP_ADDR }}
-    - name: Run playbook
+      - name: Run playbook
         uses: dawidd6/action-ansible-playbook@v2
         with:
           # Required, playbook filepath
