@@ -13,5 +13,5 @@ jobs:
         run: |
           ls ${{ github.workspace }}
       - run: sudo apt install ansible-core
-      - run: ansible-playbook .ansible/main.yaml -i {{ secrets.TARGET_SERVER_IP_ADDR }},
+      - run: ansible-playbook .ansible/main.yaml -i ${{ secrets.TARGET_SERVER_IP_ADDR }},
       - run: echo "🍏 This job's status is ${{ job.status }}."
