@@ -109,7 +109,6 @@ jobs:
           kubectl wait --for=condition=available --timeout=1000s deployment/productcatalogservice
           kubectl wait --for=condition=available --timeout=1000s deployment/recommendationservice
           kubectl wait --for=condition=available --timeout=1000s deployment/shippingservice
-          kubectl wait --for=condition=available --timeout=1000s deployment/languageservice
       - name: Query EXTERNAL_IP for staging
         timeout-minutes: 5
         run: |

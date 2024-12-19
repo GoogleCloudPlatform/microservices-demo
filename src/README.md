@@ -2,13 +2,15 @@
 
 This project is a fork of Google's Online Boutique, which is a demo for microservices architecture ([Github](https://github.com/GoogleCloudPlatform/microservices-demo)). As part of the course "Continuous Software Engineering" at Technical University of Berlin, this project is the result of the group work of Ivan Crespo Gadea, Javad Ismayilzada and Philip Morgner. We implemented the languageservice to make Online Boutique's content available in different languages. The functionality is limited to product names and descriptions and ad content. It serves as a demo of the integration of our languageservice microservice. In the frontend, there is a dropdown to select from three different languages, English, German and Spanish. The loadgenerator microservice is enhanced to select different languages as well. The default language is English.
 
+Furthermore, we integrated the project with Ansible to enable a simple deployment process to a minikube cluster on a remote server. Currently it is only tested for localhost and prerequisites (docker, minikube, skaffold, kubectl) must be pre-installed. In a next step we created Github Actions to automate the deployment process and leverage Github's Container Registry (ghrc).
+
+---
+
 ## Prerequisites
 
-0. Make sure you have all dependencies installed: [minikube](https://minikube.sigs.k8s.io/docs/start/?arch=%2Flinux%2Fx86-64%2Fstable%2Fbinary+download), [kubectl](https://kubernetes.io/docs/reference/kubectl/), [skaffold](https://skaffold.dev/), [docker](https://www.docker.com/).
+1. Make sure you have all dependencies installed: [minikube](https://minikube.sigs.k8s.io/docs/start/?arch=%2Flinux%2Fx86-64%2Fstable%2Fbinary+download), [kubectl](https://kubernetes.io/docs/reference/kubectl/), [skaffold](https://skaffold.dev/), [docker](https://www.docker.com/).
 
-1. Open a terminal
-
-2. Clone this project:
+2. Open a terminal and clone this project:
 
 ```
 git clone git@github.com:philip-morgner/microservices-demo.git
@@ -21,6 +23,8 @@ cd microservices-demo
 ```
 
 4. Follow steps in `Getting started` section
+
+---
 
 ## Getting started
 
@@ -54,6 +58,26 @@ skaffold run
 
 ```
 minikube service frontend-external
+```
+
+---
+
+## Deployment via Ansible
+
+This has been tested for Ubuntu 24.04 with localhost as target server.
+
+1. Install Ansible
+
+```
+sudo apt install ansible-core
+```
+
+2. Adjust the hosts file (currently configured to deploy on localhost)
+
+3. Start the playbook
+
+```
+ansible-playbook .ansible/main.yaml -i hosts
 ```
 
 ---
@@ -118,7 +142,7 @@ docker container ls -a
 
 ---
 
-## Delete previous minikube cluster
+## Delete previous Minikube cluster
 
 If there was an existing minikube cluster with less resources, delete it and create a new one.
 
@@ -151,6 +175,8 @@ kubectl apply -f ./release/kubernetes-manifests.yaml
 ```
 minikube service frontend-external
 ```
+
+---
 
 ## Start languageservice as standalone service
 

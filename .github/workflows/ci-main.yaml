@@ -103,7 +103,6 @@ jobs:
           kubectl wait --for=condition=available --timeout=1000s deployment/productcatalogservice
           kubectl wait --for=condition=available --timeout=1000s deployment/recommendationservice
           kubectl wait --for=condition=available --timeout=1000s deployment/shippingservice
-          kubectl wait --for=condition=available --timeout=1000s deployment/languageservice
       - name: Smoke Test
         timeout-minutes: 5
         run: |

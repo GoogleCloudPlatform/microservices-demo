@@ -1,0 +1,78 @@
+---
+- name: Deploy Google's Online Boutique on Minikube
+  hosts: localhost
+  gather_facts: False
+
+  vars:
+    source_path: "~/cse/microservices-demo/"
+    artifacts_directory: "~/ansible_artifacts/"
+
+  pre_tasks:
+    - name: Confirm docker is installed
+      ansible.builtin.command: docker --version
+
+    - name: confirm minikube is installed
+      ansible.builtin.command: minikube version
+
+    - name: confirm skaffold is installed
+      ansible.builtin.command: skaffold version
+
+    - name: check if minikube cluster is running
+      ansible.builtin.command: minikube status
+      register: minikube_cluster
+      changed_when: false
+      ignore_errors: true
+
+    - name: start minikube if it's not running.
+      ansible.builtin.command: minikube start --cpus=4 --memory=8192 --driver=docker
+      when: "not minikube_cluster.stdout or 'Running' not in minikube_cluster.stdout"
+
+    - name: confirm kubectl is installed
+      ansible.builtin.command: kubectl version
+
+    - name: create artifacts directory
+      ansible.builtin.file:
+        path: "{{ artifacts_directory }}"
+        state: directory
+        mode: "0755"
+
+  tasks:
+    - name: copy source files to remote
+      ansible.builtin.copy:
+        src: "{{ source_path }}"
+        dest: "{{ artifacts_directory }}"
+
+    - name: build images using skaffold build
+      ansible.builtin.command: skaffold build
+      args:
+        chdir: "{{ artifacts_directory }}"
+
+    - name: deploy on cluster using skaffold run
+      ansible.builtin.command: skaffold run
+      args:
+        chdir: "{{ artifacts_directory }}"
+
+  post_tasks:
+    - name: remove artifacts directory
+      ansible.builtin.file:
+        path: "{{ artifacts_directory }}"
+        state: absent
+
+    - name: check if pods are running on cluster
+      ansible.builtin.command: kubectl get pods
+      register: pods
+
+    - name: echo pods on success
+      ansible.builtin.debug:
+        var: pods.stdout_lines
+      when: pods.stdout | length > 0
+
+    - name: echo pods on error
+      ansible.builtin.debug:
+        var: pods.stderr_lines
+      when: pods.stderr | length > 0
+
+    - name: Fail when pods are not running
+      ansible.builtin.fail:
+        msg: failed to deploy
+      when: pods.stderr | length > 0
