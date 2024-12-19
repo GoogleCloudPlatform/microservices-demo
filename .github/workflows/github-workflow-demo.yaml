@@ -1,34 +1,20 @@
-name: GitHub Actions Demo
-run-name: ${{ github.actor }} is testing out GitHub Actions 🚀
-on: [push]
+name: Continuous Deployment via Ansible
+run-name: Deploy microservices-demo
+on:
+  push:
+    branches:
+      - main
 jobs:
   Deploy-Services-via-Ansible:
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository code
         uses: actions/checkout@v4
-      - run: echo "💡 The ${{ github.repository }} repository has been cloned to the runner."
-      - run: echo "🖥️ The workflow is now ready to test your code on the runner."
-      - name: List files in the repository
-        run: |
-          ls ${{ github.workspace }}
-      - run: sudo apt install ansible-core
-      - name: Run the playbook
+
+      - name: Install ansible
+        run: sudo apt install ansible-core
+
+      - name: Run playbook
         env:
           TARGET_SERVER_IP_ADDR: ${{ secrets.TARGET_SERVER_IP_ADDR }}
-        run: |
-          echo "The secret ip is: $TARGET_SERVER_IP_ADDR"
-          ansible-playbook .ansible/main.yaml -i $TARGET_SERVER_IP_ADDR,
-
-      # - name: Run playbook
-      #   uses: dawidd6/action-ansible-playbook@v2
-      #   with:
-      #     # Required, playbook filepath
-      #     playbook: main.yaml
-      #     # Optional, directory where playbooks live
-      #     directory: .ansible/
-      #     # Optional, literal inventory file contents
-      #     inventory: |
-      #       [all]
-      #       ${{ secrets.TARGET_SERVER_IP_ADDR }}
-      - run: echo "🍏 This job's status is ${{ job.status }}."
+        run: ansible-playbook .ansible/main.yaml -i $TARGET_SERVER_IP_ADDR,
