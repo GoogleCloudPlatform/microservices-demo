@@ -20,9 +20,6 @@ RUN apk update \
     && apk add --no-cache \
         wget \
         g++ \
-        gcc \
-        make \
-        libc-dev \
     && rm -rf /var/cache/apk/*
 
 # get packages
