@@ -16,7 +16,7 @@ FROM python:3.12.8-alpine@sha256:f92e36f6569658ba9501e2e1e3ca780d61faea8e84edd99
 
 FROM base AS builder
 
-RUN apk update \ # Update the package list
+RUN apk update \
     && apk add --no-cache \
         wget \
         g++ \
