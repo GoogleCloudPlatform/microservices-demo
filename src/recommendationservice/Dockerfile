@@ -23,7 +23,7 @@ RUN apk update \
         gcc \
         make \
         libc-dev \
-    && rm -rf /var/cache/apk/* # Clean APK cache
+    && rm -rf /var/cache/apk/*
 
 # get packages
 COPY requirements.txt .
