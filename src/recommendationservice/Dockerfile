@@ -12,14 +12,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-FROM python:3.12.6-slim@sha256:ad48727987b259854d52241fac3bc633574364867b8e20aec305e6e7f4028b26 AS base
+FROM python:3.12.8-alpine@sha256:f92e36f6569658ba9501e2e1e3ca780d61faea8e84edd990a0ed70d0ca8add4a AS base
 
 FROM base AS builder
 
-RUN apt-get -qq update \
-    && apt-get install -y --no-install-recommends \
-        wget g++ \
-    && rm -rf /var/lib/apt/lists/*
+RUN apk update \
+    && apk add --no-cache \
+        wget \
+        g++ \
+    && rm -rf /var/cache/apk/*
 
 # get packages
 COPY requirements.txt .
