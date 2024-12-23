@@ -28,7 +28,10 @@ if __name__ == "__main__":
         port = sys.argv[1]
     else:
         port = "8080"
+    
 
+    print("Hello world")
+    print("sample message to check changes are committed or not")
     # set up server stub
     channel = grpc.insecure_channel('localhost:'+port)
     stub = demo_pb2_grpc.RecommendationServiceStub(channel)
