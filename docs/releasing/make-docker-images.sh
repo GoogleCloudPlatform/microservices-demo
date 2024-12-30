@@ -36,10 +36,12 @@ while IFS= read -d $'\0' -r dir; do
         builddir="${dir}/src"
     fi
     image="${REPO_PREFIX}/$svcname:$TAG"
+    image_with_sample_public_image_tag="${REPO_PREFIX}/$svcname:sample-public-image-$TAG"
     (
         cd "${builddir}"
         log "Building (and pushing) image on Google Cloud Build: ${image}"
         gcloud builds submit --project=${PROJECT_ID} --tag=${image}
+        gcloud artifacts docker tags add ${image} ${image_with_sample_public_image_tag}
     )
 done < <(find "${REPO_ROOT}/src" -mindepth 1 -maxdepth 1 -type d -print0)
 

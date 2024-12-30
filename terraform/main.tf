@@ -27,7 +27,7 @@ locals {
 # Enable Google Cloud APIs
 module "enable_google_apis" {
   source  = "terraform-google-modules/project-factory/google//modules/project_services"
-  version = "~> 15.0"
+  version = "~> 17.0"
 
   project_id                  = var.gcp_project_id
   disable_services_on_destroy = false
@@ -42,10 +42,10 @@ resource "google_container_cluster" "my_cluster" {
   name     = var.name
   location = var.region
 
-  # Enabling autopilot for this cluster
+  # Enable autopilot for this cluster
   enable_autopilot = true
 
-  # Setting an empty ip_allocation_policy to allow autopilot cluster to spin up correctly
+  # Set an empty ip_allocation_policy to allow autopilot cluster to spin up correctly
   ip_allocation_policy {
   }
 

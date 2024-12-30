@@ -77,12 +77,14 @@ spec:
               - ALL
           privileged: false
           readOnlyRootFilesystem: true
-        image: gcr.io/google-samples/microservices-demo/loadgenerator:v0.10.0
+        image: us-central1-docker.pkg.dev/google-samples/microservices-demo/loadgenerator:v0.10.2
         env:
         - name: FRONTEND_ADDR
           value: "frontend:80"
         - name: USERS
           value: "10"
+        - name: RATE
+          value: "1"
         resources:
           requests:
             cpu: 300m

@@ -45,8 +45,8 @@
 
           {{ range $.products }}
           <div class="col-md-4 hot-product-card">
-            <a href="/product/{{.Item.Id}}">
-              <img loading="lazy" src="{{.Item.Picture}}">
+            <a href="{{ $.baseUrl }}/product/{{.Item.Id}}">
+              <img loading="lazy" src="{{ $.baseUrl }}{{.Item.Picture}}">
               <div class="hot-product-card-img-overlay"></div>
             </a>
             <div>

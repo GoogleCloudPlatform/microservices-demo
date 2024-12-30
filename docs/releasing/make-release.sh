@@ -29,7 +29,7 @@ log() { echo "$1" >&2; }
 fail() { log "$1"; exit 1; }
 
 TAG="${TAG:?TAG env variable must be specified}"
-REPO_PREFIX="${REPO_PREFIX:?REPO_PREFIX env variable must be specified e.g. gcr.io\/google-samples\/microservices-demo}"
+REPO_PREFIX="${REPO_PREFIX:?REPO_PREFIX env variable must be specified e.g. us-central1-docker.pkg.dev\/google-samples\/microservices-demo}"
 PROJECT_ID="${PROJECT_ID:?PROJECT_ID env variable must be specified e.g. google-samples}"
 
 if [[ "$TAG" != v* ]]; then

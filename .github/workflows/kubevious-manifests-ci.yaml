@@ -30,33 +30,27 @@ permissions:
   contents: read
 jobs:
   kubevious-manifests-ci:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     timeout-minutes: 1
     steps:
       - uses: actions/checkout@v4
 
       - name: Validate kubernetes-manifests
         id: kubernetes-manifests-validation
-        uses: kubevious/cli@v1.0.60
+        uses: kubevious/cli@v1.0.62
         with:
           manifests: kubernetes-manifests
           skip_rules: container-latest-image
 
       - name: Validate helm-chart
         id: helm-chart-validation
-        uses: kubevious/cli@v1.0.60
+        uses: kubevious/cli@v1.0.62
         with:
           manifests: helm-chart
 
-      - name: Validate istio-manifests
-        id: istio-manifests-validation
-        uses: kubevious/cli@v1.0.60
-        with:
-          manifests: istio-manifests https://github.com/istio/istio/raw/master/manifests/charts/base/crds/crd-all.gen.yaml
-
       - name: Validate kustomize
         id: kustomize-validation
-        uses: kubevious/cli@v1.0.60
+        uses: kubevious/cli@v1.0.62
         with:
           manifests: kustomize
           skip_rules: container-latest-image

@@ -35,18 +35,18 @@ func loadCatalog(catalog *pb.ListProductsResponse) error {
 	defer catalogMutex.Unlock()
 
 	if os.Getenv("ALLOYDB_CLUSTER_NAME") != "" {
-		log.Info("Loading catalog from AlloyDB...")
 		return loadCatalogFromAlloyDB(catalog)
 	}
 
-	log.Info("Loading catalog from local products.json file...")
 	return loadCatalogFromLocalFile(catalog)
 }
 
 func loadCatalogFromLocalFile(catalog *pb.ListProductsResponse) error {
+	log.Info("loading catalog from local products.json file...")
+
 	catalogJSON, err := os.ReadFile("products.json")
 	if err != nil {
-		log.Fatalf("failed to open product catalog json file: %v", err)
+		log.Warnf("failed to open product catalog json file: %v", err)
 		return err
 	}
 
@@ -63,6 +63,7 @@ func getSecretPayload(project, secret, version string) (string, error) {
 	ctx := context.Background()
 	client, err := secretmanager.NewClient(ctx)
 	if err != nil {
+		log.Warnf("failed to create SecretManager client: %v", err)
 		return "", err
 	}
 	defer client.Close()
@@ -74,6 +75,7 @@ func getSecretPayload(project, secret, version string) (string, error) {
 	// Call the API.
 	result, err := client.AccessSecretVersion(ctx, req)
 	if err != nil {
+		log.Warnf("failed to access SecretVersion: %v", err)
 		return "", err
 	}
 
@@ -81,6 +83,8 @@ func getSecretPayload(project, secret, version string) (string, error) {
 }
 
 func loadCatalogFromAlloyDB(catalog *pb.ListProductsResponse) error {
+	log.Info("loading catalog from AlloyDB...")
+
 	projectID := os.Getenv("PROJECT_ID")
 	region := os.Getenv("REGION")
 	pgClusterName := os.Getenv("ALLOYDB_CLUSTER_NAME")
@@ -96,6 +100,7 @@ func loadCatalogFromAlloyDB(catalog *pb.ListProductsResponse) error {
 
 	dialer, err := alloydbconn.NewDialer(context.Background())
 	if err != nil {
+		log.Warnf("failed to set-up dialer connection: %v", err)
 		return err
 	}
 	cleanup := func() error { return dialer.Close() }
@@ -108,6 +113,7 @@ func loadCatalogFromAlloyDB(catalog *pb.ListProductsResponse) error {
 
 	config, err := pgxpool.ParseConfig(dsn)
 	if err != nil {
+		log.Warnf("failed to parse DSN config: %v", err)
 		return err
 	}
 
@@ -118,6 +124,7 @@ func loadCatalogFromAlloyDB(catalog *pb.ListProductsResponse) error {
 
 	pool, err := pgxpool.NewWithConfig(context.Background(), config)
 	if err != nil {
+		log.Warnf("failed to set-up pgx pool: %v", err)
 		return err
 	}
 	defer pool.Close()
@@ -125,6 +132,7 @@ func loadCatalogFromAlloyDB(catalog *pb.ListProductsResponse) error {
 	query := "SELECT id, name, description, picture, price_usd_currency_code, price_usd_units, price_usd_nanos, categories FROM " + pgTableName
 	rows, err := pool.Query(context.Background(), query)
 	if err != nil {
+		log.Warnf("failed to query database: %v", err)
 		return err
 	}
 	defer rows.Close()
@@ -139,6 +147,7 @@ func loadCatalogFromAlloyDB(catalog *pb.ListProductsResponse) error {
 			&product.Picture, &product.PriceUsd.CurrencyCode, &product.PriceUsd.Units,
 			&product.PriceUsd.Nanos, &categories)
 		if err != nil {
+			log.Warnf("failed to scan query result row: %v", err)
 			return err
 		}
 		categories = strings.ToLower(categories)
@@ -147,5 +156,6 @@ func loadCatalogFromAlloyDB(catalog *pb.ListProductsResponse) error {
 		catalog.Products = append(catalog.Products, product)
 	}
 
+	log.Info("successfully parsed product catalog from AlloyDB")
 	return nil
 }
