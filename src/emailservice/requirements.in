@@ -4,8 +4,8 @@ grpcio==1.68.1
 jinja2==3.1.5
 python-json-logger==3.2.1
 google-cloud-profiler==4.1.0
-google-cloud-trace==1.14.1
+google-cloud-trace==1.15.0
 requests==2.32.2
 opentelemetry-distro==0.41b0
-opentelemetry-instrumentation-grpc==0.49b2
-opentelemetry-exporter-otlp-proto-grpc==1.28.2
+opentelemetry-instrumentation-grpc==0.50b0
+opentelemetry-exporter-otlp-proto-grpc==1.29.0
