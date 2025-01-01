@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-FROM python:3.12.8-alpine@sha256:f92e36f6569658ba9501e2e1e3ca780d61faea8e84edd990a0ed70d0ca8add4a AS base
+FROM python:3.13.1-alpine@sha256:657dbdb20479a6523b46c06114c8fec7db448232f956a429d3cc0606d30c1b59 AS base
 
 FROM base AS builder
 
