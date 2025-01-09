@@ -36,10 +36,10 @@ spec:
       serviceAccountName: emailservice
       terminationGracePeriodSeconds: 5
       securityContext:
-        fsGroup: 1000
-        runAsGroup: 1000
+        fsGroup: null
+        runAsGroup: null
         runAsNonRoot: true
-        runAsUser: 1000
+        runAsUser: null
       containers:
       - name: server
         securityContext:
@@ -110,10 +110,10 @@ spec:
     spec:
       serviceAccountName: checkoutservice
       securityContext:
-        fsGroup: 1000
-        runAsGroup: 1000
+        fsGroup: null
+        runAsGroup: null
         runAsNonRoot: true
-        runAsUser: 1000
+        runAsUser: null
       containers:
         - name: server
           securityContext:
@@ -193,10 +193,10 @@ spec:
       serviceAccountName: recommendationservice
       terminationGracePeriodSeconds: 5
       securityContext:
-        fsGroup: 1000
-        runAsGroup: 1000
+        fsGroup: null
+        runAsGroup: null
         runAsNonRoot: true
-        runAsUser: 1000
+        runAsUser: null
       containers:
       - name: server
         securityContext:
@@ -271,10 +271,10 @@ spec:
     spec:
       serviceAccountName: frontend
       securityContext:
-        fsGroup: 1000
-        runAsGroup: 1000
+        fsGroup: null
+        runAsGroup: null
         runAsNonRoot: true
-        runAsUser: 1000
+        runAsUser: null
       containers:
         - name: server
           securityContext:
@@ -398,10 +398,10 @@ spec:
       serviceAccountName: paymentservice
       terminationGracePeriodSeconds: 5
       securityContext:
-        fsGroup: 1000
-        runAsGroup: 1000
+        fsGroup: null
+        runAsGroup: null
         runAsNonRoot: true
-        runAsUser: 1000
+        runAsUser: null
       containers:
       - name: server
         securityContext:
@@ -471,10 +471,10 @@ spec:
       serviceAccountName: productcatalogservice
       terminationGracePeriodSeconds: 5
       securityContext:
-        fsGroup: 1000
-        runAsGroup: 1000
+        fsGroup: null
+        runAsGroup: null
         runAsNonRoot: true
-        runAsUser: 1000
+        runAsUser: null
       containers:
       - name: server
         securityContext:
@@ -544,10 +544,10 @@ spec:
       serviceAccountName: cartservice
       terminationGracePeriodSeconds: 5
       securityContext:
-        fsGroup: 1000
-        runAsGroup: 1000
+        fsGroup: null
+        runAsGroup: null
         runAsNonRoot: true
-        runAsUser: 1000
+        runAsUser: null
       containers:
       - name: server
         securityContext:
@@ -616,10 +616,10 @@ spec:
         app: redis-cart
     spec:
       securityContext:
-        fsGroup: 1000
-        runAsGroup: 1000
+        fsGroup: null
+        runAsGroup: null
         runAsNonRoot: true
-        runAsUser: 1000
+        runAsUser: null
       containers:
       - name: redis
         securityContext:
@@ -691,10 +691,10 @@ spec:
       terminationGracePeriodSeconds: 5
       restartPolicy: Always
       securityContext:
-        fsGroup: 1000
-        runAsGroup: 1000
+        fsGroup: null
+        runAsGroup: null
         runAsNonRoot: true
-        runAsUser: 1000
+        runAsUser: null
       initContainers:
       - command:
         - /bin/sh
@@ -774,10 +774,10 @@ spec:
       serviceAccountName: currencyservice
       terminationGracePeriodSeconds: 5
       securityContext:
-        fsGroup: 1000
-        runAsGroup: 1000
+        fsGroup: null
+        runAsGroup: null
         runAsNonRoot: true
-        runAsUser: 1000
+        runAsUser: null
       containers:
       - name: server
         securityContext:
@@ -847,10 +847,10 @@ spec:
     spec:
       serviceAccountName: shippingservice
       securityContext:
-        fsGroup: 1000
-        runAsGroup: 1000
+        fsGroup: null
+        runAsGroup: null
         runAsNonRoot: true
-        runAsUser: 1000
+        runAsUser: null
       containers:
       - name: server
         securityContext:
@@ -921,10 +921,10 @@ spec:
       serviceAccountName: adservice
       terminationGracePeriodSeconds: 5
       securityContext:
-        fsGroup: 1000
-        runAsGroup: 1000
+        fsGroup: null
+        runAsGroup: null
         runAsNonRoot: true
-        runAsUser: 1000
+        runAsUser: null
       containers:
       - name: server
         securityContext:
