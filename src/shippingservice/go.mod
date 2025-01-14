@@ -5,7 +5,7 @@ go 1.23
 require (
 	cloud.google.com/go/profiler v0.4.2
 	github.com/sirupsen/logrus v1.9.3
-	golang.org/x/net v0.33.0
+	golang.org/x/net v0.34.0
 	google.golang.org/grpc v1.69.2
 	google.golang.org/protobuf v1.36.1
 )
@@ -27,10 +27,10 @@ require (
 	go.opentelemetry.io/otel v1.31.0 // indirect
 	go.opentelemetry.io/otel/metric v1.31.0 // indirect
 	go.opentelemetry.io/otel/trace v1.31.0 // indirect
-	golang.org/x/crypto v0.31.0 // indirect
+	golang.org/x/crypto v0.32.0 // indirect
 	golang.org/x/oauth2 v0.24.0 // indirect
 	golang.org/x/sync v0.10.0 // indirect
-	golang.org/x/sys v0.28.0 // indirect
+	golang.org/x/sys v0.29.0 // indirect
 	golang.org/x/text v0.21.0 // indirect
 	golang.org/x/time v0.8.0 // indirect
 	google.golang.org/api v0.210.0 // indirect
