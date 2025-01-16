@@ -1,20 +1,6 @@
-/*
- * Copyright 2018, Google LLC.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 package hipstershop;
+
+
 
 import hipstershop.Demo.Ad;
 import hipstershop.Demo.AdRequest;
@@ -28,15 +14,12 @@ import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-/** A simple client that requests ads from the Ads Service. */
 public class AdServiceClient {
 
   private static final Logger logger = LogManager.getLogger(AdServiceClient.class);
 
   private final ManagedChannel channel;
   private final hipstershop.AdServiceGrpc.AdServiceBlockingStub blockingStub;
-
-  /** Construct client connecting to Ad Service at {@code host:port}. */
   private AdServiceClient(String host, int port) {
     this(
         ManagedChannelBuilder.forAddress(host, port)
@@ -46,8 +29,7 @@ public class AdServiceClient {
             .build());
   }
 
-  /** Construct client for accessing RouteGuide server using the existing channel. */
-  private AdServiceClient(ManagedChannel channel) {
+  private AdServiceCl(ManagedChannel channel) {
     this.channel = channel;
     blockingStub = hipstershop.AdServiceGrpc.newBlockingStub(channel);
   }
@@ -56,7 +38,6 @@ public class AdServiceClient {
     channel.shutdown().awaitTermination(5, TimeUnit.SECONDS);
   }
 
-  /** Get Ads from Server. */
   public void getAds(String contextKey) {
     logger.info("Get Ads with context " + contextKey + " ...");
     AdRequest request = AdRequest.newBuilder().addContextKeys(contextKey).build();
@@ -94,12 +75,7 @@ public class AdServiceClient {
     return s;
   }
 
-  /**
-   * Ads Service Client main. If provided, the first element of {@code args} is the context key to
-   * get the ads from the Ads Service
-   */
   public static void main(String[] args) throws InterruptedException {
-    // Add final keyword to pass checkStyle.
     final String contextKeys = getStringOrDefaultFromArgs(args, 0, "camera");
     final String host = getStringOrDefaultFromArgs(args, 1, "localhost");
     final int serverPort = getPortOrDefaultFromArgs(args);
