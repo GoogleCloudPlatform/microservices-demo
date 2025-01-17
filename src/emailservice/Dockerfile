@@ -17,7 +17,7 @@ FROM --platform=$BUILDPLATFORM python:3.12.8-alpine@sha256:54bec49592c8455de8d59
 FROM base AS builder
 
 RUN apk update \
-    && apk add --no-cache wget g++ \
+    && apk add --no-cache g++ linux-headers \
     && rm -rf /var/cache/apk/*
 
 # get packages
@@ -29,6 +29,10 @@ FROM base
 ENV PYTHONUNBUFFERED=1
 # Enable Profiler
 ENV ENABLE_PROFILER=1
+
+RUN apk update \
+    && apk add --no-cache libstdc++ \
+    && rm -rf /var/cache/apk/*
 
 WORKDIR /email_server
 
