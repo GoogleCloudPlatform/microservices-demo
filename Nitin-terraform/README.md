@@ -35,7 +35,7 @@ provider "google" {
 }
 
 resource "google_container_cluster" "primary" {
-  name     = "microservices-demo-cluster"
+  name     = "microservices-cluster"
   location = var.region
 
   node_config {
@@ -54,7 +54,7 @@ variable "node_machine_type" {
   default = "e2-medium"
 }
 variable "node_count" {
-  default = 3
+  default = 4
 }
 ```
 
@@ -77,7 +77,7 @@ variable "node_count" {
 
 4. **Connect to the Cluster**:
    ```bash
-   gcloud container clusters get-credentials microservices-demo-cluster --region asia-south1-a
+   gcloud container clusters get-credentials microservices-cluster --region asia-south1-a
    ```
 
 ### 2. Deploy Microservices via Helm
@@ -93,7 +93,7 @@ helm repo update
 
 ```bash
 helm install onlineboutique microservices-demo/onlineboutique \
-  --namespace demo --create-namespace \
+  --namespace online-boutique --create-namespace \
   -f values.yaml
 ```
 
@@ -101,7 +101,7 @@ helm install onlineboutique microservices-demo/onlineboutique \
 
 Check if all pods are running:
 ```bash
-kubectl get pods -n demo
+kubectl get pods -n online-boutique
 ```
 
 Expose the frontend service:
@@ -109,11 +109,11 @@ Expose the frontend service:
 kubectl expose deployment frontend \
   --type=LoadBalancer \
   --name=frontend-lb \
-  --namespace=demo
+  --namespace=online-boutique
 ```
 Retrieve the external IP:
 ```bash
-kubectl get services -n demo
+kubectl get services -n online-boutique
 ```
 
 Access the application at `http://EXTERNAL_IP`.
@@ -124,6 +124,6 @@ Access the application at `http://EXTERNAL_IP`.
 
 - Use `kubectl top` to monitor resource usage:
   ```bash
-  kubectl top pods -n demo
+  kubectl top pods -n online-boutique
   ```
   
