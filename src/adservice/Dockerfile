@@ -12,20 +12,29 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-FROM eclipse-temurin:21@sha256:b5fc642f67dbbd1c4ce811388801cb8480aaca8aa9e56fd6dcda362cfea113f1 AS builder
+FROM --platform=linux/arm64 amazoncorretto:21 AS builder
 
 WORKDIR /app
+
+# デバック用の環境変数を設定
+ENV GRADLE_OPTS="-Dorg.gradle.logging.level=info"
+
+# システムプロパティの設定
+# ENV JAVA_TOOL_OPTIONS="-XX:+UseContainerSupport -XX:MaxRAMPercentage=75.0 -XX:InitialRAMPercentage=50.0"
+# ENV GRADLE_OPTS="-Dorg.gradle.jvmargs=-Xmx2048m -Xms512m -XX:MaxMetaspaceSize=512m"
 
 COPY ["build.gradle", "gradlew", "./"]
 COPY gradle gradle
 RUN chmod +x gradlew
+# より詳細なログ出y録を得るためのオプションを追加
+RUN ./gradlew downloadRepos --stacktrace --info 
 RUN ./gradlew downloadRepos
 
 COPY . .
 RUN chmod +x gradlew
 RUN ./gradlew installDist
 
-FROM eclipse-temurin:21.0.4_7-jre-alpine@sha256:8cc1202a100e72f6e91bf05ab274b373a5def789ab6d9e3e293a61236662ac27
+FROM --platform=linux/arm64 amazoncorretto:21-alpine
 
 # @TODO: https://github.com/GoogleCloudPlatform/microservices-demo/issues/2517
 # Download Stackdriver Profiler Java agent
