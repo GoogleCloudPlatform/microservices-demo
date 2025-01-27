@@ -20,11 +20,11 @@ anyio==4.8.0
     # via httpx
 asyncpg==0.30.0
     # via google-cloud-alloydb-connector
-attrs==24.3.0
+attrs==25.1.0
     # via aiohttp
 blinker==1.9.0
     # via flask
-cachetools==5.5.0
+cachetools==5.5.1
     # via google-auth
 certifi==2024.12.14
     # via
@@ -47,7 +47,7 @@ frozenlist==1.5.0
     # via
     #   aiohttp
     #   aiosignal
-google-ai-generativelanguage==0.6.10
+google-ai-generativelanguage==0.6.15
     # via google-generativeai
 google-api-core[grpc]==2.24.0
     # via
@@ -59,7 +59,7 @@ google-api-core[grpc]==2.24.0
     #   google-generativeai
 google-api-python-client==2.159.0
     # via google-generativeai
-google-auth==2.37.0
+google-auth==2.38.0
     # via
     #   google-ai-generativelanguage
     #   google-api-core
@@ -76,7 +76,7 @@ google-cloud-alloydb-connector[asyncpg]==1.7.0
     # via langchain-google-alloydb-pg
 google-cloud-core==2.4.1
     # via google-cloud-storage
-google-cloud-secret-manager==2.22.0
+google-cloud-secret-manager==2.22.1
     # via -r requirements.in
 google-cloud-storage==2.19.0
     # via langchain-google-alloydb-pg
@@ -84,7 +84,7 @@ google-crc32c==1.6.0
     # via
     #   google-cloud-storage
     #   google-resumable-media
-google-generativeai==0.8.3
+google-generativeai==0.8.4
     # via langchain-google-genai
 google-resumable-media==2.7.2
     # via google-cloud-storage
@@ -97,13 +97,13 @@ greenlet==3.1.1
     # via sqlalchemy
 grpc-google-iam-v1==0.14.0
     # via google-cloud-secret-manager
-grpcio==1.69.0
+grpcio==1.70.0
     # via
     #   google-api-core
     #   googleapis-common-protos
     #   grpc-google-iam-v1
     #   grpcio-status
-grpcio-status==1.69.0
+grpcio-status==1.70.0
     # via google-api-core
 h11==0.14.0
     # via httpcore
@@ -131,7 +131,7 @@ jsonpointer==3.0.0
     # via jsonpatch
 langchain==0.3.14
     # via -r requirements.in
-langchain-core==0.3.30
+langchain-core==0.3.31
     # via
     #   langchain
     #   langchain-google-alloydb-pg
@@ -139,7 +139,7 @@ langchain-core==0.3.30
     #   langchain-text-splitters
 langchain-google-alloydb-pg==0.9.0
     # via -r requirements.in
-langchain-google-genai==2.0.8
+langchain-google-genai==2.0.9
     # via -r requirements.in
 langchain-text-splitters==0.3.5
     # via langchain
@@ -196,7 +196,7 @@ pyasn1-modules==0.4.1
     # via google-auth
 pycparser==2.22
     # via cffi
-pydantic==2.10.5
+pydantic==2.10.6
     # via
     #   google-generativeai
     #   langchain
