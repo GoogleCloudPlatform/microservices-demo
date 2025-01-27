@@ -32,7 +32,7 @@ terraform {
 # Enable Google Cloud APIs.
 module "enable_google_apis" {
   source                      = "terraform-google-modules/project-factory/google//modules/project_services"
-  version                     = "~> 17.0"
+  version                     = "~> 18.0"
   disable_services_on_destroy = false
   activate_apis = [
     "cloudresourcemanager.googleapis.com",
