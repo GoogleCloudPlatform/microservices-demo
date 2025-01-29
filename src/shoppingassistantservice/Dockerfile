@@ -12,13 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-FROM python:3.12.6-slim@sha256:ad48727987b259854d52241fac3bc633574364867b8e20aec305e6e7f4028b26 AS base
+FROM --platform=$BUILDPLATFORM python:3.12.8-slim@sha256:123be5684f39d8476e64f47a5fddf38f5e9d839baff5c023c815ae5bdfae0df7 AS base
 
 FROM base AS builder
 
 RUN apt-get -qq update \
-    && apt-get install -y --no-install-recommends \
-        wget g++ \
+    && apt-get install -y --no-install-recommends g++ \
     && rm -rf /var/lib/apt/lists/*
 
 # get packages
