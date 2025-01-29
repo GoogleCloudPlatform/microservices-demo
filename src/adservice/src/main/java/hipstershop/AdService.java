@@ -160,6 +160,32 @@ public final class AdService {
 
   }
 
+  private static ImmutableListMultimap<String, Ad> createAdsMap() {
+    Ad a = Ad.newBuilder().setRedirectUrl("/product/2ZYFJ3GM2N").setText("Hairdryer for sale. 50% off.").build();
+    Ad b = Ad.newBuilder().setRedirectUrl("/product/66VCHSJNUP").setText("Tank top for sale. 20% off.").build();
+    Ad c = Ad.newBuilder().setRedirectUrl("/product/0PUK6V6EV0").setText("Candle holder for sale. 30% off.").build();
+    Ad d = Ad.newBuilder().setRedirectUrl("/product/9SIQT8TOJO").setText("Bamboo glass jar for sale. 10% off.").build();
+    Ad e = Ad.newBuilder().setRedirectUrl("/product/1YMWWN1N4O").setText("Watch for sale. Buy one, get second kit for free").build();
+    Ad f = Ad.newBuilder().setRedirectUrl("/product/6E92ZMYYFZ").setText("Mug for sale. Buy two, get third one for free").build();
+    Ad g = Ad.newBuilder().setRedirectUrl("/product/L9ECAV7KIM").setText("Loafers for sale. Buy one, get second one for free").build();
+    ImmutableListMultimap.Builder<String, Ad> builder = ImmutableListMultimap.builder();
+    String s1 = "clothing";
+    String s2 = "accessories";
+    String s3 = "footwear";
+    String s4 = "hair";
+    String s5 = "decor";
+    String s6 = "kitchen";
+    builder.putAll(s1,b);
+    builder.putAll(s2,e);
+    builder.putAll(s3,g);
+    builder.putAll(s4,a);
+    builder.putAll(s5,c);
+    builder.putAll(s6, d);
+    builder.putAll(s6, e); // BUG 1: Incorrectly adding watch to kitchen category
+    builder.putAll(s6, f);
+  return builder.build(); //BUG 2: Missing mug in kitchen
+}
+
   private static void initTracing() {
     if (System.getenv("DISABLE_TRACING") != null) {
       logger.info("Tracing disabled.");
