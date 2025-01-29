@@ -47,6 +47,7 @@ spec:
       {{- else }}
       serviceAccountName: default
       {{- end }}
+      {{- if .Values.securityContext.enable }}
       securityContext:
         fsGroup: 1000
         runAsGroup: 1000
@@ -56,6 +57,7 @@ spec:
         seccompProfile:
           type: {{ .Values.seccompProfile.type }}
         {{- end }}
+      {{- end }}
       {{- if eq .Values.opentelemetryCollector.projectId "PROJECT_ID" }}
       initContainers:
       # Init container retrieves the current cloud project id from the metadata server
