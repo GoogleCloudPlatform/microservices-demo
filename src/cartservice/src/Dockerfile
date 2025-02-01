@@ -13,7 +13,7 @@
 # limitations under the License.
 
 # https://mcr.microsoft.com/product/dotnet/sdk
-FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:9.0.101-noble@sha256:1f13e67d295e02abdfd187c341f887442bad611eda536766172ced401fc8b9fa AS builder
+FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:9.0.102-noble@sha256:5011988a910aaddede98b82692e67fcbf0c2ce0c38450faf4d916f2a9ed6fa60 AS builder
 ARG TARGETARCH
 WORKDIR /app
 COPY cartservice.csproj .
