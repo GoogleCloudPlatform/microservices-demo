@@ -142,8 +142,8 @@ Cloud Service Mesh (CSM) provides a service mesh experience that includes a full
    kubectl label namespace default istio-injection=enabled
 
    # Make sure the istiod injection webhook port 15017 is accessible via GKE master nodes
-   # Otherwise your replicaset-controller may be blocked when trying to create new pods with:
-   #   Error creating: Internal error occurred: failed calling
+   # Otherwise your replicaset-controller may be blocked when trying to create new pods with: 
+   #   Error creating: Internal error occurred: failed calling 
    #     webhook "namespace.sidecar-injector.istio.io" ... context deadline exceeded
    gcloud compute firewall-rules list --filter="name~gke-[0-9a-z-]*-master"
    NAME                          NETWORK  DIRECTION  PRIORITY  ALLOW              DENY  DISABLED
@@ -283,7 +283,7 @@ Once the service mesh and namespace injection are configured, you can then deplo
    http://$INGRESS_HOST
    ```
 
-# Additional service mesh demos using Online Boutique
+# Additional service mesh demos using Online Boutique 
 
 - [Canary deployment](https://github.com/GoogleCloudPlatform/istio-samples/tree/master/istio-canary-gke)
 - [Security (mTLS, JWT, Authorization)](https://github.com/GoogleCloudPlatform/istio-samples/tree/master/security-intro)
