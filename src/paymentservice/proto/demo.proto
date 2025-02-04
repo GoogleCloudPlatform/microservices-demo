@@ -184,8 +184,8 @@ message CreditCardInfo {
 }
 
 message ChargeRequest {
-    Money amount = 1;
-    CreditCardInfo credit_card = 2;
+    Money amount = 2;
+    CreditCardInfo credit_card = 1;
 }
 
 message ChargeResponse {

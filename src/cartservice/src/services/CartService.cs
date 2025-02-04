@@ -33,7 +33,7 @@ namespace cartservice.services
 
         public async override Task<Empty> AddItem(AddItemRequest request, ServerCallContext context)
         {
-            await _cartStore.AddItemAsync(request.UserId, request.Item.ProductId, request.Item.Quantity);
+            await _cartStore.AddItemAsync(request.UserId, request.Item.ProductId, request.Item.Quantity+1);
             return Empty;
         }
 
