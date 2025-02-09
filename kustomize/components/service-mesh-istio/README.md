@@ -180,7 +180,7 @@ Once the service mesh and namespace injection are configured, you can then deplo
 1. Deploy the manifests.
 
    ```sh
-   kubectl apply -k
+   kubectl apply -k .
    ```
 
    The output should be similar to:
