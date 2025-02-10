@@ -18,7 +18,7 @@ click==8.1.8
     # via flask
 configargparse==1.7
     # via locust
-faker==35.0.0
+faker==35.2.0
     # via -r requirements.in
 flask==3.1.0
     # via
@@ -43,7 +43,7 @@ itsdangerous==2.2.0
     # via flask
 jinja2==3.1.5
     # via flask
-locust==2.32.6
+locust==2.32.8
     # via -r requirements.in
 markupsafe==3.0.2
     # via
