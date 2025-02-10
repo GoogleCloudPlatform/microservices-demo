@@ -63,6 +63,7 @@ func init() {
 	}
 	log.Out = os.Stdout
 	catalogMutex = &sync.Mutex{}
+	log.SetLevel(logrus.TraceLevel)
 }
 
 func main() {
@@ -234,7 +235,7 @@ func loggingUnaryInterceptor(
 		return handler(ctx, req)
 	}
 	start := time.Now()
-	log.Infof("Received gRPC request: method=%s, request=%+v", info.FullMethod, req)
+	log.Tracef("Received gRPC request: method=%s, request=%+v", info.FullMethod, req)
 
 	resp, err := handler(ctx, req)
 
@@ -242,7 +243,7 @@ func loggingUnaryInterceptor(
 	if err != nil {
 		log.Errorf("Error handling gRPC request: method=%s, error=%v, duration=%s", info.FullMethod, err, duration)
 	} else {
-		log.Infof("Handled gRPC request: method=%s, response=%+v, duration=%s", info.FullMethod, resp, duration)
+		log.Tracef("Handled gRPC request: method=%s, response=%+v, duration=%s", info.FullMethod, resp, duration)
 	}
 
 	return resp, err
@@ -257,12 +258,12 @@ func loggingStreamInterceptor(
 	if strings.HasPrefix(info.FullMethod, "/grpc.health.v1.Health/") {
 		return handler(srv, ss)
 	}
-	log.Infof("Received gRPC stream: method=%s", info.FullMethod)
+	log.Tracef("Received gRPC stream: method=%s", info.FullMethod)
 	err := handler(srv, ss)
 	if err != nil {
 		log.Errorf("Error handling gRPC stream: method=%s, error=%v", info.FullMethod, err)
 	} else {
-		log.Infof("Successfully handled gRPC stream: method=%s", info.FullMethod)
+		log.Tracef("Successfully handled gRPC stream: method=%s", info.FullMethod)
 	}
 	return err
 }
