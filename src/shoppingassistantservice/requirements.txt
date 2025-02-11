@@ -88,7 +88,7 @@ google-generativeai==0.8.4
     # via langchain-google-genai
 google-resumable-media==2.7.2
     # via google-cloud-storage
-googleapis-common-protos[grpc]==1.66.0
+googleapis-common-protos[grpc]==1.67.0rc1
     # via
     #   google-api-core
     #   grpc-google-iam-v1
