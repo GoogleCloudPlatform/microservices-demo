@@ -91,7 +91,16 @@ namespace cartservice.cartstore
 
                 if (value != null)
                 {
-                    return Hipstershop.Cart.Parser.ParseFrom(value);
+                    var cart = Hipstershop.Cart.Parser.ParseFrom(value);
+            
+                    // Log the cart contents
+                    Console.WriteLine($"Cart for user {userId}:");
+                    foreach (var item in cart.Items)
+                    {
+                        Console.WriteLine($"    Product ID: {item.ProductId}, Quantity: {item.Quantity}");
+                    }
+
+                    return cart;
                 }
 
                 // We decided to return empty cart in cases when user wasn't in the cache before
