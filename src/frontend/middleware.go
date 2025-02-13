@@ -54,31 +54,39 @@ func (r *responseRecorder) WriteHeader(statusCode int) {
 	r.w.WriteHeader(statusCode)
 }
 
+var excludedPaths = map[string]bool{
+    "/_healthz": true,
+    "/robots.txt": true,
+}
+
 func (lh *logHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	ctx := r.Context()
-	requestID, _ := uuid.NewRandom()
-	ctx = context.WithValue(ctx, ctxKeyRequestID{}, requestID.String())
-
-	start := time.Now()
 	rr := &responseRecorder{w: w}
-	log := lh.log.WithFields(logrus.Fields{
-		"http.req.path":   r.URL.Path,
-		"http.req.method": r.Method,
-		"http.req.id":     requestID.String(),
-	})
-	if v, ok := r.Context().Value(ctxKeySessionID{}).(string); ok {
-		log = log.WithField("session", v)
-	}
-	log.Debug("request started")
-	defer func() {
-		log.WithFields(logrus.Fields{
-			"http.resp.took_ms": int64(time.Since(start) / time.Millisecond),
-			"http.resp.status":  rr.status,
-			"http.resp.bytes":   rr.b}).Debugf("request complete")
-	}()
+	if !excludedPaths[r.URL.Path] {
+		ctx := r.Context()
+		requestID, _ := uuid.NewRandom()
+		ctx = context.WithValue(ctx, ctxKeyRequestID{}, requestID.String())
 
-	ctx = context.WithValue(ctx, ctxKeyLog{}, log)
-	r = r.WithContext(ctx)
+		start := time.Now()
+		
+		log := lh.log.WithFields(logrus.Fields{
+			"http.req.path":   r.URL.Path,
+			"http.req.method": r.Method,
+			"http.req.id":     requestID.String(),
+		})
+		if v, ok := r.Context().Value(ctxKeySessionID{}).(string); ok {
+			log = log.WithField("session", v)
+		}
+		log.Debug("request started")
+		defer func() {
+			log.WithFields(logrus.Fields{
+				"http.resp.took_ms": int64(time.Since(start) / time.Millisecond),
+				"http.resp.status":  rr.status,
+				"http.resp.bytes":   rr.b}).Debugf("request complete")
+		}()
+
+		ctx = context.WithValue(ctx, ctxKeyLog{}, log)
+		r = r.WithContext(ctx)
+	}
 	lh.next.ServeHTTP(rr, r)
 }
 
