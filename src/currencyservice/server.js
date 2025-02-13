@@ -139,6 +139,7 @@ function convert (call, callback) {
 
       // Convert: from_currency --> EUR
       const from = request.from;
+      logger.info(`conversion from ${from}`);
       const euros = _carry({
         units: from.units / data[from.currency_code],
         nanos: from.nanos / data[from.currency_code]
@@ -156,7 +157,7 @@ function convert (call, callback) {
       result.nanos = Math.floor(result.nanos);
       result.currency_code = request.to_code;
 
-      logger.info(`conversion request successful`);
+      logger.info(`conversion request from ${from.currency_code} to ${request.to_code} successful: ${JSON.stringify(result)}`);
       callback(null, result);
     });
   } catch (err) {
