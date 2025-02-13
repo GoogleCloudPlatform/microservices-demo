@@ -115,35 +115,43 @@ func (s *server) Watch(req *healthpb.HealthCheckRequest, ws healthpb.Health_Watc
 
 // GetQuote produces a shipping quote (cost) in USD.
 func (s *server) GetQuote(ctx context.Context, in *pb.GetQuoteRequest) (*pb.GetQuoteResponse, error) {
-	log.Info("[GetQuote] received request")
-	defer log.Info("[GetQuote] completed request")
+	// log.Info("[GetQuote] received request")
+	// defer log.Info("[GetQuote] completed request")
 
 	// 1. Generate a quote based on the total number of items to be shipped.
 	quote := CreateQuoteFromCount(0)
 
 	// 2. Generate a response.
-	return &pb.GetQuoteResponse{
+	response := &pb.GetQuoteResponse{
 		CostUsd: &pb.Money{
 			CurrencyCode: "USD",
 			Units:        int64(quote.Dollars),
 			Nanos:        int32(quote.Cents * 10000000)},
-	}, nil
+	}
+
+	log.Infof("[GetQuote] request: %+v, response: %+v", in, response)
+
+	return response, nil
 
 }
 
 // ShipOrder mocks that the requested items will be shipped.
 // It supplies a tracking ID for notional lookup of shipment delivery status.
 func (s *server) ShipOrder(ctx context.Context, in *pb.ShipOrderRequest) (*pb.ShipOrderResponse, error) {
-	log.Info("[ShipOrder] received request")
-	defer log.Info("[ShipOrder] completed request")
+	// log.Info("[ShipOrder] received request")
+	// defer log.Info("[ShipOrder] completed request")
 	// 1. Create a Tracking ID
 	baseAddress := fmt.Sprintf("%s, %s, %s", in.Address.StreetAddress, in.Address.City, in.Address.State)
 	id := CreateTrackingId(baseAddress)
 
 	// 2. Generate a response.
-	return &pb.ShipOrderResponse{
+	response := &pb.ShipOrderResponse{
 		TrackingId: id,
-	}, nil
+	}
+
+	log.Infof("[ShipOrder] request: %+v, response: %+v", in, response)
+
+	return response, nil
 }
 
 func initStats() {
