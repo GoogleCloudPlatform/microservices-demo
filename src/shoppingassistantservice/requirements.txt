@@ -37,7 +37,7 @@ charset-normalizer==3.4.1
     # via requests
 click==8.1.8
     # via flask
-cryptography==44.0.0
+cryptography==44.0.1
     # via google-cloud-alloydb-connector
 filetype==1.2.0
     # via langchain-google-genai
