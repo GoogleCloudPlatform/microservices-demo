@@ -57,7 +57,7 @@ google-api-core[grpc]==2.24.1
     #   google-cloud-secret-manager
     #   google-cloud-storage
     #   google-generativeai
-google-api-python-client==2.160.0
+google-api-python-client==2.161.0
     # via google-generativeai
 google-auth==2.38.0
     # via
@@ -88,7 +88,7 @@ google-generativeai==0.8.4
     # via langchain-google-genai
 google-resumable-media==2.7.2
     # via google-cloud-storage
-googleapis-common-protos[grpc]==1.67.0rc1
+googleapis-common-protos[grpc]==1.67.0
     # via
     #   google-api-core
     #   grpc-google-iam-v1
@@ -129,9 +129,9 @@ jsonpatch==1.33
     # via langchain-core
 jsonpointer==3.0.0
     # via jsonpatch
-langchain==0.3.17
+langchain==0.3.18
     # via -r requirements.in
-langchain-core==0.3.34
+langchain-core==0.3.35
     # via
     #   langchain
     #   langchain-google-alloydb-pg
