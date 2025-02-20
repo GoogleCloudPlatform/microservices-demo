@@ -284,7 +284,7 @@ spec:
                 - ALL
             privileged: false
             readOnlyRootFilesystem: true
-          image: gnado/frontend:v0.0.5
+          image: gnado/frontend:v0.0.6
           ports:
           - containerPort: 8080
           readinessProbe:
@@ -377,13 +377,13 @@ spec:
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: gcp-ingress
+  name: boutique-ingress
   annotations:
     nginx.ingress.kubernetes.io/ssl-redirect: "false"
 spec:
   ingressClassName: nginx
   rules:
-  - host: gcp.CHANGE_ME_USER.kuber.lab
+  - host: boutique.kuber.lab                   # <-- CHANGE_TO_YOUR_USER
     http:
       paths:
       - path: /
