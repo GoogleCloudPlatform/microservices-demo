@@ -30,10 +30,10 @@ spec:
       serviceAccountName: adservice
       terminationGracePeriodSeconds: 5
       securityContext:
-        fsGroup: 1000
+        fsGroup: 
         runAsGroup: 1000
         runAsNonRoot: true
-        runAsUser: 1000
+        runAsUser: 
       containers:
       - name: server
         securityContext:
@@ -55,7 +55,7 @@ spec:
             memory: 180Mi
           limits:
             cpu: 300m
-            memory: 300Mi
+            memory: 
         readinessProbe:
           initialDelaySeconds: 20
           periodSeconds: 15
