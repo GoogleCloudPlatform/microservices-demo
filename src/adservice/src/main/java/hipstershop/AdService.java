@@ -192,6 +192,12 @@ public final class AdService {
         .build();
   }
 
+  /**
+   * Initializes the stats exporter for the Ad Service.
+   * If the environment variable "DISABLE_STATS" is set, stats will be disabled.
+   * Otherwise, it attempts to initialize stats using OpenTelemetry.
+   * Currently, stats are enabled but temporarily unavailable.
+   */
   private static void initStats() {
     if (System.getenv("DISABLE_STATS") != null) {
       logger.info("Stats disabled.");
