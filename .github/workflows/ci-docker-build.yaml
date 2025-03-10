@@ -3,7 +3,7 @@ name: Build and Push Docker Images
 on:
   push:
     branches:
-      - devops-prac  # Run only when pushing to devops-changes
+      - devops-prac  # Run only when pushing to devops-prac
 
 jobs:
   build-and-push:
