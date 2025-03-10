@@ -1,0 +1,47 @@
+name: Build and Push Docker Images
+
+on:
+  push:
+    branches:
+      - devops-prac  # Run only when pushing to devops-changes
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout the Repository
+        uses: actions/checkout@v4
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_HUB_USERNAME }}
+          password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
+
+      - name: Build and Push Microservices Images
+        run: |
+          docker build -t ${{ secrets.DOCKER_HUB_USERNAME }}/cartservice:latest -f docker/cartservice.Dockerfile .
+          docker build -t ${{ secrets.DOCKER_HUB_USERNAME }}/frontend:latest -f docker/frontend.Dockerfile .
+          docker build -t ${{ secrets.DOCKER_HUB_USERNAME }}/currencyservice:latest -f docker/currencyservice.Dockerfile .
+          docker build -t ${{ secrets.DOCKER_HUB_USERNAME }}/paymentservice:latest -f docker/paymentservice.Dockerfile .
+          docker build -t ${{ secrets.DOCKER_HUB_USERNAME }}/emailservice:latest -f docker/emailservice.Dockerfile .
+          docker build -t ${{ secrets.DOCKER_HUB_USERNAME }}/checkoutservice:latest -f docker/checkoutservice.Dockerfile .
+          docker build -t ${{ secrets.DOCKER_HUB_USERNAME }}/productcatalogservice:latest -f docker/productcatalog.Dockerfile .
+          docker build -t ${{ secrets.DOCKER_HUB_USERNAME }}/shippingservice:latest -f docker/shippingservice.Dockerfile .
+          docker build -t ${{ secrets.DOCKER_HUB_USERNAME }}/recommendationservice:latest -f docker/recommendation.Dockerfile .
+          docker build -t ${{ secrets.DOCKER_HUB_USERNAME }}/adservice:latest -f docker/adservice.Dockerfile .
+          docker build -t ${{ secrets.DOCKER_HUB_USERNAME }}/shoppingassistantservice:latest -f docker/shoppingassistant.Dockerfile .
+          
+          docker push ${{ secrets.DOCKER_HUB_USERNAME }}/cartservice:latest
+          docker push ${{ secrets.DOCKER_HUB_USERNAME }}/frontend:latest
+          docker push ${{ secrets.DOCKER_HUB_USERNAME }}/currencyservice:latest
+          docker push ${{ secrets.DOCKER_HUB_USERNAME }}/paymentservice:latest
+          docker push ${{ secrets.DOCKER_HUB_USERNAME }}/emailservice:latest
+          docker push ${{ secrets.DOCKER_HUB_USERNAME }}/checkoutservice:latest
+          docker push ${{ secrets.DOCKER_HUB_USERNAME }}/productcatalogservice:latest
+          docker push ${{ secrets.DOCKER_HUB_USERNAME }}/shippingservice:latest
+          docker push ${{ secrets.DOCKER_HUB_USERNAME }}/recommendationservice:latest
+          docker push ${{ secrets.DOCKER_HUB_USERNAME }}/adservice:latest
+          docker push ${{ secrets.DOCKER_HUB_USERNAME }}/shoppingassistantservice:latest
+          
