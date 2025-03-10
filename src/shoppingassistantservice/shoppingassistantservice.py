@@ -16,6 +16,8 @@
 
 import os
 
+IS_LOCAL = not os.getenv("GOOGLE_CLOUD_PROJECT")
+
 from google.cloud import secretmanager_v1
 from urllib.parse import unquote
 from langchain_core.messages import HumanMessage
@@ -24,40 +26,65 @@ from flask import Flask, request
 
 from langchain_google_alloydb_pg import AlloyDBEngine, AlloyDBVectorStore
 
-PROJECT_ID = os.environ["PROJECT_ID"]
-REGION = os.environ["REGION"]
-ALLOYDB_DATABASE_NAME = os.environ["ALLOYDB_DATABASE_NAME"]
-ALLOYDB_TABLE_NAME = os.environ["ALLOYDB_TABLE_NAME"]
-ALLOYDB_CLUSTER_NAME = os.environ["ALLOYDB_CLUSTER_NAME"]
-ALLOYDB_INSTANCE_NAME = os.environ["ALLOYDB_INSTANCE_NAME"]
-ALLOYDB_SECRET_NAME = os.environ["ALLOYDB_SECRET_NAME"]
+PROJECT_ID = os.getenv("PROJECT_ID", "local-project")
+REGION = os.getenv("REGION", "us-central1")
+ALLOYDB_DATABASE_NAME = os.getenv("ALLOYDB_DATABASE_NAME", "local-db")
+ALLOYDB_TABLE_NAME = os.getenv("ALLOYDB_TABLE_NAME", "local-table")
+ALLOYDB_CLUSTER_NAME = os.getenv("ALLOYDB_CLUSTER_NAME", "local-cluster")
+ALLOYDB_INSTANCE_NAME = os.getenv("ALLOYDB_INSTANCE_NAME", "local-instance")
+ALLOYDB_SECRET_NAME = os.getenv("ALLOYDB_SECRET_NAME", "local-secret")
 
-secret_manager_client = secretmanager_v1.SecretManagerServiceClient()
-secret_name = secret_manager_client.secret_version_path(project=PROJECT_ID, secret=ALLOYDB_SECRET_NAME, secret_version="latest")
-secret_request = secretmanager_v1.AccessSecretVersionRequest(name=secret_name)
-secret_response = secret_manager_client.access_secret_version(request=secret_request)
-PGPASSWORD = secret_response.payload.data.decode("UTF-8").strip()
+if not IS_LOCAL:
+    secret_manager_client = secretmanager_v1.SecretManagerServiceClient()
+    secret_name = secret_manager_client.secret_version_path(project=PROJECT_ID, secret=ALLOYDB_SECRET_NAME, secret_version="latest")
+    secret_request = secretmanager_v1.AccessSecretVersionRequest(name=secret_name)
+    secret_response = secret_manager_client.access_secret_version(request=secret_request)
+    PGPASSWORD = secret_response.payload.data.decode("UTF-8").strip()
+else:
+    PGPASSWORD = "local-password"  # Default password for local testing
 
-engine = AlloyDBEngine.from_instance(
-    project_id=PROJECT_ID,
-    region=REGION,
-    cluster=ALLOYDB_CLUSTER_NAME,
-    instance=ALLOYDB_INSTANCE_NAME,
-    database=ALLOYDB_DATABASE_NAME,
-    user="postgres",
-    password=PGPASSWORD
-)
+
+if not IS_LOCAL:
+    engine = AlloyDBEngine.from_instance(
+        project_id=PROJECT_ID,
+        region=REGION,
+        cluster=ALLOYDB_CLUSTER_NAME,
+        instance=ALLOYDB_INSTANCE_NAME,
+        database=ALLOYDB_DATABASE_NAME,
+        user="postgres",
+        password=PGPASSWORD
+    )
+
+    vectorstore = AlloyDBVectorStore.create_sync(
+        engine=engine,
+        table_name=ALLOYDB_TABLE_NAME,
+        embedding_service=GoogleGenerativeAIEmbeddings(model="models/embedding-001"),
+        id_column="id",
+        content_column="description",
+        embedding_column="product_embedding",
+        metadata_columns=["id", "name", "categories"]
+    )
+else:
+    engine = None  # No database in local mode
+    vectorstore = None  # Skip vectorstore initialization in local mode
+    print("⚠️ Running locally: AlloyDB and VectorStore are disabled.")
 
 # Create a synchronous connection to our vectorstore
-vectorstore = AlloyDBVectorStore.create_sync(
-    engine=engine,
-    table_name=ALLOYDB_TABLE_NAME,
-    embedding_service=GoogleGenerativeAIEmbeddings(model="models/embedding-001"),
-    id_column="id",
-    content_column="description",
-    embedding_column="product_embedding",
-    metadata_columns=["id", "name", "categories"]
-)
+if not IS_LOCAL:
+    embedding_service = GoogleGenerativeAIEmbeddings(model="models/embedding-001")
+    vectorstore = AlloyDBVectorStore.create_sync(
+        engine=engine,
+        table_name=ALLOYDB_TABLE_NAME,
+        embedding_service=embedding_service,
+        id_column="id",
+        content_column="description",
+        embedding_column="product_embedding",
+        metadata_columns=["id", "name", "categories"]
+    )
+else:
+    embedding_service = None  # Disable Generative AI embeddings locally
+    vectorstore = None  # Skip AlloyDB VectorStore in local mode
+    print("⚠️ Running locally: Generative AI Embeddings & AlloyDB VectorStore are disabled.")
 
 def create_app():
     app = Flask(__name__)

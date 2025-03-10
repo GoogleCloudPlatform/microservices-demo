@@ -12,13 +12,33 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+const logger = require('./logger')
+
+const isLocal = !process.env.GOOGLE_CLOUD_PROJECT;
+
+if (isLocal || process.env.DISABLE_PROFILER === "1" || !process.env.GOOGLE_CLOUD_PROJECT) {
+  logger.info("Profiler disabled.");
+} else {
+  try {
+    logger.info("Profiler enabled.");
+    require('@google-cloud/profiler').start({
+      serviceContext: {
+        service: 'paymentservice',
+        version: '1.0.0'
+      }
+    });
+  } catch (error) {
+    logger.warn("Failed to start Profiler: " + error.message);
+  }
+}
+
 const path = require('path');
 const grpc = require('@grpc/grpc-js');
 const protoLoader = require('@grpc/proto-loader');
 
 const charge = require('./charge');
 
-const logger = require('./logger')
+
 
 class HipsterShopServer {
   constructor(protoRoot, port = HipsterShopServer.PORT) {
@@ -101,6 +121,6 @@ class HipsterShopServer {
   }
 }
 
-HipsterShopServer.PORT = process.env.PORT;
+HipsterShopServer.PORT = process.env.PORT || "50051"; 
 
 module.exports = HipsterShopServer;

@@ -1,0 +1,18 @@
+# Ignore Go build artifacts  
+*.exe  
+*.out  
+*.a  
+
+# Ignore local dependencies  
+vendor/  
+
+# Ignore Git files  
+.git  
+.gitignore  
+
+# Ignore editor/IDE files  
+.vscode/  
+.idea/  
+
+# Ignore temp files  
+node_modules/  

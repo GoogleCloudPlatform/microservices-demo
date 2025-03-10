@@ -1,0 +1,206 @@
+
+networks:
+  default:
+    name: ${NETWORK_NAME}
+    driver: bridge
+
+services:
+
+  redis:
+    image: redis:alpine
+    container_name: ${REDIS_CONTAINER}
+
+  productcatalogservice:
+    image: ${PRODUCT_CATALOG_SERVICE_IMAGE}
+    container_name: ${PRODUCT_CATALOG_SERVICE_CONTAINER}
+    build:
+      context: .
+      dockerfile: ${PRODUCT_CATALOG_DOCKERFILE}
+    ports:
+      - "${PRODUCT_CATALOG_SERVICE_PORT}"
+    environment:
+      - DISABLE_PROFILING=true
+
+  adservice:
+    image: ${AD_SERVICE_IMAGE}
+    container_name: ${AD_SERVICE_CONTAINER}
+    build:
+      context: .
+      dockerfile: ${AD_DOCKERFILE}
+    ports:
+      - "${AD_SERVICE_PORT}"
+
+  recommendationservice:
+    image: ${RECOMMENDATION_SERVICE_IMAGE}
+    container_name: ${RECOMMENDATION_SERVICE_CONTAINER}
+    build:
+      context: .
+      dockerfile: ${RECOMMENDATION_DOCKERFILE}
+    ports:
+      - "${RECOMMENDATION_SERVICE_PORT}"
+    depends_on:
+      - productcatalogservice
+    environment:
+      - PRODUCT_CATALOG_SERVICE_ADDR
+
+  shoppingassistant:
+    image: ${SHOPPING_ASSISTANT_IMAGE}
+    container_name: ${SHOPPING_ASSISTANT_CONTAINER}
+    build:
+      context: .
+      dockerfile: ${SHOPPING_DOCKERFILE}
+    ports:
+      - "${SHOPPING_ASSISTANT_SERVICE_PORT}"
+    environment:
+      - PROJECT_ID=${PROJECT_ID}
+
+  cartservice:
+    image: ${CART_SERVICE_IMAGE}
+    container_name: ${CART_SERVICE_CONTAINER}
+    build:
+      context: .
+      dockerfile: ${CART_DOCKERFILE}
+    ports:
+      - "${CART_SERVICE_PORT}"
+    environment:
+      REDIS_HOST: redis
+    depends_on:
+      - redis
+
+  shippingservice:
+    image: ${SHIPPING_SERVICE_IMAGE}
+    container_name: ${SHIPPING_SERVICE_CONTAINER}
+    build:
+      context: .
+      dockerfile: ${SHIPPING_DOCKERFILE}
+    ports:
+      - "${SHIPPING_SERVICE_PORT}"
+
+  currencyservice:
+    image: ${CURRENCY_SERVICE_IMAGE}
+    container_name: ${CURRENCY_SERVICE_CONTAINER}
+    build:
+      context: .
+      dockerfile: ${CURRENCY_SERVICE_DOCKERFILE}
+    ports:
+      - "${CURRENCY_SERVICE_PORT}"
+
+  paymentservice:
+    image: ${PAYMENT_SERVICE_IMAGE}
+    container_name: ${PAYMENT_SERVICE_CONTAINER}
+    build:
+      context: .
+      dockerfile: ${PAYMENT_DOCKERFILE}
+    ports:
+      - "${PAYMENT_SERVICE_PORT}"
+
+  emailservice:
+    image: ${EMAIL_SERVICE_IMAGE}
+    container_name: ${EMAIL_SERVICE_CONTAINER}
+    build:
+      context: .
+      dockerfile: ${EMAIL_DOCKERFILE}
+    ports:
+      - "${EMAIL_SERVICE_PORT}"
+
+  checkoutservice:
+    image: ${CHECKOUT_SERVICE_IMAGE}
+    container_name: ${CHECKOUT_SERVICE_CONTAINER}
+    build:
+      context: .
+      dockerfile: ${CHECKOUT_DOCKERFILE}
+    restart: unless-stopped
+    ports:
+      - "${CHECKOUT_SERVICE_PORT}"
+    environment:
+      - CHECKOUT_SERVICE_PORT 
+      - CART_SERVICE_ADDR
+      - CURRENCY_SERVICE_ADDR
+      - PAYMENT_SERVICE_ADDR
+      - EMAIL_SERVICE_ADDR
+      - SHIPPING_SERVICE_ADDR
+      - PRODUCT_CATALOG_SERVICE_ADDR
+
+    depends_on:
+      productcatalogservice: 
+        condition: service_started
+      cartservice:
+        condition: service_started
+      currencyservice:
+        condition: service_started
+      paymentservice:
+        condition: service_started
+      emailservice:
+        condition: service_started
+      shippingservice:
+        condition: service_started
+
+  frontend:
+    image: ${FRONTEND_IMAGE}
+    container_name: ${FRONTEND_CONTAINER}
+    build:
+      context: .
+      dockerfile: ${FRONTEND_DOCKERFILE}
+    restart: unless-stopped
+    ports:
+      - "${FRONTEND_PORT}"
+
+    environment:
+      - PORT=${FRONTEND_PORT}
+      - LOAD_GENERATOR_WEB_HOST=loadgenerator
+      - LOAD_GENERATOR_WEB_PORT=8089
+      - CHECKOUT_SERVICE_ADDR
+      - CART_SERVICE_ADDR
+      - CURRENCY_SERVICE_ADDR
+      - PAYMENT_SERVICE_ADDR
+      - EMAIL_SERVICE_ADDR
+      - SHIPPING_SERVICE_ADDR
+      - PRODUCT_CATALOG_SERVICE_ADDR
+      - RECOMMENDATION_SERVICE_ADDR
+      - AD_SERVICE_ADDR
+      - SHOPPING_ASSISTANT_SERVICE_ADDR
+      - FRONTEND_PORT
+
+    depends_on: 
+      checkoutservice:
+        condition: service_started 
+      productcatalogservice: 
+        condition: service_started
+      cartservice:
+        condition: service_started
+      currencyservice:
+        condition: service_started
+      paymentservice:
+        condition: service_started
+      emailservice: 
+        condition: service_started
+      shippingservice:
+        condition: service_started
+      adservice:
+        condition: service_started
+      recommendationservice:
+        condition: service_started
+      shoppingassistant:
+        condition: service_started
+      loadgenerator:
+        condition: service_started
+      
+  loadgenerator:
+    image: ${LOAD_GENERATOR_IMAGE}
+    container_name: ${LOAD_GENERATOR_CONTAINER}
+    build:
+      context: .
+      dockerfile: ${LOAD_GENERATOR_DOCKERFILE}
+    restart: unless-stopped
+    ports:
+      - "${LOAD_GENERATOR_WEB_PORT}"
+    environment:
+      - LOAD_GENERATOR_WEB_PORT
+      - LOAD_GENERATOR_USER
+      - LOAD_GENERATOR_HOST
+      - LOAD_GENERATOR_HEADLESS
+      - LOAD_GENERATOR_AUTOSTART
+      - LOAD_GENERATOR_BROWSER_TRAFFIC_ENABLED=true
+      - LOAD_GENERATOR_WEB_HOST=0.0.0.0
+
+

@@ -31,6 +31,7 @@ google-auth==2.23.4
     #   google-auth-httplib2
     #   google-cloud-profiler
 google-auth-httplib2==0.1.1
+google-cloud-profiler==4.1.0
     # via
     #   google-api-python-client
     #   google-cloud-profiler
@@ -40,6 +41,10 @@ googleapis-common-protos==1.61.0
     # via
     #   google-api-core
     #   opentelemetry-exporter-otlp-proto-grpc
+grpcio
+
+grpcio-tools
+
 grpcio==1.59.2
     # via
     #   grpcio-health-checking

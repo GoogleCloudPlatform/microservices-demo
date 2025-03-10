@@ -18,17 +18,22 @@
 
 const logger = require('./logger')
 
-if(process.env.DISABLE_PROFILER) {
-  logger.info("Profiler disabled.")
-}
-else {
-  logger.info("Profiler enabled.")
-  require('@google-cloud/profiler').start({
-    serviceContext: {
-      service: 'paymentservice',
-      version: '1.0.0'
-    }
-  });
+const isLocal = !process.env.GOOGLE_CLOUD_PROJECT;
+
+if (isLocal || process.env.DISABLE_PROFILER === "1" || !process.env.GOOGLE_CLOUD_PROJECT) {
+  logger.info("Profiler disabled.");
+} else {
+  try {
+    logger.info("Profiler enabled.");
+    require('@google-cloud/profiler').start({
+      serviceContext: {
+        service: 'paymentservice',
+        version: '1.0.0'
+      }
+    });
+  } catch (error) {
+    logger.warn("Failed to start Profiler: " + error.message);
+  }
 }
 
 

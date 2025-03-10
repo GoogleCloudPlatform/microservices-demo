@@ -25,17 +25,22 @@ const logger = pino({
   }
 });
 
-if(process.env.DISABLE_PROFILER) {
-  logger.info("Profiler disabled.")
-}
-else {
-  logger.info("Profiler enabled.")
-  require('@google-cloud/profiler').start({
-    serviceContext: {
-      service: 'currencyservice',
-      version: '1.0.0'
-    }
-  });
+const isLocal = !process.env.GOOGLE_CLOUD_PROJECT;
+
+if (isLocal || process.env.DISABLE_PROFILER === "1" || !process.env.GOOGLE_CLOUD_PROJECT) {
+  logger.info("Profiler disabled.");
+} else {
+  try {
+    logger.info("Profiler enabled.");
+    require('@google-cloud/profiler').start({
+      serviceContext: {
+        service: 'currencyservice',
+        version: '1.0.0'
+      }
+    });
+  } catch (error) {
+    logger.warn("Failed to start Profiler: " + error.message);
+  }
 }
 
 // Register GRPC OTel Instrumentation for trace propagation
@@ -77,7 +82,7 @@ const protoLoader = require('@grpc/proto-loader');
 const MAIN_PROTO_PATH = path.join(__dirname, './proto/demo.proto');
 const HEALTH_PROTO_PATH = path.join(__dirname, './proto/grpc/health/v1/health.proto');
 
-const PORT = process.env.PORT;
+const PORT = process.env.PORT || "7000";  // Default to 7000 if not set
 
 const shopProto = _loadProto(MAIN_PROTO_PATH).hipstershop;
 const healthProto = _loadProto(HEALTH_PROTO_PATH).grpc.health.v1;
