@@ -14,10 +14,10 @@ description = 'Ad Service'
 group = "adservice"
 version = "0.1.0-SNAPSHOT"
 
-def grpcVersion = "1.70.0"
-def jacksonCoreVersion = "2.18.2"
-def jacksonDatabindVersion = "2.18.2"
-def protocVersion = "4.29.3"
+def grpcVersion = "1.71.0"
+def jacksonCoreVersion = "2.18.3"
+def jacksonDatabindVersion = "2.18.3"
+def protocVersion = "4.30.1"
 
 tasks.withType(JavaCompile) {
     sourceCompatibility = JavaVersion.VERSION_19
@@ -33,7 +33,7 @@ dependencies {
     if (speed) {
         implementation fileTree(dir: offlineCompile, include: '*.jar')
     } else {
-        implementation "com.google.api.grpc:proto-google-common-protos:2.51.0",
+        implementation "com.google.api.grpc:proto-google-common-protos:2.54.1",
                 "javax.annotation:javax.annotation-api:1.3.2",
                 "io.grpc:grpc-protobuf:${grpcVersion}",
                 "io.grpc:grpc-stub:${grpcVersion}",
@@ -45,7 +45,7 @@ dependencies {
 
         runtimeOnly "com.fasterxml.jackson.core:jackson-core:${jacksonCoreVersion}",
                 "com.fasterxml.jackson.core:jackson-databind:${jacksonDatabindVersion}",
-                "io.netty:netty-tcnative-boringssl-static:2.0.69.Final"
+                "io.netty:netty-tcnative-boringssl-static:2.0.70.Final"
     }
 }
 
