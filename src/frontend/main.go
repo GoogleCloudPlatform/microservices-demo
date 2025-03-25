@@ -36,8 +36,8 @@ import (
 
 const (
 	port            = "8080"
-	defaultCurrency = "USD"
-	cookieMaxAge    = 60 * 60 * 48
+	defaultCurrency = "EUR"
+	cookieMaxAge    = 70
 
 	cookiePrefix    = "shop_"
 	cookieSessionID = cookiePrefix + "session-id"
@@ -120,7 +120,7 @@ func main() {
 		log.Info("Profiling enabled.")
 		go initProfiling(log, "frontend", "1.0.0")
 	} else {
-		log.Info("Profiling disabled.")
+		log.Info("This profiling has been disabled.")
 	}
 
 	srvPort := port
