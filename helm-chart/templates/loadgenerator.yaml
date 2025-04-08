@@ -59,11 +59,11 @@ spec:
         runAsGroup: 1000
         runAsNonRoot: true
         runAsUser: 1000
-      {{- end }}
         {{- if .Values.seccompProfile.enable }}
         seccompProfile:
           type: {{ .Values.seccompProfile.type }}
         {{- end }}
+      {{- end }}
       {{- if .Values.loadGenerator.checkFrontendInitContainer }}
       initContainers:
       - command:
@@ -92,7 +92,7 @@ spec:
               - ALL
           privileged: false
           readOnlyRootFilesystem: true
-        image: busybox:latest@sha256:768e5c6f5cb6db0794eec98dc7a967f40631746c32232b78a3105fb946f3ab83
+        image: busybox:latest@sha256:37f7b378a29ceb4c551b1b5582e27747b855bbfaa73fa11914fe0df028dc581f
         env:
         - name: FRONTEND_ADDR
           value: "{{ .Values.frontend.name }}:80"
@@ -112,6 +112,8 @@ spec:
           value: "{{ .Values.frontend.name }}:80"
         - name: USERS
           value: "10"
+        - name: RATE
+          value: "1"
         resources:
           {{- toYaml .Values.loadGenerator.resources | nindent 10 }}
 {{- if .Values.networkPolicies.create }}
