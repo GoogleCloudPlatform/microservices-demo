@@ -1,0 +1,90 @@
+version: "3.8"
+
+services:
+  frontend:
+    image: us-central1-docker.pkg.dev/google-samples/microservices-demo/frontend:v0.10.2
+    ports:
+      - "8080:8080"
+    environment:
+      - PORT=8080
+      - PRODUCT_CATALOG_SERVICE_ADDR=productcatalogservice:3550
+      - CURRENCY_SERVICE_ADDR=currencyservice:7000
+      - CART_SERVICE_ADDR=cartservice:7070
+      - RECOMMENDATION_SERVICE_ADDR=recommendationservice:8080
+      - SHIPPING_SERVICE_ADDR=shippingservice:50051
+      - CHECKOUT_SERVICE_ADDR=checkoutservice:5050
+      - AD_SERVICE_ADDR=adservice:9555
+      - SHOPPING_ASSISTANT_SERVICE_ADDR=shoppingassistantservice:80
+    depends_on:
+      - productcatalogservice
+      - currencyservice
+      - cartservice
+      - recommendationservice
+      - shippingservice
+      - checkoutservice
+      - adservice
+
+  productcatalogservice:
+    image: us-central1-docker.pkg.dev/google-samples/microservices-demo/productcatalogservice:v0.10.2
+    environment:
+      - PORT=3550
+      - DISABLE_PROFILER=1
+
+  currencyservice:
+    image: us-central1-docker.pkg.dev/google-samples/microservices-demo/currencyservice:v0.10.2
+    environment:
+      - PORT=7000
+      - DISABLE_PROFILER=1
+
+  cartservice:
+    image: 554043692091.dkr.ecr.eu-west-2.amazonaws.com/sre-agent/cartservice:no-loafers
+    environment:
+      - REDIS_ADDR=redis-cart:6379
+    depends_on:
+      - redis-cart
+
+  redis-cart:
+    image: redis:alpine
+    ports:
+      - "6379:6379"
+
+  recommendationservice:
+    image: us-central1-docker.pkg.dev/google-samples/microservices-demo/recommendationservice:v0.10.2
+    environment:
+      - PORT=8080
+      - PRODUCT_CATALOG_SERVICE_ADDR=productcatalogservice:3550
+      - DISABLE_PROFILER=1
+
+  shippingservice:
+    image: us-central1-docker.pkg.dev/google-samples/microservices-demo/shippingservice:v0.10.2
+    environment:
+      - PORT=50051
+      - DISABLE_PROFILER=1
+
+  checkoutservice:
+    image: us-central1-docker.pkg.dev/google-samples/microservices-demo/checkoutservice:v0.10.2
+    environment:
+      - PORT=5050
+      - PRODUCT_CATALOG_SERVICE_ADDR=productcatalogservice:3550
+      - SHIPPING_SERVICE_ADDR=shippingservice:50051
+      - PAYMENT_SERVICE_ADDR=paymentservice:50051
+      - EMAIL_SERVICE_ADDR=emailservice:5000
+      - CURRENCY_SERVICE_ADDR=currencyservice:7000
+      - CART_SERVICE_ADDR=cartservice:7070
+
+  paymentservice:
+    image: us-central1-docker.pkg.dev/google-samples/microservices-demo/paymentservice:v0.10.2
+    environment:
+      - PORT=50051
+      - DISABLE_PROFILER=1
+
+  emailservice:
+    image: us-central1-docker.pkg.dev/google-samples/microservices-demo/emailservice:v0.10.2
+    environment:
+      - PORT=8080
+      - DISABLE_PROFILER=1
+
+  adservice:
+    image: us-central1-docker.pkg.dev/google-samples/microservices-demo/adservice:v0.10.2
+    environment:
+      - PORT=9555
