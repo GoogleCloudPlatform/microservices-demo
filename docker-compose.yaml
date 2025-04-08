@@ -1,5 +1,3 @@
-version: "3.8"
-
 services:
   frontend:
     image: us-central1-docker.pkg.dev/google-samples/microservices-demo/frontend:v0.10.2
