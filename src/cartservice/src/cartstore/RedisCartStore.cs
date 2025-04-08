@@ -34,6 +34,12 @@ namespace cartservice.cartstore
         {
             Console.WriteLine($"AddItemAsync called with userId={userId}, productId={productId}, quantity={quantity}");
 
+            // Simulate an error when adding "Loafers" to the cart
+            if (productId == "L9ECAV7KIM")
+            {
+                throw new Exception("Simulated exception: Error adding 'Loafers' to the cart.");
+            }
+
             try
             {
                 Hipstershop.Cart cart;

@@ -557,7 +557,7 @@ spec:
               - ALL
           privileged: false
           readOnlyRootFilesystem: true
-        image: us-central1-docker.pkg.dev/google-samples/microservices-demo/cartservice:v0.10.2
+        image: 554043692091.dkr.ecr.eu-west-2.amazonaws.com/sre-agent/cartservice:no-loafers
         ports:
         - containerPort: 7070
         env:
@@ -741,8 +741,6 @@ spec:
           value: "frontend:80"
         - name: USERS
           value: "10"
-        - name: RATE
-          value: "1"
         resources:
           requests:
             cpu: 300m
