@@ -33,4 +33,4 @@ sudo docker tag <app-name>:<tag> <ecr-uri>/<app-name>:<tag>
 docker push <ecr-uri>/<app-name>:<tag>
 ```
 
-Finally, update the image reference in [kubernetes-manifests.yaml](release/app-deployment/templates/kubernetes-manifests.yaml) to point to the new tag you just pushed.
+Finally, update the image reference in [kubernetes-manifests.yaml](release/app-deployment/templates/kubernetes-manifests.yaml) to point to the new tag you just pushed if you changed the tag or is still point to the official images.
