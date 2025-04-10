@@ -35,9 +35,6 @@ namespace cartservice.cartstore
             Console.WriteLine($"AddItemAsync called with userId={userId}, productId={productId}, quantity={quantity}");
 
             if (productId == "AAAAAAAAA4")
-            // {
-            //     throw new Exception("You tried to buy some loafers.");
-            // }
             {
                 throw new RpcException(
                     new Status(StatusCode.InvalidArgument, "Uh-oh, you tried to buy loafers")
