@@ -1,4 +1,3 @@
-
 # Copyright 2018 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -285,7 +284,7 @@ spec:
                 - ALL
             privileged: false
             readOnlyRootFilesystem: true
-          image: 554043692091.dkr.ecr.eu-west-2.amazonaws.com/sre-agent/frontend:fshop
+          image: "{{ .Values.image.repository_uri }}/frontend:fshop"
           imagePullPolicy: Always
           ports:
           - containerPort: 8080
@@ -486,7 +485,7 @@ spec:
               - ALL
           privileged: false
           readOnlyRootFilesystem: true
-        image: 554043692091.dkr.ecr.eu-west-2.amazonaws.com/sre-agent/productcatalogservice:fshop
+        image: "{{ .Values.image.repository_uri }}/productcatalogservice:fshop"
         imagePullPolicy: Always
         ports:
         - containerPort: 3550
@@ -560,7 +559,7 @@ spec:
               - ALL
           privileged: false
           readOnlyRootFilesystem: true
-        image: 554043692091.dkr.ecr.eu-west-2.amazonaws.com/sre-agent/cartservice:no-loafers
+        image: "{{ .Values.image.repository_uri }}/cartservice:no-loafers"
         imagePullPolicy: Always
         ports:
         - containerPort: 7070
