@@ -230,9 +230,10 @@ func (fe *frontendServer) addToCartHandler(w http.ResponseWriter, r *http.Reques
 
 	if err := fe.insertCart(r.Context(), sessionID(r), p.GetId(), int32(payload.Quantity)); err != nil {
 		log.Printf("failed to add to cart: %v", err)
-		// Show specific message to user if error contains loafers message
+
 		if strings.Contains(err.Error(), "tried to buy loafers") {
-			http.Error(w, "Uh-oh, you can't buy loafers!", http.StatusBadRequest)
+			// Redirect to a custom page
+			http.Redirect(w, r, "/no-loafers", http.StatusSeeOther)
 			return
 		}
 
@@ -453,6 +454,12 @@ func (fe *frontendServer) getProductByID(w http.ResponseWriter, r *http.Request)
 
 	w.Write(jsonData)
 	w.WriteHeader(http.StatusOK)
+}
+
+func (s *frontendServer) noLoafersHandler(w http.ResponseWriter, r *http.Request) {
+	if err := templates.ExecuteTemplate(w, "no_loafers.html", nil); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
 }
 
 func (fe *frontendServer) chatBotHandler(w http.ResponseWriter, r *http.Request) {
