@@ -24,7 +24,7 @@ kubectl get svc frontend-external
 If you've made changes to the app (e.g. added a new error message), you'll need to rebuild and push the Docker image for the updated service:
 ```bash
 sudo docker build -t <app-name>:<tag> .
-sudo docker tag <app-name>:<tag> 554043692091.dkr.ecr.eu-west-2.amazonaws.com/sre-agent:<tag>
+sudo docker tag <app-name>:<tag> 554043692091.dkr.ecr.eu-west-2.amazonaws.com/sre-agent/<app-name>:<tag>
 docker push 554043692091.dkr.ecr.eu-west-2.amazonaws.com/sre-agent/<app-name>:<tag>
 ```
 

@@ -1,112 +1,52 @@
 {
     "products": [
         {
-            "id": "OLJCESPC7Z",
-            "name": "Sunglasses",
-            "description": "Add a modern touch to your outfits with these sleek aviator sunglasses.",
-            "picture": "/static/img/products/sunglasses.jpg",
+            "id": "AAAAAAAAA1",
+            "name": "The Socks You Need",
+            "description": "Marathon winning socks.",
+            "picture": "/static/img/products/socks.png",
             "priceUsd": {
                 "currencyCode": "USD",
-                "units": 19,
-                "nanos": 990000000
-            },
-            "categories": ["accessories"]
-        },
-        {
-            "id": "66VCHSJNUP",
-            "name": "Tank Top",
-            "description": "Perfectly cropped cotton tank, with a scooped neckline.",
-            "picture": "/static/img/products/tank-top.jpg",
-            "priceUsd": {
-                "currencyCode": "USD",
-                "units": 18,
-                "nanos": 990000000
-            },
-            "categories": ["clothing", "tops"]
-        },
-        {
-            "id": "1YMWWN1N4O",
-            "name": "Watch",
-            "description": "This gold-tone stainless steel watch will work with most of your outfits.",
-            "picture": "/static/img/products/watch.jpg",
-            "priceUsd": {
-                "currencyCode": "USD",
-                "units": 109,
-                "nanos": 990000000
-            },
-            "categories": ["accessories"]
-        },
-        {
-            "id": "L9ECAV7KIM",
-            "name": "Loafers",
-            "description": "A neat addition to your summer wardrobe.",
-            "picture": "/static/img/products/loafers.jpg",
-            "priceUsd": {
-                "currencyCode": "USD",
-                "units": 89,
+                "units": 28,
                 "nanos": 990000000
             },
             "categories": ["footwear"]
         },
         {
-            "id": "2ZYFJ3GM2N",
-            "name": "Hairdryer",
-            "description": "This lightweight hairdryer has 3 heat and speed settings. It's perfect for travel.",
-            "picture": "/static/img/products/hairdryer.jpg",
+            "id": "AAAAAAAAA2",
+            "name": "The Shirt You Really Need",
+            "description": "IPO must have.",
+            "picture": "/static/img/products/shirt.png",
             "priceUsd": {
                 "currencyCode": "USD",
-                "units": 24,
+                "units": 88,
                 "nanos": 990000000
             },
-            "categories": ["hair", "beauty"]
+            "categories": ["clothing"]
         },
         {
-            "id": "0PUK6V6EV0",
-            "name": "Candle Holder",
-            "description": "This small but intricate candle holder is an excellent gift.",
-            "picture": "/static/img/products/candle-holder.jpg",
+            "id": "AAAAAAAAA3",
+            "name": "The Ducks You Need",
+            "description": "The more you buy, the more you win.",
+            "picture": "/static/img/products/duck.png",
             "priceUsd": {
                 "currencyCode": "USD",
                 "units": 18,
                 "nanos": 990000000
             },
-            "categories": ["decor", "home"]
+            "categories": ["accessories"]
         },
         {
-            "id": "LS4PSXUNUM",
-            "name": "Salt & Pepper Shakers",
-            "description": "Add some flavor to your kitchen.",
-            "picture": "/static/img/products/salt-and-pepper-shakers.jpg",
+            "id": "AAAAAAAAA4",
+            "name": "The Loaf You Need",
+            "description": "You can walk on water with them.",
+            "picture": "/static/img/products/the_loaf.png",
             "priceUsd": {
                 "currencyCode": "USD",
-                "units": 18,
-                "nanos": 490000000
-            },
-            "categories": ["kitchen"]
-        },
-        {
-            "id": "9SIQT8TOJO",
-            "name": "Bamboo Glass Jar",
-            "description": "This bamboo glass jar can hold 57 oz (1.7 l) and is perfect for any kitchen.",
-            "picture": "/static/img/products/bamboo-glass-jar.jpg",
-            "priceUsd": {
-                "currencyCode": "USD",
-                "units": 5,
-                "nanos": 490000000
-            },
-            "categories": ["kitchen"]
-        },
-        {
-            "id": "6E92ZMYYFZ",
-            "name": "Mug",
-            "description": "A simple mug with a mustard interior.",
-            "picture": "/static/img/products/mug.jpg",
-            "priceUsd": {
-                "currencyCode": "USD",
-                "units": 8,
+                "units": 88,
                 "nanos": 990000000
             },
-            "categories": ["kitchen"]
+            "categories": ["footwear"]
         }
     ]
 }
