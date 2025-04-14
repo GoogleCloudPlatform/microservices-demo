@@ -34,10 +34,11 @@ namespace cartservice.cartstore
         {
             Console.WriteLine($"AddItemAsync called with userId={userId}, productId={productId}, quantity={quantity}");
 
-            // Simulate an error when adding "Loafers" to the cart
-            if (productId == "L9ECAV7KIM")
+            if (productId == "AAAAAAAAA4")
             {
-                throw new Exception("Simulated exception: Error adding 'Loafers' to the cart.");
+                throw new RpcException(
+                    new Status(StatusCode.InvalidArgument, "Uh-oh, you tried to buy loafers")
+                );
             }
 
             try
