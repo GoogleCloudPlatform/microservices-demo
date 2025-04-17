@@ -17,10 +17,13 @@ package main
 import (
 	"bytes"
 	"context"
+	"encoding/json"
 	"fmt"
 	"net"
+	"net/http"
 	"os"
 	"strings"
+	"time"
 
 	"cloud.google.com/go/alloydbconn"
 	secretmanager "cloud.google.com/go/secretmanager/apiv1"
@@ -29,6 +32,64 @@ import (
 	"github.com/golang/protobuf/jsonpb"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
+
+var (
+	lastNotificationTime time.Time
+	notificationCooldown = 5 * time.Minute
+)
+
+func notifySlack(productID string, price *pb.Money) {
+	// Check if enough time has passed since the last notification
+	if time.Since(lastNotificationTime) < notificationCooldown {
+		log.Info("Skipping Slack notification due to cooldown period")
+		return
+	}
+
+	// Update the last notification time
+	lastNotificationTime = time.Now()
+
+	slackToken := os.Getenv("SLACK_BOT_TOKEN")
+	if slackToken == "" {
+		log.Warn("SLACK_BOT_TOKEN is not set")
+		return
+	}
+
+	message := fmt.Sprintf(
+		"🚨 Detected a negative price error in the `productcatalogservice`:\nProduct ID: %s\nPrice: $%d.%d \nRun the `/diagnose` command if you'd like me to investigate.",
+		productID, price.Units, price.Nanos)
+
+	payload := map[string]interface{}{
+		"channel": "C08M5SMJ0KW",
+		"text":    message,
+	}
+
+	jsonData, err := json.Marshal(payload)
+	if err != nil {
+		log.Errorf("Failed to marshal Slack payload: %v", err)
+		return
+	}
+
+	req, err := http.NewRequest("POST", "https://slack.com/api/chat.postMessage", bytes.NewBuffer(jsonData))
+	if err != nil {
+		log.Errorf("Failed to create Slack request: %v", err)
+		return
+	}
+
+	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", slackToken))
+	req.Header.Set("Content-Type", "application/json")
+
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		log.Errorf("Failed to send Slack notification: %v", err)
+		return
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		log.Errorf("Slack API returned non-200 status: %d", resp.StatusCode)
+	}
+}
 
 func loadCatalog(catalog *pb.ListProductsResponse) error {
 	catalogMutex.Lock()
@@ -53,6 +114,18 @@ func loadCatalogFromLocalFile(catalog *pb.ListProductsResponse) error {
 	if err := jsonpb.Unmarshal(bytes.NewReader(catalogJSON), catalog); err != nil {
 		log.Warnf("failed to parse the catalog JSON: %v", err)
 		return err
+	}
+
+	// Log warnings for invalid prices
+	for _, product := range catalog.Products {
+		if product.PriceUsd == nil {
+			log.Warnf("product %s has no price set", product.Id)
+		}
+		if product.PriceUsd != nil && (product.PriceUsd.Units < 0 || (product.PriceUsd.Units == 0 && product.PriceUsd.Nanos < 0)) {
+			log.Warnf("product %s has negative price: %d.%d",
+				product.Id, product.PriceUsd.Units, product.PriceUsd.Nanos)
+			notifySlack(product.Id, product.PriceUsd)
+		}
 	}
 
 	log.Info("successfully parsed product catalog json")

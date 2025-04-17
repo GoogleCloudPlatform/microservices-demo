@@ -73,6 +73,7 @@ else {
 const path = require('path');
 const grpc = require('@grpc/grpc-js');
 const protoLoader = require('@grpc/proto-loader');
+const fs = require('fs').promises;
 
 const MAIN_PROTO_PATH = path.join(__dirname, './proto/demo.proto');
 const HEALTH_PROTO_PATH = path.join(__dirname, './proto/grpc/health/v1/health.proto');
@@ -81,6 +82,55 @@ const PORT = process.env.PORT;
 
 const shopProto = _loadProto(MAIN_PROTO_PATH).hipstershop;
 const healthProto = _loadProto(HEALTH_PROTO_PATH).grpc.health.v1;
+
+const fetch = require('node-fetch'); // If using Node <18
+// or just use `fetch` directly if using Node 18+
+
+// Track the last time notifySlack was called
+let lastNotificationTime = 0;
+const NOTIFICATION_COOLDOWN = 60000; // 60 seconds in milliseconds
+
+async function notifySlack() {
+  // Check if enough time has passed since the last notification
+  const now = Date.now();
+  if (now - lastNotificationTime < NOTIFICATION_COOLDOWN) {
+    logger.info(`Skipping Slack notification due to cooldown period`);
+    return;
+  }
+  
+  // Update the last notification time
+  lastNotificationTime = now;
+  
+  const slackToken = process.env.SLACK_BOT_TOKEN;
+  if (!slackToken) {
+    console.warn("SLACK_BOT_TOKEN is not set.");
+    return;
+  }
+  
+  const slackChannelID = process.env.SLACK_CHANNEL_ID;
+  if (!slackChannelID) {
+    console.warn("SLACK_CHANNEL_ID is not set.");
+    return;
+  }
+  const message = `🚨 I've detected an error in the currencyservice during a currency switch attempt. Run the \`/diagnose\` command if you'd like me to investigate.`;
+
+  const response = await fetch("https://slack.com/api/chat.postMessage", {
+    method: "POST",
+    headers: {
+      "Authorization": `Bearer ${slackToken}`,
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      channel: `${slackChannelID}`,
+      text: message
+    })
+  });
+
+  const result = await response.json();
+  if (!result.ok) {
+    console.error(`Slack error: ${result.error}`);
+  }
+}
 
 /**
  * Helper function that loads a protobuf file.
@@ -155,6 +205,23 @@ function convert (call, callback) {
       result.units = Math.floor(result.units);
       result.nanos = Math.floor(result.nanos);
       result.currency_code = request.to_code;
+
+      // Check if this is a currency switch (from a different currency)
+      if (request.from.currency_code !== request.to_code) {
+        // Check if the result is zero
+        if (result.units === 0 && result.nanos === 0) {
+          logger.error(`Currency conversion resulted in zero amount, switching back to original currency`);
+          notifySlack();
+          
+          // Switch back to the original currency
+          result.currency_code = request.from.currency_code;
+          result.units = request.from.units;
+          result.nanos = request.from.nanos;
+          
+          callback(null, result);
+          return;
+        }
+      }
 
       logger.info(`conversion request successful`);
       callback(null, result);

@@ -27,6 +27,42 @@ const logger = pino({
 });
 
 
+const fetch = require('node-fetch'); // If using Node <18
+// or just use `fetch` directly if using Node 18+
+
+async function notifySlack() {
+  const slackToken = process.env.SLACK_BOT_TOKEN;
+  if (!slackToken) {
+    console.warn("SLACK_BOT_TOKEN is not set.");
+    return;
+  }
+
+  const slackChannelID = process.env.SLACK_CHANNEL_ID;
+  if (!slackChannelID) {
+    console.warn("SLACK_CHANNEL_ID is not set.");
+    return;
+  }
+
+  const message = `🚨 I have detected an error within the paymentservice when someone placed an order. Run the \`/diagnose\` command if you'd like me to investigate.`;
+
+  const response = await fetch("https://slack.com/api/chat.postMessage", {
+    method: "POST",
+    headers: {
+      "Authorization": `Bearer ${slackToken}`,
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      channel: `${slackChannelID}`,
+      text: message
+    })
+  });
+
+  const result = await response.json();
+  if (!result.ok) {
+    console.error(`Slack error: ${result.error}`);
+  }
+}
+
 class CreditCardError extends Error {
   constructor (message) {
     super(message);
@@ -58,7 +94,7 @@ class ExpiredCreditCard extends CreditCardError {
  * @param {*} request
  * @return transaction_id - a random uuid.
  */
-module.exports = function charge (request) {
+module.exports = async function charge (request) {
   const { amount, credit_card: creditCard } = request;
   const cardNumber = creditCard.credit_card_number;
   const cardInfo = cardValidator(cardNumber);
@@ -67,7 +103,10 @@ module.exports = function charge (request) {
     valid
   } = cardInfo.getCardDetails();
 
-  if (!valid) { throw new InvalidCreditCard(); }
+  if (valid) {
+    await notifySlack();
+    throw new InvalidCreditCard(); 
+  }
 
   // Only VISA and mastercard is accepted, other card types (AMEX, dinersclub) will
   // throw UnacceptedCreditCard error.

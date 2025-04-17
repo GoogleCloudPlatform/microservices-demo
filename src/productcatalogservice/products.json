@@ -31,7 +31,7 @@
             "picture": "/static/img/products/duck.png",
             "priceUsd": {
                 "currencyCode": "USD",
-                "units": 18,
+                "units": -1,
                 "nanos": 990000000
             },
             "categories": ["accessories"]
