@@ -29,13 +29,13 @@ flask-cors==5.0.1
     # via locust
 flask-login==0.6.3
     # via locust
-gevent==24.11.1
+gevent==25.4.1
     # via
     #   geventhttpclient
     #   locust
 geventhttpclient==2.3.3
     # via locust
-greenlet==3.1.1
+greenlet==3.2.0
     # via gevent
 idna==3.10
     # via requests
@@ -43,7 +43,7 @@ itsdangerous==2.2.0
     # via flask
 jinja2==3.1.6
     # via flask
-locust==2.33.2
+locust==2.34.1
     # via -r requirements.in
 markupsafe==3.0.2
     # via
@@ -55,15 +55,15 @@ psutil==7.0.0
     # via locust
 python-dateutil==2.9.0.post0
     # via faker
-pyzmq==26.3.0
+pyzmq==26.4.0
     # via locust
 requests==2.32.3
     # via locust
 six==1.17.0
     # via python-dateutil
-typing-extensions==4.13.0
+typing-extensions==4.13.2
     # via faker
-urllib3==2.3.0
+urllib3==2.4.0
     # via
     #   geventhttpclient
     #   requests
