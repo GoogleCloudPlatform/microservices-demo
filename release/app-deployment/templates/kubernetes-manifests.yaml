@@ -100,6 +100,7 @@ metadata:
   labels:
     app: checkoutservice
 spec:
+  replicas: 1
   selector:
     matchLabels:
       app: checkoutservice
@@ -150,10 +151,10 @@ spec:
           resources:
             requests:
               cpu: 100m
-              memory: 64Mi
+              memory: 1Gi
             limits:
               cpu: 200m
-              memory: 128Mi
+              memory: 128Gi
 ---
 apiVersion: v1
 kind: Service

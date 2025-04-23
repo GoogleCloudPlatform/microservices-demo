@@ -38,6 +38,7 @@ from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExport
 from logger import getJSONLogger
 logger = getJSONLogger('recommendationservice-server')
 
+
 def initStackdriverProfiling():
   project_id = None
   try:
