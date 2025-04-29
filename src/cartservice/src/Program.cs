@@ -14,12 +14,26 @@
 
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using cartservice;
 
-CreateHostBuilder(args).Build().Run();
+try
+{
+    System.Console.WriteLine("CartService starting up...");
+    CreateHostBuilder(args).Build().Run();
+}
+catch (System.Exception ex)
+{
+    System.Console.WriteLine($"CartService startup failed: {ex.Message}");
+}
 
 static IHostBuilder CreateHostBuilder(string[] args) =>
     Host.CreateDefaultBuilder(args)
+        .ConfigureLogging(logging =>
+        {
+            logging.ClearProviders();
+            logging.AddConsole();
+        })
         .ConfigureWebHostDefaults(webBuilder =>
         {
             webBuilder.UseStartup<Startup>();
