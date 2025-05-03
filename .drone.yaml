@@ -1,0 +1,26 @@
+kind: pipeline
+type: docker # Use 'docker' because you are using the drone-docker-runner
+name: build-and-push-image
+
+steps:
+- name: build and publish
+  image: plugins/docker # Use the official Drone Docker plugin
+  settings:
+    repo: cart-service # e.g., docker.io/yourusername/my-app or gcr.io/my-project/my-app
+    tags:
+      - latest
+      - ${DRONE_COMMIT_SHA:0:7} # Tag with the short commit hash (optional)
+    # If your registry requires authentication (most do):
+    username:
+      from_secret: docker_username
+    password:
+      from_secret: docker_password
+    # Optional: Specify registry if not Docker Hub
+    registry: registry.modarre.si
+    # Optional: Specify Dockerfile location if not ./Dockerfile
+    dockerfile: src/cartservice/src/Dockerfile
+    # Optional: Specify build context if not .
+    context: src/cartservice/src
+    # Optional: Add build arguments
+    # build_args:
+    #  - MY_ARG=some_value
