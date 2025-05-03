@@ -6,7 +6,7 @@ steps:
 - name: build and publish
   image: plugins/docker # Use the official Drone Docker plugin
   settings:
-    repo: cart-service # e.g., docker.io/yourusername/my-app or gcr.io/my-project/my-app
+    repo: registry.modarre.si/cart-service # e.g., docker.io/yourusername/my-app or gcr.io/my-project/my-app
     tags:
       - latest
       - ${DRONE_COMMIT_SHA:0:7} # Tag with the short commit hash (optional)
