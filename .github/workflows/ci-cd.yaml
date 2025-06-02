@@ -155,5 +155,5 @@ jobs:
           else
             cd src/${{ matrix.service }}
           fi
-          docker build -t ${{ env.GHCR_REPO }}-${{ matrix.service }}:latest .
+          docker build -t ${{ env.GHCR_REPO }}/${{ matrix.service }}:latest .
           docker push ${{ env.GHCR_REPO }}/${{ matrix.service }}:latest
