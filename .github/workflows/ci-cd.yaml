@@ -46,7 +46,7 @@ jobs:
         if: matrix.service == 'cartservice'
         uses: actions/setup-dotnet@v2
         with:
-          dotnet-version: '6.0.x'
+          dotnet-version: '9.0.x'
 
       - name: Setup Go
         if: matrix.service == 'checkoutservice' || matrix.service == 'frontend' || matrix.service == 'productcatalogservice' || matrix.service == 'shippingservice'
