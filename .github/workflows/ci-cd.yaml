@@ -37,9 +37,9 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      # Definir Java 17 para serviços Java/Spring Boot
-      - name: Setup Java (apenas se houver pom.xml)
-        if: matrix.service != 'frontend' && (matrix.service contains 'service')
+      # Definir Java 17 para qualquer serviço cujo nome contenha 'service'
+      - name: Setup Java (apenas para serviços Java/Spring Boot)
+        if: matrix.service != 'frontend' && contains(matrix.service, 'service')
         uses: actions/setup-java@v3
         with:
           distribution: temurin
@@ -95,10 +95,8 @@ jobs:
           version: 'latest'
 
       - name: Configure Kubeconfig (Orbstack)
-        # Assumindo que seu runner consegue acessar o cluster Orbstack por padrão.
         run: |
           echo "Usando o kubeconfig local apontando para o cluster Orbstack."
-          # Caso precise de ajustes de contexto, inclua aqui:
           # kubectl config use-context orbstack
 
       - name: Set up Helm
@@ -128,5 +126,4 @@ jobs:
           kubectl rollout status deploy/productcatalogservice
           kubectl rollout status deploy/recommendationservice
           kubectl rollout status deploy/shippingservice
-          # O frontend pode ter deployment com outro nome; ajuste se necessário:
           kubectl rollout status deploy/frontend
