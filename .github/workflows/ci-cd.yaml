@@ -14,9 +14,7 @@ env:
 
 jobs:
   build-and-push-images:
-    name: Build & Push Docker Images
     runs-on: ubuntu-latest
-
     strategy:
       matrix:
         service:
@@ -31,40 +29,57 @@ jobs:
           - shippingservice
           - frontend
       fail-fast: false
-
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+      - uses: actions/checkout@v3
 
-      - name: List directory contents
-        run: ls -R
+      - run: ls -R
 
       - name: Setup Java
-        if: matrix.service != 'frontend' && contains(matrix.service, 'service')
+        if: matrix.service == 'adservice'
         uses: actions/setup-java@v3
         with:
           distribution: temurin
-          java-version: '17'
+          java-version: '19'
+
+      - name: Setup .NET
+        if: matrix.service == 'cartservice'
+        uses: actions/setup-dotnet@v2
+        with:
+          dotnet-version: '6.0.x'
+
+      - name: Setup Go
+        if: matrix.service == 'checkoutservice' || matrix.service == 'frontend' || matrix.service == 'productcatalogservice' || matrix.service == 'shippingservice'
+        uses: actions/setup-go@v3
+        with:
+          go-version: '1.20'
 
       - name: Setup Node.js
-        if: matrix.service == 'frontend'
+        if: matrix.service == 'currencyservice' || matrix.service == 'paymentservice'
         uses: actions/setup-node@v3
         with:
           node-version: '16'
+
+      - name: Setup Python
+        if: matrix.service == 'emailservice' || matrix.service == 'recommendationservice'
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
 
       - name: Build & Test
         run: |
           if [ -d "src/${{ matrix.service }}" ]; then
             cd "src/${{ matrix.service }}"
-            if [ -f build.gradle ]; then
+            if [ "${{ matrix.service }}" = "adservice" ]; then
               chmod +x gradlew
               ./gradlew clean build
-            elif [ -f pom.xml ]; then
-              mvn clean verify -DskipTests=false
-            fi
-            if [ -f package.json ]; then
+            elif [ "${{ matrix.service }}" = "cartservice" ]; then
+              dotnet test
+            elif [ "${{ matrix.service }}" = "checkoutservice" ] || [ "${{ matrix.service }}" = "frontend" ] || [ "${{ matrix.service }}" = "productcatalogservice" ] || [ "${{ matrix.service }}" = "shippingservice" ]; then
+              go test ./...
+            elif [ "${{ matrix.service }}" = "currencyservice" ] || [ "${{ matrix.service }}" = "paymentservice" ]; then
               npm ci
-              npm test -- --watch=false --browsers=ChromeHeadless
+            elif [ "${{ matrix.service }}" = "emailservice" ] || [ "${{ matrix.service }}" = "recommendationservice" ]; then
+              pip install -r requirements.txt
             fi
             cd -
           fi
@@ -79,7 +94,11 @@ jobs:
       - name: Build and Push Docker Image
         run: |
           if [ -d "src/${{ matrix.service }}" ]; then
-            cd "src/${{ matrix.service }}"
+            if [ "${{ matrix.service }}" = "cartservice" ]; then
+              cd "src/${{ matrix.service }}/src"
+            else
+              cd "src/${{ matrix.service }}"
+            fi
             docker build -t ${{ env.GHCR_REPO }}-${{ matrix.service }}:latest .
             docker push ${{ env.GHCR_REPO }}-${{ matrix.service }}:latest
             cd -
