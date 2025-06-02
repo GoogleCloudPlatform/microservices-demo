@@ -94,7 +94,7 @@ spec:
               - ALL
           privileged: false
           readOnlyRootFilesystem: true
-        image: busybox:latest
+        image: ghcr.io/phrafa/busybox:latest
         env:
         - name: FRONTEND_ADDR
           value: "{{ .Values.frontend.name }}:80"
