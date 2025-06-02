@@ -17,9 +17,9 @@
 # Declare variables to be passed into your templates.
 
 images:
-  repository: us-central1-docker.pkg.dev/google-samples/microservices-demo
+  repository: ghcr.io/phrafa/microservices-demo
   # Overrides the image tag whose default is the chart appVersion.
-  tag: ""
+  tag: "latest"
 
 serviceAccounts:
   # Specifies whether service accounts should be created.

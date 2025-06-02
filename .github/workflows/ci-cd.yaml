@@ -1,0 +1,132 @@
+name: CI/CD Monorepo + Helm Chart
+
+# Executa em pushes para main ou em PRs abertos contra main
+on:
+  push:
+    branches:
+      - main
+      - 'feature/**'
+  pull_request:
+    branches:
+      - main
+
+env:
+  GHCR_REPO: ghcr.io/seu-usuario/microservices-demo
+
+jobs:
+  build-and-push-images:
+    name: Build & Push Docker Images
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        service:
+          - adservice
+          - cartservice
+          - checkoutservice
+          - currencyservice
+          - emailservice
+          - paymentservice
+          - productcatalogservice
+          - recommendationservice
+          - shippingservice
+          - frontend
+      fail-fast: false
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # Definir Java 17 para serviços Java/Spring Boot
+      - name: Setup Java (apenas se houver pom.xml)
+        if: matrix.service != 'frontend' && (matrix.service contains 'service')
+        uses: actions/setup-java@v3
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      # Definir Node.js para o frontend
+      - name: Setup Node.js (apenas frontend)
+        if: matrix.service == 'frontend'
+        uses: actions/setup-node@v3
+        with:
+          node-version: '16'
+
+      - name: Build & Test ${{ matrix.service }}
+        run: |
+          cd ${{ matrix.service }}
+
+          # Se for Java (pom.xml existe), roda Maven
+          if [ -f pom.xml ]; then
+            mvn clean verify -DskipTests=false
+          fi
+
+          # Se for Node (package.json existe), roda npm
+          if [ -f package.json ]; then
+            npm ci
+            npm test -- --watch=false --browsers=ChromeHeadless
+          fi
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ secrets.GHCR_USERNAME }}
+          password: ${{ secrets.GHCR_TOKEN }}
+
+      - name: Build and push Docker image ${{ matrix.service }}
+        run: |
+          cd ${{ matrix.service }}
+          docker build -t ${{ env.GHCR_REPO }}-${{ matrix.service }}:latest .
+          docker push ${{ env.GHCR_REPO }}-${{ matrix.service }}:latest
+
+  deploy-via-helm:
+    name: Deploy via Helm Chart
+    runs-on: ubuntu-latest
+    needs: build-and-push-images
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up kubectl
+        uses: azure/setup-kubectl@v3
+        with:
+          version: 'latest'
+
+      - name: Configure Kubeconfig (Orbstack)
+        # Assumindo que seu runner consegue acessar o cluster Orbstack por padrão.
+        run: |
+          echo "Usando o kubeconfig local apontando para o cluster Orbstack."
+          # Caso precise de ajustes de contexto, inclua aqui:
+          # kubectl config use-context orbstack
+
+      - name: Set up Helm
+        uses: azure/setup-helm@v3
+        with:
+          version: 'latest'
+
+      - name: Deploy Helm Chart
+        run: |
+          cd helm-chart
+
+          # Aponta para GHCR e tag 'latest' (já configurado em values.yaml)
+          helm upgrade --install microservices-demo . \
+            --namespace default \
+            --create-namespace \
+            --set images.repository=${{ env.GHCR_REPO }} \
+            --set images.tag=latest
+
+      - name: Verificar rollout
+        run: |
+          kubectl rollout status deploy/adservice
+          kubectl rollout status deploy/cartservice
+          kubectl rollout status deploy/checkoutservice
+          kubectl rollout status deploy/currencyservice
+          kubectl rollout status deploy/emailservice
+          kubectl rollout status deploy/paymentservice
+          kubectl rollout status deploy/productcatalogservice
+          kubectl rollout status deploy/recommendationservice
+          kubectl rollout status deploy/shippingservice
+          # O frontend pode ter deployment com outro nome; ajuste se necessário:
+          kubectl rollout status deploy/frontend
