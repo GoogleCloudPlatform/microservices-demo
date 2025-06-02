@@ -1,4 +1,4 @@
-name: CI/CD Monorepo + Helm Chart
+name: CI/CD Monorepo
 
 on:
   push:
@@ -16,6 +16,7 @@ jobs:
   build-and-push-images:
     name: Build & Push Docker Images
     runs-on: ubuntu-latest
+
     strategy:
       matrix:
         service:
@@ -30,6 +31,7 @@ jobs:
           - shippingservice
           - frontend
       fail-fast: false
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -76,38 +78,3 @@ jobs:
             docker push ${{ env.GHCR_REPO }}-${{ matrix.service }}:latest
             cd ..
           fi
-
-  deploy-via-helm:
-    name: Deploy via Helm Chart
-    runs-on: ubuntu-latest
-    needs: build-and-push-images
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-
-      - name: Set up kubectl
-        uses: azure/setup-kubectl@v3
-        with:
-          version: 'latest'
-
-      - name: Set up Helm
-        uses: azure/setup-helm@v3
-        with:
-          version: 'latest'
-
-      - name: Deploy Helm Chart
-        run: |
-          cd helm-chart
-          helm upgrade --install microservices-demo . \
-            --namespace default \
-            --create-namespace \
-            --set images.repository=${{ env.GHCR_REPO }} \
-            --set images.tag=latest
-
-      - name: Verify Rollout
-        run: |
-          for svc in adservice cartservice checkoutservice currencyservice emailservice paymentservice productcatalogservice recommendationservice shippingservice frontend; do
-            if kubectl get deployment "$svc" &> /dev/null; then
-              kubectl rollout status deployment/"$svc" --timeout=120s
-            fi
-          done
