@@ -56,12 +56,11 @@ jobs:
         run: |
           if [ -d "src/${{ matrix.service }}" ]; then
             cd "src/${{ matrix.service }}"
-            if [ -f build.gradle ] || [ -f pom.xml ]; then
-              if [ -f build.gradle ]; then
-                ./gradlew clean build
-              else
-                mvn clean verify -DskipTests=false
-              fi
+            if [ -f build.gradle ]; then
+              chmod +x gradlew
+              ./gradlew clean build
+            elif [ -f pom.xml ]; then
+              mvn clean verify -DskipTests=false
             fi
             if [ -f package.json ]; then
               npm ci
