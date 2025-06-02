@@ -52,7 +52,7 @@ jobs:
         if: matrix.service == 'checkoutservice' || matrix.service == 'frontend' || matrix.service == 'productcatalogservice' || matrix.service == 'shippingservice'
         uses: actions/setup-go@v3
         with:
-          go-version: '1.20'
+          go-version: '1.22'
 
       - name: Setup Node.js
         if: matrix.service == 'currencyservice' || matrix.service == 'paymentservice'
@@ -74,7 +74,7 @@ jobs:
               chmod +x gradlew
               ./gradlew clean build
             elif [ "${{ matrix.service }}" = "cartservice" ]; then
-              dotnet test "${PWD}/src/cartservice.sln"
+              dotnet test "cartservice.sln"
             elif [ "${{ matrix.service }}" = "checkoutservice" ] || [ "${{ matrix.service }}" = "productcatalogservice" ] || [ "${{ matrix.service }}" = "shippingservice" ] || [ "${{ matrix.service }}" = "frontend" ]; then
               go test ./...
             elif [ "${{ matrix.service }}" = "currencyservice" ] || [ "${{ matrix.service }}" = "paymentservice" ]; then
