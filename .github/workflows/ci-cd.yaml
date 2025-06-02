@@ -11,7 +11,7 @@ on:
       - main
 
 env:
-  GHCR_REPO: ghcr.io/seu-usuario/microservices-demo
+  GHCR_REPO: ghcr.io/phrafa/microservices-demo
 
 jobs:
   build-and-push-images:
