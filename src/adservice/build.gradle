@@ -33,18 +33,18 @@ dependencies {
         implementation fileTree(dir: offlineCompile, include: '*.jar')
     } else {
         implementation "com.google.api.grpc:proto-google-common-protos:2.54.1",
-                "javax.annotation:javax.annotation-api:1.3.2",
-                "io.grpc:grpc-protobuf:${grpcVersion}",
-                "io.grpc:grpc-stub:${grpcVersion}",
-                "io.grpc:grpc-netty:${grpcVersion}",
-                "io.grpc:grpc-services:${grpcVersion}",
-                "io.grpc:grpc-census:${grpcVersion}",
-                "org.apache.logging.log4j:log4j-core:2.24.3",
-                "com.google.protobuf:protobuf-java:${protocVersion}"
+                   "javax.annotation:javax.annotation-api:1.3.2",
+                   "io.grpc:grpc-protobuf:${grpcVersion}",
+                   "io.grpc:grpc-stub:${grpcVersion}",
+                   "io.grpc:grpc-netty:${grpcVersion}",
+                   "io.grpc:grpc-services:${grpcVersion}",
+                   "io.grpc:grpc-census:${grpcVersion}",
+                   "org.apache.logging.log4j:log4j-core:2.24.3",
+                   "com.google.protobuf:protobuf-java:${protocVersion}"
 
         runtimeOnly "com.fasterxml.jackson.core:jackson-core:${jacksonCoreVersion}",
-                "com.fasterxml.jackson.core:jackson-databind:${jacksonDatabindVersion}",
-                "io.netty:netty-tcnative-boringssl-static:2.0.70.Final"
+                    "com.fasterxml.jackson.core:jackson-databind:${jacksonDatabindVersion}",
+                    "io.netty:netty-tcnative-boringssl-static:2.0.70.Final"
     }
 }
 
@@ -65,25 +65,18 @@ protobuf {
     }
 }
 
-googleJavaFormat {
-    toolVersion '1.25.2'
-}
-
-// Inform IDEs like IntelliJ IDEA, Eclipse or NetBeans about the generated code.
 sourceSets {
     main {
         java {
-            srcDirs 'hipstershop'
-            srcDirs 'build/generated/source/proto/main/java/hipstershop'
-            srcDirs 'build/generated/source/proto/main/grpc/hipstershop'
+            srcDirs 'src/main/java',
+                    'build/generated/source/proto/main/java',
+                    'build/generated/source/proto/main/grpc'
         }
     }
 }
 
 startScripts.enabled = false
 
-// This to cache dependencies during Docker image building. First build will take time.
-// Subsequent build will be incremental.
 task downloadRepos(type: Copy) {
     from configurations.compileClasspath
     into offlineCompile
@@ -96,9 +89,6 @@ task adService(type: CreateStartScripts) {
     applicationName = 'AdService'
     outputDir = new File(project.buildDir, 'tmp')
     classpath = startScripts.classpath
-    // @TODO: https://github.com/GoogleCloudPlatform/microservices-demo/issues/2517
-    // defaultJvmOpts =
-    //          ["-agentpath:/opt/cprof/profiler_java_agent.so=-cprof_service=adservice,-cprof_service_version=1.0.0"]
 }
 
 task adServiceClient(type: CreateStartScripts) {
@@ -106,9 +96,6 @@ task adServiceClient(type: CreateStartScripts) {
     applicationName = 'AdServiceClient'
     outputDir = new File(project.buildDir, 'tmp')
     classpath = startScripts.classpath
-    // @TODO: https://github.com/GoogleCloudPlatform/microservices-demo/issues/2517
-    // defaultJvmOpts =
-    //          ["-agentpath:/opt/cprof/profiler_java_agent.so=-cprof_service=adserviceclient,-cprof_service_version=1.0.0"]
 }
 
 applicationDistribution.into('bin') {
