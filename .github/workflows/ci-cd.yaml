@@ -36,6 +36,9 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
+      - name: List directory contents (debug)
+        run: ls -R
+
       - name: Setup Java
         if: matrix.service != 'frontend' && contains(matrix.service, 'service')
         uses: actions/setup-java@v3
@@ -51,8 +54,9 @@ jobs:
 
       - name: Build & Test
         run: |
-          if [ -d "${{ matrix.service }}" ]; then
-            cd "${{ matrix.service }}"
+          # Aqui verificamos se existe src/<service> antes de entrar
+          if [ -d "src/${{ matrix.service }}" ]; then
+            cd "src/${{ matrix.service }}"
             if [ -f pom.xml ]; then
               mvn clean verify -DskipTests=false
             fi
@@ -60,7 +64,9 @@ jobs:
               npm ci
               npm test -- --watch=false --browsers=ChromeHeadless
             fi
-            cd ..
+            cd -
+          else
+            echo "Directory src/${{ matrix.service }} not found, skipping build/test"
           fi
 
       - name: Log in to GitHub Container Registry
@@ -72,9 +78,11 @@ jobs:
 
       - name: Build and Push Docker Image
         run: |
-          if [ -d "${{ matrix.service }}" ]; then
-            cd "${{ matrix.service }}"
+          if [ -d "src/${{ matrix.service }}" ]; then
+            cd "src/${{ matrix.service }}"
             docker build -t ${{ env.GHCR_REPO }}-${{ matrix.service }}:latest .
             docker push ${{ env.GHCR_REPO }}-${{ matrix.service }}:latest
-            cd ..
+            cd -
+          else
+            echo "Directory src/${{ matrix.service }} not found, skipping build/push"
           fi
