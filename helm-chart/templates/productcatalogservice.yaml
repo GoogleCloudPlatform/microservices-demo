@@ -43,6 +43,8 @@ spec:
       labels:
         app: {{ .Values.productCatalogService.name }}
     spec:
+      imagePullSecrets:
+      - name: ghcr-credentials    
       {{- if .Values.serviceAccounts.create }}
       serviceAccountName: {{ .Values.productCatalogService.name }}
       {{- else }}

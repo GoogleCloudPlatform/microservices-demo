@@ -45,6 +45,8 @@ spec:
       annotations:
         sidecar.istio.io/rewriteAppHTTPProbers: "true"
     spec:
+      imagePullSecrets:
+      - name: ghcr-credentials    
       {{- if .Values.serviceAccounts.create }}
       serviceAccountName: {{ .Values.frontend.name }}
       {{- else }}

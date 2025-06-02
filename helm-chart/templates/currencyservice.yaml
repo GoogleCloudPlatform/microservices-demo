@@ -43,6 +43,8 @@ spec:
       labels:
         app: {{ .Values.currencyService.name }}
     spec:
+      imagePullSecrets:
+      - name: ghcr-credentials    
       {{- if .Values.serviceAccounts.create }}
       serviceAccountName: {{ .Values.currencyService.name }}
       {{- else }}
