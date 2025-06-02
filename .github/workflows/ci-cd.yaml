@@ -35,12 +35,12 @@ jobs:
 
       - run: ls -R
 
-      - name: Setup Java
+      - name: Setup Java 19
         if: matrix.service == 'adservice'
         uses: actions/setup-java@v3
         with:
           distribution: temurin
-          java-version: '17'
+          java-version: '19'
 
       - name: Setup .NET
         if: matrix.service == 'cartservice'
@@ -74,8 +74,8 @@ jobs:
               chmod +x gradlew
               ./gradlew clean build
             elif [ "${{ matrix.service }}" = "cartservice" ]; then
-              dotnet test
-            elif [ "${{ matrix.service }}" = "checkoutservice" ] || [ "${{ matrix.service }}" = "frontend" ] || [ "${{ matrix.service }}" = "productcatalogservice" ] || [ "${{ matrix.service }}" = "shippingservice" ]; then
+              dotnet test "${PWD}/src/cartservice.sln"
+            elif [ "${{ matrix.service }}" = "checkoutservice" ] || [ "${{ matrix.service }}" = "productcatalogservice" ] || [ "${{ matrix.service }}" = "shippingservice" ] || [ "${{ matrix.service }}" = "frontend" ]; then
               go test ./...
             elif [ "${{ matrix.service }}" = "currencyservice" ] || [ "${{ matrix.service }}" = "paymentservice" ]; then
               npm ci
