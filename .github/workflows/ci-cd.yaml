@@ -13,7 +13,48 @@ env:
   GHCR_REPO: ghcr.io/phrafa/microservices-demo
 
 jobs:
+  detect-changes:
+    runs-on: ubuntu-latest
+    outputs:
+      adservice: ${{ steps.filter.outputs.adservice }}
+      cartservice: ${{ steps.filter.outputs.cartservice }}
+      checkoutservice: ${{ steps.filter.outputs.checkoutservice }}
+      currencyservice: ${{ steps.filter.outputs.currencyservice }}
+      emailservice: ${{ steps.filter.outputs.emailservice }}
+      paymentservice: ${{ steps.filter.outputs.paymentservice }}
+      productcatalogservice: ${{ steps.filter.outputs.productcatalogservice }}
+      recommendationservice: ${{ steps.filter.outputs.recommendationservice }}
+      shippingservice: ${{ steps.filter.outputs.shippingservice }}
+      frontend: ${{ steps.filter.outputs.frontend }}
+    steps:
+      - uses: actions/checkout@v3
+      - uses: dorny/paths-filter@v2
+        id: filter
+        with:
+          filters: |
+            adservice:
+              - 'src/adservice/**'
+            cartservice:
+              - 'src/cartservice/**'
+            checkoutservice:
+              - 'src/checkoutservice/**'
+            currencyservice:
+              - 'src/currencyservice/**'
+            emailservice:
+              - 'src/emailservice/**'
+            paymentservice:
+              - 'src/paymentservice/**'
+            productcatalogservice:
+              - 'src/productcatalogservice/**'
+            recommendationservice:
+              - 'src/recommendationservice/**'
+            shippingservice:
+              - 'src/shippingservice/**'
+            frontend:
+              - 'src/frontend/**'
+
   build-and-push-images:
+    needs: detect-changes
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -29,63 +70,78 @@ jobs:
           - shippingservice
           - frontend
       fail-fast: false
-
     steps:
       - uses: actions/checkout@v3
 
-      - run: ls -R
-
       - name: Setup Java 19
-        if: matrix.service == 'adservice'
+        if: matrix.service == 'adservice' && needs.detect-changes.outputs.adservice == 'true'
         uses: actions/setup-java@v3
         with:
           distribution: temurin
           java-version: '19'
 
       - name: Setup .NET
-        if: matrix.service == 'cartservice'
+        if: matrix.service == 'cartservice' && needs.detect-changes.outputs.cartservice == 'true'
         uses: actions/setup-dotnet@v2
         with:
           dotnet-version: '9.0.x'
 
       - name: Setup Go
-        if: matrix.service == 'checkoutservice' || matrix.service == 'frontend' || matrix.service == 'productcatalogservice' || matrix.service == 'shippingservice'
+        if: (matrix.service == 'checkoutservice' && needs.detect-changes.outputs.checkoutservice == 'true') || (matrix.service == 'frontend' && needs.detect-changes.outputs.frontend == 'true') || (matrix.service == 'productcatalogservice' && needs.detect-changes.outputs.productcatalogservice == 'true') || (matrix.service == 'shippingservice' && needs.detect-changes.outputs.shippingservice == 'true')
         uses: actions/setup-go@v3
         with:
           go-version: '1.22'
 
       - name: Setup Node.js
-        if: matrix.service == 'currencyservice' || matrix.service == 'paymentservice'
+        if: (matrix.service == 'currencyservice' && needs.detect-changes.outputs.currencyservice == 'true') || (matrix.service == 'paymentservice' && needs.detect-changes.outputs.paymentservice == 'true')
         uses: actions/setup-node@v3
         with:
           node-version: '16'
 
       - name: Setup Python
-        if: matrix.service == 'emailservice' || matrix.service == 'recommendationservice'
+        if: (matrix.service == 'emailservice' && needs.detect-changes.outputs.emailservice == 'true') || (matrix.service == 'recommendationservice' && needs.detect-changes.outputs.recommendationservice == 'true')
         uses: actions/setup-python@v4
         with:
           python-version: '3.10'
 
       - name: Build & Test
+        if: >
+          (matrix.service == 'adservice' && needs.detect-changes.outputs.adservice == 'true') ||
+          (matrix.service == 'cartservice' && needs.detect-changes.outputs.cartservice == 'true') ||
+          (matrix.service == 'checkoutservice' && needs.detect-changes.outputs.checkoutservice == 'true') ||
+          (matrix.service == 'currencyservice' && needs.detect-changes.outputs.currencyservice == 'true') ||
+          (matrix.service == 'emailservice' && needs.detect-changes.outputs.emailservice == 'true') ||
+          (matrix.service == 'paymentservice' && needs.detect-changes.outputs.paymentservice == 'true') ||
+          (matrix.service == 'productcatalogservice' && needs.detect-changes.outputs.productcatalogservice == 'true') ||
+          (matrix.service == 'recommendationservice' && needs.detect-changes.outputs.recommendationservice == 'true') ||
+          (matrix.service == 'shippingservice' && needs.detect-changes.outputs.shippingservice == 'true') ||
+          (matrix.service == 'frontend' && needs.detect-changes.outputs.frontend == 'true')
         run: |
-          if [ -d "src/${{ matrix.service }}" ]; then
-            cd "src/${{ matrix.service }}"
-            if [ "${{ matrix.service }}" = "adservice" ]; then
-              chmod +x gradlew
-              ./gradlew clean build
-            elif [ "${{ matrix.service }}" = "cartservice" ]; then
-              dotnet test "cartservice.sln"
-            elif [ "${{ matrix.service }}" = "checkoutservice" ] || [ "${{ matrix.service }}" = "productcatalogservice" ] || [ "${{ matrix.service }}" = "shippingservice" ] || [ "${{ matrix.service }}" = "frontend" ]; then
-              go test ./...
-            elif [ "${{ matrix.service }}" = "currencyservice" ] || [ "${{ matrix.service }}" = "paymentservice" ]; then
-              npm ci
-            elif [ "${{ matrix.service }}" = "emailservice" ] || [ "${{ matrix.service }}" = "recommendationservice" ]; then
-              pip install -r requirements.txt
-            fi
-            cd -
+          cd "src/${{ matrix.service }}"
+          if [ "${{ matrix.service }}" = "adservice" ]; then
+            bash gradlew clean build
+          elif [ "${{ matrix.service }}" = "cartservice" ]; then
+            dotnet test "cartservice.sln"
+          elif [ "${{ matrix.service }}" = "checkoutservice" ] || [ "${{ matrix.service }}" = "productcatalogservice" ] || [ "${{ matrix.service }}" = "shippingservice" ] || [ "${{ matrix.service }}" = "frontend" ]; then
+            go test ./...
+          elif [ "${{ matrix.service }}" = "currencyservice" ] || [ "${{ matrix.service }}" = "paymentservice" ]; then
+            npm ci
+          elif [ "${{ matrix.service }}" = "emailservice" ] || [ "${{ matrix.service }}" = "recommendationservice" ]; then
+            pip install -r requirements.txt
           fi
 
       - name: Log in to GitHub Container Registry
+        if: >
+          (matrix.service == 'adservice' && needs.detect-changes.outputs.adservice == 'true') ||
+          (matrix.service == 'cartservice' && needs.detect-changes.outputs.cartservice == 'true') ||
+          (matrix.service == 'checkoutservice' && needs.detect-changes.outputs.checkoutservice == 'true') ||
+          (matrix.service == 'currencyservice' && needs.detect-changes.outputs.currencyservice == 'true') ||
+          (matrix.service == 'emailservice' && needs.detect-changes.outputs.emailservice == 'true') ||
+          (matrix.service == 'paymentservice' && needs.detect-changes.outputs.paymentservice == 'true') ||
+          (matrix.service == 'productcatalogservice' && needs.detect-changes.outputs.productcatalogservice == 'true') ||
+          (matrix.service == 'recommendationservice' && needs.detect-changes.outputs.recommendationservice == 'true') ||
+          (matrix.service == 'shippingservice' && needs.detect-changes.outputs.shippingservice == 'true') ||
+          (matrix.service == 'frontend' && needs.detect-changes.outputs.frontend == 'true')
         uses: docker/login-action@v2
         with:
           registry: ghcr.io
@@ -93,14 +149,22 @@ jobs:
           password: ${{ secrets.GHCR_TOKEN }}
 
       - name: Build and Push Docker Image
+        if: >
+          (matrix.service == 'adservice' && needs.detect-changes.outputs.adservice == 'true') ||
+          (matrix.service == 'cartservice' && needs.detect-changes.outputs.cartservice == 'true') ||
+          (matrix.service == 'checkoutservice' && needs.detect-changes.outputs.checkoutservice == 'true') ||
+          (matrix.service == 'currencyservice' && needs.detect-changes.outputs.currencyservice == 'true') ||
+          (matrix.service == 'emailservice' && needs.detect-changes.outputs.emailservice == 'true') ||
+          (matrix.service == 'paymentservice' && needs.detect-changes.outputs.paymentservice == 'true') ||
+          (matrix.service == 'productcatalogservice' && needs.detect-changes.outputs.productcatalogservice == 'true') ||
+          (matrix.service == 'recommendationservice' && needs.detect-changes.outputs.recommendationservice == 'true') ||
+          (matrix.service == 'shippingservice' && needs.detect-changes.outputs.shippingservice == 'true') ||
+          (matrix.service == 'frontend' && needs.detect-changes.outputs.frontend == 'true')
         run: |
-          if [ -d "src/${{ matrix.service }}" ]; then
-            if [ "${{ matrix.service }}" = "cartservice" ]; then
-              cd "src/${{ matrix.service }}/src"
-            else
-              cd "src/${{ matrix.service }}"
-            fi
-            docker build -t ${{ env.GHCR_REPO }}-${{ matrix.service }}:latest .
-            docker push ${{ env.GHCR_REPO }}-${{ matrix.service }}:latest
-            cd -
+          if [ "${{ matrix.service }}" = "cartservice" ]; then
+            cd "src/${{ matrix.service }}/src"
+          else
+            cd "src/${{ matrix.service }}"
           fi
+          docker build -t ${{ env.GHCR_REPO }}-${{ matrix.service }}:latest .
+          docker push ${{ env.GHCR_REPO }}-${{ matrix.service }}:latest
