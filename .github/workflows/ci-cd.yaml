@@ -36,7 +36,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: List directory contents (debug)
+      - name: List directory contents
         run: ls -R
 
       - name: Setup Java
@@ -54,19 +54,20 @@ jobs:
 
       - name: Build & Test
         run: |
-          # Aqui verificamos se existe src/<service> antes de entrar
           if [ -d "src/${{ matrix.service }}" ]; then
             cd "src/${{ matrix.service }}"
-            if [ -f pom.xml ]; then
-              mvn clean verify -DskipTests=false
+            if [ -f build.gradle ] || [ -f pom.xml ]; then
+              if [ -f build.gradle ]; then
+                ./gradlew clean build
+              else
+                mvn clean verify -DskipTests=false
+              fi
             fi
             if [ -f package.json ]; then
               npm ci
               npm test -- --watch=false --browsers=ChromeHeadless
             fi
             cd -
-          else
-            echo "Directory src/${{ matrix.service }} not found, skipping build/test"
           fi
 
       - name: Log in to GitHub Container Registry
@@ -83,6 +84,4 @@ jobs:
             docker build -t ${{ env.GHCR_REPO }}-${{ matrix.service }}:latest .
             docker push ${{ env.GHCR_REPO }}-${{ matrix.service }}:latest
             cd -
-          else
-            echo "Directory src/${{ matrix.service }} not found, skipping build/push"
           fi
