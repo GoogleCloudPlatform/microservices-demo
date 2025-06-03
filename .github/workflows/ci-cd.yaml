@@ -218,6 +218,7 @@ jobs:
         uses: peter-evans/create-pull-request@v5
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
+          base: main
           commit-message: "chore: bump image tag to ${{ github.sha }}"
           branch: update-image-tag-${{ github.sha }}
           title: "Bump image tag to ${{ github.sha }}"
