@@ -38,7 +38,7 @@ spec:
       app: {{ .Values.cartService.name }}
   template:
     metadata:
-      {{- if .Values.cartDatabase.externalRedisTlsOrigination.enable }}
+      {{- if and .Values.cartDatabase.externalRedisTlsOrigination .Values.cartDatabase.externalRedisTlsOrigination.enable }}
       annotations:
         sidecar.istio.io/userVolumeMount: '[{"name": "{{ .Values.cartDatabase.externalRedisTlsOrigination.name }}", "mountPath": "/etc/certs", "readonly": true}]'
         sidecar.istio.io/userVolume: '[{"name": "{{ .Values.cartDatabase.externalRedisTlsOrigination.name }}", "secret": {"secretName": "{{ .Values.cartDatabase.externalRedisTlsOrigination.name }}"}}]'
@@ -361,7 +361,7 @@ spec:
         - "6379"
 {{- end }}
 {{- end }}
-{{- if .Values.cartDatabase.externalRedisTlsOrigination.enable }}
+{{- if and .Values.cartDatabase.externalRedisTlsOrigination .Values.cartDatabase.externalRedisTlsOrigination.enable }}
 ---
 apiVersion: v1
 data:
