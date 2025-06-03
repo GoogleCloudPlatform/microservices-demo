@@ -169,8 +169,6 @@ jobs:
           sudo chmod +x /usr/local/bin/yq
       - name: Bump image tags in values.yaml
         run: |
-          git config user.name "github-actions"
-          git config user.email "actions@github.com"
           # Determine BASE_SHA and HEAD_SHA same as in build job
           if [ "${{ github.event_name }}" = "pull_request" ]; then
             BASE_SHA=${{ github.event.pull_request.base.sha }}
@@ -180,16 +178,22 @@ jobs:
             HEAD_SHA=${{ github.sha }}
           fi
 
+          # Exit early if no service directories under src/ have changed
+          if git diff --quiet "$BASE_SHA" "$HEAD_SHA" -- src/; then
+            echo "No changes detected in any service; skipping bump-image-tags job."
+            echo "bumped=false" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
           git checkout -b update-image-tag-${{ github.sha }}
 
           SERVICES=(adservice cartservice checkoutservice currencyservice emailservice paymentservice productcatalogservice recommendationservice shippingservice frontend)
 
+          # Removed per-service diff check loop as job exits early if no changes in src/
+
           for service in "${SERVICES[@]}"; do
-            # Check if there were changes in src/<service>
-            if ! git diff --quiet "$BASE_SHA" "$HEAD_SHA" -- "src/${service}/"; then
-              subdir="${service%service}"
-              yq eval -i ".images.tag = \"${{ github.sha }}\"" "helm-chart/${subdir}/values.yaml"
-            fi
+            subdir="${service%service}"
+            yq eval -i ".images.tag = \"${{ github.sha }}\"" "helm-chart/${subdir}/values.yaml"
           done
 
           git add helm-chart/*/values.yaml
