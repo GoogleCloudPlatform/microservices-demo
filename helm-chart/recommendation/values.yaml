@@ -1,0 +1,44 @@
+images:
+  repository: ghcr.io/phrafa/microservices-demo
+  # Overrides the image tag whose default is the chart appVersion.
+  tag: "latest"
+serviceAccounts:
+  # Specifies whether service accounts should be created.
+  create: true
+  # Annotations to add to the service accounts.
+  annotations: {}
+  # Annotations to add only for the cartservice app. This allows to follow the least privilege principle where only cartservice needs to connect to external database for example via Workload Identity.
+  annotationsOnlyForCartservice: false
+networkPolicies:
+  # Specifies if the NetworkPolicies are created or not. If true, one fine granular NetworkPolicy per app is created.
+  create: false
+sidecars:
+  # Specifies if the Sidecars are created or not. If true, one fine granular Sidecar per app is created.
+  create: false
+authorizationPolicies:
+  # Specifies if the AuthorizationPolicies are created or not. If true, one fine granular AuthorizationPolicy per app is created.
+  create: false
+opentelemetryCollector:
+  create: false
+  name: opentelemetrycollector
+  # Specifies the project id for the otel collector. If set as "PROJECT_ID" (default value), an initContainer will automatically retrieve the project id value from the metadata server.
+  projectId: "PROJECT_ID"
+googleCloudOperations:
+  profiler: false
+  tracing: false
+  metrics: false
+seccompProfile:
+  enable: false
+  type: RuntimeDefault
+securityContext:
+  enable: true
+recommendationService:
+  create: true
+  name: recommendationservice
+  resources:
+    requests:
+      cpu: 100m
+      memory: 220Mi
+    limits:
+      cpu: 200m
+      memory: 450Mi
