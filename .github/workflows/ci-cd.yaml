@@ -38,7 +38,6 @@ jobs:
       fail-fast: false
 
     steps:
-      - uses: actions/checkout@v3
 
       - name: Decide whether to build this service
         id: change-check
@@ -64,6 +63,10 @@ jobs:
           else
             echo "build=true" >> $GITHUB_OUTPUT
           fi
+
+      - name: Checkout code (somente se build=true)
+        if: steps.change-check.outputs.build == 'true'
+        uses: actions/checkout@v3
 
       - name: Setup tooling
         if: steps.change-check.outputs.build == 'true'
@@ -172,6 +175,8 @@ jobs:
       - name: Bump image tags in values.yaml
         id: check-changes
         run: |
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
           # Determine BASE_SHA and HEAD_SHA same as in build job
           if [ "${{ github.event_name }}" = "pull_request" ]; then
             BASE_SHA=${{ github.event.pull_request.base.sha }}
