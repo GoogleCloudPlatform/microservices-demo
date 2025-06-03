@@ -79,12 +79,15 @@ spec:
         ports:
         - containerPort: 7070
         env:
-        {{- if eq .Values.cartDatabase.type "spanner" }}
+        {{- if .Values.cartDatabase }}
+          {{- if eq .Values.cartDatabase.type "spanner" }}
         - name: SPANNER_CONNECTION_STRING
-        {{- else }}
-        - name: REDIS_ADDR
-        {{- end }}
           value: {{ .Values.cartDatabase.connectionString | quote }}
+          {{- else }}
+        - name: REDIS_ADDR
+          value: {{ .Values.cartDatabase.connectionString | quote }}
+          {{- end }}
+        {{- end }}
         resources:
           {{- toYaml .Values.cartService.resources | nindent 10 }}
         readinessProbe:
