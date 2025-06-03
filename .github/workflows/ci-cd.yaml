@@ -161,6 +161,8 @@ jobs:
   bump-image-tags:
     needs: build-and-push-images
     runs-on: ubuntu-latest
+    outputs:
+      bumped: ${{ steps.check-changes.outputs.bumped }}
     steps:
       - uses: actions/checkout@v3
       - name: Install yq
@@ -168,6 +170,7 @@ jobs:
           sudo wget -O /usr/local/bin/yq https://github.com/mikefarah/yq/releases/download/v4.30.8/yq_linux_amd64
           sudo chmod +x /usr/local/bin/yq
       - name: Bump image tags in values.yaml
+        id: check-changes
         run: |
           # Determine BASE_SHA and HEAD_SHA same as in build job
           if [ "${{ github.event_name }}" = "pull_request" ]; then
@@ -198,12 +201,15 @@ jobs:
 
           git add helm-chart/*/values.yaml
           if git diff --cached --quiet; then
+            echo "bumped=false" >> $GITHUB_OUTPUT
             echo "No values.yaml changes detected; skipping commit."
           else
             git commit -m "chore: bump image tag to ${{ github.sha }}"
             git push --set-upstream origin update-image-tag-${{ github.sha }}
+            echo "bumped=true" >> $GITHUB_OUTPUT
           fi
       - name: Create Pull Request
+        if: steps.check-changes.outputs.bumped == 'true'
         uses: peter-evans/create-pull-request@v5
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
