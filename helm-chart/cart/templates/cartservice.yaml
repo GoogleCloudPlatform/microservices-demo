@@ -130,10 +130,10 @@ spec:
   - from:
     - podSelector:
         matchLabels:
-          app: {{ .Values.frontend.name }}
+          app: frontend
     - podSelector:
         matchLabels:
-          app: {{ .Values.checkoutService.name }}
+          app: checkoutservice
     ports:
      - port: 7070
        protocol: TCP

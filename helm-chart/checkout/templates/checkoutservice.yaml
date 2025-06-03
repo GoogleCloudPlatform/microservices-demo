@@ -83,17 +83,17 @@ spec:
         - name: PORT
           value: "5050"
         - name: PRODUCT_CATALOG_SERVICE_ADDR
-          value: "{{ .Values.productCatalogService.name }}:3550"
+          value: "productcatalogservice:3550"
         - name: SHIPPING_SERVICE_ADDR
-          value: "{{ .Values.shippingService.name }}:50051"
+          value: "shippingservice:50051"
         - name: PAYMENT_SERVICE_ADDR
-          value: "{{ .Values.paymentService.name }}:50051"
+          value: "paymentservice:50051"
         - name: EMAIL_SERVICE_ADDR
-          value: "{{ .Values.emailService.name }}:5000"
+          value: "emailservice:5000"
         - name: CURRENCY_SERVICE_ADDR
-          value: "{{ .Values.currencyService.name }}:7000"
+          value: "currencyservice:7000"
         - name: CART_SERVICE_ADDR
-          value: "{{ .Values.cartService.name }}:7070"
+          value: "cartservice:7070"
         {{- if .Values.opentelemetryCollector.create }}
         - name: COLLECTOR_SERVICE_ADDR
           value: "{{ .Values.opentelemetryCollector.name }}:4317"
@@ -165,12 +165,12 @@ spec:
   egress:
   - hosts:
     - istio-system/*
-    - ./{{ .Values.cartService.name }}.{{ .Release.Namespace }}.svc.cluster.local
-    - ./{{ .Values.currencyService.name }}.{{ .Release.Namespace }}.svc.cluster.local
-    - ./{{ .Values.emailService.name }}.{{ .Release.Namespace }}.svc.cluster.local
-    - ./{{ .Values.paymentService.name }}.{{ .Release.Namespace }}.svc.cluster.local
-    - ./{{ .Values.productCatalogService.name }}.{{ .Release.Namespace }}.svc.cluster.local
-    - ./{{ .Values.shippingService.name }}.{{ .Release.Namespace }}.svc.cluster.local
+    - ./cartservice.{{ .Release.Namespace }}.svc.cluster.local
+    - ./currencyservice.{{ .Release.Namespace }}.svc.cluster.local
+    - ./emailservice.{{ .Release.Namespace }}.svc.cluster.local
+    - ./paymentservice.{{ .Release.Namespace }}.svc.cluster.local
+    - ./productcatalogservice.{{ .Release.Namespace }}.svc.cluster.local
+    - ./shippingservice.{{ .Release.Namespace }}.svc.cluster.local
     {{- if .Values.opentelemetryCollector.create }}
     - ./{{ .Values.opentelemetryCollector.name }}.{{ .Release.Namespace }}.svc.cluster.local
     {{- end }}
