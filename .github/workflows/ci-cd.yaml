@@ -155,5 +155,55 @@ jobs:
           else
             cd src/${{ matrix.service }}
           fi
-          docker build -t ${{ env.GHCR_REPO }}/${{ matrix.service }}:latest .
-          docker push ${{ env.GHCR_REPO }}/${{ matrix.service }}:latest
+          docker build -t ${{ env.GHCR_REPO }}/${{ matrix.service }}:${{ github.sha }} .
+          docker push ${{ env.GHCR_REPO }}/${{ matrix.service }}:${{ github.sha }}
+
+  bump-image-tags:
+    needs: build-and-push-images
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Install yq
+        run: |
+          sudo wget -O /usr/local/bin/yq https://github.com/mikefarah/yq/releases/download/v4.30.8/yq_linux_amd64
+          sudo chmod +x /usr/local/bin/yq
+      - name: Bump image tags in values.yaml
+        run: |
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+          # Determine BASE_SHA and HEAD_SHA same as in build job
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            BASE_SHA=${{ github.event.pull_request.base.sha }}
+            HEAD_SHA=${{ github.event.pull_request.head.sha }}
+          else
+            BASE_SHA=${{ github.event.before }}
+            HEAD_SHA=${{ github.sha }}
+          fi
+
+          git checkout -b update-image-tag-${{ github.sha }}
+
+          SERVICES=(adservice cartservice checkoutservice currencyservice emailservice paymentservice productcatalogservice recommendationservice shippingservice frontend)
+
+          for service in "${SERVICES[@]}"; do
+            # Check if there were changes in src/<service>
+            if ! git diff --quiet "$BASE_SHA" "$HEAD_SHA" -- "src/${service}/"; then
+              subdir="${service%service}"
+              yq eval -i ".images.tag = \"${{ github.sha }}\"" "helm-chart/${subdir}/values.yaml"
+            fi
+          done
+
+          git add helm-chart/*/values.yaml
+          if git diff --cached --quiet; then
+            echo "No values.yaml changes detected; skipping commit."
+          else
+            git commit -m "chore: bump image tag to ${{ github.sha }}"
+            git push --set-upstream origin update-image-tag-${{ github.sha }}
+          fi
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v5
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: "chore: bump image tag to ${{ github.sha }}"
+          branch: update-image-tag-${{ github.sha }}
+          title: "Bump image tag to ${{ github.sha }}"
+          body: "This PR bumps the image tags to ${{ github.sha }} for deployment."
