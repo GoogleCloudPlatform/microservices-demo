@@ -108,8 +108,10 @@ spec:
             value: "checkoutservice:5050"
           - name: AD_SERVICE_ADDR
             value: "adservice:9555"
+          {{- if .Values.shoppingAssistantService }}
           - name: SHOPPING_ASSISTANT_SERVICE_ADDR
             value: "shoppingassistantservice:80"
+          {{- end }}
           - name: ENV_PLATFORM
             value: {{ .Values.frontend.platform | quote }}
           {{- if .Values.opentelemetryCollector.create }}
@@ -128,8 +130,10 @@ spec:
           {{- end }}
           - name: CYMBAL_BRANDING
             value: {{ .Values.frontend.cymbalBranding | quote }}
+          {{- if .Values.shoppingAssistantService }}
           - name: ENABLE_ASSISTANT
             value: {{ .Values.shoppingAssistantService.create | quote }}
+          {{- end }}
           - name: ENABLE_SINGLE_SHARED_SESSION
             value: {{ .Values.frontend.singleSharedSession | quote }}
           resources:
@@ -224,6 +228,9 @@ spec:
     - ./{{ .Values.productCatalogService.name }}.{{ .Release.Namespace }}.svc.cluster.local
     - ./{{ .Values.recommendationService.name }}.{{ .Release.Namespace }}.svc.cluster.local
     - ./{{ .Values.shippingService.name }}.{{ .Release.Namespace }}.svc.cluster.local
+    {{- if .Values.shoppingAssistantService }}
+    - ./{{ .Values.shoppingAssistantService.name }}.{{ .Release.Namespace }}.svc.cluster.local
+    {{- end }}
     {{- if .Values.opentelemetryCollector.create }}
     - ./{{ .Values.opentelemetryCollector.name }}.{{ .Release.Namespace }}.svc.cluster.local
     {{- end }}
