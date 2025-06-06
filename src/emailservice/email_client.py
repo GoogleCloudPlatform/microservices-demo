@@ -36,4 +36,4 @@ def send_confirmation_email(email, order):
     logger.error('{}, {}'.format(err.code().name, err.code().value))
 
 if __name__ == '__main__':
-  logger.info('Client for email service.')
+  logger.info('Client for email service v2.0')
