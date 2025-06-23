@@ -41,7 +41,7 @@ namespace cartservice.cartstore
         
             // TODO: Create a separate user for connecting within the application
             // rather than using our superuser
-            string alloyDBUser = "postgres";
+            string alloyDBUser = "app_user"; // <-- Use the new user here
             string databaseName = configuration["ALLOYDB_DATABASE_NAME"];
             // TODO: Consider splitting workloads into read vs. write and take
             // advantage of the AlloyDB read pools
