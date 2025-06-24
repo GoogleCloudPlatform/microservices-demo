@@ -101,9 +101,13 @@ requires:
 - configs:
   - app
 build:
+  platforms: ["linux/amd64", "linux/arm64"]
   artifacts:
   - image: loadgenerator
     context: src/loadgenerator
+  local:
+    useDockerCLI: true
+    useBuildkit: true
 manifests:
   rawYaml:
   - ./kubernetes-manifests/loadgenerator.yaml
