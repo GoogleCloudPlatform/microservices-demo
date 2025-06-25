@@ -214,9 +214,9 @@ public final class AdService {
     logger.info("Tracing enabled but temporarily unavailable");
     logger.info("See https://github.com/GoogleCloudPlatform/microservices-demo/issues/422 for more info.");
 
-    // TODO(arbrown) Implement OpenTelemetry tracing
+    // TODO(arbrown) Implement OpenTelemetry tracing for AWS (e.g., AWS X-Ray exporter)
     
-    logger.info("Tracing enabled - Stackdriver exporter initialized.");
+    logger.info("Tracing enabled - AWS X-Ray/OpenTelemetry exporter should be initialized here.");
   }
 
   /** Main launches the server from the command line. */
