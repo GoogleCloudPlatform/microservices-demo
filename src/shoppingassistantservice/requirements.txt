@@ -39,7 +39,7 @@ cryptography==44.0.2
     # via google-cloud-alloydb-connector
 filetype==1.2.0
     # via langchain-google-genai
-flask==3.1.0
+flask==3.1.1
     # via -r requirements.in
 frozenlist==1.5.0
     # via
@@ -132,6 +132,7 @@ langsmith==0.3.19
     #   langchain-core
 markupsafe==3.0.2
     # via
+    #   flask
     #   jinja2
     #   werkzeug
 multidict==6.2.0
