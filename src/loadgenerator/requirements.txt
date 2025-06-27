@@ -25,7 +25,7 @@ flask==3.1.0
     #   flask-cors
     #   flask-login
     #   locust
-flask-cors==5.0.1
+flask-cors==6.0.0
     # via locust
 flask-login==0.6.3
     # via locust
