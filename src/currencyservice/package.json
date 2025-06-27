@@ -17,9 +17,9 @@
     "@opentelemetry/api": "1.9.0",
     "@opentelemetry/exporter-otlp-grpc": "0.26.0",
     "@opentelemetry/instrumentation-grpc": "0.202.0",
-    "@opentelemetry/resources": "1.30.1",
+    "@opentelemetry/resources": "2.0.1",
     "@opentelemetry/semantic-conventions": "1.34.0",
-    "@opentelemetry/sdk-trace-base": "1.30.1",
+    "@opentelemetry/sdk-trace-base": "2.0.1",
     "@opentelemetry/sdk-node": "0.202.0",
     "pino": "9.7.0",
     "xml2js": "0.6.2"
