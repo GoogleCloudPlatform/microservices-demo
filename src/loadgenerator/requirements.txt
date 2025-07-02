@@ -20,7 +20,7 @@ configargparse==1.7
     # via locust
 faker==37.4.0
     # via -r requirements.in
-flask==3.1.0
+flask==3.1.1
     # via
     #   flask-cors
     #   flask-login
@@ -47,6 +47,7 @@ locust==2.33.2
     # via -r requirements.in
 markupsafe==3.0.2
     # via
+    #   flask
     #   jinja2
     #   werkzeug
 msgpack==1.1.0
