@@ -158,7 +158,7 @@ packaging==24.2
     #   langsmith
 pgvector==0.4.1
     # via langchain-google-alloydb-pg
-pillow==11.2.1
+pillow==11.3.0
     # via -r requirements.in
 propcache==0.3.2
     # via
