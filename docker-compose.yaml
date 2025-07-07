@@ -1,0 +1,144 @@
+version: '3.8'
+
+services:
+  # Configuration for the CartService
+  cartservice:
+    build:
+      context: ./src/cartservice/src
+      dockerfile: Dockerfile
+    container_name: cartservice-azmysql
+    ports:
+      - "5000:8080"
+    env_file:
+      - ./src/cartservice/src/.env
+    healthcheck:
+      test: ["CMD", "/usr/bin/grpc_health_probe", "-addr=:8080"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: always
+
+  # Configuration for the ProductCatalogService
+  productcatalogservice:
+    build:
+      context: ./src/productcatalogservice
+      dockerfile: Dockerfile
+    container_name: productcatalogservice-app
+    ports:
+      - "3550:3550"
+    restart: always
+    healthcheck:
+      test: ["CMD", "/bin/sh", "-c", "grpc_health_probe -addr=localhost:3550"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Configuration for the CurrencyService (NEWLY ADDED)
+  currencyservice:
+    build:
+      context: ./src/currencyservice # Path to Dockerfile for currencyservice
+      dockerfile: Dockerfile
+    container_name: currencyservice-app
+    ports:
+      - "7000:7000" # Map host port 7000 to container's internal port 7000
+    environment:
+      - PORT=7000
+      - DISABLE_PROFILER=true
+    restart: always
+    healthcheck: # Simple health check for Node.js gRPC service
+      test: ["CMD", "/usr/bin/grpc_health_probe", "-addr=:7000"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Configuration for the Frontend Service
+  frontend:
+    build:
+      context: ./src/frontend
+      dockerfile: Dockerfile
+    container_name: frontend-app
+    ports:
+      - "8080:8080"
+    depends_on:
+      cartservice:
+        condition: service_healthy
+      productcatalogservice:
+        condition: service_healthy
+      currencyservice: # ADDED DEPENDENCY
+        condition: service_healthy
+    environment: # ALL REQUIRED ENVIRONMENT VARIABLES FOR FRONTEND
+      CART_SERVICE_ADDR: cartservice:8080
+      PRODUCT_CATALOG_SERVICE_ADDR: productcatalogservice:3550
+      CURRENCY_SERVICE_ADDR: currencyservice:7000 # ADDED THIS LINE
+      # These are other services frontend calls. For full functionality, they also need to be added to docker-compose.yaml
+      # and their addresses specified here. You can add them one by one as needed.
+      SHIPPING_SERVICE_ADDR: shippingservice:50051
+      EMAIL_SERVICE_ADDR: emailservice:8080
+      CHECKOUT_SERVICE_ADDR: checkoutservice:5050
+      RECOMMENDATION_SERVICE_ADDR: recommendationservice:8080
+      AD_SERVICE_ADDR: adservice:9555
+      PAYMENT_SERVICE_ADDR: paymentservice:50051
+      PORT: 8080
+      SHOPPING_ASSISTANT_SERVICE_ADDR: shoppingassistantservice:5050
+    restart: always
+
+  # Configuration for the Shipping Service
+  shippingservice:
+    build:
+      context: ./src/shippingservice
+      dockerfile: Dockerfile
+    container_name: shippingservice-app
+    ports:
+      - "50051:50051"
+    restart: always
+    healthcheck:
+      test: ["CMD", "/usr/bin/grpc_health_probe", "-addr=:50051"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Configuration for the Checkout Service
+  checkoutservice:
+    build:
+      context: ./src/checkoutservice
+      dockerfile: Dockerfile
+    container_name: checkoutservice-app
+    ports:
+      - "5050:5050"
+    environment:
+      - SHIPPING_SERVICE_ADDR=shippingservice:50051
+      - PRODUCT_CATALOG_SERVICE_ADDR=productcatalogservice:3550
+    restart: always
+    healthcheck:
+      test: ["CMD", "/usr/bin/grpc_health_probe", "-addr=:5050"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  adservice:
+    build:
+      context: ./src/adservice
+      dockerfile: Dockerfile
+    container_name: adservice-app
+    ports:
+      - "9555:9555"
+    restart: always
+    healthcheck:
+      test: ["CMD", "/usr/bin/grpc_health_probe", "-addr=:9555"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  recommendationservice:
+    build:
+      context: ./src/recommendationservice
+      dockerfile: Dockerfile
+    container_name: recommendationservice-app
+    ports:
+      - "8080:8080"
+    restart: always
+    healthcheck:
+      test: ["CMD", "/usr/bin/grpc_health_probe", "-addr=:8080"]
+      interval: 10s
+      timeout: 5s
+      retries: 5

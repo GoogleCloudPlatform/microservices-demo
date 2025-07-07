@@ -1,41 +1,30 @@
-# Copyright 2020 Google LLC
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#      http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
+# Stage 1: Build the Go application for shippingservice
+FROM golang:1.24.4-alpine AS build
 
-FROM --platform=$BUILDPLATFORM golang:1.23.4-alpine@sha256:c23339199a08b0e12032856908589a6d41a0dab141b8b3b21f156fc571a3f1d3 AS builder
-ARG TARGETOS
-ARG TARGETARCH
-WORKDIR /src
+# Set working directory inside the container
+WORKDIR /app
 
-# restore dependencies
+# Copy go.mod and go.sum (if they exist)
+# These files should be present in src/shippingservice/
 COPY go.mod go.sum ./
-RUN go mod download
+RUN go mod download # Download Go modules (dependencies)
+
+# Copy the rest of the source code
 COPY . .
 
-# Skaffold passes in debug-oriented compiler flags
-ARG SKAFFOLD_GO_GCFLAGS
-RUN GOOS=${TARGETOS} GOARCH=${TARGETARCH} CGO_ENABLED=0 go build -gcflags="${SKAFFOLD_GO_GCFLAGS}" -o /go/bin/shippingservice .
+# Build the shippingservice executable
+# The service's main entry point is typically in main.go
+RUN CGO_ENABLED=0 go build -o /app/shippingservice-server .
 
-FROM scratch
+# Stage 2: Create the final runtime image
+FROM alpine:latest AS final
+WORKDIR /app
 
-WORKDIR /src
-COPY --from=builder /go/bin/shippingservice /src/shippingservice
-ENV APP_PORT=50051
+# Copy the compiled executable from the build stage
+COPY --from=build /app/shippingservice-server .
 
-# Definition of this variable is used by 'skaffold debug' to identify a golang binary.
-# Default behavior - a failure prints a stack trace for the current goroutine.
-# See https://golang.org/pkg/runtime/
-ENV GOTRACEBACK=single
-
+# Expose the port on which the shippingservice listens (default 50051)
 EXPOSE 50051
-ENTRYPOINT ["/src/shippingservice"]
+
+# Set the entrypoint for the container
+ENTRYPOINT ["/app/shippingservice-server"]

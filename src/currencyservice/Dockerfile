@@ -1,42 +1,22 @@
-# Copyright 2020 Google LLC
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#      http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
+# Use a stable Node.js image
+FROM node:18-alpine AS build
 
-FROM --platform=$BUILDPLATFORM node:20.18.1-alpine@sha256:24fb6aa7020d9a20b00d6da6d1714187c45ed00d1eb4adb01395843c338b9372 AS builder
+# Install python3, make, g++ for node-gyp native module builds
+RUN apk add --no-cache python3 make g++
 
-# Some packages (e.g. @google-cloud/profiler) require additional
-# deps for post-install scripts
-RUN apk add --update --no-cache \
-    python3 \
-    make \
-    g++
+# Set the working directory inside the container
+WORKDIR /app
 
-WORKDIR /usr/src/app
+# Copy package.json and package-lock.json and install dependencies
+# This leverages Docker's build cache: dependencies are only re-downloaded if package.json changes
+COPY package.json package-lock.json ./
+RUN npm install
 
-COPY package*.json ./
-
-RUN npm install --only=production
-
-FROM alpine:3.20.3@sha256:1e42bbe2508154c9126d48c2b8a75420c3544343bf86fd041fb7527e017a4b4a
-
-RUN apk add --no-cache nodejs
-
-WORKDIR /usr/src/app
-
-COPY --from=builder /usr/src/app/node_modules ./node_modules
-
+# Copy the rest of the application source code
 COPY . .
 
+# Expose the port the service listens on (default for currencyservice is 7000)
 EXPOSE 7000
 
-ENTRYPOINT [ "node", "server.js" ]
+# Define the command to run the service
+ENTRYPOINT ["node", "server.js"]

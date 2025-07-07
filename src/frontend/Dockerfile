@@ -1,41 +1,39 @@
-# Copyright 2020 Google LLC
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#      http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
+# Stage 1: Build the Go application
+FROM golang:1.24.4-alpine AS build 
 
-FROM --platform=$BUILDPLATFORM golang:1.23.4-alpine@sha256:c23339199a08b0e12032856908589a6d41a0dab141b8b3b21f156fc571a3f1d3 AS builder
-ARG TARGETOS
-ARG TARGETARCH
-WORKDIR /src
+# Updated Go version to match yours
 
-# restore dependencies
+# Set working directory inside the container
+WORKDIR /app
+
+# Copy go.mod and go.sum if they exist (for dependency caching)
+# If these files are NOT in your src/frontend/ directory, remove these two COPY lines.
 COPY go.mod go.sum ./
-RUN go mod download
+# RUN go mod download # Uncomment this line if you copied go.mod/go.sum and use Go modules
+
+# Copy the rest of the source code for the frontend service
 COPY . .
 
-# Skaffold passes in debug-oriented compiler flags
-ARG SKAFFOLD_GO_GCFLAGS
-RUN GOOS=${TARGETOS} GOARCH=${TARGETARCH} CGO_ENABLED=0 go build -gcflags="${SKAFFOLD_GO_GCFLAGS}" -o /go/bin/frontend .
+# Build the frontend service executable
+# CGO_ENABLED=0 creates a statically linked executable, good for small Docker images
+RUN CGO_ENABLED=0 go build -o /app/frontend-server .
 
-FROM scratch
-WORKDIR /src
-COPY --from=builder /go/bin/frontend /src/server
-COPY ./templates ./templates
-COPY ./static ./static
 
-# Definition of this variable is used by 'skaffold debug' to identify a golang binary.
-# Default behavior - a failure prints a stack trace for the current goroutine.
-# See https://golang.org/pkg/runtime/
-ENV GOTRACEBACK=single
+# Stage 2: Create the final runtime image
+FROM alpine:latest AS final   
+# Using a minimal Alpine base for a smaller final image
+WORKDIR /app
 
+# Copy the compiled executable from the build stage
+COPY --from=build /app/frontend-server .
+
+# Copy static assets (HTML templates, CSS, JS, images)
+# These paths are relative to the frontend service's src directory
+COPY templates ./templates/
+COPY static ./static/
+
+# Expose the port on which the frontend service listens (default 8080)
 EXPOSE 8080
-ENTRYPOINT ["/src/server"]
+
+# Set the entrypoint for the container
+ENTRYPOINT ["/app/frontend-server"]
