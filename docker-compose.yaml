@@ -1,4 +1,3 @@
-version: '3.8'
 
 services:
   # Configuration for the CartService
@@ -17,7 +16,6 @@ services:
       timeout: 5s
       retries: 5
     restart: always
-
   # Configuration for the ProductCatalogService
   productcatalogservice:
     build:
@@ -26,14 +24,16 @@ services:
     container_name: productcatalogservice-app
     ports:
       - "3550:3550"
+    env_file:
+      - ./src/productcatalogservice/.env  
+    volumes:
+      - ./src/productcatalogservice/ssl:/ssl:ro
     restart: always
     healthcheck:
       test: ["CMD", "/bin/sh", "-c", "grpc_health_probe -addr=localhost:3550"]
       interval: 10s
       timeout: 5s
       retries: 5
-
-  # Configuration for the CurrencyService (NEWLY ADDED)
   currencyservice:
     build:
       context: ./src/currencyservice # Path to Dockerfile for currencyservice
@@ -58,7 +58,7 @@ services:
       dockerfile: Dockerfile
     container_name: frontend-app
     ports:
-      - "8080:8080"
+      - "8081:8080"
     depends_on:
       cartservice:
         condition: service_healthy

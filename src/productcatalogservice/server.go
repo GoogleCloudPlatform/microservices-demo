@@ -1,52 +1,34 @@
-// Copyright 2018 Google LLC
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//      http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-
 package main
 
 import (
 	"context"
-	"flag"
+	"crypto/tls"
+	"crypto/x509"
+	"database/sql"
 	"fmt"
 	"net"
 	"os"
-	"os/signal"
+	"strings"
 	"sync"
-	"syscall"
 	"time"
 
-	pb "github.com/GoogleCloudPlatform/microservices-demo/src/productcatalogservice/genproto"
-	"google.golang.org/grpc/credentials/insecure"
-	healthpb "google.golang.org/grpc/health/grpc_health_v1"
-
-	"cloud.google.com/go/profiler"
-	"github.com/pkg/errors"
+	"github.com/go-sql-driver/mysql"
 	"github.com/sirupsen/logrus"
-	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
-	"go.opentelemetry.io/otel"
-	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc"
-	"go.opentelemetry.io/otel/propagation"
-	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
+
+	pb "github.com/GoogleCloudPlatform/microservices-demo/src/productcatalogservice/genproto"
+)
+
+var (
+	log *logrus.Logger
+	db  *sql.DB
 )
 
 var (
 	catalogMutex *sync.Mutex
-	log          *logrus.Logger
 	extraLatency time.Duration
-
-	port = "3550"
-
 	reloadCatalog bool
 )
 
@@ -62,156 +44,148 @@ func init() {
 	}
 	log.Out = os.Stdout
 	catalogMutex = &sync.Mutex{}
+	extraLatency = 0
+	reloadCatalog = false
+}
+
+type productCatalogService struct {
+	pb.UnimplementedProductCatalogServiceServer
 }
 
 func main() {
-	if os.Getenv("ENABLE_TRACING") == "1" {
-		err := initTracing()
+	// Get database connection details from environment variables
+	dbUser := os.Getenv("MYSQL_USER")
+	dbPassword := os.Getenv("MYSQL_PASSWORD")
+	dbHost := os.Getenv("MYSQL_HOST")
+	dbPort := os.Getenv("MYSQL_PORT")
+	dbName := os.Getenv("MYSQL_DATABASE")
+	dbParams := os.Getenv("MYSQL_PARAMS")
+	sslCertPath := os.Getenv("SSL_CERT_PATH")
+
+	// Register TLS config if SSL_CERT_PATH is provided
+	if sslCertPath != "" {
+		err := mysql.RegisterTLSConfig("custom", &tls.Config{
+			RootCAs: loadCACertPool(sslCertPath),
+		})
 		if err != nil {
-			log.Warnf("warn: failed to start tracer: %+v", err)
+			log.Fatalf("failed to register TLS config: %v", err)
 		}
-	} else {
-		log.Info("Tracing disabled.")
-	}
-
-	if os.Getenv("DISABLE_PROFILER") == "" {
-		log.Info("Profiling enabled.")
-		go initProfiling("productcatalogservice", "1.0.0")
-	} else {
-		log.Info("Profiling disabled.")
-	}
-
-	flag.Parse()
-
-	// set injected latency
-	if s := os.Getenv("EXTRA_LATENCY"); s != "" {
-		v, err := time.ParseDuration(s)
-		if err != nil {
-			log.Fatalf("failed to parse EXTRA_LATENCY (%s) as time.Duration: %+v", v, err)
-		}
-		extraLatency = v
-		log.Infof("extra latency enabled (duration: %v)", extraLatency)
-	} else {
-		extraLatency = time.Duration(0)
-	}
-
-	sigs := make(chan os.Signal, 1)
-	signal.Notify(sigs, syscall.SIGUSR1, syscall.SIGUSR2)
-	go func() {
-		for {
-			sig := <-sigs
-			log.Printf("Received signal: %s", sig)
-			if sig == syscall.SIGUSR1 {
-				reloadCatalog = true
-				log.Infof("Enable catalog reloading")
-			} else {
-				reloadCatalog = false
-				log.Infof("Disable catalog reloading")
-			}
-		}
-	}()
-
-	if os.Getenv("PORT") != "" {
-		port = os.Getenv("PORT")
-	}
-	log.Infof("starting grpc server at :%s", port)
-	run(port)
-	select {}
-}
-
-func run(port string) string {
-	listener, err := net.Listen("tcp", fmt.Sprintf(":%s", port))
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	// Propagate trace context
-	otel.SetTextMapPropagator(
-		propagation.NewCompositeTextMapPropagator(
-			propagation.TraceContext{}, propagation.Baggage{}))
-	var srv *grpc.Server
-	srv = grpc.NewServer(
-		grpc.UnaryInterceptor(otelgrpc.UnaryServerInterceptor()),
-		grpc.StreamInterceptor(otelgrpc.StreamServerInterceptor()))
-
-	svc := &productCatalog{}
-	err = loadCatalog(&svc.catalog)
-	if err != nil {
-		log.Fatalf("could not parse product catalog: %v", err)
-	}
-
-	pb.RegisterProductCatalogServiceServer(srv, svc)
-	healthpb.RegisterHealthServer(srv, svc)
-	go srv.Serve(listener)
-
-	return listener.Addr().String()
-}
-
-func initStats() {
-	// TODO(drewbr) Implement OpenTelemetry stats
-}
-
-func initTracing() error {
-	var (
-		collectorAddr string
-		collectorConn *grpc.ClientConn
-	)
-
-	ctx := context.Background()
-
-	mustMapEnv(&collectorAddr, "COLLECTOR_SERVICE_ADDR")
-	mustConnGRPC(ctx, &collectorConn, collectorAddr)
-
-	exporter, err := otlptracegrpc.New(
-		ctx,
-		otlptracegrpc.WithGRPCConn(collectorConn))
-	if err != nil {
-		log.Warnf("warn: Failed to create trace exporter: %v", err)
-	}
-	tp := sdktrace.NewTracerProvider(
-		sdktrace.WithBatcher(exporter),
-		sdktrace.WithSampler(sdktrace.AlwaysSample()))
-	otel.SetTracerProvider(tp)
-	return err
-}
-
-func initProfiling(service, version string) {
-	for i := 1; i <= 3; i++ {
-		if err := profiler.Start(profiler.Config{
-			Service:        service,
-			ServiceVersion: version,
-			// ProjectID must be set if not running on GCP.
-			// ProjectID: "my-project",
-		}); err != nil {
-			log.Warnf("failed to start profiler: %+v", err)
+		if dbParams != "" {
+			dbParams += "&tls=custom"
 		} else {
-			log.Info("started Stackdriver profiler")
-			return
+			dbParams = "tls=custom"
 		}
-		d := time.Second * 10 * time.Duration(i)
-		log.Infof("sleeping %v to retry initializing Stackdriver profiler", d)
-		time.Sleep(d)
 	}
-	log.Warn("could not initialize Stackdriver profiler after retrying, giving up")
-}
 
-func mustMapEnv(target *string, envKey string) {
-	v := os.Getenv(envKey)
-	if v == "" {
-		panic(fmt.Sprintf("environment variable %q not set", envKey))
-	}
-	*target = v
-}
+	// Create database connection string
+	dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?parseTime=true&%s", dbUser, dbPassword, dbHost, dbPort, dbName, dbParams)
 
-func mustConnGRPC(ctx context.Context, conn **grpc.ClientConn, addr string) {
 	var err error
-	ctx, cancel := context.WithTimeout(ctx, time.Second*3)
-	defer cancel()
-	*conn, err = grpc.DialContext(ctx, addr,
-		grpc.WithTransportCredentials(insecure.NewCredentials()),
-		grpc.WithUnaryInterceptor(otelgrpc.UnaryClientInterceptor()),
-		grpc.WithStreamInterceptor(otelgrpc.StreamClientInterceptor()))
+	db, err = sql.Open("mysql", dsn)
 	if err != nil {
-		panic(errors.Wrapf(err, "grpc: failed to connect %s", addr))
+		log.Fatalf("failed to open database connection: %v", err)
 	}
+	// See "Important settings" section.
+	db.SetConnMaxLifetime(time.Minute * 3)
+	db.SetMaxOpenConns(10)
+	db.SetMaxIdleConns(10)
+
+	// Check the connection
+	err = db.Ping()
+	if err != nil {
+		log.Fatalf("failed to connect to database: %v", err)
+	}
+
+	defer db.Close()
+	log.Info("Successfully connected to MySQL database")
+
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "3550"
+	}
+
+	lis, err := net.Listen("tcp", fmt.Sprintf(":%s", port))
+	if err != nil {
+		log.Fatalf("failed to listen: %v", err)
+	}
+
+	srv := grpc.NewServer()
+	pb.RegisterProductCatalogServiceServer(srv, &productCatalogService{})
+	log.Infof("starting gRPC server on port %s", port)
+	if err := srv.Serve(lis); err != nil {
+		log.Fatalf("failed to serve: %v", err)
+	}
+}
+
+// loadCACertPool loads the CA certificate from the given path
+func loadCACertPool(certPath string) *x509.CertPool {
+	certPool := x509.NewCertPool()
+	caCert, err := os.ReadFile(certPath)
+	if err != nil {
+		log.Fatalf("failed to read CA cert file: %v", err)
+	}
+	if ok := certPool.AppendCertsFromPEM(caCert); !ok {
+		log.Fatalf("failed to append CA cert")
+	}
+	return certPool
+}
+
+func (s *productCatalogService) ListProducts(ctx context.Context, _ *pb.Empty) (*pb.ListProductsResponse, error) {
+	rows, err := db.QueryContext(ctx, "SELECT id, name, description, picture, price_usd_currency_code, price_usd_units, price_usd_nanos, categories FROM products")
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "failed to query products: %v", err)
+	}
+	defer rows.Close()
+
+	var products []*pb.Product
+	for rows.Next() {
+		p := &pb.Product{PriceUsd: &pb.Money{}}
+		var categories string
+		if err := rows.Scan(&p.Id, &p.Name, &p.Description, &p.Picture, &p.PriceUsd.CurrencyCode, &p.PriceUsd.Units, &p.PriceUsd.Nanos, &categories); err != nil {
+			return nil, status.Errorf(codes.Internal, "failed to scan product: %v", err)
+		}
+		p.Categories = strings.Split(categories, ",")
+		products = append(products, p)
+	}
+
+	return &pb.ListProductsResponse{Products: products}, nil
+}
+
+func (s *productCatalogService) GetProduct(ctx context.Context, req *pb.GetProductRequest) (*pb.Product, error) {
+	var p pb.Product
+	p.PriceUsd = &pb.Money{}
+	var categories string
+	row := db.QueryRowContext(ctx, "SELECT id, name, description, picture, price_usd_currency_code, price_usd_units, price_usd_nanos, categories FROM products WHERE id = ?", req.Id)
+	err := row.Scan(&p.Id, &p.Name, &p.Description, &p.Picture, &p.PriceUsd.CurrencyCode, &p.PriceUsd.Units, &p.PriceUsd.Nanos, &categories)
+	if err == sql.ErrNoRows {
+		return nil, status.Errorf(codes.NotFound, "product with ID %s not found", req.Id)
+	} else if err != nil {
+		return nil, status.Errorf(codes.Internal, "failed to get product: %v", err)
+	}
+	p.Categories = strings.Split(categories, ",")
+	return &p, nil
+}
+
+func (s *productCatalogService) SearchProducts(ctx context.Context, req *pb.SearchProductsRequest) (*pb.SearchProductsResponse, error) {
+	query := "%" + req.Query + "%"
+	rows, err := db.QueryContext(ctx, "SELECT id, name, description, picture, price_usd_currency_code, price_usd_units, price_usd_nanos, categories FROM products WHERE name LIKE ? OR description LIKE ?", query, query)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "failed to search products: %v", err)
+	}
+	defer rows.Close()
+
+	var products []*pb.Product
+	for rows.Next() {
+		p := &pb.Product{PriceUsd: &pb.Money{}}
+		var categories string
+		if err := rows.Scan(&p.Id, &p.Name, &p.Description, &p.Picture, &p.PriceUsd.CurrencyCode, &p.PriceUsd.Units, &p.PriceUsd.Nanos, &categories); err != nil {
+			return nil, status.Errorf(codes.Internal, "failed to scan product: %v", err)
+		}
+		p.Categories = strings.Split(categories, ",")
+		products = append(products, p)
+	}
+	if len(products) == 0 {
+		return &pb.SearchProductsResponse{}, nil
+	}
+	return &pb.SearchProductsResponse{Results: products}, nil
 }

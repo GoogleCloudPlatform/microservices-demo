@@ -8,7 +8,9 @@ WORKDIR /app
 
 # Copy go.mod and go.sum (if they exist)
 COPY go.mod go.sum ./
-# RUN go mod download # Uncomment if go.mod/go.sum exist
+RUN go mod download
+RUN go mod verify
+RUN go get github.com/go-sql-driver/mysql
 
 # Copy the rest of the source code
 COPY . .
