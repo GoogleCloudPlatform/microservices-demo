@@ -23,23 +23,77 @@ import (
 	"github.com/pkg/errors"
 )
 
+import (
+	"bytes"
+	"encoding/json"
+	"fmt"
+	"io/ioutil"
+	"net/http"
+	"os"
+)
+
 const (
 	avoidNoopCurrencyConversionRPC = false
 )
 
-func (fe *frontendServer) getCurrencies(ctx context.Context) ([]string, error) {
-	currs, err := pb.NewCurrencyServiceClient(fe.currencySvcConn).
-		GetSupportedCurrencies(ctx, &pb.Empty{})
-	if err != nil {
-		return nil, err
+func getCurrencyServiceRestAddr() string {
+	addr := os.Getenv("CURRENCY_SERVICE_REST_ADDR")
+	if addr == "" {
+		// Default to localhost if not set, for local development
+		// In a real deployment, this should be configured properly.
+		return "http://localhost:7000"
 	}
+	return addr
+}
+
+func (fe *frontendServer) getCurrenciesRest(ctx context.Context) ([]string, error) {
+	url := fmt.Sprintf("%s/currencies", getCurrencyServiceRestAddr())
+	req, err := http.NewRequestWithContext(ctx, "GET", url, nil)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to create getCurrencies request")
+	}
+
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to call getCurrencies endpoint")
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		bodyBytes, _ := ioutil.ReadAll(resp.Body)
+		return nil, fmt.Errorf("getCurrencies failed with status %d: %s", resp.StatusCode, string(bodyBytes))
+	}
+
+	var currencyCodes []string
+	if err := json.NewDecoder(resp.Body).Decode(&currencyCodes); err != nil {
+		return nil, errors.Wrap(err, "failed to decode getCurrencies response")
+	}
+
 	var out []string
-	for _, c := range currs.CurrencyCodes {
+	for _, c := range currencyCodes {
 		if _, ok := whitelistedCurrencies[c]; ok {
 			out = append(out, c)
 		}
 	}
 	return out, nil
+}
+
+// getCurrencies keeps the same signature and now calls the REST version.
+func (fe *frontendServer) getCurrencies(ctx context.Context) ([]string, error) {
+	// Original gRPC call:
+	// currs, err := pb.NewCurrencyServiceClient(fe.currencySvcConn).
+	// 	GetSupportedCurrencies(ctx, &pb.Empty{})
+	// if err != nil {
+	// 	return nil, err
+	// }
+	// var out []string
+	// for _, c := range currs.CurrencyCodes {
+	// 	if _, ok := whitelistedCurrencies[c]; ok {
+	// 		out = append(out, c)
+	// 	}
+	// }
+	// return out, nil
+	return fe.getCurrenciesRest(ctx)
 }
 
 func (fe *frontendServer) getProducts(ctx context.Context) ([]*pb.Product, error) {
@@ -74,14 +128,62 @@ func (fe *frontendServer) insertCart(ctx context.Context, userID, productID stri
 	return err
 }
 
-func (fe *frontendServer) convertCurrency(ctx context.Context, money *pb.Money, currency string) (*pb.Money, error) {
-	if avoidNoopCurrencyConversionRPC && money.GetCurrencyCode() == currency {
+// CurrencyConversionRequest mirrors the pb.CurrencyConversionRequest for REST
+type CurrencyConversionRequest struct {
+	From   *pb.Money `json:"from"`
+	ToCode string    `json:"to_code"`
+}
+
+func (fe *frontendServer) convertCurrencyRest(ctx context.Context, money *pb.Money, toCurrencyCode string) (*pb.Money, error) {
+	if avoidNoopCurrencyConversionRPC && money.GetCurrencyCode() == toCurrencyCode {
 		return money, nil
 	}
-	return pb.NewCurrencyServiceClient(fe.currencySvcConn).
-		Convert(ctx, &pb.CurrencyConversionRequest{
-			From:   money,
-			ToCode: currency})
+
+	url := fmt.Sprintf("%s/convert", getCurrencyServiceRestAddr())
+	reqBody := CurrencyConversionRequest{
+		From:   money,
+		ToCode: toCurrencyCode,
+	}
+	jsonBody, err := json.Marshal(reqBody)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to marshal convertCurrency request body")
+	}
+
+	req, err := http.NewRequestWithContext(ctx, "POST", url, bytes.NewBuffer(jsonBody))
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to create convertCurrency request")
+	}
+	req.Header.Set("Content-Type", "application/json")
+
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to call convertCurrency endpoint")
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		bodyBytes, _ := ioutil.ReadAll(resp.Body)
+		return nil, fmt.Errorf("convertCurrency failed with status %d: %s", resp.StatusCode, string(bodyBytes))
+	}
+
+	var convertedMoney pb.Money
+	if err := json.NewDecoder(resp.Body).Decode(&convertedMoney); err != nil {
+		return nil, errors.Wrap(err, "failed to decode convertCurrency response")
+	}
+	return &convertedMoney, nil
+}
+
+// convertCurrency keeps the same signature and now calls the REST version.
+func (fe *frontendServer) convertCurrency(ctx context.Context, money *pb.Money, currency string) (*pb.Money, error) {
+	// Original gRPC call:
+	// if avoidNoopCurrencyConversionRPC && money.GetCurrencyCode() == currency {
+	// 	return money, nil
+	// }
+	// return pb.NewCurrencyServiceClient(fe.currencySvcConn).
+	// 	Convert(ctx, &pb.CurrencyConversionRequest{
+	// 		From:   money,
+	// 		ToCode: currency})
+	return fe.convertCurrencyRest(ctx, money, currency)
 }
 
 func (fe *frontendServer) getShippingQuote(ctx context.Context, items []*pb.CartItem, currency string) (*pb.Money, error) {

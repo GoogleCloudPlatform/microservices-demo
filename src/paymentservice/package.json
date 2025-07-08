@@ -1,21 +1,23 @@
 {
-  "name": "paymentservice",
+  "name": "paymentservice-rest",
   "version": "0.0.1",
-  "description": "Payment Microservice demo",
+  "description": "Payment Microservice demo (REST)",
   "repository": "https://github.com/GoogleCloudPlatform/microservices-demo",
-  "main": "index.js",
+  "main": "dist/index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "jest",
+    "build": "tsc",
+    "start": "node dist/index.js"
   },
   "author": "Jonathan Lui",
   "license": "ISC",
   "dependencies": {
     "@google-cloud/profiler": "6.0.3",
-    "@grpc/grpc-js": "1.13.4",
-    "@grpc/proto-loader": "0.7.15",
+    "express": "^4.17.1",
     "@opentelemetry/api": "1.9.0",
     "@opentelemetry/exporter-otlp-grpc": "0.26.0",
-    "@opentelemetry/instrumentation-grpc": "0.202.0",
+    "@opentelemetry/instrumentation-http": "^0.45.1",
+    "@opentelemetry/instrumentation-express": "^0.40.1",
     "@opentelemetry/sdk-trace-base": "2.0.1",
     "@opentelemetry/sdk-node": "0.202.0",
     "@opentelemetry/resources": "2.0.1",
@@ -23,5 +25,18 @@
     "pino": "9.7.0",
     "simple-card-validator": "^1.1.0",
     "uuid": "^11.0.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0",
+    "@types/node": "^20.0.0",
+    "@types/uuid": "^9.0.0",
+    "@types/pino": "^7.0.5",
+    "@types/express": "^4.17.0",
+    "jest": "^29.0.0",
+    "@types/jest": "^29.0.0",
+    "ts-jest": "^29.0.0",
+    "supertest": "^6.0.0",
+    "@types/supertest": "^2.0.0",
+    "@types/simple-card-validator": "^1.0.0"
   }
 }

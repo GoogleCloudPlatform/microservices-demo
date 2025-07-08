@@ -63,8 +63,9 @@ type frontendServer struct {
 	productCatalogSvcAddr string
 	productCatalogSvcConn *grpc.ClientConn
 
-	currencySvcAddr string
-	currencySvcConn *grpc.ClientConn
+	// currencySvcAddr string // gRPC address, not needed for REST
+	currencyServiceRestAddr string // Added for REST
+	// currencySvcConn *grpc.ClientConn // Removed for REST
 
 	cartSvcAddr string
 	cartSvcConn *grpc.ClientConn
@@ -129,7 +130,9 @@ func main() {
 	}
 	addr := os.Getenv("LISTEN_ADDR")
 	mustMapEnv(&svc.productCatalogSvcAddr, "PRODUCT_CATALOG_SERVICE_ADDR")
-	mustMapEnv(&svc.currencySvcAddr, "CURRENCY_SERVICE_ADDR")
+	// mustMapEnv(&svc.currencySvcAddr, "CURRENCY_SERVICE_ADDR") // gRPC env var, not for REST
+	svc.currencyServiceRestAddr = getCurrencyServiceRestAddr() // Function from rpc.go
+	log.Infof("Currency service REST address: %s", svc.currencyServiceRestAddr)
 	mustMapEnv(&svc.cartSvcAddr, "CART_SERVICE_ADDR")
 	mustMapEnv(&svc.recommendationSvcAddr, "RECOMMENDATION_SERVICE_ADDR")
 	mustMapEnv(&svc.checkoutSvcAddr, "CHECKOUT_SERVICE_ADDR")
@@ -137,7 +140,7 @@ func main() {
 	mustMapEnv(&svc.adSvcAddr, "AD_SERVICE_ADDR")
 	mustMapEnv(&svc.shoppingAssistantSvcAddr, "SHOPPING_ASSISTANT_SERVICE_ADDR")
 
-	mustConnGRPC(ctx, &svc.currencySvcConn, svc.currencySvcAddr)
+	// mustConnGRPC(ctx, &svc.currencySvcConn, svc.currencySvcAddr) // Removed for REST
 	mustConnGRPC(ctx, &svc.productCatalogSvcConn, svc.productCatalogSvcAddr)
 	mustConnGRPC(ctx, &svc.cartSvcConn, svc.cartSvcAddr)
 	mustConnGRPC(ctx, &svc.recommendationSvcConn, svc.recommendationSvcAddr)
