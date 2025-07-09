@@ -27,6 +27,7 @@ namespace cartservice.services
 
         public HealthCheckService (ICartStore cartStore) 
         {
+            int test = 0;
             _cartStore = cartStore;
         }
 
