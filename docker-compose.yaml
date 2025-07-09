@@ -64,22 +64,21 @@ services:
         condition: service_healthy
       productcatalogservice:
         condition: service_healthy
-      currencyservice: # ADDED DEPENDENCY
+      currencyservice:
         condition: service_healthy
-    environment: # ALL REQUIRED ENVIRONMENT VARIABLES FOR FRONTEND
-      CART_SERVICE_ADDR: cartservice:8080
-      PRODUCT_CATALOG_SERVICE_ADDR: productcatalogservice:3550
-      CURRENCY_SERVICE_ADDR: currencyservice:7000 # ADDED THIS LINE
-      # These are other services frontend calls. For full functionality, they also need to be added to docker-compose.yaml
-      # and their addresses specified here. You can add them one by one as needed.
-      SHIPPING_SERVICE_ADDR: shippingservice:50051
-      EMAIL_SERVICE_ADDR: emailservice:8080
-      CHECKOUT_SERVICE_ADDR: checkoutservice:5050
-      RECOMMENDATION_SERVICE_ADDR: recommendationservice:8080
-      AD_SERVICE_ADDR: adservice:9555
-      PAYMENT_SERVICE_ADDR: paymentservice:50051
-      PORT: 8080
-      SHOPPING_ASSISTANT_SERVICE_ADDR: shoppingassistantservice:5050
+    # --- CORRECTED SERVICE ADDRESSES ---
+    environment:
+      - PORT=8080
+      - PRODUCT_CATALOG_SERVICE_ADDR=productcatalogservice:3550
+      - CURRENCY_SERVICE_ADDR=currencyservice:7000
+      - CART_SERVICE_ADDR=cartservice:8080
+      - RECOMMENDATION_SERVICE_ADDR=recommendationservice:8080
+      - SHIPPING_SERVICE_ADDR=shippingservice:50051
+      - CHECKOUT_SERVICE_ADDR=checkoutservice:5050
+      - AD_SERVICE_ADDR=adservice:9555
+      - PAYMENT_SERVICE_ADDR=paymentservice:50051
+      - EMAIL_SERVICE_ADDR=emailservice:5000 # Port corrected to 5000
+      - SHOPPING_ASSISTANT_SERVICE_ADDR=shoppingassistantservice:5050
     restart: always
 
   # Configuration for the Shipping Service
@@ -99,15 +98,23 @@ services:
 
   # Configuration for the Checkout Service
   checkoutservice:
-    build:
-      context: ./src/checkoutservice
-      dockerfile: Dockerfile
+    build: ./src/checkoutservice
     container_name: checkoutservice-app
     ports:
       - "5050:5050"
+    env_file:
+      - ./src/checkoutservice/.env
+    volumes:
+      - ./src/productcatalogservice/ssl:/ssl:ro
+    # --- CORRECTED SERVICE ADDRESSES ---
     environment:
-      - SHIPPING_SERVICE_ADDR=shippingservice:50051
+      - PORT=5050
       - PRODUCT_CATALOG_SERVICE_ADDR=productcatalogservice:3550
+      - SHIPPING_SERVICE_ADDR=shippingservice:50051
+      - PAYMENT_SERVICE_ADDR=paymentservice:50051
+      - EMAIL_SERVICE_ADDR=emailservice:5000
+      - CURRENCY_SERVICE_ADDR=currencyservice:7000
+      - CART_SERVICE_ADDR=cartservice:8080 
     restart: always
     healthcheck:
       test: ["CMD", "/usr/bin/grpc_health_probe", "-addr=:5050"]
@@ -139,6 +146,23 @@ services:
     restart: always
     healthcheck:
       test: ["CMD", "/usr/bin/grpc_health_probe", "-addr=:8080"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  paymentservice:
+    build:
+      context: ./src/paymentservice
+      dockerfile: Dockerfile
+    container_name: paymentservice-app
+    ports:
+      - "50052:50051"
+    environment:
+      - PORT=50051
+      - DISABLE_PROFILER=true
+    restart: always
+    healthcheck:
+      test: ["CMD", "/usr/bin/grpc_health_probe", "-addr=:50051"]
       interval: 10s
       timeout: 5s
       retries: 5
