@@ -5,6 +5,7 @@ services:
     build:
       context: ./src/cartservice/src
       dockerfile: Dockerfile
+    image: uadeel421/reliance-cartservice
     container_name: cartservice-azmysql
     ports:
       - "5000:8080"
@@ -21,6 +22,7 @@ services:
     build:
       context: ./src/productcatalogservice
       dockerfile: Dockerfile
+    image: uadeel421/reliance-productcatalogservice
     container_name: productcatalogservice-app
     ports:
       - "3550:3550"
@@ -38,6 +40,7 @@ services:
     build:
       context: ./src/currencyservice # Path to Dockerfile for currencyservice
       dockerfile: Dockerfile
+    image: uadeel421/reliance-currencyservice
     container_name: currencyservice-app
     ports:
       - "7000:7000" # Map host port 7000 to container's internal port 7000
@@ -56,6 +59,7 @@ services:
     build:
       context: ./src/frontend
       dockerfile: Dockerfile
+    image: uadeel421/reliance-frontend
     container_name: frontend-app
     ports:
       - "8081:8080"
@@ -86,6 +90,7 @@ services:
     build:
       context: ./src/shippingservice
       dockerfile: Dockerfile
+    image: uadeel421/reliance-shippingservice
     container_name: shippingservice-app
     ports:
       - "50051:50051"
@@ -99,6 +104,7 @@ services:
   # Configuration for the Checkout Service
   checkoutservice:
     build: ./src/checkoutservice
+    image: uadeel421/reliance-checkoutservice
     container_name: checkoutservice-app
     ports:
       - "5050:5050"
@@ -126,6 +132,7 @@ services:
     build:
       context: ./src/adservice
       dockerfile: Dockerfile
+    image: uadeel421/reliance-adservice
     container_name: adservice-app
     ports:
       - "9555:9555"
@@ -140,6 +147,7 @@ services:
     build:
       context: ./src/recommendationservice
       dockerfile: Dockerfile
+    image: uadeel421/reliance-recommendationservice
     container_name: recommendationservice-app
     ports:
       - "8080:8080"
@@ -154,6 +162,7 @@ services:
     build:
       context: ./src/paymentservice
       dockerfile: Dockerfile
+    image: uadeel421/reliance-paymentservice
     container_name: paymentservice-app
     ports:
       - "50052:50051"

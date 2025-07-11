@@ -1,0 +1,60 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: products-deployment
+  namespace: staging
+  labels:
+    app: products
+    environment: staging
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: products
+      environment: staging
+  template:
+    metadata:
+      labels:
+        app: products
+        environment: staging
+    spec:
+      nodeSelector:
+        kubernetes.azure.com/agentpool: stgpool
+      containers:
+        - name: products
+          image: uadeel421/reliance-productcatalogservice:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 3550
+          volumeMounts:
+            - name: secrets-store-inline
+              mountPath: /mnt/secrets-store
+              readOnly: true
+      volumes:
+        - name: secrets-store-inline
+          csi:
+            driver: secrets-store.csi.k8s.io
+            readOnly: true
+            volumeAttributes:
+              secretProviderClass: azure-keyvault-secrets
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 3550  
+    # Health check endpoint. Use grpc_health_probe for gRPC services
+            initialDelaySeconds: 15
+            periodSeconds: 20
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "500m"
+              memory: "256Mi"
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 10
+         

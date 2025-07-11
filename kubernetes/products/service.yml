@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: service
+metadata:
+  name: products-internal-service
+  namespace: staging
+  labels:
+    app: products
+    environment: staging
+spec:
+  selector:
+    app: products
+    environment: staging
+  ports:
+    - name: http  
+      protocol: TCP
+      port: 3550
+      targetPort: 3550
+  type: ClusterIP
+
+---
+apiVersion: v1  
+kind: Service
+metadata: 
+  name: products-external-serviceS
+  namespace: staging
+  labels:
+    app: products
+    environment: staging 
+spec:
+  type: LoadBalancer 
+  selector:
+    app: products
+    environment: staging
+  ports:
+    - name: http 
+      protocol: TCP
+      port: 80
+      targetPort: 3550

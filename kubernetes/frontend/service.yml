@@ -1,0 +1,38 @@
+api version: v1
+kind: Service
+metadata:
+  name: frontend-internal-service
+  namespace: staging
+  labels:
+    app: frontend
+    environment: staging
+spec:
+  selector:
+    app: frontend
+    environment: staging
+  ports:
+    - name: http
+      protocol: TCP
+      port: 8080
+      targetPort: 8081
+  type: ClusterIP    
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend-external-service
+  namespace: staging
+  labels:
+    app: frontend
+    environment: staging
+spec:
+  type: LoadBalancer
+  selector:
+    app: frontend
+    environment: staging
+  ports:
+    - name: http
+      protocol: TCP
+      port: 80
+      targetPort: 8081    

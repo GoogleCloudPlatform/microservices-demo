@@ -1,0 +1,52 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend-deployment
+  # This deployment is for the frontend service in the staging environment
+  namespace: staging
+  labels:
+    app: frontend
+    environment: staging
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: frontend
+      environment: staging
+  template:
+    metadata:
+      labels:
+        app: frontend
+        environment: staging
+    spec:
+      nodeSelector:
+        kubernetes.azure.com/agentpool: stgpool
+      containers:
+        - name: frontend
+          image: uadeel421/reliance-frontend:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8081
+          envFrom:  
+            - configMapRef:
+                name: frontend-configmap
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 8080
+            initialDelaySeconds: 15
+            periodSeconds: 20
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "500m"
+              memory: "256Mi"
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 10
+         

@@ -27,3 +27,4 @@ pkg/
 release/wi-kubernetes-manifests.yaml
 vendor/
 .env
+secrets.yaml
