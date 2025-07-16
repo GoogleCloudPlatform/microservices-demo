@@ -10,7 +10,7 @@ blinker==1.9.0
     # via flask
 brotli==1.1.0
     # via geventhttpclient
-certifi==2025.6.15
+certifi==2025.7.14
     # via
     #   geventhttpclient
     #   requests
@@ -50,9 +50,9 @@ itsdangerous==2.2.0
     # via flask
 jinja2==3.1.6
     # via flask
-locust==2.37.11
+locust==2.37.12
     # via -r requirements.in
-locust-cloud==1.24.2
+locust-cloud==1.26.3
     # via locust
 markupsafe==3.0.2
     # via
