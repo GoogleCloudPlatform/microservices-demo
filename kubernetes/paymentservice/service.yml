@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: paymentservice
+  namespace: staging
+  labels:
+    app: paymentservice
+    environment: staging
+spec:
+  type: ClusterIP
+  selector:
+    app: paymentservice
+    environment: staging
+  ports:
+    - name: grpc
+      protocol: TCP
+      port: 50051
+      targetPort: 50051

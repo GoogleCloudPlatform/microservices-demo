@@ -26,5 +26,10 @@ obj/
 pkg/
 release/wi-kubernetes-manifests.yaml
 vendor/
-.env
-secrets.yaml
+**/.env
+*.log
+# Ignore other common secret or environment files
+*.secret
+*.secrets
+secrets.yml
+secret.yml

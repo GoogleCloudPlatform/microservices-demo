@@ -1,0 +1,65 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: productcatalogservice-deployment
+  namespace: staging
+  labels:
+    app: productcatalogservice
+    environment: staging
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: productcatalogservice
+      environment: staging
+  template:
+    metadata:
+      labels:
+        app: productcatalogservice
+        environment: staging
+    spec:
+      nodeSelector:
+        kubernetes.azure.com/agentpool: stgpool
+      containers:
+        - name: productcatalogservice
+          image: uadeel421/reliance-productcatalogservice:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 3550
+          envFrom:  
+            - secretRef:
+                # This must match the name of the secret holding your env vars
+                name: productcatalog-secrets
+          # This probe uses the gRPC health probe command from your docker-compose
+          livenessProbe:
+            exec:
+              command:
+                - /bin/sh
+                - -c
+                - /usr/bin/grpc_health_probe -addr=localhost:3550
+            initialDelaySeconds: 15
+            periodSeconds: 20
+          readinessProbe:
+            exec:
+              command:
+                - /bin/sh
+                - -c
+                - /usr/bin/grpc_health_probe -addr=localhost:3550
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "500m"
+              memory: "256Mi"
+          volumeMounts:
+            - name: productcatalog-ssl
+              mountPath: "/ssl"
+              readOnly: true
+      volumes:
+        - name: productcatalog-ssl
+          secret:
+            # This must match the name of the secret holding your SSL certs
+            secretName: productcatalog-ssl-certs

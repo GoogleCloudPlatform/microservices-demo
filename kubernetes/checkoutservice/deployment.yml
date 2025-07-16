@@ -1,0 +1,59 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: checkoutservice-deployment
+  namespace: staging
+  labels:
+    app: checkoutservice
+    environment: staging
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: checkoutservice
+      environment: staging
+  template:
+    metadata:
+      labels:
+        app: checkoutservice
+        environment: staging
+    spec:
+      nodeSelector:
+        kubernetes.azure.com/agentpool: stgpool
+      containers:
+        - name: checkoutservice
+          image: uadeel421/reliance-checkoutservice:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 5050
+          envFrom:  
+            - secretRef:
+                name: checkout-secrets
+            - configMapRef:
+                name: checkout-config
+          livenessProbe:
+            exec:
+              command: ["/usr/bin/grpc_health_probe", "-addr=:5050"]
+            initialDelaySeconds: 15
+            periodSeconds: 20
+          readinessProbe:
+            exec:
+              command: ["/usr/bin/grpc_health_probe", "-addr=:5050"]
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "500m"
+              memory: "256Mi"
+          volumeMounts:
+            - name: checkout-ssl
+              mountPath: "/ssl"
+              readOnly: true
+      volumes:
+        - name: checkout-ssl
+          secret:
+            # Reusing the secret created for the product catalog service
+            secretName: productcatalog-ssl-certs

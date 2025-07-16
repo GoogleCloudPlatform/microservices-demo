@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: currencyservice-config
+  namespace: staging
+data:
+  PORT: "7000"
+  DISABLE_PROFILER: "true"

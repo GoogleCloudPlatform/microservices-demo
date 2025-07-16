@@ -1,16 +1,16 @@
-apiVersion: apps/v1
-kind: configmap
+apiVersion: v1
+kind: ConfigMap
 metadata:
   name: frontend-configmap
   namespace: staging
 data:
-      - PRODUCT_CATALOG_SERVICE_ADDR=productcatalogservice:3550
-      - CURRENCY_SERVICE_ADDR=currencyservice:7000
-      - CART_SERVICE_ADDR=cartservice:8080
-      - RECOMMENDATION_SERVICE_ADDR=recommendationservice:8080
-      - SHIPPING_SERVICE_ADDR=shippingservice:50051
-      - CHECKOUT_SERVICE_ADDR=checkoutservice:5050
-      - AD_SERVICE_ADDR=adservice:9555
-      - PAYMENT_SERVICE_ADDR=paymentservice:50051
-      - EMAIL_SERVICE_ADDR=emailservice:5000 # Port corrected to 5000
-      - SHOPPING_ASSISTANT_SERVICE_ADDR=shoppingassistantservice:5050
+  PRODUCT_CATALOG_SERVICE_ADDR: productcatalogservice:3550
+  CURRENCY_SERVICE_ADDR: currencyservice:7000
+  CART_SERVICE_ADDR: cartservice:8080
+  RECOMMENDATION_SERVICE_ADDR: recommendationservice:8080
+  SHIPPING_SERVICE_ADDR: shippingservice:50051
+  CHECKOUT_SERVICE_ADDR: checkoutservice:5050
+  AD_SERVICE_ADDR: adservice:9555
+  PAYMENT_SERVICE_ADDR: paymentservice:50051
+  EMAIL_SERVICE_ADDR: emailservice:5000
+  SHOPPING_ASSISTANT_SERVICE_ADDR: shoppingassistantservice:5050

@@ -1,4 +1,4 @@
-api version: v1
+apiVersion: v1
 kind: Service
 metadata:
   name: frontend-internal-service
@@ -7,6 +7,7 @@ metadata:
     app: frontend
     environment: staging
 spec:
+  type: ClusterIP
   selector:
     app: frontend
     environment: staging
@@ -14,8 +15,8 @@ spec:
     - name: http
       protocol: TCP
       port: 8080
-      targetPort: 8081
-  type: ClusterIP    
+      # This must match the containerPort in your deployment
+      targetPort: 8080
 
 ---
 apiVersion: v1
@@ -35,4 +36,5 @@ spec:
     - name: http
       protocol: TCP
       port: 80
-      targetPort: 8081    
+      # This must match the containerPort in your deployment
+      targetPort: 8080

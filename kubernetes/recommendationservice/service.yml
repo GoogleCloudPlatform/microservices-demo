@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: recommendationservice
+  namespace: staging
+  labels:
+    app: recommendationservice
+    environment: staging
+spec:
+  type: ClusterIP
+  selector:
+    app: recommendationservice
+    environment: staging
+  ports:
+    - name: grpc
+      protocol: TCP
+      port: 8080
+      targetPort: 8080

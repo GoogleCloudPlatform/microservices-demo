@@ -1,47 +1,39 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: frontend-deployment
+  name: adservice-deployment
   namespace: staging
   labels:
-    app: frontend
+    app: adservice
     environment: staging
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: frontend
+      app: adservice
       environment: staging
   template:
     metadata:
       labels:
-        app: frontend
+        app: adservice
         environment: staging
     spec:
       nodeSelector:
         kubernetes.azure.com/agentpool: stgpool
       containers:
-        - name: frontend
-          image: uadeel421/reliance-frontend:latest
+        - name: adservice
+          image: uadeel421/reliance-adservice:latest
           imagePullPolicy: Always
           ports:
-            # This port must match the port the application listens on
-            # and the port checked by the probes.
-            - containerPort: 8080
-          envFrom:  
-            - configMapRef:
-                # This name must match the metadata.name in your configmap.yml
-                name: frontend-configmap
+            - containerPort: 9555
           livenessProbe:
-            httpGet:
-              path: /
-              port: 8080
+            exec:
+              command: ["/usr/bin/grpc_health_probe", "-addr=:9555"]
             initialDelaySeconds: 15
             periodSeconds: 20
           readinessProbe:
-            httpGet:
-              path: /
-              port: 8080
+            exec:
+              command: ["/usr/bin/grpc_health_probe", "-addr=:9555"]
             initialDelaySeconds: 5
             periodSeconds: 10
           resources:
