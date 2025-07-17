@@ -1,6 +1,6 @@
 google-api-core==2.25.1
 google-cloud-profiler==4.1.0
-grpcio-health-checking==1.73.0
+grpcio-health-checking==1.73.1
 python-json-logger==3.3.0
 requests==2.32.4
 rsa==4.9.1
