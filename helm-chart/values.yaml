@@ -17,7 +17,7 @@
 # Declare variables to be passed into your templates.
 
 images:
-  repository: us-central1-docker.pkg.dev/google-samples/microservices-demo
+  repository: ghcr.io/riptideslabs/microservice-demo
   # Overrides the image tag whose default is the chart appVersion.
   tag: ""
 
@@ -213,8 +213,20 @@ cartDatabase:
     endpointPort: ""
     certificate: ""
 
-# @TODO: This service is not currently available in Helm.
-# https://github.com/GoogleCloudPlatform/microservices-demo/tree/main/kustomize/components/shopping-assistant
 shoppingAssistantService:
-  create: false
+  create: true
   name: shoppingassistantservice
+  alloydbClusterName: microservices-demo
+  alloydbInstanceName: microservices-demo-primary
+  alloydbDatabaseName: shoppingassistant
+  alloydbTableName: catalog_items
+  projectId: ""
+  region: europe-west1
+  resources:
+    requests:
+      cpu: 100m
+      memory: 64Mi
+    limits:
+      cpu: 200m
+      memory: 128Mi
+
