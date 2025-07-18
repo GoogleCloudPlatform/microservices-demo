@@ -16,6 +16,8 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/credentials/insecure"
+	"google.golang.org/grpc/health"
+	"google.golang.org/grpc/health/grpc_health_v1"
 	"google.golang.org/grpc/status"
 
 	pb "github.com/GoogleCloudPlatform/microservices-demo/src/checkoutservice/genproto"
@@ -75,6 +77,14 @@ func main() {
 	}
 
 	srv := grpc.NewServer()
+
+	// ==> THIS IS THE FIX <==
+	// Register the gRPC health check service.
+	healthSrv := health.NewServer()
+	grpc_health_v1.RegisterHealthServer(srv, healthSrv)
+	healthSrv.SetServingStatus("checkoutservice", grpc_health_v1.HealthCheckResponse_SERVING)
+	// =======================
+
 	pb.RegisterCheckoutServiceServer(srv, svc)
 	log.Infof("starting gRPC server on port %s", port)
 	if err := srv.Serve(lis); err != nil {

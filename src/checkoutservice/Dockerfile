@@ -27,10 +27,26 @@ COPY . .
 ARG SKAFFOLD_GO_GCFLAGS
 RUN GOOS=${TARGETOS} GOARCH=${TARGETARCH} CGO_ENABLED=0 go build -gcflags="${SKAFFOLD_GO_GCFLAGS}" -o /checkoutservice .
 
+# ==> THIS IS THE FIX <==
+# Download the gRPC health probe in the builder stage
+ARG TARGETARCH
+RUN apk add --no-cache wget && \
+    GRPC_HEALTH_PROBE_VERSION=v0.4.24 && \
+    if [ "$TARGETARCH" = "amd64" ]; then \
+      wget -qO/bin/grpc_health_probe https://github.com/grpc-ecosystem/grpc-health-probe/releases/download/${GRPC_HEALTH_PROBE_VERSION}/grpc_health_probe-linux-amd64 ; \
+    elif [ "$TARGETARCH" = "arm64" ]; then \
+      wget -qO/bin/grpc_health_probe https://github.com/grpc-ecosystem/grpc-health-probe/releases/download/${GRPC_HEALTH_PROBE_VERSION}/grpc_health_probe-linux-arm64 ; \
+    else \
+      echo "Unsupported architecture: $TARGETARCH" && exit 1 ; \
+    fi && \
+    chmod +x /bin/grpc_health_probe
+
 FROM scratch
 
 WORKDIR /src
 COPY --from=builder /checkoutservice /src/checkoutservice
+# Copy the health probe from the builder stage into the final scratch image
+COPY --from=builder /bin/grpc_health_probe /bin/grpc_health_probe
 
 # Definition of this variable is used by 'skaffold debug' to identify a golang binary.
 # Default behavior - a failure prints a stack trace for the current goroutine.

@@ -41,6 +41,20 @@ COPY --from=builder /usr/local/lib/python3.12/ /usr/local/lib/python3.12/
 # Add the application
 COPY . .
 
+# ==> THIS IS THE CORRECT FIX FOR ALPINE LINUX <==
+# Install the gRPC health probe to resolve the CrashLoopBackOff error
+RUN apk add --no-cache wget && \
+    GRPC_HEALTH_PROBE_VERSION=v0.4.24 && \
+    ARCH=$(uname -m) && \
+    if [ "$ARCH" = "x86_64" ]; then \
+      wget -qO/bin/grpc_health_probe https://github.com/grpc-ecosystem/grpc-health-probe/releases/download/${GRPC_HEALTH_PROBE_VERSION}/grpc_health_probe-linux-amd64 ; \
+    elif [ "$ARCH" = "aarch64" ]; then \
+      wget -qO/bin/grpc_health_probe https://github.com/grpc-ecosystem/grpc-health-probe/releases/download/${GRPC_HEALTH_PROBE_VERSION}/grpc_health_probe-linux-arm64 ; \
+    else \
+      echo "Unsupported architecture: $ARCH" && exit 1 ; \
+    fi && \
+    chmod +x /bin/grpc_health_probe
+
 # set listen port
 ENV PORT "8080"
 EXPOSE 8080

@@ -1,0 +1,44 @@
+replicaCount: 1
+environment: staging
+
+image:
+  repository: uadeel421/reliance-checkoutservice
+  pullPolicy: Always
+  tag: "latest"
+
+service:
+  port: 5050
+
+nodeSelector:
+  pool: stgpool
+
+# This references the existing secret for the SSL cert file
+sslVolume:
+  secretName: productcatalog-ssl-certs
+
+# These values will be created as a Kubernetes Secret
+secrets:
+  MYSQL_USER: "kpadmin"
+  MYSQL_PASSWORD: "p1Kistan0978^"
+  MYSQL_HOST: "rwdbserver.mysql.database.azure.com"
+  MYSQL_PORT: "3306"
+  MYSQL_DATABASE: "hipstershop"
+  SSL_CERT_PATH: "/ssl/DigiCertGlobalRootCA.crt.pem"
+
+# These values will be created as a Kubernetes ConfigMap
+configMap:
+  PORT: "5050"
+  PRODUCT_CATALOG_SERVICE_ADDR: "productcatalogservice:3550"
+  SHIPPING_SERVICE_ADDR: "shippingservice:50051"
+  PAYMENT_SERVICE_ADDR: "paymentservice:50051"
+  EMAIL_SERVICE_ADDR: "emailservice:5000"
+  CURRENCY_SERVICE_ADDR: "currencyservice:7000"
+  CART_SERVICE_ADDR: "cartservice:8080"
+
+resources:
+  requests:
+    cpu: "100m"
+    memory: "128Mi"
+  limits:
+    cpu: "500m"
+    memory: "256Mi"

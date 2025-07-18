@@ -1,28 +1,32 @@
-
 services:
-  # Configuration for the CartService
   cartservice:
     build:
       context: ./src/cartservice/src
       dockerfile: Dockerfile
-    image: uadeel421/reliance-cartservice
-    container_name: cartservice-azmysql
+      platforms:
+        - "linux/amd64"
+        - "linux/arm64"
+    image: uadeel421/reliance-cartservice:latest
+    container_name: cartservice-app
     ports:
       - "5000:8080"
     env_file:
       - ./src/cartservice/src/.env
     healthcheck:
-      test: ["CMD", "/usr/bin/grpc_health_probe", "-addr=:8080"]
+      test: ["CMD", "/bin/grpc_health_probe", "-addr=:8080"]
       interval: 10s
       timeout: 5s
       retries: 5
     restart: always
-  # Configuration for the ProductCatalogService
+
   productcatalogservice:
     build:
       context: ./src/productcatalogservice
       dockerfile: Dockerfile
-    image: uadeel421/reliance-productcatalogservice
+      platforms:
+        - "linux/amd64"
+        - "linux/arm64"
+    image: uadeel421/reliance-productcatalogservice:latest
     container_name: productcatalogservice-app
     ports:
       - "3550:3550"
@@ -32,34 +36,40 @@ services:
       - ./src/productcatalogservice/ssl:/ssl:ro
     restart: always
     healthcheck:
-      test: ["CMD", "/bin/sh", "-c", "grpc_health_probe -addr=localhost:3550"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-  currencyservice:
-    build:
-      context: ./src/currencyservice # Path to Dockerfile for currencyservice
-      dockerfile: Dockerfile
-    image: uadeel421/reliance-currencyservice
-    container_name: currencyservice-app
-    ports:
-      - "7000:7000" # Map host port 7000 to container's internal port 7000
-    environment:
-      - PORT=7000
-      - DISABLE_PROFILER=true
-    restart: always
-    healthcheck: # Simple health check for Node.js gRPC service
-      test: ["CMD", "/usr/bin/grpc_health_probe", "-addr=:7000"]
+      test: ["CMD", "/bin/grpc_health_probe", "-addr=localhost:3550"]
       interval: 10s
       timeout: 5s
       retries: 5
 
-  # Configuration for the Frontend Service
+  currencyservice:
+    build:
+      context: ./src/currencyservice
+      dockerfile: Dockerfile
+      platforms:
+        - "linux/amd64"
+        - "linux/arm64"
+    image: uadeel421/reliance-currencyservice:latest
+    container_name: currencyservice-app
+    ports:
+      - "7000:7000"
+    environment:
+      - PORT=7000
+      - DISABLE_PROFILER=true
+    restart: always
+    healthcheck:
+      test: ["CMD", "/bin/grpc_health_probe", "-addr=:7000"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
   frontend:
     build:
       context: ./src/frontend
       dockerfile: Dockerfile
-    image: uadeel421/reliance-frontend
+      platforms:
+        - "linux/amd64"
+        - "linux/arm64"
+    image: uadeel421/reliance-frontend:latest
     container_name: frontend-app
     ports:
       - "8081:8080"
@@ -70,7 +80,6 @@ services:
         condition: service_healthy
       currencyservice:
         condition: service_healthy
-    # --- CORRECTED SERVICE ADDRESSES ---
     environment:
       - PORT=8080
       - PRODUCT_CATALOG_SERVICE_ADDR=productcatalogservice:3550
@@ -81,30 +90,36 @@ services:
       - CHECKOUT_SERVICE_ADDR=checkoutservice:5050
       - AD_SERVICE_ADDR=adservice:9555
       - PAYMENT_SERVICE_ADDR=paymentservice:50051
-      - EMAIL_SERVICE_ADDR=emailservice:5000 # Port corrected to 5000
+      - EMAIL_SERVICE_ADDR=emailservice:5000
       - SHOPPING_ASSISTANT_SERVICE_ADDR=shoppingassistantservice:5050
     restart: always
 
-  # Configuration for the Shipping Service
   shippingservice:
     build:
       context: ./src/shippingservice
       dockerfile: Dockerfile
-    image: uadeel421/reliance-shippingservice
+      platforms:
+        - "linux/amd64"
+        - "linux/arm64"
+    image: uadeel421/reliance-shippingservice:latest
     container_name: shippingservice-app
     ports:
       - "50051:50051"
     restart: always
     healthcheck:
-      test: ["CMD", "/usr/bin/grpc_health_probe", "-addr=:50051"]
+      test: ["CMD", "/bin/grpc_health_probe", "-addr=:50051"]
       interval: 10s
       timeout: 5s
       retries: 5
 
-  # Configuration for the Checkout Service
   checkoutservice:
-    build: ./src/checkoutservice
-    image: uadeel421/reliance-checkoutservice
+    build:
+      context: ./src/checkoutservice
+      dockerfile: Dockerfile
+      platforms:
+        - "linux/amd64"
+        - "linux/arm64"
+    image: uadeel421/reliance-checkoutservice:latest
     container_name: checkoutservice-app
     ports:
       - "5050:5050"
@@ -112,7 +127,6 @@ services:
       - ./src/checkoutservice/.env
     volumes:
       - ./src/productcatalogservice/ssl:/ssl:ro
-    # --- CORRECTED SERVICE ADDRESSES ---
     environment:
       - PORT=5050
       - PRODUCT_CATALOG_SERVICE_ADDR=productcatalogservice:3550
@@ -123,7 +137,7 @@ services:
       - CART_SERVICE_ADDR=cartservice:8080 
     restart: always
     healthcheck:
-      test: ["CMD", "/usr/bin/grpc_health_probe", "-addr=:5050"]
+      test: ["CMD", "/bin/grpc_health_probe", "-addr=:5050"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -132,13 +146,16 @@ services:
     build:
       context: ./src/adservice
       dockerfile: Dockerfile
-    image: uadeel421/reliance-adservice
+      platforms:
+        - "linux/amd64"
+        - "linux/arm64"
+    image: uadeel421/reliance-adservice:latest
     container_name: adservice-app
     ports:
       - "9555:9555"
     restart: always
     healthcheck:
-      test: ["CMD", "/usr/bin/grpc_health_probe", "-addr=:9555"]
+      test: ["CMD", "/bin/grpc_health_probe", "-addr=:9555"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -147,13 +164,16 @@ services:
     build:
       context: ./src/recommendationservice
       dockerfile: Dockerfile
-    image: uadeel421/reliance-recommendationservice
+      platforms:
+        - "linux/amd64"
+        - "linux/arm64"
+    image: uadeel421/reliance-recommendationservice:latest
     container_name: recommendationservice-app
     ports:
       - "8080:8080"
     restart: always
     healthcheck:
-      test: ["CMD", "/usr/bin/grpc_health_probe", "-addr=:8080"]
+      test: ["CMD", "/bin/grpc_health_probe", "-addr=:8080"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -162,7 +182,10 @@ services:
     build:
       context: ./src/paymentservice
       dockerfile: Dockerfile
-    image: uadeel421/reliance-paymentservice
+      platforms:
+        - "linux/amd64"
+        - "linux/arm64"
+    image: uadeel421/reliance-paymentservice:latest
     container_name: paymentservice-app
     ports:
       - "50052:50051"
@@ -171,7 +194,7 @@ services:
       - DISABLE_PROFILER=true
     restart: always
     healthcheck:
-      test: ["CMD", "/usr/bin/grpc_health_probe", "-addr=:50051"]
+      test: ["CMD", "/bin/grpc_health_probe", "-addr=:50051"]
       interval: 10s
       timeout: 5s
       retries: 5

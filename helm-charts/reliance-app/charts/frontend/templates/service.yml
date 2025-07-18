@@ -1,0 +1,33 @@
+# Internal ClusterIP service, always created
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Release.Name }}-frontend-internal
+  namespace: {{ .Release.Namespace }}
+spec:
+  type: ClusterIP
+  selector:
+    app: frontend
+  ports:
+    - name: http
+      protocol: TCP
+      port: {{ .Values.serviceObjects.internal.port }}
+      targetPort: {{ .Values.service.port }}
+---
+# External LoadBalancer service, created only if enabled
+{{- if .Values.serviceObjects.external.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Release.Name }}-frontend-external
+  namespace: {{ .Release.Namespace }}
+spec:
+  type: {{ .Values.serviceObjects.external.type }}
+  selector:
+    app: frontend
+  ports:
+    - name: http
+      protocol: TCP
+      port: {{ .Values.serviceObjects.external.port }}
+      targetPort: {{ .Values.service.port }}
+{{- end }}

@@ -1,0 +1,25 @@
+replicaCount: 1
+environment: staging
+
+image:
+  repository: uadeel421/reliance-paymentservice
+  pullPolicy: Always
+  tag: "latest"
+
+service:
+  port: 50051
+
+nodeSelector:
+  pool: stgpool
+
+configMap:
+  PORT: "50051"
+  DISABLE_PROFILER: "true"
+
+resources:
+  requests:
+    cpu: "100m"
+    memory: "128Mi"
+  limits:
+    cpu: "500m"
+    memory: "256Mi"

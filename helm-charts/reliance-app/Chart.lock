@@ -1,0 +1,30 @@
+dependencies:
+- name: frontend
+  repository: file://charts/frontend
+  version: 0.1.0
+- name: productcatalog
+  repository: file://charts/productcatalog
+  version: 0.1.0
+- name: cart
+  repository: file://charts/cart
+  version: 0.1.0
+- name: checkout
+  repository: file://charts/checkout
+  version: 0.1.0
+- name: adservice
+  repository: file://charts/adservice
+  version: 0.1.0
+- name: currencyservice
+  repository: file://charts/currencyservice
+  version: 0.1.0
+- name: paymentservice
+  repository: file://charts/paymentservice
+  version: 0.1.0
+- name: recommendationservice
+  repository: file://charts/recommendationservice
+  version: 0.1.0
+- name: shippingservice
+  repository: file://charts/shippingservice
+  version: 0.1.0
+digest: sha256:f76c684c82a9fcaa7eedfb39c4bf139f3c4143900efcc4bef323dd20d1f261bd
+generated: "2025-07-18T14:22:40.7419924+05:00"
