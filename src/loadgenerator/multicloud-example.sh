@@ -8,8 +8,8 @@
 # ==============================================
 
 # Actual service URLs from your terraform deployments
-export AWS_ACCOUNTING_URL="http://13.222.214.119:8080"     # AWS EC2 Accounting Service
-export AZURE_ANALYTICS_URL="http://128.251.155.175:8080"   # Azure VM Analytics Service
+export AWS_ACCOUNTING_URL="http://54.163.148.73:8080"     # AWS EC2 Accounting Service
+export AZURE_ANALYTICS_URL="http://20.160.153.10:8080"   # Azure VM Analytics Service
 export GCP_CRM_URL="http://34.70.54.160:8080"             # GCP Instance CRM Service
 
 # Optional: Frontend URL for boutique testing

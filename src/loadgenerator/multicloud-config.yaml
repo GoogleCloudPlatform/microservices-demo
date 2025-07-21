@@ -4,8 +4,8 @@ metadata:
   name: multicloud-config
   namespace: default
 data:
-  AWS_ACCOUNTING_URL: "http://13.222.214.119:8080"
-  AZURE_ANALYTICS_URL: "http://128.251.155.175:8080"
+  AWS_ACCOUNTING_URL: "http://54.163.148.73:8080"
+  AZURE_ANALYTICS_URL: "http://20.160.153.10:8080"
   GCP_CRM_URL: "http://34.70.54.160:8080"
 ---
 # Apply this ConfigMap first, then update your loadgenerator deployment to use it

@@ -6,8 +6,8 @@ Your configuration files are ready! Here's what I've created with your actual se
 
 | Service | URL | Endpoint |
 |---------|-----|----------|
-| **AWS Accounting** | `http://13.222.214.119:8080` | `/transactions` |
-| **Azure Analytics** | `http://128.251.155.175:8080` | `/metrics` |
+| **AWS Accounting** | `http://54.163.148.73:8080` | `/transactions` |
+| **Azure Analytics** | `http://20.160.153.10:8080` | `/metrics` |
 | **GCP CRM** | `http://34.70.54.160:8080` | `/customers` |
 
 ## 🛠️ Configuration Files Created
@@ -84,7 +84,7 @@ kubectl logs -f deployment/loadgenerator
 kubectl logs -l app=loadgenerator | grep -E "(processTransaction|recordMetrics|manageCustomer)"
 
 # Test connectivity to your services
-kubectl run test-pod --image=busybox -it --rm -- wget -O- http://13.222.214.119:8080/transactions
+kubectl run test-pod --image=busybox -it --rm -- wget -O- http://54.163.148.73:8080/transactions
 ```
 
 ## 📊 Expected Load Test Output
