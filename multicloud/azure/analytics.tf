@@ -128,6 +128,7 @@ resource "azurerm_linux_virtual_machine" "vm" {
     sudo npm install pm2 -g
     
     sudo mkdir -p /opt/app
+    sudo chown -R azureuser:azureuser /opt/app
     cd /opt/app
 
     cat <<'EOF' > package.json

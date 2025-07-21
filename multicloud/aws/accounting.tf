@@ -73,6 +73,7 @@ resource "aws_instance" "accounting_server" {
 
     # Create a directory for the app
     sudo mkdir -p /opt/app
+    sudo chown -R ubuntu:ubuntu /opt/app
     cd /opt/app
 
     # Create the package.json file

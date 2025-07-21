@@ -68,6 +68,7 @@ resource "google_compute_instance" "crm_mock_vm" {
 
     # Create a directory for the app
     sudo mkdir -p /opt/app
+    sudo chown -R $(whoami):$(whoami) /opt/app
     cd /opt/app
 
     # Create the package.json file
