@@ -14,8 +14,14 @@ terraform {
   }
 }
 
+variable "subscription_id" {
+  description = "The Azure subscription ID where resources will be created"
+  type        = string
+}
+
 # Configure the Azure Provider
 provider "azurerm" {
+  subscription_id = var.subscription_id
   features {}
 }
 

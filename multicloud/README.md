@@ -152,6 +152,19 @@ terraform apply
 
 ```bash
 cd azure/
+# Copy and configure the variables file
+cp terraform.tfvars.example terraform.tfvars
+# Edit terraform.tfvars and set your actual Azure subscription ID
+
+terraform init
+terraform plan
+terraform apply
+```
+
+**Alternative using environment variable**:
+```bash
+cd azure/
+export TF_VAR_subscription_id="your-azure-subscription-id"
 terraform init
 terraform plan
 terraform apply
