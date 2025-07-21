@@ -54,6 +54,7 @@ CUSTOMER_NAMES = [
 AWS_ACCOUNTING_URL = os.getenv('AWS_ACCOUNTING_URL', '')
 AZURE_ANALYTICS_URL = os.getenv('AZURE_ANALYTICS_URL', '')
 GCP_CRM_URL = os.getenv('GCP_CRM_URL', '')
+GCP_INVENTORY_URL = os.getenv('GCP_INVENTORY_URL', '')
 
 def index(l):
     l.client.get("/")
@@ -180,6 +181,33 @@ def manageCustomer(l):
     except Exception as e:
         print(f"GCP CRM Service error: {e}")
 
+def checkInventory(l):
+    """Check inventory via GCP Inventory Service (PSC): GET inventory and specific products"""
+    if not GCP_INVENTORY_URL:
+        return
+    
+    try:
+        # GET all inventory
+        requests.get(f"{GCP_INVENTORY_URL}/inventory", timeout=10)
+        
+        # GET specific product inventory (random product from our catalog)
+        product_id = random.choice(products)
+        requests.get(f"{GCP_INVENTORY_URL}/inventory/{product_id}", timeout=10)
+        
+        # Occasionally simulate inventory operations
+        if random.random() < 0.3:  # 30% chance
+            # Reserve stock for a product
+            reserve_data = {"quantity": random.randint(1, 3)}
+            requests.post(
+                f"{GCP_INVENTORY_URL}/inventory/{product_id}/reserve",
+                json=reserve_data,
+                headers={"Content-Type": "application/json"},
+                timeout=10
+            )
+        
+    except Exception as e:
+        print(f"GCP Inventory Service (PSC) error: {e}")
+
 class UserBehavior(TaskSet):
 
     def on_start(self):
@@ -194,7 +222,8 @@ class UserBehavior(TaskSet):
         checkout: 1,
         processTransaction: 3,
         recordMetrics: 3,
-        manageCustomer: 3
+        manageCustomer: 3,
+        checkInventory: 4
     }
 
 class WebsiteUser(FastHttpUser):

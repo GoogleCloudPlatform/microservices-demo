@@ -92,6 +92,8 @@ spec:
           value: "http://20.160.153.10:8080"
         - name: GCP_CRM_URL
           value: "http://34.70.54.160:8080"
+        - name: GCP_INVENTORY_URL
+          value: "http://10.128.0.53:8080"
         resources:
           requests:
             cpu: 300m

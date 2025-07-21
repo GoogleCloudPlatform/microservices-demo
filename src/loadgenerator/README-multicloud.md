@@ -99,6 +99,7 @@ pip install -r requirements.txt
 export AWS_ACCOUNTING_URL="http://your-aws-ip:8080"
 export AZURE_ANALYTICS_URL="http://your-azure-ip:8080" 
 export GCP_CRM_URL="http://your-gcp-ip:8080"
+export GCP_INVENTORY_URL="http://your-psc-ip:8080"
 export USERS=20
 export RATE=5
 
@@ -128,6 +129,8 @@ spec:
           value: "http://your-azure-ip:8080"
         - name: GCP_CRM_URL
           value: "http://your-gcp-ip:8080"
+        - name: GCP_INVENTORY_URL
+          value: "http://your-psc-ip:8080"
         - name: ENABLE_MULTICLOUD_TESTS
           value: "true"
         - name: USER_CLASS

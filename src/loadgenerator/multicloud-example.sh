@@ -11,6 +11,7 @@
 export AWS_ACCOUNTING_URL="http://54.163.148.73:8080"     # AWS EC2 Accounting Service
 export AZURE_ANALYTICS_URL="http://20.160.153.10:8080"   # Azure VM Analytics Service
 export GCP_CRM_URL="http://34.70.54.160:8080"             # GCP Instance CRM Service
+export GCP_INVENTORY_URL="http://10.128.0.53:8080"        # GCP Inventory Service (PSC)
 
 # Optional: Frontend URL for boutique testing
 export FRONTEND_ADDR="frontend:80"
@@ -51,6 +52,12 @@ echo "Load test completed. Check the output above for results."
 echo ""
 echo "The test will show statistics for:"
 echo "- Original boutique tasks (index, setCurrency, browseProduct, etc.)"
+echo "- Multicloud tasks:"
+echo "  - processTransaction (AWS Accounting)"
+echo "  - recordMetrics (Azure Analytics)" 
+echo "  - manageCustomer (GCP CRM)"
+echo "  - checkInventory (GCP Inventory via PSC)"
 echo "- processTransaction: AWS accounting service operations (${AWS_ACCOUNTING_URL})"
 echo "- recordMetrics: Azure analytics service operations (${AZURE_ANALYTICS_URL})" 
-echo "- manageCustomer: GCP CRM service operations (${GCP_CRM_URL})" 
+echo "- manageCustomer: GCP CRM service operations (${GCP_CRM_URL})"
+echo "- checkInventory: GCP inventory service operations via PSC (${GCP_INVENTORY_URL})" 
