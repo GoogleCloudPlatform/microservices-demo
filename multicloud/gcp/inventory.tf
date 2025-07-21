@@ -18,7 +18,7 @@ resource "google_compute_network" "inventory_vpc" {
 resource "google_compute_subnetwork" "inventory_subnet" {
   name          = "inventory-subnet"
   ip_cidr_range = "10.1.0.0/24"
-  region        = "us-central1"
+  region        = "europe-west1"
   network       = google_compute_network.inventory_vpc.id
   description   = "Subnet for inventory service"
 }
@@ -27,7 +27,7 @@ resource "google_compute_subnetwork" "inventory_subnet" {
 resource "google_compute_subnetwork" "inventory_psc_subnet" {
   name          = "inventory-psc-subnet"
   ip_cidr_range = "10.1.1.0/24"
-  region        = "us-central1"
+  region        = "europe-west1"
   network       = google_compute_network.inventory_vpc.id
   purpose       = "PRIVATE_SERVICE_CONNECT"
   description   = "Subnet for PSC service attachment"
@@ -69,7 +69,7 @@ resource "google_compute_firewall" "inventory_psc" {
 resource "google_compute_instance" "inventory_vm" {
   name         = "inventory-service-vm"
   machine_type = "e2-micro"
-  zone         = "us-central1-a"
+  zone         = "europe-west1-b"
   
   tags = ["inventory-server"]
   
@@ -305,7 +305,7 @@ EOF
 # 6. Create PSC service attachment (expose inventory service via PSC)
 resource "google_compute_service_attachment" "inventory_psc_attachment" {
   name        = "inventory-psc-attachment"
-  region      = "us-central1"
+  region      = "europe-west1"
   description = "PSC attachment for inventory service"
   
   # Enable PSC
@@ -328,7 +328,7 @@ resource "google_compute_service_attachment" "inventory_psc_attachment" {
 # 7. Create internal load balancer for the inventory service
 resource "google_compute_forwarding_rule" "inventory_forwarding_rule" {
   name   = "inventory-forwarding-rule"
-  region = "us-central1"
+  region = "europe-west1"
   
   load_balancing_scheme = "INTERNAL"
   backend_service       = google_compute_region_backend_service.inventory_backend.id
@@ -340,7 +340,7 @@ resource "google_compute_forwarding_rule" "inventory_forwarding_rule" {
 # 8. Create backend service
 resource "google_compute_region_backend_service" "inventory_backend" {
   name   = "inventory-backend-service"
-  region = "us-central1"
+  region = "europe-west1"
   
   health_checks = [google_compute_region_health_check.inventory_health_check.id]
   
@@ -353,7 +353,7 @@ resource "google_compute_region_backend_service" "inventory_backend" {
 # 9. Create instance group
 resource "google_compute_instance_group" "inventory_instance_group" {
   name = "inventory-instance-group"
-  zone = "us-central1-a"
+  zone = "europe-west1-b"
   
   instances = [google_compute_instance.inventory_vm.id]
   
@@ -366,7 +366,7 @@ resource "google_compute_instance_group" "inventory_instance_group" {
 # 10. Create health check
 resource "google_compute_region_health_check" "inventory_health_check" {
   name   = "inventory-health-check"
-  region = "us-central1"
+  region = "europe-west1"
   
   timeout_sec        = 5
   check_interval_sec = 10
