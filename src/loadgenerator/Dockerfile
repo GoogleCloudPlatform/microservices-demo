@@ -40,4 +40,9 @@ COPY locustfile.py .
 # enable gevent support in debugger
 ENV GEVENT_SUPPORT=True
 
+# Environment variables for multicloud services (optional)
+ENV AWS_ACCOUNTING_URL=""
+ENV AZURE_ANALYTICS_URL=""
+ENV GCP_CRM_URL=""
+
 ENTRYPOINT locust --host="http://${FRONTEND_ADDR}" --headless -u "${USERS:-10}" -r "${RATE:-1}" 2>&1
