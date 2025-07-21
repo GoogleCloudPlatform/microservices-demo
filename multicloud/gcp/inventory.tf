@@ -7,6 +7,12 @@ data "google_compute_subnetwork" "default_subnet" {
   region = "us-central1"
 }
 
+# Data source to get default subnet in us-west1 (for multi-region support)
+data "google_compute_subnetwork" "default_subnet_west" {
+  name   = "default"
+  region = "us-west1"
+}
+
 # 1. Create a dedicated VPC network for the inventory service
 resource "google_compute_network" "inventory_vpc" {
   name                    = "inventory-vpc"
@@ -399,6 +405,27 @@ resource "google_compute_forwarding_rule" "inventory_psc_endpoint" {
   # This will use the reserved IP in the default network to reach the inventory service
 }
 
+# 13. Create additional PSC endpoint in us-west1 for multi-region support
+resource "google_compute_address" "inventory_psc_ip_west" {
+  name         = "inventory-psc-ip-west"
+  region       = "us-west1"
+  subnetwork   = data.google_compute_subnetwork.default_subnet_west.id
+  address_type = "INTERNAL"
+  description  = "Reserved IP for inventory PSC endpoint in us-west1"
+}
+
+resource "google_compute_forwarding_rule" "inventory_psc_endpoint_west" {
+  name   = "inventory-psc-endpoint-west"
+  region = "us-west1"
+  
+  load_balancing_scheme = ""
+  target                = google_compute_service_attachment.inventory_psc_attachment.id
+  network               = "default"  # Connect from default network
+  ip_address            = google_compute_address.inventory_psc_ip_west.self_link
+  
+  # This provides PSC access from us-west1 region
+}
+
 # Outputs
 output "inventory_vm_private_ip" {
   value       = google_compute_instance.inventory_vm.network_interface[0].network_ip
@@ -428,4 +455,14 @@ output "inventory_subnet_cidr" {
 output "inventory_psc_subnet_cidr" {
   value       = google_compute_subnetwork.inventory_psc_subnet.ip_cidr_range
   description = "The CIDR range of the PSC subnet"
+}
+
+output "inventory_psc_endpoint_ip_west" {
+  value       = google_compute_address.inventory_psc_ip_west.address
+  description = "The PSC endpoint IP address in us-west1 region"
+}
+
+output "inventory_service_url_west" {
+  value       = "http://${google_compute_address.inventory_psc_ip_west.address}:8080/inventory"
+  description = "The URL to access the inventory service via PSC from us-west1 region"
 } 
