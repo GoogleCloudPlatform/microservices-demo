@@ -121,12 +121,19 @@ resource "aws_instance" "accounting_server" {
       const newTransaction = { item, price: parseFloat(price), date };
       transactions.push(newTransaction);
       
-      console.log(`POST /transactions - Added new transaction: $${item}`);
+      // Cleanup: Keep only the 10 most recent transactions
+      if (transactions.length > 10) {
+        const removedCount = transactions.length - 10;
+        transactions = transactions.slice(-10); // Keep last 10
+        console.log(`POST /transactions - Cleaned up ${removedCount} old transaction(s), keeping 10 most recent`);
+      }
+      
+      console.log(`POST /transactions - Added new transaction: ${item} ($${price}). Total: ${transactions.length}`);
       res.status(201).json(newTransaction);
     });
 
     app.listen(port, '0.0.0.0', () => {
-      console.log(`Mock Accounting server listening on port $${port}`);
+      console.log(`Mock Accounting server listening on port ${port}`);
     });
     EOF
 
