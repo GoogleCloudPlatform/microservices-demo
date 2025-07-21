@@ -270,23 +270,38 @@ terraform apply
 - `instance_public_ip`: Compute Engine instance public IP
 - `application_url`: Direct URL to customers endpoint
 
-### GCP Inventory Service Deployment
+### GCP Services Deployment (CRM + Inventory)
 
+**File Structure:**
+```
+gcp/
+├── main.tf             # Shared terraform, provider, and variable configs
+├── crm.tf              # CRM service resources  
+├── inventory.tf        # Inventory service resources (private IP + PSC)
+└── terraform.tfvars    # Your project configuration
+```
+
+**Deploy both services:**
 ```bash
 cd gcp/
-# Copy and configure the variables file (if not already done)
+# Copy and configure the variables file
 cp terraform.tfvars.example terraform.tfvars
 # Edit terraform.tfvars and set your actual GCP project ID
 
-# Enable required APIs (if not already enabled)
+# Enable required APIs
 gcloud services enable compute.googleapis.com
 gcloud services enable servicenetworking.googleapis.com
 
+# Deploy all services together
 terraform init
-terraform plan -target=google_compute_network.inventory_vpc  # Plan VPC first
-terraform apply -target=google_compute_network.inventory_vpc  # Create VPC first
-terraform plan  # Plan remaining resources
+terraform plan
 terraform apply
+
+# Or deploy in stages if preferred:
+# terraform plan -target=google_compute_network.inventory_vpc
+# terraform apply -target=google_compute_network.inventory_vpc
+# terraform plan
+# terraform apply
 ```
 
 **Outputs**:
