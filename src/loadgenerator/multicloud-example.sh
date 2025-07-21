@@ -10,8 +10,8 @@
 # Actual service URLs from your terraform deployments
 export AWS_ACCOUNTING_URL="http://54.163.148.73:8080"     # AWS EC2 Accounting Service
 export AZURE_ANALYTICS_URL="http://20.160.153.10:8080"   # Azure VM Analytics Service
-export GCP_CRM_URL="http://34.70.54.160:8080"             # GCP Instance CRM Service
-export GCP_INVENTORY_URL="http://EUROPE_WEST1_PSC_IP:8080"        # GCP Inventory Service (PSC europe-west1)
+export GCP_CRM_URL="http://10.2.0.2:8080"             # GCP Instance CRM Service (private IP)
+export GCP_INVENTORY_URL="http://10.132.0.21:8080"        # GCP Inventory Service (PSC europe-west1)
 
 # Optional: Frontend URL for boutique testing
 export FRONTEND_ADDR="frontend:80"
@@ -59,5 +59,5 @@ echo "  - manageCustomer (GCP CRM)"
 echo "  - checkInventory (GCP Inventory via PSC)"
 echo "- processTransaction: AWS accounting service operations (${AWS_ACCOUNTING_URL})"
 echo "- recordMetrics: Azure analytics service operations (${AZURE_ANALYTICS_URL})" 
-echo "- manageCustomer: GCP CRM service operations (${GCP_CRM_URL})"
+echo "- manageCustomer: GCP CRM service operations via VPC peering (${GCP_CRM_URL})"
 echo "- checkInventory: GCP inventory service operations via PSC (${GCP_INVENTORY_URL})" 

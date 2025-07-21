@@ -17,9 +17,9 @@ resource "google_compute_subnetwork" "crm_subnet" {
   description   = "Subnet for CRM service"
 }
 
-# 3. Create a firewall rule to allow traffic on port 8080
+# 3. Create a firewall rule to allow traffic on port 8080 from default VPC
 resource "google_compute_firewall" "allow_crm_http" {
-  name    = "crm-allow-http"
+  name    = "crm-allow-http-internal"
   network = google_compute_network.crm_vpc.name
 
   allow {
@@ -28,7 +28,7 @@ resource "google_compute_firewall" "allow_crm_http" {
   }
 
   target_tags   = ["crm-server"]
-  source_ranges = ["0.0.0.0/0"]
+  source_ranges = ["10.128.0.0/9", "10.2.0.0/24"]  # Default VPC and CRM VPC ranges
 }
 
 # Create the smallest possible Compute Engine VM instance
@@ -48,9 +48,7 @@ resource "google_compute_instance" "crm_vm" {
   network_interface {
     network    = google_compute_network.crm_vpc.id
     subnetwork = google_compute_subnetwork.crm_subnet.id
-    access_config {
-      // Ephemeral IP assigned automatically
-    }
+    // No access_config block = no external IP (private only)
   }
 
   # This startup script runs automatically when the VM is created
@@ -138,15 +136,10 @@ resource "google_compute_instance" "crm_vm" {
   EOT
 }
 
-# Output the public IP address so we can test the service
-output "instance_public_ip" {
-  value       = google_compute_instance.crm_vm.network_interface[0].access_config[0].nat_ip
-  description = "The public IP address of the VM instance."
-}
-
-output "application_url" {
-  value       = "http://${google_compute_instance.crm_vm.network_interface[0].access_config[0].nat_ip}:8080/customers"
-  description = "The URL to access the customers endpoint."
+# Output the private IP address for internal communication
+output "crm_service_url" {
+  value       = "http://${google_compute_instance.crm_vm.network_interface[0].network_ip}:8080/customers"
+  description = "The URL to access the CRM service via private IP."
 }
 
 output "crm_vm_private_ip" {
@@ -162,4 +155,26 @@ output "crm_vpc_name" {
 output "crm_subnet_cidr" {
   value       = google_compute_subnetwork.crm_subnet.ip_cidr_range
   description = "The CIDR range of the CRM subnet."
+}
+
+# 4. Create VPC peering from crm-vpc to default VPC
+resource "google_compute_network_peering" "crm_to_default" {
+  name         = "crm-to-default-peering"
+  network      = google_compute_network.crm_vpc.id
+  peer_network = "projects/${var.project_id}/global/networks/default"
+
+  auto_create_routes = true
+  import_custom_routes = false
+  export_custom_routes = false
+}
+
+# 5. Create VPC peering from default VPC to crm-vpc  
+resource "google_compute_network_peering" "default_to_crm" {
+  name         = "default-to-crm-peering"
+  network      = "projects/${var.project_id}/global/networks/default"
+  peer_network = google_compute_network.crm_vpc.id
+
+  auto_create_routes = true
+  import_custom_routes = false
+  export_custom_routes = false
 }

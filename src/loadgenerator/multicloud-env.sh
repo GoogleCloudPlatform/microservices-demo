@@ -6,8 +6,8 @@
 
 export AWS_ACCOUNTING_URL="http://54.163.148.73:8080"
 export AZURE_ANALYTICS_URL="http://20.160.153.10:8080"
-export GCP_CRM_URL="http://34.70.54.160:8080"
-export GCP_INVENTORY_URL="http://EUROPE_WEST1_PSC_IP:8080"
+export GCP_CRM_URL="http://10.2.0.2:8080"
+export GCP_INVENTORY_URL="http://10.132.0.21:8080"
 
 # Optional: Set load testing parameters
 export USERS=20

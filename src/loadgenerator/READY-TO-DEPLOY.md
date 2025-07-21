@@ -8,8 +8,8 @@ Your configuration files are ready! Here's what I've created with your actual se
 |---------|-----|----------|
 | **AWS Accounting** | `http://54.163.148.73:8080` | `/transactions` |
 | **Azure Analytics** | `http://20.160.153.10:8080` | `/metrics` |
-| **GCP CRM** | `http://34.70.54.160:8080` | `/customers` |
-| **GCP Inventory** | `http://10.128.0.53:8080` | `/inventory` (via PSC) |
+| **GCP CRM** | `http://10.2.0.2:8080` | `/customers` (private via VPC peering) |
+| **GCP Inventory** | `http://10.132.0.21:8080` | `/inventory` (private via PSC) |
 
 ## 🛠️ Configuration Files Created
 

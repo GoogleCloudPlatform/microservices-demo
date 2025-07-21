@@ -91,9 +91,9 @@ spec:
         - name: AZURE_ANALYTICS_URL
           value: "http://20.160.153.10:8080"
         - name: GCP_CRM_URL
-          value: "http://34.70.54.160:8080"
+          value: "http://10.2.0.2:8080"
         - name: GCP_INVENTORY_URL
-          value: "http://EUROPE_WEST1_PSC_IP:8080"
+          value: "http://10.132.0.21:8080"
         resources:
           requests:
             cpu: 300m
