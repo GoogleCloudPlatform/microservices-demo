@@ -3,8 +3,47 @@
 </p> -->
 ![Continuous Integration](https://github.com/GoogleCloudPlatform/microservices-demo/workflows/Continuous%20Integration%20-%20Main/Release/badge.svg)
 
-**Online Boutique** is a cloud-first microservices demo application.  The application is a
-web-based e-commerce app where users can browse items, add them to the cart, and purchase them.
+**Online Boutique** is a cloud-first microservices demo application with **multicloud integrations**.  The application is a web-based e-commerce app where users can browse items, add them to the cart, and purchase them.
+
+## 🌐 Multicloud Architecture Overview
+
+This demo showcases a modern **multicloud microservices architecture** where the core Online Boutique application runs on **Google Cloud Platform**, while integrated business services are distributed across **AWS**, **Azure**, and **GCP** using different networking patterns:
+
+### **Core Application (GCP)**
+- **Online Boutique**: 11 microservices on Google Kubernetes Engine (GKE)
+- **Load Generator**: Tests both boutique and multicloud services
+
+### **Multicloud Business Services**
+- 🟧 **AWS**: Accounting Service (Financial transactions) - *Public Internet*
+- 🔵 **Azure**: Analytics Service (Performance metrics) - *Public Internet*  
+- 🟢 **GCP CRM**: Customer management - *Private via VPC Peering*
+- 🟢 **GCP Inventory**: Stock management - *Private via PSC (Private Service Connect)*
+
+### **Communication Diagram**
+
+The Load Generator demonstrates four different networking patterns:
+
+### **🔗 Networking Patterns**
+
+| Service | Network Type | Technology | Security Level |
+|---------|-------------|------------|----------------|
+| **AWS Accounting** | Public Internet | External IPs + Internet Gateway | Standard HTTPS |
+| **Azure Analytics** | Public Internet | Public IPs + Network Security Groups | Standard HTTPS |
+| **GCP CRM** | Private Network | VPC Peering + Private IPs | Internal only |
+| **GCP Inventory** | Private Network | Private Service Connect (PSC) | Highly secure |
+
+### **🚀 Key Features**
+- **Multi-region deployment**: Services span across `us-east-1` (AWS), `West Europe` (Azure), and `europe-west1` (GCP)
+- **Diverse networking**: Public internet, VPC peering, and Private Service Connect examples
+- **Infrastructure as Code**: Complete Terraform configurations for all cloud providers
+- **RESTful APIs**: Consistent HTTP/JSON interfaces across all services
+- **Realistic business logic**: Accounting, analytics, CRM, and inventory management
+
+### **📚 Detailed Documentation**
+For complete deployment instructions, API specifications, and architecture details, see:
+**[📁 Multicloud Documentation →](multicloud/README.md)**
+
+---
 
 Google uses this application to demonstrate how developers can modernize enterprise applications using Google Cloud products, including: [Google Kubernetes Engine (GKE)](https://cloud.google.com/kubernetes-engine), [Cloud Service Mesh (CSM)](https://cloud.google.com/service-mesh), [gRPC](https://grpc.io/), [Cloud Operations](https://cloud.google.com/products/operations), [Spanner](https://cloud.google.com/spanner), [Memorystore](https://cloud.google.com/memorystore), [AlloyDB](https://cloud.google.com/alloydb), and [Gemini](https://ai.google.dev/). This application works on any Kubernetes cluster.
 
@@ -42,7 +81,9 @@ Find **Protocol Buffers Descriptions** at the [`./protos` directory](/protos).
 | ----------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
 | [![Screenshot of store homepage](/docs/img/online-boutique-frontend-1.png)](/docs/img/online-boutique-frontend-1.png) | [![Screenshot of checkout screen](/docs/img/online-boutique-frontend-2.png)](/docs/img/online-boutique-frontend-2.png) |
 
-## Quickstart (GKE)
+## Quickstart (GKE + Multicloud)
+
+### **Core Application (GKE)**
 
 1. Ensure you have the following requirements:
    - [Google Cloud project](https://cloud.google.com/resource-manager/docs/creating-managing-projects#creating_a_project).
@@ -116,6 +157,35 @@ Find **Protocol Buffers Descriptions** at the [`./protos` directory](/protos).
    Visit `http://EXTERNAL_IP` in a web browser to access your instance of Online Boutique.
 
 8. Congrats! You've deployed the default Online Boutique. To deploy a different variation of Online Boutique (e.g., with Google Cloud Operations tracing, Istio, etc.), see [Deploy Online Boutique variations with Kustomize](#deploy-online-boutique-variations-with-kustomize).
+
+### **Multicloud Services (Optional)**
+
+Deploy additional business services across AWS, Azure, and GCP to see multicloud integrations:
+
+```bash
+# Deploy AWS Accounting Service
+cd multicloud/aws/
+terraform init && terraform apply
+
+# Deploy Azure Analytics Service  
+cd ../azure/
+cp terraform.tfvars.example terraform.tfvars
+# Edit terraform.tfvars with your Azure subscription ID
+terraform init && terraform apply
+
+# Deploy GCP CRM + Inventory Services
+cd ../gcp/
+cp terraform.tfvars.example terraform.tfvars  
+# Edit terraform.tfvars with your GCP project ID
+terraform init && terraform apply
+
+# Update load generator to test multicloud services
+kubectl apply -f ../../kubernetes-manifests/loadgenerator.yaml
+```
+
+**Load Generator Testing**: Once deployed, the load generator automatically tests all multicloud services using different networking patterns (public internet, VPC peering, PSC).
+
+For detailed instructions: **[📁 Multicloud Documentation →](multicloud/README.md)**
 
 9. Once you are done with it, delete the GKE cluster.
 
