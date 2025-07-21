@@ -4,13 +4,20 @@ This folder contains Terraform configurations that deploy mock services across t
 
 ## Architecture Overview
 
-The multicloud setup demonstrates how to deploy similar containerized services across different cloud platforms:
+The multicloud setup demonstrates how to deploy services across different cloud platforms with various networking configurations:
 
-- **AWS**: Accounting Service (Financial transactions)
-- **Azure**: Analytics Service (Performance metrics) 
-- **GCP**: CRM Service (Customer relationship management)
+- **AWS**: Accounting Service (Financial transactions) - Public IP
+- **Azure**: Analytics Service (Performance metrics) - Public IP
+- **GCP**: CRM Service (Customer relationship management) - Public IP  
+- **GCP**: Inventory Service (Stock management) - Private IP only with PSC
 
-All services are deployed on virtual machines running Ubuntu/Debian with Node.js applications exposed on port 8080.
+**Network Architecture**:
+- **Public services**: AWS, Azure, and GCP CRM services with external IPs
+- **Private service**: GCP Inventory service in dedicated VPC (inventory-vpc) 
+- **PSC connectivity**: Secure private connection from default VPC to inventory VPC
+- **Service isolation**: Each service demonstrates different security patterns
+
+All services run Node.js applications on port 8080 with RESTful APIs.
 
 ## Services Overview
 
@@ -104,6 +111,26 @@ All services are deployed on virtual machines running Ubuntu/Debian with Node.js
 - Firewall rule allowing HTTP traffic on port 8080
 - Automated Node.js application deployment via startup script
 
+### 4. GCP Inventory Service (`gcp/inventory.tf`)
+
+**Purpose**: Manages product stock levels, reservations, and availability  
+**Cloud Provider**: Google Cloud Platform  
+**Instance**: e2-micro (private IP only)  
+**Region**: us-central1  
+
+#### Infrastructure Components
+- Dedicated VPC network (inventory-vpc) with 10.1.0.0/24 subnet
+- VM with private IP only (no external IP access)
+- Private Service Connect (PSC) for secure connectivity from default VPC
+- Internal load balancer with health checks
+- Firewall rules for internal and PSC traffic
+
+#### Security Features
+- **Private IP only**: VM has no external IP address
+- **Network isolation**: Separate VPC for inventory data
+- **PSC connectivity**: Secure private connection to default network
+- **Controlled access**: Firewall rules restrict traffic to necessary ports
+
 #### REST API Contract
 
 **Base URL**: `http://<public-ip>:8080`
@@ -123,6 +150,47 @@ All services are deployed on virtual machines running Ubuntu/Debian with Node.js
 
 **Error Responses**:
 - `400 Bad Request`: Missing name or surname fields
+
+#### REST API Contract (Inventory Service)
+
+**Base URL**: `http://<psc-endpoint-ip>:8080` (accessible via PSC from default VPC)
+
+| Method | Endpoint | Description | Request Body | Response |
+|--------|----------|-------------|--------------|----------|
+| GET | `/inventory` | List all product stock levels | None | Object with total count and inventory array |
+| GET | `/inventory/{productId}` | Get stock for specific product | None | Product inventory object |
+| POST | `/inventory/{productId}/reserve` | Reserve stock for purchase | `{"quantity": number}` | Updated inventory with reservation |
+| POST | `/inventory/{productId}/release` | Release reserved stock | `{"quantity": number}` | Updated inventory after release |
+| PUT | `/inventory/{productId}` | Update stock levels | `{"stockLevel": number}` | Updated inventory object |
+| GET | `/health` | Health check endpoint | None | Service status |
+
+**Sample Response Structure**:
+```json
+{
+  "total": 9,
+  "data": [
+    {
+      "productId": "OLJCESPC7Z",
+      "name": "Vintage Typewriter", 
+      "stockLevel": 45,
+      "reserved": 3,
+      "available": 42,
+      "lastUpdated": "2025-01-20T10:30:00Z"
+    }
+  ]
+}
+```
+
+**Sample Product IDs** (matching Online Boutique catalog):
+- `OLJCESPC7Z` - Vintage Typewriter
+- `66VCHSJNUP` - Vintage Camera Lens  
+- `1YMWWN1N4O` - Home Barista Kit
+- `L9ECAV7KIM` - Terrarium
+- `2ZYFJ3GM2N` - Film Camera
+
+**Error Responses**:
+- `400 Bad Request`: Invalid quantity or stock level
+- `404 Not Found`: Product not found
 
 ## Deployment Instructions
 
@@ -202,6 +270,32 @@ terraform apply
 - `instance_public_ip`: Compute Engine instance public IP
 - `application_url`: Direct URL to customers endpoint
 
+### GCP Inventory Service Deployment
+
+```bash
+cd gcp/
+# Copy and configure the variables file (if not already done)
+cp terraform.tfvars.example terraform.tfvars
+# Edit terraform.tfvars and set your actual GCP project ID
+
+# Enable required APIs (if not already enabled)
+gcloud services enable compute.googleapis.com
+gcloud services enable servicenetworking.googleapis.com
+
+terraform init
+terraform plan -target=google_compute_network.inventory_vpc  # Plan VPC first
+terraform apply -target=google_compute_network.inventory_vpc  # Create VPC first
+terraform plan  # Plan remaining resources
+terraform apply
+```
+
+**Outputs**:
+- `inventory_vm_private_ip`: Private IP of the inventory VM (no external access)
+- `inventory_psc_endpoint_ip`: PSC endpoint IP accessible from default VPC
+- `inventory_service_url`: Direct URL to inventory service via PSC
+- `inventory_vpc_name`: Name of the dedicated inventory VPC
+- `inventory_subnet_cidr`: CIDR range of the inventory subnet
+
 ## Testing the Services
 
 ### Using curl
@@ -237,6 +331,34 @@ curl http://<gcp-ip>:8080/customers
 curl -X POST http://<gcp-ip>:8080/customers \
   -H "Content-Type: application/json" \
   -d '{"name":"Alice","surname":"Johnson"}'
+```
+
+**Test GCP Inventory Service** (via PSC from default VPC):
+```bash
+# Note: This service is only accessible via PSC endpoint from default VPC
+# Get PSC endpoint IP from terraform output
+INVENTORY_PSC_IP=$(terraform output -raw inventory_psc_endpoint_ip)
+
+# List all inventory
+curl http://$INVENTORY_PSC_IP:8080/inventory
+
+# Get specific product inventory
+curl http://$INVENTORY_PSC_IP:8080/inventory/OLJCESPC7Z
+
+# Reserve stock
+curl -X POST http://$INVENTORY_PSC_IP:8080/inventory/OLJCESPC7Z/reserve \
+  -H "Content-Type: application/json" \
+  -d '{"quantity":2}'
+
+# Release reserved stock
+curl -X POST http://$INVENTORY_PSC_IP:8080/inventory/OLJCESPC7Z/release \
+  -H "Content-Type: application/json" \
+  -d '{"quantity":1}'
+
+# Update stock levels (admin operation)
+curl -X PUT http://$INVENTORY_PSC_IP:8080/inventory/OLJCESPC7Z \
+  -H "Content-Type: application/json" \
+  -d '{"stockLevel":50}'
 ```
 
 ## Cost Considerations
@@ -277,6 +399,17 @@ terraform destroy
 - **GCP**: Use GCP console serial port or SSH through browser
 
 ## Integration Example
+
+## Complete Ecommerce Workflow
+
+These four services create a complete ecommerce business workflow:
+
+1. **Customer Management** (GCP CRM): Register and manage customer data
+2. **Inventory Management** (GCP Inventory): Check stock availability and reserve products  
+3. **Transaction Processing** (AWS Accounting): Record financial transactions
+4. **Performance Analytics** (Azure Analytics): Track system performance and metrics
+
+## Service Integration Patterns
 
 These services can be integrated into a larger microservices architecture where:
 - Accounting service tracks financial transactions
