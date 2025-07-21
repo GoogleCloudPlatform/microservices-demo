@@ -60,8 +60,8 @@ resource "google_compute_instance" "crm_mock_vm" {
     #!/bin/bash
     
     # Update packages and install Node.js and npm
-    apt-get update
-    apt-get install -y nodejs npm
+    sudo apt-get update
+    sudo apt-get install -y nodejs npm
 
     # Install pm2, a production process manager for Node.js
     npm install pm2 -g
