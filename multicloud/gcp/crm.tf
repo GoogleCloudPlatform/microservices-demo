@@ -115,12 +115,12 @@ resource "google_compute_instance" "crm_mock_vm" {
       const newCustomer = { name, surname };
       customers.push(newCustomer);
       
-      console.log(`POST /customers - Added new customer: ${name} ${surname}`);
+      console.log(`POST /customers - Added new customer: $${name} $${surname}`);
       res.status(201).json(newCustomer);
     });
 
     app.listen(port, '0.0.0.0', () => {
-      console.log(`Mock CRM server listening on port ${port}`);
+      console.log(`Mock CRM server listening on port $${port}`);
     });
     EOF
 
