@@ -16,8 +16,8 @@ resource "google_compute_firewall" "allow_crm_http" {
 }
 
 # Create the smallest possible Compute Engine VM instance
-resource "google_compute_instance" "crm_mock_vm" {
-  name         = "crm-mock-vm"
+resource "google_compute_instance" "crm_vm" {
+  name         = "crm-vm"
   machine_type = "e2-micro" # One of the smallest machine types available
   zone         = "us-central1-a"
 
@@ -123,11 +123,11 @@ resource "google_compute_instance" "crm_mock_vm" {
 
 # Output the public IP address so we can test the service
 output "instance_public_ip" {
-  value       = google_compute_instance.crm_mock_vm.network_interface[0].access_config[0].nat_ip
+  value       = google_compute_instance.crm_vm.network_interface[0].access_config[0].nat_ip
   description = "The public IP address of the VM instance."
 }
 
 output "application_url" {
-  value       = "http://${google_compute_instance.crm_mock_vm.network_interface[0].access_config[0].nat_ip}:8080/customers"
+  value       = "http://${google_compute_instance.crm_vm.network_interface[0].access_config[0].nat_ip}:8080/customers"
   description = "The URL to access the customers endpoint."
 }
