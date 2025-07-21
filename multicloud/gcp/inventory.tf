@@ -1,16 +1,10 @@
 # inventory.tf - GCP Inventory Service with Private IP and PSC
 # Note: Uses shared terraform, variable, and provider configurations from main.tf
 
-# Data source to get the default subnet in us-central1
-data "google_compute_subnetwork" "default_subnet" {
+# Data source to get the default subnet in europe-west1 (where GKE cluster is located)
+data "google_compute_subnetwork" "default_subnet_europe" {
   name   = "default"
-  region = "us-central1"
-}
-
-# Data source to get default subnet in us-west1 (for multi-region support)
-data "google_compute_subnetwork" "default_subnet_west" {
-  name   = "default"
-  region = "us-west1"
+  region = "europe-west1"
 }
 
 # 1. Create a dedicated VPC network for the inventory service
@@ -383,47 +377,26 @@ resource "google_compute_region_health_check" "inventory_health_check" {
   }
 }
 
-# 11. Reserve an IP address for the PSC endpoint
-resource "google_compute_address" "inventory_psc_ip" {
-  name         = "inventory-psc-ip"
-  region       = "us-central1"
-  subnetwork   = data.google_compute_subnetwork.default_subnet.id
+# 11. Reserve an IP address for the PSC endpoint in europe-west1
+resource "google_compute_address" "inventory_psc_ip_europe" {
+  name         = "inventory-psc-ip-europe"
+  region       = "europe-west1"
+  subnetwork   = data.google_compute_subnetwork.default_subnet_europe.id
   address_type = "INTERNAL"
-  description  = "Reserved IP for inventory PSC endpoint"
+  description  = "Reserved IP for inventory PSC endpoint in europe-west1"
 }
 
-# 12. Create PSC endpoint in the default network (for connecting to inventory service)
-resource "google_compute_forwarding_rule" "inventory_psc_endpoint" {
-  name   = "inventory-psc-endpoint"
-  region = "us-central1"
+# 12. Create PSC endpoint in europe-west1 (where GKE cluster is located)
+resource "google_compute_forwarding_rule" "inventory_psc_endpoint_europe" {
+  name   = "inventory-psc-endpoint-europe"
+  region = "europe-west1"
   
   load_balancing_scheme = ""
   target                = google_compute_service_attachment.inventory_psc_attachment.id
   network               = "default"  # Connect from default network
-  ip_address            = google_compute_address.inventory_psc_ip.self_link  # Use self_link instead of address
+  ip_address            = google_compute_address.inventory_psc_ip_europe.self_link
   
-  # This will use the reserved IP in the default network to reach the inventory service
-}
-
-# 13. Create additional PSC endpoint in us-west1 for multi-region support
-resource "google_compute_address" "inventory_psc_ip_west" {
-  name         = "inventory-psc-ip-west"
-  region       = "us-west1"
-  subnetwork   = data.google_compute_subnetwork.default_subnet_west.id
-  address_type = "INTERNAL"
-  description  = "Reserved IP for inventory PSC endpoint in us-west1"
-}
-
-resource "google_compute_forwarding_rule" "inventory_psc_endpoint_west" {
-  name   = "inventory-psc-endpoint-west"
-  region = "us-west1"
-  
-  load_balancing_scheme = ""
-  target                = google_compute_service_attachment.inventory_psc_attachment.id
-  network               = "default"  # Connect from default network
-  ip_address            = google_compute_address.inventory_psc_ip_west.self_link
-  
-  # This provides PSC access from us-west1 region
+  # This provides PSC access from europe-west1 region where GKE cluster is located
 }
 
 # Outputs
@@ -432,14 +405,14 @@ output "inventory_vm_private_ip" {
   description = "The private IP address of the inventory VM"
 }
 
-output "inventory_psc_endpoint_ip" {
-  value       = google_compute_address.inventory_psc_ip.address
-  description = "The PSC endpoint IP address accessible from default network"
+output "inventory_psc_endpoint_ip_europe" {
+  value       = google_compute_address.inventory_psc_ip_europe.address
+  description = "The PSC endpoint IP address in europe-west1 region"
 }
 
-output "inventory_service_url" {
-  value       = "http://${google_compute_address.inventory_psc_ip.address}:8080/inventory"
-  description = "The URL to access the inventory service via PSC from default network"
+output "inventory_service_url_europe" {
+  value       = "http://${google_compute_address.inventory_psc_ip_europe.address}:8080/inventory"
+  description = "The URL to access the inventory service via PSC from europe-west1 region"
 }
 
 output "inventory_vpc_name" {
@@ -457,12 +430,4 @@ output "inventory_psc_subnet_cidr" {
   description = "The CIDR range of the PSC subnet"
 }
 
-output "inventory_psc_endpoint_ip_west" {
-  value       = google_compute_address.inventory_psc_ip_west.address
-  description = "The PSC endpoint IP address in us-west1 region"
-}
-
-output "inventory_service_url_west" {
-  value       = "http://${google_compute_address.inventory_psc_ip_west.address}:8080/inventory"
-  description = "The URL to access the inventory service via PSC from us-west1 region"
-} 
+ 
