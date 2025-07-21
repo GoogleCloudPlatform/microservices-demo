@@ -152,11 +152,11 @@ app.get('/inventory/:productId', (req, res) => {
   const item = inventory.find(i => i.productId === productId);
   
   if (!item) {
-    console.log(`GET /inventory/${productId} - Product not found`);
+    console.log(`GET /inventory/$${productId} - Product not found`);
     return res.status(404).json({ error: 'Product not found' });
   }
   
-  console.log(`GET /inventory/${productId} - Retrieved inventory for ${item.name}`);
+  console.log(`GET /inventory/$${productId} - Retrieved inventory for $${item.name}`);
   res.json({
     ...item,
     lastUpdated: new Date().toISOString()
@@ -171,12 +171,12 @@ app.post('/inventory/:productId/reserve', (req, res) => {
   const item = inventory.find(i => i.productId === productId);
   
   if (!item) {
-    console.log(`POST /inventory/${productId}/reserve - Product not found`);
+    console.log(`POST /inventory/$${productId}/reserve - Product not found`);
     return res.status(404).json({ error: 'Product not found' });
   }
   
   if (item.available < quantity) {
-    console.log(`POST /inventory/${productId}/reserve - Insufficient stock. Available: ${item.available}, Requested: ${quantity}`);
+    console.log(`POST /inventory/$${productId}/reserve - Insufficient stock. Available: $${item.available}, Requested: $${quantity}`);
     return res.status(400).json({ 
       error: 'Insufficient stock', 
       available: item.available, 
@@ -188,7 +188,7 @@ app.post('/inventory/:productId/reserve', (req, res) => {
   item.reserved += quantity;
   item.available -= quantity;
   
-  console.log(`POST /inventory/${productId}/reserve - Reserved ${quantity} units of ${item.name}. Available: ${item.available}, Reserved: ${item.reserved}`);
+  console.log(`POST /inventory/$${productId}/reserve - Reserved $${quantity} units of $${item.name}. Available: $${item.available}, Reserved: $${item.reserved}`);
   res.json({
     message: 'Stock reserved successfully',
     productId: productId,
@@ -206,12 +206,12 @@ app.post('/inventory/:productId/release', (req, res) => {
   const item = inventory.find(i => i.productId === productId);
   
   if (!item) {
-    console.log(`POST /inventory/${productId}/release - Product not found`);
+    console.log(`POST /inventory/$${productId}/release - Product not found`);
     return res.status(404).json({ error: 'Product not found' });
   }
   
   if (item.reserved < quantity) {
-    console.log(`POST /inventory/${productId}/release - Insufficient reserved stock. Reserved: ${item.reserved}, Requested: ${quantity}`);
+    console.log(`POST /inventory/$${productId}/release - Insufficient reserved stock. Reserved: $${item.reserved}, Requested: $${quantity}`);
     return res.status(400).json({ 
       error: 'Insufficient reserved stock', 
       reserved: item.reserved, 
@@ -223,7 +223,7 @@ app.post('/inventory/:productId/release', (req, res) => {
   item.reserved -= quantity;
   item.available += quantity;
   
-  console.log(`POST /inventory/${productId}/release - Released ${quantity} units of ${item.name}. Available: ${item.available}, Reserved: ${item.reserved}`);
+  console.log(`POST /inventory/$${productId}/release - Released $${quantity} units of $${item.name}. Available: $${item.available}, Reserved: $${item.reserved}`);
   res.json({
     message: 'Stock released successfully',
     productId: productId,
@@ -239,14 +239,14 @@ app.put('/inventory/:productId', (req, res) => {
   const { stockLevel } = req.body;
   
   if (typeof stockLevel !== 'number' || stockLevel < 0) {
-    console.log(`PUT /inventory/${productId} - Invalid stock level: ${stockLevel}`);
+    console.log(`PUT /inventory/$${productId} - Invalid stock level: $${stockLevel}`);
     return res.status(400).json({ error: 'Valid stock level required' });
   }
   
   const item = inventory.find(i => i.productId === productId);
   
   if (!item) {
-    console.log(`PUT /inventory/${productId} - Product not found`);
+    console.log(`PUT /inventory/$${productId} - Product not found`);
     return res.status(404).json({ error: 'Product not found' });
   }
   
@@ -254,7 +254,7 @@ app.put('/inventory/:productId', (req, res) => {
   item.stockLevel = stockLevel;
   item.available = stockLevel - item.reserved;
   
-  console.log(`PUT /inventory/${productId} - Updated ${item.name} stock from ${oldStock} to ${stockLevel}. Available: ${item.available}`);
+  console.log(`PUT /inventory/$${productId} - Updated $${item.name} stock from $${oldStock} to $${stockLevel}. Available: $${item.available}`);
   res.json({
     message: 'Stock updated successfully',
     ...item,
@@ -269,8 +269,8 @@ app.use((err, req, res, next) => {
 });
 
 app.listen(port, '0.0.0.0', () => {
-  console.log(`Inventory service listening on port ${port}`);
-  console.log(`Initialized with ${inventory.length} products in inventory`);
+  console.log(`Inventory service listening on port $${port}`);
+  console.log(`Initialized with $${inventory.length} products in inventory`);
 });
 EOF
     
