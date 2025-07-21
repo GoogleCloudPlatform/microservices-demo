@@ -293,7 +293,8 @@ resource "google_compute_service_attachment" "inventory_psc_attachment" {
   description = "PSC attachment for inventory service"
   
   # Enable PSC
-  enable_proxy_protocol = false
+  enable_proxy_protocol    = false
+  connection_preference    = "ACCEPT_AUTOMATIC"
   
   # Connect to the inventory subnet
   nat_subnets = [google_compute_subnetwork.inventory_subnet.id]
