@@ -1,0 +1,4 @@
+# Copy this file to terraform.tfvars and fill in your actual GCP project ID
+# cp terraform.tfvars.example terraform.tfvars
+
+project_id = "your-gcp-project-id-here" 
