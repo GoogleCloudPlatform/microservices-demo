@@ -1,23 +1,5 @@
 # inventory.tf - GCP Inventory Service with Private IP and PSC
-
-terraform {
-  required_providers {
-    google = {
-      source  = "hashicorp/google"
-      version = ">= 4.50.0"
-    }
-  }
-}
-
-variable "project_id" {
-  description = "The GCP project ID where resources will be created"
-  type        = string
-}
-
-provider "google" {
-  project = var.project_id
-  region  = "us-central1"
-}
+# Note: Uses shared terraform, variable, and provider configurations from crm.tf
 
 # 1. Create a dedicated VPC network for the inventory service
 resource "google_compute_network" "inventory_vpc" {
