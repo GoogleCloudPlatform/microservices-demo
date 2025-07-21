@@ -169,7 +169,7 @@ resource "azurerm_linux_virtual_machine" "vm" {
       };
       metrics.push(newMetric);
       
-      console.log(`POST /metrics - Added new metric for ${transactionType}`);
+      console.log(`POST /metrics - Added new metric for $${transactionType}`);
       res.status(201).json(newMetric);
     });
 
@@ -191,7 +191,7 @@ resource "azurerm_linux_virtual_machine" "vm" {
     });
 
     app.listen(port, '0.0.0.0', () => {
-      console.log(`Mock Analytics server listening on port ${port}`);
+      console.log(`Mock Analytics server listening on port $${port}`);
     });
     EOF
 

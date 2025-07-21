@@ -121,12 +121,12 @@ resource "aws_instance" "accounting_server" {
       const newTransaction = { item, price: parseFloat(price), date };
       transactions.push(newTransaction);
       
-      console.log(`POST /transactions - Added new transaction: ${item}`);
+      console.log(`POST /transactions - Added new transaction: $${item}`);
       res.status(201).json(newTransaction);
     });
 
     app.listen(port, '0.0.0.0', () => {
-      console.log(`Mock Accounting server listening on port ${port}`);
+      console.log(`Mock Accounting server listening on port $${port}`);
     });
     EOF
 
