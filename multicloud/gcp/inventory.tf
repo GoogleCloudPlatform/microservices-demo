@@ -1,6 +1,12 @@
 # inventory.tf - GCP Inventory Service with Private IP and PSC
 # Note: Uses shared terraform, variable, and provider configurations from main.tf
 
+# Data source to get the default subnet in us-central1
+data "google_compute_subnetwork" "default_subnet" {
+  name   = "default"
+  region = "us-central1"
+}
+
 # 1. Create a dedicated VPC network for the inventory service
 resource "google_compute_network" "inventory_vpc" {
   name                    = "inventory-vpc"
@@ -379,6 +385,7 @@ resource "google_compute_forwarding_rule" "inventory_psc_endpoint" {
   load_balancing_scheme = ""
   target                = google_compute_service_attachment.inventory_psc_attachment.id
   network               = "default"  # Connect from default network
+  subnetwork            = data.google_compute_subnetwork.default_subnet.id  # Use default subnet for IP allocation
   
   # This will get an IP in the default network that can reach the inventory service
 }
