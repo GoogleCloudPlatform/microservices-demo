@@ -1,5 +1,5 @@
 # inventory.tf - GCP Inventory Service with Private IP and PSC
-# Note: Uses shared terraform, variable, and provider configurations from crm.tf
+# Note: Uses shared terraform, variable, and provider configurations from main.tf
 
 # 1. Create a dedicated VPC network for the inventory service
 resource "google_compute_network" "inventory_vpc" {

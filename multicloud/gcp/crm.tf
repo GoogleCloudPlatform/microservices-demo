@@ -1,24 +1,5 @@
 # crm.tf - GCP CRM Service Infrastructure
-
-# Configure the Google Cloud provider
-terraform {
-  required_providers {
-    google = {
-      source  = "hashicorp/google"
-      version = ">= 4.50.0"
-    }
-  }
-}
-
-variable "project_id" {
-  description = "The GCP project ID where resources will be created"
-  type        = string
-}
-
-provider "google" {
-  project = var.project_id
-  region  = "us-central1"
-}
+# Note: Uses shared terraform, variable, and provider configurations from main.tf
 
 # Create a firewall rule to allow traffic on port 8080
 resource "google_compute_firewall" "allow_crm_http" {
