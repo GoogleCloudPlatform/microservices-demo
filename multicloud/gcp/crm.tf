@@ -1,10 +1,26 @@
 # crm.tf - GCP CRM Service Infrastructure
 # Note: Uses shared terraform, variable, and provider configurations from main.tf
 
-# Create a firewall rule to allow traffic on port 8080
+# 1. Create a dedicated VPC network for the CRM service
+resource "google_compute_network" "crm_vpc" {
+  name                    = "crm-vpc"
+  auto_create_subnetworks = false
+  description             = "Dedicated VPC for CRM service"
+}
+
+# 2. Create a subnet in the CRM VPC
+resource "google_compute_subnetwork" "crm_subnet" {
+  name          = "crm-subnet"
+  ip_cidr_range = "10.2.0.0/24"
+  region        = "us-central1"
+  network       = google_compute_network.crm_vpc.id
+  description   = "Subnet for CRM service"
+}
+
+# 3. Create a firewall rule to allow traffic on port 8080
 resource "google_compute_firewall" "allow_crm_http" {
-  name    = "tf-allow-crm-http"
-  network = "default"
+  name    = "crm-allow-http"
+  network = google_compute_network.crm_vpc.name
 
   allow {
     protocol = "tcp"
@@ -30,7 +46,8 @@ resource "google_compute_instance" "crm_vm" {
   }
 
   network_interface {
-    network = "default"
+    network    = google_compute_network.crm_vpc.id
+    subnetwork = google_compute_subnetwork.crm_subnet.id
     access_config {
       // Ephemeral IP assigned automatically
     }
@@ -130,4 +147,19 @@ output "instance_public_ip" {
 output "application_url" {
   value       = "http://${google_compute_instance.crm_vm.network_interface[0].access_config[0].nat_ip}:8080/customers"
   description = "The URL to access the customers endpoint."
+}
+
+output "crm_vm_private_ip" {
+  value       = google_compute_instance.crm_vm.network_interface[0].network_ip
+  description = "The private IP address of the CRM VM."
+}
+
+output "crm_vpc_name" {
+  value       = google_compute_network.crm_vpc.name
+  description = "The name of the CRM VPC network."
+}
+
+output "crm_subnet_cidr" {
+  value       = google_compute_subnetwork.crm_subnet.ip_cidr_range
+  description = "The CIDR range of the CRM subnet."
 }
