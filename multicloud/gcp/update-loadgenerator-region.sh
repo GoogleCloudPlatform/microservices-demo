@@ -2,18 +2,17 @@
 
 # Script to update loadgenerator configuration for the correct PSC endpoint region
 # Usage: ./update-loadgenerator-region.sh <region> <psc-ip>
-# Example: ./update-loadgenerator-region.sh us-west1 10.138.0.100
+# Example: ./update-loadgenerator-region.sh europe-west1 10.132.0.100
 
 REGION=$1
 PSC_IP=$2
 
 if [ -z "$REGION" ] || [ -z "$PSC_IP" ]; then
     echo "Usage: $0 <region> <psc-ip>"
-    echo "Example: $0 us-west1 10.138.0.100"
+    echo "Example: $0 europe-west1 10.132.0.100"
     echo ""
     echo "To get the PSC IP for your region:"
-    echo "  us-central1: terraform output inventory_psc_endpoint_ip"
-    echo "  us-west1:    terraform output inventory_psc_endpoint_ip_west"
+    echo "  europe-west1: terraform output inventory_psc_endpoint_ip_europe"
     exit 1
 fi
 

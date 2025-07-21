@@ -11,7 +11,7 @@
 export AWS_ACCOUNTING_URL="http://54.163.148.73:8080"     # AWS EC2 Accounting Service
 export AZURE_ANALYTICS_URL="http://20.160.153.10:8080"   # Azure VM Analytics Service
 export GCP_CRM_URL="http://34.70.54.160:8080"             # GCP Instance CRM Service
-export GCP_INVENTORY_URL="http://10.128.0.53:8080"        # GCP Inventory Service (PSC)
+export GCP_INVENTORY_URL="http://EUROPE_WEST1_PSC_IP:8080"        # GCP Inventory Service (PSC europe-west1)
 
 # Optional: Frontend URL for boutique testing
 export FRONTEND_ADDR="frontend:80"
