@@ -329,7 +329,8 @@ resource "google_compute_region_backend_service" "inventory_backend" {
   health_checks = [google_compute_region_health_check.inventory_health_check.id]
   
   backend {
-    group = google_compute_instance_group.inventory_instance_group.id
+    group          = google_compute_instance_group.inventory_instance_group.id
+    balancing_mode = "CONNECTION"
   }
 }
 
