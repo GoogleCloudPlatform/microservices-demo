@@ -123,11 +123,11 @@ resource "azurerm_linux_virtual_machine" "vm" {
   custom_data = base64encode(<<-EOT
     #!/bin/bash
     
-    apt-get update
-    apt-get install -y nodejs npm
-    npm install pm2 -g
+    sudo apt-get update
+    sudo apt-get install -y nodejs npm
+    sudo npm install pm2 -g
     
-    mkdir -p /opt/app
+    sudo mkdir -p /opt/app
     cd /opt/app
 
     cat <<'EOF' > package.json

@@ -64,10 +64,10 @@ resource "google_compute_instance" "crm_mock_vm" {
     sudo apt-get install -y nodejs npm
 
     # Install pm2, a production process manager for Node.js
-    npm install pm2 -g
+    sudo npm install pm2 -g
 
     # Create a directory for the app
-    mkdir -p /opt/app
+    sudo mkdir -p /opt/app
     cd /opt/app
 
     # Create the package.json file
