@@ -377,7 +377,16 @@ resource "google_compute_region_health_check" "inventory_health_check" {
   }
 }
 
-# 11. Create PSC endpoint in the default network (for connecting to inventory service)
+# 11. Reserve an IP address for the PSC endpoint
+resource "google_compute_address" "inventory_psc_ip" {
+  name         = "inventory-psc-ip"
+  region       = "us-central1"
+  subnetwork   = data.google_compute_subnetwork.default_subnet.id
+  address_type = "INTERNAL"
+  description  = "Reserved IP for inventory PSC endpoint"
+}
+
+# 12. Create PSC endpoint in the default network (for connecting to inventory service)
 resource "google_compute_forwarding_rule" "inventory_psc_endpoint" {
   name   = "inventory-psc-endpoint"
   region = "us-central1"
@@ -385,9 +394,9 @@ resource "google_compute_forwarding_rule" "inventory_psc_endpoint" {
   load_balancing_scheme = ""
   target                = google_compute_service_attachment.inventory_psc_attachment.id
   network               = "default"  # Connect from default network
-  subnetwork            = data.google_compute_subnetwork.default_subnet.id  # Use default subnet for IP allocation
+  ip_address            = google_compute_address.inventory_psc_ip.address  # Use reserved IP
   
-  # This will get an IP in the default network that can reach the inventory service
+  # This will use the reserved IP in the default network to reach the inventory service
 }
 
 # Outputs
@@ -397,12 +406,12 @@ output "inventory_vm_private_ip" {
 }
 
 output "inventory_psc_endpoint_ip" {
-  value       = google_compute_forwarding_rule.inventory_psc_endpoint.ip_address
+  value       = google_compute_address.inventory_psc_ip.address
   description = "The PSC endpoint IP address accessible from default network"
 }
 
 output "inventory_service_url" {
-  value       = "http://${google_compute_forwarding_rule.inventory_psc_endpoint.ip_address}:8080/inventory"
+  value       = "http://${google_compute_address.inventory_psc_ip.address}:8080/inventory"
   description = "The URL to access the inventory service via PSC from default network"
 }
 
