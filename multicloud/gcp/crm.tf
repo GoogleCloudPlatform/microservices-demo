@@ -120,15 +120,15 @@ resource "google_compute_instance" "crm_mock_vm" {
       if (customers.length > 10) {
         const removedCount = customers.length - 10;
         customers = customers.slice(-10); // Keep last 10
-        console.log(`POST /customers - Cleaned up ${removedCount} old customer(s), keeping 10 most recent`);
+        console.log(`POST /customers - Cleaned up $${removedCount} old customer(s), keeping 10 most recent`);
       }
       
-      console.log(`POST /customers - Added new customer: ${name} ${surname}. Total: ${customers.length}`);
+      console.log(`POST /customers - Added new customer: $${name} $${surname}. Total: $${customers.length}`);
       res.status(201).json(newCustomer);
     });
 
     app.listen(port, '0.0.0.0', () => {
-      console.log(`Mock CRM server listening on port ${port}`);
+      console.log(`Mock CRM server listening on port $${port}`);
     });
     EOF
 

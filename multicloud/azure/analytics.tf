@@ -179,10 +179,10 @@ resource "azurerm_linux_virtual_machine" "vm" {
       if (metrics.length > 10) {
         const removedCount = metrics.length - 10;
         metrics = metrics.slice(-10); // Keep last 10
-        console.log(`POST /metrics - Cleaned up ${removedCount} old metric(s), keeping 10 most recent`);
+        console.log(`POST /metrics - Cleaned up $${removedCount} old metric(s), keeping 10 most recent`);
       }
       
-      console.log(`POST /metrics - Added new metric for ${transactionType} (${durationMs}ms). Total: ${metrics.length}`);
+      console.log(`POST /metrics - Added new metric for $${transactionType} ($${durationMs}ms). Total: $${metrics.length}`);
       res.status(201).json(newMetric);
     });
 
@@ -204,7 +204,7 @@ resource "azurerm_linux_virtual_machine" "vm" {
     });
 
     app.listen(port, '0.0.0.0', () => {
-      console.log(`Mock Analytics server listening on port ${port}`);
+      console.log(`Mock Analytics server listening on port $${port}`);
     });
     EOF
 
