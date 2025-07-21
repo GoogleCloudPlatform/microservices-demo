@@ -12,10 +12,11 @@ The multicloud setup demonstrates how to deploy services across different cloud 
 - **GCP**: Inventory Service (Stock management) - Private IP only with PSC
 
 **Network Architecture**:
-- **Public services**: AWS, Azure, and GCP CRM services with external IPs
-- **Private service**: GCP Inventory service in dedicated VPC (inventory-vpc) 
+- **Public services**: AWS, Azure services with external IPs
+- **GCP CRM service**: Dedicated VPC (crm-vpc) with external IP
+- **GCP Inventory service**: Dedicated VPC (inventory-vpc) with private IP only
 - **PSC connectivity**: Secure private connection from default VPC to inventory VPC
-- **Service isolation**: Each service demonstrates different security patterns
+- **Service isolation**: Each GCP service in its own VPC for better security
 
 All services run Node.js applications on port 8080 with RESTful APIs.
 
@@ -107,7 +108,8 @@ All services run Node.js applications on port 8080 with RESTful APIs.
 **Region**: us-central1  
 
 #### Infrastructure Components
-- Compute Engine instance with Debian 11
+- Dedicated VPC network (crm-vpc) with 10.2.0.0/24 subnet
+- Compute Engine instance with Debian 11 and external IP
 - Firewall rule allowing HTTP traffic on port 8080
 - Automated Node.js application deployment via startup script
 
@@ -269,6 +271,9 @@ terraform apply
 **Outputs**:
 - `instance_public_ip`: Compute Engine instance public IP
 - `application_url`: Direct URL to customers endpoint
+- `crm_vm_private_ip`: Private IP of the CRM VM
+- `crm_vpc_name`: Name of the CRM VPC network
+- `crm_subnet_cidr`: CIDR range of the CRM subnet
 
 ### GCP Services Deployment (CRM + Inventory)
 
@@ -276,8 +281,8 @@ terraform apply
 ```
 gcp/
 ├── main.tf             # Shared terraform, provider, and variable configs
-├── crm.tf              # CRM service resources  
-├── inventory.tf        # Inventory service resources (private IP + PSC)
+├── crm.tf              # CRM service resources (dedicated VPC + public IP)
+├── inventory.tf        # Inventory service resources (dedicated VPC + private IP + PSC)
 └── terraform.tfvars    # Your project configuration
 ```
 
