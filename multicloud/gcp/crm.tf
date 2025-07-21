@@ -163,7 +163,6 @@ resource "google_compute_network_peering" "crm_to_default" {
   network      = google_compute_network.crm_vpc.id
   peer_network = "projects/${var.project_id}/global/networks/default"
 
-  auto_create_routes = true
   import_custom_routes = false
   export_custom_routes = false
 }
@@ -174,7 +173,6 @@ resource "google_compute_network_peering" "default_to_crm" {
   network      = "projects/${var.project_id}/global/networks/default"
   peer_network = google_compute_network.crm_vpc.id
 
-  auto_create_routes = true
   import_custom_routes = false
   export_custom_routes = false
 }
