@@ -4,21 +4,16 @@
 # This script demonstrates how to run the load generator against your deployed multicloud services
 
 # ==============================================
-# Configuration - Update these with your actual service URLs
+# Configuration - Actual multicloud service URLs
 # ==============================================
 
-# Replace these with your actual service IP addresses from terraform outputs
-AWS_ACCOUNTING_IP="YOUR_AWS_EC2_IP"
-AZURE_ANALYTICS_IP="YOUR_AZURE_VM_IP"  
-GCP_CRM_IP="YOUR_GCP_INSTANCE_IP"
-
-# Build URLs (port 8080 as specified in the terraform configs)
-export AWS_ACCOUNTING_URL="http://${AWS_ACCOUNTING_IP}:8080"
-export AZURE_ANALYTICS_URL="http://${AZURE_ANALYTICS_IP}:8080"
-export GCP_CRM_URL="http://${GCP_CRM_IP}:8080"
+# Actual service URLs from your terraform deployments
+export AWS_ACCOUNTING_URL="http://13.222.214.119:8080"     # AWS EC2 Accounting Service
+export AZURE_ANALYTICS_URL="http://128.251.155.175:8080"   # Azure VM Analytics Service
+export GCP_CRM_URL="http://34.70.54.160:8080"             # GCP Instance CRM Service
 
 # Optional: Frontend URL for boutique testing
-export FRONTEND_ADDR="your-boutique-frontend-url"
+export FRONTEND_ADDR="frontend:80"
 
 # Load testing configuration
 export USERS=20                        # Number of concurrent users
@@ -56,6 +51,6 @@ echo "Load test completed. Check the output above for results."
 echo ""
 echo "The test will show statistics for:"
 echo "- Original boutique tasks (index, setCurrency, browseProduct, etc.)"
-echo "- processTransaction: AWS accounting service operations"
-echo "- recordMetrics: Azure analytics service operations" 
-echo "- manageCustomer: GCP CRM service operations" 
+echo "- processTransaction: AWS accounting service operations (${AWS_ACCOUNTING_URL})"
+echo "- recordMetrics: Azure analytics service operations (${AZURE_ANALYTICS_URL})" 
+echo "- manageCustomer: GCP CRM service operations (${GCP_CRM_URL})" 

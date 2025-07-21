@@ -85,6 +85,13 @@ spec:
           value: "10"
         - name: RATE
           value: "1"
+        # Multicloud service URLs - actual production endpoints
+        - name: AWS_ACCOUNTING_URL
+          value: "http://13.222.214.119:8080"
+        - name: AZURE_ANALYTICS_URL
+          value: "http://128.251.155.175:8080"
+        - name: GCP_CRM_URL
+          value: "http://34.70.54.160:8080"
         resources:
           requests:
             cpu: 300m

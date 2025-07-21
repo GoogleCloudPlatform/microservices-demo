@@ -1,0 +1,22 @@
+#!/bin/bash
+
+# Multicloud Service Environment Variables
+# Source this file to set environment variables for local testing
+# Usage: source multicloud-env.sh
+
+export AWS_ACCOUNTING_URL="http://13.222.214.119:8080"
+export AZURE_ANALYTICS_URL="http://128.251.155.175:8080"
+export GCP_CRM_URL="http://34.70.54.160:8080"
+
+# Optional: Set load testing parameters
+export USERS=20
+export RATE=5
+export FRONTEND_ADDR="frontend:80"
+
+echo "✅ Multicloud environment variables set:"
+echo "   AWS_ACCOUNTING_URL: $AWS_ACCOUNTING_URL"
+echo "   AZURE_ANALYTICS_URL: $AZURE_ANALYTICS_URL"
+echo "   GCP_CRM_URL: $GCP_CRM_URL"
+echo ""
+echo "🚀 Ready for local testing!"
+echo "   Run: locust --host=\"http://\$FRONTEND_ADDR\" --headless -u \$USERS -r \$RATE" 
