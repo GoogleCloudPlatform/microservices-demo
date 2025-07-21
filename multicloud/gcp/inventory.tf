@@ -17,6 +17,16 @@ resource "google_compute_subnetwork" "inventory_subnet" {
   description   = "Subnet for inventory service"
 }
 
+# 2b. Create a dedicated subnet for PSC
+resource "google_compute_subnetwork" "inventory_psc_subnet" {
+  name          = "inventory-psc-subnet"
+  ip_cidr_range = "10.1.1.0/24"
+  region        = "us-central1"
+  network       = google_compute_network.inventory_vpc.id
+  purpose       = "PRIVATE_SERVICE_CONNECT"
+  description   = "Subnet for PSC service attachment"
+}
+
 # 3. Create firewall rules for the inventory VPC
 resource "google_compute_firewall" "inventory_internal" {
   name    = "inventory-allow-internal"
@@ -296,8 +306,8 @@ resource "google_compute_service_attachment" "inventory_psc_attachment" {
   enable_proxy_protocol    = false
   connection_preference    = "ACCEPT_MANUAL"
   
-  # Connect to the inventory subnet
-  nat_subnets = [google_compute_subnetwork.inventory_subnet.id]
+  # Connect to the PSC subnet
+  nat_subnets = [google_compute_subnetwork.inventory_psc_subnet.id]
   
   # Target service (we'll use a load balancer)
   target_service = google_compute_forwarding_rule.inventory_forwarding_rule.id
@@ -397,4 +407,9 @@ output "inventory_vpc_name" {
 output "inventory_subnet_cidr" {
   value       = google_compute_subnetwork.inventory_subnet.ip_cidr_range
   description = "The CIDR range of the inventory subnet"
+}
+
+output "inventory_psc_subnet_cidr" {
+  value       = google_compute_subnetwork.inventory_psc_subnet.ip_cidr_range
+  description = "The CIDR range of the PSC subnet"
 } 
