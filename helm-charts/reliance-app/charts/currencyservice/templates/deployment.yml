@@ -4,17 +4,25 @@ metadata:
   name: {{ .Release.Name }}-{{ .Chart.Name }}
   namespace: {{ .Release.Namespace }}
   labels:
+    # Labels for the Deployment object itself (good for organization)
     app: {{ .Chart.Name }}
     environment: {{ .Values.environment }}
 spec:
   replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:
+      # This selector tells the Deployment how to find the Pods it manages.
+      # It should match the Pod labels exactly.
       app: {{ .Chart.Name }}
+      environment: {{ .Values.environment }}
+  strategy:
   template:
     metadata:
       labels:
+        # These labels are applied to every Pod created.
+        # The Service looks for these labels.
         app: {{ .Chart.Name }}
+        environment: {{ .Values.environment }}
     spec:
       nodeSelector:
         kubernetes.azure.com/agentpool: {{ .Values.nodeSelector.pool }}

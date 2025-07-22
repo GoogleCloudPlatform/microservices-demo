@@ -5,10 +5,12 @@ metadata:
   namespace: {{ .Release.Namespace }}
   labels:
     app: {{ .Chart.Name }}
+    environment: {{ .Values.environment }}
 spec:
   type: ClusterIP
   selector:
     app: {{ .Chart.Name }}
+    environment: {{ .Values.environment }}
   ports:
     - name: grpc
       protocol: TCP

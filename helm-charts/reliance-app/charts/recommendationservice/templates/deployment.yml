@@ -11,10 +11,12 @@ spec:
   selector:
     matchLabels:
       app: {{ .Chart.Name }}
+      environment: {{ .Values.environment }}
   template:
     metadata:
       labels:
         app: {{ .Chart.Name }}
+        environment: {{ .Values.environment }}
     spec:
       nodeSelector:
         kubernetes.azure.com/agentpool: {{ .Values.nodeSelector.pool }}

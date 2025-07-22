@@ -22,7 +22,7 @@ serviceObjects:
     port: 80
 
 nodeSelector:
-  pool: stgpool
+  pool: stagingpool
 
 # We are defining the configmap data here, so it's all in one place.
 configMap:

@@ -3,6 +3,9 @@ kind: ConfigMap
 metadata:
   name: {{ .Release.Name }}-{{ .Chart.Name }}-config
   namespace: {{ .Release.Namespace }}
+  labels:
+    app: {{ .Chart.Name }}
+    environment: {{ .Values.environment }}
 data:
   {{- range $key, $value := .Values.configMap }}
   {{ $key }}: {{ $value | quote }}

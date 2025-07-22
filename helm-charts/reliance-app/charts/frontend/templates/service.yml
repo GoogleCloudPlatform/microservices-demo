@@ -4,6 +4,9 @@ kind: Service
 metadata:
   name: {{ .Release.Name }}-frontend-internal
   namespace: {{ .Release.Namespace }}
+  labels:
+    app: {{ .Chart.Name }}
+    environment: {{ .Values.environment }}
 spec:
   type: ClusterIP
   selector:
@@ -21,6 +24,9 @@ kind: Service
 metadata:
   name: {{ .Release.Name }}-frontend-external
   namespace: {{ .Release.Namespace }}
+  labels:
+    app: {{ .Chart.Name }}
+    environment: {{ .Values.environment }}
 spec:
   type: {{ .Values.serviceObjects.external.type }}
   selector:

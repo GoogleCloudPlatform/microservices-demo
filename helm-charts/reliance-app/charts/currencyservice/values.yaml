@@ -10,7 +10,7 @@ service:
   port: 7000
 
 nodeSelector:
-  pool: stgpool
+  pool: stagingpool
 
 configMap:
   PORT: "7000"

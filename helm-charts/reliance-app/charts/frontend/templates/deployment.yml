@@ -4,18 +4,24 @@ metadata:
   name: {{ .Release.Name }}-frontend
   namespace: {{ .Release.Namespace }}
   labels:
-    app: frontend
+    # Labels for the Deployment object itself (good for organization)
+    app: {{ .Chart.Name }}
     environment: {{ .Values.environment }}
 spec:
   replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:
-      app: frontend
+      # This selector tells the Deployment how to find the Pods it manages.
+      # It should match the Pod labels exactly.
+      app: {{ .Chart.Name }}
       environment: {{ .Values.environment }}
   template:
     metadata:
+
       labels:
-        app: frontend
+      # These labels are applied to every Pod created.
+      # The Service looks for these labels.
+        app: {{ .Chart.Name }}
         environment: {{ .Values.environment }}
     spec:
       nodeSelector:

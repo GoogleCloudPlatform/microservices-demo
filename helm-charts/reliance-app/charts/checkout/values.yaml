@@ -10,7 +10,7 @@ service:
   port: 5050
 
 nodeSelector:
-  pool: stgpool
+  pool: stagingpool
 
 # This references the existing secret for the SSL cert file
 sslVolume:
@@ -18,11 +18,6 @@ sslVolume:
 
 # These values will be created as a Kubernetes Secret
 secrets:
-  MYSQL_USER: "kpadmin"
-  MYSQL_PASSWORD: "p1Kistan0978^"
-  MYSQL_HOST: "rwdbserver.mysql.database.azure.com"
-  MYSQL_PORT: "3306"
-  MYSQL_DATABASE: "hipstershop"
   SSL_CERT_PATH: "/ssl/DigiCertGlobalRootCA.crt.pem"
 
 # These values will be created as a Kubernetes ConfigMap

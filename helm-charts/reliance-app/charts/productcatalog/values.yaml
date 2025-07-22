@@ -10,15 +10,10 @@ service:
   port: 3550
 
 nodeSelector:
-  pool: stgpool
+  pool: stagingpool
 
 # This secret will be created from the values below
 secrets:
-  MYSQL_USER: "kpadmin"
-  MYSQL_PASSWORD: "p1Kistan0978^"
-  MYSQL_HOST: "liverwdbserver.mysql.database.azure.com"
-  MYSQL_PORT: "3306"
-  MYSQL_DATABASE: "hipstershop"
   SSL_CERT_PATH: "/ssl/DigiCertGlobalRootCA.crt.pem"
 
 # This references the existing secret for the SSL cert file

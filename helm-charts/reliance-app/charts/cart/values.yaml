@@ -10,13 +10,12 @@ service:
   port: 8080
 
 nodeSelector:
-  pool: stgpool
+  pool: stagingpool
 
 # This secret will be created from the values below
 secrets:
   CartStore: "AzureMySQL"
-  AZURE_MYSQL_CONNECTION_STRING: "Server=rwdbserver.mysql.database.azure.com;Port=3306;Database=hipstershop;Uid=kpadmin;Pwd=p1Kistan0978^;SslMode=Required;"
-
+  
 resources:
   requests:
     cpu: "100m"

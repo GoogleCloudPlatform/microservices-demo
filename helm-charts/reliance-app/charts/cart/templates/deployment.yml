@@ -3,6 +3,8 @@ kind: Deployment
 metadata:
   name: {{ .Release.Name }}-{{ .Chart.Name }}
   namespace: {{ .Release.Namespace }}
+
+   # Labels for the Deployment object itself (good for organization)
   labels:
     app: {{ .Chart.Name }}
     environment: {{ .Values.environment }}
@@ -10,11 +12,17 @@ spec:
   replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:
+      # This selector tells the Deployment how to find the Pods it manages.
+      # It should match the Pod labels exactly.
       app: {{ .Chart.Name }}
+      environment: {{ .Values.environment }}  
   template:
     metadata:
       labels:
+        # These labels are applied to every Pod created.
+        # The Service looks for these labels.
         app: {{ .Chart.Name }}
+        environment: {{ .Values.environment }}
     spec:
       nodeSelector:
         kubernetes.azure.com/agentpool: {{ .Values.nodeSelector.pool }}
@@ -24,9 +32,12 @@ spec:
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
             - containerPort: {{ .Values.service.port }}
+          env:
+            - name: CartStore
+              value: {{ .Values.secrets.CartStore | quote }}  
           envFrom:
             - secretRef:
-                name: {{ .Release.Name }}-{{ .Chart.Name }}-secrets
+                name: cart-connection-string # The name of the secret you created
           livenessProbe:
             exec:
               command: ["/usr/bin/grpc_health_probe", "-addr=:{{ .Values.service.port }}"]
