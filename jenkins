@@ -1,0 +1,107 @@
+pipeline {
+    agent any
+
+    environment {
+        SCANNER_HOME = tool 'sonar-scanner'
+    }
+
+    stages {
+        stage('Git Checkout') {
+            steps {
+                git branch: 'master', url: 'https://github.com/Ayush-Singh986/kubernetes-projects-learning.git'
+            }
+        }
+
+        stage('SonarQube Analysis') {
+            steps {
+                withSonarQubeEnv('sonar') {
+                    sh '''$SCANNER_HOME/bin/sonar-scanner \
+                        -Dsonar.projectKey=10-Tier \
+                        -Dsonar.projectName=10-Tier \
+                        -Dsonar.sources=. \
+                        -Dsonar.java.binaries=.'''
+                }
+            }
+        }
+
+        stage('Build & Push Docker Images') {
+            parallel {
+                stage('adservice') {
+                    steps { buildAndPush('adservice') }
+                }
+                stage('cartservice') {
+                    steps { buildAndPush('cartservice/src') }
+                }
+                stage('checkoutservice') {
+                    steps { buildAndPush('checkoutservice') }
+                }
+                stage('currencyservice') {
+                    steps { buildAndPush('currencyservice') }
+                }
+                stage('emailservice') {
+                    steps { buildAndPush('emailservice') }
+                }
+                stage('frontend') {
+                    steps { buildAndPush('frontend') }
+                }
+                stage('loadgenerator') {
+                    steps { buildAndPush('loadgenerator') }
+                }
+                stage('paymentservice') {
+                    steps { buildAndPush('paymentservice') }
+                }
+                stage('productcatalogservice') {
+                    steps { buildAndPush('productcatalogservice') }
+                }
+                stage('recommendationservice') {
+                    steps { buildAndPush('recommendationservice') }
+                }
+                stage('shippingservice') {
+                    steps { buildAndPush('shippingservice') }
+                }
+            }
+        }
+
+        stage('K8s Deploy') {
+            steps {
+                withKubeConfig(
+                    credentialsId: 'k8-token',
+                    clusterName: 'my-eks2',
+                    namespace: 'webapps',
+                    serverUrl: 'https://F186ECD3A9834EA73B2F0E8361E04355.gr7.eu-north-1.eks.amazonaws.com'
+                ) {
+                    sh 'kubectl apply -f deployment-service.yml'
+                    sh 'kubectl get pods'
+                    sh 'kubectl get svc'
+                }
+            }
+        }
+    }
+
+    post {
+        always {
+            echo "Pipeline execution complete!"
+        }
+    }
+}
+
+def buildAndPush(String servicePath) {
+    script {
+        def imageName = "sushantkapare1717/${servicePath.tokenize('/')[-1]}:latest"
+        def fullPath = "${env.WORKSPACE}/${servicePath}"
+        def dockerfile = "${fullPath}/Dockerfile"
+
+        if (fileExists(dockerfile)) {
+            echo "Building and pushing image for ${servicePath}"
+            withDockerRegistry(credentialsId: 'docker-cred', toolName: 'docker') {
+                dir(fullPath) {
+                    sh "docker build -t ${imageName} ."
+                    sh "docker push ${imageName}"
+                    sh "docker rmi ${imageName}"
+                }
+            }
+        } else {
+            echo "⚠️ Skipping ${servicePath}: Dockerfile not found at ${dockerfile}"
+        }
+    }
+}
