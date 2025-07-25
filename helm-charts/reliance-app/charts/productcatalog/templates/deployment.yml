@@ -36,7 +36,7 @@ spec:
               value: {{ .Values.secrets.SSL_CERT_PATH }}   
           envFrom:
             - secretRef:
-                name: mysql-credentials
+                name: productcatalog-db-creds
           livenessProbe:
             exec:
               command:
@@ -56,10 +56,19 @@ spec:
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
           volumeMounts:
+            - name: secrets-store-inline
+              mountPath: /mnt/secrets-store
+              readOnly: true
             - name: ssl-certs
               mountPath: "/ssl"
               readOnly: true
       volumes:
+        - name: secrets-store-inline
+          csi:
+            driver: secrets-store.csi.k8s.io
+            readOnly: true
+            volumeAttributes:
+              secretProviderClass: azure-kv-productcatalog
         - name: ssl-certs
           secret:
             secretName: {{ .Values.sslVolume.secretName }}

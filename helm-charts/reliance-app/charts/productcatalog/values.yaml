@@ -18,7 +18,7 @@ secrets:
 
 # This references the existing secret for the SSL cert file
 sslVolume:
-  secretName: productcatalog-ssl-certs
+  secretName: ssl-certificates
 
 resources:
   requests:
@@ -27,3 +27,8 @@ resources:
   limits:
     cpu: "500m"
     memory: "256Mi"
+
+secretProvider:
+  keyvaultName: "kpskeyvault"
+  tenantId: "1c127d2d-2d00-477a-b479-3104cb849681"
+  userAssignedIdentityID: "accc398e-392b-4ebe-94e1-580808ecd2fb"    

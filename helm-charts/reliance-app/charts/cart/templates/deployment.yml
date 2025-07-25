@@ -37,7 +37,7 @@ spec:
               value: {{ .Values.secrets.CartStore | quote }}  
           envFrom:
             - secretRef:
-                name: cart-connection-string # The name of the secret you created
+                name: cart-db-connection # The name of the secret in Secret providerclass
           livenessProbe:
             exec:
               command: ["/usr/bin/grpc_health_probe", "-addr=:{{ .Values.service.port }}"]
@@ -50,3 +50,14 @@ spec:
             periodSeconds: 10
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
+          volumeMounts:
+            - name: secrets-store-inline
+              mountPath: /mnt/secrets-store
+              readOnly: true
+      volumes:
+        - name: secrets-store-inline
+          csi:
+            driver: secrets-store.csi.k8s.io
+            readOnly: true
+            volumeAttributes:
+              secretProviderClass: azure-kv-cartservice # The name of the SecretProviderClass        
