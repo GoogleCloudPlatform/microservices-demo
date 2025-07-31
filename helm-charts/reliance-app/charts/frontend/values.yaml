@@ -17,7 +17,7 @@ serviceObjects:
   internal:
     port: 8080
   external:
-    enabled: true # Set to false to not create the LoadBalancer
+    enabled: false # Set to false to not create the LoadBalancer
     type: LoadBalancer
     port: 80
 
