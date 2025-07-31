@@ -2,6 +2,8 @@
 
 1. Create GitHub Actions pipeline to check container images and push them to repository
     * build container images with correct tags
+        * find services for build
+        * 
     * scan with sec tools (Trivy, Checkov, Docker Scout)
     * scan manifests with sec tools in pipeline
     * push images to repository
