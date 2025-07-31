@@ -10,11 +10,7 @@ service:
   port: 8080
 
 nodeSelector:
-  pool: stagingpool
-
-# This secret will be created from the values below
-secrets:
-  CartStore: "AzureMySQL"
+  workload-type: staging-pool
   
 resources:
   requests:
@@ -24,7 +20,11 @@ resources:
     cpu: "500m"
     memory: "256Mi"
 
+# This secret will be created from the values below
+secrets:
+  CartStore: "AzureMySQL"
+
 secretProvider:
   keyvaultName: "kpskeyvault"
   tenantId: "1c127d2d-2d00-477a-b479-3104cb849681"
-  userAssignedIdentityID: "accc398e-392b-4ebe-94e1-580808ecd2fb"    
+  userAssignedIdentityID: "0f25cea3-7f60-40b8-98d7-a87116e002dc"    

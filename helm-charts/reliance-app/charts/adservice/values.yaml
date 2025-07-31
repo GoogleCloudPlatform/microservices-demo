@@ -10,7 +10,7 @@ service:
   port: 9555
 
 nodeSelector:
-  pool: stagingpool
+  workload-type: staging-pool
 
 resources:
   requests:

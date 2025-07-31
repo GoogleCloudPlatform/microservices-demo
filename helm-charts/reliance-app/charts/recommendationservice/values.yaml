@@ -10,7 +10,7 @@ service:
   port: 8080
 
 nodeSelector:
-  pool: stagingpool
+  workload-type: staging-pool
 
 resources:
   requests:

@@ -25,7 +25,7 @@ spec:
         environment: {{ .Values.environment }}
     spec:
       nodeSelector:
-        kubernetes.azure.com/agentpool: {{ .Values.nodeSelector.pool }}
+        {{- toYaml .Values.nodeSelector | nindent 8 }}
       containers:
         - name: {{ .Chart.Name }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
@@ -33,8 +33,8 @@ spec:
           ports:
             - containerPort: {{ .Values.service.port }}
           env:
-            - name: CartStore
-              value: {{ .Values.secrets.CartStore | quote }}  
+           - name: CartStore
+             value: {{ .Values.secrets.CartStore | quote }}  
           envFrom:
             - secretRef:
                 name: cart-db-connection # The name of the secret in Secret providerclass

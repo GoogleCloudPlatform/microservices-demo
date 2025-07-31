@@ -10,7 +10,7 @@ service:
   port: 50051
 
 nodeSelector:
-  pool: stagingpool
+  workload-type: staging-pool
 
 configMap:
   PORT: "50051"

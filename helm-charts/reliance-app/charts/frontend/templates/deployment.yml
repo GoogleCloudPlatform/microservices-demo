@@ -25,7 +25,7 @@ spec:
         environment: {{ .Values.environment }}
     spec:
       nodeSelector:
-        kubernetes.azure.com/agentpool: {{ .Values.nodeSelector.pool }}
+        {{- toYaml .Values.nodeSelector | nindent 8 }}
       containers:
         - name: frontend
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"

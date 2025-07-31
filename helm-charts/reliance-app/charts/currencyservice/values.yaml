@@ -10,7 +10,7 @@ service:
   port: 7000
 
 nodeSelector:
-  pool: stagingpool
+  workload-type: staging-pool
 
 configMap:
   PORT: "7000"
