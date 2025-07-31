@@ -1,11 +1,12 @@
 name: Container Image CI/CD
-description: Build, Scan Containers on pull request and push images on push 
 
 on:
   push:
-    branches: [ $default-branch ]
+    branches: 
+        - main
   pull_request:
-    branches: [ $default-branch ]
+    branches:
+        - main
 
 jobs:
 
@@ -23,3 +24,6 @@ jobs:
         echo "Discovered services: $SERVICES_JSON"
         echo "services=$SERVICES_JSON" >> "$GITHUB_OUTPUT"
 
+    - name: List discovered services
+      run: |
+        echo "Discovered services: ${{ steps.discover_services.outputs.services }}"
