@@ -20,10 +20,6 @@ jobs:
       id: discover_services
       run: |
         SERVICES=$(find microservices-demo/src -mindepth 1 -maxdepth 1 -type d -exec test -f "{}/Dockerfile" \; -print | xargs -n1 basename)
-        SERVICES_JSON=$(echo "$SERVICES" | jq -R . | jq -s .)
+        SERVICES_JSON=$(echo "$SERVICES" | jq -R . | jq -sc .)
         echo "Discovered services: $SERVICES_JSON"
         echo "services=$SERVICES_JSON" >> "$GITHUB_OUTPUT"
-
-    - name: List discovered services
-      run: |
-        echo "Discovered services: ${{ steps.discover_services.outputs.services }}"
