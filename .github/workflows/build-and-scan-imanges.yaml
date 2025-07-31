@@ -23,3 +23,6 @@ jobs:
         echo "Discovered services: $SERVICES_JSON"
         echo "services=$SERVICES_JSON" >> "$GITHUB_OUTPUT"
 
+    - name: List discovered services
+      run: |
+        echo "Discovered services: ${{ steps.discover_services.outputs.services }}"
