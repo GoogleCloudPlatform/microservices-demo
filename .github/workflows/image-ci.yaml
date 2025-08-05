@@ -67,7 +67,7 @@ jobs:
         uses: docker/scout-action@v1
         with:
           command: cves
-          image: ${{ env.IMAGE_TAG }}
+          image: local://${{ env.IMAGE_TAG }}
           sarif-file: sarif.output.json
           summary: true
 
