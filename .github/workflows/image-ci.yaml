@@ -60,6 +60,7 @@ jobs:
           file: ./microservices-demo/src/${{ matrix.service }}/Dockerfile
           platforms: linux/amd64
           push: false
+          load: true
           tags: |
             ${{ env.IMAGE_TAG }}
 
