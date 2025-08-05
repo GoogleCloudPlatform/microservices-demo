@@ -97,21 +97,3 @@ jobs:
         uses: github/codeql-action/upload-sarif@v3
         with:
           sarif_file: trivy-results.sarif
-
-      - name: Checkov scan
-        uses: bridgecrewio/checkov-action@master
-        with:
-          quiet: true
-          soft_fail: true
-          log_level: 'WARNING'
-          docker_image: ${{ env.IMAGE_TAG }}
-          dockerfile_path: ./microservices-demo/src/${{ matrix.service }}/Dockerfile
-          output_format: sarif
-          output_file_path: checkov-results.sarif
-          skip_results_upload: true
-          bc_api_key: ''
-
-      - name: Upload Checkov SARIF to GitHub Security
-        uses: github/codeql-action/upload-sarif@v3
-        with:
-          sarif_file: checkov-results.sarif
