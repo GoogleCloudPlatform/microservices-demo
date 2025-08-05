@@ -64,12 +64,12 @@ jobs:
             ${{ env.IMAGE_TAG }}
 
       # Debug steps to verify the image tag
-      - name: Verify Docker image
-        run: |
-          echo "Checking if image exists locally:"
-          docker images | grep ${{ matrix.service }}
-          echo "Image details:"
-          docker inspect ${{ env.IMAGE_TAG }} --format='{{.Id}}'
+    #   - name: Verify Docker image
+    #     run: |
+    #       echo "Checking if image exists locally:"
+    #       docker images | grep ${{ matrix.service }}
+    #       echo "Image details:"
+    #       docker inspect ${{ env.IMAGE_TAG }} --format='{{.Id}}'
 
       - name: Docker Scout Login
         run: |
