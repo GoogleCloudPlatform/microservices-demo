@@ -15,6 +15,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       services: ${{ steps.discover_services.outputs.services }}
+
     steps:
       - uses: actions/checkout@v4
       - name: Discover services
@@ -32,6 +33,7 @@ jobs:
   push_images:
     needs: discover_services
     runs-on: ubuntu-latest
+
     strategy:
       matrix:
         service: ${{ fromJson(needs.discover_services.outputs.services) }}
