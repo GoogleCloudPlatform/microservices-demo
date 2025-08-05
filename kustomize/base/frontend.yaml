@@ -27,6 +27,7 @@ spec:
       labels:
         app: frontend
       annotations:
+        proxy.istio.io/config: '{ "holdApplicationUntilProxyStarts": true }'
         sidecar.istio.io/rewriteAppHTTPProbers: "true"
     spec:
       serviceAccountName: frontend

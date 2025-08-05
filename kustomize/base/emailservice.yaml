@@ -26,6 +26,8 @@ spec:
     metadata:
       labels:
         app: emailservice
+      annotations:
+        proxy.istio.io/config: '{ "holdApplicationUntilProxyStarts": true }'
     spec:
       serviceAccountName: emailservice
       terminationGracePeriodSeconds: 5

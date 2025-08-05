@@ -26,6 +26,8 @@ spec:
     metadata:
       labels:
         app: shippingservice
+      annotations:
+        proxy.istio.io/config: '{ "holdApplicationUntilProxyStarts": true }'
     spec:
       serviceAccountName: shippingservice
       securityContext:

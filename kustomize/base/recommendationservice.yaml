@@ -26,6 +26,8 @@ spec:
     metadata:
       labels:
         app: recommendationservice
+      annotations:
+        proxy.istio.io/config: '{ "holdApplicationUntilProxyStarts": true }'
     spec:
       serviceAccountName: recommendationservice
       terminationGracePeriodSeconds: 5

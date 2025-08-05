@@ -26,6 +26,8 @@ spec:
     metadata:
       labels:
         app: cartservice
+      annotations:
+        proxy.istio.io/config: '{ "holdApplicationUntilProxyStarts": true }'
     spec:
       serviceAccountName: cartservice
       terminationGracePeriodSeconds: 5

@@ -26,6 +26,8 @@ spec:
     metadata:
       labels:
         app: adservice
+      annotations:
+        proxy.istio.io/config: '{ "holdApplicationUntilProxyStarts": true }'
     spec:
       serviceAccountName: adservice
       terminationGracePeriodSeconds: 5

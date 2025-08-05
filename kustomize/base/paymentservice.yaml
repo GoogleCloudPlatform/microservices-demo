@@ -26,6 +26,8 @@ spec:
     metadata:
       labels:
         app: paymentservice
+      annotations:
+        proxy.istio.io/config: '{ "holdApplicationUntilProxyStarts": true }'
     spec:
       serviceAccountName: paymentservice
       terminationGracePeriodSeconds: 5

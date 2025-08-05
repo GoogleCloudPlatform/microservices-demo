@@ -26,6 +26,8 @@ spec:
     metadata:
       labels:
         app: productcatalogservice
+      annotations:
+        proxy.istio.io/config: '{ "holdApplicationUntilProxyStarts": true }'
     spec:
       serviceAccountName: productcatalogservice
       terminationGracePeriodSeconds: 5

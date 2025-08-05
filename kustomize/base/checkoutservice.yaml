@@ -26,6 +26,8 @@ spec:
     metadata:
       labels:
         app: checkoutservice
+      annotations:
+        proxy.istio.io/config: '{ "holdApplicationUntilProxyStarts": true }'
     spec:
       serviceAccountName: checkoutservice
       securityContext:
