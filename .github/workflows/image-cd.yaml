@@ -22,6 +22,11 @@ jobs:
         run: |
           SERVICES=$(find microservices-demo/src -mindepth 1 -maxdepth 1 -type d -exec test -f "{}/Dockerfile" \; -print | xargs -n1 basename)
           SERVICES_JSON=$(echo "$SERVICES" | jq -R . | jq -sc .)
+          
+          echo "=================================="
+          echo "Detected services: $SERVICES_JSON"
+          echo "=================================="
+
           echo "services=$SERVICES_JSON" >> "$GITHUB_OUTPUT"
 
   push_images:

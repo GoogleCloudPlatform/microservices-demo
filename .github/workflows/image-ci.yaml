@@ -5,9 +5,6 @@ on:
     branches: [main]
 
 env:
-  ECR_REGISTRY: ${{ secrets.ECR_REGISTRY }}
-  AWS_REGION: ${{ secrets.AWS_REGION }}
-  AWS_ROLE_TO_ASSUME: ${{ secrets.AWS_ROLE_TO_ASSUME }}
   GH_TOKEN: ${{ secrets.GITHUB_TOKEN }} # automatically provided by GitHub Actions
   DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
   DOCKERHUB_PASSWORD: ${{ secrets.DOCKERHUB_PASSWORD }}
@@ -24,6 +21,11 @@ jobs:
         run: |
           SERVICES=$(find microservices-demo/src -mindepth 1 -maxdepth 1 -type d -exec test -f "{}/Dockerfile" \; -print | xargs -n1 basename)
           SERVICES_JSON=$(echo "$SERVICES" | jq -R . | jq -sc .)
+          
+          echo "=================================="
+          echo "Detected services: $SERVICES_JSON"
+          echo "=================================="
+
           echo "services=$SERVICES_JSON" >> "$GITHUB_OUTPUT"
 
   build_and_scan:
@@ -53,13 +55,13 @@ jobs:
           platforms: linux/amd64
           push: false
           tags: |
-            ${{ env.ECR_REGISTRY }}/${{ matrix.service }}:${{ github.sha }}
+            ${{ matrix.service }}:ci-${{ github.sha }}
 
       - name: Docker Scout
         uses: docker/scout-action@v1
         with:
           command: cves
-          image: ${{ env.ECR_REGISTRY }}/${{ matrix.service }}:${{ github.sha }}
+          image: ${{ matrix.service }}:ci-${{ github.sha }}
           only-severities: critical,high
           write-comment: true
           github-token: ${{ env.GH_TOKEN }}
@@ -67,7 +69,7 @@ jobs:
       - name: Trivy scan
         uses: aquasecurity/trivy-action@0.28.0
         with:
-          image-ref: '${{ env.ECR_REGISTRY }}/${{ matrix.service }}:${{ github.sha }}'
+          image-ref: '${{ matrix.service }}:ci-${{ github.sha }}'
           format: 'sarif'
           output: 'trivy-results.sarif'
           exit-code: '1'
@@ -86,7 +88,7 @@ jobs:
           quiet: true
           soft_fail: true
           log_level: 'WARNING'
-          docker_image: ${{ env.ECR_REGISTRY }}/${{ matrix.service }}:${{ github.sha }}
+          docker_image: ${{ matrix.service }}:ci-${{ github.sha }}
           dockerfile_path: ./microservices-demo/src/${{ matrix.service }}/Dockerfile
           output_format: sarif
           output_file_path: checkov-results.sarif
