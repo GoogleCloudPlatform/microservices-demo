@@ -1,0 +1,89 @@
+name: Container Image CI
+
+on:
+  pull_request:
+    branches: [main]
+
+env:
+  ECR_REGISTRY: ${{ secrets.ECR_REGISTRY }}
+  AWS_REGION: ${{ secrets.AWS_REGION }}
+  AWS_ROLE_TO_ASSUME: ${{ secrets.AWS_ROLE_TO_ASSUME }}
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+jobs:
+  discover_services:
+    runs-on: ubuntu-latest
+    outputs:
+      services: ${{ steps.discover_services.outputs.services }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Discover services
+        id: discover_services
+        run: |
+          SERVICES=$(find microservices-demo/src -mindepth 1 -maxdepth 1 -type d -exec test -f "{}/Dockerfile" \; -print | xargs -n1 basename)
+          SERVICES_JSON=$(echo "$SERVICES" | jq -R . | jq -sc .)
+          echo "services=$SERVICES_JSON" >> "$GITHUB_OUTPUT"
+
+  build_and_scan:
+    needs: discover_services
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        service: ${{ fromJson(needs.discover_services.outputs.services) }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Docker image (no push)
+        uses: docker/build-push-action@v5
+        with:
+          context: ./microservices-demo/src/${{ matrix.service }}
+          file: ./microservices-demo/src/${{ matrix.service }}/Dockerfile
+          platforms: linux/amd64
+          push: false
+          tags: |
+            ${{ env.ECR_REGISTRY }}/${{ matrix.service }}:${{ github.sha }}
+
+      - name: Docker Scout
+        uses: docker/scout-action@v1
+        with:
+          command: cves
+          image: ${{ env.ECR_REGISTRY }}/${{ matrix.service }}:${{ github.sha }}
+          only-severities: critical,high
+          write-comment: true
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Trivy scan
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          image-ref: '${{ env.ECR_REGISTRY }}/${{ matrix.service }}:${{ github.sha }}'
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+          exit-code: '1'
+          ignore-unfixed: true
+          vuln-type: 'os,library'
+          severity: 'CRITICAL,HIGH'
+
+      - name: Upload Trivy SARIF
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: trivy-results.sarif
+
+      - name: Checkov scan
+        uses: bridgecrewio/checkov-action@master
+        with:
+          quiet: true
+          soft_fail: true
+          log_level: 'WARNING'
+          docker_image: ${{ env.ECR_REGISTRY }}/${{ matrix.service }}:${{ github.sha }}
+          dockerfile_path: ./microservices-demo/src/${{ matrix.service }}/Dockerfile
+          output_format: sarif
+          output_file_path: checkov-results.sarif
+
+      - name: Upload Checkov SARIF
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: checkov-results.sarif
