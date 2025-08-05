@@ -68,7 +68,6 @@ jobs:
         with:
           command: cves
           image: ${{ env.IMAGE_TAG }}
-          only-severities: critical,high
           sarif-file: sarif.output.json
           summary: true
 
