@@ -34,6 +34,10 @@ jobs:
     needs: discover_services
     runs-on: ubuntu-latest
     
+    permissions:
+      contents: read # for actions/checkout to fetch code
+      security-events: write # for github/codeql-action/upload-sarif to upload SARIF results
+
     strategy:
       matrix:
         service: ${{ fromJson(needs.discover_services.outputs.services) }}
@@ -104,6 +108,7 @@ jobs:
           output_format: sarif
           output_file_path: checkov-results.sarif
           skip_results_upload: true
+          bc_api_key: ''
 
       - name: Upload Checkov SARIF to GitHub Security
         uses: github/codeql-action/upload-sarif@v3
