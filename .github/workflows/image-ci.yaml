@@ -63,6 +63,19 @@ jobs:
           tags: |
             ${{ env.IMAGE_TAG }}
 
+      # Debug steps to verify the image tag
+      - name: Verify Docker image
+        run: |
+          echo "Checking if image exists locally:"
+          docker images | grep ${{ matrix.service }}
+          echo "Image details:"
+          docker inspect ${{ env.IMAGE_TAG }} --format='{{.Id}}'
+
+      - name: Docker Scout Login
+        run: |
+          echo "${{ env.DOCKERHUB_PASSWORD }}" | docker login -u "${{ env.DOCKERHUB_USERNAME }}" --password-stdin
+          docker scout version
+
       - name: Docker Scout
         uses: docker/scout-action@v1
         with:
