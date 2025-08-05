@@ -37,6 +37,7 @@ jobs:
     permissions:
       contents: read # for actions/checkout to fetch code
       security-events: write # for github/codeql-action/upload-sarif to upload SARIF results
+      pull-requests: write # for creating pull requests with scan results
 
     strategy:
       matrix:

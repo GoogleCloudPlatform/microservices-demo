@@ -5,6 +5,7 @@
         * find services for build [DONE]
         * move config to one place (envs) [DONE]
     * scan with sec tools (Trivy, Checkov, Docker Scout) [DONE]
+    * outpu scans to Security tab on GitHub [IN PROGRESS]
     * scan manifests with sec tools in pipeline [IN FUTURE]
     * push images to repository [DONE]
 2. Contenerise each app for minimal image
