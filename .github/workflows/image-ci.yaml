@@ -12,8 +12,10 @@ env:
 jobs:
   discover_services:
     runs-on: ubuntu-latest
+
     outputs:
       services: ${{ steps.discover_services.outputs.services }}
+
     steps:
       - uses: actions/checkout@v4
       - name: Discover services
@@ -31,9 +33,13 @@ jobs:
   build_and_scan:
     needs: discover_services
     runs-on: ubuntu-latest
+    
     strategy:
       matrix:
         service: ${{ fromJson(needs.discover_services.outputs.services) }}
+
+    env:
+      IMAGE_TAG: ${{ matrix.service }}:ci-${{ github.sha }}
 
     steps:
       - uses: actions/checkout@v4
@@ -55,13 +61,13 @@ jobs:
           platforms: linux/amd64
           push: false
           tags: |
-            ${{ matrix.service }}:ci-${{ github.sha }}
+            ${{ env.IMAGE_TAG }}
 
       - name: Docker Scout
         uses: docker/scout-action@v1
         with:
           command: cves
-          image: ${{ matrix.service }}:ci-${{ github.sha }}
+          image: ${{ env.IMAGE_TAG }}
           only-severities: critical,high
           write-comment: true
           github-token: ${{ env.GH_TOKEN }}
@@ -69,7 +75,7 @@ jobs:
       - name: Trivy scan
         uses: aquasecurity/trivy-action@0.28.0
         with:
-          image-ref: '${{ matrix.service }}:ci-${{ github.sha }}'
+          image-ref: '${{ env.IMAGE_TAG }}'
           format: 'sarif'
           output: 'trivy-results.sarif'
           exit-code: '1'
@@ -88,7 +94,7 @@ jobs:
           quiet: true
           soft_fail: true
           log_level: 'WARNING'
-          docker_image: ${{ matrix.service }}:ci-${{ github.sha }}
+          docker_image: ${{ env.IMAGE_TAG }}
           dockerfile_path: ./microservices-demo/src/${{ matrix.service }}/Dockerfile
           output_format: sarif
           output_file_path: checkov-results.sarif
