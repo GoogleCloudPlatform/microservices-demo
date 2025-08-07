@@ -5,9 +5,13 @@ metadata:
   namespace: {{ .Release.Namespace }}
   labels:
     app: {{ .Chart.Name }}
-    environment: {{ .Values.environment }}
+    environment: {{ coalesce .Values.global.environment .Values.environment | quote }}
     
 data:
+  # First, add all the global service endpoints
+  {{- toYaml .Values.global.serviceEndpoints | nindent 2 }}
+
+  # Then, add any service-specific configMap values
   {{- range $key, $value := .Values.configMap }}
   {{ $key }}: {{ $value | quote }}
   {{- end }}

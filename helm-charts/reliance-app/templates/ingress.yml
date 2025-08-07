@@ -2,14 +2,14 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: main-ingress
-  namespace: staging
+  namespace: {{ .Release.Namespace }}
   annotations:
     # This annotation is important for NGINX Ingress Controller
     kubernetes.io/ingress.class: "nginx"
 spec:
   rules:
   # Replace "yourdomain.com" with your actual domain name
-  - host: "reliancecloud.online"
+  - host: {{ .Values.ingress.host | quote }}
     http:
       paths:
       - path: /

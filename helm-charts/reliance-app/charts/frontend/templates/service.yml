@@ -6,11 +6,12 @@ metadata:
   namespace: {{ .Release.Namespace }}
   labels:
     app: {{ .Chart.Name }}
-    environment: {{ .Values.environment }}
+    environment: {{ coalesce .Values.global.environment .Values.environment | quote }}
 spec:
   type: ClusterIP
   selector:
-    app: frontend
+    app: {{ .Chart.Name }}
+    environment: {{ coalesce .Values.global.environment .Values.environment | quote }}
   ports:
     - name: http
       protocol: TCP
@@ -26,11 +27,12 @@ metadata:
   namespace: {{ .Release.Namespace }}
   labels:
     app: {{ .Chart.Name }}
-    environment: {{ .Values.environment }}
+    environment: {{ coalesce .Values.global.environment .Values.environment | quote }}
 spec:
   type: {{ .Values.serviceObjects.external.type }}
   selector:
-    app: frontend
+    app: {{ .Chart.Name }}
+    environment: {{ coalesce .Values.global.environment .Values.environment | quote }}
   ports:
     - name: http
       protocol: TCP

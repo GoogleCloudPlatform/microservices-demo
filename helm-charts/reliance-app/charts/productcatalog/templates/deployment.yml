@@ -6,7 +6,7 @@ metadata:
   labels:
     # Labels for the Deployment object itself (good for organization)
     app: {{ .Chart.Name }}
-    environment: {{ .Values.environment }}
+    environment: {{ coalesce .Values.global.environment .Values.environment | quote }}
 spec:
   replicas: {{ .Values.replicaCount }}
   selector:
@@ -14,17 +14,17 @@ spec:
       # This selector tells the Deployment how to find the Pods it manages.
       # It should match the Pod labels exactly.
       app: {{ .Chart.Name }}
-      environment: {{ .Values.environment }}
+      environment: {{ coalesce .Values.global.environment .Values.environment | quote }}
   template:
     metadata:
       labels:
         # These labels are applied to every Pod created.
         # The Service looks for these labels.
         app: {{ .Chart.Name }}
-        environment: {{ .Values.environment }}
+        environment: {{ coalesce .Values.global.environment .Values.environment | quote }}
     spec:
       nodeSelector:
-        {{- toYaml .Values.nodeSelector | nindent 8 }}
+        {{- toYaml (coalesce .Values.global.nodeSelector .Values.nodeSelector) | nindent 8 }}
       containers:
         - name: {{ .Chart.Name }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
@@ -33,7 +33,7 @@ spec:
             - containerPort: {{ .Values.service.port }}
           env:
             - name: SSL_CERT_PATH
-              value: {{ .Values.secrets.SSL_CERT_PATH }}   
+              value: {{ coalesce .Values.global.secrets.SSL_CERT_PATH .Values.secrets.SSL_CERT_PATH | quote }}    
           envFrom:
             - secretRef:
                 name: productcatalog-db-creds
@@ -71,4 +71,4 @@ spec:
               secretProviderClass: azure-kv-productcatalog
         - name: ssl-certs
           secret:
-            secretName: {{ .Values.sslVolume.secretName }}
+            secretName: {{ coalesce .Values.global.sslVolume.secretName .Values.sslVolume.secretName }}

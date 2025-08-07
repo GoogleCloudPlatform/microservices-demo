@@ -5,7 +5,7 @@ metadata:
   namespace: {{ .Release.Namespace }}
   labels:
     app: {{ .Chart.Name }}
-    environment: {{ .Values.environment }}
+    environment: {{ coalesce .Values.global.environment .Values.environment | quote }}
 data:
   {{- range $key, $value := .Values.configMap }}
   {{ $key }}: {{ $value | quote }}

@@ -1,0 +1,65 @@
+# This is the single source of truth for the ENTIRE staging environment.
+
+# Global values that are shared across all subcharts
+
+ingress:
+  host: "reliancecloud.online"
+
+global:
+  environment: production
+  nodeSelector:
+    workload-type: production-pool
+  secretProvider:
+    keyvaultName: "kpskeyvault"
+    tenantId: "1c127d2d-2d00-477a-b479-3104cb849681"
+    userAssignedIdentityID: "ed8e96be-9e8a-4a02-b84c-21fffb351be8"
+  sslVolume:
+    secretName: ssl-certificates
+  secrets:
+    SSL_CERT_PATH: "/ssl/DigiCertGlobalRootCA.crt.pem"
+
+  # Centralized service endpoints for inter-service communication
+  serviceEndpoints:
+    PRODUCT_CATALOG_SERVICE_ADDR: "productcatalog:3550"
+    CURRENCY_SERVICE_ADDR: "currencyservice:7000"
+    CART_SERVICE_ADDR: "cart:8080"
+    RECOMMENDATION_SERVICE_ADDR: "recommendationservice:8080"
+    SHIPPING_SERVICE_ADDR: "shippingservice:50051"
+    CHECKOUT_SERVICE_ADDR: "checkout:5050"
+    AD_SERVICE_ADDR: "adservice:9555"
+    PAYMENT_SERVICE_ADDR: "paymentservice:50051"
+    EMAIL_SERVICE_ADDR: "emailservice:5000"
+    SHOPPING_ASSISTANT_SERVICE_ADDR: "shoppingassistantservice:5050"       
+
+# Default values for the cart service chart
+# We only need to define values that are unique to the cart service.
+
+adservice:
+  replicaCount: 2
+cart:
+  replicaCount: 2
+  secrets:
+    CartStore: "AzureMySQL"
+
+checkout:
+  replicaCount: 1
+
+currencyservice:
+  replicaCount: 1
+
+frontend:
+  replicaCount: 1
+  configMap:
+    PORT: "8080"
+
+paymentservice:
+  replicaCount: 1
+
+productcatalog:
+  replicaCount: 1  
+
+recommendationservice:
+  replicaCount: 1  
+
+shippingservice:
+  replicaCount: 1 

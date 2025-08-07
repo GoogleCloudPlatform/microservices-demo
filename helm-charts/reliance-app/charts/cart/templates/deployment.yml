@@ -7,7 +7,7 @@ metadata:
    # Labels for the Deployment object itself (good for organization)
   labels:
     app: {{ .Chart.Name }}
-    environment: {{ .Values.environment }}
+    environment: {{ coalesce .Values.global.environment .Values.environment | quote }}
 spec:
   replicas: {{ .Values.replicaCount }}
   selector:
@@ -15,17 +15,18 @@ spec:
       # This selector tells the Deployment how to find the Pods it manages.
       # It should match the Pod labels exactly.
       app: {{ .Chart.Name }}
-      environment: {{ .Values.environment }}  
+      environment: {{ coalesce .Values.global.environment .Values.environment | quote }} 
   template:
     metadata:
       labels:
         # These labels are applied to every Pod created.
         # The Service looks for these labels.
         app: {{ .Chart.Name }}
-        environment: {{ .Values.environment }}
+        environment: {{ coalesce .Values.global.environment .Values.environment | quote }}
     spec:
       nodeSelector:
-        {{- toYaml .Values.nodeSelector | nindent 8 }}
+        # Use coalesce to prefer the global nodeSelector, but fall back to the local one
+        {{- toYaml (coalesce .Values.global.nodeSelector .Values.nodeSelector) | nindent 8 }}
       containers:
         - name: {{ .Chart.Name }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
