@@ -1,0 +1,1 @@
+{"severity":"error","time":1754576234975,"pid":5212,"hostname":"devbox","name":"currencyservice-server","message":"Failed to load currency data: Error: Cannot find module '/app/src/currencyservice/dist/data/currency_conversion.json'\nRequire stack:\n- /app/src/currencyservice/dist/server.js"}
