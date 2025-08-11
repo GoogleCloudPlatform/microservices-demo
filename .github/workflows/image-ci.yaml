@@ -36,6 +36,8 @@ jobs:
 
   build_and_scan:
     needs: discover_services
+    if: ${{ needs.discover_services.outputs.services != '[]' }}
+
     runs-on: ubuntu-latest
     
     permissions:
