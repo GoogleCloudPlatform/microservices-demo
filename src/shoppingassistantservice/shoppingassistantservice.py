@@ -93,6 +93,7 @@ def create_app():
         print(f"Retrieved documents: {len(docs)}")
         #Prepare relevant documents for inclusion in final prompt
         relevant_docs = ""
+        talkTogemini()
         for doc in docs:
             doc_details = doc.to_json()
             print(f"Adding relevant document to prompt context: {doc_details}")
