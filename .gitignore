@@ -33,3 +33,5 @@ vendor/
 *.secrets
 secrets.yml
 secret.yml
+*.tfvars
+.terraform/
