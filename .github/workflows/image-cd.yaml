@@ -35,6 +35,8 @@ jobs:
 
   push_images:
     needs: discover_services
+    if: ${{ needs.discover_services.outputs.services != '[]' }}
+
     runs-on: ubuntu-latest
 
     strategy:
@@ -42,12 +44,6 @@ jobs:
         service: ${{ fromJson(needs.discover_services.outputs.services) }}
 
     steps:
-      - name: Early exit if no services
-        if: ${{ matrix.service == '' }}
-        run: |
-          echo "No services to build or scan. Exiting."
-          exit 0
-
       - uses: actions/checkout@v4
 
       - name: Configure AWS credentials
