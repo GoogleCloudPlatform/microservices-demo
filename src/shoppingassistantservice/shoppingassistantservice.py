@@ -67,7 +67,7 @@ def create_app():
         print("Beginning RAG call")
         prompt = request.json['message']
         prompt = unquote(prompt)
-
+        talkToGemini()
         # Step 1 – Get a room description from Gemini-vision-pro
         llm_vision = ChatGoogleGenerativeAI(model="gemini-1.5-flash")
         message = HumanMessage(
