@@ -23,15 +23,14 @@ jobs:
         run: |
           SERVICES=$(find microservices-demo/src -mindepth 1 -maxdepth 1 -type d -exec test -f "{}/Dockerfile" \; -print | xargs -n1 basename || true)
           if [ -z "$SERVICES" ]; then
+            echo "  No Dockerfiles found in microservices-demo/src"
             SERVICES_JSON="[]"
           else
             SERVICES_JSON=$(echo "$SERVICES" | jq -R . | jq -sc .)
           fi
           
-          echo "=================================="
-          echo "Detected services: $SERVICES_JSON"
-          echo "=================================="
-
+          echo "    Detected services: $SERVICES_JSON"
+          echo "====================================="
           echo "services=$SERVICES_JSON" >> "$GITHUB_OUTPUT"
 
   build_and_scan:
