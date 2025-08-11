@@ -35,7 +35,7 @@ global:
 # We only need to define values that are unique to the cart service.
 
 adservice:
-  replicaCount: 2
+  replicaCount: 1
 cart:
   replicaCount: 2
   secrets:
