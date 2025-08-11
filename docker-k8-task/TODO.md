@@ -2,11 +2,12 @@
 
 1. Create GitHub Actions pipeline to check container images and push them to repository
     * build container images with correct tags
-        * find services for build
-        * 
-    * scan with sec tools (Trivy, Checkov, Docker Scout)
-    * scan manifests with sec tools in pipeline
-    * push images to repository
+        * find services for build [DONE]
+        * move config to one place (envs) [DONE]
+    * scan with sec tools (Trivy, Checkov, Docker Scout) [DONE]
+    * outpu scans to Security tab on GitHub [IN PROGRESS]
+    * scan manifests with sec tools in pipeline [IN FUTURE]
+    * push images to repository [DONE]
 2. Contenerise each app for minimal image
 3. Create GitHub Actions pipeline for infrastructure with GitOps approach
 4. Create infrastructure on Cloud:

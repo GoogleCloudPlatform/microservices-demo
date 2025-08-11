@@ -1,0 +1,70 @@
+name: Container Image CD
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+env:
+  ECR_REGISTRY: ${{ secrets.ECR_REGISTRY }}
+  AWS_REGION: ${{ secrets.AWS_REGION }}
+  AWS_ROLE_TO_ASSUME: ${{ secrets.AWS_ROLE_TO_ASSUME }}
+
+jobs:
+  discover_services:
+    runs-on: ubuntu-latest
+    outputs:
+      services: ${{ steps.discover_services.outputs.services }}
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Discover services
+        id: discover_services
+        run: |
+          SERVICES=$(find microservices-demo/src -mindepth 1 -maxdepth 1 -type d -exec test -f "{}/Dockerfile" \; -print | xargs -n1 basename || true)
+          if [ -z "$SERVICES" ]; then
+            echo "  No Dockerfiles found in microservices-demo/src"
+            SERVICES_JSON="[]"
+          else
+            SERVICES_JSON=$(echo "$SERVICES" | jq -R . | jq -sc .)
+          fi
+          
+          echo "    Detected services: $SERVICES_JSON"
+          echo "====================================="
+          echo "services=$SERVICES_JSON" >> "$GITHUB_OUTPUT"
+
+  push_images:
+    needs: discover_services
+    if: ${{ needs.discover_services.outputs.services != '[]' }}
+
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        service: ${{ fromJson(needs.discover_services.outputs.services) }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ env.AWS_ROLE_TO_ASSUME }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./microservices-demo/src/${{ matrix.service }}
+          file: ./microservices-demo/src/${{ matrix.service }}/Dockerfile
+          platforms: linux/amd64
+          push: true
+          tags: |
+            ${{ env.ECR_REGISTRY }}/${{ matrix.service }}:${{ github.ref_name }}
+            ${{ env.ECR_REGISTRY }}/${{ matrix.service }}:latest
