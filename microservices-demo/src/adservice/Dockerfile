@@ -7,17 +7,10 @@ COPY src /app/src
 
 RUN ./gradlew installDist --no-daemon
 
-FROM alpine AS runtime
-
-RUN apk add --no-cache openjdk21-jre-headless
+FROM gcr.io/distroless/java21-debian12 AS runtime
 
 WORKDIR /app
-COPY --from=build /app/build/install/hipstershop /app/
+COPY --from=build /app/build/install/hipstershop /app
 
-RUN addgroup -g 1000 adservice && \
-    adduser -u 1000 -G adservice -s /bin/sh -D adservice && \
-    chown -R adservice:adservice /app
-
-USER adservice
 EXPOSE 9555
 ENTRYPOINT ["bin/AdService"]
