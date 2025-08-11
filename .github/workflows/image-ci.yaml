@@ -21,8 +21,12 @@ jobs:
       - name: Discover services
         id: discover_services
         run: |
-          SERVICES=$(find microservices-demo/src -mindepth 1 -maxdepth 1 -type d -exec test -f "{}/Dockerfile" \; -print | xargs -n1 basename)
-          SERVICES_JSON=$(echo "$SERVICES" | jq -R . | jq -sc .)
+          SERVICES=$(find microservices-demo/src -mindepth 1 -maxdepth 1 -type d -exec test -f "{}/Dockerfile" \; -print | xargs -n1 basename || true)
+          if [ -z "$SERVICES" ]; then
+            SERVICES_JSON="[]"
+          else
+            SERVICES_JSON=$(echo "$SERVICES" | jq -R . | jq -sc .)
+          fi
           
           echo "=================================="
           echo "Detected services: $SERVICES_JSON"
