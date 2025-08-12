@@ -54,14 +54,19 @@ This doc explains how to build and run the Online Boutique source code locally u
     gcloud auth configure-docker -q 
     ```
 
-3.  In the root of this repository, run `skaffold run --default-repo=us-docker.pkg.dev/[PROJECT_ID]/microservices-demo`,
-    where [PROJECT_ID] is your GCP project ID.
+3.  In the root of this repository, run:
+
+    ```
+    skaffold run --default-repo=us-docker.pkg.dev/PROJECT_ID/microservices-demo
+    ```
+    
+    Where `PROJECT_ID` is replaced by your Google Cloud project ID.
 
     This command:
 
-    - builds the container images
-    - pushes them to AR
-    - applies the `./kubernetes-manifests` deploying the application to
+    - Builds the container images.
+    - Pushes them to AR.
+    - Applies the `./kubernetes-manifests` deploying the application to
       Kubernetes.
 
     **Troubleshooting:** If you get "No space left on device" error on Google
@@ -114,6 +119,11 @@ This doc explains how to build and run the Online Boutique source code locally u
 
 6. Navigate to `localhost:8080` to access the web frontend.
 
+## Adding a new microservice
+
+In general, the set of core microservices for Online Boutique is fairly complete and unlikely to change in the future, but it can be useful to add an additional optional microservice that can be deployed to complement the core services.
+
+See the [Adding a new microservice](adding-new-microservice.md) guide for instructions on how to add a new microservice.
 
 ## Cleanup
 
