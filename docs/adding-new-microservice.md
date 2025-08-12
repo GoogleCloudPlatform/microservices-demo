@@ -46,7 +46,13 @@ Add your newly created service to the root skaffold file so the images build cor
 
 The file is available here: https://github.com/GoogleCloudPlatform/microservices-demo/blob/main/skaffold.yaml
 
-## 7. Update the documentation
+## 7. Update the Helm chart
+
+Add your newly created service to the Helm chart templates and default values.
+
+The chart is available here: https://github.com/GoogleCloudPlatform/microservices-demo/tree/main/helm-chart
+
+## 8. Update the documentation
 
 Finally, update the project's documentation to reflect the addition of your new microservice. This may include:
 
