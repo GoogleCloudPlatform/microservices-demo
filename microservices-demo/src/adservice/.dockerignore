@@ -1,0 +1,5 @@
+Dockerfile*
+**/gradlew.bat
+README.md
+**/.gradle
+**/build
