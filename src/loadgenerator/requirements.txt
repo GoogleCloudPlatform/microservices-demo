@@ -10,11 +10,11 @@ blinker==1.9.0
     # via flask
 brotli==1.1.0
     # via geventhttpclient
-certifi==2025.7.14
+certifi==2025.8.3
     # via
     #   geventhttpclient
     #   requests
-charset-normalizer==3.4.2
+charset-normalizer==3.4.3
     # via requests
 click==8.2.1
     # via flask
@@ -22,7 +22,7 @@ configargparse==1.7.1
     # via
     #   locust
     #   locust-cloud
-faker==37.4.2
+faker==37.5.3
     # via -r requirements.in
 flask==3.1.1
     # via
@@ -40,7 +40,7 @@ gevent==25.5.1
     #   locust-cloud
 geventhttpclient==2.3.4
     # via locust
-greenlet==3.2.3
+greenlet==3.2.4
     # via gevent
 h11==0.16.0
     # via wsproto
@@ -50,7 +50,7 @@ itsdangerous==2.2.0
     # via flask
 jinja2==3.1.6
     # via flask
-locust==2.37.14
+locust==2.38.0
     # via -r requirements.in
 locust-cloud==1.26.3
     # via locust
@@ -71,7 +71,7 @@ python-engineio==4.12.2
     #   python-socketio
 python-socketio[client]==5.13.0
     # via locust-cloud
-pyzmq==27.0.0
+pyzmq==27.0.1
     # via locust
 requests==2.32.4
     # via
