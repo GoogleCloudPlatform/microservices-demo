@@ -1,0 +1,15 @@
+capsule_id: P-101
+applies_to: ["service://boutique/checkoutservice"]
+rules:
+  - id: sec.pii.logs
+    expr: "no_log_fields in ['email','phone','card_number']"
+    severity: critical
+    waiver_allowed: false
+  - id: test.coverage
+    expr: "statement>=0.80 && branch>=0.70"
+    severity: medium
+    waiver_allowed: true
+  - id: feature.refund_window
+    expr: "env['REFUND_WINDOW_MINUTES'] == '30' || feature_flag('CHECKOUT_EU_REFUND_ENABLED') == 'true'"
+    severity: high
+    waiver_allowed: true

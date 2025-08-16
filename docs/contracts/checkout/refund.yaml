@@ -1,0 +1,6 @@
+endpoint: POST /api/refund
+request:
+  fields: [order_id]
+response:
+  fields: [eligible:boolean, reason?:string]
+notes: "No PII in request or logs. Authorization context supplies customer_id."
