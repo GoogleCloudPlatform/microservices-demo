@@ -1,0 +1,19 @@
+name: Unit tests (checkoutservice)
+on:
+  pull_request:
+    branches: ["**"]
+jobs:
+  go:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with: { go-version: "1.22" }
+      - name: Test checkoutservice
+        run: |
+          cd src/checkoutservice
+          go test ./... -coverprofile=cover.out
+      - uses: actions/upload-artifact@v4
+        with:
+          name: coverage-checkout
+          path: src/checkoutservice/cover.out
