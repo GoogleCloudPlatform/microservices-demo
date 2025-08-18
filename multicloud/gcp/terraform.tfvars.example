@@ -1,0 +1,11 @@
+# terraform.tfvars.example - GCP Configuration
+
+# Your GCP project ID where resources will be created
+# Replace with your actual project ID
+project_id = "your-gcp-project-id"
+
+# Note: This file is used by both crm.tf and inventory.tf
+# Make sure your project has the following APIs enabled:
+# - Compute Engine API
+# - Service Networking API (required for inventory PSC)
+# - Cloud Load Balancing API (required for inventory load balancer) 
