@@ -38,6 +38,7 @@ module "enable_google_apis" {
 
 resource "google_compute_network" "online-boutique-vpc" {
   name = "online-boutique-vpc"
+  auto_create_subnetworks = false
 }
 
 resource "google_compute_subnetwork" "subnet1" {
