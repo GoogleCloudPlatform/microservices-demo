@@ -188,7 +188,7 @@ resource "google_compute_network_peering" "remote_to_ob" {
 }
 
 # 7. Create VPC peering from online-boutique-vpc VPC to crm-vpc  
-resource "google_compute_network_peering" "ob_to_crm" {
+resource "google_compute_network_peering" "ob_to_remote" {
   name         = "ob-to-crm-peering"
   network      = "projects/${var.peering_project_id}/global/networks/online-boutique-vpc"
   peer_network = "projects/${var.peering_project_id}/global/networks/${peering_vpc_network}"
