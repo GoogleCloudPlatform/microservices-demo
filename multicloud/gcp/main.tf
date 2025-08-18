@@ -14,6 +14,16 @@ variable "project_id" {
   type        = string
 }
 
+variable "peering_project_id" {
+  description = "GCP project with remote network you want to peer with"
+  type = string
+}
+
+variable "peering_vpc_network" {
+  description = "Valid name of VPC network in remote project"
+  type = string
+}
+
 provider "google" {
   project = var.project_id
   region  = "us-central1"
