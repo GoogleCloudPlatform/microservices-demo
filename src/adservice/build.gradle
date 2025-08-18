@@ -14,9 +14,9 @@ description = 'Ad Service'
 group = "adservice"
 version = "0.1.0-SNAPSHOT"
 
-def grpcVersion = "1.73.0"
-def jacksonCoreVersion = "2.19.1"
-def jacksonDatabindVersion = "2.19.1"
+def grpcVersion = "1.74.0"
+def jacksonCoreVersion = "2.19.2"
+def jacksonDatabindVersion = "2.19.2"
 def protocVersion = "4.31.1"
 
 tasks.withType(JavaCompile) {
@@ -33,7 +33,7 @@ dependencies {
     if (speed) {
         implementation fileTree(dir: offlineCompile, include: '*.jar')
     } else {
-        implementation "com.google.api.grpc:proto-google-common-protos:2.59.1",
+        implementation "com.google.api.grpc:proto-google-common-protos:2.60.0",
                 "javax.annotation:javax.annotation-api:1.3.2",
                 "io.grpc:grpc-protobuf:${grpcVersion}",
                 "io.grpc:grpc-stub:${grpcVersion}",
@@ -67,7 +67,7 @@ protobuf {
 }
 
 googleJavaFormat {
-    toolVersion '1.27.0'
+    toolVersion '1.28.0'
 }
 
 // Inform IDEs like IntelliJ IDEA, Eclipse or NetBeans about the generated code.
