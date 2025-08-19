@@ -34,7 +34,7 @@ metadata:
   namespace: {{ .Release.Namespace }}
   labels:
     app: {{ .Values.checkoutService.name }}
-    tags.datadoghq.com/service: "CheckoutService"
+    tags.datadoghq.com/service: {{ .Values.checkoutService.name }}
 spec:
   selector:
     matchLabels:
@@ -43,6 +43,7 @@ spec:
     metadata:
       labels:
         app: {{ .Values.checkoutService.name }}
+        tags.datadoghq.com/service: {{ .Values.checkoutService.name }}
     spec:
       {{- if .Values.serviceAccounts.create }}
       serviceAccountName: {{ .Values.checkoutService.name }}
