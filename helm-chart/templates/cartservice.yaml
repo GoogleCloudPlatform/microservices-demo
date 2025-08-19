@@ -32,7 +32,7 @@ metadata:
   namespace: {{ .Release.Namespace }}
   labels:
     app: {{ .Values.cartService.name }}
-    tags.datadoghq.com/dd_service: {{ .Values.cartService.name }}
+    tags.datadoghq.com/service: {{ .Values.cartService.name }}
 spec:
   selector:
     matchLabels:
@@ -47,7 +47,7 @@ spec:
       {{- end }}
       labels:
         app: {{ .Values.cartService.name }}
-        tags.datadoghq.com/dd_service: {{ .Values.cartService.name }}
+        tags.datadoghq.com/service: {{ .Values.cartService.name }}
     spec:
       {{- if .Values.serviceAccounts.create }}
       serviceAccountName: {{ .Values.cartService.name }}

@@ -34,7 +34,7 @@ metadata:
   namespace: {{ .Release.Namespace }}
   labels:
     app: {{ .Values.frontend.name }}
-    tags.datadoghq.com/dd_service: {{ .Values.frontend.name }}
+    tags.datadoghq.com/service: {{ .Values.frontend.name }}
 spec:
   selector:
     matchLabels:
@@ -43,7 +43,7 @@ spec:
     metadata:
       labels:
         app: {{ .Values.frontend.name }}
-        tags.datadoghq.com/dd_service: {{ .Values.frontend.name }}
+        tags.datadoghq.com/service: {{ .Values.frontend.name }}
       annotations:
         sidecar.istio.io/rewriteAppHTTPProbers: "true"
     spec:

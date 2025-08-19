@@ -33,7 +33,7 @@ metadata:
   name: {{ .Values.opentelemetryCollector.name }}
   namespace: {{ .Release.Namespace }}
   labels:
-    tags.datadoghq.com/dd_service: {{ .Values.opentelemetryCollector.name }}
+    tags.datadoghq.com/service: {{ .Values.opentelemetryCollector.name }}
 spec:
   replicas: 1
   selector:
@@ -43,7 +43,7 @@ spec:
     metadata:
       labels:
         app: {{ .Values.opentelemetryCollector.name }}
-        tags.datadoghq.com/dd_service: {{ .Values.opentelemetryCollector.name }}
+        tags.datadoghq.com/service: {{ .Values.opentelemetryCollector.name }}
     spec:
       {{- if .Values.serviceAccounts.create }}
       serviceAccountName: {{ .Values.opentelemetryCollector.name }}
