@@ -93,6 +93,10 @@ spec:
         {{- end }}
         - name: EXTRA_LATENCY
           value: {{ .Values.productCatalogService.extraLatency }}
+        - name: DD_SERVICE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.labels['tags.datadoghq.com/service']
         readinessProbe:
           grpc:
             port: 3550

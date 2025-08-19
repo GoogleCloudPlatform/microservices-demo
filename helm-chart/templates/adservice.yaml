@@ -77,6 +77,10 @@ spec:
         env:
         - name: PORT
           value: "9555"
+        - name: DD_SERVICE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.labels['tags.datadoghq.com/service']
         resources:
           {{- toYaml .Values.adService.resources | nindent 10 }}
         readinessProbe:

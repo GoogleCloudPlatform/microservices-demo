@@ -92,6 +92,10 @@ spec:
         - name: DISABLE_PROFILER
           value: "1"
         {{- end }}
+        - name: DD_SERVICE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.labels['tags.datadoghq.com/service']
         readinessProbe:
           grpc:
             port: 7000

@@ -103,6 +103,11 @@ spec:
         volumeMounts:
         - name: collector-gateway-config
           mountPath: /conf
+        env:
+        - name: DD_SERVICE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.labels['tags.datadoghq.com/service']
       volumes:
       # Simple ConfigMap volume with template file
       - name: collector-gateway-config-template

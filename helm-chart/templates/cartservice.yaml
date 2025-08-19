@@ -85,6 +85,10 @@ spec:
         - name: REDIS_ADDR
         {{- end }}
           value: {{ .Values.cartDatabase.connectionString | quote }}
+        - name: DD_SERVICE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.labels['tags.datadoghq.com/service']
         resources:
           {{- toYaml .Values.cartService.resources | nindent 10 }}
         readinessProbe:

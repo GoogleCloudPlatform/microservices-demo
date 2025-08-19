@@ -108,6 +108,10 @@ spec:
         - name: ENABLE_PROFILER
           value: "1"
         {{- end }}
+        - name: DD_SERVICE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.labels['tags.datadoghq.com/service']
         resources:
           {{- toYaml .Values.checkoutService.resources | nindent 10 }}
 ---
