@@ -34,6 +34,7 @@ metadata:
   namespace: {{ .Release.Namespace }}
   labels:
     app: {{ .Values.emailService.name }}
+    tags.datadoghq.com/service: "Email Service"
 spec:
   selector:
     matchLabels:

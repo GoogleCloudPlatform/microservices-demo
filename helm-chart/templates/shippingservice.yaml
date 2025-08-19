@@ -34,6 +34,7 @@ metadata:
   namespace: {{ .Release.Namespace }}
   labels:
     app: {{ .Values.shippingService.name }}
+    tags.datadoghq.com/service: "Shipping Service"
 spec:
   selector:
     matchLabels:

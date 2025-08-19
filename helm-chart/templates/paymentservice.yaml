@@ -34,6 +34,7 @@ metadata:
   namespace: {{ .Release.Namespace }}
   labels:
     app: {{ .Values.paymentService.name }}
+    tags.datadoghq.com/service: "Payment Service"
 spec:
   selector:
     matchLabels:

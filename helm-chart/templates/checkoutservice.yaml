@@ -34,6 +34,7 @@ metadata:
   namespace: {{ .Release.Namespace }}
   labels:
     app: {{ .Values.checkoutService.name }}
+    tags.datadoghq.com/service: "Checkout Service"
 spec:
   selector:
     matchLabels:

@@ -32,6 +32,8 @@ kind: Deployment
 metadata:
   name: {{ .Values.opentelemetryCollector.name }}
   namespace: {{ .Release.Namespace }}
+  labels:
+    tags.datadoghq.com/service: "OTel Service"
 spec:
   replicas: 1
   selector:
@@ -138,7 +140,7 @@ data:
   collector-gateway-config-template.yaml: |
     receivers:
       otlp:
-        protocols: 
+        protocols:
           grpc:
     processors:
     exporters:

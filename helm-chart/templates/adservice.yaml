@@ -34,6 +34,7 @@ metadata:
   namespace: {{ .Release.Namespace }}
   labels:
     app: {{ .Values.adService.name }}
+    tags.datadoghq.com/service: "Ads Service"
 spec:
   selector:
     matchLabels:

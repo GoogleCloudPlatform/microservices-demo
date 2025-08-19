@@ -34,6 +34,7 @@ metadata:
   namespace: {{ .Release.Namespace }}
   labels:
     app: {{ .Values.frontend.name }}
+    tags.datadoghq.com/service: "Frontend Service"
 spec:
   selector:
     matchLabels:
