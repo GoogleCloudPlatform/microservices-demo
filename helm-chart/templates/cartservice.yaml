@@ -32,7 +32,7 @@ metadata:
   namespace: {{ .Release.Namespace }}
   labels:
     app: {{ .Values.cartService.name }}
-    tags.datadoghq.com/service: "Cart Service"
+    tags.datadoghq.com/service: "CartService"
 spec:
   selector:
     matchLabels:

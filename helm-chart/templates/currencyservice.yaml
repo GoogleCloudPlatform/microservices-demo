@@ -34,7 +34,7 @@ metadata:
   namespace: {{ .Release.Namespace }}
   labels:
     app: {{ .Values.currencyService.name }}
-    tags.datadoghq.com/service: "Currency Service"
+    tags.datadoghq.com/service: "CurrencyService"
 spec:
   selector:
     matchLabels:

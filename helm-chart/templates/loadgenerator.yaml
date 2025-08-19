@@ -34,7 +34,7 @@ metadata:
   namespace: {{ .Release.Namespace }}
   labels:
     app: {{ .Values.loadGenerator.name }}
-    tags.datadoghq.com/service: "Load Gen Service"
+    tags.datadoghq.com/service: "LoadGenService"
 spec:
   selector:
     matchLabels:

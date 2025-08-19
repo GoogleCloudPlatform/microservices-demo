@@ -33,7 +33,7 @@ metadata:
   name: {{ .Values.opentelemetryCollector.name }}
   namespace: {{ .Release.Namespace }}
   labels:
-    tags.datadoghq.com/service: "OTel Service"
+    tags.datadoghq.com/service: "OTelService"
 spec:
   replicas: 1
   selector:
