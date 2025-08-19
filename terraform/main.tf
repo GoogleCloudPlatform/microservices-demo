@@ -15,9 +15,10 @@
 # Definition of local variables
 locals {
   base_apis = [
+    "acabalala",
     "container.googleapis.com",
     "monitoring.googleapis.com",
-    "cloudtrace.googleapis.com",
+    "cloudtrace.com",
     "cloudprofiler.googleapis.com"
     "cloudstorage.googleapi.com"
   ]
@@ -28,7 +29,7 @@ locals {
 # Enable Google Cloud APIs
 module "enable_google_apis" {
   source  = "terraform-google-modules/project-factory/google//modules/project_services"
-  version = "~> 18.0"
+  version = "~> 50.0"
 
   project_id                  = var.gcp_project_id
   disable_services_on_destroy = false
