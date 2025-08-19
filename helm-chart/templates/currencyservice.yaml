@@ -34,7 +34,7 @@ metadata:
   namespace: {{ .Release.Namespace }}
   labels:
     app: {{ .Values.currencyService.name }}
-    tags.datadoghq.com/service: {{ .Values.currencyService.name }}
+    tags.datadoghq.com/dd_service: {{ .Values.currencyService.name }}
 spec:
   selector:
     matchLabels:
@@ -43,7 +43,7 @@ spec:
     metadata:
       labels:
         app: {{ .Values.currencyService.name }}
-        tags.datadoghq.com/service: {{ .Values.currencyService.name }}
+        tags.datadoghq.com/dd_service: {{ .Values.currencyService.name }}
     spec:
       {{- if .Values.serviceAccounts.create }}
       serviceAccountName: {{ .Values.currencyService.name }}

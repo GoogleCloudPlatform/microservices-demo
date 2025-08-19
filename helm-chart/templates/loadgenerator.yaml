@@ -34,7 +34,7 @@ metadata:
   namespace: {{ .Release.Namespace }}
   labels:
     app: {{ .Values.loadGenerator.name }}
-    tags.datadoghq.com/service: {{ .Values.loadGenerator.name }}
+    tags.datadoghq.com/dd_service: {{ .Values.loadGenerator.name }}
 spec:
   selector:
     matchLabels:
@@ -44,7 +44,7 @@ spec:
     metadata:
       labels:
         app: {{ .Values.loadGenerator.name }}
-        tags.datadoghq.com/service: {{ .Values.loadGenerator.name }}
+        tags.datadoghq.com/dd_service: {{ .Values.loadGenerator.name }}
       annotations:
         sidecar.istio.io/rewriteAppHTTPProbers: "true"
     spec:

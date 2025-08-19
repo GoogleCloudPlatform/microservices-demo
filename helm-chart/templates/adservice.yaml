@@ -34,7 +34,7 @@ metadata:
   namespace: {{ .Release.Namespace }}
   labels:
     app: {{ .Values.adService.name }}
-    tags.datadoghq.com/service: {{ .Values.adService.name }}
+    tags.datadoghq.com/dd_service: {{ .Values.adService.name }}
 spec:
   selector:
     matchLabels:
@@ -43,7 +43,7 @@ spec:
     metadata:
       labels:
         app: {{ .Values.adService.name }}
-        tags.datadoghq.com/service: {{ .Values.adService.name }}
+        tags.datadoghq.com/dd_service: {{ .Values.adService.name }}
     spec:
       {{- if .Values.serviceAccounts.create }}
       serviceAccountName: {{ .Values.adService.name }}

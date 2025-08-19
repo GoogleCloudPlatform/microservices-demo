@@ -34,7 +34,7 @@ metadata:
   namespace: {{ .Release.Namespace }}
   labels:
     app: {{ .Values.emailService.name }}
-    tags.datadoghq.com/service: {{ .Values.emailService.name }}
+    tags.datadoghq.com/dd_service: {{ .Values.emailService.name }}
 spec:
   selector:
     matchLabels:
@@ -43,7 +43,7 @@ spec:
     metadata:
       labels:
         app: {{ .Values.emailService.name }}
-        tags.datadoghq.com/service: {{ .Values.emailService.name }}
+        tags.datadoghq.com/dd_service: {{ .Values.emailService.name }}
     spec:
       {{- if .Values.serviceAccounts.create }}
       serviceAccountName: {{ .Values.emailService.name }}
