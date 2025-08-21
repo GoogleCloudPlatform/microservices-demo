@@ -633,3 +633,106 @@ func stringinSlice(slice []string, val string) bool {
 	}
 	return false
 }
+
+// AI Stylist Handlers
+
+func (fe *frontendServer) aiStylistHandler(w http.ResponseWriter, r *http.Request) {
+	log := r.Context().Value(ctxKeyLog{}).(logrus.FieldLogger)
+
+	if err := templates.ExecuteTemplate(w, "ai_stylist", injectCommonTemplateData(r, map[string]interface{}{
+		"show_currency": false,
+		"currencies":    []string{}, // Empty currencies since we don't need them
+	})); err != nil {
+		log.Println(err)
+	}
+}
+
+func (fe *frontendServer) analyzeStyleHandler(w http.ResponseWriter, r *http.Request) {
+	log := r.Context().Value(ctxKeyLog{}).(logrus.FieldLogger)
+	
+	// Proxy request to AI Stylist Service
+	url := "http://" + fe.aiStylistSvcAddr + "/analyze-style"
+	req, err := http.NewRequest(http.MethodPost, url, r.Body)
+	if err != nil {
+		renderHTTPError(log, r, w, errors.Wrap(err, "failed to create request"), http.StatusInternalServerError)
+		return
+	}
+	
+	// Copy headers
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Accept", "application/json")
+	
+	// Forward request
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		renderHTTPError(log, r, w, errors.Wrap(err, "failed to send request"), http.StatusInternalServerError)
+		return
+	}
+	defer resp.Body.Close()
+	
+	// Copy response
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(resp.StatusCode)
+	io.Copy(w, resp.Body)
+}
+
+func (fe *frontendServer) compareProductsHandler(w http.ResponseWriter, r *http.Request) {
+	log := r.Context().Value(ctxKeyLog{}).(logrus.FieldLogger)
+	
+	// Proxy request to AI Stylist Service
+	url := "http://" + fe.aiStylistSvcAddr + "/compare-products"
+	req, err := http.NewRequest(http.MethodPost, url, r.Body)
+	if err != nil {
+		renderHTTPError(log, r, w, errors.Wrap(err, "failed to create request"), http.StatusInternalServerError)
+		return
+	}
+	
+	// Copy headers
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Accept", "application/json")
+	
+	// Forward request
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		renderHTTPError(log, r, w, errors.Wrap(err, "failed to send request"), http.StatusInternalServerError)
+		return
+	}
+	defer resp.Body.Close()
+	
+	// Copy response
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(resp.StatusCode)
+	io.Copy(w, resp.Body)
+}
+
+func (fe *frontendServer) voiceStylistHandler(w http.ResponseWriter, r *http.Request) {
+	log := r.Context().Value(ctxKeyLog{}).(logrus.FieldLogger)
+	
+	// Proxy request to AI Stylist Service
+	url := "http://" + fe.aiStylistSvcAddr + "/voice-stylist"
+	req, err := http.NewRequest(http.MethodPost, url, r.Body)
+	if err != nil {
+		renderHTTPError(log, r, w, errors.Wrap(err, "failed to create request"), http.StatusInternalServerError)
+		return
+	}
+	
+	// Copy headers
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Accept", "application/json")
+	
+	// Forward request
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		renderHTTPError(log, r, w, errors.Wrap(err, "failed to send request"), http.StatusInternalServerError)
+		return
+	}
+	defer resp.Body.Close()
+	
+	// Copy response
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(resp.StatusCode)
+	io.Copy(w, resp.Body)
+}

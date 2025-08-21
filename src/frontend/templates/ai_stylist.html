@@ -1,0 +1,439 @@
+<!--
+ Copyright 2020 Google LLC
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+-->
+
+{{ define "ai_quanBuy" }}
+
+{{ template "header" . }}
+<div {{ with $.platform_css }} class="{{.}}" {{ end }}>
+  <span class="platform-flag">
+    {{$.platform_name}}
+  </span>
+</div>
+
+<main role="main">
+  <div class="container">
+    <div class="row">
+      <div class="col-md-12">
+        <h1 class="mb-4">🎨 AI Personal quanBuy</h1>
+        <p class="lead">Get expert fashion advice powered by AI. Upload your photo and let our quanBuy help you look amazing!</p>
+      </div>
+    </div>
+
+    <!-- Main Interface -->
+    <div class="row mb-4">
+      <!-- Photo Upload Section -->
+      <div class="col-md-6">
+        <div class="card h-100">
+          <div class="card-header">
+            <h5>📸 Upload Your Photo</h5>
+          </div>
+          <div class="card-body">
+            <div id="photo-upload-area" class="border border-dashed border-secondary rounded p-4 text-center mb-3" style="min-height: 200px;">
+              <input type="file" id="photo-input" accept="image/*" style="display: none;">
+              <div id="upload-placeholder">
+                <i class="fa fa-camera fa-3x text-muted mb-3"></i>
+                <p>Click to upload or drag and drop your photo</p>
+                <button type="button" id="upload-btn" class="btn btn-primary">📷 Choose Photo</button>
+              </div>
+              <div id="photo-preview" style="display: none;">
+                <img id="preview-image" class="img-fluid rounded" style="max-height: 300px;">
+                <div class="mt-2">
+                  <button type="button" id="change-photo-btn" class="btn btn-secondary btn-sm">Change Photo</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Voice & Questions Section -->
+      <div class="col-md-6">
+        <div class="card h-100">
+          <div class="card-header">
+            <h5>💬 Ask Your quanBuy</h5>
+          </div>
+          <div class="card-body">
+            <div class="mb-3">
+              <label for="user-question" class="form-label">What would you like to know?</label>
+              <textarea id="user-question" class="form-control" rows="3" placeholder="How do I look? What should I add to this outfit? Is this appropriate for work?"></textarea>
+            </div>
+            
+            <div class="row mb-3">
+              <div class="col-md-6">
+                <label for="occasion-select" class="form-label">Occasion</label>
+                <select id="occasion-select" class="form-select">
+                  <option value="">Select occasion...</option>
+                  <option value="work">Work/Business</option>
+                  <option value="casual">Casual</option>
+                  <option value="date">Date Night</option>
+                  <option value="formal">Formal Event</option>
+                  <option value="party">Party</option>
+                </select>
+              </div>
+              <div class="col-md-6">
+                <label for="budget-select" class="form-label">Budget</label>
+                <select id="budget-select" class="form-select">
+                  <option value="">Any budget</option>
+                  <option value="under-50">Under $50</option>
+                  <option value="50-100">$50 - $100</option>
+                  <option value="100-200">$100 - $200</option>
+                  <option value="200-plus">$200+</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <button type="button" id="voice-btn" class="btn btn-outline-primary me-2">
+                🎤 Voice Question
+              </button>
+              <button type="button" id="analyze-btn" class="btn btn-primary">
+                ✨ Get Style Advice
+              </button>
+            </div>
+
+            <!-- Quick Questions -->
+            <div class="mt-3">
+              <h6>Quick Questions:</h6>
+              <div class="d-flex flex-wrap gap-2">
+                <button type="button" class="btn btn-outline-secondary btn-sm quick-question" data-question="How do I look?">How do I look?</button>
+                <button type="button" class="btn btn-outline-secondary btn-sm quick-question" data-question="What accessories should I add?">Add accessories?</button>
+                <button type="button" class="btn btn-outline-secondary btn-sm quick-question" data-question="Is this appropriate for work?">Work appropriate?</button>
+                <button type="button" class="btn btn-outline-secondary btn-sm quick-question" data-question="What shoes would go with this?">Shoe suggestions?</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Results Section -->
+    <div id="results-section" style="display: none;">
+      <div class="row">
+        <div class="col-md-12">
+          <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+              <h5>🎯 Your Style Analysis</h5>
+              <span id="confidence-score" class="badge bg-success"></span>
+            </div>
+            <div class="card-body">
+              <div id="analysis-content">
+                <!-- Analysis results will be inserted here -->
+              </div>
+              
+              <div id="recommendations-section" class="mt-4">
+                <h6>🛍️ Recommended Products</h6>
+                <div id="recommendations-grid" class="row">
+                  <!-- Product recommendations will be inserted here -->
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Loading Spinner -->
+    <div id="loading-spinner" style="display: none;" class="text-center my-5">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Analyzing your style...</span>
+      </div>
+      <p class="mt-3">Our AI quanBuy is analyzing your look...</p>
+    </div>
+  </div>
+</main>
+
+<script>
+// Global variables
+let currentPhoto = null;
+let isVoiceMode = false;
+
+// Initialize event listeners
+document.addEventListener('DOMContentLoaded', function() {
+    initializePhotoUpload();
+    initializeQuickQuestions();
+    initializeAnalyzeButton();
+    initializeVoiceButton();
+});
+
+function initializePhotoUpload() {
+    const uploadBtn = document.getElementById('upload-btn');
+    const photoInput = document.getElementById('photo-input');
+    const uploadArea = document.getElementById('photo-upload-area');
+    const changePhotoBtn = document.getElementById('change-photo-btn');
+
+    uploadBtn.addEventListener('click', () => photoInput.click());
+    changePhotoBtn.addEventListener('click', () => photoInput.click());
+    
+    photoInput.addEventListener('change', handlePhotoUpload);
+    
+    // Drag and drop functionality
+    uploadArea.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        uploadArea.classList.add('border-primary');
+    });
+    
+    uploadArea.addEventListener('dragleave', () => {
+        uploadArea.classList.remove('border-primary');
+    });
+    
+    uploadArea.addEventListener('drop', (e) => {
+        e.preventDefault();
+        uploadArea.classList.remove('border-primary');
+        const files = e.dataTransfer.files;
+        if (files.length > 0) {
+            handlePhotoFile(files[0]);
+        }
+    });
+}
+
+function handlePhotoUpload(event) {
+    const file = event.target.files[0];
+    if (file) {
+        handlePhotoFile(file);
+    }
+}
+
+function handlePhotoFile(file) {
+    if (!file.type.startsWith('image/')) {
+        alert('Please select an image file.');
+        return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        currentPhoto = e.target.result.split(',')[1]; // Remove data:image/jpeg;base64, prefix
+        
+        // Show preview
+        document.getElementById('preview-image').src = e.target.result;
+        document.getElementById('upload-placeholder').style.display = 'none';
+        document.getElementById('photo-preview').style.display = 'block';
+    };
+    reader.readAsDataURL(file);
+}
+
+function initializeQuickQuestions() {
+    const quickQuestionBtns = document.querySelectorAll('.quick-question');
+    quickQuestionBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.getElementById('user-question').value = btn.dataset.question;
+        });
+    });
+}
+
+function initializeAnalyzeButton() {
+    document.getElementById('analyze-btn').addEventListener('click', analyzeStyle);
+}
+
+function initializeVoiceButton() {
+    const voiceBtn = document.getElementById('voice-btn');
+    
+    // Check if browser supports speech recognition
+    if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+        voiceBtn.addEventListener('click', toggleVoiceRecording);
+    } else {
+        voiceBtn.disabled = true;
+        voiceBtn.innerHTML = '🎤 Voice not supported';
+    }
+}
+
+function toggleVoiceRecording() {
+    const voiceBtn = document.getElementById('voice-btn');
+    
+    if (!isVoiceMode) {
+        startVoiceRecording();
+        voiceBtn.innerHTML = '⏹️ Stop Recording';
+        voiceBtn.classList.add('btn-danger');
+        voiceBtn.classList.remove('btn-outline-primary');
+        isVoiceMode = true;
+    } else {
+        stopVoiceRecording();
+        voiceBtn.innerHTML = '🎤 Voice Question';
+        voiceBtn.classList.remove('btn-danger');
+        voiceBtn.classList.add('btn-outline-primary');
+        isVoiceMode = false;
+    }
+}
+
+function startVoiceRecording() {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    const recognition = new SpeechRecognition();
+    
+    recognition.continuous = false;
+    recognition.interimResults = false;
+    recognition.lang = 'en-US';
+    
+    recognition.onresult = function(event) {
+        const transcript = event.results[0][0].transcript;
+        document.getElementById('user-question').value = transcript;
+        toggleVoiceRecording(); // Stop recording
+    };
+    
+    recognition.onerror = function(event) {
+        console.error('Speech recognition error:', event.error);
+        toggleVoiceRecording(); // Stop recording
+    };
+    
+    recognition.start();
+    window.currentRecognition = recognition;
+}
+
+function stopVoiceRecording() {
+    if (window.currentRecognition) {
+        window.currentRecognition.stop();
+    }
+}
+
+async function analyzeStyle() {
+    if (!currentPhoto) {
+        alert('Please upload a photo first!');
+        return;
+    }
+
+    const userQuestion = document.getElementById('user-question').value || 'How do I look?';
+    const occasion = document.getElementById('occasion-select').value;
+    const budget = document.getElementById('budget-select').value;
+
+    // Show loading
+    document.getElementById('loading-spinner').style.display = 'block';
+    document.getElementById('results-section').style.display = 'none';
+
+    try {
+        const response = await fetch('{{ $.baseUrl }}/api/analyze-style', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                image_base64: currentPhoto,
+                user_question: userQuestion,
+                occasion: occasion,
+                budget_range: budget,
+                user_id: 'demo_user' // TODO: Get from session
+            })
+        });
+
+        if (!response.ok) {
+            throw new Error('Analysis failed');
+        }
+
+        const result = await response.json();
+        displayResults(result);
+    } catch (error) {
+        console.error('Analysis error:', error);
+        alert('Sorry, analysis failed. Please try again.');
+    } finally {
+        document.getElementById('loading-spinner').style.display = 'none';
+    }
+}
+
+function displayResults(result) {
+    // Show confidence score
+    const confidencePercent = Math.round(result.confidence_score * 100);
+    document.getElementById('confidence-score').textContent = `${confidencePercent}% Match`;
+
+    // Display analysis
+    document.getElementById('analysis-content').innerHTML = `
+        <div class="analysis-text">
+            ${result.analysis.replace(/\n/g, '<br>')}
+        </div>
+    `;
+
+    // Display recommendations
+    const recommendationsGrid = document.getElementById('recommendations-grid');
+    recommendationsGrid.innerHTML = '';
+    
+    result.recommendations.forEach(product => {
+        const productHtml = `
+            <div class="col-md-4 mb-3">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h6 class="card-title">${product.name}</h6>
+                        <p class="card-text text-success fw-bold">${product.price}</p>
+                        <p class="card-text small">${product.reason}</p>
+                        <a href="{{ $.baseUrl }}/product/${product.id}" class="btn btn-primary btn-sm">View Product</a>
+                        <button type="button" class="btn btn-outline-primary btn-sm" onclick="addToCart('${product.id}')">Add to Cart</button>
+                    </div>
+                </div>
+            </div>
+        `;
+        recommendationsGrid.innerHTML += productHtml;
+    });
+
+    // Show results
+    document.getElementById('results-section').style.display = 'block';
+    document.getElementById('results-section').scrollIntoView({ behavior: 'smooth' });
+}
+
+async function addToCart(productId) {
+    try {
+        const response = await fetch('{{ $.baseUrl }}/cart', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: `product_id=${productId}&quantity=1`
+        });
+
+        if (response.ok) {
+            // Show success feedback
+            const btn = event.target;
+            const originalText = btn.textContent;
+            btn.textContent = 'Added!';
+            btn.disabled = true;
+            setTimeout(() => {
+                btn.textContent = originalText;
+                btn.disabled = false;
+            }, 2000);
+        }
+    } catch (error) {
+        console.error('Add to cart failed:', error);
+    }
+}
+</script>
+
+<style>
+.card {
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.border-dashed {
+    border-style: dashed !important;
+}
+
+#photo-upload-area {
+    cursor: pointer;
+    transition: border-color 0.3s ease;
+}
+
+#photo-upload-area:hover {
+    border-color: #007bff !important;
+}
+
+.analysis-text {
+    line-height: 1.6;
+    white-space: pre-wrap;
+}
+
+.quick-question {
+    margin-bottom: 0.5rem;
+}
+
+#confidence-score {
+    font-size: 0.9rem;
+}
+</style>
+
+{{ end }}

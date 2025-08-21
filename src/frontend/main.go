@@ -85,6 +85,7 @@ type frontendServer struct {
 	collectorConn *grpc.ClientConn
 
 	shoppingAssistantSvcAddr string
+	aiStylistSvcAddr         string
 }
 
 func main() {
@@ -136,6 +137,7 @@ func main() {
 	mustMapEnv(&svc.shippingSvcAddr, "SHIPPING_SERVICE_ADDR")
 	mustMapEnv(&svc.adSvcAddr, "AD_SERVICE_ADDR")
 	mustMapEnv(&svc.shoppingAssistantSvcAddr, "SHOPPING_ASSISTANT_SERVICE_ADDR")
+	mustMapEnv(&svc.aiStylistSvcAddr, "AI_STYLIST_SERVICE_ADDR")
 
 	mustConnGRPC(ctx, &svc.currencySvcConn, svc.currencySvcAddr)
 	mustConnGRPC(ctx, &svc.productCatalogSvcConn, svc.productCatalogSvcAddr)
@@ -155,6 +157,10 @@ func main() {
 	r.HandleFunc(baseUrl + "/logout", svc.logoutHandler).Methods(http.MethodGet)
 	r.HandleFunc(baseUrl + "/cart/checkout", svc.placeOrderHandler).Methods(http.MethodPost)
 	r.HandleFunc(baseUrl + "/assistant", svc.assistantHandler).Methods(http.MethodGet)
+	r.HandleFunc(baseUrl + "/ai-quanBuy", svc.aiStylistHandler).Methods(http.MethodGet)
+	r.HandleFunc(baseUrl + "/api/analyze-style", svc.analyzeStyleHandler).Methods(http.MethodPost)
+	r.HandleFunc(baseUrl + "/api/compare-products", svc.compareProductsHandler).Methods(http.MethodPost)
+	r.HandleFunc(baseUrl + "/api/voice-stylist", svc.voiceStylistHandler).Methods(http.MethodPost)
 	r.PathPrefix(baseUrl + "/static/").Handler(http.StripPrefix(baseUrl + "/static/", http.FileServer(http.Dir("./static/"))))
 	r.HandleFunc(baseUrl + "/robots.txt", func(w http.ResponseWriter, _ *http.Request) { fmt.Fprint(w, "User-agent: *\nDisallow: /") })
 	r.HandleFunc(baseUrl + "/_healthz", func(w http.ResponseWriter, _ *http.Request) { fmt.Fprint(w, "ok") })

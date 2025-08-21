@@ -1,0 +1,10 @@
+fastapi==0.104.1
+uvicorn==0.24.0
+python-multipart==0.0.6
+langchain-google-genai==2.1.9
+langchain-core==0.3.74
+grpcio==1.74.0
+google-api-core==2.25.1
+pillow==11.3.0
+requests==2.32.4
+pydantic==2.11.7

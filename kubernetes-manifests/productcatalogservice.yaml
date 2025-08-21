@@ -43,7 +43,8 @@ spec:
               - ALL
           privileged: false
           readOnlyRootFilesystem: true
-        image: productcatalogservice
+        image: productcatalogservice:latest
+        imagePullPolicy: Never
         ports:
         - containerPort: 3550
         env:
