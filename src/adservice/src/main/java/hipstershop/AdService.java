@@ -104,10 +104,6 @@ public final class AdService {
         } else {
           allAds = service.getRandomAds();
         }
-        if (allAds.isEmpty()) {
-          // Serve random ads.
-          allAds = service.getRandomAds();
-        }
         AdResponse reply = AdResponse.newBuilder().addAllAds(allAds).build();
         responseObserver.onNext(reply);
         responseObserver.onCompleted();
@@ -215,7 +211,7 @@ public final class AdService {
     logger.info("See https://github.com/GoogleCloudPlatform/microservices-demo/issues/422 for more info.");
 
     // TODO(arbrown) Implement OpenTelemetry tracing
-    
+
     logger.info("Tracing enabled - Stackdriver exporter initialized.");
   }
 
