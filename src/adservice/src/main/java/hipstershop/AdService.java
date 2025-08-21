@@ -101,8 +101,6 @@ public final class AdService {
             Collection<Ad> ads = service.getAdsByCategory(req.getContextKeys(i));
             allAds.addAll(ads);
           }
-        } else {
-          allAds = service.getRandomAds();
         }
         AdResponse reply = AdResponse.newBuilder().addAllAds(allAds).build();
         responseObserver.onNext(reply);
