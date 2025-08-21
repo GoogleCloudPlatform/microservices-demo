@@ -29,6 +29,30 @@ variable "region" {
   default     = "us-central1"
 }
 
+variable "zone" {
+  description = "The GCP zone for the furniture VM."
+  type        = string
+  default     = "us-central1-c"
+}
+
+variable "ob_network_name" {
+  description = "The name of the peer VPC network."
+  type        = string
+  default     = "online-boutique-vpc"
+}
+
+variable "ob_subnet_name" {
+  description = "The name of the subnet in the peer VPC."
+  type        = string
+  default     = "subnet1-us-central1"
+}
+
+variable "ob_gke_pod_range" {
+  description = "The CIDR range for the GKE Pods in the peer network."
+  type        = list(string)
+  default     = ["10.69.128.0/17"]
+}
+
 variable "namespace" {
   type        = string
   description = "Kubernetes Namespace in which the Online Boutique resources are to be deployed"
