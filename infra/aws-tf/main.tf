@@ -16,19 +16,25 @@ module "vpc" {
   name                    = var.name
   cidr                    = "10.0.0.0/16"
   azs                     = var.az
-  public_subnets          = ["10.0.0.0/24", "10.0.1.0/24"]
-  enable_nat_gateway      = false
+  public_subnets          = ["10.0.1.0/24", "10.0.2.0/24"]
+  private_subnets         = ["10.0.11.0/24", "10.0.12.0/24"]
+  
+  enable_nat_gateway      = true
+  single_nat_gateway      = true
   enable_dns_support      = true
   enable_dns_hostnames    = true
-  map_public_ip_on_launch = true
 
   public_subnet_tags = {
-    "kubernetes.io/cluster/${var.name}" = "owned"
+    "kubernetes.io/cluster/${var.name}" = "shared"
     "kubernetes.io/role/elb"            = "1"
+  }
+  
+  private_subnet_tags = {
+    "kubernetes.io/cluster/${var.name}" = "owned"
+    "kubernetes.io/role/internal-elb"   = "1"
   }
 
   tags = local.tags
-
 }
 
 # ---------------- EKS ----------------
@@ -40,7 +46,7 @@ module "eks" {
   cluster_version                = "1.29"
   cluster_endpoint_public_access = true
   vpc_id                         = module.vpc.vpc_id
-  subnet_ids                     = module.vpc.public_subnets
+  subnet_ids                     = module.vpc.private_subnets  # Use private subnets
   enable_irsa                    = true
 
   enable_cluster_creator_admin_permissions = true
@@ -50,14 +56,21 @@ module "eks" {
   tags = local.tags
 
   eks_managed_node_groups = {
-    spot = {
+    general = {
       capacity_type  = "ON_DEMAND"
-      instance_types = ["t3.large", "t3a.large"]    # 2 vCPU / 8 GiB
-      desired_size   = 3
-      min_size       = 2
-      max_size       = 5                            # Increased from 4 to 5
-      labels         = { workload = "general" }
-      tags           = local.tags
+      instance_types = ["t3.xlarge", "t3a.xlarge"]  # 4 vCPU / 16 GiB - better for heavy workloads
+      desired_size   = 4    # Increased from 3
+      min_size       = 3    # Increased from 2  
+      max_size       = 6    # Room for scaling
+      
+      labels = { workload = "general" }
+      tags   = local.tags
+      
+      # Enable cluster autoscaler tags
+      tags = merge(local.tags, {
+        "k8s.io/cluster-autoscaler/enabled"                = "true"
+        "k8s.io/cluster-autoscaler/${var.name}"           = "owned"
+      })
     }
   }
 }
@@ -69,10 +82,10 @@ resource "aws_cloudwatch_metric_alarm" "daily_cost_alert" {
   evaluation_periods  = "1"
   metric_name         = "EstimatedCharges"
   namespace           = "AWS/Billing"
-  period              = "86400"  # 24 hours
+  period              = "86400"
   statistic           = "Maximum"
-  threshold           = "50"     # Alert if > $50/day
-  alarm_description   = "Daily AWS cost exceeded $50 for ${var.name} cluster"
+  threshold           = "30"     # Lowered from $50 to $30 for tighter control
+  alarm_description   = "Daily AWS cost exceeded $30 for ${var.name} cluster"
   
   dimensions = {
     Currency = "USD"
@@ -177,40 +190,74 @@ resource "helm_release" "kps" {
   namespace  = kubernetes_namespace.monitoring.metadata[0].name
   repository = "https://prometheus-community.github.io/helm-charts"
   chart      = "kube-prometheus-stack"
-  timeout    = 2400
+  timeout    = 3600  # Increased timeout
   wait       = true
+  
 
   values = [yamlencode({
     admissionWebhooks = { patch = { enabled = false } }
 
-    grafana = {
-      adminUser     = "admin"
-      adminPassword = "Admin123!"
-      service       = { type = "LoadBalancer" }
-      resources = {
-        requests = { cpu = "50m", memory = "128Mi" }
-        limits   = { cpu = "200m", memory = "256Mi" }
-      }
-      additionalDataSources = [
-        { name = "Loki", type = "loki", access = "proxy", url = "http://loki.logging.svc.cluster.local:3100" },
-        { name = "Tempo", type = "tempo", access = "proxy", url = "http://tempo.tracing.svc.cluster.local:3100" }
-      ]
+grafana = {
+  adminUser     = "admin"
+  adminPassword = "Admin123!"
+  service       = { type = "LoadBalancer" }
+
+  # expose /metrics and protect it with basic auth
+  "grafana.ini" = {
+    metrics = {
+      enabled             = true
     }
+  }
+
+  metrics = { enabled = true }
+
+  serviceMonitor = {
+    enabled       = true
+    path          = "/metrics"
+    interval      = "30s"
+    scrapeTimeout = "10s"
+    labels        = { release = "kube-prom" }
+    basicAuth = {
+      username = { name = "kube-prom-grafana", key = "admin-user" }
+      password = { name = "kube-prom-grafana", key = "admin-password" }
+    }
+    jobLabel = "app.kubernetes.io/name"
+  }
+
+  resources = {
+    requests = { cpu = "200m", memory = "512Mi" }
+    limits   = { cpu = "500m", memory = "1Gi" }
+  }
+
+  persistence = {
+    enabled          = true
+    size             = "2Gi"
+    storageClassName = "gp3"
+  }
+
+  additionalDataSources = [
+    { name = "Loki",  type = "loki",  access = "proxy", url = "http://loki.logging.svc.cluster.local:3100" },
+    { name = "Tempo", type = "tempo", access = "proxy", url = "http://tempo.tracing.svc.cluster.local:3100" }
+  ]
+}
 
     prometheus = {
       prometheusSpec = {
-        retention      = "12h"
+        retention      = "24h"  # Increased from 12h
         scrapeInterval = "30s"
+        
+        # Significantly increased Prometheus resources
         resources = {
-          requests = { cpu = "50m", memory = "200Mi" }
-          limits   = { cpu = "200m", memory = "400Mi" }
+          requests = { cpu = "300m", memory = "1Gi" }   # Much higher
+          limits   = { cpu = "1", memory = "2Gi" }      # Better limits
         }
+        
         storageSpec = {
           volumeClaimTemplate = {
             spec = {
               storageClassName = "gp3"
               accessModes      = ["ReadWriteOnce"]
-              resources        = { requests = { storage = "5Gi" } }
+              resources        = { requests = { storage = "20Gi" } }  # Increased storage
             }
           }
         }
@@ -220,39 +267,40 @@ resource "helm_release" "kps" {
     alertmanager = {
       alertmanagerSpec = {
         resources = {
-          requests = { cpu = "25m", memory = "64Mi" }
-          limits   = { cpu = "100m", memory = "128Mi" }
+          requests = { cpu = "50m", memory = "128Mi" }   # Slightly increased
+          limits   = { cpu = "200m", memory = "256Mi" }
         }
         storage = {
           volumeClaimTemplate = {
             spec = {
               storageClassName = "gp3"
               accessModes      = ["ReadWriteOnce"]
-              resources        = { requests = { storage = "1Gi" } }
+              resources        = { requests = { storage = "2Gi" } }
             }
           }
         }
       }
     }
 
+    # Optimized component resources
     kubeStateMetrics = {
       resources = {
-        requests = { cpu = "50m", memory = "120Mi" }
-        limits   = { cpu = "150m", memory = "250Mi" }
+        requests = { cpu = "100m", memory = "200Mi" }  # Increased
+        limits   = { cpu = "300m", memory = "400Mi" }
       }
     }
 
     prometheusOperator = {
       resources = {
-        requests = { cpu = "50m", memory = "100Mi" }
-        limits   = { cpu = "150m", memory = "200Mi" }
+        requests = { cpu = "100m", memory = "200Mi" }  # Increased
+        limits   = { cpu = "300m", memory = "400Mi" }
       }
     }
 
     nodeExporter = {
       resources = {
-        requests = { cpu = "15m", memory = "30Mi" }
-        limits   = { cpu = "50m", memory = "60Mi" }
+        requests = { cpu = "50m", memory = "64Mi" }    # Slightly increased
+        limits   = { cpu = "100m", memory = "128Mi" }
       }
     }
   })]
@@ -290,11 +338,35 @@ resource "helm_release" "loki_stack" {
   namespace  = kubernetes_namespace.logging.metadata[0].name
   repository = "https://grafana.github.io/helm-charts"
   chart      = "loki-stack"
+  timeout    = 2400
 
   values = [yamlencode({
-    loki     = { auth_enabled = false }
-    grafana  = { enabled = false }
-    promtail = { enabled = true }
+    loki = {
+      auth_enabled = false
+      
+      # Add persistence to Loki
+      persistence = {
+        enabled      = true
+        size         = "10Gi"
+        storageClassName = "gp3"
+      }
+      
+      # Resource limits for Loki
+      resources = {
+        requests = { cpu = "100m", memory = "256Mi" }
+        limits   = { cpu = "300m", memory = "512Mi" }
+      }
+    }
+    
+    grafana = { enabled = false }
+    
+    promtail = {
+      enabled = true
+      resources = {
+        requests = { cpu = "50m", memory = "64Mi" }
+        limits   = { cpu = "100m", memory = "128Mi" }
+      }
+    }
   })]
 
   depends_on = [module.eks, kubernetes_namespace.logging]
@@ -306,9 +378,21 @@ resource "helm_release" "tempo" {
   namespace  = kubernetes_namespace.tracing.metadata[0].name
   repository = "https://grafana.github.io/helm-charts"
   chart      = "tempo"
+  timeout    = 2400
 
   values = [yamlencode({
-    persistence = { enabled = false }
+    # Enable persistence for Tempo
+    persistence = {
+      enabled = true
+      size    = "10Gi"
+      storageClassName = "gp3"
+    }
+    
+    # Resource allocation for Tempo
+    resources = {
+      requests = { cpu = "100m", memory = "256Mi" }
+      limits   = { cpu = "300m", memory = "512Mi" }
+    }
   })]
 
   depends_on = [module.eks, kubernetes_namespace.tracing]
@@ -396,18 +480,26 @@ resource "kubectl_manifest" "online_boutique" {
 
 
 # ---------------- Read LB hostnames ----------------
+
+# delay to let ELB DNS publish
+resource "time_sleep" "lb_settle" {
+  depends_on      = [kubectl_manifest.online_boutique]
+  create_duration = "60s"
+}
+
 data "kubernetes_service" "grafana" {
   metadata {
     name      = "kube-prom-grafana"
     namespace = "monitoring"
   }
-  depends_on = [helm_release.kps]
+  depends_on = [time_sleep.lb_settle]
 }
 
+# keep only this one block
 data "kubernetes_service" "frontend" {
   metadata {
     name      = "frontend-external"
     namespace = "default"
   }
-  depends_on = [kubectl_manifest.online_boutique]
+  depends_on = [time_sleep.lb_settle]
 }

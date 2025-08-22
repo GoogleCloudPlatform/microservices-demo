@@ -6,6 +6,13 @@ terraform {
     helm       = { source = "hashicorp/helm", version = "~> 2.13" }
     kubectl    = { source = "gavinbunney/kubectl", version = "~> 1.14" }
   }
+  backend "s3" {
+    bucket         = "tf-state-xebia-shared"
+    key            = "online-boutique/aws-tf/${terraform.workspace}/terraform.tfstate"
+    region         = "ap-south-1"
+    dynamodb_table = "tf-locks-xebia-shared"
+    encrypt        = true
+  }
 }
 
 provider "aws" {
