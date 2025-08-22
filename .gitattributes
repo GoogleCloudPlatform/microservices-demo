@@ -2,3 +2,4 @@
 
 # Converts "CR + LF" to "LF", for all "text" files — for local files on all OSes and files pushed to the remote repo.
 * text=auto eol=lf
+* text=auto eol=lf
