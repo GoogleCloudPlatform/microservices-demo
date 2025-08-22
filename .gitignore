@@ -1,28 +1,67 @@
+# Copyright 2025 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# --- OS / IDE noise ---
 .DS_Store
-.eclipse.buildship.core.prefs
-.gradle/
 .idea/
-.kubernetes-manifests-*/
-.project
-.skaffold-*.yaml
-.terraform.lock.hcl
-.terraform/*
-.venv/
-.vs/
 .vscode/
+.vs/
 *.iml
 *.ipr
 *.iws
-*.pyc
 *.swp
-*.tfstate*
-*.tfvars
 *~
 bin/
 build/
-Dockerfile.pip
-node_modules/
 obj/
 pkg/
-release/wi-kubernetes-manifests.yaml
+
+# Eclipse / Gradle
+.project
+.gradle/
+.eclipse.buildship.core.prefs
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+
+# Node
+node_modules/
+
+# Go / Vendor
 vendor/
+
+# Skaffold / Kubernetes
+.skaffold-*.yaml
+.kubernetes-manifests-*/
+release/wi-kubernetes-manifests.yaml
+
+# Docker
+Dockerfile.pip
+
+# Terraform
+.terraform/
+*.tfstate
+*.tfstate.*
+*.tfvars
+*.tfvars.json
+crash.log
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+
+# Important: keep lock file versioned
+!.terraform.lock.hcl
