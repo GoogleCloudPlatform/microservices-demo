@@ -1,14 +1,18 @@
 terraform {
   required_version = ">= 1.5.0"
-  required_providers {
+   required_providers {
     aws        = { source = "hashicorp/aws", version = "~> 5.0" }
     kubernetes = { source = "hashicorp/kubernetes", version = "~> 2.29" }
     helm       = { source = "hashicorp/helm", version = "~> 2.13" }
-    kubectl    = { source = "gavinbunney/kubectl", version = "~> 1.14" }
+    kubectl = {
+      source = "alekc/kubectl"
+      version = "2.1.3"
+    }
   }
+
   backend "s3" {
     bucket         = "tf-state-xebia-shared"
-    key            = "online-boutique/aws-tf/${terraform.workspace}/terraform.tfstate"
+    key            = "online-boutique/aws-tf/terraform.tfstate" # no variables allowed
     region         = "ap-south-1"
     dynamodb_table = "tf-locks-xebia-shared"
     encrypt        = true
