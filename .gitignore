@@ -1,28 +1,53 @@
+# --- OS / IDE noise ---
 .DS_Store
-.eclipse.buildship.core.prefs
-.gradle/
 .idea/
-.kubernetes-manifests-*/
-.project
-.skaffold-*.yaml
-.terraform.lock.hcl
-.terraform/*
-.venv/
-.vs/
 .vscode/
+.vs/
 *.iml
 *.ipr
 *.iws
-*.pyc
 *.swp
-*.tfstate*
-*.tfvars
 *~
 bin/
 build/
-Dockerfile.pip
-node_modules/
 obj/
 pkg/
-release/wi-kubernetes-manifests.yaml
+
+# Eclipse / Gradle
+.project
+.gradle/
+.eclipse.buildship.core.prefs
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+
+# Node
+node_modules/
+
+# Go / Vendor
 vendor/
+
+# Skaffold / Kubernetes
+.skaffold-*.yaml
+.kubernetes-manifests-*/
+release/wi-kubernetes-manifests.yaml
+
+# Docker
+Dockerfile.pip
+
+# Terraform
+.terraform/
+*.tfstate
+*.tfstate.*
+*.tfvars
+*.tfvars.json
+crash.log
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+
+# Important: keep lock file versioned
+!.terraform.lock.hcl
