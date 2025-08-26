@@ -133,7 +133,7 @@ langchain-google-genai==2.1.9
     # via -r requirements.in
 langchain-text-splitters==0.3.9
     # via langchain
-langsmith==0.4.14
+langsmith==0.4.16
     # via
     #   langchain
     #   langchain-core
@@ -201,7 +201,7 @@ pyyaml==6.0.2
     # via
     #   langchain
     #   langchain-core
-requests==2.32.4
+requests==2.32.5
     # via
     #   google-api-core
     #   google-cloud-alloydb-connector

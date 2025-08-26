@@ -31,7 +31,7 @@ jobs:
   code-tests:
     runs-on: [self-hosted, is-enabled]
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
     - uses: actions/setup-dotnet@v4
       env:
         DOTNET_INSTALL_DIR: "./.dotnet"
@@ -39,7 +39,7 @@ jobs:
         dotnet-version: '9.0'
     - uses: actions/setup-go@v5
       with:
-        go-version: '1.24'
+        go-version: '1.25'
     - name: Go Unit Tests
       timeout-minutes: 10
       run: |
@@ -61,7 +61,7 @@ jobs:
         profile: ["local-code"]
       fail-fast: true
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
     - name: Build + Deploy PR images to GKE
       timeout-minutes: 20
       run: |
