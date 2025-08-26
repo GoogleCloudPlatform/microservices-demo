@@ -24,7 +24,7 @@ configargparse==1.7.1
     #   locust-cloud
 faker==37.5.3
     # via -r requirements.in
-flask==3.1.1
+flask==3.1.2
     # via
     #   flask-cors
     #   flask-login
@@ -50,7 +50,7 @@ itsdangerous==2.2.0
     # via flask
 jinja2==3.1.6
     # via flask
-locust==2.38.0
+locust==2.38.1
     # via -r requirements.in
 locust-cloud==1.26.3
     # via locust
@@ -71,9 +71,9 @@ python-engineio==4.12.2
     #   python-socketio
 python-socketio[client]==5.13.0
     # via locust-cloud
-pyzmq==27.0.1
+pyzmq==27.0.2
     # via locust
-requests==2.32.4
+requests==2.32.5
     # via
     #   locust
     #   python-socketio
