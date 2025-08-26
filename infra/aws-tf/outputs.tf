@@ -12,13 +12,32 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+output "region" {
+  value = var.region
+}
 
-output "grafana_url" {
-  value       = "http://${try(data.kubernetes_service.grafana.status[0].load_balancer[0].ingress[0].hostname, "")}"
-  description = "Grafana URL"
+output "cluster_name" {
+  
+  value = module.eks.cluster_name
+}
+
+output "vpc_id" {
+  value = module.vpc.vpc_id
+}
+
+output "public_subnets" {
+  value = module.vpc.public_subnets
+}
+
+output "cwagent_role_arn" {
+  value = aws_iam_role.cwagent_irsa.arn
+}
+
+output "kubeconfig_update_cmd" {
+  value = "aws eks update-kubeconfig --region ${var.region} --name ${module.eks.cluster_name} --profile ${var.aws_profile}"
 }
 
 output "app_url" {
-  value       = "http://${try(data.kubernetes_service.frontend.status[0].load_balancer[0].ingress[0].hostname, "")}"
   description = "Online Boutique URL"
+  value       = "http://${try(data.kubernetes_service.frontend.status[0].load_balancer[0].ingress[0].hostname, "")}"
 }

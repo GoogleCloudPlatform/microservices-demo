@@ -12,22 +12,63 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-variable "name" {
-  type    = string
-  default = "online-boutique"
-}
-
 variable "region" {
   type    = string
   default = "ap-south-1"
 }
 
-variable "az" {
-  type    = list(string)
-  default = ["ap-south-1a", "ap-south-1b"]
-}
-
 variable "aws_profile" {
   type    = string
-  default = "xebia-adithya"
+  default = "xebia"
+}
+
+variable "name" {
+  type    = string
+  default = "online-boutique"
+}
+
+variable "vpc_cidr" {
+  type    = string
+  default = "10.0.0.0/16"
+}
+
+variable "cluster_version" {
+  type    = string
+  default = "1.30"
+}
+
+variable "tags" {
+  type = map(string)
+  default = {
+    Project     = "OnlineBoutique"
+    Owner       = "Xebia-team"
+    TTL         = "today"
+    Environment = "demo"
+    CostCenter  = "RD"
+  }
+}
+
+variable "node_instance_types" {
+  type    = list(string)
+  default = ["t3.medium", "t3.large", "t3a.medium", "t2.medium"]
+}
+
+variable "desired_size" {
+  type    = number
+  default = 2
+}
+
+variable "min_size" {
+  type    = number
+  default = 2
+}
+
+variable "max_size" {
+  type    = number
+  default = 4
+}
+
+variable "capacity_type" {
+  type    = string
+  default = "SPOT" # or "ON_DEMAND"
 }
