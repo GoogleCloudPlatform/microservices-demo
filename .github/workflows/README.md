@@ -12,33 +12,18 @@ We also host a test GKE cluster, which is where the deploy tests run. Every PR h
 
 **Note**: In order for the current CI/CD setup to work on your pull request, you must branch directly off the repo (no forks). This is because the Github secrets necessary for these tests aren't copied over when you fork.
 
-### Code Tests - [ci-pr.yaml](ci-pr.yaml)
+### Code Tests - [ci-pr.yaml](ci-main.yaml)
 
 These tests run on every commit for every open PR, as well as any commit to main / any release branch. Currently, this workflow runs only Go unit tests.
 
+### Push and Deploy Latest - [build-and-publish](build-and-publish.yml)
 
-### Deploy Tests- [ci-pr.yaml](ci-pr.yaml)
+This is the Continuous Deployment workflow, and it runs when a release is published. This workflow:
 
-These tests run on every commit for every open PR, as well as any commit to main / any release branch. This workflow:
+1.  Builds the container images for every service, tagging with the release version.
+2.  Pushes those images to Azure Container Registry.
 
-1. Creates a dedicated GKE namespace for that PR, if it doesn't already exist, in the PR GKE cluster.
-2. Uses `skaffold run` to build and push the images specific to that PR commit. Then skaffold deploys those images, via `kubernetes-manifests`, to the PR namespace in the test cluster.
-3. Tests to make sure all the pods start up and become ready.
-4. Gets the LoadBalancer IP for the frontend service.
-5. Comments that IP in the pull request, for staging.
-
-### Push and Deploy Latest - [push-deploy](push-deploy.yml)
-
-This is the Continuous Deployment workflow, and it runs on every commit to the main branch. This workflow:
-
-1. Builds the container images for every service, tagging as `latest`.
-2. Pushes those images to Google Container Registry.
-
-Note that this workflow does not update the image tags used in `release/kubernetes-manifests.yaml` - these release manifests are tied to a stable `v0.x.x` release.
-
-### Cleanup - [cleanup.yaml](cleanup.yaml)
-
-This workflow runs when a PR closes, regardless of whether it was merged into main. This workflow deletes the PR-specific GKE namespace in the test cluster.
+Note that this workflow uses federated credentials to authenticate with Azure, eliminating the need for storing secrets for ACR username/password.
 
 ## Appendix - Creating a new Actions runner
 

@@ -1,0 +1,42 @@
+﻿name: Release to ACR
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Azure Login
+      uses: azure/login@v1
+      with:
+        client-id: ${{ secrets.AZURE_CLIENT_ID }}
+        tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+        subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+    - name: Get the version
+      id: get_version
+      run: echo "VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+
+    - name: Build and Push Docker images
+      run: |
+        ACR_NAME="${{ secrets.ACR_NAME }}"
+        VERSION="${{ steps.get_version.outputs.VERSION }}"
+
+        az acr login --name "$ACR_NAME"
+
+        for SERVICE in $(ls -d src/*); do
+          SERVICE_NAME=$(basename "$SERVICE")
+          echo "Building and pushing Docker image for: $SERVICE_NAME"
+
+          docker build -t "$ACR_NAME.azurecr.io/$SERVICE_NAME:$VERSION" "$SERVICE"
+
+          docker push "$ACR_NAME.azurecr.io/$SERVICE_NAME:$VERSION"
+        done
