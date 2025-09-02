@@ -14,7 +14,7 @@ If you’re using this demo, please **★Star** this repository to show your int
 
 ## Architecture
 
-**Online Boutique** is composed of 11 microservices written in different
+**Online Boutique** is composed of 12 microservices written in different
 languages that talk to each other over gRPC.
 
 [![Architecture of
@@ -34,6 +34,7 @@ Find **Protocol Buffers Descriptions** at the [`./protos` directory](/protos).
 | [checkoutservice](/src/checkoutservice)             | Go            | Retrieves user cart, prepares order and orchestrates the payment, shipping and the email notification.                            |
 | [recommendationservice](/src/recommendationservice) | Python        | Recommends other products based on what's given in the cart.                                                                      |
 | [adservice](/src/adservice)                         | Java          | Provides text ads based on given context words.                                                                                   |
+| [shoppingassistantservice](/src/shoppingassistantservice) | Python        | Provides AI-powered product recommendations using Gemini and vector embeddings stored in AlloyDB.                                 |
 | [loadgenerator](/src/loadgenerator)                 | Python/Locust | Continuously sends requests imitating realistic user shopping flows to the frontend.                                              |
 
 ## Screenshots
