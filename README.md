@@ -1,7 +1,8 @@
 <!-- <p align="center">
 <img src="/src/frontend/static/icons/Hipster_HeroLogoMaroon.svg" width="300" alt="Online Boutique" />
 </p> -->
-![Continuous Integration](https://github.com/GoogleCloudPlatform/microservices-demo/workflows/Continuous%20Integration%20-%20Main/Release/badge.svg)
+![CI Pipeline](https://github.com/ggkarthik/microservices-demo-app/actions/workflows/ci/ci-pipeline.yml/badge.svg)
+![Security Scan](https://github.com/ggkarthik/microservices-demo-app/actions/workflows/security/security-scan.yml/badge.svg)
 
 **Online Boutique** is a cloud-first microservices demo application.  The application is a
 web-based e-commerce app where users can browse items, add them to the cart, and purchase them.
@@ -14,8 +15,8 @@ If you’re using this demo, please **★Star** this repository to show your int
 
 ## Architecture
 
-**Online Boutique** is composed of 11 microservices written in different
-languages that talk to each other over gRPC.
+**Online Boutique** is composed of 12 microservices written in different
+languages that talk to each other over gRPC. The application includes a comprehensive CI/CD pipeline with security scanning, IaC validation, and SBOM generation.
 
 [![Architecture of
 microservices](/docs/img/architecture-diagram.png)](/docs/img/architecture-diagram.png)
