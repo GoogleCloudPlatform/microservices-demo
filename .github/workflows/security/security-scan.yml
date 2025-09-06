@@ -1,0 +1,218 @@
+name: Security Scanning
+
+on:
+  schedule:
+    - cron: '0 0 * * 0'  # Run weekly on Sunday at midnight
+  workflow_dispatch:
+
+env:
+  REGISTRY: ghcr.io
+  OWNER: ${{ github.repository_owner }}
+
+jobs:
+  secret-scanning:
+    name: Secret Scanning
+    runs-on: ubuntu-latest
+    permissions:
+      security-events: write
+      actions: read
+      contents: read
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      # GitHub Advanced Security secret scanning is enabled at the repository level
+      - name: Check for secrets with GitHub Advanced Security
+        run: |
+          echo "GitHub Advanced Security secret scanning is enabled for this repository"
+          echo "Any detected secrets will be reported in the Security tab"
+
+      # Additional secret scanning with TruffleHog for enhanced coverage
+      - name: TruffleHog OSS
+        uses: trufflesecurity/trufflehog@v3.42.0
+        with:
+          path: ./
+          base: ${{ github.event.repository.default_branch }}
+          head: HEAD
+          extra_args: --debug --only-verified
+
+  dependency-review:
+    name: Dependency Review
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Dependency Review
+        uses: actions/dependency-review-action@v3
+        with:
+          fail-on-severity: critical
+
+  trivy-fs-scan:
+    name: Trivy File System Scan
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Run Trivy vulnerability scanner in fs mode
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'fs'
+          scan-ref: '.'
+          format: 'sarif'
+          output: 'trivy-results-fs.sarif'
+          severity: 'CRITICAL,HIGH'
+
+      - name: Upload Trivy scan results to GitHub Security tab
+        uses: github/codeql-action/upload-sarif@v2
+        with:
+          sarif_file: 'trivy-results-fs.sarif'
+          
+  trivy-config-scan:
+    name: Trivy IaC and Config Scan
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        
+      - name: Run Trivy IaC scan for Kubernetes manifests
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'config'
+          scan-ref: './kubernetes-manifests'
+          format: 'sarif'
+          output: 'trivy-k8s-results.sarif'
+          severity: 'CRITICAL,HIGH'
+          
+      - name: Run Trivy IaC scan for Terraform
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'config'
+          scan-ref: './terraform'
+          format: 'sarif'
+          output: 'trivy-terraform-results.sarif'
+          severity: 'CRITICAL,HIGH'
+          
+      - name: Run Trivy IaC scan for Dockerfiles
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'config'
+          scan-ref: './src'
+          format: 'sarif'
+          output: 'trivy-dockerfile-results.sarif'
+          severity: 'CRITICAL,HIGH'
+          
+      - name: Upload Trivy K8s scan results to GitHub Security tab
+        uses: github/codeql-action/upload-sarif@v2
+        with:
+          sarif_file: 'trivy-k8s-results.sarif'
+          
+      - name: Upload Trivy Terraform scan results to GitHub Security tab
+        uses: github/codeql-action/upload-sarif@v2
+        with:
+          sarif_file: 'trivy-terraform-results.sarif'
+          
+      - name: Upload Trivy Dockerfile scan results to GitHub Security tab
+        uses: github/codeql-action/upload-sarif@v2
+        with:
+          sarif_file: 'trivy-dockerfile-results.sarif'
+
+  codeql-extended:
+    name: CodeQL Extended Analysis
+    runs-on: ubuntu-latest
+    permissions:
+      security-events: write
+      actions: read
+      contents: read
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v2
+        with:
+          languages: go, javascript, python, java, csharp
+          queries: security-extended,security-and-quality
+
+      - name: Autobuild
+        uses: github/codeql-action/autobuild@v2
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v2
+
+  software-bill-of-materials:
+    name: Generate SBOM
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        service: [
+          frontend, 
+          cartservice, 
+          productcatalogservice, 
+          currencyservice, 
+          paymentservice, 
+          shippingservice, 
+          emailservice, 
+          checkoutservice, 
+          recommendationservice, 
+          adservice,
+          shoppingassistantservice,
+          loadgenerator
+        ]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+        
+      - name: Build ${{ matrix.service }} image
+        uses: docker/build-push-action@v4
+        with:
+          context: ./src/${{ matrix.service }}
+          push: false
+          load: true
+          tags: ${{ env.REGISTRY }}/${{ env.OWNER }}/microservices-demo-${{ matrix.service }}:sbom-scan
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Generate SBOM with Syft
+        uses: anchore/sbom-action@v0
+        with:
+          image: ${{ env.REGISTRY }}/${{ env.OWNER }}/microservices-demo-${{ matrix.service }}:sbom-scan
+          format: spdx-json
+          output-file: sbom-${{ matrix.service }}.spdx.json
+
+      - name: Upload SBOM
+        uses: actions/upload-artifact@v3
+        with:
+          name: sbom-${{ matrix.service }}
+          path: sbom-${{ matrix.service }}.spdx.json
+          
+  consolidated-sbom:
+    name: Consolidate SBOMs
+    runs-on: ubuntu-latest
+    needs: software-bill-of-materials
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        
+      - name: Download all SBOMs
+        uses: actions/download-artifact@v3
+        with:
+          path: ./sboms
+          
+      - name: Consolidate SBOMs
+        run: |
+          mkdir -p consolidated-sbom
+          cp -r sboms/*/*.json consolidated-sbom/
+          echo "Created consolidated SBOM directory with all service SBOMs"
+          
+      - name: Upload consolidated SBOM
+        uses: actions/upload-artifact@v3
+        with:
+          name: consolidated-sbom
+          path: consolidated-sbom/

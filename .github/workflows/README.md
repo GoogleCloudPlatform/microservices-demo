@@ -1,44 +1,64 @@
 # GitHub Actions Workflows
 
-This page describes the CI/CD workflows for the Online Boutique app, which run in [Github Actions](https://github.com/GoogleCloudPlatform/microservices-demo/actions).
+This page describes the CI/CD workflows for the Online Boutique app, which run in [GitHub Actions](https://github.com/GoogleCloudPlatform/microservices-demo/actions).
+
+## Workflow Organization
+
+The workflows are organized into the following directories:
+
+### `/ci` - Continuous Integration
+
+- **[ci-pipeline.yml](ci/ci-pipeline.yml)**: Main CI pipeline that runs on every push to main and pull requests
+  - Coordinates linting, CodeQL analysis, IaC scanning, and GitHub Advanced Security secret scanning
+  - Uses matrix builds to build, test, and scan all 12 microservices in parallel
+  - Generates SBOM for each microservice
+  - Publishes images to GHCR when merged to main
+
+### `/security` - Security Scanning
+
+- **[security-scan.yml](security/security-scan.yml)**: Dedicated security scanning workflow that runs weekly
+  - Performs extended security analysis including GitHub Advanced Security secret scanning
+  - Scans IaC (Kubernetes manifests, Terraform, Dockerfiles) for misconfigurations
+  - Generates comprehensive SBOMs for all microservices
+  - Consolidates SBOMs for easier management
+
+### `/release` - Release Management
+
+- **[build-publish.yml](release/build-publish.yml)**: Triggered when a new tag is pushed or manually
+  - Uses matrix builds to build and publish versioned Docker images for all 12 microservices
+  - Scans images for vulnerabilities and misconfigurations
+  - Generates and consolidates SBOMs for all microservices
+  - Creates Kubernetes deployment manifests
+  - Creates GitHub releases for tagged versions
+
+### `/infrastructure` - Infrastructure Validation
+
+- **[helm-chart-ci.yaml](infrastructure/helm-chart-ci.yaml)**: Validates Helm charts
+- **[kubevious-manifests-ci.yaml](infrastructure/kubevious-manifests-ci.yaml)**: Validates Kubernetes manifests
+- **[kustomize-build-ci.yaml](infrastructure/kustomize-build-ci.yaml)**: Validates Kustomize configurations
+- **[terraform-validate-ci.yaml](infrastructure/terraform-validate-ci.yaml)**: Validates Terraform configurations
+
+### `/archive` - Archived Workflows
+
+Contains older workflow files that are kept for reference but are no longer actively used:
+
+- **[ci-main.yaml](archive/ci-main.yaml)**: Older main branch CI workflow
+- **[ci-pr.yaml](archive/ci-pr.yaml)**: Older PR-based CI workflow
+- **[cleanup.yaml](archive/cleanup.yaml)**: Cleanup workflow for PR environments
+
+## Helper Scripts
+
+- **[install-dependencies.sh](install-dependencies.sh)**: Script to install dependencies needed for CI/CD workflows
 
 ## Infrastructure
 
-The CI/CD pipelines for Online Boutique run in Github Actions, using a pool of two [self-hosted runners]((https://help.github.com/en/actions/automating-your-workflow-with-github-actions/about-self-hosted-runners)). These runners are GCE instances (virtual machines) that, for every open Pull Request in the repo, run the code test pipeline, deploy test pipeline, and (on main) deploy the latest version of the app to [cymbal-shops.retail.cymbal.dev](https://cymbal-shops.retail.cymbal.dev)
+The CI/CD pipelines for Online Boutique run in GitHub Actions. For every open Pull Request in the repo, the CI pipeline runs code tests, security scans, and builds container images.
 
-We also host a test GKE cluster, which is where the deploy tests run. Every PR has its own namespace in the cluster.
+## Notes for Contributors
 
-## Workflows
-
-**Note**: In order for the current CI/CD setup to work on your pull request, you must branch directly off the repo (no forks). This is because the Github secrets necessary for these tests aren't copied over when you fork.
-
-### Code Tests - [ci-pr.yaml](ci-pr.yaml)
-
-These tests run on every commit for every open PR, as well as any commit to main / any release branch. Currently, this workflow runs only Go unit tests.
-
-
-### Deploy Tests- [ci-pr.yaml](ci-pr.yaml)
-
-These tests run on every commit for every open PR, as well as any commit to main / any release branch. This workflow:
-
-1. Creates a dedicated GKE namespace for that PR, if it doesn't already exist, in the PR GKE cluster.
-2. Uses `skaffold run` to build and push the images specific to that PR commit. Then skaffold deploys those images, via `kubernetes-manifests`, to the PR namespace in the test cluster.
-3. Tests to make sure all the pods start up and become ready.
-4. Gets the LoadBalancer IP for the frontend service.
-5. Comments that IP in the pull request, for staging.
-
-### Push and Deploy Latest - [push-deploy](push-deploy.yml)
-
-This is the Continuous Deployment workflow, and it runs on every commit to the main branch. This workflow:
-
-1. Builds the container images for every service, tagging as `latest`.
-2. Pushes those images to Google Container Registry.
-
-Note that this workflow does not update the image tags used in `release/kubernetes-manifests.yaml` - these release manifests are tied to a stable `v0.x.x` release.
-
-### Cleanup - [cleanup.yaml](cleanup.yaml)
-
-This workflow runs when a PR closes, regardless of whether it was merged into main. This workflow deletes the PR-specific GKE namespace in the test cluster.
+- All new workflow files should be placed in the appropriate directory based on their purpose
+- When creating new workflows, follow the naming convention of using `.yml` extension for consistency
+- Reference the CI_CD_SETUP.md file in the repository root for detailed information about the CI/CD pipeline
 
 ## Appendix - Creating a new Actions runner
 
