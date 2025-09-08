@@ -1,7 +1,7 @@
 resource "google_compute_network" "furniture_vpc" {
   name                    = "furniture-vpc"
   auto_create_subnetworks = false
-  project                 = var.project_id
+  project                 = var.gcp_project_id
   routing_mode            = "GLOBAL"
 }
 
@@ -10,14 +10,14 @@ resource "google_compute_subnetwork" "furniture_subnet" {
   ip_cidr_range = "10.0.1.0/24"
   region        = var.region
   network       = google_compute_network.furniture_vpc.id
-  project       = var.project_id
+  project       = var.gcp_project_id
 }
 
 # Firewall rule to allow SSH access
 resource "google_compute_firewall" "furniture_vpc_allow_ssh" {
   name    = "furniture-vpc-allow-ssh"
   network = google_compute_network.furniture_vpc.name
-  project = var.project_id
+  project = var.gcp_project_id
 
   allow {
     protocol = "tcp"
@@ -30,7 +30,7 @@ resource "google_compute_firewall" "furniture_vpc_allow_ssh" {
 resource "google_compute_firewall" "furniture_vpc_allow_app" {
   name    = "furniture-vpc-allow-app"
   network = google_compute_network.furniture_vpc.name
-  project = var.project_id
+  project = var.gcp_project_id
 
   allow {
     protocol = "tcp"
@@ -45,7 +45,7 @@ resource "google_compute_instance" "furniture_vm" {
   name         = "furniture-vm"
   machine_type = "e2-small"
   zone         = var.zone
-  project      = var.project_id
+  project      = var.gcp_project_id
 
   tags = ["furniture-app"]
 
@@ -70,13 +70,13 @@ output "instance_internal_ip" {
 
 data "google_compute_network" "ob_network" {
   name    = var.ob_network_name
-  project = var.project_id
+  project = var.gcp_project_id
 }
 
 data "google_compute_subnetwork" "ob_subnet" {
   name    = var.ob_subnet_name
   region  = var.region
-  project = var.project_id
+  project = var.gcp_project_id
 }
 
 # -----------------------------------------------------------------------------
@@ -93,14 +93,14 @@ resource "google_compute_ha_vpn_gateway" "furniture_ha_gateway" {
   name    = "furniture-ha-gateway"
   region  = var.region
   network = google_compute_network.furniture_vpc.id
-  project = var.project_id
+  project = var.gcp_project_id
 }
 
 resource "google_compute_router" "furniture_router" {
   name    = "furniture-router"
   region  = var.region
   network = google_compute_network.furniture_vpc.name
-  project = var.project_id
+  project = var.gcp_project_id
   bgp {
     asn = 65001
   }
@@ -111,14 +111,14 @@ resource "google_compute_ha_vpn_gateway" "boutique_ha_gateway" {
   name    = "boutique-ha-gateway"
   region  = var.region
   network = data.google_compute_network.ob_network.id
-  project = var.project_id
+  project = var.gcp_project_id
 }
 
 resource "google_compute_router" "boutique_router" {
   name    = "boutique-router"
   region  = var.region
   network = data.google_compute_network.ob_network.name
-  project = var.project_id
+  project = var.gcp_project_id
   bgp {
     asn = 65002
     # Advertise the subnet and the GKE pod range
@@ -140,7 +140,7 @@ resource "google_compute_router" "boutique_router" {
 resource "google_compute_vpn_tunnel" "tunnel_a_to_b_if0" {
   name                          = "tunnel-furniture-to-boutique-if0"
   region                        = var.region
-  project                       = var.project_id
+  project                       = var.gcp_project_id
   peer_gcp_gateway              = google_compute_ha_vpn_gateway.boutique_ha_gateway.id
   shared_secret                 = random_id.vpn_shared_secret.hex
   router                        = google_compute_router.furniture_router.id
@@ -155,7 +155,7 @@ resource "google_compute_vpn_tunnel" "tunnel_a_to_b_if0" {
 resource "google_compute_vpn_tunnel" "tunnel_a_to_b_if1" {
   name                          = "tunnel-furniture-to-boutique-if1"
   region                        = var.region
-  project                       = var.project_id
+  project                       = var.gcp_project_id
   peer_gcp_gateway              = google_compute_ha_vpn_gateway.boutique_ha_gateway.id
   shared_secret                 = random_id.vpn_shared_secret.hex
   router                        = google_compute_router.furniture_router.id
@@ -171,7 +171,7 @@ resource "google_compute_router_interface" "furniture_if0" {
   name       = "if0-tunnel-a-b-if0"
   router     = google_compute_router.furniture_router.name
   region     = var.region
-  project    = var.project_id
+  project    = var.gcp_project_id
   ip_range   = "169.254.0.1/30"
   vpn_tunnel = google_compute_vpn_tunnel.tunnel_a_to_b_if0.name
 }
@@ -180,7 +180,7 @@ resource "google_compute_router_peer" "furniture_peer0" {
   name                      = "peer0-boutique"
   router                    = google_compute_router.furniture_router.name
   region                    = var.region
-  project                   = var.project_id
+  project                   = var.gcp_project_id
   peer_ip_address           = "169.254.0.2"
   peer_asn                  = google_compute_router.boutique_router.bgp[0].asn
   interface                 = google_compute_router_interface.furniture_if0.name
@@ -192,7 +192,7 @@ resource "google_compute_router_interface" "furniture_if1" {
   name       = "if1-tunnel-a-b-if1"
   router     = google_compute_router.furniture_router.name
   region     = var.region
-  project    = var.project_id
+  project    = var.gcp_project_id
   ip_range   = "169.254.1.1/30"
   vpn_tunnel = google_compute_vpn_tunnel.tunnel_a_to_b_if1.name
 }
@@ -201,7 +201,7 @@ resource "google_compute_router_peer" "furniture_peer1" {
   name                      = "peer1-boutique"
   router                    = google_compute_router.furniture_router.name
   region                    = var.region
-  project                   = var.project_id
+  project                   = var.gcp_project_id
   peer_ip_address           = "169.254.1.2"
   peer_asn                  = google_compute_router.boutique_router.bgp[0].asn
   interface                 = google_compute_router_interface.furniture_if1.name
@@ -214,7 +214,7 @@ resource "google_compute_router_interface" "boutique_if0" {
   name       = "if0-tunnel-a-b-if0"
   router     = google_compute_router.boutique_router.name
   region     = var.region
-  project    = var.project_id
+  project    = var.gcp_project_id
   ip_range   = "169.254.0.2/30"
   vpn_tunnel = google_compute_vpn_tunnel.tunnel_a_to_b_if0.name
 }
@@ -223,7 +223,7 @@ resource "google_compute_router_peer" "boutique_peer0" {
   name                      = "peer0-furniture"
   router                    = google_compute_router.boutique_router.name
   region                    = var.region
-  project                   = var.project_id
+  project                   = var.gcp_project_id
   peer_ip_address           = "169.254.0.1"
   peer_asn                  = google_compute_router.furniture_router.bgp[0].asn
   interface                 = google_compute_router_interface.boutique_if0.name
@@ -236,7 +236,7 @@ resource "google_compute_router_interface" "boutique_if1" {
   name       = "if1-tunnel-a-b-if1"
   router     = google_compute_router.boutique_router.name
   region     = var.region
-  project    = var.project_id
+  project    = var.gcp_project_id
   ip_range   = "169.254.1.2/30"
   vpn_tunnel = google_compute_vpn_tunnel.tunnel_a_to_b_if1.name
 }
@@ -245,7 +245,7 @@ resource "google_compute_router_peer" "boutique_peer1" {
   name                      = "peer1-furniture"
   router                    = google_compute_router.boutique_router.name
   region                    = var.region
-  project                   = var.project_id
+  project                   = var.gcp_project_id
   peer_ip_address           = "169.254.1.1"
   peer_asn                  = google_compute_router.furniture_router.bgp[0].asn
   interface                 = google_compute_router_interface.boutique_if1.name
