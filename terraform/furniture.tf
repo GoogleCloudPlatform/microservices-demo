@@ -1,8 +1,3 @@
-provider "google" {
-  project = var.project_id
-  region  = var.region
-}
-
 resource "google_compute_network" "furniture_vpc" {
   name                    = "furniture-vpc"
   auto_create_subnetworks = false
