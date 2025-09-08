@@ -146,7 +146,6 @@ resource "google_compute_vpn_tunnel" "tunnel_a_to_b_if0" {
   router                        = google_compute_router.furniture_router.id
   vpn_gateway                   = google_compute_ha_vpn_gateway.furniture_ha_gateway.id
   vpn_gateway_interface         = 0
-  ike_version                   = 2
   local_traffic_selector        = ["0.0.0.0/0"]
   remote_traffic_selector       = ["0.0.0.0/0"]
 }
@@ -161,7 +160,6 @@ resource "google_compute_vpn_tunnel" "tunnel_a_to_b_if1" {
   router                        = google_compute_router.furniture_router.id
   vpn_gateway                   = google_compute_ha_vpn_gateway.furniture_ha_gateway.id
   vpn_gateway_interface         = 1
-  ike_version                   = 2
   local_traffic_selector        = ["0.0.0.0/0"]
   remote_traffic_selector       = ["0.0.0.0/0"]
 }
@@ -184,7 +182,6 @@ resource "google_compute_router_peer" "furniture_peer0" {
   peer_ip_address           = "169.254.0.2"
   peer_asn                  = google_compute_router.boutique_router.bgp[0].asn
   interface                 = google_compute_router_interface.furniture_if0.name
-  ike_version               = 2
   enable_ipv6               = false
 }
 
@@ -205,7 +202,6 @@ resource "google_compute_router_peer" "furniture_peer1" {
   peer_ip_address           = "169.254.1.2"
   peer_asn                  = google_compute_router.boutique_router.bgp[0].asn
   interface                 = google_compute_router_interface.furniture_if1.name
-  ike_version               = 2
   enable_ipv6               = false
 }
 
@@ -227,7 +223,6 @@ resource "google_compute_router_peer" "boutique_peer0" {
   peer_ip_address           = "169.254.0.1"
   peer_asn                  = google_compute_router.furniture_router.bgp[0].asn
   interface                 = google_compute_router_interface.boutique_if0.name
-  ike_version               = 2
   enable_ipv6               = false
   # Advertisement handled at the router level for boutique-router
 }
@@ -249,7 +244,6 @@ resource "google_compute_router_peer" "boutique_peer1" {
   peer_ip_address           = "169.254.1.1"
   peer_asn                  = google_compute_router.furniture_router.bgp[0].asn
   interface                 = google_compute_router_interface.boutique_if1.name
-  ike_version               = 2
   enable_ipv6               = false
   # Advertisement handled at the router level for boutique-router
 }
