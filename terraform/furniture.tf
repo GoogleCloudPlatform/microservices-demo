@@ -60,7 +60,89 @@ resource "google_compute_instance" "furniture_vm" {
     subnetwork = google_compute_subnetwork.furniture_subnet.id
   }
 
-  metadata_startup_script = file("${path.module}/furniture_startup.sh")
+  # This startup script runs automatically when the VM is created
+  metadata_startup_script = <<-EOT
+    #!/bin/bash
+    
+    # Update packages and install Node.js and npm
+    sudo apt-get update
+    sudo apt-get install -y nodejs npm
+
+    # Install pm2, a production process manager for Node.js
+    sudo npm install pm2 -g
+
+    # Create a directory for the app
+    sudo mkdir -p /opt/app
+    sudo chown -R $(whoami):$(whoami) /opt/app
+    cd /opt/app
+
+    # Create the package.json file
+    cat <<'EOF' > package.json
+    {
+      "name": "mock-furniture-service",
+      "version": "1.0.0",
+      "main": "app.js",
+      "dependencies": {
+        "express": "^4.18.2"
+      }
+    }
+    EOF
+
+    # Create the app.js file with the mock furniture logic
+    cat <<'EOF' > app.js
+    const express = require('express');
+    const app = express();
+    const port = 8080;
+
+    // Middleware to parse JSON bodies
+    app.use(express.json());
+
+    // In-memory data store with two hardcoded items
+    let items = [
+      { name: 'chair', brand: 'ikea' },
+      { name: 'table', surname: 'jysk' }
+    ];
+
+    // GET endpoint to list all items
+    app.get('/furniture', (req, res) => {
+      console.log('GET /furniture - Returning items list');
+      res.status(200).json(items);
+    });
+
+    // POST endpoint to add a new item
+    app.post('/furniture', (req, res) => {
+      const { name, brand } = req.body;
+
+      if (!name || !brand) {
+        console.log('POST /furniture - Failed: Missing name or brand');
+        return res.status(400).json({ error: 'Name and brand are required.' });
+      }
+
+      const newItem = { name, brand };
+      items.push(newItem);
+      
+      // Cleanup: Keep only the 10 most recent items
+      if (items.length > 10) {
+        const removedCount = items.length - 10;
+        items = items.slice(-10); // Keep last 10
+        console.log(`POST /furniture - Cleaned up $${removedCount} old items(s), keeping 10 most recent`);
+      }
+      
+      console.log(`POST /furniture - Added new iten: $${name} $${brand}. Total: $${items.length}`);
+      res.status(201).json(newItem);
+    });
+
+    app.listen(port, '0.0.0.0', () => {
+      console.log(`Mock furniture server listening on port $${port}`);
+    });
+    EOF
+
+    # Install application dependencies
+    npm install
+
+    # Start the application using pm2 to run it in the background
+    pm2 start app.js --name "crm-app"
+  EOT
 }
 
 output "instance_internal_ip" {
