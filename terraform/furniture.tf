@@ -7,7 +7,7 @@ resource "google_compute_network" "furniture_vpc" {
 
 resource "google_compute_subnetwork" "furniture_subnet" {
   name          = "furniture-subnet-us-central1"
-  ip_cidr_range = "10.0.1.0/24"
+  ip_cidr_range = "10.1.0.0/24"
   region        = var.region
   network       = google_compute_network.furniture_vpc.id
   project       = var.gcp_project_id
@@ -221,7 +221,7 @@ resource "google_compute_router" "boutique_router" {
 resource "google_compute_ha_vpn_gateway" "ha_gateway1" {
   region  = "us-central1"
   name    = "ha-vpn-1"
-  network = google_compute_network.ob_network.id
+  network = data.google_compute_network.ob_network.id
 }
 
 resource "google_compute_ha_vpn_gateway" "ha_gateway2" {
@@ -233,7 +233,7 @@ resource "google_compute_ha_vpn_gateway" "ha_gateway2" {
 resource "google_compute_router" "router1" {
   name    = "ha-vpn-router1"
   region  = "us-central1"
-  network = google_compute_network.ob_network.name
+  network = data.google_compute_network.ob_network.name
   bgp {
     asn = 64514
   }
