@@ -7,7 +7,7 @@ resource "google_compute_network" "furniture_vpc" {
 
 resource "google_compute_subnetwork" "furniture_subnet" {
   name          = "furniture-subnet-us-central1"
-  ip_cidr_range = "10.1.0.0/24"
+  ip_cidr_range = "10.5.0.0/24"
   region        = var.region
   network       = google_compute_network.furniture_vpc.id
   project       = var.gcp_project_id
