@@ -17,30 +17,12 @@ Browser (React) → BFF (Node.js/Express) → Product Catalog Service (gRPC)
 npm run install:all
 ```
 
-2. **Copiar o arquivo proto:**
-```bash
-# Certifique-se de que o arquivo demo.proto está em ../protos/demo.proto
-cp ../microservices-demo/protos/demo.proto protos/
-```
-
-3. **Port-forward do Product Catalog Service:**
+2. **Port-forward do Product Catalog Service:**
 ```bash
 kubectl port-forward service/productcatalogservice 3550:3550
 ```
 
-4. **Configurar variáveis de ambiente:**
-```bash
-# Backend
-cd backend
-cp env.example .env
-# Edite .env se necessário
-
-# Frontend
-cd ..
-echo "VITE_API_BASE_URL=http://localhost:3001/api" > .env.local
-```
-
-5. **Executar em modo desenvolvimento:**
+3. **Executar em modo desenvolvimento:**
 ```bash
 npm run dev
 ```
