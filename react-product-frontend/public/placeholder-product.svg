@@ -1,0 +1,9 @@
+<svg width="300" height="300" xmlns="http://www.w3.org/2000/svg">
+  <rect width="300" height="300" fill="#f8f9fa"/>
+  <rect x="50" y="50" width="200" height="200" fill="#e9ecef" rx="10"/>
+  <circle cx="120" cy="120" r="15" fill="#6c757d"/>
+  <circle cx="180" cy="120" r="15" fill="#6c757d"/>
+  <path d="M120 160 Q150 180 180 160" stroke="#6c757d" stroke-width="3" fill="none" stroke-linecap="round"/>
+  <text x="150" y="220" text-anchor="middle" fill="#6c757d" font-family="Arial, sans-serif" font-size="12">Product Image</text>
+  <text x="150" y="235" text-anchor="middle" fill="#6c757d" font-family="Arial, sans-serif" font-size="10">Not Available</text>
+</svg>
