@@ -16,12 +16,12 @@
     "google-protobuf": "3.21.4",
     "@opentelemetry/api": "1.9.0",
     "@opentelemetry/exporter-otlp-grpc": "0.26.0",
-    "@opentelemetry/instrumentation-grpc": "0.203.0",
-    "@opentelemetry/resources": "2.0.1",
-    "@opentelemetry/semantic-conventions": "1.36.0",
-    "@opentelemetry/sdk-trace-base": "2.0.1",
-    "@opentelemetry/sdk-node": "0.203.0",
-    "pino": "9.9.0",
+    "@opentelemetry/instrumentation-grpc": "0.204.0",
+    "@opentelemetry/resources": "2.1.0",
+    "@opentelemetry/semantic-conventions": "1.37.0",
+    "@opentelemetry/sdk-trace-base": "2.1.0",
+    "@opentelemetry/sdk-node": "0.204.0",
+    "pino": "9.9.4",
     "xml2js": "0.6.2"
   }
 }
