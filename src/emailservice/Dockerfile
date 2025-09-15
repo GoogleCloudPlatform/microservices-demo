@@ -24,6 +24,11 @@ RUN apk update \
 COPY requirements.txt .
 RUN pip install -r requirements.txt
 
+ARG SKAFFOLD_PY_DEBUG=false
+RUN if [ "$SKAFFOLD_PY_DEBUG" = "true" ]; then \
+      pip install debugpy; \
+    fi
+
 FROM base
 # Enable unbuffered logging
 ENV PYTHONUNBUFFERED=1

@@ -41,8 +41,6 @@ build:
     context: src/currencyservice
   - image: cartservice
     context: src/cartservice/src
-    docker:
-      dockerfile: Dockerfile
   - image: frontend
     context: src/frontend
   - image: adservice
@@ -81,9 +79,20 @@ profiles:
   activation:
   - command: debug
   patches:
-  - op: replace
-    path: /build/artifacts/7/docker/dockerfile
-    value: Dockerfile.debug
+  - op: add
+    path: /build/artifacts/0/docker
+    value:
+      buildArgs:
+        SKAFFOLD_PY_DEBUG: "true"
+  - op: add
+    path: /build/artifacts/2/docker
+    value:
+      buildArgs:
+        SKAFFOLD_PY_DEBUG: "true"
+  - op: add
+    path: /build/artifacts/8/docker
+    value:
+      dockerfile: Dockerfile.debug
 # The "network-policies" profile is not used by default.
 # You can use it in isolation or in combination with other profiles:
 #     skaffold run -p network-policies, debug
@@ -120,3 +129,12 @@ profiles:
       diskSizeGb: 300
       machineType: N1_HIGHCPU_32
       timeout: 4000s
+- name: debug
+  activation:
+    - command: debug
+  patches:
+  - op: add
+    path: /build/artifacts/0/docker
+    value:
+      buildArgs:
+        SKAFFOLD_PY_DEBUG: "true"
