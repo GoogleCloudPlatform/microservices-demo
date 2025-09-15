@@ -184,7 +184,7 @@ resource "google_compute_network_peering" "remote_to_ob" {
   peer_network = "projects/${var.project_id}/global/networks/online-boutique-vpc"
 
   import_custom_routes = false
-  export_custom_routes = false
+  export_custom_routes = true
 }
 
 # 7. Create VPC peering from online-boutique-vpc VPC to remote  
@@ -193,6 +193,6 @@ resource "google_compute_network_peering" "ob_to_remote" {
   network      = "projects/${var.project_id}/global/networks/online-boutique-vpc"
   peer_network = "projects/${var.peering_project_id}/global/networks/${var.peering_vpc_network}"
 
-  import_custom_routes = false
+  import_custom_routes = true
   export_custom_routes = false
 }
