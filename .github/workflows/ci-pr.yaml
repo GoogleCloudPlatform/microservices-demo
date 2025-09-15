@@ -36,7 +36,7 @@ jobs:
     runs-on: [self-hosted, is-enabled]
     steps:
     - uses: actions/checkout@v5
-    - uses: actions/setup-dotnet@v4
+    - uses: actions/setup-dotnet@v5
       env:
         DOTNET_INSTALL_DIR: "./.dotnet"
       with:
