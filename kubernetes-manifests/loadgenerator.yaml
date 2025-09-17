@@ -44,18 +44,49 @@ spec:
         - |
           MAX_RETRIES=12
           RETRY_INTERVAL=10
-          for i in $(seq 1 $MAX_RETRIES); do
-            echo "Attempt $i: Pinging frontend: ${FRONTEND_ADDR}..."
-            STATUSCODE=$(wget --server-response http://${FRONTEND_ADDR} 2>&1 | awk '/^  HTTP/{print $2}')
-            if [ $STATUSCODE -eq 200 ]; then
-                echo "Frontend is reachable."
-                exit 0
-            fi
-            echo "Error: Could not reach frontend - Status code: ${STATUSCODE}"
-            sleep $RETRY_INTERVAL
-          done
-          echo "Failed to reach frontend after $MAX_RETRIES attempts."
-          exit 1
+
+          check_url() {
+            local url=$1
+            local name=$2
+            echo "Checking endpoint: $name ($url)"
+            for i in $(seq 1 $MAX_RETRIES); do
+              echo "Attempt $i/$MAX_RETRIES: Pinging $name: $url..."
+              # Use --spider to not download the body, -T for timeout
+              STATUSCODE=$(wget --spider --server-response -T 5 "$url" 2>&1 | awk '/^  HTTP/{print $2}' || true)
+
+              if [ "$STATUSCODE" = "200" ]; then
+                  echo "$name ($url) is reachable."
+                  return 0
+              fi
+
+              echo "Warning: Could not reach $name ($url) on attempt $i - Status code: ${STATUSCODE:-"No response"}"
+
+              if [ $i -lt $MAX_RETRIES ]; then
+                sleep $RETRY_INTERVAL
+              fi
+            done
+            echo "Error: Failed to reach $name ($url) after $MAX_RETRIES attempts."
+            return 1
+          }
+
+          # Check Frontend service from environment variable
+          if [ -z "${FRONTEND_ADDR}" ]; then
+            echo "Error: FRONTEND_ADDR environment variable is not set."
+            exit 1
+          fi
+          check_url "http://${FRONTEND_ADDR}" "Frontend"
+          if [ $? -ne 0 ]; then
+            exit 1
+          fi
+
+          # Check hardcoded Furniture service
+          check_url "http://10.5.0.2:3000/furniture" "Furniture Service"
+          if [ $? -ne 0 ]; then
+            exit 1
+          fi
+
+          echo "All required services are up."
+          exit 0
         name: frontend-check
         securityContext:
           allowPrivilegeEscalation: false
