@@ -208,6 +208,12 @@ def checkInventory(l):
     except Exception as e:
         print(f"GCP Inventory Service (PSC) error: {e}")
 
+def checkFurniture(l):
+    FURNITURE_URL = "http://10.5.0.2:3000/furniture"
+    try:
+        requests.get(FURNITURE_URL)
+        requests.post(FURNITURE_URL, {"name": "sofa", "brand": "ikea"})
+
 class UserBehavior(TaskSet):
 
     def on_start(self):
@@ -224,6 +230,7 @@ class UserBehavior(TaskSet):
         recordMetrics: 3,
         manageCustomer: 3,
         checkInventory: 4
+        checkFurniture: 5
     }
 
 class WebsiteUser(FastHttpUser):
