@@ -26,7 +26,7 @@ resource "google_compute_firewall" "furniture_vpc_allow_ssh" {
   source_ranges = ["0.0.0.0/0"] # Be more restrictive in production
 }
 
-# Firewall rule to allow application traffic on port 3000
+# Firewall rule to allow application traffic on port 8080
 resource "google_compute_firewall" "furniture_vpc_allow_app" {
   name    = "furniture-vpc-allow-app"
   network = google_compute_network.furniture_vpc.name
@@ -34,7 +34,7 @@ resource "google_compute_firewall" "furniture_vpc_allow_app" {
 
   allow {
     protocol = "tcp"
-    ports    = ["3000"]
+    ports    = ["8080"]
   }
   # Allow from anywhere for testing, including the peer VPC ranges
   source_ranges = ["0.0.0.0/0"]

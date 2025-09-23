@@ -702,8 +702,8 @@ spec:
         - |
           MAX_RETRIES=12
           RETRY_INTERVAL=10
-          echo "Attempt to ping furniture at http://10.5.0.2:3000..."
-          STATUSCODE=$(wget --server-response http://10.5.0.2:3000 2>&1 | awk '/^  HTTP/{print $2}')
+          echo "Attempt to ping furniture at http://10.5.0.2:8080..."
+          STATUSCODE=$(wget --server-response http://10.5.0.2:8080 2>&1 | awk '/^  HTTP/{print $2}')
             if [ $STATUSCODE -eq 200 ]; then
                 echo "Furniture is reachable."
             fi
