@@ -27,6 +27,7 @@ spec:
       labels:
         app: loadgenerator
       annotations:
+        proxy.istio.io/config: '{ "holdApplicationUntilProxyStarts": true }'
         sidecar.istio.io/rewriteAppHTTPProbers: "true"
     spec:
       serviceAccountName: loadgenerator
