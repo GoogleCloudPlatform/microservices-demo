@@ -24,6 +24,11 @@ COPY requirements.txt .
 
 RUN pip install --prefix="/install" -r requirements.txt
 
+ARG SKAFFOLD_PY_DEBUG=false
+RUN if [ "$SKAFFOLD_PY_DEBUG" = "true" ]; then \
+      pip install --prefix="/install" debugpy; \
+    fi
+
 FROM base
 
 RUN apk update \
