@@ -1,10 +1,12 @@
 name: "Continuous Integration - Pull Request (AWS EKS)"
 
+# Se activa en Pull Requests hacia la rama main
 on:
   pull_request:
     branches:
       - main
     paths-ignore:
+      # Ignorar cambios que no afectan el build/deploy
       - '**/README.md'
       - 'kustomize/**'
       - '.github/workflows/kustomize-build-ci.yaml'
@@ -13,65 +15,59 @@ on:
       - 'helm-chart/**'
       - '.github/workflows/helm-chart-ci.yaml'
 
+# Evitar que se ejecuten varias instancias al mismo tiempo para el mismo PR
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
 jobs:
+  # Job de tests de código
   code-tests:
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-dotnet@v4
-        env:
-          DOTNET_INSTALL_DIR: "./.dotnet"
+      - uses: actions/checkout@v4  # Obtener código del repositorio
+      - uses: actions/setup-dotnet@v4  # Instalar .NET 9
         with:
           dotnet-version: '9.0'
-      - uses: actions/setup-go@v5
+      - uses: actions/setup-go@v5  # Instalar Go 1.24
         with:
           go-version: '1.24'
       - name: Go Unit Tests
-        timeout-minutes: 10
         run: |
+          # Ejecuta tests para microservicios en Go
           for GO_PACKAGE in "shippingservice" "productcatalogservice" "frontend/validator"; do
-            echo "Testing $GO_PACKAGE..."
             pushd src/$GO_PACKAGE
             go test
             popd
           done
       - name: C# Unit Tests
-        timeout-minutes: 10
-        run: |
-          dotnet test src/cartservice/
+        run: dotnet test src/cartservice/  # Ejecuta tests de C#
 
+  # Job de deploy temporal para PR
   deployment-tests:
     runs-on: ubuntu-24.04
-    needs: code-tests
+    needs: code-tests  # Se ejecuta solo si code-tests pasa
     steps:
       - uses: actions/checkout@v4
-        with:
-          ref: ${{ github.event.pull_request.head.sha }}
 
       # Configurar credenciales de AWS
       - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v4
+        uses: aws-actions/configure-aws-credentials@v5
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION }}
 
-      # Login en Amazon ECR
+      # Login a ECR
       - name: Login to Amazon ECR
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
 
-      # Build y push de la imagen del PR
+      # Construir y subir la imagen de Docker a ECR
       - name: Build, tag, and push image to Amazon ECR
         run: |
           IMAGE_REPO=${{ steps.login-ecr.outputs.registry }}/online-boutique
           IMAGE_TAG=pr-${{ github.event.pull_request.number }}-${{ github.sha }}
-          echo "Building image: $IMAGE_REPO:$IMAGE_TAG"
-
           docker build -t $IMAGE_REPO:$IMAGE_TAG .
           docker push $IMAGE_REPO:$IMAGE_TAG
 
@@ -87,33 +83,34 @@ jobs:
           kubectl create namespace $NAMESPACE --dry-run=client -o yaml | kubectl apply -f -
           echo "NAMESPACE=$NAMESPACE" >> $GITHUB_ENV
 
-      # Desplegar la app al namespace
-      - name: Deploy application to EKS
+      # Desplegar aplicación con Helm
+      - name: Deploy application with Helm
         run: |
-          kubectl apply -n $NAMESPACE -f k8s-manifests/
+          helm upgrade --install onlineboutique ./helm-chart \
+            --namespace $NAMESPACE --create-namespace \
+            --set images.repository=${{ steps.login-ecr.outputs.registry }}/online-boutique \
+            --set images.tag=pr-${{ github.event.pull_request.number }}-${{ github.sha }}
 
-      # Esperar a que todos los pods estén listos
+      # Esperar que el frontend esté listo
       - name: Wait for pods
         run: |
           kubectl rollout status -n $NAMESPACE deployment/frontend --timeout=300s
           kubectl get pods -n $NAMESPACE
 
-      # Smoke test (verificar que el frontend responde)
+      # Smoke test para validar que frontend responde
       - name: Smoke Test
         run: |
           NAMESPACE=pr${{ github.event.pull_request.number }}
           EXTERNAL_IP=""
           for i in {1..30}; do
             EXTERNAL_IP=$(kubectl get svc frontend-external -n $NAMESPACE -o jsonpath='{.status.loadBalancer.ingress[0].hostname}' || true)
-            if [ -n "$EXTERNAL_IP" ]; then break; fi
-            echo "Waiting for LoadBalancer IP..."
+            [ -n "$EXTERNAL_IP" ] && break
             sleep 10
           done
           if [ -z "$EXTERNAL_IP" ]; then
             echo "ERROR: No external IP found for frontend"
             exit 1
           fi
-          echo "Frontend available at http://$EXTERNAL_IP"
           curl -s --retry 5 --retry-delay 10 http://$EXTERNAL_IP > /dev/null
 
       # Comentar en el PR la URL del deployment
@@ -124,9 +121,7 @@ jobs:
         run: |
           NAMESPACE=pr${{ github.event.pull_request.number }}
           EXTERNAL_IP=$(kubectl get svc frontend-external -n $NAMESPACE -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')
-          curl \
-            -X POST \
-            $COMMENTS_URL \
+          curl -X POST $COMMENTS_URL \
             -H "Content-Type: application/json" \
             -H "Authorization: token $GITHUB_TOKEN" \
             --data "{ \"body\": \"🚀 PR desplegado en: http://$EXTERNAL_IP\" }"
