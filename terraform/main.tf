@@ -1,100 +1,181 @@
-# Copyright 2022 Google LLC
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#      http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
+# =========================
+# VPC
+# =========================
+# Creamos una VPC con rango privado 10.0.0.0/16
+# Habilitamos soporte DNS y hostnames para los recursos dentro de la VPC
+resource "aws_vpc" "main" {
+  cidr_block           = "10.0.0.0/16"
+  enable_dns_support   = true
+  enable_dns_hostnames = true
 
-# Definition of local variables
-locals {
-  base_apis = [
-    "container.googleapis.com",
-    "monitoring.googleapis.com",
-    "cloudtrace.googleapis.com",
-    "cloudprofiler.googleapis.com"
-  ]
-  memorystore_apis = ["redis.googleapis.com"]
-  cluster_name     = google_container_cluster.my_cluster.name
+  tags = { Name = "online-boutique-vpc" }
 }
 
-# Enable Google Cloud APIs
-module "enable_google_apis" {
-  source  = "terraform-google-modules/project-factory/google//modules/project_services"
-  version = "~> 18.0"
-
-  project_id                  = var.gcp_project_id
-  disable_services_on_destroy = false
-
-  # activate_apis is the set of base_apis and the APIs required by user-configured deployment options
-  activate_apis = concat(local.base_apis, var.memorystore ? local.memorystore_apis : [])
+# =========================
+# Subredes públicas
+# =========================
+# Subred en AZ us-east-2a que asigna IP pública automáticamente
+resource "aws_subnet" "public_az1" {
+  vpc_id                 = aws_vpc.main.id
+  cidr_block             = "10.0.1.0/24"
+  availability_zone      = "us-east-2a"
+  map_public_ip_on_launch = true
+  tags = { Name = "online-boutique-public-subnet-az1" }
 }
 
-# Create GKE cluster
-resource "google_container_cluster" "my_cluster" {
+# Subred en AZ us-east-2b que asigna IP pública automáticamente
+resource "aws_subnet" "public_az2" {
+  vpc_id                 = aws_vpc.main.id
+  cidr_block             = "10.0.3.0/24"
+  availability_zone      = "us-east-2b"
+  map_public_ip_on_launch = true
+  tags = { Name = "online-boutique-public-subnet-az2" }
+}
 
-  name     = var.name
-  location = var.region
+# =========================
+# Subredes privadas
+# =========================
+# Subred privada en AZ us-east-2a
+resource "aws_subnet" "private_az1" {
+  vpc_id            = aws_vpc.main.id
+  cidr_block        = "10.0.2.0/24"
+  availability_zone = "us-east-2a"
+  tags = { Name = "online-boutique-private-subnet-az1" }
+}
 
-  # Enable autopilot for this cluster
-  enable_autopilot = true
+# Subred privada en AZ us-east-2b
+resource "aws_subnet" "private_az2" {
+  vpc_id            = aws_vpc.main.id
+  cidr_block        = "10.0.4.0/24"
+  availability_zone = "us-east-2b"
+  tags = { Name = "online-boutique-private-subnet-az2" }
+}
 
-  # Set an empty ip_allocation_policy to allow autopilot cluster to spin up correctly
-  ip_allocation_policy {
+# =========================
+# IAM Role para EKS (Control Plane)
+# =========================
+# Rol que EKS usará para crear y administrar el clúster
+resource "aws_iam_role" "eks_cluster_role" {
+  name = "online-boutique-eks-role"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Principal = { Service = "eks.amazonaws.com" }
+        Action = "sts:AssumeRole"
+      }
+    ]
+  })
+}
+
+# Adjuntamos políticas necesarias al rol del clúster
+resource "aws_iam_role_policy_attachment" "eks_cluster_AmazonEKSClusterPolicy" {
+  role       = aws_iam_role.eks_cluster_role.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonEKSClusterPolicy"
+}
+
+resource "aws_iam_role_policy_attachment" "eks_cluster_AmazonEKSServicePolicy" {
+  role       = aws_iam_role.eks_cluster_role.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonEKSServicePolicy"
+}
+
+# =========================
+# IAM Role para Node Group (Worker Nodes)
+# =========================
+# Rol que los nodos worker usarán para interactuar con AWS
+resource "aws_iam_role" "eks_node_role" {
+  name = "online-boutique-eks-node-role"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Principal = { Service = "ec2.amazonaws.com" }
+        Action = "sts:AssumeRole"
+      }
+    ]
+  })
+}
+
+# Adjuntamos políticas para nodos worker
+resource "aws_iam_role_policy_attachment" "eks_node_AmazonEKSWorkerNodePolicy" {
+  role       = aws_iam_role.eks_node_role.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy"
+}
+
+resource "aws_iam_role_policy_attachment" "eks_node_AmazonEKS_CNI_Policy" {
+  role       = aws_iam_role.eks_node_role.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy"
+}
+
+resource "aws_iam_role_policy_attachment" "eks_node_AmazonEC2ContainerRegistryReadOnly" {
+  role       = aws_iam_role.eks_node_role.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
+}
+
+# =========================
+# EKS Cluster
+# =========================
+# Creamos el clúster EKS usando el rol de control plane y las subredes definidas
+resource "aws_eks_cluster" "main" {
+  name     = "online-boutique-cluster"
+  role_arn = aws_iam_role.eks_cluster_role.arn
+
+  vpc_config {
+    subnet_ids = [
+      aws_subnet.public_az1.id,
+      aws_subnet.public_az2.id,
+      aws_subnet.private_az1.id,
+      aws_subnet.private_az2.id
+    ]
   }
 
-  # Avoid setting deletion_protection to false
-  # until you're ready (and certain you want) to destroy the cluster.
-  # deletion_protection = false
+  tags = { Name = "online-boutique-eks" }
+}
 
-  depends_on = [
-    module.enable_google_apis
+# =========================
+# Managed Node Group
+# =========================
+# Creamos nodos worker gestionados para ejecutar pods
+resource "aws_eks_node_group" "main" {
+  cluster_name    = aws_eks_cluster.main.name
+  node_group_name = "online-boutique-nodegroup"
+  node_role_arn   = aws_iam_role.eks_node_role.arn
+
+  # Nodos en subredes privadas
+  subnet_ids      = [
+    aws_subnet.private_az1.id,
+    aws_subnet.private_az2.id
   ]
-}
 
-# Get credentials for cluster
-module "gcloud" {
-  source  = "terraform-google-modules/gcloud/google"
-  version = "~> 3.0"
-
-  platform              = "linux"
-  additional_components = ["kubectl", "beta"]
-
-  create_cmd_entrypoint = "gcloud"
-  # Module does not support explicit dependency
-  # Enforce implicit dependency through use of local variable
-  create_cmd_body = "container clusters get-credentials ${local.cluster_name} --zone=${var.region} --project=${var.gcp_project_id}"
-}
-
-# Apply YAML kubernetes-manifest configurations
-resource "null_resource" "apply_deployment" {
-  provisioner "local-exec" {
-    interpreter = ["bash", "-exc"]
-    command     = "kubectl apply -k ${var.filepath_manifest} -n ${var.namespace}"
+  # Configuración de escalado automático
+  scaling_config {
+    desired_size = 2
+    max_size     = 3
+    min_size     = 1
   }
 
+  #instancia EC2 para los nodos
+  instance_types = ["t3.medium"]
+
+  tags = {
+    Name = "online-boutique-nodegroup"
+  }
+
+  # Espera a que el clúster esté listo antes de crear nodos
   depends_on = [
-    module.gcloud
+    aws_eks_cluster.main
   ]
 }
 
-# Wait condition for all Pods to be ready before finishing
-resource "null_resource" "wait_conditions" {
-  provisioner "local-exec" {
-    interpreter = ["bash", "-exc"]
-    command     = <<-EOT
-    kubectl wait --for=condition=AVAILABLE apiservice/v1beta1.metrics.k8s.io --timeout=180s
-    kubectl wait --for=condition=ready pods --all -n ${var.namespace} --timeout=280s
-    EOT
-  }
-
-  depends_on = [
-    resource.null_resource.apply_deployment
-  ]
+# =========================
+# ECR Repository
+# =========================
+# Repositorio de imágenes Docker
+resource "aws_ecr_repository" "app_repo" {
+  name = "online-boutique"
+  tags = { Name = "online-boutique-ecr" }
 }
