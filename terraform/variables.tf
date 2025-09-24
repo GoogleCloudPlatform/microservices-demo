@@ -1,47 +1,34 @@
-# Copyright 2022 Google LLC
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#      http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-
-variable "gcp_project_id" {
-  type        = string
-  description = "The GCP project ID to apply this config to"
+# Variable que define la región de AWS donde se desplegarán los recursos
+variable "aws_region" {
+  description = "AWS region to deploy resources" 
+  type        = string                            
+  default     = "us-east-2"                       
 }
 
-variable "name" {
-  type        = string
-  description = "Name given to the new GKE cluster"
-  default     = "online-boutique"
+# Variable que contiene el ARN del rol IAM necesario para el clúster EKS
+variable "eks_role_arn" {
+  description = "IAM role ARN for the EKS cluster" 
+  type        = string                              
 }
 
-variable "region" {
-  type        = string
-  description = "Region of the new GKE cluster"
-  default     = "us-central1"
+# Variable que define el bloque CIDR para la VPC principal
+variable "vpc_cidr" {
+  description = "CIDR block for the main VPC"  
+  type        = string                         
+  default     = "10.0.0.0/16"                 
 }
 
-variable "namespace" {
-  type        = string
-  description = "Kubernetes Namespace in which the Online Boutique resources are to be deployed"
-  default     = "default"
+# Variable que define el bloque CIDR para la subred pública
+variable "public_subnet_cidr" {
+  description = "CIDR block for the public subnet"  
+  type        = string                             
+  default     = "10.0.1.0/24"                        
 }
 
-variable "filepath_manifest" {
-  type        = string
-  description = "Path to Online Boutique's Kubernetes resources, written using Kustomize"
-  default     = "../kustomize/"
+# Variable que define el bloque CIDR para la subred privada
+variable "private_subnet_cidr" {
+  description = "CIDR block for the private subnet"  
+  type        = string                               
+  default     = "10.0.2.0/24"                        
 }
 
-variable "memorystore" {
-  type        = bool
-  description = "If true, Online Boutique's in-cluster Redis cache will be replaced with a Google Cloud Memorystore Redis cache"
-}
