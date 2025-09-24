@@ -1,116 +1,181 @@
-/**
- * Copyright 2024 Google LLC
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+# =========================
+# VPC
+# =========================
+# Creamos una VPC con rango privado 10.0.0.0/16
+# Habilitamos soporte DNS y hostnames para los recursos dentro de la VPC
+resource "aws_vpc" "main" {
+  cidr_block           = "10.0.0.0/16"
+  enable_dns_support   = true
+  enable_dns_hostnames = true
 
-# Set defaults for the google Terraform provider.
-provider "google" {
-  project = var.project_id
-  region  = "us-central1"
-  zone    = "us-central1-a"
+  tags = { Name = "online-boutique-vpc" }
 }
 
-terraform {
-  # Store the state inside a Google Cloud Storage bucket.
-  backend "gcs" {
-    bucket = "cicd-terraform-state"
-    prefix = "terraform-state"
+# =========================
+# Subredes públicas
+# =========================
+# Subred en AZ us-east-2a que asigna IP pública automáticamente
+resource "aws_subnet" "public_az1" {
+  vpc_id                 = aws_vpc.main.id
+  cidr_block             = "10.0.1.0/24"
+  availability_zone      = "us-east-2a"
+  map_public_ip_on_launch = true
+  tags = { Name = "online-boutique-public-subnet-az1" }
+}
+
+# Subred en AZ us-east-2b que asigna IP pública automáticamente
+resource "aws_subnet" "public_az2" {
+  vpc_id                 = aws_vpc.main.id
+  cidr_block             = "10.0.3.0/24"
+  availability_zone      = "us-east-2b"
+  map_public_ip_on_launch = true
+  tags = { Name = "online-boutique-public-subnet-az2" }
+}
+
+# =========================
+# Subredes privadas
+# =========================
+# Subred privada en AZ us-east-2a
+resource "aws_subnet" "private_az1" {
+  vpc_id            = aws_vpc.main.id
+  cidr_block        = "10.0.2.0/24"
+  availability_zone = "us-east-2a"
+  tags = { Name = "online-boutique-private-subnet-az1" }
+}
+
+# Subred privada en AZ us-east-2b
+resource "aws_subnet" "private_az2" {
+  vpc_id            = aws_vpc.main.id
+  cidr_block        = "10.0.4.0/24"
+  availability_zone = "us-east-2b"
+  tags = { Name = "online-boutique-private-subnet-az2" }
+}
+
+# =========================
+# IAM Role para EKS (Control Plane)
+# =========================
+# Rol que EKS usará para crear y administrar el clúster
+resource "aws_iam_role" "eks_cluster_role" {
+  name = "online-boutique-eks-role"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Principal = { Service = "eks.amazonaws.com" }
+        Action = "sts:AssumeRole"
+      }
+    ]
+  })
+}
+
+# Adjuntamos políticas necesarias al rol del clúster
+resource "aws_iam_role_policy_attachment" "eks_cluster_AmazonEKSClusterPolicy" {
+  role       = aws_iam_role.eks_cluster_role.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonEKSClusterPolicy"
+}
+
+resource "aws_iam_role_policy_attachment" "eks_cluster_AmazonEKSServicePolicy" {
+  role       = aws_iam_role.eks_cluster_role.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonEKSServicePolicy"
+}
+
+# =========================
+# IAM Role para Node Group (Worker Nodes)
+# =========================
+# Rol que los nodos worker usarán para interactuar con AWS
+resource "aws_iam_role" "eks_node_role" {
+  name = "online-boutique-eks-node-role"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Principal = { Service = "ec2.amazonaws.com" }
+        Action = "sts:AssumeRole"
+      }
+    ]
+  })
+}
+
+# Adjuntamos políticas para nodos worker
+resource "aws_iam_role_policy_attachment" "eks_node_AmazonEKSWorkerNodePolicy" {
+  role       = aws_iam_role.eks_node_role.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy"
+}
+
+resource "aws_iam_role_policy_attachment" "eks_node_AmazonEKS_CNI_Policy" {
+  role       = aws_iam_role.eks_node_role.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy"
+}
+
+resource "aws_iam_role_policy_attachment" "eks_node_AmazonEC2ContainerRegistryReadOnly" {
+  role       = aws_iam_role.eks_node_role.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
+}
+
+# =========================
+# EKS Cluster
+# =========================
+# Creamos el clúster EKS usando el rol de control plane y las subredes definidas
+resource "aws_eks_cluster" "main" {
+  name     = "online-boutique-cluster"
+  role_arn = aws_iam_role.eks_cluster_role.arn
+
+  vpc_config {
+    subnet_ids = [
+      aws_subnet.public_az1.id,
+      aws_subnet.public_az2.id,
+      aws_subnet.private_az1.id,
+      aws_subnet.private_az2.id
+    ]
   }
+
+  tags = { Name = "online-boutique-eks" }
 }
 
-# Enable Google Cloud APIs.
-module "enable_google_apis" {
-  source                      = "terraform-google-modules/project-factory/google//modules/project_services"
-  version                     = "~> 18.0"
-  disable_services_on_destroy = false
-  activate_apis = [
-    "cloudresourcemanager.googleapis.com",
-    "container.googleapis.com",
-    "iam.googleapis.com",
-    "storage.googleapis.com",
+# =========================
+# Managed Node Group
+# =========================
+# Creamos nodos worker gestionados para ejecutar pods
+resource "aws_eks_node_group" "main" {
+  cluster_name    = aws_eks_cluster.main.name
+  node_group_name = "online-boutique-nodegroup"
+  node_role_arn   = aws_iam_role.eks_node_role.arn
+
+  # Nodos en subredes privadas
+  subnet_ids      = [
+    aws_subnet.private_az1.id,
+    aws_subnet.private_az2.id
   ]
-  project_id = var.project_id
-}
 
-# Google Cloud Storage for storing Terraform state (.tfstate).
-resource "google_storage_bucket" "terraform_state_storage_bucket" {
-  name                        = "cicd-terraform-state"
-  location                    = "us"
-  storage_class               = "STANDARD"
-  force_destroy               = false
-  public_access_prevention    = "enforced"
-  uniform_bucket_level_access = true
-  versioning {
-    enabled = true
+  # Configuración de escalado automático
+  scaling_config {
+    desired_size = 2
+    max_size     = 3
+    min_size     = 1
   }
-}
 
-# Google Cloud IAM service account for GKE clusters.
-# We avoid using the Compute Engine default service account because it's too permissive.
-resource "google_service_account" "gke_clusters_service_account" {
-  account_id   = "gke-clusters-service-account"
-  display_name = "My Service Account"
+  #instancia EC2 para los nodos
+  instance_types = ["t3.medium"]
+
+  tags = {
+    Name = "online-boutique-nodegroup"
+  }
+
+  # Espera a que el clúster esté listo antes de crear nodos
   depends_on = [
-    module.enable_google_apis
+    aws_eks_cluster.main
   ]
 }
 
-# See https://cloud.google.com/kubernetes-engine/docs/how-to/hardening-your-cluster#use_least_privilege_sa
-resource "google_project_iam_member" "gke_clusters_service_account_role_metric_writer" {
-  project = var.project_id
-  role    = "roles/monitoring.metricWriter"
-  member  = "serviceAccount:${google_service_account.gke_clusters_service_account.email}"
-}
-
-# See https://cloud.google.com/kubernetes-engine/docs/how-to/hardening-your-cluster#use_least_privilege_sa
-resource "google_project_iam_member" "gke_clusters_service_account_role_logging_writer" {
-  project = var.project_id
-  role    = "roles/logging.logWriter"
-  member  = "serviceAccount:${google_service_account.gke_clusters_service_account.email}"
-}
-
-# See https://cloud.google.com/kubernetes-engine/docs/how-to/hardening-your-cluster#use_least_privilege_sa
-resource "google_project_iam_member" "gke_clusters_service_account_role_monitoring_viewer" {
-  project = var.project_id
-  role    = "roles/monitoring.viewer"
-  member  = "serviceAccount:${google_service_account.gke_clusters_service_account.email}"
-}
-
-# See https://cloud.google.com/kubernetes-engine/docs/how-to/hardening-your-cluster#use_least_privilege_sa
-resource "google_project_iam_member" "gke_clusters_service_account_role_stackdriver_writer" {
-  project = var.project_id
-  role    = "roles/stackdriver.resourceMetadata.writer"
-  member  = "serviceAccount:${google_service_account.gke_clusters_service_account.email}"
-}
-
-# The GKE cluster used for pull-request (PR) staging deployments.
-resource "google_container_cluster" "prs_gke_cluster" {
-  name                = "prs-gke-cluster"
-  location            = "us-central1"
-  enable_autopilot    = true
-  project             = var.project_id
-  deletion_protection = true
-  depends_on = [
-    module.enable_google_apis
-  ]
-  cluster_autoscaling {
-    auto_provisioning_defaults {
-      service_account = google_service_account.gke_clusters_service_account.email
-    }
-  }
-  # Need an empty ip_allocation_policy to overcome an error related to autopilot node pool constraints.
-  # Workaround from https://github.com/hashicorp/terraform-provider-google/issues/10782#issuecomment-1024488630
-  ip_allocation_policy {
-  }
+# =========================
+# ECR Repository
+# =========================
+# Repositorio de imágenes Docker
+resource "aws_ecr_repository" "app_repo" {
+  name = "online-boutique"
+  tags = { Name = "online-boutique-ecr" }
 }
