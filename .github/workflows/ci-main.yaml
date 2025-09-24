@@ -1,5 +1,6 @@
 name: "Continuous Integration - Main/Release"
 
+# Se ejecuta en push a main o ramas release/*
 on:
   push:
     branches:
@@ -15,6 +16,7 @@ on:
       - '.github/workflows/helm-chart-ci.yaml'
 
 jobs:
+  # Job de tests de código
   code-tests:
     runs-on: ubuntu-24.04
     steps:
@@ -28,7 +30,6 @@ jobs:
       - name: Go Unit Tests
         run: |
           for SERVICE in "shippingservice" "productcatalogservice"; do
-            echo "testing $SERVICE..."
             pushd src/$SERVICE
             go test
             popd
@@ -36,37 +37,50 @@ jobs:
       - name: C# Unit Tests
         run: dotnet test src/cartservice/
 
+  # Job de deploy a producción
   deployment-tests:
     runs-on: ubuntu-24.04
     needs: code-tests
     steps:
       - uses: actions/checkout@v4
 
-      # Configurar AWS creds
+      # Configurar credenciales AWS
       - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v4
+        uses: aws-actions/configure-aws-credentials@v5
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION }}
 
-      #  Conectarse al cluster EKS
+      # Login a ECR
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      # Build + Push de la imagen principal
+      - name: Build, tag, and push images to Amazon ECR
+        run: |
+          IMAGE_REPO=${{ steps.login-ecr.outputs.registry }}/online-boutique
+          docker build -t $IMAGE_REPO:$GITHUB_SHA .
+          docker push $IMAGE_REPO:$GITHUB_SHA
+
+      # Configurar kubectl para EKS
       - name: Update kubeconfig for EKS
         run: |
           aws eks update-kubeconfig --name online-boutique-cluster --region ${{ secrets.AWS_REGION }}
 
-      # Desplegar usando Skaffold (igual que antes, pero ya contra EKS)
-      - name: Build + Deploy to EKS
+      # Desplegar con Helm al namespace main-deploy
+      - name: Deploy application with Helm
         run: |
           NAMESPACE="main-deploy"
           kubectl create namespace $NAMESPACE --dry-run=client -o yaml | kubectl apply -f -
-          echo "Deploying application..."
-          skaffold config set --global local-cluster false
-          skaffold run --default-repo=$AWS_ACCOUNT_ID.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/online-boutique \
-            --tag=$GITHUB_SHA --namespace=$NAMESPACE -p network-policies
+          helm upgrade --install onlineboutique ./helm-chart \
+            --namespace $NAMESPACE --create-namespace \
+            --set images.repository=${{ steps.login-ecr.outputs.registry }}/online-boutique \
+            --set images.tag=$GITHUB_SHA
 
-      # ⏳ Esperar que arranquen los pods
-      - name: Wait For Pods
+      # Esperar que todos los pods estén listos
+      - name: Wait for pods
         run: |
           kubectl config set-context --current --namespace=main-deploy
           for DEPLOY in redis-cart adservice cartservice checkoutservice currencyservice \
@@ -75,15 +89,15 @@ jobs:
             kubectl wait --for=condition=available --timeout=1000s deployment/$DEPLOY
           done
 
-      # Smoke Test
+      # Smoke Test para validar aplicación
       - name: Smoke Test
         run: |
           set -x
           kubectl delete pod -l app=loadgenerator || true
           REQUEST_COUNT="0"
-          while [[ "$REQUEST_COUNT"  -lt "50"  ]]; do
-              sleep 5
-              REQUEST_COUNT=$(kubectl logs -l app=loadgenerator | grep Aggregated | awk '{print $2}')
+          while [[ "$REQUEST_COUNT" -lt "50" ]]; do
+            sleep 5
+            REQUEST_COUNT=$(kubectl logs -l app=loadgenerator | grep Aggregated | awk '{print $2}')
           done
           ERROR_COUNT=$(kubectl logs -l app=loadgenerator | grep Aggregated | awk '{print $3}' | sed "s/[(][^)]*[)]//g")
           if [[ "$ERROR_COUNT" -gt "0" ]]; then
