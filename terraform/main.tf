@@ -61,7 +61,7 @@ resource "google_container_cluster" "my_cluster" {
 # Get credentials for cluster
 module "gcloud" {
   source  = "terraform-google-modules/gcloud/google"
-  version = "~> 3.0"
+  version = "~> 4.0"
 
   platform              = "linux"
   additional_components = ["kubectl", "beta"]
