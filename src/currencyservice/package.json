@@ -10,7 +10,7 @@
   "dependencies": {
     "@google-cloud/profiler": "6.0.3",
     "@google-cloud/trace-agent": "8.0.0",
-    "@grpc/grpc-js": "1.13.4",
+    "@grpc/grpc-js": "1.14.0",
     "@grpc/proto-loader": "0.8.0",
     "async": "3.2.6",
     "google-protobuf": "4.0.0",
@@ -21,7 +21,7 @@
     "@opentelemetry/semantic-conventions": "1.37.0",
     "@opentelemetry/sdk-trace-base": "2.1.0",
     "@opentelemetry/sdk-node": "0.205.0",
-    "pino": "9.9.5",
+    "pino": "9.11.0",
     "xml2js": "0.6.2"
   }
 }
