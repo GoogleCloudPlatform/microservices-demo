@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-FROM --platform=$TARGETPLATFORM python:3.12.8-alpine AS base
+FROM python:3.12.8-alpine AS base
 
 FROM base AS builder
 
