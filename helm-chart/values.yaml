@@ -17,7 +17,7 @@
 # Declare variables to be passed into your templates.
 
 images:
-  repository: ghcr.io/riptideslabs/microservice-demo
+  repository: ghcr.io/riptideslabs/microservices-demo
   # Overrides the image tag whose default is the chart appVersion.
   tag: ""
 
@@ -229,4 +229,3 @@ shoppingAssistantService:
     limits:
       cpu: 200m
       memory: 128Mi
-
