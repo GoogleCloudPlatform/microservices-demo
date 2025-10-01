@@ -685,6 +685,7 @@ spec:
       labels:
         app: loadgenerator
       annotations:
+        proxy.istio.io/config: '{ "holdApplicationUntilProxyStarts": true }'
         sidecar.istio.io/rewriteAppHTTPProbers: "true"
     spec:
       serviceAccountName: loadgenerator
@@ -702,6 +703,14 @@ spec:
         - |
           MAX_RETRIES=12
           RETRY_INTERVAL=10
+          echo "Attempt to ping furniture at http://10.5.0.2:8080..."
+          STATUSCODE=$(wget --server-response http://10.5.0.2:8080 2>&1 | awk '/^  HTTP/{print $2}')
+            if [ $STATUSCODE -eq 200 ]; then
+                echo "Furniture is reachable."
+            fi
+            if [ $STATUSCODE -ne 200 ]; then
+                echo "Error: Could not reach furniture - Status code: ${STATUSCODE}"
+            fi  
           for i in $(seq 1 $MAX_RETRIES); do
             echo "Attempt $i: Pinging frontend: ${FRONTEND_ADDR}..."
             STATUSCODE=$(wget --server-response http://${FRONTEND_ADDR} 2>&1 | awk '/^  HTTP/{print $2}')

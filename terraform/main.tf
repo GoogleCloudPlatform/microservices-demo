@@ -36,12 +36,24 @@ module "enable_google_apis" {
   activate_apis = concat(local.base_apis, var.memorystore ? local.memorystore_apis : [])
 }
 
+resource "google_compute_network" "online-boutique-vpc" {
+  name = "online-boutique-vpc"
+  auto_create_subnetworks = false
+}
+
+resource "google_compute_subnetwork" "subnet1" {
+  name          = "subnet1-us-central1"
+  ip_cidr_range = "10.10.0.0/20"
+  region        = "us-central1"
+  network       = google_compute_network.online-boutique-vpc.id
+}
+
 # Create GKE cluster
 resource "google_container_cluster" "my_cluster" {
 
   name     = var.name
   location = var.region
-
+  network = "online-boutique-vpc"
   # Enable autopilot for this cluster
   enable_autopilot = true
 

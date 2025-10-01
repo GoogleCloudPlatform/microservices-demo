@@ -3,7 +3,7 @@
 
 # Data source to get the default subnet in europe-west1 (where GKE cluster is located)
 data "google_compute_subnetwork" "default_subnet_europe" {
-  name   = "default"
+  name   = "online-boutique-vpc"
   region = "europe-west1"
 }
 
@@ -318,7 +318,7 @@ resource "google_compute_service_attachment" "inventory_psc_attachment" {
   # Target service (we'll use a load balancer)
   target_service = google_compute_forwarding_rule.inventory_forwarding_rule.id
   
-  # Allow connections from the default VPC project
+  # Allow connections from the online-boutique-vpc VPC project
   consumer_accept_lists {
     project_id_or_num = var.project_id
     connection_limit  = 10
@@ -393,7 +393,7 @@ resource "google_compute_forwarding_rule" "inventory_psc_endpoint_europe" {
   
   load_balancing_scheme = ""
   target                = google_compute_service_attachment.inventory_psc_attachment.id
-  network               = "default"  # Connect from default network
+  network               = "online-boutique-vpc"  # Connect from online-boutique-vpc network
   ip_address            = google_compute_address.inventory_psc_ip_europe.self_link
   
   # This provides PSC access from europe-west1 region where GKE cluster is located

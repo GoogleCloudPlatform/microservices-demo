@@ -17,7 +17,7 @@ resource "google_compute_subnetwork" "crm_subnet" {
   description   = "Subnet for CRM service"
 }
 
-# 3. Create a firewall rule to allow traffic on port 8080 from default VPC
+# 3. Create a firewall rule to allow traffic on port 8080 from online-boutique-vpc VPC
 resource "google_compute_firewall" "allow_crm_http" {
   name    = "crm-allow-http-internal"
   network = google_compute_network.crm_vpc.name
@@ -28,7 +28,7 @@ resource "google_compute_firewall" "allow_crm_http" {
   }
 
   target_tags   = ["crm-server"]
-  source_ranges = ["10.128.0.0/9", "10.2.0.0/24"]  # Default VPC and CRM VPC ranges
+  source_ranges = ["10.128.0.0/9", "10.2.0.0/24"]  # Online-boutique-vpc VPC and CRM VPC ranges
 }
 
 # Create the smallest possible Compute Engine VM instance
@@ -157,22 +157,42 @@ output "crm_subnet_cidr" {
   description = "The CIDR range of the CRM subnet."
 }
 
-# 4. Create VPC peering from crm-vpc to default VPC
-resource "google_compute_network_peering" "crm_to_default" {
-  name         = "crm-to-default-peering"
+# 4. Create VPC peering from crm-vpc to online-boutique-vpc VPC
+resource "google_compute_network_peering" "crm_to_ob" {
+  name         = "crm-to-ob-peering"
   network      = google_compute_network.crm_vpc.id
-  peer_network = "projects/${var.project_id}/global/networks/default"
+  peer_network = "projects/${var.project_id}/global/networks/online-boutique-vpc"
 
   import_custom_routes = false
   export_custom_routes = false
 }
 
-# 5. Create VPC peering from default VPC to crm-vpc  
-resource "google_compute_network_peering" "default_to_crm" {
-  name         = "default-to-crm-peering"
-  network      = "projects/${var.project_id}/global/networks/default"
+# 5. Create VPC peering from online-boutique-vpc VPC to crm-vpc  
+resource "google_compute_network_peering" "ob_to_crm" {
+  name         = "ob-to-crm-peering"
+  network      = "projects/${var.project_id}/global/networks/online-boutique-vpc"
   peer_network = google_compute_network.crm_vpc.id
 
   import_custom_routes = false
+  export_custom_routes = false
+}
+
+# 6. Create VPC peering from remote VPC to online-boutique-vpc 
+resource "google_compute_network_peering" "remote_to_ob" {
+  name         = "remote-to-ob-peering"
+  network      = "projects/${var.peering_project_id}/global/networks/${var.peering_vpc_network}"
+  peer_network = "projects/${var.project_id}/global/networks/online-boutique-vpc"
+
+  import_custom_routes = false
+  export_custom_routes = true
+}
+
+# 7. Create VPC peering from online-boutique-vpc VPC to remote  
+resource "google_compute_network_peering" "ob_to_remote" {
+  name         = "ob-to-remote-peering"
+  network      = "projects/${var.project_id}/global/networks/online-boutique-vpc"
+  peer_network = "projects/${var.peering_project_id}/global/networks/${var.peering_vpc_network}"
+
+  import_custom_routes = true
   export_custom_routes = false
 }
