@@ -95,7 +95,7 @@ spec:
         image: busybox:latest
         env:
         - name: FRONTEND_ADDR
-          value: "{{ .Values.frontend.name }}:80"
+          value: "{{ .Values.frontend.name }}.{{ .Release.Namespace }}.svc.cluster.local:80"
       {{- end }}
       containers:
       - name: main
@@ -109,7 +109,7 @@ spec:
         image: {{ .Values.images.repository }}/{{ .Values.loadGenerator.name }}:{{ .Values.images.tag | default .Chart.AppVersion }}
         env:
         - name: FRONTEND_ADDR
-          value: "{{ .Values.frontend.name }}:80"
+          value: "{{ .Values.frontend.name }}.{{ .Release.Namespace }}.svc.cluster.local:80"
         - name: USERS
           value: "10"
         - name: RATE

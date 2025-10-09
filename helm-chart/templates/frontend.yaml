@@ -93,26 +93,26 @@ spec:
           - name: PORT
             value: "8080"
           - name: PRODUCT_CATALOG_SERVICE_ADDR
-            value: "{{ .Values.productCatalogService.name }}:3550"
+            value: "{{ .Values.productCatalogService.name }}.{{ .Release.Namespace }}.svc.cluster.local:3550"
           - name: CURRENCY_SERVICE_ADDR
-            value: "{{ .Values.currencyService.name }}:7000"
+            value: "{{ .Values.currencyService.name }}.{{ .Release.Namespace }}.svc.cluster.local:7000"
           - name: CART_SERVICE_ADDR
-            value: "{{ .Values.cartService.name }}:7070"
+            value: "{{ .Values.cartService.name }}.{{ .Release.Namespace }}.svc.cluster.local:7070"
           - name: RECOMMENDATION_SERVICE_ADDR
-            value: "{{ .Values.recommendationService.name }}:8080"
+            value: "{{ .Values.recommendationService.name }}.{{ .Release.Namespace }}.svc.cluster.local:8080"
           - name: SHIPPING_SERVICE_ADDR
-            value: "{{ .Values.shippingService.name }}:50051"
+            value: "{{ .Values.shippingService.name }}.{{ .Release.Namespace }}.svc.cluster.local:50051"
           - name: CHECKOUT_SERVICE_ADDR
-            value: "{{ .Values.checkoutService.name }}:5050"
+            value: "{{ .Values.checkoutService.name }}.{{ .Release.Namespace }}.svc.cluster.local:5050"
           - name: AD_SERVICE_ADDR
-            value: "{{ .Values.adService.name }}:9555"
+            value: "{{ .Values.adService.name }}.{{ .Release.Namespace }}.svc.cluster.local:9555"
           - name: SHOPPING_ASSISTANT_SERVICE_ADDR
-            value: "{{ .Values.shoppingAssistantService.name }}:80"
+            value: "{{ .Values.shoppingAssistantService.name }}.{{ .Release.Namespace }}.svc.cluster.local:80"
           - name: ENV_PLATFORM
             value: {{ .Values.frontend.platform | quote }}
           {{- if .Values.opentelemetryCollector.create }}
           - name: COLLECTOR_SERVICE_ADDR
-            value: "{{ .Values.opentelemetryCollector.name }}:4317"
+            value: "{{ .Values.opentelemetryCollector.name }}.{{ .Release.Namespace }}.svc.cluster.local:4317"
           - name: OTEL_SERVICE_NAME
             value: "{{ .Values.frontend.name }}"
           {{- end }}

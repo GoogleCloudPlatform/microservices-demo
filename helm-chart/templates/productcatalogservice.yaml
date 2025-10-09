@@ -77,7 +77,7 @@ spec:
           value: "3550"
         {{- if .Values.opentelemetryCollector.create }}
         - name: COLLECTOR_SERVICE_ADDR
-          value: "{{ .Values.opentelemetryCollector.name }}:4317"
+          value: "{{ .Values.opentelemetryCollector.name }}.{{ .Release.Namespace }}.svc.cluster.local:4317"
         - name: OTEL_SERVICE_NAME
           value: "{{ .Values.productCatalogService.name }}"
         {{- end }}

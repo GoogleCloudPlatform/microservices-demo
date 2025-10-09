@@ -81,20 +81,20 @@ spec:
         - name: PORT
           value: "5050"
         - name: PRODUCT_CATALOG_SERVICE_ADDR
-          value: "{{ .Values.productCatalogService.name }}:3550"
+          value: "{{ .Values.productCatalogService.name }}.{{ .Release.Namespace }}.svc.cluster.local:3550"
         - name: SHIPPING_SERVICE_ADDR
-          value: "{{ .Values.shippingService.name }}:50051"
+          value: "{{ .Values.shippingService.name }}.{{ .Release.Namespace }}.svc.cluster.local:50051"
         - name: PAYMENT_SERVICE_ADDR
-          value: "{{ .Values.paymentService.name }}:50051"
+          value: "{{ .Values.paymentService.name }}.{{ .Release.Namespace }}.svc.cluster.local:50051"
         - name: EMAIL_SERVICE_ADDR
-          value: "{{ .Values.emailService.name }}:5000"
+          value: "{{ .Values.emailService.name }}.{{ .Release.Namespace }}.svc.cluster.local:5000"
         - name: CURRENCY_SERVICE_ADDR
-          value: "{{ .Values.currencyService.name }}:7000"
+          value: "{{ .Values.currencyService.name }}.{{ .Release.Namespace }}.svc.cluster.local:7000"
         - name: CART_SERVICE_ADDR
-          value: "{{ .Values.cartService.name }}:7070"
+          value: "{{ .Values.cartService.name }}.{{ .Release.Namespace }}.svc.cluster.local:7070"
         {{- if .Values.opentelemetryCollector.create }}
         - name: COLLECTOR_SERVICE_ADDR
-          value: "{{ .Values.opentelemetryCollector.name }}:4317"
+          value: "{{ .Values.opentelemetryCollector.name }}.{{ .Release.Namespace }}.svc.cluster.local:4317"
         - name: OTEL_SERVICE_NAME
           value: "{{ .Values.checkoutService.name }}"
         {{- end }}
