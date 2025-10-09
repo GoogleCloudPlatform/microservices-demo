@@ -29,7 +29,7 @@ RUN CGO_ENABLED=0 GOOS=${TARGETOS} GOARCH=${TARGETARCH} go build -gcflags="${SKA
 FROM scratch
 
 WORKDIR /src
-COPY --from=builder /productcatalogservice ./server
+COPY --from=builder /productcatalogservice ./productcatalogservice
 COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
 COPY products.json .
 
@@ -39,4 +39,4 @@ COPY products.json .
 ENV GOTRACEBACK=single
 
 EXPOSE 3550
-ENTRYPOINT ["/src/server"]
+ENTRYPOINT ["/src/productcatalogservice"]
