@@ -183,6 +183,7 @@ def manageCustomer(l):
 
 def checkInventory(l):
     """Check inventory via GCP Inventory Service (PSC): GET inventory and specific products"""
+    print(f"GCP Inventory Service call: {GCP_INVENTORY_URL}")
     if not GCP_INVENTORY_URL:
         return
     
@@ -190,16 +191,12 @@ def checkInventory(l):
         # GET all inventory
         requests.get(f"{GCP_INVENTORY_URL}/inventory", timeout=10)
         
-        # GET specific product inventory (random product from our catalog)
-        product_id = random.choice(products)
-        requests.get(f"{GCP_INVENTORY_URL}/inventory/{product_id}", timeout=10)
-        
         # Occasionally simulate inventory operations
         if random.random() < 0.3:  # 30% chance
             # Reserve stock for a product
-            reserve_data = {"quantity": random.randint(1, 3)}
+            reserve_data = {"name": "item", "code": "7" }
             requests.post(
-                f"{GCP_INVENTORY_URL}/inventory/{product_id}/reserve",
+                f"{GCP_INVENTORY_URL}/inventory",
                 json=reserve_data,
                 headers={"Content-Type": "application/json"},
                 timeout=10

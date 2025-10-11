@@ -17,7 +17,7 @@ resource "google_compute_network" "inventory_vpc" {
 # 2. Create a subnet in the inventory VPC
 resource "google_compute_subnetwork" "inventory_subnet" {
   name          = "inventory-subnet"
-  ip_cidr_range = "10.1.0.0/24"
+  ip_cidr_range = "10.20.0.0/24"
   region        = "europe-west1"
   network       = google_compute_network.inventory_vpc.id
   description   = "Subnet for inventory service"
@@ -26,7 +26,7 @@ resource "google_compute_subnetwork" "inventory_subnet" {
 # 2b. Create a dedicated subnet for PSC
 resource "google_compute_subnetwork" "inventory_psc_subnet" {
   name          = "inventory-psc-subnet"
-  ip_cidr_range = "10.1.1.0/24"
+  ip_cidr_range = "10.20.1.0/24"
   region        = "europe-west1"
   network       = google_compute_network.inventory_vpc.id
   purpose       = "PRIVATE_SERVICE_CONNECT"
@@ -47,7 +47,7 @@ resource "google_compute_firewall" "inventory_internal" {
     protocol = "icmp"
   }
   
-  source_ranges = ["10.1.0.0/24", "10.0.0.0/8"]
+  source_ranges = ["10.10.0.0/24", "10.0.0.0/8"]
   description   = "Allow internal traffic within inventory VPC and from PSC"
 }
 
@@ -68,14 +68,14 @@ resource "google_compute_firewall" "inventory_psc" {
 # 5. Create the inventory service VM with private IP only
 resource "google_compute_instance" "inventory_vm" {
   name         = "inventory-service-vm"
-  machine_type = "e2-micro"
+  machine_type = "e2-small"
   zone         = "europe-west1-b"
   
   tags = ["inventory-server"]
   
   boot_disk {
     initialize_params {
-      image = "debian-cloud/debian-11"
+      image = "debian-cloud/debian-12"
     }
   }
   
@@ -86,219 +86,89 @@ resource "google_compute_instance" "inventory_vm" {
     # No access_config block = no external IP
   }
   
-  # Service account for VM
-  service_account {
-    scopes = ["cloud-platform"]
-  }
-  
   # Startup script to install and run the inventory service
   metadata_startup_script = <<-EOT
     #!/bin/bash
-    set -e
     
-    # Update system
-    apt-get update
-    apt-get install -y curl
-    
-    # Install Node.js
-    curl -fsSL https://deb.nodesource.com/setup_18.x | bash -
-    apt-get install -y nodejs
-    
-    # Install PM2 for process management
-    npm install -g pm2
-    
-    # Create application directory
-    mkdir -p /opt/inventory-service
-    cd /opt/inventory-service
-    
-    # Create package.json
-    cat > package.json << 'EOF'
-{
-  "name": "inventory-service",
-  "version": "1.0.0",
-  "description": "Simple inventory management service",
-  "main": "app.js",
-  "dependencies": {
-    "express": "^4.18.2"
-  }
-}
-EOF
-    
-    # Create the main application file
-    cat > app.js << 'EOF'
-const express = require('express');
-const app = express();
-const port = 8080;
+    # Update packages and install Node.js and npm
+    sudo apt-get update
+    sudo apt-get install -y nodejs npm
 
-app.use(express.json());
+    # Install pm2, a production process manager for Node.js
+    sudo npm install pm2 -g
 
-// In-memory inventory data (simulating a database)
-let inventory = [
-  { productId: "OLJCESPC7Z", name: "Vintage Typewriter", stockLevel: 45, reserved: 3, available: 42 },
-  { productId: "66VCHSJNUP", name: "Vintage Camera Lens", stockLevel: 12, reserved: 0, available: 12 },
-  { productId: "1YMWWN1N4O", name: "Home Barista Kit", stockLevel: 8, reserved: 2, available: 6 },
-  { productId: "L9ECAV7KIM", name: "Terrarium", stockLevel: 25, reserved: 1, available: 24 },
-  { productId: "2ZYFJ3GM2N", name: "Film Camera", stockLevel: 15, reserved: 0, available: 15 },
-  { productId: "0PUK6V6EV0", name: "Vintage Record Player", stockLevel: 3, reserved: 1, available: 2 },
-  { productId: "LS4PSXUNUM", name: "Metal Camping Mug", stockLevel: 100, reserved: 5, available: 95 },
-  { productId: "9SIQT8TOJO", name: "City Bike", stockLevel: 7, reserved: 0, available: 7 },
-  { productId: "6E92ZMYYFZ", name: "Air Plant", stockLevel: 30, reserved: 2, available: 28 }
-];
+    # Create a directory for the app
+    sudo mkdir -p /opt/app
+    sudo chown -R $(whoami):$(whoami) /opt/app
+    cd /opt/app
 
-// Health check endpoint
-app.get('/health', (req, res) => {
-  res.json({ status: 'healthy', service: 'inventory', timestamp: new Date().toISOString() });
-});
+    # Create the package.json file
+    cat <<'EOF' > package.json
+    {
+      "name": "mock-inventory-service",
+      "version": "1.0.0",
+      "main": "app.js",
+      "dependencies": {
+        "express": "^4.18.2"
+      }
+    }
+    EOF
 
-// Get all inventory
-app.get('/inventory', (req, res) => {
-  console.log('GET /inventory - Retrieved all inventory items');
-  res.json({
-    total: inventory.length,
-    data: inventory.map(item => ({
-      ...item,
-      lastUpdated: new Date().toISOString()
-    }))
-  });
-});
+    # Create the app.js file with the mock furniture logic
+    cat <<'EOF' > app.js
+    const express = require('express');
+    const app = express();
+    const port = 8080;
 
-// Get inventory for specific product
-app.get('/inventory/:productId', (req, res) => {
-  const { productId } = req.params;
-  const item = inventory.find(i => i.productId === productId);
-  
-  if (!item) {
-    console.log(`GET /inventory/$${productId} - Product not found`);
-    return res.status(404).json({ error: 'Product not found' });
-  }
-  
-  console.log(`GET /inventory/$${productId} - Retrieved inventory for $${item.name}`);
-  res.json({
-    ...item,
-    lastUpdated: new Date().toISOString()
-  });
-});
+    // Middleware to parse JSON bodies
+    app.use(express.json());
 
-// Reserve stock for a product
-app.post('/inventory/:productId/reserve', (req, res) => {
-  const { productId } = req.params;
-  const { quantity = 1 } = req.body;
-  
-  const item = inventory.find(i => i.productId === productId);
-  
-  if (!item) {
-    console.log(`POST /inventory/$${productId}/reserve - Product not found`);
-    return res.status(404).json({ error: 'Product not found' });
-  }
-  
-  if (item.available < quantity) {
-    console.log(`POST /inventory/$${productId}/reserve - Insufficient stock. Available: $${item.available}, Requested: $${quantity}`);
-    return res.status(400).json({ 
-      error: 'Insufficient stock', 
-      available: item.available, 
-      requested: quantity 
+    // In-memory data store
+    let items = [
+    ];
+
+    // GET endpoint to list all items
+    app.get('/inventory', (req, res) => {
+      console.log('GET /inventory - Returning items list');
+      res.status(200).json(items);
     });
-  }
-  
-  // Reserve the stock
-  item.reserved += quantity;
-  item.available -= quantity;
-  
-  console.log(`POST /inventory/$${productId}/reserve - Reserved $${quantity} units of $${item.name}. Available: $${item.available}, Reserved: $${item.reserved}`);
-  res.json({
-    message: 'Stock reserved successfully',
-    productId: productId,
-    reservedQuantity: quantity,
-    ...item,
-    lastUpdated: new Date().toISOString()
-  });
-});
 
-// Release reserved stock
-app.post('/inventory/:productId/release', (req, res) => {
-  const { productId } = req.params;
-  const { quantity = 1 } = req.body;
-  
-  const item = inventory.find(i => i.productId === productId);
-  
-  if (!item) {
-    console.log(`POST /inventory/$${productId}/release - Product not found`);
-    return res.status(404).json({ error: 'Product not found' });
-  }
-  
-  if (item.reserved < quantity) {
-    console.log(`POST /inventory/$${productId}/release - Insufficient reserved stock. Reserved: $${item.reserved}, Requested: $${quantity}`);
-    return res.status(400).json({ 
-      error: 'Insufficient reserved stock', 
-      reserved: item.reserved, 
-      requested: quantity 
+    // POST endpoint to add a new item
+    app.post('/inventory', (req, res) => {
+      const { name, code } = req.body;
+
+      if (!name || !code) {
+        console.log('POST /furniture - Failed: Missing name or code');
+        return res.status(400).json({ error: 'Name and code are required.' });
+      }
+      const index = items.findIndex(el => el.code === code);
+      if (index >-1) {
+        items[index].count++;
+      } else {
+        items.push({name, code, count: 1 });
+      }
+      
+      // Cleanup: Keep only the 10 most recent items
+      if (items.length > 10) {
+        const removedCount = items.length - 10;
+        items = items.slice(-10); // Keep last 10
+        console.log(`POST /furniture - Cleaned up $${removedCount} old items(s), keeping 10 most recent`);
+      }
+      
+      console.log(`POST /inventory - Added new iten: $${name} $${code}. Total: $${items.length}`);
+      res.status(201).json(newItem);
     });
-  }
-  
-  // Release the stock
-  item.reserved -= quantity;
-  item.available += quantity;
-  
-  console.log(`POST /inventory/$${productId}/release - Released $${quantity} units of $${item.name}. Available: $${item.available}, Reserved: $${item.reserved}`);
-  res.json({
-    message: 'Stock released successfully',
-    productId: productId,
-    releasedQuantity: quantity,
-    ...item,
-    lastUpdated: new Date().toISOString()
-  });
-});
 
-// Update stock levels (admin endpoint)
-app.put('/inventory/:productId', (req, res) => {
-  const { productId } = req.params;
-  const { stockLevel } = req.body;
-  
-  if (typeof stockLevel !== 'number' || stockLevel < 0) {
-    console.log(`PUT /inventory/$${productId} - Invalid stock level: $${stockLevel}`);
-    return res.status(400).json({ error: 'Valid stock level required' });
-  }
-  
-  const item = inventory.find(i => i.productId === productId);
-  
-  if (!item) {
-    console.log(`PUT /inventory/$${productId} - Product not found`);
-    return res.status(404).json({ error: 'Product not found' });
-  }
-  
-  const oldStock = item.stockLevel;
-  item.stockLevel = stockLevel;
-  item.available = stockLevel - item.reserved;
-  
-  console.log(`PUT /inventory/$${productId} - Updated $${item.name} stock from $${oldStock} to $${stockLevel}. Available: $${item.available}`);
-  res.json({
-    message: 'Stock updated successfully',
-    ...item,
-    lastUpdated: new Date().toISOString()
-  });
-});
+    app.listen(port, '0.0.0.0', () => {
+      console.log(`Mock inventory server listening on port $${port}`);
+    });
+    EOF
 
-// Error handling middleware
-app.use((err, req, res, next) => {
-  console.error('Error:', err);
-  res.status(500).json({ error: 'Internal server error' });
-});
-
-app.listen(port, '0.0.0.0', () => {
-  console.log(`Inventory service listening on port $${port}`);
-  console.log(`Initialized with $${inventory.length} products in inventory`);
-});
-EOF
-    
-    # Install dependencies
+    # Install application dependencies
     npm install
-    
-    # Start the application with PM2
-    pm2 start app.js --name "inventory-service"
-    pm2 startup
-    pm2 save
-    
-    echo "Inventory service started successfully"
+
+    # Start the application using pm2 to run it in the background
+    pm2 start app.js --name "crm-app"
   EOT
 }
 
@@ -329,7 +199,6 @@ resource "google_compute_service_attachment" "inventory_psc_attachment" {
 resource "google_compute_forwarding_rule" "inventory_forwarding_rule" {
   name   = "inventory-forwarding-rule"
   region = "europe-west1"
-  
   load_balancing_scheme = "INTERNAL"
   backend_service       = google_compute_region_backend_service.inventory_backend.id
   all_ports            = true
@@ -390,13 +259,13 @@ resource "google_compute_address" "inventory_psc_ip_europe" {
 resource "google_compute_forwarding_rule" "inventory_psc_endpoint_europe" {
   name   = "inventory-psc-endpoint-europe"
   region = "europe-west1"
-  
-  load_balancing_scheme = ""
+  allow_psc_global_access = true
+  load_balancing_scheme   = ""
   target                = google_compute_service_attachment.inventory_psc_attachment.id
   network               = "online-boutique-vpc"  # Connect from online-boutique-vpc network
   ip_address            = google_compute_address.inventory_psc_ip_europe.self_link
   
-  # This provides PSC access from europe-west1 region where GKE cluster is located
+  # This provides PSC access from europe-west1 region and as it is global, gke cluster from u-central1 should be able to access it
 }
 
 # Outputs
