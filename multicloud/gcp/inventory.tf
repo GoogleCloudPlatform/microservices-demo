@@ -47,7 +47,7 @@ resource "google_compute_firewall" "inventory_internal" {
     protocol = "icmp"
   }
   
-  source_ranges = ["10.10.0.0/24", "10.0.0.0/8"]
+  source_ranges = ["10.0.0.0/8", "10.10.0.0/24", "10.128.0.0/24", "10.132.0.0/24", "130.211.0.0/22", "35.191.0.0/16"]
   description   = "Allow internal traffic within inventory VPC and from PSC"
 }
 
@@ -234,7 +234,7 @@ resource "google_compute_instance_group" "inventory_instance_group" {
 
 # 10. Create health check
 resource "google_compute_region_health_check" "inventory_health_check" {
-  name   = "inventory-health-check"
+  name   = "inventory-health-check"f
   region = "europe-west1"
   
   timeout_sec        = 5
