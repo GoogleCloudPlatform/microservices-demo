@@ -1,0 +1,25 @@
+name: Test AWS OIDC Connection
+
+on:
+  workflow_dispatch:  # Allows you to run this manually from the Actions tab
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  verify-aws:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ vars.AWS_ROLE_TO_ASSUME }}
+          aws-region: ${{ vars.AWS_REGION }}
+
+      - name: Verify AWS identity
+        run: aws sts get-caller-identity
