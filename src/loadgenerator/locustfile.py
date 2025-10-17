@@ -15,7 +15,7 @@
 # limitations under the License.
 
 import random
-from locust import FastHttpUser, TaskSet, constant
+from locust import FastHttpUser, TaskSet, between
 from faker import Faker
 import datetime
 fake = Faker()
@@ -89,4 +89,4 @@ class UserBehavior(TaskSet):
 
 class WebsiteUser(FastHttpUser):
     tasks = [UserBehavior]
-    wait_time = constant(120)
+    wait_time = between(5, 20)
