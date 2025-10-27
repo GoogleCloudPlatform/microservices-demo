@@ -59,39 +59,46 @@ namespace cartservice.cartstore
         }
 
 
-        public async Task AddItemAsync(string userId, string productId, int quantity)
+    public async Task AddItemAsync(string userId, string productId, int quantity)
+    {
+        Console.WriteLine($"AddItemAsync for {userId} called");
+        try
         {
-            Console.WriteLine($"AddItemAsync for {userId} called");
-            try
+            await using var dataSource = NpgsqlDataSource.Create(connectionString);
+
+            var fetchCmd = $"SELECT quantity FROM {tableName} WHERE userID='{userId}' AND productID='{productId}'";
+            var currentQuantity = 0;
+            var cmdRead = dataSource.CreateCommand(fetchCmd);
+            await using (var reader = await cmdRead.ExecuteReaderAsync())
             {
-                await using var dataSource = NpgsqlDataSource.Create(connectionString);
-
-                // Fetch the current quantity for our userId/productId tuple
-                var fetchCmd = $"SELECT quantity FROM {tableName} WHERE userID='{userId}' AND productID='{productId}'";
-                var currentQuantity = 0;
-                var cmdRead = dataSource.CreateCommand(fetchCmd);
-                await using (var reader = await cmdRead.ExecuteReaderAsync())
-                {
-                    while (await reader.ReadAsync())
-                        currentQuantity += reader.GetInt32(0);
-                }
-                var totalQuantity = quantity + currentQuantity;
-
-                var insertCmd = $"INSERT INTO {tableName} (userId, productId, quantity) VALUES ('{userId}', '{productId}', {totalQuantity})";
-                await using (var cmdInsert = dataSource.CreateCommand(insertCmd))
-                {
-                    await Task.Run(() =>
-                    {
-                        return cmdInsert.ExecuteNonQueryAsync();
-                    });
-                }
+                while (await reader.ReadAsync())
+                    currentQuantity += reader.GetInt32(0);
             }
-            catch (Exception ex)
+
+            var totalQuantity = quantity + currentQuantity;
+
+            // Use INSERT ... ON CONFLICT to prevent duplicate key error
+            var insertCmd = $@"
+                INSERT INTO {tableName} (userId, productId, quantity)
+                VALUES ('{userId}', '{productId}', {totalQuantity})
+                ON CONFLICT (userId, productId)
+                DO UPDATE SET quantity = {totalQuantity};
+            ";
+
+            await using (var cmdInsert = dataSource.CreateCommand(insertCmd))
             {
-                throw new RpcException(
-                    new Status(StatusCode.FailedPrecondition, $"Can't access cart storage at {connectionString}. {ex}"));
+                await Task.Run(() =>
+                {
+                    return cmdInsert.ExecuteNonQueryAsync();
+                });
             }
         }
+        catch (Exception ex)
+        {   
+            throw new RpcException(
+                new Status(StatusCode.FailedPrecondition, $"Unable to access cart storage due to an internal error. {ex}"));
+        }
+    }
 
 
         public async Task<Hipstershop.Cart> GetCartAsync(string userId)
@@ -125,7 +132,7 @@ namespace cartservice.cartstore
             catch (Exception ex)
             {
                 throw new RpcException(
-                    new Status(StatusCode.FailedPrecondition, $"Can't access cart storage at {connectionString}. {ex}"));
+                    new Status(StatusCode.FailedPrecondition, $"Unable to access cart storage due to an internal error. {ex}"));
             }
             return cart;
         }
@@ -150,7 +157,7 @@ namespace cartservice.cartstore
             catch (Exception ex)
             {
                 throw new RpcException(
-                    new Status(StatusCode.FailedPrecondition, $"Can't access cart storage at {connectionString}. {ex}"));
+                    new Status(StatusCode.FailedPrecondition, $"Unable to access cart storage due to an internal error. {ex}"));
             }
         }
 

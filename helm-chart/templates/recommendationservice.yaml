@@ -59,8 +59,8 @@ spec:
         seccompProfile:
           type: {{ .Values.seccompProfile.type }}
         {{- end }}
-      containers:
       {{- end }}
+      containers:
       - name: server
         securityContext:
           allowPrivilegeEscalation: false
