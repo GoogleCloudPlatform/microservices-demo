@@ -89,17 +89,26 @@ resource "google_compute_instance" "inventory_vm" {
   # Startup script to install and run the inventory service
   metadata_startup_script = <<-EOT
     #!/bin/bash
+    set -e
+    
+    # Log everything
+    exec > >(tee /var/log/startup-script.log) 2>&1
+    echo "Starting inventory service setup at $(date)"
     
     # Update packages and install Node.js and npm
-    sudo apt-get update
-    sudo apt-get install -y nodejs npm
+    apt-get update
+    apt-get install -y nodejs npm
+    
+    echo "Node.js version: $(node --version)"
+    echo "NPM version: $(npm --version)"
 
     # Install pm2, a production process manager for Node.js
-    sudo npm install pm2 -g
+    npm install pm2 -g
+    
+    echo "PM2 version: $(pm2 --version)"
 
     # Create a directory for the app
-    sudo mkdir -p /opt/app
-    sudo chown -R $(whoami):$(whoami) /opt/app
+    mkdir -p /opt/app
     cd /opt/app
 
     # Create the package.json file
@@ -112,63 +121,93 @@ resource "google_compute_instance" "inventory_vm" {
         "express": "^4.18.2"
       }
     }
-    EOF
+EOF
 
-    # Create the app.js file with the mock furniture logic
-    cat <<'EOF' > app.js
-    const express = require('express');
-    const app = express();
-    const port = 8080;
+    # Create the app.js file with the inventory service logic
+    cat <<'EOFAPP' > app.js
+const express = require('express');
+const app = express();
+const port = 8080;
 
-    // Middleware to parse JSON bodies
-    app.use(express.json());
+// Middleware to parse JSON bodies
+app.use(express.json());
 
-    // In-memory data store
-    let items = [
-    ];
+// In-memory data store with some initial items
+let items = [
+  { name: 'Laptop', code: 'TECH-001', count: 50 },
+  { name: 'Desk Chair', code: 'FURN-001', count: 25 },
+  { name: 'Monitor', code: 'TECH-002', count: 100 }
+];
 
-    // GET endpoint to list all items
-    app.get('/inventory', (req, res) => {
-      console.log('GET /inventory - Returning items list');
-      res.status(200).json(items);
-    });
+// Health check endpoint
+app.get('/health', (req, res) => {
+  console.log('GET /health - Health check');
+  res.status(200).json({ status: 'healthy', service: 'inventory-service' });
+});
 
-    // POST endpoint to add a new item
-    app.post('/inventory', (req, res) => {
-      const { name, code } = req.body;
+// GET endpoint to list all items
+app.get('/inventory', (req, res) => {
+  console.log('GET /inventory - Returning items list');
+  res.status(200).json(items);
+});
 
-      if (!name || !code) {
-        console.log('POST /furniture - Failed: Missing name or code');
-        return res.status(400).json({ error: 'Name and code are required.' });
-      }
-      const index = items.findIndex(el => el.code === code);
-      if (index >-1) {
-        items[index].count++;
-      } else {
-        items.push({name, code, count: 1 });
-      }
-      
-      // Cleanup: Keep only the 10 most recent items
-      if (items.length > 10) {
-        const removedCount = items.length - 10;
-        items = items.slice(-10); // Keep last 10
-        console.log(`POST /furniture - Cleaned up $${removedCount} old items(s), keeping 10 most recent`);
-      }
-      
-      console.log(`POST /inventory - Added new iten: $${name} $${code}. Total: $${items.length}`);
-      res.status(201).json(newItem);
-    });
+// POST endpoint to add a new item
+app.post('/inventory', (req, res) => {
+  const { name, code } = req.body;
 
-    app.listen(port, '0.0.0.0', () => {
-      console.log(`Mock inventory server listening on port $${port}`);
-    });
-    EOF
+  if (!name || !code) {
+    console.log('POST /inventory - Failed: Missing name or code');
+    return res.status(400).json({ error: 'Name and code are required.' });
+  }
+  
+  const index = items.findIndex(el => el.code === code);
+  let updatedItem;
+  
+  if (index > -1) {
+    items[index].count++;
+    updatedItem = items[index];
+    console.log('POST /inventory - Updated existing item: ' + name + ' ' + code + '. Count: ' + items[index].count);
+  } else {
+    updatedItem = { name, code, count: 1 };
+    items.push(updatedItem);
+    console.log('POST /inventory - Added new item: ' + name + ' ' + code + '. Total items: ' + items.length);
+  }
+  
+  // Cleanup: Keep only the 50 most recent items
+  if (items.length > 50) {
+    const removedCount = items.length - 50;
+    items = items.slice(-50);
+    console.log('POST /inventory - Cleaned up ' + removedCount + ' old item(s), keeping 50 most recent');
+  }
+  
+  res.status(201).json(updatedItem);
+});
+
+app.listen(port, '0.0.0.0', () => {
+  console.log('Inventory service listening on port ' + port);
+  console.log('Initial inventory: ' + items.length + ' items');
+});
+EOFAPP
+
+    echo "Created app.js and package.json"
 
     # Install application dependencies
     npm install
+    
+    echo "NPM dependencies installed"
 
-    # Start the application using pm2 to run it in the background
-    pm2 start app.js --name "crm-app"
+    # Start the application using pm2
+    pm2 start app.js --name "inventory-app"
+    
+    # Save the PM2 process list
+    pm2 save
+    
+    # Configure PM2 to start on boot
+    env PATH=$PATH:/usr/bin pm2 startup systemd -u root --hp /root
+    
+    echo "Inventory service started successfully at $(date)"
+    echo "PM2 status:"
+    pm2 list
   EOT
 }
 
@@ -234,7 +273,7 @@ resource "google_compute_instance_group" "inventory_instance_group" {
 
 # 10. Create health check
 resource "google_compute_region_health_check" "inventory_health_check" {
-  name   = "inventory-health-check"f
+  name   = "inventory-health-check"
   region = "europe-west1"
   
   timeout_sec        = 5

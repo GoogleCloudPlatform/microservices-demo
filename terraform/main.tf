@@ -42,10 +42,21 @@ resource "google_compute_network" "online-boutique-vpc" {
 }
 
 resource "google_compute_subnetwork" "subnet1" {
-  name          = "subnet1-us-central1"
+  name          = "subnet1-${var.region}"
   ip_cidr_range = "10.10.0.0/20"
-  region        = "us-central1"
+  region        = var.region
   network       = google_compute_network.online-boutique-vpc.id
+  
+  # Secondary IP ranges for GKE pods and services
+  secondary_ip_range {
+    range_name    = "gke-pods"
+    ip_cidr_range = "10.69.128.0/17"
+  }
+  
+  secondary_ip_range {
+    range_name    = "gke-services"
+    ip_cidr_range = "10.69.64.0/18"
+  }
 }
 
 # Create GKE cluster
@@ -53,12 +64,33 @@ resource "google_container_cluster" "my_cluster" {
 
   name     = var.name
   location = var.region
-  network = "online-boutique-vpc"
+  network    = google_compute_network.online-boutique-vpc.id
+  subnetwork = google_compute_subnetwork.subnet1.id
+  
   # Enable autopilot for this cluster
   enable_autopilot = true
 
-  # Set an empty ip_allocation_policy to allow autopilot cluster to spin up correctly
+  # Set ip_allocation_policy for autopilot cluster with secondary ranges
   ip_allocation_policy {
+    cluster_secondary_range_name  = "gke-pods"
+    services_secondary_range_name = "gke-services"
+  }
+  
+  # Enable Istio/Service Mesh
+  addons_config {
+    gcp_filestore_csi_driver_config {
+      enabled = true
+    }
+  }
+  
+  # Enable Workload Identity for service mesh
+  workload_identity_config {
+    workload_pool = "${var.gcp_project_id}.svc.id.goog"
+  }
+  
+  # Enable Cloud Service Mesh (Istio)
+  mesh_certificates {
+    enable_certificates = true
   }
 
   # Avoid setting deletion_protection to false

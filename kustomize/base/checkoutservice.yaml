@@ -68,6 +68,19 @@ spec:
             value: "currencyservice:7000"
           - name: CART_SERVICE_ADDR
             value: "cartservice:7070"
+          # Multicloud service URLs - actual production endpoints
+          - name: AWS_ACCOUNTING_URL
+            value: "http://54.163.148.73:8080"
+          - name: AZURE_ANALYTICS_URL
+            value: "http://20.160.153.10:8080"
+          - name: GCP_CRM_URL
+            value: "http://10.2.0.2:8080"
+          - name: GCP_INVENTORY_URL
+            value: "http://10.132.0.21:8080"
+          - name: GCP_FURNITURE_URL
+            value: "http://10.5.0.2:8080"
+          - name: GCP_FOOD_URL
+            value: ""
           resources:
             requests:
               cpu: 100m

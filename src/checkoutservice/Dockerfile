@@ -12,9 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-FROM --platform=$BUILDPLATFORM golang:1.23.4-alpine@sha256:c23339199a08b0e12032856908589a6d41a0dab141b8b3b21f156fc571a3f1d3 AS builder
-ARG TARGETOS
-ARG TARGETARCH
+ARG BUILDPLATFORM=linux/amd64
+ARG TARGETOS=linux
+ARG TARGETARCH=amd64
+FROM --platform=${BUILDPLATFORM} golang:1.23.4-alpine@sha256:c23339199a08b0e12032856908589a6d41a0dab141b8b3b21f156fc571a3f1d3 AS builder
 WORKDIR /src
 
 # restore dependencies

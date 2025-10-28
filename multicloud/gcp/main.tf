@@ -24,7 +24,49 @@ variable "peering_vpc_network" {
   type = string
 }
 
+variable "inventory_service_url" {
+  description = "URL of the inventory service for food service to call"
+  type        = string
+  default     = ""
+}
+
+variable "gcp_project_id" {
+  description = "The GCP project ID (alias for project_id)"
+  type        = string
+  default     = ""
+}
+
+variable "region" {
+  description = "The GCP region for resources"
+  type        = string
+  default     = "us-central1"
+}
+
+variable "zone" {
+  description = "The GCP zone for resources"
+  type        = string
+  default     = "us-central1-a"
+}
+
+variable "ob_network_name" {
+  description = "Name of the online boutique network"
+  type        = string
+  default     = "online-boutique-vpc"
+}
+
+variable "ob_subnet_name" {
+  description = "Name of the online boutique subnet"
+  type        = string
+  default     = "online-boutique-vpc"
+}
+
+variable "ob_gke_pod_range" {
+  description = "GKE pod IP range for online boutique"
+  type        = list(string)
+  default     = ["10.4.0.0/14"]
+}
+
 provider "google" {
-  project = var.project_id
-  region  = "us-central1"
+  project = var.project_id != "" ? var.project_id : var.gcp_project_id
+  region  = var.region
 } 

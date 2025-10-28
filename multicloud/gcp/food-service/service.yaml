@@ -1,0 +1,29 @@
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: food-api-service
+  labels:
+    cloud.googleapis.com/location: europe-west1
+spec:
+  template:
+    metadata:
+      annotations:
+        run.googleapis.com/vpc-access-egress: private-ranges-only
+        run.googleapis.com/network-interfaces: '[{"network":"inventory-vpc","subnetwork":"inventory-subnet"}]'
+    spec:
+      containerConcurrency: 80
+      timeoutSeconds: 300
+      containers:
+      - image: europe-west1-docker.pkg.dev/przemeksroka-joonix-gke-std/food-repo/food-service:latest
+        ports:
+        - name: http1
+          containerPort: 8080
+        env:
+        - name: INVENTORY_SERVICE_URL
+          value: "http://10.1.0.2:8080"
+        resources:
+          limits:
+            cpu: "1"
+            memory: 512Mi
+      serviceAccountName: 1067423932729-compute@developer.gserviceaccount.com
+

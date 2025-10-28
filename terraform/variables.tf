@@ -26,13 +26,13 @@ variable "name" {
 variable "region" {
   type        = string
   description = "Region of the new GKE cluster"
-  default     = "us-central1"
+  default     = "europe-west1"
 }
 
 variable "zone" {
   description = "The GCP zone for the furniture VM."
   type        = string
-  default     = "us-central1-c"
+  default     = "europe-west1-b"
 }
 
 variable "ob_network_name" {
@@ -44,7 +44,7 @@ variable "ob_network_name" {
 variable "ob_subnet_name" {
   description = "The name of the subnet in the peer VPC."
   type        = string
-  default     = "subnet1-us-central1"
+  default     = "subnet1-europe-west1"
 }
 
 variable "ob_gke_pod_range" {

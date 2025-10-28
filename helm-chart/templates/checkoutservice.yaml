@@ -92,6 +92,19 @@ spec:
           value: "{{ .Values.currencyService.name }}:7000"
         - name: CART_SERVICE_ADDR
           value: "{{ .Values.cartService.name }}:7070"
+        # Multicloud service URLs (optional)
+        - name: AWS_ACCOUNTING_URL
+          value: "{{ .Values.checkoutService.awsAccountingUrl | default "" }}"
+        - name: AZURE_ANALYTICS_URL
+          value: "{{ .Values.checkoutService.azureAnalyticsUrl | default "" }}"
+        - name: GCP_CRM_URL
+          value: "{{ .Values.checkoutService.gcpCrmUrl | default "" }}"
+        - name: GCP_INVENTORY_URL
+          value: "{{ .Values.checkoutService.gcpInventoryUrl | default "" }}"
+        - name: GCP_FURNITURE_URL
+          value: "{{ .Values.checkoutService.gcpFurnitureUrl | default "" }}"
+        - name: GCP_FOOD_URL
+          value: "{{ .Values.checkoutService.gcpFoodUrl | default "" }}"
         {{- if .Values.opentelemetryCollector.create }}
         - name: COLLECTOR_SERVICE_ADDR
           value: "{{ .Values.opentelemetryCollector.name }}:4317"
