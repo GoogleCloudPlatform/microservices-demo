@@ -1,6 +1,6 @@
 # Shopping Assistant with RAG & AlloyDB
 
-This demo adds a new service to Online Boutique called `shoppingassistantservice` which, alongside an Alloy-DB backed products catalog, adds a RAG-featured AI assistant to the frontned experience, helping users suggest products matching their home decor.
+This demo adds a new service to Online Boutique called `shoppingassistantservice` which, alongside an Alloy-DB backed products catalog, adds a RAG-featured AI assistant to the frontend experience, helping users suggest products matching their home decor.
 
 ## Setup instructions
 

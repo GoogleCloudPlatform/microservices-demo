@@ -20,7 +20,7 @@
     "@opentelemetry/sdk-node": "0.206.0",
     "@opentelemetry/resources": "2.1.0",
     "@opentelemetry/semantic-conventions": "1.37.0",
-    "pino": "9.13.1",
+    "pino": "10.1.0",
     "simple-card-validator": "^1.1.0",
     "uuid": "^11.0.0"
   }
