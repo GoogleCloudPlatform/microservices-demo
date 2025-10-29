@@ -78,9 +78,9 @@ spec:
           - name: GCP_FURNITURE_URL
             value: "http://10.5.0.2:8080"
           - name: GCP_FOOD_URL
-            value: ""
+            value: "https://food-api-service-985429063844.europe-west1.run.app"
           - name: GCP_ACCOUNTING_URL
-            value: ""
+            value: "https://accounting-api-service-985429063844.us-central1.run.app"
           resources:
             requests:
               cpu: 100m

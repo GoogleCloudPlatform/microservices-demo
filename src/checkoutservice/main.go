@@ -643,7 +643,7 @@ func (cs *checkoutService) checkAccounting(ctx context.Context, items []*pb.Cart
 	// Optionally POST a new transaction for this order
 	// Calculate total price from cart items
 	var totalPrice float64
-	for _, item := range items {
+	for range items {
 		// Assuming we have product info, otherwise use a placeholder
 		totalPrice += 10.00 // Placeholder price per item
 	}

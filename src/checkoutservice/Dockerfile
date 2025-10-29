@@ -18,6 +18,9 @@ ARG TARGETARCH=amd64
 FROM --platform=${BUILDPLATFORM} golang:1.23.4-alpine@sha256:c23339199a08b0e12032856908589a6d41a0dab141b8b3b21f156fc571a3f1d3 AS builder
 WORKDIR /src
 
+# Install CA certificates
+RUN apk add --no-cache ca-certificates
+
 # restore dependencies
 COPY go.mod go.sum ./
 RUN go mod download
@@ -31,6 +34,8 @@ RUN GOOS=${TARGETOS} GOARCH=${TARGETARCH} CGO_ENABLED=0 go build -gcflags="${SKA
 FROM scratch
 
 WORKDIR /src
+# Copy CA certificates for HTTPS requests
+COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 COPY --from=builder /checkoutservice /src/checkoutservice
 
 # Definition of this variable is used by 'skaffold debug' to identify a golang binary.
