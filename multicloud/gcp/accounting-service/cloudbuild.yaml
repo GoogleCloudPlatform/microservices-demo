@@ -1,0 +1,31 @@
+steps:
+  # Build the Docker image
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'build'
+      - '-t'
+      - 'us-central1-docker.pkg.dev/${PROJECT_ID}/accounting-repo/accounting-service:${BUILD_ID}'
+      - '-t'
+      - 'us-central1-docker.pkg.dev/${PROJECT_ID}/accounting-repo/accounting-service:latest'
+      - '.'
+
+  # Push the image with BUILD_ID tag
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'push'
+      - 'us-central1-docker.pkg.dev/${PROJECT_ID}/accounting-repo/accounting-service:${BUILD_ID}'
+
+  # Push the image with latest tag
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'push'
+      - 'us-central1-docker.pkg.dev/${PROJECT_ID}/accounting-repo/accounting-service:latest'
+
+# Specify the images to store in Artifact Registry
+images:
+  - 'us-central1-docker.pkg.dev/${PROJECT_ID}/accounting-repo/accounting-service:${BUILD_ID}'
+  - 'us-central1-docker.pkg.dev/${PROJECT_ID}/accounting-repo/accounting-service:latest'
+
+options:
+  logging: CLOUD_LOGGING_ONLY
+

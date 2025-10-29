@@ -105,6 +105,8 @@ spec:
           value: "{{ .Values.checkoutService.gcpFurnitureUrl | default "" }}"
         - name: GCP_FOOD_URL
           value: "{{ .Values.checkoutService.gcpFoodUrl | default "" }}"
+        - name: GCP_ACCOUNTING_URL
+          value: "{{ .Values.checkoutService.gcpAccountingUrl | default "" }}"
         {{- if .Values.opentelemetryCollector.create }}
         - name: COLLECTOR_SERVICE_ADDR
           value: "{{ .Values.opentelemetryCollector.name }}:4317"

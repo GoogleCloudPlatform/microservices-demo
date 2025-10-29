@@ -30,6 +30,12 @@ variable "inventory_service_url" {
   default     = ""
 }
 
+variable "crm_service_url" {
+  description = "URL of the CRM service for accounting service to call"
+  type        = string
+  default     = ""
+}
+
 variable "gcp_project_id" {
   description = "The GCP project ID (alias for project_id)"
   type        = string

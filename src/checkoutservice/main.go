@@ -90,12 +90,13 @@ type checkoutService struct {
 	httpClient *http.Client
 
 	// Multicloud service URLs
-	awsAccountingURL  string
-	azureAnalyticsURL string
-	gcpCrmURL         string
-	gcpInventoryURL   string
-	gcpFurnitureURL   string
-	gcpFoodURL        string
+	awsAccountingURL    string
+	azureAnalyticsURL   string
+	gcpCrmURL           string
+	gcpInventoryURL     string
+	gcpFurnitureURL     string
+	gcpFoodURL          string
+	gcpAccountingURL    string
 }
 
 func main() {
@@ -147,9 +148,10 @@ func main() {
 	svc.gcpInventoryURL = os.Getenv("GCP_INVENTORY_URL")
 	svc.gcpFurnitureURL = os.Getenv("GCP_FURNITURE_URL")
 	svc.gcpFoodURL = os.Getenv("GCP_FOOD_URL")
+	svc.gcpAccountingURL = os.Getenv("GCP_ACCOUNTING_URL")
 	
-	log.Infof("Multicloud services configured: awsAccounting=%q azureAnalytics=%q gcpCrm=%q gcpInventory=%q gcpFurniture=%q gcpFood=%q",
-		svc.awsAccountingURL, svc.azureAnalyticsURL, svc.gcpCrmURL, svc.gcpInventoryURL, svc.gcpFurnitureURL, svc.gcpFoodURL)
+	log.Infof("Multicloud services configured: awsAccounting=%q azureAnalytics=%q gcpCrm=%q gcpInventory=%q gcpFurniture=%q gcpFood=%q gcpAccounting=%q",
+		svc.awsAccountingURL, svc.azureAnalyticsURL, svc.gcpCrmURL, svc.gcpInventoryURL, svc.gcpFurnitureURL, svc.gcpFoodURL, svc.gcpAccountingURL)
 
 	log.Infof("service config: %+v", svc)
 
@@ -293,6 +295,12 @@ func (cs *checkoutService) PlaceOrder(ctx context.Context, req *pb.PlaceOrderReq
 	// Check food service
 	if err := cs.checkFood(ctx); err != nil {
 		log.Warnf("Food service check failed: %v", err)
+		// Don't fail the order, just log
+	}
+
+	// Check accounting service
+	if err := cs.checkAccounting(ctx, prep.cartItems); err != nil {
+		log.Warnf("Accounting service check failed: %v", err)
 		// Don't fail the order, just log
 	}
 
@@ -613,6 +621,46 @@ func (cs *checkoutService) checkFood(ctx context.Context) error {
 	}
 
 	log.Infof("Food service check completed successfully")
+	return nil
+}
+
+// checkAccounting calls GCP Accounting Service via VPC Connector (which internally calls CRM Service)
+func (cs *checkoutService) checkAccounting(ctx context.Context, items []*pb.CartItem) error {
+	if cs.gcpAccountingURL == "" {
+		log.Debug("GCP Accounting URL not configured, skipping")
+		return nil
+	}
+
+	// GET transactions list - this will trigger the accounting service to call CRM service
+	accountingData, err := cs.getJSON(ctx, cs.gcpAccountingURL+"/transactions")
+	if err != nil {
+		log.Warnf("Failed to check accounting service: %v", err)
+		return err
+	}
+
+	log.Infof("Successfully checked accounting service, received data: %v", accountingData)
+	
+	// Optionally POST a new transaction for this order
+	// Calculate total price from cart items
+	var totalPrice float64
+	for _, item := range items {
+		// Assuming we have product info, otherwise use a placeholder
+		totalPrice += 10.00 // Placeholder price per item
+	}
+
+	newTransaction := map[string]interface{}{
+		"item":     "Online Order",
+		"price":    totalPrice,
+		"date":     "2025-10-29",
+		"customer": "Online Customer",
+	}
+
+	if err := cs.postJSON(ctx, cs.gcpAccountingURL+"/transactions", newTransaction); err != nil {
+		log.Warnf("Failed to add transaction to accounting: %v", err)
+		// Don't return error, just log
+	}
+
+	log.Infof("Accounting service check completed successfully")
 	return nil
 }
 

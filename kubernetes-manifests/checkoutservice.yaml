@@ -79,6 +79,8 @@ spec:
             value: "http://10.5.0.2:8080"
           - name: GCP_FOOD_URL
             value: ""
+          - name: GCP_ACCOUNTING_URL
+            value: ""
           resources:
             requests:
               cpu: 100m

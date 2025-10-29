@@ -1,0 +1,13 @@
+{
+  "name": "accounting-service",
+  "version": "1.0.0",
+  "description": "Mock accounting service API",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2"
+  }
+}
+
