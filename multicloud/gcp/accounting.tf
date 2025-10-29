@@ -37,7 +37,7 @@ resource "google_vpc_access_connector" "accounting_connector" {
   name          = "accounting-connector"
   region        = "us-central1"
   network       = data.google_compute_network.crm_vpc.name
-  ip_cidr_range = "10.2.1.0/28"  # Dedicated range for connector (16 IPs)
+  ip_cidr_range = "10.3.1.0/28"  # Dedicated range for connector (16 IPs)
   
   # Connector throughput settings
   min_throughput = 200  # Minimum 200 Mbps
@@ -60,7 +60,7 @@ resource "google_compute_firewall" "allow_connector_to_crm" {
   }
 
   # VPC Connector uses IPs from this range
-  source_ranges = ["10.2.1.0/28"]
+  source_ranges = ["10.3.1.0/28"]
   target_tags   = ["crm-server"]
   
   description = "Allow VPC Connector (accounting service) to access CRM service"

@@ -96,7 +96,7 @@ The terraform configuration will:
 This service uses a **VPC Connector** (not Direct VPC egress) to connect to the CRM service in `crm-vpc`:
 
 - **Accounting Service**: Cloud Run with VPC Connector
-- **CRM Service**: Running on VM in private `crm-vpc` (10.2.0.0/24)
+- **CRM Service**: Running on VM in private `crm-vpc` (10.3.0.0/24)
 - **Connectivity**: VPC Connector creates a managed connection to the CRM VPC
 - **Firewall**: Configured to allow traffic from VPC Connector IP range to CRM service
 

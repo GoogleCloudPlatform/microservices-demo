@@ -11,7 +11,7 @@ resource "google_compute_network" "crm_vpc" {
 # 2. Create a subnet in the CRM VPC
 resource "google_compute_subnetwork" "crm_subnet" {
   name          = "crm-subnet"
-  ip_cidr_range = "10.2.0.0/24"
+  ip_cidr_range = "10.3.0.0/24"
   region        = "us-central1"
   network       = google_compute_network.crm_vpc.id
   description   = "Subnet for CRM service"
@@ -28,7 +28,7 @@ resource "google_compute_firewall" "allow_crm_http" {
   }
 
   target_tags   = ["crm-server"]
-  source_ranges = ["10.128.0.0/9", "10.2.0.0/24"]  # Online-boutique-vpc VPC and CRM VPC ranges
+  source_ranges = ["10.128.0.0/9", "10.3.0.0/24"]  # Online-boutique-vpc VPC and CRM VPC ranges
 }
 
 # Create the smallest possible Compute Engine VM instance

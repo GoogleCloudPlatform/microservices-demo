@@ -12,6 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-gcp_project_id = "<project_id_here>"
+gcp_project_id = "przemeksroka-joonix-gke-std"
 
 memorystore = false
+
+# Use europe-west1 to match existing resources
+region = "europe-west1"
+name = "online-boutique-cluster"
