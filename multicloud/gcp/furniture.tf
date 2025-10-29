@@ -13,6 +13,24 @@ resource "google_compute_subnetwork" "furniture_subnet" {
   project       = var.gcp_project_id
 }
 
+# Cloud Router for NAT
+resource "google_compute_router" "furniture_nat_router" {
+  name    = "furniture-nat-router"
+  region  = var.region
+  network = google_compute_network.furniture_vpc.id
+  project = var.gcp_project_id
+}
+
+# Cloud NAT for outbound internet access
+resource "google_compute_router_nat" "furniture_nat" {
+  name                               = "furniture-nat"
+  router                             = google_compute_router.furniture_nat_router.name
+  region                             = var.region
+  project                            = var.gcp_project_id
+  nat_ip_allocate_option             = "AUTO_ONLY"
+  source_subnetwork_ip_ranges_to_nat = "ALL_SUBNETWORKS_ALL_IP_RANGES"
+}
+
 # Firewall rule to allow SSH access
 resource "google_compute_firewall" "furniture_vpc_allow_ssh" {
   name    = "furniture-vpc-allow-ssh"
@@ -58,6 +76,11 @@ resource "google_compute_instance" "furniture_vm" {
   network_interface {
     network    = google_compute_network.furniture_vpc.id
     subnetwork = google_compute_subnetwork.furniture_subnet.id
+    
+    # Add external IP for public access
+    access_config {
+      # Ephemeral public IP
+    }
   }
 
   # This startup script runs automatically when the VM is created
@@ -100,7 +123,7 @@ resource "google_compute_instance" "furniture_vm" {
     // In-memory data store with two hardcoded items
     let items = [
       { name: 'chair', brand: 'ikea' },
-      { name: 'table', surname: 'jysk' }
+      { name: 'table', brand: 'jysk' }
     ];
 
     // GET endpoint to list all items
@@ -125,15 +148,15 @@ resource "google_compute_instance" "furniture_vm" {
       if (items.length > 10) {
         const removedCount = items.length - 10;
         items = items.slice(-10); // Keep last 10
-        console.log(`POST /furniture - Cleaned up $${removedCount} old items(s), keeping 10 most recent`);
+        console.log('POST /furniture - Cleaned up ' + removedCount + ' old item(s), keeping 10 most recent');
       }
       
-      console.log(`POST /furniture - Added new iten: $${name} $${brand}. Total: $${items.length}`);
+      console.log('POST /furniture - Added new item: ' + name + ' ' + brand + '. Total: ' + items.length);
       res.status(201).json(newItem);
     });
 
     app.listen(port, '0.0.0.0', () => {
-      console.log(`Mock furniture server listening on port $${port}`);
+      console.log('Mock furniture server listening on port ' + port);
     });
     EOF
 
@@ -145,9 +168,14 @@ resource "google_compute_instance" "furniture_vm" {
   EOT
 }
 
-output "instance_internal_ip" {
+output "furniture_vm_internal_ip" {
   description = "Internal IP address of the furniture VM"
   value       = google_compute_instance.furniture_vm.network_interface[0].network_ip
+}
+
+output "furniture_vm_public_ip" {
+  description = "External IP address of the furniture VM"
+  value       = google_compute_instance.furniture_vm.network_interface[0].access_config[0].nat_ip
 }
 
 data "google_compute_network" "ob_network" {
@@ -170,54 +198,7 @@ resource "random_id" "vpn_shared_secret" {
   byte_length = 16
 }
 
-# --- Resources for furniture-vpc ---
-resource "google_compute_ha_vpn_gateway" "furniture_ha_gateway" {
-  name    = "furniture-ha-gateway"
-  region  = var.region
-  network = google_compute_network.furniture_vpc.id
-  project = var.gcp_project_id
-}
-
-resource "google_compute_router" "furniture_router" {
-  name    = "furniture-router"
-  region  = var.region
-  network = google_compute_network.furniture_vpc.name
-  project = var.gcp_project_id
-  bgp {
-    asn = 65001
-  }
-}
-
-# --- Resources for online-boutique-vpc ---
-resource "google_compute_ha_vpn_gateway" "boutique_ha_gateway" {
-  name    = "boutique-ha-gateway"
-  region  = var.region
-  network = data.google_compute_network.ob_network.id
-  project = var.gcp_project_id
-}
-
-resource "google_compute_router" "boutique_router" {
-  name    = "boutique-router"
-  region  = var.region
-  network = data.google_compute_network.ob_network.name
-  project = var.gcp_project_id
-  bgp {
-    asn = 65002
-    # Advertise the subnet and the GKE pod range
-    advertise_mode = "CUSTOM"
-    advertised_ip_ranges {
-      range       = data.google_compute_subnetwork.ob_subnet.ip_cidr_range
-      description = "Boutique Subnet"
-    }
-    advertised_ip_ranges {
-      range       = var.ob_gke_pod_range[0]
-      description = "Boutique GKE Pods"
-    }
-    # Add GKE Service range here if needed
-  }
-}
-
-# --- VPN Tunnels ---
+# --- VPN Gateways ---
 resource "google_compute_ha_vpn_gateway" "ha_gateway1" {
   region  = "us-central1"
   name    = "ha-vpn-1"
@@ -236,6 +217,20 @@ resource "google_compute_router" "router1" {
   network = data.google_compute_network.ob_network.name
   bgp {
     asn = 64514
+    # Advertise the online boutique subnet and GKE ranges
+    advertise_mode = "CUSTOM"
+    advertised_ip_ranges {
+      range       = "10.10.0.0/20"
+      description = "Online Boutique Subnet (europe-west1)"
+    }
+    advertised_ip_ranges {
+      range       = "10.69.128.0/17"
+      description = "Online Boutique GKE Pods"
+    }
+    advertised_ip_ranges {
+      range       = "10.69.64.0/18"
+      description = "Online Boutique GKE Services"
+    }
   }
 }
 
