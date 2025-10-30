@@ -12,7 +12,7 @@ resource "google_compute_network" "crm_vpc" {
 resource "google_compute_subnetwork" "crm_subnet" {
   name          = "crm-subnet"
   ip_cidr_range = "10.3.0.0/24"
-  region        = "us-central1"
+  region        = "asia-east1"
   network       = google_compute_network.crm_vpc.id
   description   = "Subnet for CRM service"
 }
@@ -35,7 +35,7 @@ resource "google_compute_firewall" "allow_crm_http" {
 resource "google_compute_instance" "crm_vm" {
   name         = "crm-vm"
   machine_type = "e2-micro" # One of the smallest machine types available
-  zone         = "us-central1-a"
+  zone         = "asia-east1-a"
 
   tags = ["crm-server"]
 
@@ -178,14 +178,16 @@ resource "google_compute_network_peering" "ob_to_crm" {
 }
 
 # 6. Create VPC peering from remote VPC to online-boutique-vpc 
-resource "google_compute_network_peering" "remote_to_ob" {
-  name         = "remote-to-ob-peering"
-  network      = "projects/${var.peering_project_id}/global/networks/${var.peering_vpc_network}"
-  peer_network = "projects/${var.project_id}/global/networks/online-boutique-vpc"
-
-  import_custom_routes = false
-  export_custom_routes = true
-}
+# Note: This peering is managed by the remote project owner (cci-dev-playground)
+# and cannot be managed from this Terraform configuration
+# resource "google_compute_network_peering" "remote_to_ob" {
+#   name         = "remote-to-ob-peering"
+#   network      = "projects/${var.peering_project_id}/global/networks/${var.peering_vpc_network}"
+#   peer_network = "projects/${var.project_id}/global/networks/online-boutique-vpc"
+#
+#   import_custom_routes = false
+#   export_custom_routes = true
+# }
 
 # 7. Create VPC peering from online-boutique-vpc VPC to remote  
 resource "google_compute_network_peering" "ob_to_remote" {

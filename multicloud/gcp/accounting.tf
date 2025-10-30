@@ -41,7 +41,7 @@ resource "google_vpc_access_connector" "accounting_connector" {
   
   # Connector throughput settings
   min_throughput = 200  # Minimum 200 Mbps
-  max_throughput = 300  # Maximum 300 Mbps
+  max_throughput = 1000  # Maximum 1000 Mbps
   
   project = var.project_id
 
@@ -110,7 +110,7 @@ resource "google_cloud_run_v2_service" "accounting_api_service" {
       # Use VPC Connector (legacy approach, different from Direct VPC egress)
       connector = google_vpc_access_connector.accounting_connector.id
       # Route only private ranges through VPC (more efficient)
-      egress = "private-ranges-only"
+      egress = "PRIVATE_RANGES_ONLY"
     }
   }
 

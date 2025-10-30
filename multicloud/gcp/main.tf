@@ -7,6 +7,12 @@ terraform {
       version = ">= 4.50.0"
     }
   }
+  
+  # Remote state configuration - store in GCS bucket
+  backend "gcs" {
+    bucket  = "network-obs-demo-terraform-state"
+    prefix  = "terraform/state"
+  }
 }
 
 variable "project_id" {
