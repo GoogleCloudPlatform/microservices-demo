@@ -63,7 +63,7 @@ spec:
         - name: PORT
           value: "8080"
         - name: GOOGLE_APPLICATION_CREDENTIALS
-          value: "/var/secrets/google/key.json"
+          value: {{ .Values.shoppingAssistantService.gcpCredentialsFile | quote }}
         - name: ALLOYDB_CLUSTER_NAME
           value: {{ .Values.shoppingAssistantService.alloydbClusterName | quote }}
         - name: ALLOYDB_INSTANCE_NAME
@@ -92,17 +92,8 @@ spec:
         - name: DISABLE_PROFILER
           value: "1"
         {{- end }}
-        volumeMounts:
-        - name: gcp-key
-          mountPath: /var/secrets/google
-          readOnly: true
-      volumes:
-      - name: gcp-key
-        secret:
-          secretName: {{ .Values.shoppingAssistantService.name }}-gcp-key
         resources:
           {{- toYaml .Values.shoppingAssistantService.resources | nindent 10 }}
-
 ---
 
 apiVersion: v1
@@ -120,16 +111,5 @@ spec:
   - name: http
     port: 80
     targetPort: 8080
-
-
-# Make sure to create a secret like this one with the GCP credentials
-# apiVersion: v1
-# kind: Secret
-# metadata:
-#   name: {{ .Values.shoppingAssistantService.name }}-gcp-key
-#   namespace: {{ .Release.Namespace }}
-# type: Opaque
-# data:
-#   key.json: ""
 
 {{ end -}}

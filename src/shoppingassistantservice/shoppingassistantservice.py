@@ -102,7 +102,7 @@ def create_app():
             relevant_docs += str(doc_details) + ", "
 
         # Step 3 – Tie it all together by augmenting our call to Gemini-pro
-        llm = ChatGoogleGenerativeAI(model="gemini-1.5-flash")
+        llm = ChatGoogleGenerativeAI(model="gemini-2.5-flash")
         design_prompt = (
             f" You are a shopping assistant for Online Boutique. You are tasked with providing recommendations to a customer on what they should buy based on their request. \n"
             f"Here is a list of products that are relevant to it: {relevant_docs} Specifically, this is what the customer has asked for, see if you can accommodate it: {prompt} Do your best to pick the most relevant item out of the list of products provided, but if none of them seem relevant, then say that instead of inventing a new product. At the end of the response, add a list of the IDs of the relevant products in the following format for the top 3 results: [<first product ID>], [<second product ID>], [<third product ID>] ")
