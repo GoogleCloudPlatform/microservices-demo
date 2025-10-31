@@ -1,82 +1,110 @@
-# Terraform Configuration Summary
+# Terraform Configuration Reference
 
 ## Overview
-This document summarizes the Terraform configuration for the **network-obs-demo** GCP project. All infrastructure resources are managed in a single project with Terraform state stored remotely in Google Cloud Storage.
+Quick reference guide for managing Terraform infrastructure in the **network-obs-demo** GCP project.
 
-## Project Configuration
+## Backend Configuration
 
-### Single Project Setup
-All resources are deployed in the **network-obs-demo** project. The configuration uses variables consistently to avoid hardcoding project IDs.
+Terraform state is stored in Google Cloud Storage:
 
-### Remote State Storage
-Terraform state is stored in Google Cloud Storage for:
-- **Collaboration**: Multiple team members can work with the same state
-- **Security**: State is not stored in Git repository
-- **Versioning**: GCS bucket has versioning enabled for state recovery
-- **Locking**: Automatic state locking prevents concurrent modifications
+```hcl
+terraform {
+  backend "gcs" {
+    bucket = "network-obs-demo-terraform-state"
+    prefix = "terraform/state"
+  }
+}
+```
 
-**GCS Bucket**: `gs://network-obs-demo-terraform-state/terraform/state/`
+**Bucket location**: `gs://network-obs-demo-terraform-state/terraform/state/`
 
-## Infrastructure Components
+## Standard Workflow
 
-### CRM Service (asia-east1)
-- **VPC Network**: `crm-vpc` (global)
-- **Subnet**: `crm-subnet` in asia-east1 with IP range 10.3.0.0/24
-- **VM Instance**: `crm-vm` in asia-east1-a
-- **Firewall Rules**: 
-  - `crm-allow-http-internal` - allows port 8080 from internal networks
-  - `allow-accounting-connector-to-crm` - allows VPC connector access
-- **VPC Peerings**:
-  - `crm-to-ob` - CRM VPC to Online Boutique VPC
-  - `ob-to-crm` - Online Boutique VPC to CRM VPC
-  - `ob-to-remote` - Online Boutique to remote project (cci-dev-playground)
+```bash
+# 1. Initialize (first time or after backend changes)
+terraform init
 
-### Accounting Service (us-central1)
-- **VPC Access Connector**: `accounting-connector` in us-central1
-  - IP range: 10.3.1.0/28
-  - Throughput: 200-1000 Mbps
-  - Connects Cloud Run to CRM VPC
+# 2. Plan changes
+terraform plan
 
-### Inventory Service (europe-west1)
-- **VPC Network**: `inventory-vpc` (global)
-- **Subnets**:
-  - `inventory-subnet` - main subnet (10.20.0.0/24)
-  - `inventory-psc-subnet` - Private Service Connect subnet (10.20.1.0/24)
-- **VM Instance**: `inventory-service-vm` in europe-west1-b
-- **Instance Group**: `inventory-instance-group`
-- **Load Balancing**:
-  - Backend service with health checks
-  - Internal forwarding rule
-- **Private Service Connect**:
-  - Service attachment for cross-VPC access
-  - PSC endpoint in europe-west1
-  - Reserved IP address
-- **Firewall Rules**:
-  - `inventory-allow-internal` - internal traffic
-  - `inventory-allow-psc` - PSC traffic
+# 3. Apply changes
+terraform apply
 
-### Food Service (europe-west1)
-- **Cloud Run Service**: API service connecting to inventory
-- **Artifact Registry**: Docker repository for food service
-- **Firewall Rule**: `allow-cloud-run-to-inventory` - allows Cloud Run to access inventory VM
+# 4. View current state
+terraform state list
 
-## Configuration Files
+# 5. Destroy resources (if needed)
+terraform destroy
+```
 
-### Core Files
-- **main.tf**: Provider configuration, variables, and backend configuration
-- **terraform.tfvars**: Project-specific variable values (not in Git)
-- **terraform.tfvars.example**: Template for variable configuration
+## Targeting Specific Resources
 
-### Service Files
-- **crm.tf**: CRM service infrastructure and VPC peerings
-- **accounting.tf**: Accounting Cloud Run service and VPC connector
-- **inventory.tf**: Inventory service with PSC configuration
-- **food.tf**: Food service Cloud Run configuration
+```bash
+# Apply specific resource
+terraform apply -target=google_cloud_run_v2_service.accounting_api_service
 
-## Variables
+# Plan specific resource
+terraform plan -target=google_compute_instance.crm_vm
+```
 
-### Required Variables
-All configured in `terraform.tfvars`:
+## State Management
+
+### View State
+```bash
+# List all resources
+terraform state list
+
+# Show specific resource
+terraform state show google_compute_instance.crm_vm
+
+# Pull remote state (for inspection)
+terraform state pull
+```
+
+### Import Existing Resources
+```bash
+# Import a resource
+terraform import <resource_type>.<resource_name> <resource_id>
+
+# Example: Import a VM
+terraform import google_compute_instance.crm_vm projects/network-obs-demo/zones/asia-east1-a/instances/crm-vm
+```
+
+### Remove Resources from State
+```bash
+# Remove resource from state (doesn't delete from GCP)
+terraform state rm google_compute_instance.old_vm
+```
+
+## Troubleshooting
+
+### State Locking Issues
+```bash
+# If state is locked, force unlock
+terraform force-unlock <LOCK_ID>
+```
+
+### Backend Reinitialization
+```bash
+# Reconfigure backend
+terraform init -reconfigure
+
+# Migrate state
+terraform init -migrate-state
+```
+
+### State Drift Detection
+```bash
+# Check for drift between state and actual infrastructure
+terraform plan -refresh-only
+
+# Update state to match reality
+terraform apply -refresh-only
+```
+
+## Variables Configuration
+
+Configure in `terraform.tfvars` (never commit to Git):
 
 ```hcl
 project_id            = "network-obs-demo"
@@ -91,152 +119,43 @@ inventory_service_url = "http://10.1.0.2:8080"
 crm_service_url       = "http://10.3.0.2:8080"
 ```
 
-**Important**: Never commit `terraform.tfvars` to Git as it may contain sensitive information.
+## Best Practices
 
-## Terraform State Management
+1. **Always plan before apply**: Review changes with `terraform plan`
+2. **Use version control**: Commit Terraform configurations, not state files
+3. **Use remote state**: Already configured with GCS backend
+4. **Use variables**: Avoid hardcoding values
+5. **State file security**: State is in GCS, excluded from Git via .gitignore
+6. **Descriptive commits**: Document infrastructure changes clearly
+7. **Test in isolation**: Use `-target` for testing specific resources
+8. **Regular backups**: GCS bucket has versioning enabled
 
-### Backend Configuration
-```hcl
-terraform {
-  backend "gcs" {
-    bucket = "network-obs-demo-terraform-state"
-    prefix = "terraform/state"
-  }
-}
-```
+## Security Considerations
 
-### State Operations
+- **State contains sensitive data**: Never commit terraform.tfstate
+- **GCS bucket access**: Limit to authorized team members only
+- **Variables file**: Keep terraform.tfvars secure and out of Git
+- **Service accounts**: Use least-privilege principles
+- **State locking**: Automatic with GCS backend
 
-**Initialize and migrate state**:
-```bash
-terraform init
-```
+## Common Commands Quick Reference
 
-**View current state**:
-```bash
-terraform state list
-```
+| Command | Purpose |
+|---------|---------|
+| `terraform init` | Initialize working directory |
+| `terraform plan` | Show execution plan |
+| `terraform apply` | Apply changes |
+| `terraform destroy` | Destroy all resources |
+| `terraform state list` | List resources in state |
+| `terraform state show <resource>` | Show resource details |
+| `terraform output` | Show output values |
+| `terraform fmt` | Format configuration files |
+| `terraform validate` | Validate configuration |
+| `terraform import <type> <id>` | Import existing resource |
 
-**Pull remote state**:
-```bash
-terraform state pull
-```
+## Resources
 
-**Import existing resources**:
-```bash
-terraform import <resource_type>.<resource_name> <resource_id>
-```
-
-## Working with Terraform
-
-### Standard Workflow
-
-1. **Initialize** (first time or after backend changes):
-   ```bash
-   terraform init
-   ```
-
-2. **Plan changes**:
-   ```bash
-   terraform plan
-   ```
-
-3. **Apply changes**:
-   ```bash
-   terraform apply
-   ```
-
-4. **Destroy resources** (if needed):
-   ```bash
-   terraform destroy
-   ```
-
-### Targeting Specific Resources
-
-Create or update specific resources:
-```bash
-terraform apply -target=google_cloud_run_v2_service.accounting_api_service
-```
-
-### Best Practices
-
-1. **Always run `terraform plan`** before `apply` to review changes
-2. **Use descriptive commit messages** when changing Terraform configurations
-3. **Never commit state files** - they're in GCS and excluded via .gitignore
-4. **Use variables** instead of hardcoding values
-5. **Test changes in isolation** using `-target` when appropriate
-6. **Keep terraform.tfvars up to date** but never commit it to Git
-
-## Current State
-
-### Resources Managed by Terraform
-All infrastructure in the network-obs-demo project is now tracked in Terraform state:
-- ✅ VPC networks and subnets
-- ✅ VM instances and instance groups
-- ✅ Firewall rules
-- ✅ VPC peering connections
-- ✅ Load balancers and health checks
-- ✅ Private Service Connect resources
-- ✅ VPC Access Connectors
-
-### Resources to be Created
-When you run `terraform apply`, these will be created:
-- Artifact Registry repositories
-- Cloud Run services for accounting and food APIs
-- Cloud Run IAM bindings for public access
-- Project service API enablements
-
-### Known State Differences
-Some VM instances show as needing replacement due to metadata format differences between manual creation and Terraform definitions. These are cosmetic differences and the VMs function correctly. You can choose to:
-- **Option A**: Leave them as-is (recommended) - they work fine
-- **Option B**: Allow Terraform to replace them for perfect alignment (causes temporary downtime)
-
-## Migration History
-
-### Recent Changes
-1. **Consolidated to single project**: Removed references to secondary project
-2. **Removed furniture.tf**: Deleted as it referenced old project infrastructure
-3. **Enabled remote state**: Migrated from local state to GCS
-4. **Fixed configuration**: Updated subnet names and peering settings to match actual GCP resources
-5. **Imported manual resources**: All manually created resources now tracked in Terraform
-
-### CRM Service Migration
-The CRM VM was migrated from us-central1 to asia-east1:
-- **Old location**: us-central1-a
-- **New location**: asia-east1-a
-- **IP range preserved**: 10.3.0.0/24
-- **VM IP maintained**: 10.3.0.2
-
-## Troubleshooting
-
-### State Locking Issues
-If you see "Error acquiring the state lock":
-```bash
-# View current lock
-terraform force-unlock <LOCK_ID>
-```
-
-### Backend Initialization
-If backend configuration changes:
-```bash
-terraform init -reconfigure
-```
-
-### State Drift
-Check for differences between state and actual infrastructure:
-```bash
-terraform plan -refresh-only
-```
-
-## Security Notes
-
-1. **State file contains sensitive data**: Never commit or share terraform.tfstate
-2. **GCS bucket access**: Limit access to the state bucket to authorized users only
-3. **Service accounts**: Use dedicated service accounts with minimal required permissions
-4. **Variables file**: Keep terraform.tfvars secure and out of version control
-
-## Support and Documentation
-
-- Terraform GCP Provider: https://registry.terraform.io/providers/hashicorp/google/latest/docs
-- GCS Backend: https://www.terraform.io/docs/language/settings/backends/gcs.html
-- Google Cloud Networking: https://cloud.google.com/vpc/docs
+- [Terraform GCP Provider Documentation](https://registry.terraform.io/providers/hashicorp/google/latest/docs)
+- [GCS Backend Documentation](https://www.terraform.io/docs/language/settings/backends/gcs.html)
+- [Google Cloud VPC Documentation](https://cloud.google.com/vpc/docs)
+- [Terraform Best Practices](https://www.terraform.io/docs/cloud/guides/recommended-practices/index.html)

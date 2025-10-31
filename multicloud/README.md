@@ -10,18 +10,16 @@ The multicloud setup demonstrates modern microservices deployment patterns with 
 - **Analytics Service** (Performance metrics) - VM with Public IP
 
 ### GCP Services
-- **CRM Service** (Customer relationship management) - VM with Public IP
-- **Inventory Service** (Stock management) - VM with Private IP only
-- **Furniture Service** (Furniture catalog) - VM with Public IP
+- **CRM Service** (Customer relationship management) - VM in asia-east1
+- **Inventory Service** (Stock management) - VM with Private IP only in europe-west1
 - **Food Service** (Food catalog) - Cloud Run with Direct VPC Egress
 - **Accounting Service** (Financial transactions) - Cloud Run with VPC Connector
 
 ### Network Architecture
 
 **Service Isolation**: Each GCP service in its own dedicated VPC for security
-- `crm-vpc` (10.2.0.0/24) - CRM service
-- `inventory-vpc` (10.1.0.0/24) - Inventory service  
-- `furniture-vpc` (10.3.0.0/24) - Furniture service
+- `crm-vpc` (10.3.0.0/24) - CRM service in asia-east1
+- `inventory-vpc` (10.20.0.0/24) - Inventory service in europe-west1
 - `online-boutique-vpc` - Online Boutique GKE cluster
 
 **Advanced Networking Patterns**:
@@ -34,7 +32,7 @@ The multicloud setup demonstrates modern microservices deployment patterns with 
 | Pattern | Use Case | Throughput | IP Range |
 |---------|----------|------------|----------|
 | Direct VPC Egress | Frequent communication | No limits | From target subnet |
-| VPC Connector | Occasional access | 200-300 Mbps | Dedicated /28 |
+| VPC Connector | Occasional access | 200-1000 Mbps | Dedicated /28 |
 
 All VM services run Node.js applications on port 8080 with RESTful APIs.
 
@@ -91,15 +89,15 @@ All VM services run Node.js applications on port 8080 with RESTful APIs.
 **Purpose**: Manages customer relationship data  
 **Cloud Provider**: Google Cloud Platform  
 **Instance**: e2-micro (Compute Engine VM)  
-**Region**: us-central1  
-**Network**: Public IP with external access
+**Region**: asia-east1  
+**Network**: Private IP with VPC connectivity
 
 #### Infrastructure Components
-- Dedicated VPC network (crm-vpc) with 10.2.0.0/24 subnet
-- Compute Engine instance with Debian 11 and external IP
-- Firewall rule allowing HTTP traffic on port 8080
+- Dedicated VPC network (crm-vpc) with 10.3.0.0/24 subnet in asia-east1
+- Compute Engine instance with Debian 11 (private IP only)
+- Firewall rules for internal HTTP traffic on port 8080
 - Automated Node.js application deployment via startup script
-- Cloud NAT for outbound internet access
+- VPC peering to online-boutique-vpc
 
 #### REST API Contract
 
@@ -126,15 +124,15 @@ All VM services run Node.js applications on port 8080 with RESTful APIs.
 **Purpose**: Manages product stock levels, reservations, and availability  
 **Cloud Provider**: Google Cloud Platform  
 **Instance**: e2-micro (Compute Engine VM)  
-**Region**: us-central1  
+**Region**: europe-west1  
 **Network**: Private IP only (no external access)
 
 #### Infrastructure Components
-- Dedicated VPC network (inventory-vpc) with 10.1.0.0/24 subnet
+- Dedicated VPC network (inventory-vpc) with 10.20.0.0/24 subnet in europe-west1
 - VM with private IP only (no external IP access)
-- Cloud NAT for outbound internet access (package installation)
 - Private Service Connect (PSC) for secure connectivity
 - Firewall rules for internal and PSC traffic
+- Load balancer with health checks for high availability
 
 #### Security Features
 - **Private IP only**: VM has no external IP address
@@ -183,42 +181,7 @@ All VM services run Node.js applications on port 8080 with RESTful APIs.
 - `400 Bad Request`: Invalid quantity or stock level
 - `404 Not Found`: Product not found
 
-### 4. GCP Furniture Service (`gcp/furniture.tf`)
-
-**Purpose**: Manages furniture product catalog  
-**Cloud Provider**: Google Cloud Platform  
-**Instance**: e2-micro (Compute Engine VM)  
-**Region**: europe-west1  
-**Network**: Public IP with external access
-
-#### Infrastructure Components
-- Dedicated VPC network (furniture-vpc) with 10.3.0.0/24 subnet
-- Compute Engine instance with Debian 11 and external IP
-- Firewall rule allowing HTTP traffic on port 8080
-- Inline Node.js application deployment via startup script
-- Cloud NAT for outbound internet access
-
-#### REST API Contract
-
-**Base URL**: `http://<public-ip>:8080`
-
-| Method | Endpoint | Description | Request Body | Response |
-|--------|----------|-------------|--------------|----------|
-| GET | `/furniture` | List all furniture items | None | Array of furniture objects |
-| GET | `/furniture/:id` | Get specific furniture item | None | Furniture object |
-| POST | `/furniture` | Add new furniture item | `{"name": "string", "category": "string", "price": number}` | Created furniture object |
-| PUT | `/furniture/:id` | Update furniture item | `{"name": "string", "category": "string", "price": number}` | Updated furniture object |
-| DELETE | `/furniture/:id` | Delete furniture item | None | Success message |
-
-**Sample Data**:
-```json
-[
-  { "id": 1, "name": "Oak Desk", "category": "Office", "price": 299.99 },
-  { "id": 2, "name": "Leather Sofa", "category": "Living Room", "price": 899.99 }
-]
-```
-
-### 5. GCP Food Service (`gcp/food.tf` + `gcp/food-service/`)
+### 4. GCP Food Service (`gcp/food.tf` + `gcp/food-service/`)
 
 **Purpose**: Manages food product catalog with inventory integration  
 **Cloud Provider**: Google Cloud Platform  
@@ -268,7 +231,7 @@ All VM services run Node.js applications on port 8080 with RESTful APIs.
 }
 ```
 
-### 6. GCP Accounting Service (`gcp/accounting.tf` + `gcp/accounting-service/`)
+### 5. GCP Accounting Service (`gcp/accounting.tf` + `gcp/accounting-service/`)
 
 **Purpose**: Manages financial transactions with CRM integration  
 **Cloud Provider**: Google Cloud Platform  
@@ -317,6 +280,84 @@ All VM services run Node.js applications on port 8080 with RESTful APIs.
   }
 }
 ```
+
+## Terraform Configuration
+
+### Project Setup
+
+All GCP infrastructure is deployed in a single project (**network-obs-demo**) using Terraform with remote state storage in Google Cloud Storage.
+
+### Remote State Management
+
+Terraform state is stored remotely for:
+- **Team Collaboration**: Multiple team members can work with the same state
+- **Security**: State is not stored in Git repository  
+- **Versioning**: GCS bucket has versioning enabled for state recovery
+- **Locking**: Automatic state locking prevents concurrent modifications
+
+**GCS Bucket**: `gs://network-obs-demo-terraform-state/terraform/state/`
+
+### Configuration Files
+
+**Core Files:**
+- `main.tf` - Provider configuration, variables, and backend configuration
+- `terraform.tfvars` - Project-specific variable values (not in Git)
+- `terraform.tfvars.example` - Template for variable configuration
+
+**Service Files:**
+- `crm.tf` - CRM service infrastructure and VPC peerings
+- `accounting.tf` - Accounting Cloud Run service and VPC connector
+- `inventory.tf` - Inventory service with PSC configuration
+- `food.tf` - Food service Cloud Run configuration
+
+### Required Variables
+
+Configure in `terraform.tfvars`:
+
+```hcl
+project_id            = "network-obs-demo"
+gcp_project_id        = "network-obs-demo"
+region                = "us-central1"
+zone                  = "us-central1-a"
+ob_network_name       = "online-boutique-vpc"
+ob_subnet_name        = "subnet1-us-central1"
+peering_project_id    = "cci-dev-playground"
+peering_vpc_network   = "location-verification"
+inventory_service_url = "http://10.1.0.2:8080"
+crm_service_url       = "http://10.3.0.2:8080"
+```
+
+**Important**: Never commit `terraform.tfvars` to Git.
+
+### Terraform Workflow
+
+1. **Initialize** (first time or after backend changes):
+   ```bash
+   terraform init
+   ```
+
+2. **Plan changes**:
+   ```bash
+   terraform plan
+   ```
+
+3. **Apply changes**:
+   ```bash
+   terraform apply
+   ```
+
+4. **View state**:
+   ```bash
+   terraform state list
+   ```
+
+### Best Practices
+
+- Always run `terraform plan` before `apply` to review changes
+- Use descriptive commit messages when changing Terraform configurations  
+- Never commit state files (they're in GCS and excluded via .gitignore)
+- Use variables instead of hardcoding values
+- Test changes in isolation using `-target` when appropriate
 
 ## Deployment Instructions
 
@@ -371,18 +412,17 @@ terraform apply
 **File Structure:**
 ```
 gcp/
-├── main.tf             # Shared Terraform, provider, and variable configs
-├── crm.tf              # CRM service (VM with public IP)
+├── main.tf             # Shared Terraform, provider, and backend configuration
+├── crm.tf              # CRM service (VM in asia-east1)
 ├── inventory.tf        # Inventory service (VM with private IP + PSC)
-├── furniture.tf        # Furniture service (VM with public IP)
 ├── food.tf             # Food service (Cloud Run with Direct VPC Egress)
 ├── accounting.tf       # Accounting service (Cloud Run with VPC Connector)
 ├── food-service/       # Food service application code
 ├── accounting-service/ # Accounting service application code
-└── terraform.tfvars    # Your project configuration
+└── terraform.tfvars    # Your project configuration (not in Git)
 ```
 
-#### Step 1: Deploy VM-based services (CRM, Inventory, Furniture)
+#### Step 1: Deploy VM-based services (CRM, Inventory)
 
 ```bash
 cd gcp/
@@ -401,11 +441,9 @@ terraform apply
 ```
 
 **VM Services Outputs**:
-- `crm_vm_public_ip`: CRM service public IP
-- `crm_vm_private_ip`: CRM service private IP
-- `inventory_vm_private_ip`: Inventory VM private IP (no external access)
+- `crm_vm_private_ip`: CRM service private IP (asia-east1)
+- `inventory_vm_private_ip`: Inventory VM private IP (europe-west1, no external access)
 - `inventory_psc_endpoint_ip`: PSC endpoint to access inventory
-- `furniture_vm_public_ip`: Furniture service public IP
 
 #### Step 2: Build and deploy Food Service (Cloud Run)
 
@@ -520,31 +558,6 @@ curl -X PUT http://$INVENTORY_PSC_IP:8080/inventory/OLJCESPC7Z \
   -d '{"stockLevel":50}'
 ```
 
-**Test GCP Furniture Service**:
-```bash
-# Get furniture service IP
-FURNITURE_IP=$(terraform output -raw furniture_vm_public_ip)
-
-# List all furniture
-curl http://$FURNITURE_IP:8080/furniture
-
-# Get specific item
-curl http://$FURNITURE_IP:8080/furniture/1
-
-# Add furniture item
-curl -X POST http://$FURNITURE_IP:8080/furniture \
-  -H "Content-Type: application/json" \
-  -d '{"name":"Modern Chair","category":"Office","price":199.99}'
-
-# Update furniture item
-curl -X PUT http://$FURNITURE_IP:8080/furniture/1 \
-  -H "Content-Type: application/json" \
-  -d '{"name":"Executive Desk","category":"Office","price":499.99}'
-
-# Delete furniture item
-curl -X DELETE http://$FURNITURE_IP:8080/furniture/1
-```
-
 **Test GCP Food Service** (Cloud Run with inventory integration):
 ```bash
 # Get food service URL
@@ -609,8 +622,7 @@ curl -X DELETE $ACCOUNTING_URL/transactions/1
 
 ### GCP Compute Engine (VMs)
 - **e2-micro**: Always-free tier eligible (1 per month per region)
-- **CRM, Inventory, Furniture**: ~$5-8/month each if not in free tier
-- **Cloud NAT**: ~$0.045/hour + data processing charges
+- **CRM, Inventory**: ~$5-8/month each if not in free tier
 
 ### GCP Cloud Run (Serverless)
 - **Food & Accounting Services**: Pay-per-request pricing
@@ -628,9 +640,9 @@ curl -X DELETE $ACCOUNTING_URL/transactions/1
 ### Cost Optimization Tips
 1. Use Direct VPC Egress instead of VPC Connector when possible
 2. Set Cloud Run min instances to 0 for development
-3. Use e2-micro instances in free tier
-4. Monitor Cloud NAT data processing costs
-5. Consider regional deployment to minimize data transfer
+3. Use e2-micro instances in free tier (one per region)
+4. Deploy services in same region to minimize data transfer costs
+5. Monitor VPC Connector usage and consider Direct VPC Egress alternatives
 
 ## Security Notes
 
@@ -732,9 +744,9 @@ These services create a complete multicloud ecommerce platform:
     │         │           │              │
     ▼         ▼           ▼              ▼
 ┌────────┐ ┌─────────┐ ┌──────────┐ ┌──────────┐
-│  Food  │ │Accounting│ │Furniture │ │Analytics │
-│Service │ │ Service │ │ Service  │ │ Service  │
-│(Cloud  │ │(Cloud   │ │  (VM)    │ │  (Azure) │
+│  Food  │ │Accounting│ │ Other    │ │Analytics │
+│Service │ │ Service │ │ Services │ │ Service  │
+│(Cloud  │ │(Cloud   │ │          │ │  (Azure) │
 │ Run)   │ │  Run)   │ │          │ │          │
 └───┬────┘ └────┬─────┘ └──────────┘ └──────────┘
     │           │
@@ -746,26 +758,28 @@ These services create a complete multicloud ecommerce platform:
 │Inventory │ │   CRM   │
 │ Service  │ │ Service │
 │(Private) │ │  (VM)   │
+│  (PSC)   │ │asia-east1│
 └──────────┘ └─────────┘
 ```
 
 ### Integration Flow
 
-1. **Customer browses catalog** → Food/Furniture services provide product data
+1. **Customer browses catalog** → Food service provides product data
 2. **Check inventory** → Food service calls Inventory service (Direct VPC Egress)
 3. **Customer checkout** → Checkout service orchestrates the flow
 4. **Record transaction** → Accounting service saves transaction + fetches CRM data (VPC Connector)
 5. **Track metrics** → Analytics service records performance data
-6. **Update inventory** → Inventory service reserves/releases stock
+6. **Update inventory** → Inventory service reserves/releases stock via PSC
 
 ### Key Integration Points
 
-| Service | Calls | Via | Purpose |
-|---------|-------|-----|---------|
+| Source Service | Target Service | Connection Type | Purpose |
+|----------------|----------------|-----------------|---------|
 | Checkout | Food Service | Public HTTPS | Get food catalog |
 | Checkout | Accounting Service | Public HTTPS | Record transactions |
 | Food Service | Inventory Service | Direct VPC Egress | Check stock levels |
 | Accounting Service | CRM Service | VPC Connector | Get customer data |
+| Other VPCs | Inventory Service | Private Service Connect | Stock management |
 
 ### Example: Complete Order Flow
 
