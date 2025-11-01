@@ -1,11 +1,23 @@
 #!/bin/bash
 
-# Update packages and install Node.js and npm
+# Update packages and install curl
 sudo apt-get update
-sudo apt-get install -y nodejs npm
+sudo apt-get install -y curl
+
+# Install nvm (Node Version Manager) and Node.js v18
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh | bash
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+nvm install 18
+nvm use 18
+
+# Create symlinks to make node and pm2 available globally
+sudo ln -s "$(which node)" "/usr/local/bin/node"
+sudo ln -s "$(which npm)" "/usr/local/bin/npm"
 
 # Install pm2, a production process manager for Node.js
-sudo npm install pm2 -g
+npm install pm2 -g
+sudo ln -s "$(which pm2)" "/usr/local/bin/pm2"
 
 # Create a directory for the app
 sudo mkdir -p /opt/crm-status
@@ -20,7 +32,8 @@ cat <<'EOF' > package.json
   "description": "CRM Status Monitoring Dashboard",
   "main": "app.js",
   "dependencies": {
-    "express": "^4.18.2"
+    "express": "^4.18.2",
+    "node-fetch": "^3.3.2"
   }
 }
 EOF
@@ -32,6 +45,45 @@ const app = express();
 const port = 80;
 
 const BACKEND_URL = 'http://10.3.0.2:8080/customers';
+
+// Proxy endpoint to fetch backend status
+app.get('/api/status', async (req, res) => {
+    const startTime = Date.now();
+    try {
+        const fetch = (await import('node-fetch')).default;
+        const backendResponse = await fetch(BACKEND_URL);
+        const endTime = Date.now();
+        const responseTime = endTime - startTime;
+
+        if (backendResponse.ok) {
+            const data = await backendResponse.json();
+            res.status(200).json({
+                status: 'ok',
+                httpStatus: backendResponse.status,
+                responseTime: responseTime,
+                customerCount: data.length,
+                data: data
+            });
+        } else {
+            res.status(200).json({
+                status: 'degraded',
+                httpStatus: backendResponse.status,
+                responseTime: responseTime,
+                customerCount: null
+            });
+        }
+    } catch (error) {
+        const endTime = Date.now();
+        const responseTime = endTime - startTime;
+        res.status(200).json({
+            status: 'error',
+            httpStatus: null,
+            responseTime: responseTime,
+            customerCount: null,
+            error: error.message
+        });
+    }
+});
 
 app.get('/', (req, res) => {
   res.send(`
@@ -115,14 +167,21 @@ app.get('/', (req, res) => {
                     display: inline-block !important;
                     visibility: visible !important;
                     opacity: 1 !important;
-                    z-index: 1000;
-                    position: relative;
-                    color: white;
-                    cursor: pointer;
+                    z-index: 9999 !important;
+                    position: relative !important;
+                    color: white !important;
+                    cursor: pointer !important;
+                    pointer-events: auto !important;
                 }
                 .btn-check:hover {
                     transform: translateY(-2px);
                     box-shadow: 0 5px 15px rgba(52, 152, 219, 0.4);
+                }
+                #statusDisplay {
+                    pointer-events: auto !important;
+                }
+                .card-body {
+                    pointer-events: auto !important;
                 }
         .endpoint-info {
             background: #ecf0f1;
@@ -248,7 +307,7 @@ app.get('/', (req, res) => {
             const startTime = performance.now();
             
             try {
-                const response = await fetch('${BACKEND_URL}');
+                const response = await fetch('/api/status');
                 const endTime = performance.now();
                 const responseTime = Math.round(endTime - startTime);
 
@@ -262,28 +321,34 @@ app.get('/', (req, res) => {
                 if (response.ok) {
                     const data = await response.json();
                     
-                    statusIndicator.className = 'status-indicator status-up';
-                    statusText.textContent = 'Service Operational';
-                    statusText.style.color = '#2ecc71';
-                    
-                    httpStatus.textContent = response.status;
-                    httpStatus.style.color = '#2ecc71';
-                    
-                    responseTimeEl.textContent = responseTime + ' ms';
-                    responseTimeEl.style.color = responseTime < 100 ? '#2ecc71' : responseTime < 300 ? '#f39c12' : '#e74c3c';
-                    
-                    customerCount.textContent = data.length || 0;
-                    customerCount.style.color = '#3498db';
+                    if (data.status === 'ok') {
+                        statusIndicator.className = 'status-indicator status-up';
+                        statusText.textContent = 'Service Operational';
+                        statusText.style.color = '#2ecc71';
+                        
+                        httpStatus.textContent = data.httpStatus;
+                        httpStatus.style.color = '#2ecc71';
+                        
+                        responseTimeEl.textContent = data.responseTime + ' ms';
+                        responseTimeEl.style.color = data.responseTime < 100 ? '#2ecc71' : data.responseTime < 300 ? '#f39c12' : '#e74c3c';
+                        
+                        customerCount.textContent = data.customerCount;
+                        customerCount.style.color = '#3498db';
+                    } else if (data.status === 'degraded') {
+                        statusIndicator.className = 'status-indicator status-down';
+                        statusText.textContent = 'Service Degraded';
+                        statusText.style.color = '#e74c3c';
+                        
+                        httpStatus.textContent = data.httpStatus;
+                        httpStatus.style.color = '#e74c3c';
+                        
+                        responseTimeEl.textContent = data.responseTime + ' ms';
+                        customerCount.textContent = 'N/A';
+                    } else { // error
+                        throw new Error(data.error || 'Unknown backend error');
+                    }
                 } else {
-                    statusIndicator.className = 'status-indicator status-down';
-                    statusText.textContent = 'Service Degraded';
-                    statusText.style.color = '#e74c3c';
-                    
-                    httpStatus.textContent = response.status;
-                    httpStatus.style.color = '#e74c3c';
-                    
-                    responseTimeEl.textContent = responseTime + ' ms';
-                    customerCount.textContent = 'N/A';
+                    throw new Error('Frontend API error! status: ' + response.status);
                 }
 
                 lastCheck.textContent = new Date().toLocaleString();
@@ -303,7 +368,7 @@ app.get('/', (req, res) => {
                 httpStatus.textContent = 'Error';
                 httpStatus.style.color = '#e74c3c';
                 
-                responseTimeEl.textContent = 'Timeout';
+                responseTimeEl.textContent = 'N/A';
                 responseTimeEl.style.color = '#e74c3c';
                 
                 customerCount.textContent = 'N/A';

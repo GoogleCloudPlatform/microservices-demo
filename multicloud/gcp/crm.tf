@@ -52,6 +52,62 @@ resource "google_compute_address" "crm_status_external_ip" {
   description = "Static external IP for CRM status VM (public access)"
 }
 
+# ============================================================================
+# CLOUD STORAGE BUCKET WITH PRIVATE SERVICE CONNECT
+# ============================================================================
+
+# 2c. Enable Cloud Storage API
+resource "google_project_service" "storage_api" {
+  service            = "storage.googleapis.com"
+  disable_on_destroy = false
+}
+
+# 2d. Create Cloud Storage bucket for CRM API logs
+resource "google_storage_bucket" "crm_logs_bucket" {
+  name          = "crm-online-boutique-bucket"
+  location      = "US-CENTRAL1"
+  storage_class = "STANDARD"
+  project       = var.project_id
+  
+  uniform_bucket_level_access = true
+  public_access_prevention    = "enforced"
+  
+  versioning {
+    enabled = true
+  }
+  
+  lifecycle_rule {
+    condition {
+      age = 30
+    }
+    action {
+      type = "Delete"
+    }
+  }
+  
+  depends_on = [google_project_service.storage_api]
+}
+
+# Note: PSC endpoint for Cloud Storage is not required.
+# GCP VMs can access Cloud Storage directly through service account authentication
+# without needing a Private Service Connect endpoint. The storage client library
+# automatically uses Google's private network paths when running on GCP.
+
+# 2g. Service account for CRM backend
+resource "google_service_account" "crm_backend_sa" {
+  account_id   = "crm-backend-sa"
+  display_name = "CRM Backend Service Account"
+  project      = var.project_id
+  description  = "Service account for CRM backend VM with GCS access"
+}
+
+# 2h. Grant storage object creator role
+resource "google_storage_bucket_iam_member" "crm_backend_bucket_access" {
+  bucket = google_storage_bucket.crm_logs_bucket.name
+  role   = "roles/storage.objectCreator"
+  member = "serviceAccount:${google_service_account.crm_backend_sa.email}"
+}
+
 # 2d. Create Cloud Router for NAT
 resource "google_compute_router" "crm_router" {
   name    = "crm-router"
@@ -94,7 +150,7 @@ resource "google_compute_firewall" "allow_crm_http" {
 # 4. Create CRM Backend VM instance with static IP
 resource "google_compute_instance" "crm_vm" {
   name         = "crm-backend-vm"
-  machine_type = "e2-micro"
+  machine_type = "e2-small"
   zone         = "asia-east1-a"
 
   tags = ["crm-server"]
@@ -110,6 +166,12 @@ resource "google_compute_instance" "crm_vm" {
     subnetwork = google_compute_subnetwork.crm_subnet.id
     network_ip = google_compute_address.crm_backend_static_ip.address
     // No access_config block = no external IP (private only)
+  }
+
+  # Service account for GCS access
+  service_account {
+    email  = google_service_account.crm_backend_sa.email
+    scopes = ["cloud-platform"]
   }
 
   # Startup script from external file
@@ -433,6 +495,11 @@ output "crm_status_url" {
 output "crm_status_vm_private_ip" {
   value       = google_compute_address.crm_status_static_ip.address
   description = "Private IP address of the CRM status VM"
+}
+
+output "crm_storage_bucket" {
+  value       = google_storage_bucket.crm_logs_bucket.name
+  description = "Cloud Storage bucket for CRM API logs"
 }
 
 # ============================================================================

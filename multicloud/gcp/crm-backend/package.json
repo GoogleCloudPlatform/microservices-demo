@@ -1,13 +1,14 @@
 {
   "name": "mock-crm-service",
   "version": "1.0.0",
-  "description": "Mock CRM Backend Service",
+  "description": "Mock CRM Backend Service with GCS Logging",
   "main": "app.js",
   "scripts": {
     "start": "node app.js"
   },
   "dependencies": {
-    "express": "^4.18.2"
+    "express": "^4.18.2",
+    "@google-cloud/storage": "^7.7.0"
   }
 }
 

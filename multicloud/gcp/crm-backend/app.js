@@ -1,9 +1,56 @@
 const express = require('express');
+const { Storage } = require('@google-cloud/storage');
+
 const app = express();
 const port = 8080;
 
+// Initialize Google Cloud Storage only in production
+let storage, bucket;
+if (process.env.NODE_ENV === 'production') {
+  storage = new Storage();
+  const BUCKET_NAME = 'crm-online-boutique-bucket';
+  bucket = storage.bucket(BUCKET_NAME);
+}
+
+// Async logging function
+async function logToGCS(logEntry) {
+  if (!bucket) {
+    // Silently fail in non-production environments
+    return;
+  }
+  try {
+    const date = new Date().toISOString().split('T')[0];
+    const fileName = `logs/${date}/${Date.now()}-${Math.random().toString(36).substring(7)}.json`;
+    await bucket.file(fileName).save(JSON.stringify(logEntry, null, 2));
+  } catch (error) {
+    console.error('Failed to write log to GCS:', error.message);
+  }
+}
+
 // Middleware to parse JSON bodies
 app.use(express.json());
+
+// Logging middleware - runs for all requests
+app.use((req, res, next) => {
+  const startTime = Date.now();
+  
+  res.on('finish', () => {
+    const logEntry = {
+      timestamp: new Date().toISOString(),
+      method: req.method,
+      path: req.path,
+      statusCode: res.statusCode,
+      responseTimeMs: Date.now() - startTime,
+      clientIp: req.ip,
+      userAgent: req.get('user-agent') || 'unknown'
+    };
+    
+    // Log asynchronously (don't wait)
+    logToGCS(logEntry).catch(err => console.error('Logging error:', err));
+  });
+  
+  next();
+});
 
 // In-memory data store with two hardcoded customers
 let customers = [

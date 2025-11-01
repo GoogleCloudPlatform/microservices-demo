@@ -1,11 +1,23 @@
 #!/bin/bash
 
-# Update packages and install Node.js and npm
+# Update packages and install curl
 sudo apt-get update
-sudo apt-get install -y nodejs npm
+sudo apt-get install -y curl
+
+# Install nvm (Node Version Manager) and Node.js v18
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh | bash
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+nvm install 18
+nvm use 18
+
+# Create symlinks to make node and pm2 available globally
+sudo ln -s "$(which node)" "/usr/local/bin/node"
+sudo ln -s "$(which npm)" "/usr/local/bin/npm"
 
 # Install pm2, a production process manager for Node.js
-sudo npm install pm2 -g
+npm install pm2 -g
+sudo ln -s "$(which pm2)" "/usr/local/bin/pm2"
 
 # Create a directory for the app
 sudo mkdir -p /opt/app
@@ -17,9 +29,14 @@ cat <<'EOF' > package.json
 {
   "name": "mock-crm-service",
   "version": "1.0.0",
+  "description": "Mock CRM Backend Service with GCS Logging",
   "main": "app.js",
+  "scripts": {
+    "start": "node app.js"
+  },
   "dependencies": {
-    "express": "^4.18.2"
+    "express": "^4.18.2",
+    "@google-cloud/storage": "^7.7.0"
   }
 }
 EOF
@@ -27,11 +44,58 @@ EOF
 # Create the app.js file with the mock CRM logic
 cat <<'EOF' > app.js
 const express = require('express');
+const { Storage } = require('@google-cloud/storage');
+
 const app = express();
 const port = 8080;
 
+// Initialize Google Cloud Storage only in production
+let storage, bucket;
+if (process.env.NODE_ENV === 'production') {
+  storage = new Storage();
+  const BUCKET_NAME = 'crm-online-boutique-bucket';
+  bucket = storage.bucket(BUCKET_NAME);
+}
+
+// Async logging function
+async function logToGCS(logEntry) {
+  if (!bucket) {
+    // Silently fail in non-production environments
+    return;
+  }
+  try {
+    const date = new Date().toISOString().split('T')[0];
+    const fileName = `logs/${date}/${Date.now()}-${Math.random().toString(36).substring(7)}.json`;
+    await bucket.file(fileName).save(JSON.stringify(logEntry, null, 2));
+  } catch (error) {
+    console.error('Failed to write log to GCS:', error.message);
+  }
+}
+
 // Middleware to parse JSON bodies
 app.use(express.json());
+
+// Logging middleware - runs for all requests
+app.use((req, res, next) => {
+  const startTime = Date.now();
+  
+  res.on('finish', () => {
+    const logEntry = {
+      timestamp: new Date().toISOString(),
+      method: req.method,
+      path: req.path,
+      statusCode: res.statusCode,
+      responseTimeMs: Date.now() - startTime,
+      clientIp: req.ip,
+      userAgent: req.get('user-agent') || 'unknown'
+    };
+    
+    // Log asynchronously (don't wait)
+    logToGCS(logEntry).catch(err => console.error('Logging error:', err));
+  });
+  
+  next();
+});
 
 // In-memory data store with two hardcoded customers
 let customers = [
@@ -76,6 +140,10 @@ EOF
 # Install application dependencies
 npm install
 
-# Start the application using pm2 to run it in the background
-pm2 start app.js --name "crm-app"
+# Start the application using pm2 to run it in the background with NODE_ENV set
+NODE_ENV=production pm2 start app.js --name "crm-app"
+
+# Save the PM2 process list and configure it to start on system boot
+pm2 save
+pm2 startup systemd -u root --hp /root
 

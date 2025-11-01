@@ -86,14 +86,21 @@ app.get('/', (req, res) => {
             display: inline-block !important;
             visibility: visible !important;
             opacity: 1 !important;
-            z-index: 1000;
-            position: relative;
-            color: white;
-            cursor: pointer;
+            z-index: 9999 !important;
+            position: relative !important;
+            color: white !important;
+            cursor: pointer !important;
+            pointer-events: auto !important;
         }
         .btn-check:hover {
             transform: translateY(-2px);
             box-shadow: 0 5px 15px rgba(52, 152, 219, 0.4);
+        }
+        #statusDisplay {
+            pointer-events: auto !important;
+        }
+        .card-body {
+            pointer-events: auto !important;
         }
         .endpoint-info {
             background: #ecf0f1;
