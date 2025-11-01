@@ -19,6 +19,10 @@ terraform {
       version = "6.50.0"
     }
   }
+  backend "gcs" {
+    bucket  = "network-obs-demo-terraform-state"
+    prefix  = "terraform/gke-cluster"
+  }
 }
 
 provider "google" {

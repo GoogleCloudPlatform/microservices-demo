@@ -13,11 +13,11 @@
 # limitations under the License.
 
 output "cluster_location" {
-  description = "Location of the cluster"
-  value       = resource.google_container_cluster.my_cluster.location
+  description = "The location (region or zone) in which the GKE cluster was created"
+  value       = google_container_cluster.my_cluster.location
 }
 
 output "cluster_name" {
-  description = "Name of the cluster"
-  value       = resource.google_container_cluster.my_cluster.name
+  description = "The name of the GKE cluster that was created"
+  value       = google_container_cluster.my_cluster.name
 }

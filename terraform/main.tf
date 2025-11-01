@@ -42,28 +42,20 @@ resource "google_compute_network" "online-boutique-vpc" {
 }
 
 resource "google_compute_subnetwork" "subnet1" {
-  name          = "subnet1-${var.region}"
-  ip_cidr_range = "10.10.0.0/20"
-  region        = var.region
+  name          = "online-boutique-vpc"
+  ip_cidr_range = "10.128.0.0/20"
+  region        = "us-central1"
   network       = google_compute_network.online-boutique-vpc.id
   
-  # Secondary IP ranges for GKE pods and services
-  secondary_ip_range {
-    range_name    = "gke-pods"
-    ip_cidr_range = "10.69.128.0/17"
-  }
-  
-  secondary_ip_range {
-    range_name    = "gke-services"
-    ip_cidr_range = "10.69.64.0/18"
-  }
+  # Note: Secondary IP ranges are created and managed by GKE automatically
+  # Don't define them here to avoid conflicts
 }
 
 # Create GKE cluster
 resource "google_container_cluster" "my_cluster" {
 
-  name     = var.name
-  location = var.region
+  name     = "online-boutique"
+  location = "us-central1"
   network    = google_compute_network.online-boutique-vpc.id
   subnetwork = google_compute_subnetwork.subnet1.id
   
@@ -72,8 +64,8 @@ resource "google_container_cluster" "my_cluster" {
 
   # Set ip_allocation_policy for autopilot cluster with secondary ranges
   ip_allocation_policy {
-    cluster_secondary_range_name  = "gke-pods"
-    services_secondary_range_name = "gke-services"
+    cluster_secondary_range_name  = "gke-online-boutique-pods-9aa648a1"
+    services_secondary_range_name = "gke-online-boutique-services-9aa648a1"
   }
   
   # Enable Istio/Service Mesh
@@ -113,7 +105,7 @@ module "gcloud" {
   create_cmd_entrypoint = "gcloud"
   # Module does not support explicit dependency
   # Enforce implicit dependency through use of local variable
-  create_cmd_body = "container clusters get-credentials ${local.cluster_name} --zone=${var.region} --project=${var.gcp_project_id}"
+  create_cmd_body = "container clusters get-credentials ${local.cluster_name} --zone=us-central1 --project=${var.gcp_project_id}"
 }
 
 # Apply YAML kubernetes-manifest configurations
