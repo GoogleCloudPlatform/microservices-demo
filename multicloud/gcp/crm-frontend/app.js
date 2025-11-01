@@ -129,7 +129,7 @@ app.get('/', (req, res) => {
     </div>
 
     <script>
-        const BACKEND_URL = 'http://10.3.0.2:8080/customers';
+        const BACKEND_URL = 'http://10.3.0.4:8080/customers';
         
         // Display backend URL
         document.getElementById('backendUrl').textContent = BACKEND_URL;
