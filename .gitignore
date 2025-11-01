@@ -27,3 +27,5 @@ obj/
 pkg/
 release/wi-kubernetes-manifests.yaml
 vendor/
+*.tfplan
+tfplan

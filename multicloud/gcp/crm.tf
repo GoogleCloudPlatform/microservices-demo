@@ -17,6 +17,31 @@ resource "google_compute_subnetwork" "crm_subnet" {
   description   = "Subnet for CRM service"
 }
 
+# 2a. Create Cloud Router for NAT
+resource "google_compute_router" "crm_router" {
+  name    = "crm-router"
+  region  = "asia-east1"
+  network = google_compute_network.crm_vpc.id
+
+  bgp {
+    asn = 64514
+  }
+}
+
+# 2b. Create Cloud NAT for internet access
+resource "google_compute_router_nat" "crm_nat" {
+  name                               = "crm-nat"
+  router                             = google_compute_router.crm_router.name
+  region                             = "asia-east1"
+  nat_ip_allocate_option             = "AUTO_ONLY"
+  source_subnetwork_ip_ranges_to_nat = "ALL_SUBNETWORKS_ALL_IP_RANGES"
+
+  log_config {
+    enable = true
+    filter = "ERRORS_ONLY"
+  }
+}
+
 # 3. Create a firewall rule to allow traffic on port 8080 from online-boutique-vpc VPC
 resource "google_compute_firewall" "allow_crm_http" {
   name    = "crm-allow-http-internal"
@@ -253,13 +278,13 @@ resource "google_compute_instance" "crm_frontend_vm" {
     EOF
     
     # Create the frontend app.js file
-    cat <<'EOF' > app.js
+    cat <<'APPJS' > app.js
     const express = require('express');
     const app = express();
     const port = 8080;
 
     app.get('/', (req, res) => {
-      res.send(\`
+      res.send(`
     <!DOCTYPE html>
     <html lang="en">
     <head>
@@ -349,7 +374,7 @@ resource "google_compute_instance" "crm_frontend_vm" {
                 
                 try {
                     const response = await fetch(BACKEND_URL);
-                    if (!response.ok) throw new Error(\`HTTP error! status: $${response.status}\`);
+                    if (!response.ok) throw new Error(`HTTP error! status: $${response.status}`);
                     
                     const customers = await response.json();
                     document.getElementById('customerCount').textContent = customers.length;
@@ -364,7 +389,7 @@ resource "google_compute_instance" "crm_frontend_vm" {
                         customers.forEach((customer, index) => {
                             const initials = getInitials(customer.name, customer.surname);
                             const bgGradient = getRandomColor(customer.name);
-                            customerList.innerHTML += \`
+                            customerList.innerHTML += `
                                 <div class="col-md-6">
                                     <div class="card customer-card h-100">
                                         <div class="card-body">
@@ -379,7 +404,7 @@ resource "google_compute_instance" "crm_frontend_vm" {
                                         </div>
                                     </div>
                                 </div>
-                            \`;
+                            `;
                         });
                     }
                     
@@ -398,7 +423,7 @@ resource "google_compute_instance" "crm_frontend_vm" {
         </script>
     </body>
     </html>
-      \`);
+      `);
     });
 
     app.get('/health', (req, res) => {
@@ -406,9 +431,9 @@ resource "google_compute_instance" "crm_frontend_vm" {
     });
 
     app.listen(port, '0.0.0.0', () => {
-      console.log(\`CRM Frontend server listening on port $${port}\`);
+      console.log(`CRM Frontend server listening on port $${port}`);
     });
-    EOF
+    APPJS
     
     # Install application dependencies
     npm install
@@ -431,7 +456,7 @@ resource "google_compute_instance_group" "crm_frontend_group" {
   ]
 
   named_port {
-    name = "http"
+    name = "http8080"
     port = "8080"
   }
 }
@@ -450,19 +475,24 @@ resource "google_compute_health_check" "crm_frontend_health" {
   }
 }
 
-# 11. Create backend service
+# 11. Create backend service (using EXTERNAL_MANAGED for better configuration)
 resource "google_compute_backend_service" "crm_frontend_backend" {
   name                  = "crm-frontend-backend"
   protocol              = "HTTP"
-  port_name             = "http"
+  port_name             = "http8080"
   timeout_sec           = 30
   health_checks         = [google_compute_health_check.crm_frontend_health.id]
-  load_balancing_scheme = "EXTERNAL"
+  load_balancing_scheme = "EXTERNAL_MANAGED"
 
   backend {
     group           = google_compute_instance_group.crm_frontend_group.id
     balancing_mode  = "UTILIZATION"
     capacity_scaler = 1.0
+  }
+
+  log_config {
+    enable      = true
+    sample_rate = 1.0
   }
 }
 
@@ -489,7 +519,7 @@ resource "google_compute_global_forwarding_rule" "crm_frontend_forwarding_rule" 
   target                = google_compute_target_http_proxy.crm_frontend_proxy.id
   port_range            = "80"
   ip_address            = google_compute_global_address.crm_frontend_ip.address
-  load_balancing_scheme = "EXTERNAL"
+  load_balancing_scheme = "EXTERNAL_MANAGED"
 }
 
 # 16. Firewall rule to allow health checks from Google Cloud load balancers

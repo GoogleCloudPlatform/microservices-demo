@@ -255,6 +255,6 @@ app.get('/health', (req, res) => {
 });
 
 app.listen(port, '0.0.0.0', () => {
-  console.log(\`CRM Frontend server listening on port \${port}\`);
+  console.log(`CRM Frontend server listening on port ${port}`);
 });
 
