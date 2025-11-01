@@ -2,6 +2,17 @@
 
 This folder contains Terraform configurations that deploy microservices across Azure and Google Cloud Platform, demonstrating various deployment patterns including VMs, Cloud Run, and advanced networking configurations.
 
+### Key Features
+
+- **Multi-Cloud Deployment**: Demonstrates deploying microservices across both Azure and Google Cloud Platform.
+- **Diverse Compute Options**: Utilizes a mix of VMs (Azure, GCP Compute Engine) and serverless (GCP Cloud Run) to showcase different hosting models.
+- **Advanced GCP Networking**: Implements sophisticated networking patterns including:
+  - **VPC Peering**: For connecting services across different VPCs.
+  - **Private Service Connect (PSC)**: To securely expose services without public IPs.
+  - **Direct VPC Egress & VPC Connectors**: Comparing two methods for serverless networking.
+- **Service Isolation**: Each service is deployed in its own dedicated VPC for enhanced security.
+- **CI/CD Automation**: Uses Cloud Build for automated container builds and deployments.
+
 ## Architecture Overview
 
 The multicloud setup demonstrates modern microservices deployment patterns with various networking and compute options:
@@ -31,7 +42,7 @@ The multicloud setup demonstrates modern microservices deployment patterns with 
 **Cloud Run Networking Comparison**:
 | Pattern | Use Case | Throughput | IP Range |
 |---------|----------|------------|----------|
-| Direct VPC Egress | Frequent communication | No limits | From target subnet |
+| Direct VPC Egress | High-throughput needs | No limits | From target subnet |
 | VPC Connector | Occasional access | 200-1000 Mbps | Dedicated /28 |
 
 All VM services run Node.js applications on port 8080 with RESTful APIs.
@@ -101,7 +112,7 @@ All VM services run Node.js applications on port 8080 with RESTful APIs.
 
 #### REST API Contract
 
-**Base URL**: `http://<public-ip>:8080`
+**Base URL**: `http://10.3.0.2:8080` (accessible from peered VPCs)
 
 | Method | Endpoint | Description | Request Body | Response |
 |--------|----------|-------------|--------------|----------|
@@ -517,13 +528,16 @@ curl -X POST http://<azure-ip>:8080/metrics \
   -d '{"transactionType":"checkout","durationMs":150,"success":true}'
 ```
 
-**Test GCP CRM Service**:
+**Test GCP CRM Service** (from a peered VPC):
 ```bash
+# Get CRM private IP from terraform output
+CRM_IP=$(terraform output -raw crm_vm_private_ip)
+
 # List customers
-curl http://<gcp-ip>:8080/customers
+curl http://$CRM_IP:8080/customers
 
 # Add customer
-curl -X POST http://<gcp-ip>:8080/customers \
+curl -X POST http://$CRM_IP:8080/customers \
   -H "Content-Type: application/json" \
   -d '{"name":"Alice","surname":"Johnson"}'
 ```
@@ -713,9 +727,8 @@ terraform destroy
 **Test VPC connectivity:**
 ```bash
 # From GKE pod or Cloud Shell in same VPC
-curl http://10.1.0.2:8080/health  # Inventory service
-curl http://10.2.0.2:8080/health  # CRM service
-curl http://10.3.0.2:8080/health  # Furniture service
+curl http://10.20.0.2:8080/health # Inventory service
+curl http://10.3.0.2:8080/customers # CRM service
 ```
 
 **Check firewall rules:**
