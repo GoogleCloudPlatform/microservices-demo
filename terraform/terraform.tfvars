@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-gcp_project_id = "przemeksroka-joonix-gke-std"
+gcp_project_id = "network-obs-demo"
 
 memorystore = false
 
