@@ -61,12 +61,6 @@ resource "google_container_cluster" "my_cluster" {
   
   # Enable autopilot for this cluster
   enable_autopilot = true
-
-  # Set ip_allocation_policy for autopilot cluster with secondary ranges
-  ip_allocation_policy {
-    cluster_secondary_range_name  = "gke-online-boutique-pods-9aa648a1"
-    services_secondary_range_name = "gke-online-boutique-services-9aa648a1"
-  }
   
   # Enable Istio/Service Mesh
   addons_config {
