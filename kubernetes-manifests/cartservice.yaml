@@ -43,7 +43,7 @@ spec:
               - ALL
           privileged: false
           readOnlyRootFilesystem: true
-        image: ghcr.io/alaxay8/cartservice:latest
+        image: cartservice
         imagePullPolicy: Always
         ports:
         - containerPort: 7070

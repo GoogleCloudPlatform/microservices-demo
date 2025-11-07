@@ -43,7 +43,7 @@ spec:
               - ALL
           privileged: false
           readOnlyRootFilesystem: true
-        image: ghcr.io/alaxay8/paymentservice:latest
+        image: paymentservice
         imagePullPolicy: Always
         ports:
         - containerPort: 50051

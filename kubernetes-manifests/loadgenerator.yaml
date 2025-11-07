@@ -77,7 +77,7 @@ spec:
               - ALL
           privileged: false
           readOnlyRootFilesystem: true
-        image: ghcr.io/alaxay8/loadgenerator:latest
+        image: loadgenerator
         imagePullPolicy: Always
         env:
         - name: FRONTEND_ADDR
