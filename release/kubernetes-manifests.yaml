@@ -92,6 +92,8 @@ apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: emailservice
+imagePullSecrets:
+  - name: ghcr-cred
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -174,6 +176,8 @@ apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: checkoutservice
+imagePullSecrets:
+  - name: ghcr-cred
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -251,6 +255,8 @@ apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: recommendationservice
+imagePullSecrets:
+  - name: ghcr-cred
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -379,6 +385,8 @@ apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: frontend
+imagePullSecrets:
+  - name: ghcr-cred
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -452,6 +460,8 @@ apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: paymentservice
+imagePullSecrets:
+  - name: ghcr-cred
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -525,6 +535,8 @@ apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: productcatalogservice
+imagePullSecrets:
+  - name: ghcr-cred
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -599,6 +611,8 @@ apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: cartservice
+imagePullSecrets:
+  - name: ghcr-cred
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -755,6 +769,8 @@ apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: loadgenerator
+imagePullSecrets:
+  - name: ghcr-cred
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -829,6 +845,8 @@ apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: currencyservice
+imagePullSecrets:
+  - name: ghcr-cred
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -902,6 +920,8 @@ apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: shippingservice
+imagePullSecrets:
+  - name: ghcr-cred
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -977,4 +997,6 @@ apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: adservice
+imagePullSecrets:
+  - name: ghcr-cred
 # [END gke_release_kubernetes_manifests_microservices_demo]
