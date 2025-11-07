@@ -43,7 +43,8 @@ spec:
               - ALL
           privileged: false
           readOnlyRootFilesystem: true
-        image: productcatalogservice
+        image: ghcr.io/alaxay8/productcatalogservice:latest
+        imagePullPolicy: Always
         ports:
         - containerPort: 3550
         env:

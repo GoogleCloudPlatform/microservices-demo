@@ -43,7 +43,8 @@ spec:
               - ALL
           privileged: false
           readOnlyRootFilesystem: true
-        image: adservice
+        image: ghcr.io/alaxay8/adservice:latest
+        imagePullPolicy: Always
         ports:
         - containerPort: 9555
         env:

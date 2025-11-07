@@ -42,7 +42,8 @@ spec:
               - ALL
           privileged: false
           readOnlyRootFilesystem: true
-        image: shippingservice
+        image: ghcr.io/alaxay8/shippingservice:latest
+        imagePullPolicy: Always
         ports:
         - containerPort: 50051
         env:

@@ -43,7 +43,8 @@ spec:
               - ALL
           privileged: false
           readOnlyRootFilesystem: true
-        image: paymentservice
+        image: ghcr.io/alaxay8/paymentservice:latest
+        imagePullPolicy: Always
         ports:
         - containerPort: 50051
         env:

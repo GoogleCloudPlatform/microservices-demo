@@ -43,7 +43,8 @@ spec:
               - ALL
           privileged: false
           readOnlyRootFilesystem: true
-        image: emailservice
+        image: ghcr.io/alaxay8/emailservice:latest
+        imagePullPolicy: Always
         ports:
         - containerPort: 8080
         env:
