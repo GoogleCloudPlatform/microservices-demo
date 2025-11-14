@@ -10,17 +10,17 @@
   "dependencies": {
     "@google-cloud/profiler": "6.0.3",
     "@google-cloud/trace-agent": "8.0.0",
-    "@grpc/grpc-js": "1.14.0",
+    "@grpc/grpc-js": "1.14.1",
     "@grpc/proto-loader": "0.8.0",
     "async": "3.2.6",
     "google-protobuf": "4.0.0",
     "@opentelemetry/api": "1.9.0",
     "@opentelemetry/exporter-otlp-grpc": "0.26.0",
-    "@opentelemetry/instrumentation-grpc": "0.206.0",
-    "@opentelemetry/resources": "2.1.0",
-    "@opentelemetry/semantic-conventions": "1.37.0",
-    "@opentelemetry/sdk-trace-base": "2.1.0",
-    "@opentelemetry/sdk-node": "0.206.0",
+    "@opentelemetry/instrumentation-grpc": "0.208.0",
+    "@opentelemetry/resources": "2.2.0",
+    "@opentelemetry/semantic-conventions": "1.38.0",
+    "@opentelemetry/sdk-trace-base": "2.2.0",
+    "@opentelemetry/sdk-node": "0.208.0",
     "pino": "10.1.0",
     "xml2js": "0.6.2"
   }
