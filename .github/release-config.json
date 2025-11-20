@@ -1,0 +1,13 @@
+{
+    "bump-patch-for-minor-pre-major": true,
+    "separate-pull-requests": true,
+    "sequential-calls": true,
+    "include-component-in-tag": true,
+    "skip-github-release": false,
+    "packages": {
+        "helm-chart": {
+            "package-name": "helm",
+            "release-type": "helm"
+        }
+    }
+}

@@ -1,0 +1,36 @@
+# Copyright (c) 2025 Riptides Labs, Inc.
+# SPDX-License-Identifier: RIP-1.0
+
+---
+name: Release Please check
+
+on:
+  push:
+    branches:
+      - main
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Generate a token
+        id: generate-token
+        uses: actions/create-github-app-token@v2
+        with:
+          app-id: ${{ vars.RIPTIDES_CI_APP_ID }}
+          private-key: ${{ secrets.RIPTIDES_CI_PRIVATE_KEY }}
+          owner: ${{ github.repository_owner }}
+          permission-contents: write
+          permission-pull-requests: write
+          permission-issues: write
+
+      - uses: googleapis/release-please-action@v4
+        id: release-please
+        with:
+          token: ${{ steps.generate-token.outputs.token }}
+          config-file: .github/release-config.json
+          manifest-file: .github/release-manifest.json

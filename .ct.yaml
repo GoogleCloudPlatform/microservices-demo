@@ -1,0 +1,10 @@
+chart-dirs:
+  - helm-chart
+check-version-increment: false
+validate-maintainers: false
+helm-extra-args: --timeout 10m
+debug: false
+upgrade: true
+install: true
+namespace: riptides
+release-label: riptides

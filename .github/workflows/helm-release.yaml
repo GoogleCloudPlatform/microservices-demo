@@ -1,0 +1,63 @@
+# Copyright (c) 2025 Riptides Labs, Inc.
+# SPDX-License-Identifier: RIP-1.0
+
+---
+name: Release helm chart
+
+on:
+  push:
+    tags:
+      - 'helm-*'
+
+jobs:
+  lint-test:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
+      attestations: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Set up Helm
+        uses: azure/setup-helm@v4.2.0
+        with:
+          version: v3.17.0
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ github.token }}
+
+      - name: Helm lint
+        shell: bash
+        run: helm lint helm-chart --with-subcharts
+
+      - name: Set chart version
+        id: chart-version
+        shell: bash
+        run: |
+          TAG="${GITHUB_REF##*/}"
+          VERSION="${TAG##*-}"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Helm package
+        id: build
+        shell: bash
+        run: |
+          helm package helm-chart --dependency-update --version ${{ steps.chart-version.outputs.version }}
+          echo "package=onlineboutique-${{ steps.chart-version.outputs.version }}.tgz" >> "$GITHUB_OUTPUT"
+
+      - name: Helm push to GHCR OCI registry
+        shell: bash
+        run: |
+          echo "🚧 Pushing ${{ steps.build.outputs.package }} to GHCR OCI registry"
+          helm push ${{ steps.build.outputs.package }} oci://ghcr.io/${{ github.repository_owner }}/charts
