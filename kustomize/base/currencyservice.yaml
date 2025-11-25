@@ -43,7 +43,7 @@ spec:
               - ALL
           privileged: false
           readOnlyRootFilesystem: true
-        image: us-central1-docker.pkg.dev/google-samples/microservices-demo/currencyservice:v0.10.3
+        image: us-central1-docker.pkg.dev/google-samples/microservices-demo/currencyservice:v0.10.4
         ports:
         - name: grpc
           containerPort: 7000
