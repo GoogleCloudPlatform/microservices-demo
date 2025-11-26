@@ -35,36 +35,36 @@ spec:
         runAsNonRoot: true
         runAsUser: 1000
       containers:
-      - name: server
-        securityContext:
-          allowPrivilegeEscalation: false
-          capabilities:
-            drop:
-              - ALL
-          privileged: false
-          readOnlyRootFilesystem: true
-        image: currencyservice
-        ports:
-        - name: grpc
-          containerPort: 7000
-        env:
-        - name: PORT
-          value: "7000"
-        - name: DISABLE_PROFILER
-          value: "1"
-        readinessProbe:
-          grpc:
-            port: 7000
-        livenessProbe:
-          grpc:
-            port: 7000
-        resources:
-          requests:
-            cpu: 100m
-            memory: 64Mi
-          limits:
-            cpu: 200m
-            memory: 128Mi
+        - name: server
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            privileged: false
+            readOnlyRootFilesystem: true
+          image: ghcr.io/mirzahilmi/microservices-demo-aws-currencyservice:ec5a254c
+          ports:
+            - name: grpc
+              containerPort: 7000
+          env:
+            - name: PORT
+              value: "7000"
+            - name: DISABLE_PROFILER
+              value: "1"
+          readinessProbe:
+            grpc:
+              port: 7000
+          livenessProbe:
+            grpc:
+              port: 7000
+          resources:
+            requests:
+              cpu: 100m
+              memory: 64Mi
+            limits:
+              cpu: 200m
+              memory: 128Mi
 ---
 apiVersion: v1
 kind: Service
@@ -77,9 +77,9 @@ spec:
   selector:
     app: currencyservice
   ports:
-  - name: grpc
-    port: 7000
-    targetPort: 7000
+    - name: grpc
+      port: 7000
+      targetPort: 7000
 ---
 apiVersion: v1
 kind: ServiceAccount

@@ -55,7 +55,7 @@ build:
 manifests:
   kustomize:
     paths:
-      - ./kubernetes-manifests/aws/
+      - ./kubernetes-manifests/
 deploy:
   kubectl: {}
 # "gcb" profile allows building and pushing the images
@@ -110,7 +110,7 @@ build:
     useBuildkit: true
 manifests:
   rawYaml:
-    - ./kubernetes-manifests/aws/loadgenerator.yaml
+    - ./kubernetes-manifests/loadgenerator.yaml
 deploy:
   kubectl: {}
 profiles:
