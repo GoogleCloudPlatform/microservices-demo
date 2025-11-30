@@ -110,7 +110,7 @@ jsonpointer==3.0.0
     # via jsonpatch
 langchain==0.3.27
     # via -r requirements.in
-langchain-core==0.3.76
+langchain-core==0.3.80
     # via
     #   langchain
     #   langchain-google-genai
