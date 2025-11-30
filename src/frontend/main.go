@@ -167,7 +167,7 @@ func main() {
 	handler = ensureSessionID(handler)                 // add session ID
 	handler = otelhttp.NewHandler(handler, "frontend") // add OTel tracing
 
-	log.Infof("starting server on " + addr + ":" + srvPort)
+	log.Infof("starting server on %s:%s", addr, srvPort)
 	log.Fatal(http.ListenAndServe(addr+":"+srvPort, handler))
 }
 func initStats(log logrus.FieldLogger) {
