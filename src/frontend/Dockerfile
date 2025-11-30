@@ -26,7 +26,7 @@ COPY . .
 ARG SKAFFOLD_GO_GCFLAGS
 RUN GOOS=${TARGETOS} GOARCH=${TARGETARCH} CGO_ENABLED=0 go build -ldflags="-s -w" -gcflags="${SKAFFOLD_GO_GCFLAGS}" -o /go/bin/frontend .
 
-FROM scratch
+FROM gcr.io/distroless/static
 WORKDIR /src
 COPY --from=builder /go/bin/frontend /src/server
 COPY ./templates ./templates

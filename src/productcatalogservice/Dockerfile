@@ -26,11 +26,10 @@ COPY . .
 ARG SKAFFOLD_GO_GCFLAGS
 RUN GOOS=${TARGETOS} GOARCH=${TARGETARCH} CGO_ENABLED=0 go build -ldflags="-s -w" -gcflags="${SKAFFOLD_GO_GCFLAGS}" -o /productcatalogservice .
 
-FROM scratch
+FROM gcr.io/distroless/static
 
 WORKDIR /src
 COPY --from=builder /productcatalogservice ./server
-COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
 COPY products.json .
 
 # Definition of this variable is used by 'skaffold debug' to identify a golang binary.
