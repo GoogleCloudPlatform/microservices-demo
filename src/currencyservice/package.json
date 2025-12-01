@@ -13,7 +13,7 @@
     "@grpc/grpc-js": "1.14.1",
     "@grpc/proto-loader": "0.8.0",
     "async": "3.2.6",
-    "google-protobuf": "4.0.0",
+    "google-protobuf": "4.0.1",
     "@opentelemetry/api": "1.9.0",
     "@opentelemetry/exporter-otlp-grpc": "0.26.0",
     "@opentelemetry/instrumentation-grpc": "0.208.0",
