@@ -40,7 +40,7 @@ jobs:
       env:
         DOTNET_INSTALL_DIR: "./.dotnet"
       with:
-        dotnet-version: '9.0'
+        dotnet-version: '10.0'
     - uses: actions/setup-go@v6
       with:
         go-version: '1.25'
