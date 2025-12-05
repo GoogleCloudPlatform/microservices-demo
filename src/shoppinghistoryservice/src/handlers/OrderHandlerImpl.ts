@@ -3,6 +3,7 @@ import type {IOrderController} from "../controllers/IOrderController.js";
 import type {Request, Response} from "express";
 import * as z from "zod";
 import type {OrderPositionCreateManyOrderInput} from "../generated/prisma/models/OrderPosition.ts";
+import type {ZodError} from "zod";
 
 const OrderId = z.object({orderId: z.string()});
 const UserId = z.object({userId: z.string()});
@@ -26,7 +27,7 @@ export class OrderHandlerImpl implements IOrderHandler {
       orderPositionsCreate = payload.items;
     } catch (e) {
       if (e instanceof z.ZodError) {
-        res.status(400);
+        this.handleInvalidInput(res, e);
       }
       return;
     }
@@ -35,7 +36,7 @@ export class OrderHandlerImpl implements IOrderHandler {
       const result = await this.orderController.createOrder(userId, orderPositionsCreate);
       res.status(201).json(result);
     } catch (e) {
-      res.status(400);
+      res.status(500).json();
     }
   }
 
@@ -45,7 +46,7 @@ export class OrderHandlerImpl implements IOrderHandler {
       orderId = OrderId.parse(req.query).orderId;
     } catch (e) {
       if (e instanceof z.ZodError) {
-        res.status(400).json();
+        this.handleInvalidInput(res, e);
       }
       return;
     }
@@ -58,7 +59,7 @@ export class OrderHandlerImpl implements IOrderHandler {
         res.status(200);
       }
     } catch (e) {
-      res.status(400);
+      res.status(500);
     } finally {
       res.json();
     }
@@ -70,7 +71,7 @@ export class OrderHandlerImpl implements IOrderHandler {
       userId = UserId.parse(req.query).userId;
     } catch (e) {
       if (e instanceof z.ZodError) {
-        res.status(400);
+        this.handleInvalidInput(res, e);
       }
       return;
     }
@@ -78,7 +79,7 @@ export class OrderHandlerImpl implements IOrderHandler {
       const result = await this.orderController.getOrdersOfUser(userId);
       res.status(200).json(result);
     } catch (e) {
-      res.status(400);
+      res.status(500).json();
     }
   }
 
@@ -88,7 +89,7 @@ export class OrderHandlerImpl implements IOrderHandler {
       orderId = OrderId.parse(req.query).orderId;
     } catch (e) {
       if (e instanceof z.ZodError) {
-        res.status(400).json();
+        this.handleInvalidInput(res, e);
       }
       return;
     }
@@ -98,5 +99,9 @@ export class OrderHandlerImpl implements IOrderHandler {
     } catch (e) {
       res.status(500).json();
     }
+  }
+
+  private handleInvalidInput(res: Response, e: ZodError<any>) {
+    res.status(400).json(e.message);
   }
 }
