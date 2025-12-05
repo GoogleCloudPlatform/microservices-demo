@@ -1,9 +1,15 @@
 import express from "express";
+import {OrderController} from "./controllers/OrderController.js";
+import {OrderHandlerImpl} from "./handlers/OrderHandlerImpl.ts";
+import {orderRoutes} from "./routes/orderRoutes.js";
 
 const app = express();
 const PORT = 3000;
 
-app.use(express.json());
+const controller = new OrderController();
+const handler = new OrderHandlerImpl(controller)
+
+app.use("/", orderRoutes(handler));
 
 app.get("/", (req, res) => {
   res.json({ message: "Server is running!" });
