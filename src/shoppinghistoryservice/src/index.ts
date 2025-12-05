@@ -9,6 +9,7 @@ const PORT = 3000;
 const controller = new OrderController();
 const handler = new OrderHandlerImpl(controller)
 
+app.use(express.json())
 app.use("/", orderRoutes(handler));
 
 app.get("/", (req, res) => {
