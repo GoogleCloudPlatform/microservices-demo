@@ -14,7 +14,7 @@ datasource db {
 }
 
 model Order {
-  id         String          @id
+  id         String          @id @default(uuid())
   userId     String
   placedOn   DateTime        @default(now())
   orderItems OrderPosition[]
