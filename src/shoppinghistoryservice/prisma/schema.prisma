@@ -21,8 +21,8 @@ model Order {
 }
 
 model OrderPosition {
-  productId String  @id
+  productId String @id
   quantity  Int
-  Order     Order?  @relation(fields: [orderId], references: [id])
-  orderId   String?
+  Order     Order? @relation(fields: [orderId], references: [id])
+  orderId   String
 }

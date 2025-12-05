@@ -21,6 +21,7 @@ export class OrderController implements IOrderController {
   }
 
   async deleteOrder(orderId: string): Promise<void> {
+    await prisma.orderPosition.deleteMany({where: {orderId}})
     await prisma.order.delete({
       where: {id: orderId}
     });
