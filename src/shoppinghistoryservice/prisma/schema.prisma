@@ -12,3 +12,17 @@ generator client {
 datasource db {
   provider = "postgresql"
 }
+
+model Order {
+  id         Int             @id @default(autoincrement())
+  userId     String
+  placedOn   DateTime        @default(now())
+  orderItems OrderPosition[]
+}
+
+model OrderPosition {
+  productId String @id
+  quantity  Int
+  Order     Order? @relation(fields: [orderId], references: [id])
+  orderId   Int?
+}
