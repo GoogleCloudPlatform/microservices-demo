@@ -1,27 +1,36 @@
-import type {IOrderController} from "./IOrderController.js";
-import type {Order, OrderPosition} from "../generated/prisma/client.js";
+import type {IOrderController, OrderWithItems} from "./IOrderController.js";
+import type {Order} from "../generated/prisma/client.js";
 import {prisma} from "../prisma.js";
+import type {OrderPositionCreateManyOrderInput} from "../generated/prisma/models/OrderPosition.js";
 
 
-class OrderController implements IOrderController {
+export class OrderController implements IOrderController {
 
-  async createOrder(userId: string, items: OrderPosition[]): Promise<Order> {
+  async createOrder(userId: string, items: OrderPositionCreateManyOrderInput[]): Promise<Order> {
     return prisma.order.create({
-      data: {items, userId}
+      data: {
+        userId,
+        orderItems: {
+          createMany: {
+            data: items,
+            skipDuplicates: true
+          },
+        }
+      }
     });
   }
 
-  deleteOrder(orderId: string): Promise<void> {
-    return prisma.order.delete({
+  async deleteOrder(orderId: string): Promise<void> {
+    await prisma.order.delete({
       where: {id: orderId}
     });
   }
 
-  getOrder(orderId: string): Promise<Order> {
+  async getOrder(orderId: string): Promise<OrderWithItems | null> {
     return prisma.order.findUnique({where: {id: orderId}, include: {orderItems: true}});
   }
 
-  getOrdersOfUser(userId: string): Promise<Order[] | null> {
-    return prisma.order.findMany({where: {userId}});
+  getOrdersOfUser(userId: string): Promise<OrderWithItems[]> {
+    return prisma.order.findMany({where: {userId}, include: {orderItems: true}});
   }
 }
