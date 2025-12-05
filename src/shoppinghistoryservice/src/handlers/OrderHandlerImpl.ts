@@ -45,16 +45,22 @@ export class OrderHandlerImpl implements IOrderHandler {
       orderId = OrderId.parse(req.query).orderId;
     } catch (e) {
       if (e instanceof z.ZodError) {
-        res.status(400);
+        res.status(400).json();
       }
       return;
     }
 
     try {
-      await this.orderController.deleteOrder(orderId);
-      res.status(200);
+      if ((await this.orderController.getOrder(orderId)) == null) {
+        res.status(204)
+      } else {
+        await this.orderController.deleteOrder(orderId);
+        res.status(200);
+      }
     } catch (e) {
       res.status(400);
+    } finally {
+      res.json();
     }
   }
 
