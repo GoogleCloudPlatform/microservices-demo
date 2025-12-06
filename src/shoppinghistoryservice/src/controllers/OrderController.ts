@@ -1,12 +1,11 @@
 import type {IOrderController, OrderWithItems} from "./IOrderController.js";
-import type {Order} from "../generated/prisma/client.js";
 import {prisma} from "../prisma.js";
-import type {OrderPositionCreateManyOrderInput} from "../generated/prisma/models/OrderPosition.js";
+import {type Order, Prisma} from "@prisma/client";
 
 
 export class OrderController implements IOrderController {
 
-  async createOrder(userId: string, items: OrderPositionCreateManyOrderInput[]): Promise<Order> {
+  async createOrder(userId: string, items: Prisma.OrderPositionCreateManyOrderInput[]): Promise<Order> {
     return prisma.order.create({
       data: {
         userId,

@@ -1,9 +1,9 @@
 import type {IOrderHandler} from "./IOrderHandler.js";
 import type {IOrderController} from "../controllers/IOrderController.js";
 import type {Request, Response} from "express";
-import * as z from "zod";
-import type {OrderPositionCreateManyOrderInput} from "../generated/prisma/models/OrderPosition.ts";
 import type {ZodError} from "zod";
+import * as z from "zod";
+import {Prisma} from "@prisma/client";
 
 const OrderId = z.object({orderId: z.string()});
 const UserId = z.object({userId: z.string()});
@@ -16,7 +16,7 @@ export class OrderHandlerImpl implements IOrderHandler {
 
   createOrder = async (req: Request, res: Response): Promise<void> => {
     let userId: string;
-    let orderPositionsCreate: OrderPositionCreateManyOrderInput[];
+    let orderPositionsCreate: Prisma.OrderPositionCreateManyOrderInput[]
     try {
       const payload = z.object(
         {

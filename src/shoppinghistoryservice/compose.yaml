@@ -1,0 +1,19 @@
+services:
+  db:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: shoppinghistoryservice
+      POSTGRES_PASSWORD: 123456789
+      POSTGRES_DB: shoppinghistoryservice
+    ports:
+      - "5432:5432"
+
+  app:
+    build: .
+    environment:
+      DATABASE_URL: postgresql://shoppinghistoryservice:123456789@db:5432/shoppinghistoryservice?schema=public
+    ports:
+      - "3000:3000"
+      - "9229:9229"
+    depends_on:
+      - db
