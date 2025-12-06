@@ -96,7 +96,7 @@ typing-extensions==4.15.0
     # via locust
 tzdata==2025.2
     # via faker
-urllib3==2.5.0
+urllib3==2.6.0
     # via
     #   geventhttpclient
     #   requests
