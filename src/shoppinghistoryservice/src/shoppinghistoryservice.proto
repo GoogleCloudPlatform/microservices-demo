@@ -1,0 +1,47 @@
+syntax  = "proto3";
+
+import "google/protobuf/timestamp.proto";
+
+package shoppinghistoryservice;
+
+service ShoppingHistoryService {
+  rpc CreateOrder(CreateOrderRequest) returns (Order);
+  rpc GetOrder(GetOrderRequest) returns (Order);
+  rpc GetOrdersOfUser(GetOrdersOfUserRequest) returns (Orders);
+  rpc DeleteOrder(DeleteOrderRequest) returns (Empty);
+}
+
+message CreateOrderRequest {
+  string user_id = 1;
+  repeated OrderItem positions = 2;
+}
+
+message OrderItem {
+  string product_id = 1;
+  int32 quantity = 2;
+}
+
+message GetOrderRequest {
+  string order_id = 1;
+}
+
+message GetOrdersOfUserRequest {
+  string user_id = 1;
+}
+
+message DeleteOrderRequest {
+  string order_id = 1;
+}
+
+message Order {
+  string order_id = 1;
+  string user_id = 2;
+  google.protobuf.Timestamp created_at = 3;
+  repeated OrderItem order_items = 4;
+}
+
+message Orders {
+  repeated Order orders = 1;
+}
+
+message Empty {}

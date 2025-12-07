@@ -20,6 +20,8 @@
     "ignoreDeprecations": "6.0"
   },
   "dependencies": {
+    "@grpc/grpc-js": "^1.14.2",
+    "@grpc/proto-loader": "^0.8.0",
     "@prisma/adapter-pg": "^7.1.0",
     "@prisma/client": "^7.1.0",
     "dotenv": "^17.2.3",
