@@ -32,6 +32,14 @@ Resources:
         - Key: Name
           Value: !Sub ${ClusterName}-public-rt
 
+  PrivateRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value: !Sub ${ClusterName}-private-rt
+
   InternetGateway:
     Type: AWS::EC2::InternetGateway
     Properties:
@@ -62,51 +70,43 @@ Resources:
         - Key: Name
           Value: !Sub ${ClusterName}-public-subnet-primary
 
-  PublicSubnetRoute:
+  PublicSubnetSecondary:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      CidrBlock: 10.0.1.0/24
+      AvailabilityZone: !Select [1, !GetAZs ""]
+      Tags:
+        - Key: Name
+          Value: !Sub ${ClusterName}-public-subnet-primary
+
+  PublicSubnetPrimaryRoute:
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
       RouteTableId: !Ref PublicRouteTable
       SubnetId: !Ref PublicSubnetPrimary
 
+  PublicSubnetSecondaryRoute:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref PublicRouteTable
+      SubnetId: !Ref PublicSubnetSecondary
+
   PrivateSubnetPrimary:
     Type: AWS::EC2::Subnet
     Properties:
       VpcId: !Ref VPC
-      CidrBlock: 10.0.1.0/24
+      CidrBlock: 10.0.16.0/20
       AvailabilityZone: !Select [0, !GetAZs ""]
       Tags:
         - Key: Name
           Value: !Sub ${ClusterName}-private-subnet-primary
-
-  PrivateSubnetSecondary:
-    Type: AWS::EC2::Subnet
-    Properties:
-      VpcId: !Ref VPC
-      CidrBlock: 10.0.2.0/24
-      AvailabilityZone: !Select [1, !GetAZs ""]
-      Tags:
-        - Key: Name
-          Value: !Sub ${ClusterName}-private-subnet-secondary
-
-  PrivateRouteTable:
-    Type: AWS::EC2::RouteTable
-    Properties:
-      VpcId: !Ref VPC
-      Tags:
-        - Key: Name
-          Value: !Sub ${ClusterName}-private-rt
 
   PrivateSubnetPrimaryRoute:
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
       RouteTableId: !Ref PrivateRouteTable
       SubnetId: !Ref PrivateSubnetPrimary
-
-  PrivateSubnetSecondaryRoute:
-    Type: AWS::EC2::SubnetRouteTableAssociation
-    Properties:
-      RouteTableId: !Ref PrivateRouteTable
-      SubnetId: !Ref PrivateSubnetSecondary
 
   NatGatewayEip:
     Type: AWS::EC2::EIP
@@ -148,10 +148,10 @@ Resources:
       ResourcesVpcConfig:
         SecurityGroupIds: [!Ref SecurityGroup]
         SubnetIds:
-          - !Ref PrivateSubnetPrimary
-          - !Ref PrivateSubnetSecondary
-        EndpointPublicAccess: false
-        EndpointPrivateAccess: true
+          - !Ref PublicSubnetPrimary
+          - !Ref PublicSubnetSecondary
+        EndpointPublicAccess: true
+        EndpointPrivateAccess: false
 
   EksNodeGroup:
     Type: AWS::EKS::Nodegroup
@@ -255,4 +255,3 @@ Outputs:
     Value: !Sub ${PublicSubnet1},${PublicSubnet2}
       Subnets:
         - !Ref PrivateSubnetPrimary
-        - !Ref PrivateSubnetSecondary
