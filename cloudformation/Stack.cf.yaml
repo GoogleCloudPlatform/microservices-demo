@@ -1,6 +1,6 @@
 ---
 AWSTemplateFormatVersion: 2010-09-09
-Description: mirzaganteng
+Description: Final project for Teknologi Berbasis Cloud Class, Group 1
 
 Parameters:
   ClusterName:
@@ -14,7 +14,6 @@ Parameters:
     Description: ARN of the existing LabRole (check your AWS Academy console for exact ARN)
 
 Resources:
-  # VPC
   VPC:
     Type: AWS::EC2::VPC
     Properties:
@@ -23,15 +22,22 @@ Resources:
       EnableDnsSupport: true
       Tags:
         - Key: Name
-          Value: !Sub ${ClusterName}-VPC
+          Value: !Sub ${ClusterName}-vpc
 
-  # Internet Gateway
+  PublicRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value: !Sub ${ClusterName}-public-rt
+
   InternetGateway:
     Type: AWS::EC2::InternetGateway
     Properties:
       Tags:
         - Key: Name
-          Value: !Sub ${ClusterName}-IGW
+          Value: !Sub ${ClusterName}-igw
 
   AttachGateway:
     Type: AWS::EC2::VPCGatewayAttachment
@@ -39,99 +45,120 @@ Resources:
       VpcId: !Ref VPC
       InternetGatewayId: !Ref InternetGateway
 
-  # Public Subnets
-  PublicSubnet1:
+  InternetGatewayRoute:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId: !Ref PublicRouteTable
+      GatewayId: !Ref InternetGateway
+      DestinationCidrBlock: 0.0.0.0/0
+
+  PublicSubnetPrimary:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      CidrBlock: 10.0.0.0/24
+      AvailabilityZone: !Select [0, !GetAZs ""]
+      Tags:
+        - Key: Name
+          Value: !Sub ${ClusterName}-public-subnet-primary
+
+  PublicSubnetRoute:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref PublicRouteTable
+      SubnetId: !Ref PublicSubnetPrimary
+
+  PrivateSubnetPrimary:
     Type: AWS::EC2::Subnet
     Properties:
       VpcId: !Ref VPC
       CidrBlock: 10.0.1.0/24
       AvailabilityZone: !Select [0, !GetAZs ""]
-      MapPublicIpOnLaunch: true
       Tags:
         - Key: Name
-          Value: !Sub ${ClusterName}-PublicSubnet1
-        - Key: kubernetes.io/role/elb
-          Value: 1
+          Value: !Sub ${ClusterName}-private-subnet-primary
 
-  PublicSubnet2:
+  PrivateSubnetSecondary:
     Type: AWS::EC2::Subnet
     Properties:
       VpcId: !Ref VPC
       CidrBlock: 10.0.2.0/24
       AvailabilityZone: !Select [1, !GetAZs ""]
-      MapPublicIpOnLaunch: true
       Tags:
         - Key: Name
-          Value: !Sub ${ClusterName}-PublicSubnet2
-        - Key: kubernetes.io/role/elb
-          Value: 1
+          Value: !Sub ${ClusterName}-private-subnet-secondary
 
-  # Route Table
-  PublicRouteTable:
+  PrivateRouteTable:
     Type: AWS::EC2::RouteTable
     Properties:
       VpcId: !Ref VPC
       Tags:
         - Key: Name
-          Value: !Sub ${ClusterName}-PublicRT
+          Value: !Sub ${ClusterName}-private-rt
 
-  PublicRoute:
+  PrivateSubnetPrimaryRoute:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref PrivateRouteTable
+      SubnetId: !Ref PrivateSubnetPrimary
+
+  PrivateSubnetSecondaryRoute:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref PrivateRouteTable
+      SubnetId: !Ref PrivateSubnetSecondary
+
+  NatGatewayEip:
+    Type: AWS::EC2::EIP
+    Properties:
+      Domain: vpc
+
+  NatGateway:
+    Type: AWS::EC2::NatGateway
+    Properties:
+      AllocationId: !GetAtt NatGatewayEip.AllocationId
+      SubnetId: !Ref PublicSubnetPrimary
+      Tags:
+        - Key: Name
+          Value: !Sub ${ClusterName}-nat
+
+  NatGatewayRoute:
     Type: AWS::EC2::Route
-    DependsOn: AttachGateway
     Properties:
-      RouteTableId: !Ref PublicRouteTable
+      RouteTableId: !Ref PrivateRouteTable
+      GatewayId: !Ref NatGateway
       DestinationCidrBlock: 0.0.0.0/0
-      GatewayId: !Ref InternetGateway
 
-  SubnetRouteTableAssociation1:
-    Type: AWS::EC2::SubnetRouteTableAssociation
-    Properties:
-      SubnetId: !Ref PublicSubnet1
-      RouteTableId: !Ref PublicRouteTable
-
-  SubnetRouteTableAssociation2:
-    Type: AWS::EC2::SubnetRouteTableAssociation
-    Properties:
-      SubnetId: !Ref PublicSubnet2
-      RouteTableId: !Ref PublicRouteTable
-
-  # Security Group for EKS Cluster
-  ClusterSecurityGroup:
+  SecurityGroup:
     Type: AWS::EC2::SecurityGroup
+    # Deliberately empty rules, because EKS will set it up itself. See https://docs.aws.amazon.com/eks/latest/userguide/sec-group-reqs.html
     Properties:
-      GroupDescription: Security group for EKS cluster
+      GroupDescription: EKS Cluster Autoconfigured Security Group
       VpcId: !Ref VPC
       Tags:
         - Key: Name
-          Value: !Sub ${ClusterName}-SG
+          Value: !Sub ${ClusterName}-sg
 
-  # EKS Cluster (using LabRole)
-  EKSCluster:
+  EksCluster:
     Type: AWS::EKS::Cluster
     Properties:
       Name: !Ref ClusterName
-      Version: "1.32"
+      Version: "1.34"
       RoleArn: !Ref LabRoleArn
       ResourcesVpcConfig:
-        SecurityGroupIds:
-          - !Ref ClusterSecurityGroup
+        SecurityGroupIds: [!Ref SecurityGroup]
         SubnetIds:
-          - !Ref PublicSubnet1
-          - !Ref PublicSubnet2
-        EndpointPublicAccess: true
-        EndpointPrivateAccess: false
+          - !Ref PrivateSubnetPrimary
+          - !Ref PrivateSubnetSecondary
+        EndpointPublicAccess: false
+        EndpointPrivateAccess: true
 
-  # EKS Node Group (using LabRole)
-  NodeGroup:
+  EksNodeGroup:
     Type: AWS::EKS::Nodegroup
-    DependsOn: EKSCluster
+    DependsOn: EksCluster
     Properties:
       ClusterName: !Ref ClusterName
-      NodegroupName: !Sub ${ClusterName}-nodegroup
       NodeRole: !Ref LabRoleArn
-      Subnets:
-        - !Ref PublicSubnet1
-        - !Ref PublicSubnet2
       ScalingConfig:
         MinSize: 1
         DesiredSize: 2
@@ -196,3 +223,36 @@ Outputs:
   PaymentServiceECRUri:
     Description: ECR URI for PaymentService
     Value: !GetAtt PaymentServiceECR.RepositoryUri
+      InstanceTypes:
+        - t2.micro
+      AmiType: AL2_x86_64
+
+Outputs:
+  ClusterName:
+    Description: EKS Cluster Name
+    Value: !Ref EKSCluster
+    Export:
+      Name: !Sub ${AWS::StackName}-ClusterName
+
+  ClusterEndpoint:
+    Description: EKS Cluster Endpoint
+    Value: !GetAtt EKSCluster.Endpoint
+    Export:
+      Name: !Sub ${AWS::StackName}-ClusterEndpoint
+
+  ClusterArn:
+    Description: EKS Cluster ARN
+    Value: !GetAtt EKSCluster.Arn
+    Export:
+      Name: !Sub ${AWS::StackName}-ClusterArn
+
+  VPCId:
+    Description: VPC ID
+    Value: !Ref VPC
+
+  SubnetIds:
+    Description: Subnet IDs
+    Value: !Sub ${PublicSubnet1},${PublicSubnet2}
+      Subnets:
+        - !Ref PrivateSubnetPrimary
+        - !Ref PrivateSubnetSecondary
