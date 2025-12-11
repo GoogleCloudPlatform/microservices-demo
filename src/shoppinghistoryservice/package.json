@@ -5,7 +5,8 @@
   "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "tsc"
+    "build": "tsc",
+    "proto:gen": "npx protoc --plugin=protoc-gen-ts_proto=./node_modules/.bin/protoc-gen-ts_proto --ts_proto_out=src/generated --ts_proto_opt=esModuleInterop=true,addGrpcMetadata=true,forceLong=string,useGrpcJs=true,snakeToCamel=false -Isrc/proto -I./node_modules src/proto/shoppinghistoryservice.proto"
   },
   "keywords": [],
   "author": "",
@@ -20,14 +21,18 @@
     "ignoreDeprecations": "6.0"
   },
   "dependencies": {
+    "@bufbuild/protoc-gen-es": "^2.10.1",
     "@grpc/grpc-js": "^1.14.2",
     "@grpc/proto-loader": "^0.8.0",
     "@prisma/adapter-pg": "^7.1.0",
     "@prisma/client": "^7.1.0",
+    "@types/long": "^4.0.2",
     "dotenv": "^17.2.3",
     "express": "^5.2.1",
+    "google-protobuf": "^4.0.1",
     "grpc_tools_node_protoc_ts": "^5.3.3",
     "grpc-tools": "^1.13.1",
+    "long": "^5.3.2",
     "pg": "^8.16.3",
     "zod": "^4.1.13"
   },
@@ -38,6 +43,7 @@
     "nodemon": "^3.1.11",
     "prisma": "^7.1.0",
     "ts-node": "^10.9.2",
+    "ts-proto": "^2.8.3",
     "typescript": "^5.9.3"
   }
 }
