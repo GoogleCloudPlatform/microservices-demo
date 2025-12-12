@@ -20,35 +20,40 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm install
 
-# Copy the source code
 COPY . .
 
-# Generate Prisma client BEFORE building TS
 RUN npx prisma generate
-
-# Build TS -> JS
 RUN npm run build
+
 
 # --- Runtime stage ---
 FROM node:20-alpine
-
 WORKDIR /app
 
-# Copy only prod dependencies
-COPY --from=builder /app/node_modules ./node_modules
-
-# Copy compiled JS
-COPY --from=builder /app/dist ./dist
-
-
-# Copy prisma schema + runtime engines
-COPY --from=builder /app/prisma ./prisma
-COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
-COPY --from=builder /app/src/prisma/migrations ./dist/prisma/migrations
-
-# Copy package files
+# 1. Copy package files FIRST
 COPY package*.json ./
 
-EXPOSE $PORT
+# 2. Copy production deps
+COPY --from=builder /app/node_modules ./node_modules
 
-CMD ["node", "--inspect=0.0.0.0:9229", "dist/index.js"]
+# 3. Copy built files
+COPY --from=builder /app/dist ./dist
+
+# 4. Copy prisma
+COPY --from=builder /app/prisma ./dist/prisma
+COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
+
+# 5. Copy migrations into dist
+COPY --from=builder /app/src/prisma/migrations ./dist/prisma/migrations
+
+# 6. Copy proto into dist/proto
+RUN mkdir -p "./dist/proto"
+COPY --from=builder /app/src/proto ./dist/proto
+
+# 7. Entry script
+COPY --from=builder /app/src/scripts/docker-entrypoint.sh /app/docker-entrypoint.sh
+RUN chmod +x /app/docker-entrypoint.sh
+
+EXPOSE 3000 9229
+
+ENTRYPOINT ["./docker-entrypoint.sh"]

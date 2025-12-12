@@ -11,7 +11,9 @@ services:
   app:
     build: .
     environment:
-      DATABASE_URL: postgresql://shoppinghistoryservice:123456789@db:5432/shoppinghistoryservice?schema=public
+#      NODE_ENV: development
+      DATABASE_URL: "postgresql://shoppinghistoryservice:123456789@db:5432/shoppinghistoryservice?schema=public"
+      PORT: 3000
     ports:
       - "3000:3000"
       - "9229:9229"
