@@ -159,6 +159,8 @@ Resources:
     Properties:
       ClusterName: !Ref ClusterName
       NodeRole: !Ref LabRoleArn
+      InstanceTypes:
+        - t3.medium
       ScalingConfig:
         MinSize: 1
         DesiredSize: 2
