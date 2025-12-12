@@ -1,6 +1,6 @@
 import type {IOrderController, OrderWithItems} from "./IOrderController.js";
 import {prisma} from "../prisma.js";
-import {type Order, Prisma} from "@prisma/client";
+import {Prisma} from "@prisma/client";
 
 
 export class OrderController implements IOrderController {
