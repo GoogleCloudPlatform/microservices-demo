@@ -3,7 +3,7 @@ import {type Order, type OrderPosition, Prisma} from "@prisma/client";
 export type OrderWithItems = Order & { orderItems: OrderPosition[];}
 
 export interface IOrderController {
-  createOrder(userId: string, items: Prisma.OrderPositionCreateManyOrderInput[]): Promise<Order>
+  createOrder(userId: string, items: Prisma.OrderPositionCreateManyOrderInput[]): Promise<OrderWithItems>
 
   getOrdersOfUser(userId: string): Promise<OrderWithItems[]>;
 

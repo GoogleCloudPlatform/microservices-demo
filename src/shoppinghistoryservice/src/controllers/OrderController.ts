@@ -5,7 +5,7 @@ import {type Order, Prisma} from "@prisma/client";
 
 export class OrderController implements IOrderController {
 
-  async createOrder(userId: string, items: Prisma.OrderPositionCreateManyOrderInput[]): Promise<Order> {
+  async createOrder(userId: string, items: Prisma.OrderPositionCreateManyOrderInput[]): Promise<OrderWithItems> {
     return prisma.order.create({
       data: {
         userId,
@@ -15,6 +15,9 @@ export class OrderController implements IOrderController {
             skipDuplicates: true
           },
         }
+      },
+      include: {
+        orderItems: true
       }
     });
   }
