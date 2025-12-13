@@ -190,9 +190,9 @@ Outputs:
     Value: !Sub ${PublicSubnet1},${PublicSubnet2}
 
   CheckoutServiceECRUri:
-    Description: ECR URI for Checkout Service
+    Description: ECR URI for CheckoutService
     Value: !GetAtt CheckoutServiceECR.RepositoryUri
 
   PaymentServiceECRUri:
-    Description: ECR URI for Payment Service
+    Description: ECR URI for PaymentService
     Value: !GetAtt PaymentServiceECR.RepositoryUri
