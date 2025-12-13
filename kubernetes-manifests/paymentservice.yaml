@@ -43,7 +43,7 @@ spec:
                 - ALL
             privileged: false
             readOnlyRootFilesystem: true
-          image: ghcr.io/mirzahilmi/microservices-demo-aws-paymentservice:ec5a254c
+          image: 339713115679.dkr.ecr.us-east-1.amazonaws.com/paymentservice:latest
           ports:
             - containerPort: 50051
           env:
