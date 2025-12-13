@@ -1,0 +1,235 @@
+version: '3.9'
+
+services:
+  # Redis for cart storage
+  redis-cart:
+    image: redis:7.2-alpine
+    container_name: redis-cart
+    ports:
+      - "6379:6379"
+    networks:
+      - microservices
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  # Cart Service (C# microservice)
+  cartservice:
+    build:
+      context: ./src/cartservice/src
+      dockerfile: Dockerfile
+    container_name: cartservice
+    ports:
+      - "7070:7070"
+    environment:
+      - ASPNETCORE_HTTP_PORTS=7070
+      - REDIS_ADDR=redis-cart:6379
+    depends_on:
+      redis-cart:
+        condition: service_healthy
+    networks:
+      - microservices
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:7070/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  # Product Catalog Service (Go microservice)
+  productcatalogservice:
+    build:
+      context: ./src/productcatalogservice
+      dockerfile: Dockerfile
+    container_name: productcatalogservice
+    ports:
+      - "3550:3550"
+    environment:
+      - PORT=3550
+    networks:
+      - microservices
+    healthcheck:
+      test: ["CMD", "grpc_health_probe", "-addr=:3550"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  # Currency Service (Node.js microservice)
+  currencyservice:
+    build:
+      context: ./src/currencyservice
+      dockerfile: Dockerfile
+    container_name: currencyservice
+    ports:
+      - "7000:7000"
+    environment:
+      - PORT=7000
+      - DISABLE_PROFILER=true
+    networks:
+      - microservices
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:7000/health', (r) => {if (r.statusCode !== 200) throw new Error(r.statusCode)})"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  # Shipping Service (Go microservice)
+  shippingservice:
+    build:
+      context: ./src/shippingservice
+      dockerfile: Dockerfile
+    container_name: shippingservice
+    ports:
+      - "50051:50051"
+    environment:
+      - PORT=50051
+    networks:
+      - microservices
+    healthcheck:
+      test: ["CMD", "grpc_health_probe", "-addr=:50051"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  # Recommendation Service (Python microservice)
+  recommendationservice:
+    build:
+      context: ./src/recommendationservice
+      dockerfile: Dockerfile
+    container_name: recommendationservice
+    environment:
+      - PORT=8080
+      - PRODUCT_CATALOG_SERVICE_ADDR=productcatalogservice:3550
+    depends_on:
+      - productcatalogservice
+    networks:
+      - microservices
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  # Payment Service (Node.js microservice)
+  paymentservice:
+    build:
+      context: ./src/paymentservice
+      dockerfile: Dockerfile
+    container_name: paymentservice
+    ports:
+      - "50052:50052"
+    environment:
+      - PORT=50052
+      - DISABLE_PROFILER=true
+    networks:
+      - microservices
+    healthcheck:
+      test: ["CMD", "grpc_health_probe", "-addr=:50052"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  # Email Service (Python microservice)
+  emailservice:
+    build:
+      context: ./src/emailservice
+      dockerfile: Dockerfile
+    container_name: emailservice
+    environment:
+      - PORT=8080
+    networks:
+      - microservices
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  # Ad Service (Java microservice)
+  adservice:
+    build:
+      context: ./src/adservice
+      dockerfile: Dockerfile
+    container_name: adservice
+    ports:
+      - "9555:9555"
+    environment:
+      - PORT=9555
+    networks:
+      - microservices
+    healthcheck:
+      test: ["CMD", "grpc_health_probe", "-addr=:9555"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  # Checkout Service (Go microservice)
+  checkoutservice:
+    build:
+      context: ./src/checkoutservice
+      dockerfile: Dockerfile
+    container_name: checkoutservice
+    ports:
+      - "5050:5050"
+    environment:
+      - PORT=5050
+      - SHIPPING_SERVICE_ADDR=shippingservice:50051
+      - PRODUCT_CATALOG_SERVICE_ADDR=productcatalogservice:3550
+      - CART_SERVICE_ADDR=cartservice:7070
+      - CURRENCY_SERVICE_ADDR=currencyservice:7000
+      - EMAIL_SERVICE_ADDR=emailservice:8080
+      - PAYMENT_SERVICE_ADDR=paymentservice:50052
+    depends_on:
+      - shippingservice
+      - productcatalogservice
+      - cartservice
+      - currencyservice
+      - emailservice
+      - paymentservice
+    networks:
+      - microservices
+    healthcheck:
+      test: ["CMD", "grpc_health_probe", "-addr=:5050"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  # Frontend (Go microservice)
+  frontend:
+    build:
+      context: ./src/frontend
+      dockerfile: Dockerfile
+    container_name: frontend
+    ports:
+      - "8080:8080"
+    environment:
+      - PORT=8080
+      - PRODUCT_CATALOG_SERVICE_ADDR=productcatalogservice:3550
+      - CURRENCY_SERVICE_ADDR=currencyservice:7000
+      - CART_SERVICE_ADDR=cartservice:7070
+      - RECOMMENDATION_SERVICE_ADDR=recommendationservice:8080
+      - SHIPPING_SERVICE_ADDR=shippingservice:50051
+      - CHECKOUT_SERVICE_ADDR=checkoutservice:5050
+      - AD_SERVICE_ADDR=adservice:9555
+      - SHOPPING_ASSISTANT_SERVICE_ADDR=shoppingassistantservice:80
+      - ENABLE_PROFILER=0
+    depends_on:
+      - productcatalogservice
+      - currencyservice
+      - cartservice
+      - recommendationservice
+      - shippingservice
+      - checkoutservice
+      - adservice
+    networks:
+      - microservices
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/_healthz"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+networks:
+  microservices:
+    driver: bridge
