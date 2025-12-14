@@ -140,6 +140,28 @@ Resources:
         - t2.micro
       AmiType: AL2_x86_64
 
+  # ECR Repository for CheckoutService
+  CheckoutServiceECR:
+    Type: AWS::ECR::Repository
+    Properties:
+      RepositoryName: checkoutservice
+      ImageScanningConfiguration:
+        ScanOnPush: true
+      Tags:
+        - Key: Service
+          Value: checkoutservice
+
+  # ECR Repository for PaymentService
+  PaymentServiceECR:
+    Type: AWS::ECR::Repository
+    Properties:
+      RepositoryName: paymentservice
+      ImageScanningConfiguration:
+        ScanOnPush: true
+      Tags:
+        - Key: Service
+          Value: paymentservice
+
 Outputs:
   ClusterName:
     Description: EKS Cluster Name
@@ -166,3 +188,11 @@ Outputs:
   SubnetIds:
     Description: Subnet IDs
     Value: !Sub ${PublicSubnet1},${PublicSubnet2}
+
+  CheckoutServiceECRUri:
+    Description: ECR URI for CheckoutService
+    Value: !GetAtt CheckoutServiceECR.RepositoryUri
+
+  PaymentServiceECRUri:
+    Description: ECR URI for PaymentService
+    Value: !GetAtt PaymentServiceECR.RepositoryUri

@@ -42,7 +42,7 @@ spec:
                 - ALL
             privileged: false
             readOnlyRootFilesystem: true
-          image: ghcr.io/mirzahilmi/microservices-demo-aws-checkoutservice:ec5a254c
+          image: 339713115679.dkr.ecr.us-east-1.amazonaws.com/checkoutservice:latest
           ports:
             - containerPort: 5050
           readinessProbe:
