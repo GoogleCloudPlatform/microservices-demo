@@ -1,6 +1,6 @@
 ---
 AWSTemplateFormatVersion: 2010-09-09
-Description: mirzaganteng
+Description: mirzaganteng - with ProductCatalog and EmailService
 
 Parameters:
   ClusterName:
@@ -140,6 +140,122 @@ Resources:
         - t2.micro
       AmiType: AL2_x86_64
 
+  # -------------------------------------------------------------------------
+  # Product Catalog Service Resources (ADDED)
+  # -------------------------------------------------------------------------
+  ProductCatalogBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub "product-catalog-${AWS::AccountId}"
+
+  ProductCatalogFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: ProductCatalogService
+      Handler: index.lambda_handler
+      Role: !Ref LabRoleArn
+      Runtime: python3.9
+      Timeout: 10
+      Environment:
+        Variables:
+          BUCKET_NAME: !Ref ProductCatalogBucket
+          FILE_KEY: products.json
+      Code:
+        ZipFile: |
+          import json
+          import boto3
+          import os
+
+          s3 = boto3.client('s3')
+
+          def lambda_handler(event, context):
+              bucket_name = os.environ.get('BUCKET_NAME')
+              file_key = os.environ.get('FILE_KEY', 'products.json')
+              
+              if not bucket_name:
+                  return {'statusCode': 500, 'body': json.dumps({'error': 'BUCKET_NAME not set'})}
+
+              try:
+                  response = s3.get_object(Bucket=bucket_name, Key=file_key)
+                  file_content = response['Body'].read().decode('utf-8')
+                  products_data = json.loads(file_content)
+                  
+                  if 'id' in event:
+                      product_id = event['id']
+                      for product in products_data.get('products', []):
+                          if product['id'] == product_id:
+                              return {
+                                  'statusCode': 200, 
+                                  'headers': {'Content-Type': 'application/json'},
+                                  'body': json.dumps(product)
+                              }
+                      return {'statusCode': 404, 'body': json.dumps({'error': 'Product not found'})}
+                      
+                  return {
+                      'statusCode': 200, 
+                      'headers': {'Content-Type': 'application/json'},
+                      'body': json.dumps(products_data)
+                  }
+
+              except Exception as e:
+                  return {'statusCode': 500, 'body': json.dumps({'error': str(e)})}
+
+  # -------------------------------------------------------------------------
+  # Email Service Resources (ADDED)
+  # -------------------------------------------------------------------------
+  OrderNotificationTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      TopicName: OrderNotification
+      DisplayName: Order Confirmation
+
+  EmailServiceFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: EmailService
+      Handler: index.lambda_handler
+      Role: !Ref LabRoleArn
+      Runtime: python3.9
+      Timeout: 10
+      Environment:
+        Variables:
+          SNS_TOPIC_ARN: !Ref OrderNotificationTopic
+      Code:
+        ZipFile: |
+          import json
+          import boto3
+          import os
+
+          sns = boto3.client('sns')
+
+          def lambda_handler(event, context):
+              sns_topic_arn = os.environ.get('SNS_TOPIC_ARN')
+              
+              if not sns_topic_arn:
+                  return {'statusCode': 500, 'body': json.dumps({'error': 'SNS_TOPIC_ARN not set'})}
+
+              if 'body' in event:
+                  try:
+                      body = json.loads(event['body'])
+                  except:
+                      body = event
+              else:
+                  body = event
+
+              order_id = body.get('order', {}).get('order_id', 'N/A')
+              message = f"Halo! Pesanan #{order_id} sudah diterima. Terima kasih!"
+
+              try:
+                  sns.publish(
+                      TopicArn=sns_topic_arn,
+                      Subject=f"Konfirmasi Pesanan #{order_id}",
+                      Message=message
+                  )
+                  return {'statusCode': 200, 'body': json.dumps({'message': 'Notifikasi terkirim!'})}
+
+              except Exception as e:
+                  return {'statusCode': 500, 'body': json.dumps({'error': str(e)})}
+
 Outputs:
   ClusterName:
     Description: EKS Cluster Name
@@ -166,3 +282,19 @@ Outputs:
   SubnetIds:
     Description: Subnet IDs
     Value: !Sub ${PublicSubnet1},${PublicSubnet2}
+
+  ProductCatalogBucketName:
+    Description: Name of the S3 bucket for products
+    Value: !Ref ProductCatalogBucket
+  
+  ProductCatalogFunctionName:
+    Description: Name of the Product Catalog Lambda function
+    Value: !Ref ProductCatalogFunction
+  
+  EmailServiceFunctionName:
+    Description: Name of the Email Service Lambda function
+    Value: !Ref EmailServiceFunction
+  
+  SNSTopicArn:
+    Description: ARN of the SNS Topic
+    Value: !Ref OrderNotificationTopic
