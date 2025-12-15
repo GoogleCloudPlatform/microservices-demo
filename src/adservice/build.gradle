@@ -17,7 +17,7 @@ version = "0.1.0-SNAPSHOT"
 def grpcVersion = "1.77.0"
 def jacksonCoreVersion = "2.20.1"
 def jacksonDatabindVersion = "2.20.1"
-def protocVersion = "4.33.1"
+def protocVersion = "4.33.2"
 
 tasks.withType(JavaCompile) {
     sourceCompatibility = JavaVersion.VERSION_21
@@ -67,7 +67,7 @@ protobuf {
 }
 
 googleJavaFormat {
-    toolVersion '1.32.0'
+    toolVersion '1.33.0'
 }
 
 // Inform IDEs like IntelliJ IDEA, Eclipse or NetBeans about the generated code.
