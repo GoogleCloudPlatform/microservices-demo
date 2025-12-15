@@ -165,9 +165,8 @@ Resources:
         MinSize: 1
         DesiredSize: 2
         MaxSize: 3
-      InstanceTypes:
-        - t2.micro
-      AmiType: AL2_x86_64
+      Subnets:
+        - !Ref PrivateSubnetPrimary
 
   # ECR Repository for CheckoutService
   CheckoutServiceECR:
@@ -192,32 +191,6 @@ Resources:
           Value: paymentservice
 
 Outputs:
-  ClusterName:
-    Description: EKS Cluster Name
-    Value: !Ref EKSCluster
-    Export:
-      Name: !Sub ${AWS::StackName}-ClusterName
-
-  ClusterEndpoint:
-    Description: EKS Cluster Endpoint
-    Value: !GetAtt EKSCluster.Endpoint
-    Export:
-      Name: !Sub ${AWS::StackName}-ClusterEndpoint
-
-  ClusterArn:
-    Description: EKS Cluster ARN
-    Value: !GetAtt EKSCluster.Arn
-    Export:
-      Name: !Sub ${AWS::StackName}-ClusterArn
-
-  VPCId:
-    Description: VPC ID
-    Value: !Ref VPC
-
-  SubnetIds:
-    Description: Subnet IDs
-    Value: !Sub ${PublicSubnet1},${PublicSubnet2}
-
   CheckoutServiceECRUri:
     Description: ECR URI for CheckoutService
     Value: !GetAtt CheckoutServiceECR.RepositoryUri
@@ -225,35 +198,3 @@ Outputs:
   PaymentServiceECRUri:
     Description: ECR URI for PaymentService
     Value: !GetAtt PaymentServiceECR.RepositoryUri
-      InstanceTypes:
-        - t2.micro
-      AmiType: AL2_x86_64
-
-Outputs:
-  ClusterName:
-    Description: EKS Cluster Name
-    Value: !Ref EKSCluster
-    Export:
-      Name: !Sub ${AWS::StackName}-ClusterName
-
-  ClusterEndpoint:
-    Description: EKS Cluster Endpoint
-    Value: !GetAtt EKSCluster.Endpoint
-    Export:
-      Name: !Sub ${AWS::StackName}-ClusterEndpoint
-
-  ClusterArn:
-    Description: EKS Cluster ARN
-    Value: !GetAtt EKSCluster.Arn
-    Export:
-      Name: !Sub ${AWS::StackName}-ClusterArn
-
-  VPCId:
-    Description: VPC ID
-    Value: !Ref VPC
-
-  SubnetIds:
-    Description: Subnet IDs
-    Value: !Sub ${PublicSubnet1},${PublicSubnet2}
-      Subnets:
-        - !Ref PrivateSubnetPrimary
