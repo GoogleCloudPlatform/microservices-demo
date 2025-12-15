@@ -31,7 +31,7 @@ jobs:
   code-tests:
     runs-on: [self-hosted, is-enabled]
     steps:
-    - uses: actions/checkout@v5
+    - uses: actions/checkout@v6
     - uses: actions/setup-dotnet@v5
       env:
         DOTNET_INSTALL_DIR: "./.dotnet"
@@ -61,7 +61,7 @@ jobs:
         profile: ["local-code"]
       fail-fast: true
     steps:
-    - uses: actions/checkout@v5
+    - uses: actions/checkout@v6
     - name: Build + Deploy PR images to GKE
       timeout-minutes: 20
       run: |
