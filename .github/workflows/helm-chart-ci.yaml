@@ -28,7 +28,7 @@ jobs:
   helm-chart-ci:
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - name: helm lint
         run: |
           cd helm-chart/
