@@ -38,60 +38,60 @@ spec:
         runAsNonRoot: true
         runAsUser: 1000
       initContainers:
-      - command:
-        - /bin/sh
-        - -exc
-        - |
-          MAX_RETRIES=12
-          RETRY_INTERVAL=10
-          for i in $(seq 1 $MAX_RETRIES); do
-            echo "Attempt $i: Pinging frontend: ${FRONTEND_ADDR}..."
-            STATUSCODE=$(wget --server-response http://${FRONTEND_ADDR} 2>&1 | awk '/^  HTTP/{print $2}')
-            if [ $STATUSCODE -eq 200 ]; then
-                echo "Frontend is reachable."
-                exit 0
-            fi
-            echo "Error: Could not reach frontend - Status code: ${STATUSCODE}"
-            sleep $RETRY_INTERVAL
-          done
-          echo "Failed to reach frontend after $MAX_RETRIES attempts."
-          exit 1
-        name: frontend-check
-        securityContext:
-          allowPrivilegeEscalation: false
-          capabilities:
-            drop:
-              - ALL
-          privileged: false
-          readOnlyRootFilesystem: true
-        image: busybox:latest
-        env:
-        - name: FRONTEND_ADDR
-          value: "frontend:80"
+        - command:
+            - /bin/sh
+            - -exc
+            - |
+              MAX_RETRIES=12
+              RETRY_INTERVAL=10
+              for i in $(seq 1 $MAX_RETRIES); do
+                echo "Attempt $i: Pinging frontend: ${FRONTEND_ADDR}..."
+                STATUSCODE=$(wget --server-response http://${FRONTEND_ADDR} 2>&1 | awk '/^  HTTP/{print $2}')
+                if [ $STATUSCODE -eq 200 ]; then
+                    echo "Frontend is reachable."
+                    exit 0
+                fi
+                echo "Error: Could not reach frontend - Status code: ${STATUSCODE}"
+                sleep $RETRY_INTERVAL
+              done
+              echo "Failed to reach frontend after $MAX_RETRIES attempts."
+              exit 1
+          name: frontend-check
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            privileged: false
+            readOnlyRootFilesystem: true
+          image: busybox:latest
+          env:
+            - name: FRONTEND_ADDR
+              value: "frontend:80"
       containers:
-      - name: main
-        securityContext:
-          allowPrivilegeEscalation: false
-          capabilities:
-            drop:
-              - ALL
-          privileged: false
-          readOnlyRootFilesystem: true
-        image: loadgenerator
-        env:
-        - name: FRONTEND_ADDR
-          value: "frontend:80"
-        - name: USERS
-          value: "10"
-        - name: RATE
-          value: "1"
-        resources:
-          requests:
-            cpu: 300m
-            memory: 256Mi
-          limits:
-            cpu: 500m
-            memory: 512Mi
+        - name: main
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            privileged: false
+            readOnlyRootFilesystem: true
+          image: ghcr.io/mirzahilmi/microservices-demo-aws-loadgenerator:ec5a254c
+          env:
+            - name: FRONTEND_ADDR
+              value: "frontend:80"
+            - name: USERS
+              value: "10"
+            - name: RATE
+              value: "1"
+          resources:
+            requests:
+              cpu: 300m
+              memory: 256Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
 ---
 apiVersion: v1
 kind: ServiceAccount
