@@ -84,8 +84,8 @@ spec:
               value: "shoppingassistantservice:80"
             # # ENV_PLATFORM: One of: local, gcp, aws, azure, onprem, alibaba
             # # When not set, defaults to "local" unless running in GKE, otherwies auto-sets to gcp
-            # - name: ENV_PLATFORM
-            #   value: "aws"
+            - name: ENV_PLATFORM
+              value: "aws"
             - name: ENABLE_PROFILER
               value: "0"
           # - name: CYMBAL_BRANDING
@@ -126,13 +126,23 @@ metadata:
   name: frontend-external
   labels:
     app: frontend
+  annotations:
+    service.beta.kubernetes.io/aws-load-balancer-type: nlb
+    service.beta.kubernetes.io/aws-load-balancer-ssl-cert: FIXME
+    service.beta.kubernetes.io/aws-load-balancer-ssl-ports: "443"
+    service.beta.kubernetes.io/aws-load-balancer-backend-protocol: http
 spec:
   type: LoadBalancer
   selector:
     app: frontend
   ports:
     - name: http
+      protocol: TCP
       port: 80
+      targetPort: 8080
+    - name: https
+      protocol: TCP
+      port: 443
       targetPort: 8080
 ---
 apiVersion: v1
