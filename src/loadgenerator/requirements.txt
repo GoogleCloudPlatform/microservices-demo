@@ -96,13 +96,13 @@ typing-extensions==4.15.0
     # via locust
 tzdata==2025.2
     # via faker
-urllib3==2.5.0
+urllib3==2.6.0
     # via
     #   geventhttpclient
     #   requests
 websocket-client==1.8.0
     # via python-socketio
-werkzeug==3.1.3
+werkzeug==3.1.4
     # via
     #   flask
     #   flask-cors
