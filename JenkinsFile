@@ -1,0 +1,160 @@
+pipeline {
+    agent any
+
+    environment {
+        SCANNER_HOME = tool 'sonar-scanner'
+        IMAGE_TAG = "${BUILD_NUMBER}"
+        REGISTRY = "adarshjain428"
+        CD_REPO = "https://github.com/AdarshJain-dev/OnlineBuitique-CD.git"
+    }
+
+    stages {
+        stage('Clean Workspace') {
+            steps {
+                cleanWs()
+            }
+        }
+        stage('Checkout CI Repo') {
+            steps {
+                git branch: 'main',
+                    url: 'https://github.com/AdarshJain-dev/OnlineBuitique-CI.git'
+            }
+        }
+        stage('Detect Changed Microservices') {
+            steps {
+                script {
+        
+                    def servicePathMap = [
+                        adservice             : "src/adservice",
+                        cartservice           : "src/cartservice",
+                        checkoutservice       : "src/checkoutservice",
+                        currencyservice       : "src/currencyservice",
+                        emailservice          : "src/emailservice",
+                        frontend              : "src/frontend",
+                        loadgenerator         : "src/loadgenerator",
+                        paymentservice        : "src/paymentservice",
+                        productcatalogservice : "src/productcatalogservice",
+                        recommendationservice : "src/recommendationservice",
+                        shippingservice       : "src/shippingservice"
+                    ]
+        
+                    def changedFilesOutput = sh(
+                        script: 'git diff --name-only HEAD~1 || true',
+                        returnStdout: true
+                    ).trim()
+        
+                    def servicesChanged = []
+        
+                    if (changedFilesOutput) {
+                        changedFilesOutput.split('\n').each { file ->
+                            servicePathMap.each { svc, path ->
+                                if (file.startsWith(path)) {
+                                    servicesChanged << svc
+                                }
+                            }
+                        }
+                        servicesChanged = servicesChanged.unique()
+                    }
+        
+                    if (servicesChanged.isEmpty()) {
+                        servicesChanged = servicePathMap.keySet().toList()
+                        echo "No previous commit detected. Building ALL services."
+                    } else {
+                        echo "Changed services: ${servicesChanged}"
+                    }
+        
+                    // 🔑 Persist across stages
+                    env.SERVICES_CHANGED = servicesChanged.join(" ")
+                }
+            }
+        }
+
+        stage('SonarQube Scan') {
+            steps {
+                withSonarQubeEnv('sonar') {
+                    sh """
+                    ${SCANNER_HOME}/bin/sonar-scanner \
+                    -Dsonar.projectKey=online-boutique \
+                    -Dsonar.projectName=online-boutique \
+                    -Dsonar.java.binaries=.
+                    """
+                }
+            }
+        }
+
+        stage('Build & Push Docker Images') {
+            steps {
+                script {
+        
+                    def dockerPaths = [
+                        adservice             : "src/adservice",
+                        cartservice           : "src/cartservice/src",
+                        checkoutservice       : "src/checkoutservice",
+                        currencyservice       : "src/currencyservice",
+                        emailservice          : "src/emailservice",
+                        frontend              : "src/frontend",
+                        loadgenerator         : "src/loadgenerator",
+                        paymentservice        : "src/paymentservice",
+                        productcatalogservice : "src/productcatalogservice",
+                        recommendationservice : "src/recommendationservice",
+                        shippingservice       : "src/shippingservice"
+                    ]
+        
+                    def servicesChanged = env.SERVICES_CHANGED.split(" ")
+        
+                    withDockerRegistry(credentialsId: 'docker-cred') {
+                        servicesChanged.each { svc ->
+                            dir(dockerPaths[svc]) {
+                                sh """
+                                docker build -t ${REGISTRY}/${svc}:${IMAGE_TAG} .
+                                docker push ${REGISTRY}/${svc}:${IMAGE_TAG}
+                                docker rmi ${REGISTRY}/${svc}:${IMAGE_TAG}
+                                """
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        stage('Update image tag in github (GitOps)') {
+            steps {
+                withCredentials([gitUsernamePassword(credentialsId: 'git-cred', gitToolName: 'Default')]) {
+        
+                    script {
+                        
+                            sh '''
+                            rm -rf OnlineBuitique-CD
+                            git clone https://github.com/AdarshJain-dev/OnlineBuitique-CD.git
+                            cd OnlineBuitique-CD
+                            ls -l release
+                            '''
+                        
+                            // 🔑 THIS IS THE FIX
+                            def servicesChanged = env.SERVICES_CHANGED.split(" ")
+                        
+                            servicesChanged.each { svc ->
+                                sh """
+                                sed -i 's|image: ${REGISTRY}/${svc}:.*|image: ${REGISTRY}/${svc}:${IMAGE_TAG}|' \
+                                OnlineBuitique-CD/release/kubernetes-manifests.yaml
+                                """
+                            }
+                        
+                            sh '''
+                            echo "Updated YAML file contents:"
+                            cat OnlineBuitique-CD/release/kubernetes-manifests.yaml
+                            '''
+                        
+                            sh '''
+                            cd OnlineBuitique-CD
+                            git config user.email "jenkins@ci.com"
+                            git config user.name "Jenkins CI"
+                            git add release/kubernetes-manifests.yaml
+                            git commit -m "Update image tag(s) to ${IMAGE_TAG}" || echo "No changes to commit"
+                            git push origin main
+                            '''
+                        }
+                }
+            }
+        }
+    }
+}
