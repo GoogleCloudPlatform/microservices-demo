@@ -51,7 +51,11 @@ spec:
               - ALL
           privileged: false
           readOnlyRootFilesystem: true
+        {{- if .Values.nativeGrpcHealthCheck }}
+        image: {{ .Values.images.repository }}/{{ .Values.emailService.name }}:{{ .Values.images.tag | default .Chart.AppVersion }}-native-grpc-probes
+        {{- else }}
         image: {{ .Values.images.repository }}/{{ .Values.emailService.name }}:{{ .Values.images.tag | default .Chart.AppVersion }}
+        {{- end }}
         ports:
         - containerPort: 8080
         env:
@@ -71,12 +75,22 @@ spec:
         {{- end }}
         readinessProbe:
           periodSeconds: 5
+          {{- if .Values.nativeGrpcHealthCheck }}
           grpc:
             port: 8080
+          {{- else }}
+          exec:
+            command: ["/bin/grpc_health_probe", "-addr=:8080"]
+          {{- end }}
         livenessProbe:
           periodSeconds: 5
+          {{- if .Values.nativeGrpcHealthCheck }}
           grpc:
             port: 8080
+          {{- else }}
+          exec:
+            command: ["/bin/grpc_health_probe", "-addr=:8080"]
+          {{- end }}
         resources:
           {{- toYaml .Values.emailService.resources | nindent 10 }}
 ---

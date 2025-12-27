@@ -44,11 +44,11 @@ spec:
           ports:
           - containerPort: 5050
           readinessProbe:
-            grpc:
-              port: 5050
+            exec:
+              command: ["/bin/grpc_health_probe", "-addr=:5050"]
           livenessProbe:
-            grpc:
-              port: 5050
+            exec:
+              command: ["/bin/grpc_health_probe", "-addr=:5050"]
           env:
           - name: PORT
             value: "5050"

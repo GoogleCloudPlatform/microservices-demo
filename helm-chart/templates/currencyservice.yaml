@@ -51,7 +51,11 @@ spec:
               - ALL
           privileged: false
           readOnlyRootFilesystem: true
+        {{- if .Values.nativeGrpcHealthCheck }}
+        image: {{ .Values.images.repository }}/{{ .Values.currencyService.name }}:{{ .Values.images.tag | default .Chart.AppVersion }}-native-grpc-probes
+        {{- else }}
         image: {{ .Values.images.repository }}/{{ .Values.currencyService.name }}:{{ .Values.images.tag | default .Chart.AppVersion }}
+        {{- end }}
         ports:
         - name: grpc
           containerPort: 7000
@@ -71,11 +75,21 @@ spec:
           value: "1"
         {{- end }}
         readinessProbe:
+          {{- if .Values.nativeGrpcHealthCheck }}
           grpc:
             port: 7000
+          {{- else }}
+          exec:
+            command: ["/bin/grpc_health_probe", "-addr=:7000"]
+          {{- end }}
         livenessProbe:
+          {{- if .Values.nativeGrpcHealthCheck }}
           grpc:
             port: 7000
+          {{- else }}
+          exec:
+            command: ["/bin/grpc_health_probe", "-addr=:7000"]
+          {{- end }}
         resources:
           {{- toYaml .Values.currencyService.resources | nindent 10 }}
 ---

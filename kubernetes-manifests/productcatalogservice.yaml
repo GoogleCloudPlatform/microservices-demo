@@ -50,11 +50,11 @@ spec:
         - name: DISABLE_PROFILER
           value: "1"
         readinessProbe:
-          grpc:
-            port: 3550
+          exec:
+            command: ["/bin/grpc_health_probe", "-addr=:3550"]
         livenessProbe:
-          grpc:
-            port: 3550
+          exec:
+            command: ["/bin/grpc_health_probe", "-addr=:3550"]
         resources:
           requests:
             cpu: 100m

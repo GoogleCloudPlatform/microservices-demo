@@ -51,7 +51,11 @@ spec:
               - ALL
           privileged: false
           readOnlyRootFilesystem: true
+        {{- if .Values.nativeGrpcHealthCheck }}
+        image: {{ .Values.images.repository }}/{{ .Values.adService.name }}:{{ .Values.images.tag | default .Chart.AppVersion }}-native-grpc-probes
+        {{- else }}
         image: {{ .Values.images.repository }}/{{ .Values.adService.name }}:{{ .Values.images.tag | default .Chart.AppVersion }}
+        {{- end }}
         ports:
         - containerPort: 9555
         env:
@@ -62,13 +66,23 @@ spec:
         readinessProbe:
           initialDelaySeconds: 20
           periodSeconds: 15
+          {{- if .Values.nativeGrpcHealthCheck }}
           grpc:
             port: 9555
+          {{- else }}
+          exec:
+            command: ["/bin/grpc_health_probe", "-addr=:9555"]
+          {{- end }}
         livenessProbe:
           initialDelaySeconds: 20
           periodSeconds: 15
+          {{- if .Values.nativeGrpcHealthCheck }}
           grpc:
             port: 9555
+          {{- else }}
+          exec:
+            command: ["/bin/grpc_health_probe", "-addr=:9555"]
+          {{- end }}
 ---
 apiVersion: v1
 kind: Service

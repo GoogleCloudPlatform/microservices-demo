@@ -40,15 +40,15 @@ spec:
                 - ALL
             privileged: false
             readOnlyRootFilesystem: true
-          image: gcr.io/google-samples/microservices-demo/checkoutservice:v0.8.0
+          image: gcr.io/google-samples/microservices-demo/checkoutservice:v0.7.0
           ports:
           - containerPort: 5050
           readinessProbe:
-            grpc:
-              port: 5050
+            exec:
+              command: ["/bin/grpc_health_probe", "-addr=:5050"]
           livenessProbe:
-            grpc:
-              port: 5050
+            exec:
+              command: ["/bin/grpc_health_probe", "-addr=:5050"]
           env:
           - name: PORT
             value: "5050"

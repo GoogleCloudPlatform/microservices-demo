@@ -51,7 +51,11 @@ spec:
               - ALL
           privileged: false
           readOnlyRootFilesystem: true
+        {{- if .Values.nativeGrpcHealthCheck }}
+        image: {{ .Values.images.repository }}/{{ .Values.paymentService.name }}:{{ .Values.images.tag | default .Chart.AppVersion }}-native-grpc-probes
+        {{- else }}
         image: {{ .Values.images.repository }}/{{ .Values.paymentService.name }}:{{ .Values.images.tag | default .Chart.AppVersion }}
+        {{- end }}
         ports:
         - containerPort: 50051
         env:
@@ -70,11 +74,21 @@ spec:
           value: "1"
         {{- end }}
         readinessProbe:
+          {{- if .Values.nativeGrpcHealthCheck }}
           grpc:
             port: 50051
+          {{- else }}
+          exec:
+            command: ["/bin/grpc_health_probe", "-addr=:50051"]
+          {{- end }}
         livenessProbe:
+          {{- if .Values.nativeGrpcHealthCheck }}
           grpc:
             port: 50051
+          {{- else }}
+          exec:
+            command: ["/bin/grpc_health_probe", "-addr=:50051"]
+          {{- end }}
         resources:
           {{- toYaml .Values.paymentService.resources | nindent 10 }}
 ---
