@@ -12,37 +12,29 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-FROM --platform=$BUILDPLATFORM python:3.12.12-alpine@sha256:d82291d418d5c47f267708393e40599ae836f2260b0519dd38670e9d281657f5 AS base
+FROM python:3.10.8-slim@sha256:abf96998af340975c26177b900c10cfb40716c985325303c063736f0f5cf3171 as base
 
-FROM base AS builder
+FROM base as builder
 
-ENV PYTHONDONTWRITEBYTECODE=1
-ENV PYTHONUNBUFFERED=1
-
-RUN apk update \
-    && apk add --no-cache g++ linux-headers \
-    && rm -rf /var/cache/apk/*
+RUN apt-get -qq update \
+    && apt-get install -y --no-install-recommends \
+        wget g++ \
+    && rm -rf /var/lib/apt/lists/*
 
 # get packages
 COPY requirements.txt .
 RUN pip install -r requirements.txt
 
 FROM base
-
-ENV PYTHONDONTWRITEBYTECODE=1
+# Enable unbuffered logging
 ENV PYTHONUNBUFFERED=1
-
 # Enable Profiler
 ENV ENABLE_PROFILER=1
-
-RUN apk update \
-    && apk add --no-cache libstdc++ \
-    && rm -rf /var/cache/apk/*
 
 WORKDIR /email_server
 
 # Grab packages from builder
-COPY --from=builder /usr/local/lib/python3.12/ /usr/local/lib/python3.12/
+COPY --from=builder /usr/local/lib/python3.10/ /usr/local/lib/python3.10/
 
 # Add the application
 COPY . .

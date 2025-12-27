@@ -14,11 +14,20 @@
 
 const path = require('path');
 const grpc = require('@grpc/grpc-js');
+const pino = require('pino');
 const protoLoader = require('@grpc/proto-loader');
 
 const charge = require('./charge');
 
-const logger = require('./logger')
+const logger = pino({
+  name: 'paymentservice-server',
+  messageKey: 'message',
+  formatters: {
+    level (logLevelString, logLevelNum) {
+      return { severity: logLevelString }
+    }
+  }
+});
 
 class HipsterShopServer {
   constructor(protoRoot, port = HipsterShopServer.PORT) {

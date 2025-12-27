@@ -16,8 +16,6 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: emailservice
-  labels:
-    app: emailservice
 spec:
   selector:
     matchLabels:
@@ -27,7 +25,7 @@ spec:
       labels:
         app: emailservice
     spec:
-      serviceAccountName: emailservice
+      serviceAccountName: default
       terminationGracePeriodSeconds: 5
       securityContext:
         fsGroup: 1000
@@ -43,7 +41,7 @@ spec:
               - ALL
           privileged: false
           readOnlyRootFilesystem: true
-        image: us-central1-docker.pkg.dev/google-samples/microservices-demo/emailservice:v0.10.4
+        image: gcr.io/google-samples/microservices-demo/emailservice:v0.8.0
         ports:
         - containerPort: 8080
         env:
@@ -71,8 +69,6 @@ apiVersion: v1
 kind: Service
 metadata:
   name: emailservice
-  labels:
-    app: emailservice
 spec:
   type: ClusterIP
   selector:
@@ -81,8 +77,3 @@ spec:
   - name: grpc
     port: 5000
     targetPort: 8080
----
-apiVersion: v1
-kind: ServiceAccount
-metadata:
-  name: emailservice

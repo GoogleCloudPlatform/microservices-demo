@@ -25,7 +25,6 @@ import (
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/health"
 	"google.golang.org/grpc/reflection"
 	"google.golang.org/grpc/status"
 
@@ -90,8 +89,7 @@ func main() {
 	}
 	svc := &server{}
 	pb.RegisterShippingServiceServer(srv, svc)
-	healthcheck := health.NewServer()
-	healthpb.RegisterHealthServer(srv, healthcheck)
+	healthpb.RegisterHealthServer(srv, svc)
 	log.Infof("Shipping Service listening on port %s", port)
 
 	// Register reflection service on gRPC server.
@@ -102,9 +100,7 @@ func main() {
 }
 
 // server controls RPC service responses.
-type server struct {
-	pb.UnimplementedShippingServiceServer
-}
+type server struct{}
 
 // Check is for health checking.
 func (s *server) Check(ctx context.Context, req *healthpb.HealthCheckRequest) (*healthpb.HealthCheckResponse, error) {

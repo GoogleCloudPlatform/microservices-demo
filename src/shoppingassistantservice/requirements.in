@@ -1,6 +1,0 @@
-flask==3.1.2
-langchain-google-genai==2.1.10
-langchain==0.3.27
-pillow==11.3.0
-langchain-google-alloydb-pg==0.13.0
-google-cloud-secret-manager==2.24.0

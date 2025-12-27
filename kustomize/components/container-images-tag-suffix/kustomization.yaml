@@ -15,25 +15,25 @@
 apiVersion: kustomize.config.k8s.io/v1alpha1
 kind: Component
 images:
-- name: us-central1-docker.pkg.dev/google-samples/microservices-demo/adservice
+- name: gcr.io/google-samples/microservices-demo/adservice
   tagSuffix: CONTAINER_IMAGES_TAG_SUFFIX
-- name: us-central1-docker.pkg.dev/google-samples/microservices-demo/cartservice
+- name: gcr.io/google-samples/microservices-demo/cartservice
   tagSuffix: CONTAINER_IMAGES_TAG_SUFFIX
-- name: us-central1-docker.pkg.dev/google-samples/microservices-demo/checkoutservice
+- name: gcr.io/google-samples/microservices-demo/checkoutservice
   tagSuffix: CONTAINER_IMAGES_TAG_SUFFIX
-- name: us-central1-docker.pkg.dev/google-samples/microservices-demo/currencyservice
+- name: gcr.io/google-samples/microservices-demo/currencyservice
   tagSuffix: CONTAINER_IMAGES_TAG_SUFFIX
-- name: us-central1-docker.pkg.dev/google-samples/microservices-demo/emailservice
+- name: gcr.io/google-samples/microservices-demo/emailservice
   tagSuffix: CONTAINER_IMAGES_TAG_SUFFIX
-- name: us-central1-docker.pkg.dev/google-samples/microservices-demo/frontend
+- name: gcr.io/google-samples/microservices-demo/frontend
   tagSuffix: CONTAINER_IMAGES_TAG_SUFFIX
-- name: us-central1-docker.pkg.dev/google-samples/microservices-demo/loadgenerator
+- name: gcr.io/google-samples/microservices-demo/loadgenerator
   tagSuffix: CONTAINER_IMAGES_TAG_SUFFIX
-- name: us-central1-docker.pkg.dev/google-samples/microservices-demo/paymentservice
+- name: gcr.io/google-samples/microservices-demo/paymentservice
   tagSuffix: CONTAINER_IMAGES_TAG_SUFFIX
-- name: us-central1-docker.pkg.dev/google-samples/microservices-demo/productcatalogservice
+- name: gcr.io/google-samples/microservices-demo/productcatalogservice
   tagSuffix: CONTAINER_IMAGES_TAG_SUFFIX
-- name: us-central1-docker.pkg.dev/google-samples/microservices-demo/recommendationservice
+- name: gcr.io/google-samples/microservices-demo/recommendationservice
   tagSuffix: CONTAINER_IMAGES_TAG_SUFFIX
-- name: us-central1-docker.pkg.dev/google-samples/microservices-demo/shippingservice
+- name: gcr.io/google-samples/microservices-demo/shippingservice
   tagSuffix: CONTAINER_IMAGES_TAG_SUFFIX

@@ -14,22 +14,11 @@
  * limitations under the License.
  */
 
-const pino = require('pino');
-const logger = pino({
-  name: 'currencyservice-server',
-  messageKey: 'message',
-  formatters: {
-    level (logLevelString, logLevelNum) {
-      return { severity: logLevelString }
-    }
-  }
-});
-
 if(process.env.DISABLE_PROFILER) {
-  logger.info("Profiler disabled.")
+  console.log("Profiler disabled.")
 }
 else {
-  logger.info("Profiler enabled.")
+  console.log("Profiler enabled.")
   require('@google-cloud/profiler').start({
     serviceContext: {
       service: 'currencyservice',
@@ -48,33 +37,25 @@ registerInstrumentations({
 });
 
 if(process.env.ENABLE_TRACING == "1") {
-  logger.info("Tracing enabled.")
+  console.log("Tracing enabled.")
+  const { NodeTracerProvider } = require('@opentelemetry/sdk-trace-node');
+  const { SimpleSpanProcessor } = require('@opentelemetry/sdk-trace-base');
+  const { OTLPTraceExporter } = require("@opentelemetry/exporter-otlp-grpc");
 
-  const { resourceFromAttributes } = require('@opentelemetry/resources');
+  const provider = new NodeTracerProvider();
+  
+  const collectorUrl = process.env.COLLECTOR_SERVICE_ADDR
 
-  const { ATTR_SERVICE_NAME } = require('@opentelemetry/semantic-conventions');
-
-  const opentelemetry = require('@opentelemetry/sdk-node');
-
-  const { OTLPTraceExporter } = require('@opentelemetry/exporter-otlp-grpc');
-
-  const collectorUrl = process.env.COLLECTOR_SERVICE_ADDR;
-  const traceExporter = new OTLPTraceExporter({url: collectorUrl});
-  const sdk = new opentelemetry.NodeSDK({
-    resource: resourceFromAttributes({
-      [ ATTR_SERVICE_NAME ]: process.env.OTEL_SERVICE_NAME || 'currencyservice',
-    }),
-    traceExporter: traceExporter,
-  });
-
-  sdk.start()
+  provider.addSpanProcessor(new SimpleSpanProcessor(new OTLPTraceExporter({url: collectorUrl})));
+  provider.register();
 }
 else {
-  logger.info("Tracing disabled.")
+  console.log("Tracing disabled.")
 }
 
 const path = require('path');
 const grpc = require('@grpc/grpc-js');
+const pino = require('pino');
 const protoLoader = require('@grpc/proto-loader');
 
 const MAIN_PROTO_PATH = path.join(__dirname, './proto/demo.proto');
@@ -84,6 +65,16 @@ const PORT = process.env.PORT;
 
 const shopProto = _loadProto(MAIN_PROTO_PATH).hipstershop;
 const healthProto = _loadProto(HEALTH_PROTO_PATH).grpc.health.v1;
+
+const logger = pino({
+  name: 'currencyservice-server',
+  messageKey: 'message',
+  formatters: {
+    level (logLevelString, logLevelNum) {
+      return { severity: logLevelString }
+    }
+  }
+});
 
 /**
  * Helper function that loads a protobuf file.

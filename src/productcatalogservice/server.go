@@ -15,6 +15,7 @@
 package main
 
 import (
+	"bytes"
 	"context"
 	"flag"
 	"fmt"
@@ -27,10 +28,10 @@ import (
 
 	pb "github.com/GoogleCloudPlatform/microservices-demo/src/productcatalogservice/genproto"
 	"google.golang.org/grpc/credentials/insecure"
-	"google.golang.org/grpc/health"
 	healthpb "google.golang.org/grpc/health/grpc_health_v1"
 
 	"cloud.google.com/go/profiler"
+	"github.com/golang/protobuf/jsonpb"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
@@ -132,17 +133,17 @@ func run(port string) string {
 			propagation.TraceContext{}, propagation.Baggage{}))
 	var srv *grpc.Server
 	srv = grpc.NewServer(
-		grpc.StatsHandler(otelgrpc.NewServerHandler()))
+		grpc.UnaryInterceptor(otelgrpc.UnaryServerInterceptor()),
+		grpc.StreamInterceptor(otelgrpc.StreamServerInterceptor()))
 
 	svc := &productCatalog{}
-	err = loadCatalog(&svc.catalog)
+	err = readCatalogFile(&svc.catalog)
 	if err != nil {
-		log.Fatalf("could not parse product catalog: %v", err)
+		log.Warnf("could not parse product catalog")
 	}
 
 	pb.RegisterProductCatalogServiceServer(srv, svc)
-	healthcheck := health.NewServer()
-	healthpb.RegisterHealthServer(srv, healthcheck)
+	healthpb.RegisterHealthServer(srv, svc)
 	go srv.Serve(listener)
 
 	return listener.Addr().String()
@@ -206,12 +207,32 @@ func mustMapEnv(target *string, envKey string) {
 
 func mustConnGRPC(ctx context.Context, conn **grpc.ClientConn, addr string) {
 	var err error
-	_, cancel := context.WithTimeout(ctx, time.Second*3)
+	ctx, cancel := context.WithTimeout(ctx, time.Second*3)
 	defer cancel()
-	*conn, err = grpc.NewClient(addr,
+	*conn, err = grpc.DialContext(ctx, addr,
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
-		grpc.WithStatsHandler(otelgrpc.NewClientHandler()))
+		grpc.WithUnaryInterceptor(otelgrpc.UnaryClientInterceptor()),
+		grpc.WithStreamInterceptor(otelgrpc.StreamClientInterceptor()))
 	if err != nil {
 		panic(errors.Wrapf(err, "grpc: failed to connect %s", addr))
 	}
+}
+
+func readCatalogFile(catalog *pb.ListProductsResponse) error {
+	catalogMutex.Lock()
+	defer catalogMutex.Unlock()
+
+	catalogJSON, err := os.ReadFile("products.json")
+	if err != nil {
+		log.Fatalf("failed to open product catalog json file: %v", err)
+		return err
+	}
+
+	if err := jsonpb.Unmarshal(bytes.NewReader(catalogJSON), catalog); err != nil {
+		log.Warnf("failed to parse the catalog JSON: %v", err)
+		return err
+	}
+
+	log.Info("successfully parsed product catalog json")
+	return nil
 }

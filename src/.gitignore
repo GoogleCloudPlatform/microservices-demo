@@ -1,0 +1,5 @@
+# Go: for the time being we are not checking in the vendor/ directories to git
+# to prevent the repo from getting larger forever. In each Go service, you can
+# run "dep ensure --vendor-only" to download the dependencies to vendor/ based
+# on the Gopkg.{toml,lock} files in that directory.
+vendor/

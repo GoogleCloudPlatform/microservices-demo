@@ -15,10 +15,7 @@
 # limitations under the License.
 
 import random
-from locust import FastHttpUser, TaskSet, between
-from faker import Faker
-import datetime
-fake = Faker()
+from locust import HttpUser, TaskSet, between
 
 products = [
     '0PUK6V6EV0',
@@ -35,7 +32,7 @@ def index(l):
     l.client.get("/")
 
 def setCurrency(l):
-    currencies = ['EUR', 'USD', 'JPY', 'CAD', 'GBP', 'TRY']
+    currencies = ['EUR', 'USD', 'JPY', 'CAD']
     l.client.post("/setCurrency",
         {'currency_code': random.choice(currencies)})
 
@@ -50,30 +47,22 @@ def addToCart(l):
     l.client.get("/product/" + product)
     l.client.post("/cart", {
         'product_id': product,
-        'quantity': random.randint(1,10)})
-    
-def empty_cart(l):
-    l.client.post('/cart/empty')
+        'quantity': random.choice([1,2,3,4,5,10])})
 
 def checkout(l):
     addToCart(l)
-    current_year = datetime.datetime.now().year+1
     l.client.post("/cart/checkout", {
-        'email': fake.email(),
-        'street_address': fake.street_address(),
-        'zip_code': fake.zipcode(),
-        'city': fake.city(),
-        'state': fake.state_abbr(),
-        'country': fake.country(),
-        'credit_card_number': fake.credit_card_number(card_type="visa"),
-        'credit_card_expiration_month': random.randint(1, 12),
-        'credit_card_expiration_year': random.randint(current_year, current_year + 70),
-        'credit_card_cvv': f"{random.randint(100, 999)}",
+        'email': 'someone@example.com',
+        'street_address': '1600 Amphitheatre Parkway',
+        'zip_code': '94043',
+        'city': 'Mountain View',
+        'state': 'CA',
+        'country': 'United States',
+        'credit_card_number': '4432-8015-6152-0454',
+        'credit_card_expiration_month': '1',
+        'credit_card_expiration_year': '2039',
+        'credit_card_cvv': '672',
     })
-    
-def logout(l):
-    l.client.get('/logout')  
-
 
 class UserBehavior(TaskSet):
 
@@ -87,6 +76,6 @@ class UserBehavior(TaskSet):
         viewCart: 3,
         checkout: 1}
 
-class WebsiteUser(FastHttpUser):
+class WebsiteUser(HttpUser):
     tasks = [UserBehavior]
     wait_time = between(1, 10)

@@ -1,0 +1,203 @@
+{{- if .Values.cartDatabase.inClusterRedis.create }}
+{{- if .Values.serviceAccounts.create }}
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: {{ .Values.cartDatabase.inClusterRedis.name }}
+  namespace: {{.Release.Namespace}}
+  {{- if not .Values.serviceAccounts.annotationsOnlyForCartservice }}
+  {{- with .Values.serviceAccounts.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  {{- end }}
+---
+{{- end }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.cartDatabase.inClusterRedis.name }}
+  namespace: {{ .Release.Namespace }}
+spec:
+  selector:
+    matchLabels:
+      app: {{ .Values.cartDatabase.inClusterRedis.name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.cartDatabase.inClusterRedis.name }}
+    spec:
+      {{- if .Values.serviceAccounts.create }}
+      serviceAccountName: {{ .Values.cartDatabase.inClusterRedis.name }}
+      {{- else }}
+      serviceAccountName: default
+      {{- end }}
+      securityContext:
+        fsGroup: 1000
+        runAsGroup: 1000
+        runAsNonRoot: true
+        runAsUser: 1000
+        {{- if .Values.seccompProfile.enable }}
+        seccompProfile:
+          type: {{ .Values.seccompProfile.type }}
+        {{- end }}
+      containers:
+      - name: redis
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+              - ALL
+          privileged: false
+          readOnlyRootFilesystem: true
+        {{- if .Values.cartDatabase.inClusterRedis.publicRepository }}
+        image: redis:alpine@sha256:a4c910678a1b358a88446b2fe1c5bb0417a5c9cfac4eba959f1e42d22f2e0af1
+        {{- else }}
+        image: {{ .Values.images.repository }}/redis:alpine
+        {{- end }}
+        ports:
+        - containerPort: 6379
+        readinessProbe:
+          periodSeconds: 5
+          tcpSocket:
+            port: 6379
+        livenessProbe:
+          periodSeconds: 5
+          tcpSocket:
+            port: 6379
+        volumeMounts:
+        - mountPath: /data
+          name: redis-data
+        resources:
+          limits:
+            memory: 256Mi
+            cpu: 125m
+          requests:
+            cpu: 70m
+            memory: 200Mi
+      volumes:
+      - name: redis-data
+        emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.cartDatabase.inClusterRedis.name }}
+  namespace: {{ .Release.Namespace }}
+spec:
+  type: ClusterIP
+  selector:
+    app: {{ .Values.cartDatabase.inClusterRedis.name }}
+  ports:
+  - name: tcp-redis
+    port: 6379
+    targetPort: 6379
+{{- if .Values.networkPolicies.create }}
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ .Values.cartDatabase.inClusterRedis.name }}
+  namespace: {{ .Release.Namespace }}
+spec:
+  podSelector:
+    matchLabels:
+      app: {{ .Values.cartDatabase.inClusterRedis.name }}
+  policyTypes:
+  - Ingress
+  - Egress
+  ingress:
+  - from:
+    - podSelector:
+        matchLabels:
+          app: {{ .Values.cartService.name }}
+    ports:
+     - port: 6379
+       protocol: TCP
+  egress:
+  - {}
+{{- end }}
+{{- if .Values.sidecars.create }}
+---
+apiVersion: networking.istio.io/v1beta1
+kind: Sidecar
+metadata:
+  name: {{ .Values.cartDatabase.inClusterRedis.name }}
+  namespace: {{ .Release.Namespace }}
+spec:
+  workloadSelector:
+    labels:
+      app: {{ .Values.cartDatabase.inClusterRedis.name }}
+  egress:
+  - hosts:
+    - istio-system/*
+{{- end }}
+{{- if .Values.authorizationPolicies.create }}
+---
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+  name: {{ .Values.cartDatabase.inClusterRedis.name }}
+  namespace: {{ .Release.Namespace }}
+spec:
+  selector:
+    matchLabels:
+      app: {{ .Values.cartDatabase.inClusterRedis.name }}
+  rules:
+  - from:
+    - source:
+        principals:
+        {{- if .Values.serviceAccounts.create }}
+        - cluster.local/ns/{{ .Release.Namespace }}/sa/{{ .Values.cartService.name }}
+        {{- else }}
+        - cluster.local/ns/{{ .Release.Namespace }}/sa/default
+        {{- end }}
+    to:
+    - operation:
+        ports:
+        - "6379"
+{{- end }}
+{{- end }}
+{{- if .Values.cartDatabase.externalRedisTlsOrigination.enable }}
+---
+apiVersion: v1
+data:
+  {{ .Values.cartDatabase.externalRedisTlsOrigination.name }}.pem: {{ .Values.cartDatabase.externalRedisTlsOrigination.certificate | b64enc | quote }}
+kind: Secret
+metadata:
+  name: {{ .Values.cartDatabase.externalRedisTlsOrigination.name }}
+  namespace: {{ .Release.Namespace }}
+---
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: {{ .Values.cartDatabase.externalRedisTlsOrigination.name }}
+  namespace: {{ .Release.Namespace }}
+spec:
+  exportTo:
+  - '.'
+  host: {{ .Values.cartDatabase.externalRedisTlsOrigination.name }}.{{ .Release.Namespace }}
+  trafficPolicy:
+    tls:
+      mode: SIMPLE
+      caCertificates: /etc/certs/{{ .Values.cartDatabase.externalRedisTlsOrigination.name }}.pem
+---
+apiVersion: networking.istio.io/v1beta1
+kind: ServiceEntry
+metadata:
+  name: {{ .Values.cartDatabase.externalRedisTlsOrigination.name }}
+  namespace: {{ .Release.Namespace }}
+spec:
+  hosts:
+  - {{ .Values.cartDatabase.externalRedisTlsOrigination.name }}.{{ .Release.Namespace }}
+  addresses:
+  - {{ .Values.cartDatabase.externalRedisTlsOrigination.endpointAddress }}/32
+  endpoints:
+  - address: {{ .Values.cartDatabase.externalRedisTlsOrigination.endpointAddress }}
+  location: MESH_EXTERNAL
+  resolution: STATIC
+  ports:
+  - number: {{ .Values.cartDatabase.externalRedisTlsOrigination.endpointPort }}
+    name: tcp-redis
+    protocol: TCP
+{{- end }}

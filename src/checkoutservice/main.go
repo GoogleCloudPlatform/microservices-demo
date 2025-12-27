@@ -27,8 +27,6 @@ import (
 	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/credentials/insecure"
-	"google.golang.org/grpc/health"
 	"google.golang.org/grpc/status"
 
 	pb "github.com/GoogleCloudPlatform/microservices-demo/src/checkoutservice/genproto"
@@ -64,8 +62,6 @@ func init() {
 }
 
 type checkoutService struct {
-	pb.UnimplementedCheckoutServiceServer
-
 	productCatalogSvcAddr string
 	productCatalogSvcConn *grpc.ClientConn
 
@@ -136,12 +132,12 @@ func main() {
 		propagation.NewCompositeTextMapPropagator(
 			propagation.TraceContext{}, propagation.Baggage{}))
 	srv = grpc.NewServer(
-		grpc.StatsHandler(otelgrpc.NewServerHandler()),
+		grpc.UnaryInterceptor(otelgrpc.UnaryServerInterceptor()),
+		grpc.StreamInterceptor(otelgrpc.StreamServerInterceptor()),
 	)
 
 	pb.RegisterCheckoutServiceServer(srv, svc)
-	healthcheck := health.NewServer()
-	healthpb.RegisterHealthServer(srv, healthcheck)
+	healthpb.RegisterHealthServer(srv, svc)
 	log.Infof("starting to listen on tcp: %q", lis.Addr().String())
 	err = srv.Serve(lis)
 	log.Fatal(err)
@@ -209,11 +205,12 @@ func mustMapEnv(target *string, envKey string) {
 
 func mustConnGRPC(ctx context.Context, conn **grpc.ClientConn, addr string) {
 	var err error
-	_, cancel := context.WithTimeout(ctx, time.Second*3)
+	ctx, cancel := context.WithTimeout(ctx, time.Second*3)
 	defer cancel()
-	*conn, err = grpc.NewClient(addr,
-		grpc.WithTransportCredentials(insecure.NewCredentials()),
-		grpc.WithStatsHandler(otelgrpc.NewClientHandler()))
+	*conn, err = grpc.DialContext(ctx, addr,
+		grpc.WithInsecure(),
+		grpc.WithUnaryInterceptor(otelgrpc.UnaryClientInterceptor()),
+		grpc.WithStreamInterceptor(otelgrpc.StreamClientInterceptor()))
 	if err != nil {
 		panic(errors.Wrapf(err, "grpc: failed to connect %s", addr))
 	}

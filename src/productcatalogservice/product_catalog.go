@@ -26,7 +26,6 @@ import (
 )
 
 type productCatalog struct {
-	pb.UnimplementedProductCatalogServiceServer
 	catalog pb.ListProductsResponse
 }
 
@@ -76,7 +75,7 @@ func (p *productCatalog) SearchProducts(ctx context.Context, req *pb.SearchProdu
 
 func (p *productCatalog) parseCatalog() []*pb.Product {
 	if reloadCatalog || len(p.catalog.Products) == 0 {
-		err := loadCatalog(&p.catalog)
+		err := readCatalogFile(&p.catalog)
 		if err != nil {
 			return []*pb.Product{}
 		}

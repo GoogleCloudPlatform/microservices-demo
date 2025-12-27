@@ -15,25 +15,25 @@
 apiVersion: kustomize.config.k8s.io/v1alpha1
 kind: Component
 images:
-- name: us-central1-docker.pkg.dev/google-samples/microservices-demo/adservice
+- name: gcr.io/google-samples/microservices-demo/adservice
   newTag: CONTAINER_IMAGES_TAG
-- name: us-central1-docker.pkg.dev/google-samples/microservices-demo/cartservice
+- name: gcr.io/google-samples/microservices-demo/cartservice
   newTag: CONTAINER_IMAGES_TAG
-- name: us-central1-docker.pkg.dev/google-samples/microservices-demo/checkoutservice
+- name: gcr.io/google-samples/microservices-demo/checkoutservice
   newTag: CONTAINER_IMAGES_TAG
-- name: us-central1-docker.pkg.dev/google-samples/microservices-demo/currencyservice
+- name: gcr.io/google-samples/microservices-demo/currencyservice
   newTag: CONTAINER_IMAGES_TAG
-- name: us-central1-docker.pkg.dev/google-samples/microservices-demo/emailservice
+- name: gcr.io/google-samples/microservices-demo/emailservice
   newTag: CONTAINER_IMAGES_TAG
-- name: us-central1-docker.pkg.dev/google-samples/microservices-demo/frontend
+- name: gcr.io/google-samples/microservices-demo/frontend
   newTag: CONTAINER_IMAGES_TAG
-- name: us-central1-docker.pkg.dev/google-samples/microservices-demo/loadgenerator
+- name: gcr.io/google-samples/microservices-demo/loadgenerator
   newTag: CONTAINER_IMAGES_TAG
-- name: us-central1-docker.pkg.dev/google-samples/microservices-demo/paymentservice
+- name: gcr.io/google-samples/microservices-demo/paymentservice
   newTag: CONTAINER_IMAGES_TAG
-- name: us-central1-docker.pkg.dev/google-samples/microservices-demo/productcatalogservice
+- name: gcr.io/google-samples/microservices-demo/productcatalogservice
   newTag: CONTAINER_IMAGES_TAG
-- name: us-central1-docker.pkg.dev/google-samples/microservices-demo/recommendationservice
+- name: gcr.io/google-samples/microservices-demo/recommendationservice
   newTag: CONTAINER_IMAGES_TAG
-- name: us-central1-docker.pkg.dev/google-samples/microservices-demo/shippingservice
+- name: gcr.io/google-samples/microservices-demo/shippingservice
   newTag: CONTAINER_IMAGES_TAG

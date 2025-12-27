@@ -64,6 +64,7 @@ To automate the deployment of Online Boutique integrated with Spanner you can le
 From the `kustomize/` folder at the root level of this repository, execute these commands:
 
 ```bash
+kustomize edit add component components/service-accounts
 kustomize edit add component components/spanner
 ```
 
@@ -77,6 +78,7 @@ kind: Kustomization
 resources:
 - base
 components:
+- components/service-accounts
 - components/spanner
 ```
 

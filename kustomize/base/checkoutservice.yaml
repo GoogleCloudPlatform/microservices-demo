@@ -16,8 +16,6 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: checkoutservice
-  labels:
-    app: checkoutservice
 spec:
   selector:
     matchLabels:
@@ -27,7 +25,7 @@ spec:
       labels:
         app: checkoutservice
     spec:
-      serviceAccountName: checkoutservice
+      serviceAccountName: default
       securityContext:
         fsGroup: 1000
         runAsGroup: 1000
@@ -42,7 +40,7 @@ spec:
                 - ALL
             privileged: false
             readOnlyRootFilesystem: true
-          image: us-central1-docker.pkg.dev/google-samples/microservices-demo/checkoutservice:v0.10.4
+          image: gcr.io/google-samples/microservices-demo/checkoutservice:v0.8.0
           ports:
           - containerPort: 5050
           readinessProbe:
@@ -78,8 +76,6 @@ apiVersion: v1
 kind: Service
 metadata:
   name: checkoutservice
-  labels:
-    app: checkoutservice
 spec:
   type: ClusterIP
   selector:
@@ -88,8 +84,3 @@ spec:
   - name: grpc
     port: 5050
     targetPort: 5050
----
-apiVersion: v1
-kind: ServiceAccount
-metadata:
-  name: checkoutservice
