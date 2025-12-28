@@ -15,6 +15,24 @@ services:
       timeout: 3s
       retries: 5
 
+  # PostgreSQL for application data (shopping history, users, etc.)
+  postgres:
+    image: postgres:15
+    container_name: postgres-db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres123
+      POSTGRES_DB: microservices
+    ports:
+      - "5432:5432"
+    networks:
+      - microservices
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
   # Cart Service (C# microservice)
   cartservice:
     build:
@@ -180,6 +198,7 @@ services:
       - CURRENCY_SERVICE_ADDR=currencyservice:7000
       - EMAIL_SERVICE_ADDR=emailservice:8080
       - PAYMENT_SERVICE_ADDR=paymentservice:50052
+      - SHOPPING_HISTORY_SERVICE_ADDR=shoppinghistoryservice:3000
     depends_on:
       - shippingservice
       - productcatalogservice
@@ -187,6 +206,7 @@ services:
       - currencyservice
       - emailservice
       - paymentservice
+      - shoppinghistoryservice
     networks:
       - microservices
     healthcheck:
@@ -226,6 +246,29 @@ services:
       - microservices
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8080/_healthz"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  # Shopping History Service (Node.js/TypeScript microservice)
+  shoppinghistoryservice:
+    build:
+      context: ./src/shoppinghistoryservice
+      dockerfile: Dockerfile
+    container_name: shoppinghistoryservice
+    ports:
+      - "3000:3000"
+      - "9229:9229"
+    environment:
+      - PORT=3000
+      - DATABASE_URL=postgresql://postgres:postgres123@postgres:5432/microservices?schema=public
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - microservices
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
       interval: 10s
       timeout: 5s
       retries: 3

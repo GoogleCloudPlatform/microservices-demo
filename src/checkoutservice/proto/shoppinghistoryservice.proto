@@ -1,0 +1,49 @@
+syntax  = "proto3";
+
+import "google/protobuf/timestamp.proto";
+
+package shoppinghistoryservice;
+
+option go_package = "github.com/GoogleCloudPlatform/microservices-demo/src/checkoutservice/genproto;hipstershop";
+
+service ShoppingHistoryService {
+  rpc CreateOrder(CreateOrderRequest) returns (HistoryOrder);
+  rpc GetOrder(GetOrderRequest) returns (HistoryOrder);
+  rpc GetOrdersOfUser(GetOrdersOfUserRequest) returns (HistoryOrders);
+  rpc DeleteOrder(DeleteOrderRequest) returns (EmptyResponse);
+}
+
+message CreateOrderRequest {
+  string user_id = 1;
+  repeated HistoryOrderItem positions = 2;
+}
+
+message HistoryOrderItem {
+  string product_id = 1;
+  int32 quantity = 2;
+}
+
+message GetOrderRequest {
+  string order_id = 1;
+}
+
+message GetOrdersOfUserRequest {
+  string user_id = 1;
+}
+
+message DeleteOrderRequest {
+  string order_id = 1;
+}
+
+message HistoryOrder {
+  string order_id = 1;
+  string user_id = 2;
+  google.protobuf.Timestamp created_at = 3;
+  repeated HistoryOrderItem order_items = 4;
+}
+
+message HistoryOrders {
+  repeated HistoryOrder orders = 1;
+}
+
+message EmptyResponse {}

@@ -83,6 +83,9 @@ type checkoutService struct {
 
 	paymentSvcAddr string
 	paymentSvcConn *grpc.ClientConn
+
+	shoppingHistorySvcAddr string
+	shoppingHistorySvcConn *grpc.ClientConn
 }
 
 func main() {
@@ -114,6 +117,7 @@ func main() {
 	mustMapEnv(&svc.currencySvcAddr, "CURRENCY_SERVICE_ADDR")
 	mustMapEnv(&svc.emailSvcAddr, "EMAIL_SERVICE_ADDR")
 	mustMapEnv(&svc.paymentSvcAddr, "PAYMENT_SERVICE_ADDR")
+	mustMapEnv(&svc.shoppingHistorySvcAddr, "SHOPPING_HISTORY_SERVICE_ADDR")
 
 	mustConnGRPC(ctx, &svc.shippingSvcConn, svc.shippingSvcAddr)
 	mustConnGRPC(ctx, &svc.productCatalogSvcConn, svc.productCatalogSvcAddr)
@@ -121,6 +125,7 @@ func main() {
 	mustConnGRPC(ctx, &svc.currencySvcConn, svc.currencySvcAddr)
 	mustConnGRPC(ctx, &svc.emailSvcConn, svc.emailSvcAddr)
 	mustConnGRPC(ctx, &svc.paymentSvcConn, svc.paymentSvcAddr)
+	mustConnGRPC(ctx, &svc.shoppingHistorySvcConn, svc.shoppingHistorySvcAddr)
 
 	log.Infof("service config: %+v", svc)
 
@@ -275,6 +280,13 @@ func (cs *checkoutService) PlaceOrder(ctx context.Context, req *pb.PlaceOrderReq
 	} else {
 		log.Infof("order confirmation email sent to %q", req.Email)
 	}
+
+	if err := cs.saveOrderToHistory(ctx, req.UserId, orderResult); err != nil {
+		log.Warnf("failed to save order to history: %+v", err)
+	} else {
+		log.Infof("order %s saved to shopping history", orderID.String())
+	}
+
 	resp := &pb.PlaceOrderResponse{Order: orderResult}
 	return resp, nil
 }
@@ -391,4 +403,23 @@ func (cs *checkoutService) shipOrder(ctx context.Context, address *pb.Address, i
 		return "", fmt.Errorf("shipment failed: %+v", err)
 	}
 	return resp.GetTrackingId(), nil
+}
+
+func (cs *checkoutService) saveOrderToHistory(ctx context.Context, userID string, order *pb.OrderResult) error {
+	var orderItems []*pb.HistoryOrderItem
+	for _, item := range order.GetItems() {
+		orderItems = append(orderItems, &pb.HistoryOrderItem{
+			ProductId: item.GetItem().GetProductId(),
+			Quantity:  item.GetItem().GetQuantity(),
+		})
+	}
+
+	_, err := pb.NewShoppingHistoryServiceClient(cs.shoppingHistorySvcConn).CreateOrder(ctx, &pb.CreateOrderRequest{
+		UserId:    userID,
+		Positions: orderItems,
+	})
+	if err != nil {
+		return fmt.Errorf("failed to save order to history: %+v", err)
+	}
+	return nil
 }
