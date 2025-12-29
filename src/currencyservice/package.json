@@ -10,7 +10,7 @@
   "dependencies": {
     "@google-cloud/profiler": "6.0.3",
     "@google-cloud/trace-agent": "8.0.0",
-    "@grpc/grpc-js": "1.14.2",
+    "@grpc/grpc-js": "1.14.3",
     "@grpc/proto-loader": "0.8.0",
     "async": "3.2.6",
     "google-protobuf": "4.0.1",
