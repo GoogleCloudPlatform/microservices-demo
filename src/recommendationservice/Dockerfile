@@ -40,7 +40,7 @@ RUN apk update \
 WORKDIR /recommendationservice
 
 # Grab packages from builder
-COPY --from=builder /usr/local/lib/python3.12/ /usr/local/lib/python3.12/
+COPY --from=builder /usr/local/lib/python3.14/ /usr/local/lib/python3.14/
 
 # Add the application
 COPY . .
