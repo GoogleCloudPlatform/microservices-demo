@@ -75,7 +75,7 @@ grpc-google-iam-v1==0.14.2
     # via
     #   google-cloud-alloydb
     #   google-cloud-secret-manager
-grpcio==1.75.0
+grpcio==1.76.0
     # via
     #   google-api-core
     #   googleapis-common-protos
