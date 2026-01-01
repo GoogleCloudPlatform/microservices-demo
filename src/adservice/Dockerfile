@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-FROM --platform=$BUILDPLATFORM eclipse-temurin:21.0.9_10-jdk-noble@sha256:e2ba4c84f2356d829837f561e171482f5121d75e537e8fe04e91fb4381694641 AS builder
+FROM --platform=$BUILDPLATFORM eclipse-temurin:24.0.2_12-jdk-noble@sha256:dacac8e9a0df0d2bd24e702b4431132875c249930b70555ebd7ca285b5bee684 AS builder
 
 WORKDIR /app
 
