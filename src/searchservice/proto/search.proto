@@ -1,0 +1,32 @@
+
+syntax = "proto3";
+
+package hipstershop.search;
+
+// Optional, aber sauber für spätere Codegen-Integration
+// option python_package = "search_pb2";
+// option go_package = "github.com/GoogleCloudPlatform/microservices-demo/search";
+
+// -------- Search Service --------
+
+service SearchService {
+  rpc SearchProducts (SearchRequest) returns (SearchResponse) {}
+}
+
+// -------- Messages --------
+
+message SearchRequest {
+  // Freitext aus der Suchleiste
+  string query = 1;
+}
+
+message SearchResponse {
+  repeated Product products = 1;
+}
+
+message Product {
+    string id = 1;
+    string name = 2;
+    string description = 3;
+    string picture = 4;
+}
