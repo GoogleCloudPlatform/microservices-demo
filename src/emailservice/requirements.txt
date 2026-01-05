@@ -2,7 +2,7 @@
 #    uv pip compile requirements.in -o requirements.txt
 cachetools==5.3.2
     # via google-auth
-certifi==2023.7.22
+certifi==2024.7.4
     # via requests
 charset-normalizer==3.3.2
     # via requests
