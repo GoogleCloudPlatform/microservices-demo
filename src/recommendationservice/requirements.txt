@@ -97,5 +97,5 @@ wrapt==1.16.0
     # via
     #   opentelemetry-instrumentation
     #   opentelemetry-instrumentation-grpc
-zipp==3.17.0
+zipp==3.19.1
     # via importlib-metadata
