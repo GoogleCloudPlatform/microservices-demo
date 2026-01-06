@@ -20,7 +20,7 @@ grpcio==1.76.0
     #   opentelemetry-exporter-otlp-proto-grpc
 grpcio-health-checking==1.76.0
     # via -r requirements.in
-idna==3.4
+idna==3.7
     # via requests
 importlib-metadata==6.8.0
     # via opentelemetry-api
