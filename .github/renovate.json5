@@ -5,8 +5,8 @@
   ],
   'pip-compile': {
     enabled: true,
-    fileMatch: [
-      '(^|/)requirements\\.txt$',
+    managerFilePatterns: [
+      '/(^|/)requirements\\.txt$/',
     ],
   },
   pip_requirements: {
@@ -16,8 +16,8 @@
     python: '~=3.11.0',
   },
   kubernetes: {
-    fileMatch: [
-      '\\.yaml$',
+    managerFilePatterns: [
+      '/\\.yaml$/',
     ],
     ignorePaths: [
       'release/**',
