@@ -35,14 +35,14 @@ filetype==1.2.0
     # via langchain-google-genai
 flask==3.1.2
     # via -r requirements.in
-google-api-core==2.25.1
+google-api-core[grpc]==2.25.1
     # via
     #   google-cloud-alloydb
     #   google-cloud-alloydb-connector
     #   google-cloud-core
     #   google-cloud-secret-manager
     #   google-cloud-storage
-google-auth==2.45.0
+google-auth[requests]==2.45.0
     # via
     #   google-api-core
     #   google-cloud-alloydb
@@ -53,7 +53,7 @@ google-auth==2.45.0
     #   google-genai
 google-cloud-alloydb==0.4.9
     # via google-cloud-alloydb-connector
-google-cloud-alloydb-connector==1.9.1
+google-cloud-alloydb-connector[asyncpg]==1.9.1
     # via langchain-google-alloydb-pg
 google-cloud-core==2.4.3
     # via google-cloud-storage
@@ -69,7 +69,7 @@ google-genai==1.56.0
     # via langchain-google-genai
 google-resumable-media==2.7.2
     # via google-cloud-storage
-googleapis-common-protos==1.70.0
+googleapis-common-protos[grpc]==1.70.0
     # via
     #   google-api-core
     #   grpc-google-iam-v1
@@ -178,7 +178,7 @@ protobuf==6.32.1
     #   grpc-google-iam-v1
     #   grpcio-status
     #   proto-plus
-psycopg==3.2.10
+psycopg[binary]==3.2.10
     # via langchain-postgres
 psycopg-binary==3.2.10
     # via psycopg
@@ -221,7 +221,7 @@ sniffio==1.3.1
     # via
     #   anyio
     #   google-genai
-sqlalchemy==2.0.43
+sqlalchemy[asyncio]==2.0.43
     # via langchain-postgres
 tenacity==9.1.2
     # via
@@ -245,7 +245,7 @@ uuid-utils==0.12.0
     # via langchain-core
 websockets==15.0.1
     # via google-genai
-werkzeug==3.1.4
+werkzeug==3.1.5
     # via flask
 xxhash==3.6.0
     # via langgraph
