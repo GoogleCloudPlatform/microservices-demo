@@ -239,7 +239,7 @@ typing-extensions==4.15.0
     #   typing-inspection
 typing-inspection==0.4.2
     # via pydantic
-urllib3==2.6.0
+urllib3==2.6.3
     # via requests
 uuid-utils==0.12.0
     # via langchain-core
