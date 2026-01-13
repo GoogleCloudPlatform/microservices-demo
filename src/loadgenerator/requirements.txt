@@ -86,7 +86,7 @@ urllib3==2.6.3
     #   requests
 websocket-client==1.8.0
     # via python-socketio
-werkzeug==3.1.4
+werkzeug==3.1.5
     # via
     #   flask
     #   flask-cors
