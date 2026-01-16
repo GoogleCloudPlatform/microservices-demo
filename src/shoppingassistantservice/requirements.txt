@@ -184,7 +184,7 @@ psycopg-binary==3.2.10
     # via psycopg
 psycopg-pool==3.2.6
     # via langchain-postgres
-pyasn1==0.6.1
+pyasn1==0.6.2
     # via
     #   pyasn1-modules
     #   rsa
