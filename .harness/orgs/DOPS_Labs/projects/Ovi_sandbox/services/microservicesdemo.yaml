@@ -1,0 +1,5 @@
+service:
+  name: microservices-demo
+  identifier: microservicesdemo
+  orgIdentifier: DOPS_Labs
+  projectIdentifier: Ovi_sandbox
