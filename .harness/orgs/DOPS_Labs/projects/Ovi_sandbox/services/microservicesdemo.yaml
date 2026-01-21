@@ -3,3 +3,25 @@ service:
   identifier: microservicesdemo
   orgIdentifier: DOPS_Labs
   projectIdentifier: Ovi_sandbox
+  serviceDefinition:
+    spec:
+      manifests:
+        - manifest:
+            identifier: mshelm
+            type: HelmChart
+            spec:
+              store:
+                type: Github
+                spec:
+                  connectorRef: github
+                  gitFetchType: Branch
+                  folderPath: /
+                  repoName: microservices-demo
+                  branch: main
+              subChartPath: ""
+              optionalValuesYaml: false
+              skipResourceVersioning: false
+              enableDeclarativeRollback: false
+              helmVersion: V3
+              fetchHelmChartMetadata: false
+    type: NativeHelm
