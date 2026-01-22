@@ -130,26 +130,6 @@ func (*AddItemRequest) Descriptor() ([]byte, []int) {
 	return file_demo_proto_rawDescGZIP(), []int{1}
 }
 
-func (x *AddItemRequest) GetUserId() string {
-	if x != nil {
-		return x.UserId
-	}
-	return ""
-}
-
-func (x *AddItemRequest) GetItem() *CartItem {
-	if x != nil {
-		return x.Item
-	}
-	return nil
-}
-
-
-func (x *EmptyCartRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*EmptyCartRequest) ProtoMessage() {}
 
 func (x *EmptyCartRequest) ProtoReflect() protoreflect.Message {
 	mi := &file_demo_proto_msgTypes[2]

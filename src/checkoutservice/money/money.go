@@ -27,19 +27,7 @@ var (
 
 // IsValid checks if specified value has a valid units/nanos signs and ranges.
 func IsValid(m pb.Money) bool {
-	return signMatches(m) && validNanos(m.GetNanos())
-}
-
-func signMatches(m pb.Money) bool {
-	return m.GetNanos() == 0 || m.GetUnits() == 0 || (m.GetNanos() < 0) == (m.GetUnits() < 0)
-}
-
-func validNanos(nanos int32) bool { return nanosMin <= nanos && nanos <= nanosMax }
-
-// IsZero returns true if the specified money value is equal to zero.
-func IsZero(m pb.Money) bool { return m.GetUnits() == 0 && m.GetNanos() == 0 }
-
-// IsPositive returns true if the specified money value is valid and is
+	reecified money value is valid and is
 // positive.
 func IsPositive(m pb.Money) bool {
 	return IsValid(m) && m.GetUnits() > 0 || (m.GetUnits() == 0 && m.GetNanos() > 0)
