@@ -20,12 +20,6 @@ import (
 	pb "github.com/GoogleCloudPlatform/microservices-demo/src/checkoutservice/genproto"
 )
 
-const (
-	nanosMin = -999999999
-	nanosMax = +999999999
-	nanosMod = 1000000000
-)
-
 var (
 	ErrInvalidValue        = errors.New("one of the specified money values is invalid")
 	ErrMismatchingCurrency = errors.New("mismatching currency codes")
@@ -76,15 +70,6 @@ func Negate(m pb.Money) pb.Money {
 		Units:        -m.GetUnits(),
 		Nanos:        -m.GetNanos(),
 		CurrencyCode: m.GetCurrencyCode()}
-}
-
-// Must panics if the given error is not nil. This can be used with other
-// functions like: "m := Must(Sum(a,b))".
-func Must(v pb.Money, err error) pb.Money {
-	if err != nil {
-		panic(err)
-	}
-	return v
 }
 
 // Sum adds two values. Returns an error if one of the values are invalid or

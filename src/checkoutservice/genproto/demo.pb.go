@@ -144,22 +144,6 @@ func (x *AddItemRequest) GetItem() *CartItem {
 	return nil
 }
 
-type EmptyCartRequest struct {
-	state         protoimpl.MessageState
-	sizeCache     protoimpl.SizeCache
-	unknownFields protoimpl.UnknownFields
-
-	UserId string `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
-}
-
-func (x *EmptyCartRequest) Reset() {
-	*x = EmptyCartRequest{}
-	if protoimpl.UnsafeEnabled {
-		mi := &file_demo_proto_msgTypes[2]
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		ms.StoreMessageInfo(mi)
-	}
-}
 
 func (x *EmptyCartRequest) String() string {
 	return protoimpl.X.MessageStringOf(x)
@@ -195,6 +179,7 @@ type GetCartRequest struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
+	file_demo_proto_msgTypes = make([]protoimpl.MessageInfo, 32)
 
 	UserId string `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
 }
