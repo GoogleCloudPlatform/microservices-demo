@@ -23,10 +23,6 @@ pipeline:
                               type: GitClone
                               spec:
                                 sparseCheckout: <+input>
-                                build:
-                                  type: branch
-                                  spec:
-                                    branch: <+input>
                 variables:
                   - name: module_path
                     type: String
