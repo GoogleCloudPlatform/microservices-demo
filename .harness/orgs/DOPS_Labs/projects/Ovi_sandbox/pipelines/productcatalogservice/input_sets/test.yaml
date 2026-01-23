@@ -1,0 +1,34 @@
+inputSet:
+  pipeline:
+    identifier: productcatalogservice
+    template:
+      templateInputs:
+        stages:
+          - stage:
+              identifier: Build
+              template:
+                templateInputs:
+                  type: CI
+                  spec:
+                    execution:
+                      steps:
+                        - step:
+                            identifier: Clone
+                            template:
+                              templateInputs:
+                                type: GitClone
+                                spec:
+                                  sparseCheckout:
+                                    - src/<+stage.variables.module_path>
+                                  build:
+                                    type: branch
+                                    spec:
+                                      branch: main
+                  variables:
+                    - name: module_path
+                      type: String
+                      value: productcatalogservice
+  name: test
+  identifier: test
+  orgIdentifier: DOPS_Labs
+  projectIdentifier: Ovi_sandbox
