@@ -1,0 +1,35 @@
+pipeline:
+  name: productcatalogservice
+  identifier: productcatalogservice
+  tags: {}
+  template:
+    templateRef: Golang_CI_pipeline
+    versionLabel: "1"
+    gitBranch: main
+    templateInputs:
+      stages:
+        - stage:
+            identifier: Build
+            template:
+              templateInputs:
+                type: CI
+                spec:
+                  execution:
+                    steps:
+                      - step:
+                          identifier: Clone
+                          template:
+                            templateInputs:
+                              type: GitClone
+                              spec:
+                                sparseCheckout: <+input>
+                                build:
+                                  type: branch
+                                  spec:
+                                    branch: <+input>
+                variables:
+                  - name: module_path
+                    type: String
+                    value: <+input>
+  projectIdentifier: Ovi_sandbox
+  orgIdentifier: DOPS_Labs
