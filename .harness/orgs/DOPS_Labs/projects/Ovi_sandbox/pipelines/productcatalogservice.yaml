@@ -13,19 +13,13 @@ pipeline:
             template:
               templateInputs:
                 type: CI
-                spec:
-                  execution:
-                    steps:
-                      - step:
-                          identifier: Clone
-                          template:
-                            templateInputs:
-                              type: GitClone
-                              spec:
-                                sparseCheckout: <+input>
                 variables:
                   - name: module_path
                     type: String
                     value: <+input>
+      properties:
+        ci:
+          codebase:
+            build: <+input>
   projectIdentifier: Ovi_sandbox
   orgIdentifier: DOPS_Labs
