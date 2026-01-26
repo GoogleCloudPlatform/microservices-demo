@@ -2,7 +2,7 @@ module github.com/GoogleCloudPlatform/microservices-demo/src/frontend
 
 go 1.25
 
-toolchain go1.25.5
+toolchain go1.25.6
 
 require (
 	cloud.google.com/go/compute/metadata v0.9.0
@@ -11,7 +11,7 @@ require (
 	github.com/google/uuid v1.6.0
 	github.com/gorilla/mux v1.8.1
 	github.com/pkg/errors v0.9.1
-	github.com/sirupsen/logrus v1.9.3
+	github.com/sirupsen/logrus v1.9.4
 	go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc v0.64.0
 	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.64.0
 	go.opentelemetry.io/otel v1.39.0
