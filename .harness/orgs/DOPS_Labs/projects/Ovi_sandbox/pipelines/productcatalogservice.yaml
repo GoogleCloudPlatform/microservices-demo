@@ -7,16 +7,6 @@ pipeline:
     versionLabel: "1"
     gitBranch: main
     templateInputs:
-      stages:
-        - stage:
-            identifier: Build
-            template:
-              templateInputs:
-                type: CI
-                variables:
-                  - name: module_path
-                    type: String
-                    value: <+input>
       properties:
         ci:
           codebase:
