@@ -11,5 +11,9 @@ pipeline:
         ci:
           codebase:
             build: <+input>
+      variables:
+        - name: scan
+          type: Number
+          value: <+input>
   projectIdentifier: Ovi_sandbox
   orgIdentifier: DOPS_Labs
