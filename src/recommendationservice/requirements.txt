@@ -61,7 +61,7 @@ packaging==25.0
     # via opentelemetry-instrumentation
 proto-plus==1.27.0
     # via google-api-core
-protobuf==6.33.2
+protobuf==6.33.5
     # via
     #   google-api-core
     #   googleapis-common-protos
