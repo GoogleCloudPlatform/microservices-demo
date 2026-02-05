@@ -444,8 +444,12 @@ func (fe *frontendServer) getProductByID(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	w.Write(jsonData)
 	w.WriteHeader(http.StatusOK)
+if _, err := w.Write(jsonData); err != nil {
+	http.Error(w, "failed to write response", http.StatusInternalServerError)
+	return
+}
+
 }
 
 func (fe *frontendServer) chatBotHandler(w http.ResponseWriter, r *http.Request) {
