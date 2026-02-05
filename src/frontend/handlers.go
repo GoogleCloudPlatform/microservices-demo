@@ -495,7 +495,12 @@ func (fe *frontendServer) chatBotHandler(w http.ResponseWriter, r *http.Request)
 	}
 
 	// respond with the same message
-	json.NewEncoder(w).Encode(Response{Message: response.Content})
+	w.WriteHeader(http.StatusOK)
+if err := json.NewEncoder(w).Encode(Response{Message: response.Content}); err != nil {
+	http.Error(w, "failed to encode response", http.StatusInternalServerError)
+	return
+}
+
 
 	w.WriteHeader(http.StatusOK)
 }
