@@ -3,4 +3,10 @@
 
 # These owners will be the default owners for everything in
 # the repo. Unless a later match takes precedence.
+
+# Security and CI ownership
+/.github/     @almecc
+/docs/        @almecc
+/security/    @almecc
+
 * @GoogleCloudPlatform/devrel-flagship-app-maintainers @yoshi-approver
