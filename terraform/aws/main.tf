@@ -53,3 +53,9 @@ module "iam" {
 
   project_name = var.project_name
 }
+
+module "waf" {
+  source = "./modules/waf"
+
+  project_name = var.project_name
+}
