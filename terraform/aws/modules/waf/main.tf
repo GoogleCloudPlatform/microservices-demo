@@ -76,9 +76,19 @@ resource "aws_wafv2_web_acl" "main" {
     }
   }
 
+  tags = {
+    Name = "${var.project_name}-waf"
+  }
+
   visibility_config {
     sampled_requests_enabled   = true
     cloudwatch_metrics_enabled = true
     metric_name                = "WAFMain"
   }
+}
+
+# Associer le WAF au ALB pour qu'il protege le trafic entrant
+resource "aws_wafv2_web_acl_association" "alb" {
+  resource_arn = var.alb_arn
+  web_acl_arn  = aws_wafv2_web_acl.main.arn
 }

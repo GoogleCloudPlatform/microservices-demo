@@ -10,6 +10,10 @@ resource "aws_iam_role" "eks_cluster" {
       Action    = "sts:AssumeRole"
     }]
   })
+
+  tags = {
+    Name = "${var.project_name}-eks-cluster"
+  }
 }
 
 resource "aws_iam_role_policy_attachment" "eks_cluster" {
@@ -29,6 +33,10 @@ resource "aws_iam_role" "eks_nodes" {
       Action    = "sts:AssumeRole"
     }]
   })
+
+  tags = {
+    Name = "${var.project_name}-eks-nodes"
+  }
 }
 
 resource "aws_iam_role_policy_attachment" "nodes_worker" {
