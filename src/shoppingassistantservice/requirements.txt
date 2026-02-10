@@ -168,7 +168,7 @@ proto-plus==1.26.1
     #   google-api-core
     #   google-cloud-alloydb
     #   google-cloud-secret-manager
-protobuf==6.32.1
+protobuf==6.33.5
     # via
     #   google-api-core
     #   google-cloud-alloydb
