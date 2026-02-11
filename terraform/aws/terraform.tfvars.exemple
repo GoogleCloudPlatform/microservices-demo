@@ -1,0 +1,9 @@
+aws_region     = "eu-west-3"
+aws_access_key = "YOUR_AWS_ACCESS_KEY"
+aws_secret_key = "YOUR_AWS_SECRET_KEY"
+project_name   = "online-boutique"
+ami_id         = "ami_code"
+instance_type  = "t3.micro" # Attention à la région, le type d'instance peux ne pas être dispo
+key_name       = "your-ssh-key-pair-name" # Nom de la paire clé (pas la public key)
+db_username    = "admin"
+db_password    = "your-secure-password"
