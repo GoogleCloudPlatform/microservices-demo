@@ -6,7 +6,21 @@ This doc explains how to build and run the Online Boutique source code locally u
 
 - [Docker for Desktop](https://www.docker.com/products/docker-desktop)
 - [kubectl](https://kubernetes.io/docs/tasks/tools/) (can be installed via `gcloud components install kubectl` for Option 1 - GKE)
-- [skaffold **2.0.2+**](https://skaffold.dev/docs/install/) (latest version recommended), a tool that builds and deploys Docker images in bulk. 
+- [skaffold **2.0.2+**](https://skaffold.dev/docs/install/) (latest version recommended), a tool that builds and deploys Docker images in bulk.
+  
+  **Install skaffold:**
+  ```sh
+  # Linux
+  curl -Lo skaffold https://storage.googleapis.com/skaffold/releases/latest/skaffold-linux-amd64
+  chmod +x skaffold
+  sudo mv skaffold /usr/local/bin/
+  
+  # macOS
+  brew install skaffold
+  
+  # Or download from: https://skaffold.dev/docs/install/
+  ```
+
 - Clone the repository.
     ```sh
     git clone https://github.com/GoogleCloudPlatform/microservices-demo
@@ -15,6 +29,19 @@ This doc explains how to build and run the Online Boutique source code locally u
 - A Google Cloud project with Google Container Registry enabled. (for Option 1 - GKE)
 - [Minikube](https://minikube.sigs.k8s.io/docs/start/) (optional for Option 2 - Local Cluster)
 - [Kind](https://kind.sigs.k8s.io/) (optional for Option 2 - Local Cluster)
+- [k3d](https://k3d.io/) (optional for Option 2 - Local Cluster)
+
+### Verify Prerequisites
+
+Before starting, verify all required tools are installed:
+
+```sh
+docker --version         # Should show Docker 20.10+
+kubectl version --client # Should show kubectl 1.19+
+skaffold version        # Should show skaffold 2.0.2+
+```
+
+If any command fails, install the missing tool using the links above.
 
 ## Option 1: Google Kubernetes Engine (GKE)
 
@@ -113,11 +140,33 @@ This doc explains how to build and run the Online Boutique source code locally u
    This will build and deploy the application. If you need to rebuild the images
    automatically as you refactor the code, run `skaffold dev` command.
 
+   **If you encounter build errors** (see Troubleshooting section below), use pre-built images instead:
+   ```shell
+   kubectl apply -f ./release/kubernetes-manifests.yaml
+   ```
+
 4. Run `kubectl get pods` to verify the Pods are ready and running.
+
+   After a few minutes, you should see output similar to:
+   ```
+   NAME                                     READY   STATUS    RESTARTS   AGE
+   adservice-xxx                            1/1     Running   0          2m
+   cartservice-xxx                          1/1     Running   0          2m
+   checkoutservice-xxx                      1/1     Running   0          2m
+   currencyservice-xxx                      1/1     Running   0          2m
+   emailservice-xxx                         1/1     Running   0          2m
+   frontend-xxx                             1/1     Running   0          2m
+   loadgenerator-xxx                        1/1     Running   0          2m
+   paymentservice-xxx                       1/1     Running   0          2m
+   productcatalogservice-xxx                1/1     Running   0          2m
+   recommendationservice-xxx                1/1     Running   0          2m
+   redis-cart-xxx                           1/1     Running   0          2m
+   shippingservice-xxx                      1/1     Running   0          2m
+   ```
 
 5. Run `kubectl port-forward deployment/frontend 8080:8080` to forward a port to the frontend service.
 
-6. Navigate to `localhost:8080` to access the web frontend.
+6. Navigate to `http://localhost:8080` to access the web frontend.
 
 ## Adding a new microservice
 
@@ -129,3 +178,20 @@ See the [Adding a new microservice](adding-new-microservice.md) guide for instru
 
 If you've deployed the application with `skaffold run` command, you can run
 `skaffold delete` to clean up the deployed resources.
+
+If you used `kubectl apply`, run:
+```shell
+kubectl delete -f ./release/kubernetes-manifests.yaml
+```
+
+To delete your local cluster:
+```shell
+# k3d
+k3d cluster delete mycluster
+
+# Minikube
+minikube delete
+
+# Kind
+kind delete cluster
+```
