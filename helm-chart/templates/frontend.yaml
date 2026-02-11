@@ -25,6 +25,10 @@ metadata:
     {{- toYaml . | nindent 4 }}
   {{- end }}
   {{- end }}
+{{- if .Values.serviceAccounts.imagePullSecrets }}
+imagePullSecrets:
+  {{ toYaml .Values.serviceAccounts.imagePullSecrets | indent 2 }}
+{{- end }}
 ---
 {{- end }}
 apiVersion: apps/v1
