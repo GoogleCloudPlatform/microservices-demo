@@ -245,7 +245,7 @@ uuid-utils==0.12.0
     # via langchain-core
 websockets==15.0.1
     # via google-genai
-werkzeug==3.1.5
+werkzeug==3.1.6
     # via flask
 xxhash==3.6.0
     # via langgraph
