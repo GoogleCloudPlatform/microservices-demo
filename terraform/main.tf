@@ -45,6 +45,8 @@ resource "google_container_cluster" "my_cluster" {
   # Enable autopilot for this cluster
   enable_autopilot = true
 
+  deletion_protection = false
+
   # Set an empty ip_allocation_policy to allow autopilot cluster to spin up correctly
   ip_allocation_policy {
   }
@@ -63,7 +65,7 @@ module "gcloud" {
   source  = "terraform-google-modules/gcloud/google"
   version = "~> 4.0"
 
-  platform              = "linux"
+  platform              = "darwin"
   additional_components = ["kubectl", "beta"]
 
   create_cmd_entrypoint = "gcloud"
@@ -81,20 +83,5 @@ resource "null_resource" "apply_deployment" {
 
   depends_on = [
     module.gcloud
-  ]
-}
-
-# Wait condition for all Pods to be ready before finishing
-resource "null_resource" "wait_conditions" {
-  provisioner "local-exec" {
-    interpreter = ["bash", "-exc"]
-    command     = <<-EOT
-    kubectl wait --for=condition=AVAILABLE apiservice/v1beta1.metrics.k8s.io --timeout=180s
-    kubectl wait --for=condition=ready pods --all -n ${var.namespace} --timeout=280s
-    EOT
-  }
-
-  depends_on = [
-    resource.null_resource.apply_deployment
   ]
 }
