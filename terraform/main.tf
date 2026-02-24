@@ -78,7 +78,10 @@ module "gcloud" {
 resource "null_resource" "apply_deployment" {
   provisioner "local-exec" {
     interpreter = ["bash", "-exc"]
-    command     = "kubectl apply -k ${var.filepath_manifest} -n ${var.namespace}"
+    command     = "kubectl apply -k ${var.filepath_manifest} -n ${var.namespace} --validate=false"
+    environment = {
+      KUBECONFIG = "~/.kube/config"
+    }
   }
 
   depends_on = [
