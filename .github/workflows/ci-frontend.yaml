@@ -15,8 +15,8 @@ on:
 env:
   SERVICE: frontend
   SERVICE_DIR: src/frontend
-  GAR_LOCATION: ${{ vars.GAR_LOCATION }}        # e.g. us-central1
-  GAR_REPOSITORY: ${{ vars.GAR_REPOSITORY }}    # e.g. microservices-demo
+  GAR_LOCATION: ${{ vars.GAR_LOCATION }}        
+  GAR_REPOSITORY: ${{ vars.GAR_REPOSITORY }}    
   GCP_PROJECT_ID: ${{ vars.GCP_PROJECT_ID }}
 
 jobs:
@@ -27,13 +27,13 @@ jobs:
       - uses: actions/checkout@v6
 
       - name: Set up Go
-        uses: actions/setup-go@v5
+        uses: actions/setup-go@v6
         with:
           go-version-file: ${{ env.SERVICE_DIR }}/go.mod
           cache-dependency-path: ${{ env.SERVICE_DIR }}/go.sum
 
       - name: golangci-lint
-        uses: golangci/golangci-lint-action@v6
+        uses: golangci/golangci-lint-action@v9
         with:
           version: latest
           working-directory: ${{ env.SERVICE_DIR }}
