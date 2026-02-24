@@ -1,0 +1,124 @@
+name: "CI – cartservice (C#)"
+
+on:
+  push:
+    branches: [main, release/**, staging]
+    paths:
+      - "src/cartservice/**"
+      - ".github/workflows/ci-cartservice.yaml"
+  pull_request:
+    branches: [main, staging]
+    paths:
+      - "src/cartservice/**"
+      - ".github/workflows/ci-cartservice.yaml"
+
+env:
+  SERVICE: cartservice
+  SERVICE_DIR: src/cartservice
+  DOTNET_PROJECT_DIR: src/cartservice/src
+  GAR_LOCATION: ${{ vars.GAR_LOCATION }}
+  GAR_REPOSITORY: ${{ vars.GAR_REPOSITORY }}
+  GCP_PROJECT_ID: ${{ vars.GCP_PROJECT_ID }}
+
+jobs:
+  lint-and-test:
+    name: Lint & Test (C# / .NET)
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "8.x"
+
+      - name: Restore NuGet packages
+        working-directory: ${{ env.SERVICE_DIR }}
+        run: dotnet restore
+
+      - name: Check formatting (dotnet format)
+        working-directory: ${{ env.SERVICE_DIR }}
+        run: dotnet format --verify-no-changes --verbosity diagnostic
+
+      - name: Build (release)
+        working-directory: ${{ env.SERVICE_DIR }}
+        run: dotnet build --no-restore --configuration Release
+
+      - name: Run unit tests with coverage
+        working-directory: ${{ env.SERVICE_DIR }}
+        run: |
+          dotnet test \
+            --no-build \
+            --configuration Release \
+            --logger "trx;LogFileName=test-results.trx" \
+            --collect:"XPlat Code Coverage" \
+            -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover
+
+      - name: Upload test results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: cartservice-test-results
+          path: ${{ env.SERVICE_DIR }}/**/*.trx
+
+      - name: Upload coverage
+        uses: actions/upload-artifact@v4
+        with:
+          name: cartservice-coverage
+          path: ${{ env.SERVICE_DIR }}/**/coverage.opencover.xml
+
+  build-and-push:
+    name: Build & Push Image
+    runs-on: ubuntu-24.04
+    needs: lint-and-test
+    if: github.event_name == 'push'
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      - name: Configure Docker for GAR
+        run: gcloud auth configure-docker ${{ env.GAR_LOCATION }}-docker.pkg.dev --quiet
+
+      - name: Set image metadata
+        id: meta
+        run: |
+          SHORT_SHA="${GITHUB_SHA::8}"
+          IMAGE="${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.GCP_PROJECT_ID }}/${{ env.GAR_REPOSITORY }}/${{ env.SERVICE }}"
+          BRANCH="${GITHUB_REF_NAME//\//-}"
+          echo "image=${IMAGE}" >> "$GITHUB_OUTPUT"
+          echo "tag=${SHORT_SHA}" >> "$GITHUB_OUTPUT"
+          echo "branch_tag=${BRANCH}" >> "$GITHUB_OUTPUT"
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v6
+        with:
+          context: ${{ env.DOTNET_PROJECT_DIR }}
+          file: ${{ env.DOTNET_PROJECT_DIR }}/Dockerfile
+          push: true
+          platforms: linux/amd64
+          tags: |
+            ${{ steps.meta.outputs.image }}:${{ steps.meta.outputs.tag }}
+            ${{ steps.meta.outputs.image }}:${{ steps.meta.outputs.branch_tag }}
+            ${{ steps.meta.outputs.image }}:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Image digest summary
+        run: |
+          echo "### Image pushed" >> $GITHUB_STEP_SUMMARY
+          echo "| Key | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "| --- | --- |" >> $GITHUB_STEP_SUMMARY
+          echo "| Service | ${{ env.SERVICE }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Tag | ${{ steps.meta.outputs.tag }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Registry | ${{ steps.meta.outputs.image }} |" >> $GITHUB_STEP_SUMMARY

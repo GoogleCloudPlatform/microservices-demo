@@ -1,0 +1,109 @@
+name: "CI – checkoutservice (Go)"
+
+on:
+  push:
+    branches: [main, release/**, staging]
+    paths:
+      - "src/checkoutservice/**"
+      - ".github/workflows/ci-checkoutservice.yaml"
+  pull_request:
+    branches: [main, staging]
+    paths:
+      - "src/checkoutservice/**"
+      - ".github/workflows/ci-checkoutservice.yaml"
+
+env:
+  SERVICE: checkoutservice
+  SERVICE_DIR: src/checkoutservice
+  GAR_LOCATION: ${{ vars.GAR_LOCATION }}
+  GAR_REPOSITORY: ${{ vars.GAR_REPOSITORY }}
+  GCP_PROJECT_ID: ${{ vars.GCP_PROJECT_ID }}
+
+jobs:
+  lint-and-test:
+    name: Lint & Test (Go)
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: ${{ env.SERVICE_DIR }}/go.mod
+          cache-dependency-path: ${{ env.SERVICE_DIR }}/go.sum
+
+      - name: golangci-lint
+        uses: golangci/golangci-lint-action@v6
+        with:
+          version: latest
+          working-directory: ${{ env.SERVICE_DIR }}
+          args: --timeout=5m
+
+      - name: go vet
+        working-directory: ${{ env.SERVICE_DIR }}
+        run: go vet ./...
+
+      - name: Unit tests
+        working-directory: ${{ env.SERVICE_DIR }}
+        run: go test -race -coverprofile=coverage.out -covermode=atomic ./...
+
+      - name: Upload coverage
+        uses: actions/upload-artifact@v4
+        with:
+          name: checkoutservice-coverage
+          path: ${{ env.SERVICE_DIR }}/coverage.out
+
+  build-and-push:
+    name: Build & Push Image
+    runs-on: ubuntu-24.04
+    needs: lint-and-test
+    if: github.event_name == 'push'
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      - name: Configure Docker for GAR
+        run: gcloud auth configure-docker ${{ env.GAR_LOCATION }}-docker.pkg.dev --quiet
+
+      - name: Set image metadata
+        id: meta
+        run: |
+          SHORT_SHA="${GITHUB_SHA::8}"
+          IMAGE="${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.GCP_PROJECT_ID }}/${{ env.GAR_REPOSITORY }}/${{ env.SERVICE }}"
+          BRANCH="${GITHUB_REF_NAME//\//-}"
+          echo "image=${IMAGE}" >> "$GITHUB_OUTPUT"
+          echo "tag=${SHORT_SHA}" >> "$GITHUB_OUTPUT"
+          echo "branch_tag=${BRANCH}" >> "$GITHUB_OUTPUT"
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v6
+        with:
+          context: ${{ env.SERVICE_DIR }}
+          push: true
+          platforms: linux/amd64
+          tags: |
+            ${{ steps.meta.outputs.image }}:${{ steps.meta.outputs.tag }}
+            ${{ steps.meta.outputs.image }}:${{ steps.meta.outputs.branch_tag }}
+            ${{ steps.meta.outputs.image }}:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Image digest summary
+        run: |
+          echo "### Image pushed" >> $GITHUB_STEP_SUMMARY
+          echo "| Key | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "| --- | --- |" >> $GITHUB_STEP_SUMMARY
+          echo "| Service | ${{ env.SERVICE }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Tag | ${{ steps.meta.outputs.tag }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Registry | ${{ steps.meta.outputs.image }} |" >> $GITHUB_STEP_SUMMARY

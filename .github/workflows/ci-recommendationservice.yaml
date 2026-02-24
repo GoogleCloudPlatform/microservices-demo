@@ -1,0 +1,123 @@
+name: "CI - recommendationservice"
+
+on:
+  push:
+    branches: [main, staging, "release/**"]
+    paths:
+      - "src/recommendationservice/**"
+      - ".github/workflows/ci-recommendationservice.yaml"
+  pull_request:
+    branches: [main, staging]
+    paths:
+      - "src/recommendationservice/**"
+      - ".github/workflows/ci-recommendationservice.yaml"
+
+env:
+  SERVICE: recommendationservice
+  SERVICE_DIR: src/recommendationservice
+  GAR_LOCATION: ${{ vars.GAR_LOCATION }}
+  GCP_PROJECT_ID: ${{ vars.GCP_PROJECT_ID }}
+  GAR_REPOSITORY: ${{ vars.GAR_REPOSITORY }}
+
+jobs:
+  lint-and-test:
+    name: Lint & Test (Python)
+    runs-on: ubuntu-24.04
+    defaults:
+      run:
+        working-directory: ${{ env.SERVICE_DIR }}
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+          cache-dependency-path: ${{ env.SERVICE_DIR }}/requirements.txt
+
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          pip install flake8 pylint pytest pytest-cov
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+
+      - name: Lint with flake8
+        run: |
+          flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+          flake8 . --count --max-complexity=10 --max-line-length=127 --statistics --exit-zero
+
+      - name: Lint with pylint
+        run: |
+          pylint --disable=all --enable=E $(find . -name "*.py" ! -path "*/vendor/*" ! -path "*_pb2*") --exit-zero
+
+      - name: Run tests
+        run: |
+          if find . -name "test_*.py" -o -name "*_test.py" | grep -q .; then
+            pytest --cov=. --cov-report=xml -v
+          else
+            echo "No tests found, skipping pytest"
+          fi
+
+      - name: Upload coverage report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: recommendationservice-coverage
+          path: ${{ env.SERVICE_DIR }}/coverage.xml
+          if-no-files-found: ignore
+
+  build-and-push:
+    name: Build & Push Image
+    runs-on: ubuntu-24.04
+    needs: lint-and-test
+    if: github.event_name == 'push'
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Authenticate to GCP
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      - name: Configure Docker for Artifact Registry
+        run: gcloud auth configure-docker ${{ env.GAR_LOCATION }}-docker.pkg.dev --quiet
+
+      - name: Set image metadata
+        id: meta
+        run: |
+          SHA_TAG="${GITHUB_SHA::8}"
+          BRANCH_TAG="${GITHUB_REF_NAME//\//-}"
+          IMAGE_BASE="${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.GCP_PROJECT_ID }}/${{ env.GAR_REPOSITORY }}/${{ env.SERVICE }}"
+          echo "image_base=$IMAGE_BASE" >> $GITHUB_OUTPUT
+          echo "sha_tag=$SHA_TAG" >> $GITHUB_OUTPUT
+          echo "branch_tag=$BRANCH_TAG" >> $GITHUB_OUTPUT
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v6
+        with:
+          context: ${{ env.SERVICE_DIR }}
+          push: true
+          tags: |
+            ${{ steps.meta.outputs.image_base }}:${{ steps.meta.outputs.sha_tag }}
+            ${{ steps.meta.outputs.image_base }}:${{ steps.meta.outputs.branch_tag }}
+            ${{ steps.meta.outputs.image_base }}:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Image digest summary
+        run: |
+          echo "### Image pushed" >> $GITHUB_STEP_SUMMARY
+          echo "| Key | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "| --- | --- |" >> $GITHUB_STEP_SUMMARY
+          echo "| Service | ${{ env.SERVICE }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Tag | ${{ steps.meta.outputs.tag }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Registry | ${{ steps.meta.outputs.image }} |" >> $GITHUB_STEP_SUMMARY
