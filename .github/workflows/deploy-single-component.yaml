@@ -1,4 +1,5 @@
 name: Deploy Single Component
+run-name: Deploy component ${{ inputs.component }} to ${{ inputs.namespace }} environment version ${{ inputs.image_tag }}
 on:
   workflow_dispatch:
     inputs:
@@ -15,9 +16,11 @@ on:
         description: 'Image tag/version (optional, e.g., 3188ba25daca3f57225805de62a5b61ee4263a1f or v0.10.4)'
         required: false
         type: string
+
 permissions:
   contents: read
   id-token: write
+
 jobs:
   deploy-single:
     runs-on: ubuntu-24.04
