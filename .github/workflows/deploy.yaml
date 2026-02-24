@@ -1,6 +1,12 @@
-name: terraform-validate-ci
+name: Deploy
 on:
   workflow_dispatch:
+    inputs:
+      namespace:
+        description: 'Kubernetes namespace to deploy to'
+        required: true
+        default: 'default'
+        type: string
 permissions:
   contents: read
   id-token: write
@@ -31,7 +37,7 @@ jobs:
 
       - name: terraform plan
         working-directory: terraform
-        run: terraform plan -out=tfplan
+        run: terraform plan -out=tfplan -var="namespace=${{ inputs.namespace }}"
 
       - name: terraform apply
         working-directory: terraform
