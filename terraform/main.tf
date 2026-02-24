@@ -78,10 +78,10 @@ module "gcloud" {
 resource "null_resource" "apply_deployment" {
   provisioner "local-exec" {
     interpreter = ["bash", "-exc"]
-    command     = "kubectl apply -k ${var.filepath_manifest} -n ${var.namespace} --validate=false"
-    environment = {
-      KUBECONFIG = "~/.kube/config"
-    }
+    command     = <<-EOT
+      gcloud container clusters get-credentials ${local.cluster_name} --zone=${var.region} --project=${var.gcp_project_id}
+      kubectl apply -k ${var.filepath_manifest} -n ${var.namespace}
+    EOT
   }
 
   depends_on = [
