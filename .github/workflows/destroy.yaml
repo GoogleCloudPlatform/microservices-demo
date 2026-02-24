@@ -1,0 +1,44 @@
+name: Destroy Infrastructure
+on:
+  workflow_dispatch:
+    inputs:
+      namespace:
+        description: 'Kubernetes namespace to destroy'
+        required: true
+        default: 'default'
+        type: string
+      delete_namespace:
+        description: 'Delete the namespace after destroy'
+        required: false
+        default: 'true'
+        type: choice
+        options:
+          - 'true'
+          - 'false'
+permissions:
+  contents: read
+  id-token: write
+jobs:
+  destroy:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_AUTENITIFICATION_KEY}}
+          project_id: ${{ secrets.GCP_PROJECT_ID }}
+
+      - name: Set up gcloud
+        uses: google-github-actions/setup-gcloud@v2
+
+      - uses: hashicorp/setup-terraform@v3
+
+      - name: terraform init
+        working-directory: terraform
+        run: terraform init
+
+      - name: terraform destroy
+        working-directory: terraform
+        run: terraform destroy -auto-approve -var="namespace=${{ inputs.namespace }}"
