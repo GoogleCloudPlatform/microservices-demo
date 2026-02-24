@@ -21,3 +21,13 @@ output "cluster_name" {
   description = "Name of the cluster"
   value       = resource.google_container_cluster.my_cluster.name
 }
+
+output "staging_frontend_ip_cmd" {
+  description = "Command to get the staging frontend external IP"
+  value       = "kubectl get svc frontend-external -n staging -o jsonpath='{.status.loadBalancer.ingress[0].ip}'"
+}
+
+output "prod_frontend_ip_cmd" {
+  description = "Command to get the prod frontend external IP"
+  value       = "kubectl get svc frontend-external -n prod -o jsonpath='{.status.loadBalancer.ingress[0].ip}'"
+}

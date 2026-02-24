@@ -72,15 +72,44 @@ module "gcloud" {
   create_cmd_body = "container clusters get-credentials ${local.cluster_name} --zone=${var.region} --project=${var.gcp_project_id}"
 }
 
-# Apply YAML kubernetes-manifest configurations
-resource "null_resource" "apply_deployment" {
+# Create staging and prod namespaces
+resource "null_resource" "create_namespaces" {
   provisioner "local-exec" {
     interpreter = ["bash", "-exc"]
-    command     = "kubectl apply -k ${var.filepath_manifest} -n ${var.namespace}"
+    command     = <<-EOT
+      kubectl create namespace staging --dry-run=client -o yaml | kubectl apply -f -
+      kubectl create namespace prod    --dry-run=client -o yaml | kubectl apply -f -
+      kubectl label namespace staging environment=staging --overwrite
+      kubectl label namespace prod    environment=prod    --overwrite
+    EOT
   }
 
   depends_on = [
     module.gcloud
+  ]
+}
+
+# Deploy Online Boutique to staging namespace
+resource "null_resource" "deploy_staging" {
+  provisioner "local-exec" {
+    interpreter = ["bash", "-exc"]
+    command     = "kubectl apply -k ${path.module}/../kustomize/overlays/staging"
+  }
+
+  depends_on = [
+    null_resource.create_namespaces
+  ]
+}
+
+# Deploy Online Boutique to prod namespace
+resource "null_resource" "deploy_prod" {
+  provisioner "local-exec" {
+    interpreter = ["bash", "-exc"]
+    command     = "kubectl apply -k ${path.module}/../kustomize/overlays/prod"
+  }
+
+  depends_on = [
+    null_resource.create_namespaces
   ]
 }
 
@@ -89,12 +118,14 @@ resource "null_resource" "wait_conditions" {
   provisioner "local-exec" {
     interpreter = ["bash", "-exc"]
     command     = <<-EOT
-    kubectl wait --for=condition=AVAILABLE apiservice/v1beta1.metrics.k8s.io --timeout=180s
-    kubectl wait --for=condition=ready pods --all -n ${var.namespace} --timeout=280s
+      kubectl wait --for=condition=AVAILABLE apiservice/v1beta1.metrics.k8s.io --timeout=180s
+      kubectl wait --for=condition=ready pods --all -n staging --timeout=300s
+      kubectl wait --for=condition=ready pods --all -n prod    --timeout=300s
     EOT
   }
 
   depends_on = [
-    resource.null_resource.apply_deployment
+    null_resource.deploy_staging,
+    null_resource.deploy_prod,
   ]
 }
