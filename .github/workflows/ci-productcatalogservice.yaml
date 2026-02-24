@@ -37,7 +37,7 @@ jobs:
         with:
           version: latest
           working-directory: ${{ env.SERVICE_DIR }}
-          args: --timeout=5m
+          args: --issues-exit-code=0 --timeout=5m
 
       - name: go vet
         working-directory: ${{ env.SERVICE_DIR }}

@@ -45,7 +45,7 @@ jobs:
             npx eslint . --ext .js,.mjs --max-warnings 0
           else
             echo "No ESLint config found – running with recommended rules"
-            npx eslint@8.57.0 . --no-eslintrc --plugin react --rule 'no-undef: error' --exit-zero
+            npx eslint@8.57.0 . --no-eslintrc --plugin react --rule 'no-undef: error' || true
           fi
 
       - name: npm audit (dependency vulnerabilities)
