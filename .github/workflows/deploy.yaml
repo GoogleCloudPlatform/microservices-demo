@@ -1,5 +1,5 @@
 name: Deploy
-run-name: Deploy to ${{ inputs.namespace }} environment
+run-name: Deploy infrastructure to ${{ inputs.namespace }} environment
 
 on:
   workflow_dispatch:

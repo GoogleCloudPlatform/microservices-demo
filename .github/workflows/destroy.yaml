@@ -1,5 +1,5 @@
 name: Destroy Infrastructure
-run-name: Destroy to ${{ inputs.namespace }} environment
+run-name: Destroy Infrastructure in ${{ inputs.namespace }} environment
 
 on:
   workflow_dispatch:
