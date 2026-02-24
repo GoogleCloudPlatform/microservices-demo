@@ -1,4 +1,6 @@
 name: Destroy Infrastructure
+run-name: Destroy to ${{ inputs.namespace }} environment
+
 on:
   workflow_dispatch:
     inputs:
@@ -7,17 +9,11 @@ on:
         required: true
         default: 'default'
         type: string
-      delete_namespace:
-        description: 'Delete the namespace after destroy'
-        required: false
-        default: 'true'
-        type: choice
-        options:
-          - 'true'
-          - 'false'
+
 permissions:
   contents: read
   id-token: write
+
 jobs:
   destroy:
     runs-on: ubuntu-24.04

@@ -1,4 +1,6 @@
 name: Deploy
+run-name: Deploy to ${{ inputs.namespace }} environment
+
 on:
   workflow_dispatch:
     inputs:
@@ -7,9 +9,11 @@ on:
         required: true
         default: 'default'
         type: string
+
 permissions:
   contents: read
   id-token: write
+  
 jobs:
   terraform-validate-ci:
     runs-on: ubuntu-24.04
