@@ -1,0 +1,8 @@
+# Staging overlay: namespace for K8s isolation (uses base with public images, no loadgenerator)
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: staging
+resources:
+  - ../../base
+components:
+  - ../../components/without-loadgenerator

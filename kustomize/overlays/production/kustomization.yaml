@@ -1,0 +1,8 @@
+# Production overlay: namespace (uses base with public images)
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: production
+resources:
+  - ../../base
+commonLabels:
+  environment: production

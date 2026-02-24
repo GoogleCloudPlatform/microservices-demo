@@ -32,6 +32,10 @@ jobs:
       - uses: hashicorp/setup-terraform@v3
       - name: terraform init & validate
         run: |
-          cd terraform/
-          terraform init -backend=false
-          terraform validate
+          for env in terraform/environments/cluster terraform/environments/staging terraform/environments/production; do
+            echo "--- $env ---"
+            cd "$env"
+            terraform init -backend=false
+            terraform validate
+            cd -
+          done

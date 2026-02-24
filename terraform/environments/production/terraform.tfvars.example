@@ -1,0 +1,9 @@
+# forgeteam: copy to terraform.tfvars and set project_id.
+# Apply cluster first. Backend bucket is in backend.tf.
+
+project_id       = "forgeteam"
+tfstate_bucket   = "forgeteam-tfstate-1771882722"
+region           = "us-central1"
+use_remote_state = true
+# If use_remote_state = false, set:
+# cluster_name = "forgeteam-online-boutique"

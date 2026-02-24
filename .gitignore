@@ -5,8 +5,7 @@
 .kubernetes-manifests-*/
 .project
 .skaffold-*.yaml
-.terraform.lock.hcl
-.terraform/*
+.terraform/
 .venv/
 .vs/
 .vscode/
@@ -17,6 +16,7 @@
 *.swp
 *.tfstate*
 *.tfvars
+!*.tfvars.example
 *~
 bin/
 build/
@@ -26,3 +26,15 @@ obj/
 pkg/
 release/wi-kubernetes-manifests.yaml
 vendor/
+
+# Secrets and credentials
+*.pem
+*.key
+*.json
+!package.json
+!package-lock.json
+!tsconfig.json
+credentials.json
+service-account*.json
+.env
+.env.*

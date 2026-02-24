@@ -1,0 +1,8 @@
+# forgeteam: copy to terraform.tfvars and set project_id.
+# Backend bucket is already set in backend.tf.
+
+project_id  = "forgeteam"
+name        = "forgeteam-online-boutique"
+region      = "us-central1"
+enable_apis = true
+memorystore = false
