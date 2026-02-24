@@ -1,0 +1,36 @@
+name: terraform-validate-ci
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+  id-token: write
+jobs:
+  terraform-validate-ci:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_AUTENITIFICATION_KEY}}
+          project_id: ${{ secrets.GCP_PROJECT_ID }}
+
+      - name: Set up gcloud
+        uses: google-github-actions/setup-gcloud@v2
+
+      - uses: hashicorp/setup-terraform@v3
+
+      - name: terraform init & validate
+        working-directory: terraform
+        run: |
+          terraform init -backend=false
+          terraform validate
+
+      - name: terraform plan
+        working-directory: terraform
+        run: terraform plan -out=tfplan
+
+      - name: terraform apply
+        working-directory: terraform
+        run: terraform apply -auto-approve tfplan
