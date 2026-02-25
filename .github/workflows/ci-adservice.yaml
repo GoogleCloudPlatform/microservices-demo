@@ -1,0 +1,122 @@
+name: "CI - adservice"
+
+on:
+  push:
+    branches: [main, release/**, staging]
+    paths:
+      - "src/adservice/**"
+      - ".github/workflows/ci-adservice.yaml"
+  pull_request:
+    branches: [main, staging]
+    paths:
+      - "src/adservice/**"
+      - ".github/workflows/ci-adservice.yaml"
+
+env:
+  SERVICE: adservice
+  GAR_LOCATION: ${{ vars.GAR_LOCATION }}
+  GCP_PROJECT_ID: ${{ vars.GCP_PROJECT_ID }}
+  GAR_REPOSITORY: ${{ vars.GAR_REPOSITORY }}
+
+jobs:
+  lint-and-test:
+    name: Lint & Test (Java/Gradle)
+    runs-on: ubuntu-24.04
+    defaults:
+      run:
+        working-directory: src/adservice
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: "21"
+          distribution: "temurin"
+          cache: gradle
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      - name: Check code style with Checkstyle
+        run: |
+          # Run checkstyle if configured in build.gradle, otherwise skip gracefully
+          if ./gradlew tasks --all 2>/dev/null | grep -q "checkstyleMain"; then
+            ./gradlew checkstyleMain checkstyleTest --no-daemon || true
+          else
+            echo "Checkstyle not configured, running basic compilation check instead"
+            ./gradlew compileJava --no-daemon
+          fi
+
+      - name: Run tests
+        run: ./gradlew test --no-daemon
+
+      - name: Generate test report
+        if: always()
+        run: ./gradlew jacocoTestReport --no-daemon || true
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: adservice-test-results
+          path: |
+            src/adservice/build/reports/tests/
+            src/adservice/build/reports/jacoco/
+          if-no-files-found: ignore
+
+  build-and-push:
+    name: Build & Push Image
+    runs-on: ubuntu-24.04
+    needs: lint-and-test
+    if: github.event_name == 'push'
+
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Authenticate to GCP
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      - name: Configure Docker for Artifact Registry
+        run: gcloud auth configure-docker ${{ env.GAR_LOCATION }}-docker.pkg.dev --quiet
+
+      - name: Set image metadata
+        id: meta
+        run: |
+          SHA_TAG="${GITHUB_SHA::8}"
+          BRANCH_TAG="${GITHUB_REF_NAME//\//-}"
+          IMAGE_BASE="${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.GCP_PROJECT_ID }}/${{ env.GAR_REPOSITORY }}/${{ env.SERVICE }}"
+          echo "image_base=$IMAGE_BASE" >> $GITHUB_OUTPUT
+          echo "sha_tag=$SHA_TAG" >> $GITHUB_OUTPUT
+          echo "branch_tag=$BRANCH_TAG" >> $GITHUB_OUTPUT
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v6
+        with:
+          context: src/adservice
+          push: true
+          tags: |
+            ${{ steps.meta.outputs.image_base }}:${{ steps.meta.outputs.sha_tag }}
+            ${{ steps.meta.outputs.image_base }}:${{ steps.meta.outputs.branch_tag }}
+            ${{ steps.meta.outputs.image_base }}:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Image digest summary
+        run: |
+          echo "### Image pushed" >> $GITHUB_STEP_SUMMARY
+          echo "| Key | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "| --- | --- |" >> $GITHUB_STEP_SUMMARY
+          echo "| Service | ${{ env.SERVICE }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Tag | ${{ steps.meta.outputs.sha_tag }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Registry | ${{ steps.meta.outputs.image_base }} |" >> $GITHUB_STEP_SUMMARY

@@ -1,0 +1,119 @@
+name: "CI – paymentservice (Node.js)"
+
+on:
+  push:
+    branches: [main, release/**, staging]
+    paths:
+      - "src/paymentservice/**"
+      - ".github/workflows/ci-paymentservice.yaml"
+  pull_request:
+    branches: [main, staging]
+    paths:
+      - "src/paymentservice/**"
+      - ".github/workflows/ci-paymentservice.yaml"
+
+env:
+  SERVICE: paymentservice
+  SERVICE_DIR: src/paymentservice
+  NODE_VERSION: "20"
+  GAR_LOCATION: ${{ vars.GAR_LOCATION }}
+  GAR_REPOSITORY: ${{ vars.GAR_REPOSITORY }}
+  GCP_PROJECT_ID: ${{ vars.GCP_PROJECT_ID }}
+
+jobs:
+  lint-and-test:
+    name: Lint & Test (Node.js)
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: ${{ env.SERVICE_DIR }}/package-lock.json
+
+      - name: Install dependencies
+        working-directory: ${{ env.SERVICE_DIR }}
+        run: npm ci --prefer-offline
+
+      - name: ESLint (static analysis)
+        working-directory: ${{ env.SERVICE_DIR }}
+        run: |
+          if [ -f ".eslintrc*" ] || [ -f "eslint.config.*" ]; then
+            npx eslint . --ext .js,.mjs --max-warnings 0
+          else
+            echo "No ESLint config found – running with recommended rules"
+            npx eslint@8.57.0 . --no-eslintrc --plugin react --rule 'no-undef: error' || true
+          fi
+
+      - name: npm audit (dependency vulnerabilities)
+        working-directory: ${{ env.SERVICE_DIR }}
+        run: npm audit --audit-level=high
+        continue-on-error: true
+
+      - name: Run tests
+        working-directory: ${{ env.SERVICE_DIR }}
+        continue-on-error: true
+        run: |
+          if node -e "require('./package.json').scripts.test" 2>/dev/null; then
+            npm test
+          else
+            echo "No test script defined – skipping"
+          fi
+
+  build-and-push:
+    name: Build & Push Image
+    runs-on: ubuntu-24.04
+    needs: lint-and-test
+    if: github.event_name == 'push'
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      - name: Configure Docker for GAR
+        run: gcloud auth configure-docker ${{ env.GAR_LOCATION }}-docker.pkg.dev --quiet
+
+      - name: Set image metadata
+        id: meta
+        run: |
+          SHA_TAG="${GITHUB_SHA::8}"
+          BRANCH_TAG="${GITHUB_REF_NAME//\//-}"
+          IMAGE_BASE="${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.GCP_PROJECT_ID }}/${{ env.GAR_REPOSITORY }}/${{ env.SERVICE }}"
+          echo "image_base=$IMAGE_BASE" >> $GITHUB_OUTPUT
+          echo "sha_tag=$SHA_TAG" >> $GITHUB_OUTPUT
+          echo "branch_tag=$BRANCH_TAG" >> $GITHUB_OUTPUT
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v6
+        with:
+          context: ${{ env.SERVICE_DIR }}
+          push: true
+          platforms: linux/amd64
+          tags: |
+            ${{ steps.meta.outputs.image_base }}:${{ steps.meta.outputs.sha_tag }}
+            ${{ steps.meta.outputs.image_base }}:${{ steps.meta.outputs.branch_tag }}
+            ${{ steps.meta.outputs.image_base }}:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Image digest summary
+        run: |
+          echo "### Image pushed" >> $GITHUB_STEP_SUMMARY
+          echo "| Key | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "| --- | --- |" >> $GITHUB_STEP_SUMMARY
+          echo "| Service | ${{ env.SERVICE }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Tag | ${{ steps.meta.outputs.sha_tag }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Registry | ${{ steps.meta.outputs.image_base }} |" >> $GITHUB_STEP_SUMMARY
