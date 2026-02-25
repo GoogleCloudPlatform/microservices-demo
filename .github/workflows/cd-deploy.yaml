@@ -1,9 +1,6 @@
 name: "CD - deploy service"
 
 on:
-  # ── ВРЕМЕННЫЙ ТРИГГЕР ───────────────────────────
-  push:
-    branches: [CD-creation]
   # ── Автоматично: спрацьовує коли будь-який CI пройшов на main ──────────────
   workflow_run:
     workflows:
