@@ -94,9 +94,9 @@ jobs:
           push: true
           platforms: linux/amd64
           tags: |
-            ${{ steps.meta.outputs.image }}:${{ steps.meta.outputs.tag }}
-            ${{ steps.meta.outputs.image }}:${{ steps.meta.outputs.branch_tag }}
-            ${{ steps.meta.outputs.image }}:latest
+            ${{ steps.meta.outputs.image_base }}:${{ steps.meta.outputs.sha_tag }}
+            ${{ steps.meta.outputs.image_base }}:${{ steps.meta.outputs.branch_tag }}
+            ${{ steps.meta.outputs.image_base }}:latest
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
@@ -106,5 +106,5 @@ jobs:
           echo "| Key | Value |" >> $GITHUB_STEP_SUMMARY
           echo "| --- | --- |" >> $GITHUB_STEP_SUMMARY
           echo "| Service | ${{ env.SERVICE }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Tag | ${{ steps.meta.outputs.tag }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Registry | ${{ steps.meta.outputs.image }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Tag | ${{ steps.meta.outputs.sha_tag }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Registry | ${{ steps.meta.outputs.image_base }} |" >> $GITHUB_STEP_SUMMARY

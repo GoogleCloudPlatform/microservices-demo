@@ -77,12 +77,12 @@ jobs:
       - name: Set image metadata
         id: meta
         run: |
-          SHORT_SHA="${GITHUB_SHA::8}"
-          IMAGE="${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.GCP_PROJECT_ID }}/${{ env.GAR_REPOSITORY }}/${{ env.SERVICE }}"
-          BRANCH="${GITHUB_REF_NAME//\//-}"
-          echo "image=${IMAGE}" >> "$GITHUB_OUTPUT"
-          echo "tag=${SHORT_SHA}" >> "$GITHUB_OUTPUT"
-          echo "branch_tag=${BRANCH}" >> "$GITHUB_OUTPUT"
+          SHA_TAG="${GITHUB_SHA::8}"
+          BRANCH_TAG="${GITHUB_REF_NAME//\//-}"
+          IMAGE_BASE="${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.GCP_PROJECT_ID }}/${{ env.GAR_REPOSITORY }}/${{ env.SERVICE }}"
+          echo "image_base=$IMAGE_BASE" >> $GITHUB_OUTPUT
+          echo "sha_tag=$SHA_TAG" >> $GITHUB_OUTPUT
+          echo "branch_tag=$BRANCH_TAG" >> $GITHUB_OUTPUT
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -94,9 +94,9 @@ jobs:
           push: true
           platforms: linux/amd64
           tags: |
-            ${{ steps.meta.outputs.image }}:${{ steps.meta.outputs.tag }}
-            ${{ steps.meta.outputs.image }}:${{ steps.meta.outputs.branch_tag }}
-            ${{ steps.meta.outputs.image }}:latest
+            ${{ steps.meta.outputs.image_base }}:${{ steps.meta.outputs.sha_tag }}
+            ${{ steps.meta.outputs.image_base }}:${{ steps.meta.outputs.branch_tag }}
+            ${{ steps.meta.outputs.image_base }}:latest
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
@@ -106,5 +106,5 @@ jobs:
           echo "| Key | Value |" >> $GITHUB_STEP_SUMMARY
           echo "| --- | --- |" >> $GITHUB_STEP_SUMMARY
           echo "| Service | ${{ env.SERVICE }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Tag | ${{ steps.meta.outputs.tag }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Registry | ${{ steps.meta.outputs.image }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Tag | ${{ steps.meta.outputs.sha_tag }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Registry | ${{ steps.meta.outputs.image_base }} |" >> $GITHUB_STEP_SUMMARY
