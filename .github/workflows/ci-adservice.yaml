@@ -70,7 +70,7 @@ jobs:
     name: Build & Push Image
     runs-on: ubuntu-24.04
     needs: lint-and-test
-    if: github.event_name == 'push'
+    # if: github.event_name == 'push'
 
     permissions:
       contents: read
@@ -118,5 +118,5 @@ jobs:
           echo "| Key | Value |" >> $GITHUB_STEP_SUMMARY
           echo "| --- | --- |" >> $GITHUB_STEP_SUMMARY
           echo "| Service | ${{ env.SERVICE }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Tag | ${{ steps.meta.outputs.tag }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Registry | ${{ steps.meta.outputs.image }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Tag | ${{ steps.meta.outputs.sha_tag }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Registry | ${{ steps.meta.outputs.image_base }} |" >> $GITHUB_STEP_SUMMARY
