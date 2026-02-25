@@ -11,6 +11,7 @@ on:
 
 permissions:
   contents: read
+  id-token: write
 
 env:
   GCP_PROJECT_ID: phonic-cinema-488316-b5
@@ -36,10 +37,13 @@ jobs:
       - name: Auth to GCP
         uses: google-github-actions/auth@v2
         with:
+          # ВАЖЛИВО: це має бути GitHub Secret з повним JSON сервісного акаунта
           credentials_json: ${{ secrets.GCP_SA_KEY }}
 
       - name: Setup gcloud
         uses: google-github-actions/setup-gcloud@v2
+        with:
+          project_id: ${{ env.GCP_PROJECT_ID }}
 
       - name: Ensure Artifact Registry repository exists
         run: |
@@ -71,6 +75,7 @@ jobs:
     needs: build_and_push
     env:
       K8S_NAMESPACE: staging
+
     steps:
       - name: Auth to GCP
         uses: google-github-actions/auth@v2
@@ -83,6 +88,10 @@ jobs:
           cluster_name: ${{ env.GKE_CLUSTER_NAME }}
           location: ${{ env.GKE_LOCATION }}
           project_id: ${{ env.GCP_PROJECT_ID }}
+
+      - name: Ensure namespace exists
+        run: |
+          kubectl get namespace "${K8S_NAMESPACE}" || kubectl create namespace "${K8S_NAMESPACE}"
 
       - name: Update images in staging
         run: |
@@ -105,6 +114,7 @@ jobs:
     needs: deploy_staging
     env:
       K8S_NAMESPACE: prod
+
     steps:
       - name: Auth to GCP
         uses: google-github-actions/auth@v2
@@ -117,6 +127,10 @@ jobs:
           cluster_name: ${{ env.GKE_CLUSTER_NAME }}
           location: ${{ env.GKE_LOCATION }}
           project_id: ${{ env.GCP_PROJECT_ID }}
+
+      - name: Ensure namespace exists
+        run: |
+          kubectl get namespace "${K8S_NAMESPACE}" || kubectl create namespace "${K8S_NAMESPACE}"
 
       - name: Update images in prod
         run: |
