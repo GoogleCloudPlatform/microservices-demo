@@ -1,4 +1,4 @@
-name: "CI – paymentservice (Node.js)"
+name: "CI – paymentservice"
 
 on:
   push:

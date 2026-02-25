@@ -1,4 +1,4 @@
-name: "CI – currencyservice (Node.js)"
+name: "CI – currencyservice"
 
 on:
   push:
