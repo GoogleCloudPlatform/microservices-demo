@@ -67,7 +67,7 @@ jobs:
     name: Build & Push Image
     runs-on: ubuntu-24.04
     needs: lint-and-test
-    # if: github.event_name == 'push'
+    if: github.event_name == 'push'
     permissions:
       contents: read
       id-token: write
