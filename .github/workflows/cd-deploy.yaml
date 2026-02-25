@@ -1,0 +1,136 @@
+name: "CD - deploy service"
+
+on:
+  # ── Автоматично: спрацьовує коли будь-який CI пройшов на main ──────────────
+  workflow_run:
+    workflows:
+      - "CI - adservice"
+      - "CI - cartservice"
+      - "CI - checkoutservice"
+      - "CI - currencyservice"
+      - "CI - emailservice"
+      - "CI - frontend"
+      - "CI - loadgenerator"
+      - "CI - paymentservice"
+      - "CI - productcatalogservice"
+      - "CI - recommendationservice"
+      - "CI - shippingservice"
+    branches: [main]
+    types: [completed]
+
+  # ── Вручну: вибираєш сервіс, середовище і тег ─────────────────────────────
+  workflow_dispatch:
+    inputs:
+      service:
+        description: "Service to deploy"
+        required: true
+        type: choice
+        options:
+          - adservice
+          - cartservice
+          - checkoutservice
+          - currencyservice
+          - emailservice
+          - frontend
+          - loadgenerator
+          - paymentservice
+          - productcatalogservice
+          - recommendationservice
+          - shippingservice
+      environment:
+        description: "Target environment"
+        required: true
+        type: choice
+        options:
+          - staging
+          - production
+      image_tag:
+        description: "Image tag (e.g. abc12345, latest)"
+        required: false
+        default: "latest"
+
+env:
+  GAR_LOCATION: ${{ vars.GAR_LOCATION }}
+  GCP_PROJECT_ID: ${{ vars.GCP_PROJECT_ID }}
+  GAR_REPOSITORY: ${{ vars.GAR_REPOSITORY }}
+  GKE_CLUSTER: ${{ vars.GKE_CLUSTER }}
+  GKE_ZONE: ${{ vars.GKE_ZONE }}
+
+jobs:
+  # ── Визначаємо SERVICE і TAG залежно від типу тригера ─────────────────────
+  resolve:
+    name: Resolve inputs
+    runs-on: ubuntu-24.04
+    # Для workflow_run — пропускаємо якщо CI впав
+    if: |
+      github.event_name == 'workflow_dispatch' ||
+      github.event.workflow_run.conclusion == 'success'
+    outputs:
+      service:     ${{ steps.vars.outputs.service }}
+      image_tag:   ${{ steps.vars.outputs.image_tag }}
+      environment: ${{ steps.vars.outputs.environment }}
+
+    steps:
+      - name: Resolve service, tag and environment
+        id: vars
+        run: |
+          if [ "${{ github.event_name }}" == "workflow_run" ]; then
+            # Витягуємо назву сервісу з "CI - frontend" → "frontend"
+            SERVICE=$(echo "${{ github.event.workflow_run.name }}" | sed 's/CI - //')
+            SHA="${{ github.event.workflow_run.head_sha }}"
+            TAG="${SHA::8}"
+            ENV="staging"
+          else
+            SERVICE="${{ github.event.inputs.service }}"
+            TAG="${{ github.event.inputs.image_tag }}"
+            ENV="${{ github.event.inputs.environment }}"
+          fi
+
+          echo "service=$SERVICE"     >> $GITHUB_OUTPUT
+          echo "image_tag=$TAG"       >> $GITHUB_OUTPUT
+          echo "environment=$ENV"     >> $GITHUB_OUTPUT
+
+          echo "Service:     $SERVICE"
+          echo "Tag:         $TAG"
+          echo "Environment: $ENV"
+
+  # ── Deploy ─────────────────────────────────────────────────────────────────
+  deploy:
+    name: Deploy ${{ needs.resolve.outputs.service }} → ${{ needs.resolve.outputs.environment }}
+    runs-on: ubuntu-24.04
+    needs: resolve
+    environment: ${{ needs.resolve.outputs.environment }}
+
+    steps:
+      - name: Authenticate to GCP
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      - name: Get GKE credentials
+        uses: google-github-actions/get-gke-credentials@v2
+        with:
+          cluster_name: ${{ env.GKE_CLUSTER }}
+          location: ${{ env.GKE_ZONE }}
+
+      - name: Deploy
+        run: |
+          SERVICE="${{ needs.resolve.outputs.service }}"
+          TAG="${{ needs.resolve.outputs.image_tag }}"
+          NAMESPACE="${{ needs.resolve.outputs.environment }}"
+          IMAGE="${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.GCP_PROJECT_ID }}/${{ env.GAR_REPOSITORY }}/${SERVICE}:${TAG}"
+
+          echo "Deploying $IMAGE to namespace/$NAMESPACE"
+          kubectl set image deployment/${SERVICE} server=${IMAGE} --namespace=${NAMESPACE}
+
+      - name: Wait for rollout
+        run: |
+          kubectl rollout status deployment/${{ needs.resolve.outputs.service }} \
+            --namespace=${{ needs.resolve.outputs.environment }} \
+            --timeout=300s
+
+      - name: Verify pods
+        run: |
+          kubectl get pods \
+            -n ${{ needs.resolve.outputs.environment }} \
+            -l app=${{ needs.resolve.outputs.service }}

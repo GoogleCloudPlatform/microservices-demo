@@ -1,4 +1,4 @@
-name: "CI – shippingservice (Go)"
+name: "CI – shippingservice"
 
 on:
   push:

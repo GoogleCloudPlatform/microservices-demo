@@ -1,4 +1,4 @@
-name: "CI – checkoutservice (Go)"
+name: "CI – checkoutservice"
 
 on:
   push:
