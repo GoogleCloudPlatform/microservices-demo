@@ -1,4 +1,4 @@
-name: "CI – checkoutservice"
+name: "CI - checkoutservice"
 
 on:
   push:

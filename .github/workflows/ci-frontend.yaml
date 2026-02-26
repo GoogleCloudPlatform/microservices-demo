@@ -1,4 +1,4 @@
-name: "CI – frontend"
+name: "CI - frontend"
 
 on:
   push:

@@ -1,4 +1,4 @@
-name: "CI – productcatalogservice"
+name: "CI - productcatalogservice"
 
 on:
   push:

@@ -1,4 +1,4 @@
-name: "CI – currencyservice"
+name: "CI - currencyservice"
 
 on:
   push:
