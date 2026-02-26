@@ -10,8 +10,6 @@ on:
       - "CI - currencyservice"
       - "CI - emailservice"
       - "CI - frontend"
-      - "CI - loadgenerator"
-      - "CI - paymentservice"
       - "CI - productcatalogservice"
       - "CI - recommendationservice"
       - "CI - shippingservice"
