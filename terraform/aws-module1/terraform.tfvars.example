@@ -1,0 +1,13 @@
+project_name             = "blackfriday-survival"
+aws_region               = "eu-west-3"
+cluster_version          = "1.31"
+node_instance_types      = ["m6i.large"]
+node_group_min_size      = 3
+node_group_max_size      = 12
+node_group_desired_size  = 3
+enable_cluster_bootstrap = false
+
+tags = {
+  Owner      = "mt5-team"
+  CostCenter = "blackfriday"
+}

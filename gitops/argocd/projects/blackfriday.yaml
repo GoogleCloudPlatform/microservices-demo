@@ -1,0 +1,18 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: blackfriday
+  namespace: argocd
+spec:
+  description: Black Friday Survival project scope
+  sourceRepos:
+  - '*'
+  destinations:
+  - namespace: onlineboutique
+    server: https://kubernetes.default.svc
+  clusterResourceWhitelist:
+  - group: '*'
+    kind: '*'
+  namespaceResourceWhitelist:
+  - group: '*'
+    kind: '*'

@@ -1,0 +1,20 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: online-boutique
+  namespace: argocd
+spec:
+  project: blackfriday
+  source:
+    repoURL: https://github.com/your-org/microservices-demo.git
+    targetRevision: HEAD
+    path: kustomize
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: onlineboutique
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+    - CreateNamespace=true

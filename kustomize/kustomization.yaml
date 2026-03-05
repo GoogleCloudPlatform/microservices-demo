@@ -27,6 +27,7 @@ components:
 # - components/single-shared-session
 # - components/spanner
 # - components/service-mesh-istio
+# - components/blackfriday-week1-loadtest
 # - components/without-loadgenerator
 # These must be run last and in this order
 # - components/container-images-tag

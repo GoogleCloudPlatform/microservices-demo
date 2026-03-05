@@ -1,0 +1,14 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: loadgenerator
+spec:
+  template:
+    spec:
+      containers:
+      - name: main
+        env:
+        - name: USERS
+          value: "1000"
+        - name: RATE
+          value: "25"
