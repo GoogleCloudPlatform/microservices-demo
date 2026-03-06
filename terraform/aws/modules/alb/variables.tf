@@ -22,3 +22,9 @@ variable "instance_id" {
   type        = string
   description = "EC2 instance ID to register in the target group"
 }
+
+variable "certificate_arn" {
+  type        = string
+  description = "ARN of the ACM certificate for HTTPS (empty string disables HTTPS)"
+  default     = ""
+}

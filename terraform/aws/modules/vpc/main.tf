@@ -62,6 +62,128 @@ resource "aws_route_table_association" "public" {
   route_table_id = aws_route_table.public.id
 }
 
+# --- Network ACLs : second layer of defense at subnet level ---
+
+# NACL for public subnets (ALB + EC2)
+resource "aws_network_acl" "public" {
+  vpc_id     = aws_vpc.main.id
+  subnet_ids = aws_subnet.public[*].id
+
+  # Allow inbound HTTP
+  ingress {
+    protocol   = "tcp"
+    rule_no    = 100
+    action     = "allow"
+    cidr_block = "0.0.0.0/0"
+    from_port  = 80
+    to_port    = 80
+  }
+
+  # Allow inbound HTTPS
+  ingress {
+    protocol   = "tcp"
+    rule_no    = 110
+    action     = "allow"
+    cidr_block = "0.0.0.0/0"
+    from_port  = 443
+    to_port    = 443
+  }
+
+  # Allow inbound SSH from VPC only
+  ingress {
+    protocol   = "tcp"
+    rule_no    = 120
+    action     = "allow"
+    cidr_block = "10.0.0.0/16"
+    from_port  = 22
+    to_port    = 22
+  }
+
+  # Allow ephemeral ports (return traffic)
+  ingress {
+    protocol   = "tcp"
+    rule_no    = 200
+    action     = "allow"
+    cidr_block = "0.0.0.0/0"
+    from_port  = 1024
+    to_port    = 65535
+  }
+
+  # Allow all outbound TCP
+  egress {
+    protocol   = "tcp"
+    rule_no    = 100
+    action     = "allow"
+    cidr_block = "0.0.0.0/0"
+    from_port  = 0
+    to_port    = 65535
+  }
+
+  tags = {
+    Name = "${var.project_name}-public-nacl"
+  }
+}
+
+# NACL for private subnets (database)
+resource "aws_network_acl" "private" {
+  vpc_id     = aws_vpc.main.id
+  subnet_ids = aws_subnet.private[*].id
+
+  # Allow MySQL from public subnet 1
+  ingress {
+    protocol   = "tcp"
+    rule_no    = 100
+    action     = "allow"
+    cidr_block = var.public_subnet_cidrs[0]
+    from_port  = 3306
+    to_port    = 3306
+  }
+
+  # Allow MySQL from public subnet 2
+  ingress {
+    protocol   = "tcp"
+    rule_no    = 101
+    action     = "allow"
+    cidr_block = var.public_subnet_cidrs[1]
+    from_port  = 3306
+    to_port    = 3306
+  }
+
+  # Allow SSH from VPC only
+  ingress {
+    protocol   = "tcp"
+    rule_no    = 110
+    action     = "allow"
+    cidr_block = "10.0.0.0/16"
+    from_port  = 22
+    to_port    = 22
+  }
+
+  # Allow ephemeral return traffic to public subnets
+  egress {
+    protocol   = "tcp"
+    rule_no    = 100
+    action     = "allow"
+    cidr_block = "10.0.0.0/16"
+    from_port  = 1024
+    to_port    = 65535
+  }
+
+  # Allow outbound HTTPS for package updates
+  egress {
+    protocol   = "tcp"
+    rule_no    = 110
+    action     = "allow"
+    cidr_block = "0.0.0.0/0"
+    from_port  = 443
+    to_port    = 443
+  }
+
+  tags = {
+    Name = "${var.project_name}-private-nacl"
+  }
+}
+
 # --- VPC Flow Logs : logger tout le trafic reseau ---
 
 resource "aws_flow_log" "main" {
