@@ -28,6 +28,7 @@ components:
 # - components/spanner
 # - components/service-mesh-istio
 # - components/without-loadgenerator
+# - components/autoscaling
 # These must be run last and in this order
 # - components/container-images-tag
 # - components/container-images-tag-suffix
