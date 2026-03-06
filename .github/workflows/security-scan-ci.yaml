@@ -39,7 +39,7 @@ jobs:
       - name: Run Trivy vulnerability scanner
         uses: aquasecurity/trivy-action@master
         with:
-          image-ref: "gcr.io/google-samples/microservices-demo/${{ matrix.service }}:v0.10.2"
+          image-ref: "us-central1-docker.pkg.dev/google-samples/microservices-demo/${{ matrix.service }}:v0.10.4"
           format: "table"
           exit-code: "0"
           severity: "CRITICAL,HIGH"

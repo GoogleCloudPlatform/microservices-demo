@@ -48,6 +48,18 @@ variable "availability_zones" {
   ]
 }
 
+variable "db_username" {
+  type        = string
+  description = "Database master username"
+  sensitive   = true
+}
+
+variable "db_password" {
+  type        = string
+  description = "Database master password"
+  sensitive   = true
+}
+
 variable "eks_oidc_issuer_url" {
   type        = string
   description = "OIDC issuer URL from EKS cluster (empty to skip IRSA setup)"
