@@ -1,0 +1,62 @@
+name: aws-module1-terraform
+
+on:
+  pull_request:
+    paths:
+    - 'terraform/aws-module1/**'
+    - '.github/workflows/aws-module1-terraform.yaml'
+  push:
+    branches:
+    - main
+    paths:
+    - 'terraform/aws-module1/**'
+    - '.github/workflows/aws-module1-terraform.yaml'
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: read
+
+env:
+  TF_IN_AUTOMATION: true
+  TF_CLI_ARGS: -no-color
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: terraform/aws-module1
+    steps:
+    - uses: actions/checkout@v4
+    - uses: hashicorp/setup-terraform@v3
+      with:
+        terraform_version: 1.11.4
+    - name: Terraform fmt
+      run: terraform fmt -check -recursive
+    - name: Terraform init (no backend)
+      run: terraform init -backend=false
+    - name: Terraform validate
+      run: terraform validate
+
+  plan:
+    if: github.event_name == 'pull_request' && vars.AWS_ROLE_TO_ASSUME != ''
+    runs-on: ubuntu-latest
+    needs: validate
+    defaults:
+      run:
+        working-directory: terraform/aws-module1
+    steps:
+    - uses: actions/checkout@v4
+    - uses: hashicorp/setup-terraform@v3
+      with:
+        terraform_version: 1.11.4
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        role-to-assume: ${{ vars.AWS_ROLE_TO_ASSUME }}
+        aws-region: ${{ vars.AWS_REGION || 'eu-west-3' }}
+    - name: Terraform init (no backend)
+      run: terraform init -backend=false
+    - name: Terraform plan
+      run: terraform plan -input=false -refresh=false -var-file=terraform.tfvars.example

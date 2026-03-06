@@ -6,6 +6,9 @@ Ce dossier couvre la partie 1 du cahier des charges:
 - CI/CD (GitHub Actions + Argo CD)
 - Multi-AZ (3 zones)
 
+Detailed tutorial (including mermaid sequence diagrams):
+- `docs/blackfriday/module1-infrastructure-simple-guide.md`
+
 ## 1. Prerequis
 
 - AWS CLI configure (`aws configure` ou SSO)

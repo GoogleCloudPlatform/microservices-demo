@@ -1,6 +1,5 @@
-# Remplace ce bucket par celui cree dans bootstrap-state.
-bucket         = "blackfriday-terraform-state-mt5team01"
+bucket         = "blackfriday-terraform-state-newacct-eus1-20260306"
 key            = "module1/terraform.tfstate"
-region         = "eu-west-3"
+region         = "eu-south-1"
 dynamodb_table = "blackfriday-terraform-locks"
 encrypt        = true

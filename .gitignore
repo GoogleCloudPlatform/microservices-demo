@@ -17,6 +17,7 @@
 *.swp
 *.tfstate*
 *.tfvars
+terraform/aws-module1/backend.hcl
 *~
 bin/
 build/
@@ -26,3 +27,5 @@ obj/
 pkg/
 release/wi-kubernetes-manifests.yaml
 vendor/
+ terraform/aws-module1/.terraform
+.terraform/

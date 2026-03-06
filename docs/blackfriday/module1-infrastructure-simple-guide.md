@@ -565,3 +565,209 @@ aws eks update-kubeconfig --name "$(terraform output -raw cluster_name)" --regio
 kubectl get nodes
 helm list -A
 ```
+
+---
+
+## 12. How We Actually Deployed It In This Project (Real Execution Story)
+
+This section is not generic. It explains the real sequence we followed in this repository and why each step mattered.
+
+## 12.1 Phase A: Bootstrap Terraform state
+
+What we did:
+1. entered `terraform/aws-module1/bootstrap-state`
+2. initialized Terraform
+3. created:
+- S3 bucket for state
+- DynamoDB table for locks
+
+Why:
+- main stack (`terraform/aws-module1`) uses `backend \"s3\" {}`
+- without state backend, `terraform init` in main stack fails or is unsafe for team usage
+
+Important lesson:
+- changing account/region requires a new bucket or a clean backend migration
+- stale local bootstrap state can keep references to old region buckets and trigger `PermanentRedirect`
+
+## 12.2 Phase B: Main infra deployment
+
+What we did:
+1. configured `backend.hcl`
+2. `terraform init -backend-config=backend.hcl -reconfigure`
+3. `terraform plan/apply -var-file=terraform.tfvars`
+
+Resources created:
+- VPC and subnets
+- IGW + NAT + route tables
+- EKS cluster
+- managed node group
+
+Important lesson:
+- VPC quotas are regional and account-specific
+- changing region can still hit quota if that region is also full
+
+## 12.3 Phase C: EKS access and Kubernetes deployment
+
+What we did:
+1. `aws eks update-kubeconfig ...`
+2. set kube context
+3. deployed app with `kubectl apply -k ... -n onlineboutique`
+
+Important lesson:
+- kubeconfig context creation is not enough
+- IAM principal must have EKS access (access entry + policy)
+- restricted users can get token failures even after context is created
+
+## 12.4 Phase D: App startup and scaling issues
+
+What we saw:
+- many pods stuck in `Pending`
+- scheduler events: `Too many pods`
+
+Root cause:
+- node/pod density limits with small instance type
+
+Fix:
+- increased nodegroup capacity and/or instance size
+- disabled `loadgenerator` for baseline deployment
+
+---
+
+## 13. Mermaid Sequence Diagrams
+
+## 13.1 Infra Provisioning Sequence
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor Dev as Developer
+    participant TFb as Terraform bootstrap-state
+    participant S3 as AWS S3
+    participant DDB as AWS DynamoDB
+    participant TFm as Terraform aws-module1
+    participant EC2 as AWS EC2/VPC
+    participant EKS as AWS EKS
+
+    Dev->>TFb: terraform init
+    Dev->>TFb: terraform apply (aws_region, state_bucket_name)
+    TFb->>S3: Create state bucket
+    TFb->>S3: Enable versioning + encryption + public-access-block
+    TFb->>DDB: Create lock table (LockID)
+
+    Dev->>TFm: Update backend.hcl (bucket/key/region/table)
+    Dev->>TFm: terraform init -backend-config=backend.hcl
+    TFm->>S3: Read/write remote state
+    TFm->>DDB: Acquire state lock
+
+    Dev->>TFm: terraform apply -var-file=terraform.tfvars
+    TFm->>EC2: Create VPC, subnets, IGW, NAT, routes
+    TFm->>EKS: Create cluster + managed nodegroup
+    TFm->>S3: Persist new state
+    TFm->>DDB: Release lock
+```
+
+## 13.2 Cluster Access + App Deployment Sequence
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor Dev as Developer
+    participant AWSCLI as aws cli
+    participant IAM as AWS IAM
+    participant EKS as EKS API
+    participant KCTL as kubectl
+    participant KS as K8s Scheduler
+    participant Pods as Workload Pods
+    participant ELB as AWS Load Balancer
+    participant User as Browser User
+
+    Dev->>AWSCLI: aws sts get-caller-identity
+    AWSCLI->>IAM: Validate principal/session
+    Dev->>AWSCLI: aws eks update-kubeconfig
+    AWSCLI->>EKS: Discover cluster endpoint/CA
+    Dev->>KCTL: kubectl get nodes
+    KCTL->>AWSCLI: aws eks get-token
+    AWSCLI->>EKS: Auth request with IAM principal
+    EKS-->>KCTL: Authorized cluster access
+
+    Dev->>KCTL: kubectl apply -k ... -n onlineboutique
+    KCTL->>KS: Create Deployments/Services
+    KS->>Pods: Schedule pods on nodes
+    KCTL->>ELB: Service type LoadBalancer request
+    ELB-->>KCTL: External DNS/IP ready
+    User->>ELB: HTTP request to frontend-external
+    ELB->>Pods: Route traffic to frontend pod
+```
+
+## 13.3 Failure Sequence (What Happened to Us)
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor Dev as Developer
+    participant KCTL as kubectl
+    participant KS as Scheduler
+    participant Nodes as EKS Nodes
+
+    Dev->>KCTL: kubectl get pods
+    KCTL->>KS: Schedule pending workloads
+    KS->>Nodes: Try placement
+    Nodes-->>KS: Capacity/pod-density limit reached
+    KS-->>KCTL: FailedScheduling (Too many pods)
+    Dev->>Nodes: Increase nodegroup size/type
+    Nodes-->>KS: New Ready nodes available
+    KS->>KCTL: Pods transition Pending -> ContainerCreating -> Running
+```
+
+---
+
+## 14. Detailed Step-by-Step Deployment Procedure (As Run)
+
+Use this exact operational sequence.
+
+1. Backend bootstrap:
+- create state bucket + lock table in chosen region/account
+
+2. Main backend configuration:
+- set `backend.hcl` with the same bucket/region/table
+- reconfigure Terraform init
+
+3. Infrastructure apply:
+- run plan/apply in `terraform/aws-module1`
+- wait for EKS + nodegroup completion
+
+4. Access setup:
+- update kubeconfig
+- verify IAM principal has EKS access (access entry if needed)
+
+5. App deployment:
+- create namespace
+- apply kustomize manifests
+- disable loadgenerator for baseline
+- optional: set `ENV_PLATFORM=aws` on frontend
+
+6. Validation:
+- `kubectl get pods -n onlineboutique`
+- `kubectl get svc frontend-external -n onlineboutique`
+- open ELB DNS URL over HTTP
+
+7. Troubleshooting loop:
+- if `Pending`: inspect `describe pod` events
+- if `Too many pods`: increase nodegroup capacity/type
+- if auth errors: verify principal and EKS access entry
+
+---
+
+## 15. Final Validation Checklist
+
+Before saying \"deployment complete\", verify all points.
+
+- Terraform state is remote (S3) and lock table is active (DynamoDB).
+- EKS cluster is `ACTIVE`.
+- At least 2-3 nodes are `Ready` for this workload profile.
+- Core services are `Running` in `onlineboutique`.
+- `frontend-external` has an ELB DNS or external endpoint.
+- Website loads in browser.
+- `loadgenerator` is disabled unless explicitly running load tests.
+
+If all checks pass, this module is considered successfully deployed end-to-end.
