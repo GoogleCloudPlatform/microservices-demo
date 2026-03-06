@@ -17,6 +17,7 @@ on:
   push:
     branches:
       - main
+      - 'security/**'
     paths:
       - 'terraform/**'
       - '.github/workflows/terraform-validate-ci.yaml'
@@ -25,13 +26,20 @@ on:
       - 'terraform/**'
       - '.github/workflows/terraform-validate-ci.yaml'
 jobs:
-  terraform-validate-ci:
+  terraform-validate:
     runs-on: ubuntu-24.04
+    strategy:
+      matrix:
+        directory: [terraform/, terraform/aws/]
     steps:
       - uses: actions/checkout@v6
       - uses: hashicorp/setup-terraform@v3
       - name: terraform init & validate
         run: |
-          cd terraform/
+          cd ${{ matrix.directory }}
           terraform init -backend=false
           terraform validate
+      - name: terraform fmt check
+        run: |
+          cd ${{ matrix.directory }}
+          terraform fmt -check -recursive

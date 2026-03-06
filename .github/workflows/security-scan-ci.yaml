@@ -1,0 +1,101 @@
+name: security-scan-ci
+
+on:
+  push:
+    branches:
+      - main
+      - 'security/**'
+    paths:
+      - 'src/**'
+      - 'terraform/**'
+      - '.github/workflows/security-scan-ci.yaml'
+  pull_request:
+    paths:
+      - 'src/**'
+      - 'terraform/**'
+      - '.github/workflows/security-scan-ci.yaml'
+
+jobs:
+  # Scan container images for known vulnerabilities (CVEs)
+  trivy-image-scan:
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        service:
+          - adservice
+          - cartservice
+          - checkoutservice
+          - currencyservice
+          - emailservice
+          - frontend
+          - paymentservice
+          - productcatalogservice
+          - recommendationservice
+          - shippingservice
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: "gcr.io/google-samples/microservices-demo/${{ matrix.service }}:v0.10.2"
+          format: "table"
+          exit-code: "0"
+          severity: "CRITICAL,HIGH"
+          output: "trivy-${{ matrix.service }}.txt"
+
+      - name: Upload Trivy report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: trivy-report-${{ matrix.service }}
+          path: "trivy-${{ matrix.service }}.txt"
+
+  # Scan IaC files for misconfigurations
+  trivy-fs-scan:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Trivy filesystem scan (IaC misconfigurations)
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: "fs"
+          scan-ref: "."
+          format: "table"
+          exit-code: "0"
+          severity: "CRITICAL,HIGH"
+
+  # Scan Terraform for security best practices
+  tfsec-scan:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: tfsec - Terraform security scanner
+        uses: aquasecurity/tfsec-action@v1.0.3
+        with:
+          working_directory: terraform/aws
+          soft_fail: true
+
+  # OWASP ZAP baseline scan (only on main push)
+  owasp-zap-baseline:
+    runs-on: ubuntu-24.04
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: OWASP ZAP Baseline Scan
+        uses: zaproxy/action-baseline@v0.14.0
+        with:
+          target: "http://localhost"
+          cmd_options: "-a"
+        continue-on-error: true
+
+      - name: Upload ZAP report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: zap-report
+          path: report_html.html
