@@ -47,3 +47,9 @@ variable "availability_zones" {
     "eu-central-2b"
   ]
 }
+
+variable "eks_oidc_issuer_url" {
+  type        = string
+  description = "OIDC issuer URL from EKS cluster (empty to skip IRSA setup)"
+  default     = ""
+}

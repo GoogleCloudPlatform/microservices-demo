@@ -51,7 +51,9 @@ module "alb" {
 module "iam" {
   source = "./modules/iam"
 
-  project_name = var.project_name
+  project_name        = var.project_name
+  redis_secret_arn    = module.secrets.redis_secret_arn
+  eks_oidc_issuer_url = var.eks_oidc_issuer_url
 }
 
 module "waf" {
