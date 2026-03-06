@@ -32,8 +32,8 @@ module "rds" {
   subnet_id         = module.vpc.public_subnet_ids[1]
   security_group_id = module.security.rds_sg_id
   key_name          = var.key_name
-  db_username       = var.db_username
-  db_password       = var.db_password
+  db_username       = module.secrets.db_username
+  db_password       = module.secrets.db_password
 }
 
 module "alb" {

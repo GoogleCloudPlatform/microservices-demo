@@ -39,18 +39,6 @@ variable "key_name" {
   description = "Name of the SSH key pair for EC2 access"
 }
 
-variable "db_username" {
-  type        = string
-  description = "MySQL username for the database EC2 instance"
-  default     = "admin"
-}
-
-variable "db_password" {
-  type        = string
-  description = "MySQL password for the database EC2 instance"
-  sensitive   = true
-}
-
 variable "availability_zones" {
   type        = list(string)
   description = "Availability zones to use"
