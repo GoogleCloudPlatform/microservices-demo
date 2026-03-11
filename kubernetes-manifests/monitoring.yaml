@@ -2053,6 +2053,10 @@ data:
               - __meta_kubernetes_pod_container_name
             action: replace
             target_label: job
+      - job_name: 'opentelemetry-collector'
+        scrape_interval: 5s
+        static_configs:
+          - targets: ['opentelemetrycollector.monitoring.svc.cluster.local:8889']
 kind: ConfigMap
 metadata:
   name: prometheus-configmap

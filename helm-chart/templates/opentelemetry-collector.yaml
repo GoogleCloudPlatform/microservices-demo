@@ -123,6 +123,10 @@ spec:
     port: 4317
     protocol: TCP
     targetPort: 4317
+  - name: prometheus
+    port: 8889
+    protocol: TCP
+    targetPort: 8889
   selector:
     app: {{ .Values.opentelemetryCollector.name }}
   type: ClusterIP
@@ -141,19 +145,29 @@ data:
         protocols: 
           grpc:
     processors:
+      batch:
+        timeout: 10s
+      memory_limiter:
+        check_interval: 1s
+        limit_mib: 512
     exporters:
       googlecloud:
         project: {{ .Values.opentelemetryCollector.projectId | quote }}
+      prometheus:
+        endpoint: "0.0.0.0:8889"
+        namespace: "boutique"
+        const_labels:
+          environment: "production"
     service:
       pipelines:
         traces:
           receivers: [otlp] # Receive otlp-formatted data from other collector instances
-          processors: []
+          processors: [memory_limiter, batch]
           exporters: [googlecloud] # Export traces directly to Google Cloud
         metrics:
           receivers: [otlp]
-          processors: []
-          exporters: [googlecloud] # Export metrics to Google Cloud
+          processors: [memory_limiter, batch]
+          exporters: [prometheus, googlecloud] # Export metrics to Prometheus and Google Cloud
 {{- if .Values.networkPolicies.create }}
 ---
 apiVersion: networking.k8s.io/v1

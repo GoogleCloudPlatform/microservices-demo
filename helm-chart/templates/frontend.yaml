@@ -115,6 +115,10 @@ spec:
             value: "{{ .Values.opentelemetryCollector.name }}:4317"
           - name: OTEL_SERVICE_NAME
             value: "{{ .Values.frontend.name }}"
+          - name: OTEL_EXPORTER_OTLP_ENDPOINT
+            value: "http://{{ .Values.opentelemetryCollector.name }}.{{ .Release.Namespace }}:4317"
+          - name: OTEL_METRICS_EXPORTER
+            value: "otlp"
           {{- end }}
           {{- if .Values.googleCloudOperations.tracing }}
           - name: ENABLE_TRACING

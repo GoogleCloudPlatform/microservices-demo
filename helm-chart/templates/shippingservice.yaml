@@ -74,6 +74,12 @@ spec:
         env:
         - name: PORT
           value: "50051"
+        {{- if .Values.opentelemetryCollector.create }}
+        - name: OTEL_EXPORTER_OTLP_ENDPOINT
+          value: "http://{{ .Values.opentelemetryCollector.name }}.{{ .Release.Namespace }}:4317"
+        - name: OTEL_METRICS_EXPORTER
+          value: "otlp"
+        {{- end }}
         {{- if not .Values.googleCloudOperations.profiler }}
         - name: DISABLE_PROFILER
           value: "1"

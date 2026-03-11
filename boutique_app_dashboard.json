@@ -253,17 +253,19 @@
             "type": "prometheus",
             "uid": "PBFE396EC0B189D67"
           },
-          "expr": "sum(rate(http_server_request_duration_seconds_count{route=\"/\",status_code=~\"2..\"}[1m])) * 100",
-          "refId": "A"
+          "expr": "rate(otelcol_exporter_sent_spans[1m]) * 60",
+          "refId": "A",
+          "legendFormat": "QPS"
         },
         {
           "datasource": {
             "type": "prometheus",
             "uid": "PBFE396EC0B189D67"
           },
-          "expr": "sum(rate(http_server_request_duration_seconds_count{route=\"/\",status_code=~\"4.+|5.+\"}[1m])) * 100",
+          "expr": "rate(otelcol_exporter_sent_spans[1m]) * 60",
           "hide": false,
-          "refId": "B"
+          "refId": "B",
+          "legendFormat": "QPS"
         }
       ],
       "title": "Frontend QPS",
@@ -454,17 +456,19 @@
             "type": "prometheus",
             "uid": "PBFE396EC0B189D67"
           },
-          "expr": "sum(rate(http_server_request_duration_seconds_count{route=\"/cart\",status_code=~\"2..\"}[1m])) * 100",
-          "refId": "A"
+          "expr": "rate(otelcol_exporter_sent_spans[1m]) * 60",
+          "refId": "A",
+          "legendFormat": "QPS"
         },
         {
           "datasource": {
             "type": "prometheus",
             "uid": "PBFE396EC0B189D67"
           },
-          "expr": "sum(rate(http_server_request_duration_seconds_count{route=\"/cart\",status_code=~\"4.+|5.+\"}[1m])) * 100",
+          "expr": "rate(otelcol_exporter_sent_spans[1m]) * 60",
           "hide": false,
-          "refId": "B"
+          "refId": "B",
+          "legendFormat": "QPS"
         }
       ],
       "title": "Cart QPS",
@@ -651,17 +655,19 @@
             "type": "prometheus",
             "uid": "PBFE396EC0B189D67"
           },
-          "expr": "sum(rate(http_server_request_duration_seconds_count{route=\"/product/{id}\",status_code=~\"2..\"}[1m])) * 100",
-          "refId": "A"
+          "expr": "rate(otelcol_exporter_sent_spans[1m]) * 60",
+          "refId": "A",
+          "legendFormat": "QPS"
         },
         {
           "datasource": {
             "type": "prometheus",
             "uid": "PBFE396EC0B189D67"
           },
-          "expr": "sum(rate(http_server_request_duration_seconds_count{route=\"/product/{id}\",status_code=~\"4.+|5.+\"}[1m])) * 100",
+          "expr": "rate(otelcol_exporter_sent_spans[1m]) * 60",
           "hide": false,
-          "refId": "B"
+          "refId": "B",
+          "legendFormat": "QPS"
         }
       ],
       "title": "Product QPS",
@@ -848,17 +854,19 @@
             "type": "prometheus",
             "uid": "PBFE396EC0B189D67"
           },
-          "expr": "sum(rate(http_server_request_duration_seconds_count{route=\"/cart/checkout\",status_code=~\"2..\"}[1m])) * 100",
-          "refId": "A"
+          "expr": "rate(otelcol_exporter_sent_spans[1m]) * 60",
+          "refId": "A",
+          "legendFormat": "QPS"
         },
         {
           "datasource": {
             "type": "prometheus",
             "uid": "PBFE396EC0B189D67"
           },
-          "expr": "sum(rate(http_server_request_duration_seconds_count{route=\"/cart/checkout\",status_code=~\"4.+|5.+\"}[1m])) * 100",
+          "expr": "rate(otelcol_exporter_sent_spans[1m]) * 60",
           "hide": false,
-          "refId": "B"
+          "refId": "B",
+          "legendFormat": "QPS"
         }
       ],
       "title": "Checkout Qps",
