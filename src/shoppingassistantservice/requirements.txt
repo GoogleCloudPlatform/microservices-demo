@@ -137,7 +137,7 @@ langgraph-prebuilt==1.0.5
     # via langgraph
 langgraph-sdk==0.3.1
     # via langgraph
-langsmith==0.4.30
+langsmith==0.6.3
     # via langchain-core
 markupsafe==3.0.2
     # via
@@ -242,7 +242,9 @@ typing-inspection==0.4.2
 urllib3==2.6.3
     # via requests
 uuid-utils==0.12.0
-    # via langchain-core
+    # via
+    #   langchain-core
+    #   langsmith
 websockets==15.0.1
     # via google-genai
 werkzeug==3.1.5
