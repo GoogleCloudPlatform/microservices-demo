@@ -127,13 +127,13 @@ langchain-google-genai==4.1.2
     # via -r requirements.in
 langchain-postgres==0.0.16
     # via langchain-google-alloydb-pg
-langgraph==1.0.5
+langgraph==1.0.10rc1
     # via langchain
 langgraph-checkpoint==3.0.1
     # via
     #   langgraph
     #   langgraph-prebuilt
-langgraph-prebuilt==1.0.5
+langgraph-prebuilt==1.0.8
     # via langgraph
 langgraph-sdk==0.3.1
     # via langgraph
