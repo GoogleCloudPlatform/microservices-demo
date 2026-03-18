@@ -149,7 +149,7 @@ numpy==2.3.3
     #   langchain-google-alloydb-pg
     #   langchain-postgres
     #   pgvector
-orjson==3.11.3
+orjson==3.11.6
     # via
     #   langgraph-sdk
     #   langsmith
