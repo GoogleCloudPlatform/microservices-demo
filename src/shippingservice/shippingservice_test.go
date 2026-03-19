@@ -29,6 +29,7 @@ import (
 )
 
 // TestGetQuote is a basic check on the GetQuote RPC service.
+// Verifies correct cost calculation for a standard multi-item cart.
 func TestGetQuote(t *testing.T) {
 	s := server{}
 
