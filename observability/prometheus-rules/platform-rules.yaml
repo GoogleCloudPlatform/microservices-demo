@@ -1,0 +1,51 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: platform-health-rules
+  namespace: monitoring
+  labels:
+    release: kube-prometheus-stack
+spec:
+  groups:
+    - name: platform.health.recording
+      interval: 30s
+      rules:
+        # Gateway RPS - all traffic through Istio gateway
+        - record: platform:gw_rps
+          expr: >-
+            sum(rate(istio_requests_total{reporter="source", source_workload="istio-ingressgateway"}[5m])) or vector(0)
+
+        # Application RPS - traffic to Online Boutique services
+        - record: platform:app_rps
+          expr: >-
+            sum(rate(istio_requests_total{reporter="source", destination_workload=~"frontend|cartservice|checkoutservice|productcatalogservice|currencyservice|paymentservice|shippingservice|emailservice|recommendationservice|adservice"}[5m])) or vector(0)
+
+        # 5xx errors per second
+        - record: platform:app_5xx_rps
+          expr: >-
+            sum(rate(istio_requests_total{reporter="source", destination_workload=~"frontend|cartservice|checkoutservice|productcatalogservice|currencyservice|paymentservice|shippingservice|emailservice|recommendationservice|adservice", response_code=~"5.."}[5m])) or vector(0)
+
+        # 5xx error percentage
+        - record: platform:app_5xx_pct
+          expr: >-
+            (platform:app_5xx_rps / clamp_min(platform:app_rps, 0.0001)) * 100
+
+        # Platform health: UP when gateway has traffic AND app RPS > 0.05 AND 5xx < 5%
+        - record: platform_up
+          expr: >-
+            (platform:gw_rps > bool 0)
+            *
+            (platform:app_rps > bool 0.05)
+            *
+            (platform:app_5xx_pct < bool 5)
+
+    - name: platform.health.alerts
+      rules:
+        - alert: PlatformDown
+          expr: platform_up == 0
+          for: 2m
+          labels:
+            severity: critical
+          annotations:
+            summary: "Online Boutique platform is DOWN"
+            description: "The platform health indicator has been 0 for more than 2 minutes. Check gateway traffic, application RPS, and error rates."

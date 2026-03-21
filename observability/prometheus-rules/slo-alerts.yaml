@@ -1,0 +1,493 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: service-slo-alerts
+  namespace: monitoring
+  labels:
+    release: kube-prometheus-stack
+spec:
+  groups:
+    # ---------------------------------------------------------------
+    # Burn-rate alerts (Google SRE model)
+    # SLO target: 99.9% (error budget = 0.001)
+    # Fast burn: 14.4x budget over 1h window, fires after 2m
+    # Slow burn: 6x budget over 6h window, fires after 15m
+    # ---------------------------------------------------------------
+    - name: service.slo.burn_rate_alerts
+      rules:
+        # ===================== frontend =====================
+        - alert: HighErrorBurnRate
+          expr: >-
+            sum(rate(istio_requests_total{reporter="source", destination_workload="frontend", response_code=~"5.."}[1h]))
+            /
+            sum(rate(istio_requests_total{reporter="source", destination_workload="frontend"}[1h]))
+            > 14.4 * 0.001
+          for: 2m
+          labels:
+            severity: critical
+            service: frontend
+          annotations:
+            summary: "High error burn rate on frontend"
+            description: "frontend is burning through its error budget at 14.4x the allowed rate."
+        - alert: SlowErrorBurnRate
+          expr: >-
+            sum(rate(istio_requests_total{reporter="source", destination_workload="frontend", response_code=~"5.."}[6h]))
+            /
+            sum(rate(istio_requests_total{reporter="source", destination_workload="frontend"}[6h]))
+            > 6 * 0.001
+          for: 15m
+          labels:
+            severity: warning
+            service: frontend
+          annotations:
+            summary: "Slow error burn rate on frontend"
+            description: "frontend is burning through its error budget at 6x the allowed rate."
+
+        # ===================== cartservice =====================
+        - alert: HighErrorBurnRate
+          expr: >-
+            sum(rate(istio_requests_total{reporter="source", destination_workload="cartservice", response_code=~"5.."}[1h]))
+            /
+            sum(rate(istio_requests_total{reporter="source", destination_workload="cartservice"}[1h]))
+            > 14.4 * 0.001
+          for: 2m
+          labels:
+            severity: critical
+            service: cartservice
+          annotations:
+            summary: "High error burn rate on cartservice"
+            description: "cartservice is burning through its error budget at 14.4x the allowed rate."
+        - alert: SlowErrorBurnRate
+          expr: >-
+            sum(rate(istio_requests_total{reporter="source", destination_workload="cartservice", response_code=~"5.."}[6h]))
+            /
+            sum(rate(istio_requests_total{reporter="source", destination_workload="cartservice"}[6h]))
+            > 6 * 0.001
+          for: 15m
+          labels:
+            severity: warning
+            service: cartservice
+          annotations:
+            summary: "Slow error burn rate on cartservice"
+            description: "cartservice is burning through its error budget at 6x the allowed rate."
+
+        # ===================== checkoutservice =====================
+        - alert: HighErrorBurnRate
+          expr: >-
+            sum(rate(istio_requests_total{reporter="source", destination_workload="checkoutservice", response_code=~"5.."}[1h]))
+            /
+            sum(rate(istio_requests_total{reporter="source", destination_workload="checkoutservice"}[1h]))
+            > 14.4 * 0.001
+          for: 2m
+          labels:
+            severity: critical
+            service: checkoutservice
+          annotations:
+            summary: "High error burn rate on checkoutservice"
+            description: "checkoutservice is burning through its error budget at 14.4x the allowed rate."
+        - alert: SlowErrorBurnRate
+          expr: >-
+            sum(rate(istio_requests_total{reporter="source", destination_workload="checkoutservice", response_code=~"5.."}[6h]))
+            /
+            sum(rate(istio_requests_total{reporter="source", destination_workload="checkoutservice"}[6h]))
+            > 6 * 0.001
+          for: 15m
+          labels:
+            severity: warning
+            service: checkoutservice
+          annotations:
+            summary: "Slow error burn rate on checkoutservice"
+            description: "checkoutservice is burning through its error budget at 6x the allowed rate."
+
+        # ===================== productcatalogservice =====================
+        - alert: HighErrorBurnRate
+          expr: >-
+            sum(rate(istio_requests_total{reporter="source", destination_workload="productcatalogservice", response_code=~"5.."}[1h]))
+            /
+            sum(rate(istio_requests_total{reporter="source", destination_workload="productcatalogservice"}[1h]))
+            > 14.4 * 0.001
+          for: 2m
+          labels:
+            severity: critical
+            service: productcatalogservice
+          annotations:
+            summary: "High error burn rate on productcatalogservice"
+            description: "productcatalogservice is burning through its error budget at 14.4x the allowed rate."
+        - alert: SlowErrorBurnRate
+          expr: >-
+            sum(rate(istio_requests_total{reporter="source", destination_workload="productcatalogservice", response_code=~"5.."}[6h]))
+            /
+            sum(rate(istio_requests_total{reporter="source", destination_workload="productcatalogservice"}[6h]))
+            > 6 * 0.001
+          for: 15m
+          labels:
+            severity: warning
+            service: productcatalogservice
+          annotations:
+            summary: "Slow error burn rate on productcatalogservice"
+            description: "productcatalogservice is burning through its error budget at 6x the allowed rate."
+
+        # ===================== currencyservice =====================
+        - alert: HighErrorBurnRate
+          expr: >-
+            sum(rate(istio_requests_total{reporter="source", destination_workload="currencyservice", response_code=~"5.."}[1h]))
+            /
+            sum(rate(istio_requests_total{reporter="source", destination_workload="currencyservice"}[1h]))
+            > 14.4 * 0.001
+          for: 2m
+          labels:
+            severity: critical
+            service: currencyservice
+          annotations:
+            summary: "High error burn rate on currencyservice"
+            description: "currencyservice is burning through its error budget at 14.4x the allowed rate."
+        - alert: SlowErrorBurnRate
+          expr: >-
+            sum(rate(istio_requests_total{reporter="source", destination_workload="currencyservice", response_code=~"5.."}[6h]))
+            /
+            sum(rate(istio_requests_total{reporter="source", destination_workload="currencyservice"}[6h]))
+            > 6 * 0.001
+          for: 15m
+          labels:
+            severity: warning
+            service: currencyservice
+          annotations:
+            summary: "Slow error burn rate on currencyservice"
+            description: "currencyservice is burning through its error budget at 6x the allowed rate."
+
+        # ===================== paymentservice =====================
+        - alert: HighErrorBurnRate
+          expr: >-
+            sum(rate(istio_requests_total{reporter="source", destination_workload="paymentservice", response_code=~"5.."}[1h]))
+            /
+            sum(rate(istio_requests_total{reporter="source", destination_workload="paymentservice"}[1h]))
+            > 14.4 * 0.001
+          for: 2m
+          labels:
+            severity: critical
+            service: paymentservice
+          annotations:
+            summary: "High error burn rate on paymentservice"
+            description: "paymentservice is burning through its error budget at 14.4x the allowed rate."
+        - alert: SlowErrorBurnRate
+          expr: >-
+            sum(rate(istio_requests_total{reporter="source", destination_workload="paymentservice", response_code=~"5.."}[6h]))
+            /
+            sum(rate(istio_requests_total{reporter="source", destination_workload="paymentservice"}[6h]))
+            > 6 * 0.001
+          for: 15m
+          labels:
+            severity: warning
+            service: paymentservice
+          annotations:
+            summary: "Slow error burn rate on paymentservice"
+            description: "paymentservice is burning through its error budget at 6x the allowed rate."
+
+        # ===================== shippingservice =====================
+        - alert: HighErrorBurnRate
+          expr: >-
+            sum(rate(istio_requests_total{reporter="source", destination_workload="shippingservice", response_code=~"5.."}[1h]))
+            /
+            sum(rate(istio_requests_total{reporter="source", destination_workload="shippingservice"}[1h]))
+            > 14.4 * 0.001
+          for: 2m
+          labels:
+            severity: critical
+            service: shippingservice
+          annotations:
+            summary: "High error burn rate on shippingservice"
+            description: "shippingservice is burning through its error budget at 14.4x the allowed rate."
+        - alert: SlowErrorBurnRate
+          expr: >-
+            sum(rate(istio_requests_total{reporter="source", destination_workload="shippingservice", response_code=~"5.."}[6h]))
+            /
+            sum(rate(istio_requests_total{reporter="source", destination_workload="shippingservice"}[6h]))
+            > 6 * 0.001
+          for: 15m
+          labels:
+            severity: warning
+            service: shippingservice
+          annotations:
+            summary: "Slow error burn rate on shippingservice"
+            description: "shippingservice is burning through its error budget at 6x the allowed rate."
+
+        # ===================== emailservice =====================
+        - alert: HighErrorBurnRate
+          expr: >-
+            sum(rate(istio_requests_total{reporter="source", destination_workload="emailservice", response_code=~"5.."}[1h]))
+            /
+            sum(rate(istio_requests_total{reporter="source", destination_workload="emailservice"}[1h]))
+            > 14.4 * 0.001
+          for: 2m
+          labels:
+            severity: critical
+            service: emailservice
+          annotations:
+            summary: "High error burn rate on emailservice"
+            description: "emailservice is burning through its error budget at 14.4x the allowed rate."
+        - alert: SlowErrorBurnRate
+          expr: >-
+            sum(rate(istio_requests_total{reporter="source", destination_workload="emailservice", response_code=~"5.."}[6h]))
+            /
+            sum(rate(istio_requests_total{reporter="source", destination_workload="emailservice"}[6h]))
+            > 6 * 0.001
+          for: 15m
+          labels:
+            severity: warning
+            service: emailservice
+          annotations:
+            summary: "Slow error burn rate on emailservice"
+            description: "emailservice is burning through its error budget at 6x the allowed rate."
+
+        # ===================== recommendationservice =====================
+        - alert: HighErrorBurnRate
+          expr: >-
+            sum(rate(istio_requests_total{reporter="source", destination_workload="recommendationservice", response_code=~"5.."}[1h]))
+            /
+            sum(rate(istio_requests_total{reporter="source", destination_workload="recommendationservice"}[1h]))
+            > 14.4 * 0.001
+          for: 2m
+          labels:
+            severity: critical
+            service: recommendationservice
+          annotations:
+            summary: "High error burn rate on recommendationservice"
+            description: "recommendationservice is burning through its error budget at 14.4x the allowed rate."
+        - alert: SlowErrorBurnRate
+          expr: >-
+            sum(rate(istio_requests_total{reporter="source", destination_workload="recommendationservice", response_code=~"5.."}[6h]))
+            /
+            sum(rate(istio_requests_total{reporter="source", destination_workload="recommendationservice"}[6h]))
+            > 6 * 0.001
+          for: 15m
+          labels:
+            severity: warning
+            service: recommendationservice
+          annotations:
+            summary: "Slow error burn rate on recommendationservice"
+            description: "recommendationservice is burning through its error budget at 6x the allowed rate."
+
+        # ===================== adservice =====================
+        - alert: HighErrorBurnRate
+          expr: >-
+            sum(rate(istio_requests_total{reporter="source", destination_workload="adservice", response_code=~"5.."}[1h]))
+            /
+            sum(rate(istio_requests_total{reporter="source", destination_workload="adservice"}[1h]))
+            > 14.4 * 0.001
+          for: 2m
+          labels:
+            severity: critical
+            service: adservice
+          annotations:
+            summary: "High error burn rate on adservice"
+            description: "adservice is burning through its error budget at 14.4x the allowed rate."
+        - alert: SlowErrorBurnRate
+          expr: >-
+            sum(rate(istio_requests_total{reporter="source", destination_workload="adservice", response_code=~"5.."}[6h]))
+            /
+            sum(rate(istio_requests_total{reporter="source", destination_workload="adservice"}[6h]))
+            > 6 * 0.001
+          for: 15m
+          labels:
+            severity: warning
+            service: adservice
+          annotations:
+            summary: "Slow error burn rate on adservice"
+            description: "adservice is burning through its error budget at 6x the allowed rate."
+
+    # ---------------------------------------------------------------
+    # Latency SLO alerts
+    # HighLatency (critical): P99 > 2s sustained for 5m
+    # ElevatedLatency (warning): P95 > 1s sustained for 10m
+    # ---------------------------------------------------------------
+    - name: service.slo.latency_alerts
+      rules:
+        - alert: HighLatency
+          expr: slo:service_latency_p99:seconds{service="frontend"} > 2
+          for: 5m
+          labels:
+            severity: critical
+            service: frontend
+          annotations:
+            summary: "High P99 latency on frontend"
+            description: "frontend P99 latency has exceeded 2s for the last 5 minutes."
+        - alert: ElevatedLatency
+          expr: slo:service_latency_p95:seconds{service="frontend"} > 1
+          for: 10m
+          labels:
+            severity: warning
+            service: frontend
+          annotations:
+            summary: "Elevated P95 latency on frontend"
+            description: "frontend P95 latency has exceeded 1s for the last 10 minutes."
+
+        - alert: HighLatency
+          expr: slo:service_latency_p99:seconds{service="cartservice"} > 2
+          for: 5m
+          labels:
+            severity: critical
+            service: cartservice
+          annotations:
+            summary: "High P99 latency on cartservice"
+            description: "cartservice P99 latency has exceeded 2s for the last 5 minutes."
+        - alert: ElevatedLatency
+          expr: slo:service_latency_p95:seconds{service="cartservice"} > 1
+          for: 10m
+          labels:
+            severity: warning
+            service: cartservice
+          annotations:
+            summary: "Elevated P95 latency on cartservice"
+            description: "cartservice P95 latency has exceeded 1s for the last 10 minutes."
+
+        - alert: HighLatency
+          expr: slo:service_latency_p99:seconds{service="checkoutservice"} > 2
+          for: 5m
+          labels:
+            severity: critical
+            service: checkoutservice
+          annotations:
+            summary: "High P99 latency on checkoutservice"
+            description: "checkoutservice P99 latency has exceeded 2s for the last 5 minutes."
+        - alert: ElevatedLatency
+          expr: slo:service_latency_p95:seconds{service="checkoutservice"} > 1
+          for: 10m
+          labels:
+            severity: warning
+            service: checkoutservice
+          annotations:
+            summary: "Elevated P95 latency on checkoutservice"
+            description: "checkoutservice P95 latency has exceeded 1s for the last 10 minutes."
+
+        - alert: HighLatency
+          expr: slo:service_latency_p99:seconds{service="productcatalogservice"} > 2
+          for: 5m
+          labels:
+            severity: critical
+            service: productcatalogservice
+          annotations:
+            summary: "High P99 latency on productcatalogservice"
+            description: "productcatalogservice P99 latency has exceeded 2s for the last 5 minutes."
+        - alert: ElevatedLatency
+          expr: slo:service_latency_p95:seconds{service="productcatalogservice"} > 1
+          for: 10m
+          labels:
+            severity: warning
+            service: productcatalogservice
+          annotations:
+            summary: "Elevated P95 latency on productcatalogservice"
+            description: "productcatalogservice P95 latency has exceeded 1s for the last 10 minutes."
+
+        - alert: HighLatency
+          expr: slo:service_latency_p99:seconds{service="currencyservice"} > 2
+          for: 5m
+          labels:
+            severity: critical
+            service: currencyservice
+          annotations:
+            summary: "High P99 latency on currencyservice"
+            description: "currencyservice P99 latency has exceeded 2s for the last 5 minutes."
+        - alert: ElevatedLatency
+          expr: slo:service_latency_p95:seconds{service="currencyservice"} > 1
+          for: 10m
+          labels:
+            severity: warning
+            service: currencyservice
+          annotations:
+            summary: "Elevated P95 latency on currencyservice"
+            description: "currencyservice P95 latency has exceeded 1s for the last 10 minutes."
+
+        - alert: HighLatency
+          expr: slo:service_latency_p99:seconds{service="paymentservice"} > 2
+          for: 5m
+          labels:
+            severity: critical
+            service: paymentservice
+          annotations:
+            summary: "High P99 latency on paymentservice"
+            description: "paymentservice P99 latency has exceeded 2s for the last 5 minutes."
+        - alert: ElevatedLatency
+          expr: slo:service_latency_p95:seconds{service="paymentservice"} > 1
+          for: 10m
+          labels:
+            severity: warning
+            service: paymentservice
+          annotations:
+            summary: "Elevated P95 latency on paymentservice"
+            description: "paymentservice P95 latency has exceeded 1s for the last 10 minutes."
+
+        - alert: HighLatency
+          expr: slo:service_latency_p99:seconds{service="shippingservice"} > 2
+          for: 5m
+          labels:
+            severity: critical
+            service: shippingservice
+          annotations:
+            summary: "High P99 latency on shippingservice"
+            description: "shippingservice P99 latency has exceeded 2s for the last 5 minutes."
+        - alert: ElevatedLatency
+          expr: slo:service_latency_p95:seconds{service="shippingservice"} > 1
+          for: 10m
+          labels:
+            severity: warning
+            service: shippingservice
+          annotations:
+            summary: "Elevated P95 latency on shippingservice"
+            description: "shippingservice P95 latency has exceeded 1s for the last 10 minutes."
+
+        - alert: HighLatency
+          expr: slo:service_latency_p99:seconds{service="emailservice"} > 2
+          for: 5m
+          labels:
+            severity: critical
+            service: emailservice
+          annotations:
+            summary: "High P99 latency on emailservice"
+            description: "emailservice P99 latency has exceeded 2s for the last 5 minutes."
+        - alert: ElevatedLatency
+          expr: slo:service_latency_p95:seconds{service="emailservice"} > 1
+          for: 10m
+          labels:
+            severity: warning
+            service: emailservice
+          annotations:
+            summary: "Elevated P95 latency on emailservice"
+            description: "emailservice P95 latency has exceeded 1s for the last 10 minutes."
+
+        - alert: HighLatency
+          expr: slo:service_latency_p99:seconds{service="recommendationservice"} > 2
+          for: 5m
+          labels:
+            severity: critical
+            service: recommendationservice
+          annotations:
+            summary: "High P99 latency on recommendationservice"
+            description: "recommendationservice P99 latency has exceeded 2s for the last 5 minutes."
+        - alert: ElevatedLatency
+          expr: slo:service_latency_p95:seconds{service="recommendationservice"} > 1
+          for: 10m
+          labels:
+            severity: warning
+            service: recommendationservice
+          annotations:
+            summary: "Elevated P95 latency on recommendationservice"
+            description: "recommendationservice P95 latency has exceeded 1s for the last 10 minutes."
+
+        - alert: HighLatency
+          expr: slo:service_latency_p99:seconds{service="adservice"} > 2
+          for: 5m
+          labels:
+            severity: critical
+            service: adservice
+          annotations:
+            summary: "High P99 latency on adservice"
+            description: "adservice P99 latency has exceeded 2s for the last 5 minutes."
+        - alert: ElevatedLatency
+          expr: slo:service_latency_p95:seconds{service="adservice"} > 1
+          for: 10m
+          labels:
+            severity: warning
+            service: adservice
+          annotations:
+            summary: "Elevated P95 latency on adservice"
+            description: "adservice P95 latency has exceeded 1s for the last 10 minutes."

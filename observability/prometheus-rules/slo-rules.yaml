@@ -1,0 +1,474 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: service-slo-rules
+  namespace: monitoring
+  labels:
+    release: kube-prometheus-stack
+spec:
+  groups:
+    # ---------------------------------------------------------------
+    # Group 1: Per-service RED metrics recording rules
+    # Tracks RPS, error rate, availability, P99/P95 latency
+    # for each Online Boutique microservice
+    # ---------------------------------------------------------------
+    - name: service.slo.recording
+      interval: 30s
+      rules:
+        # ===================== frontend =====================
+        - record: slo:service_rps:rate5m
+          expr: >-
+            sum(rate(istio_requests_total{reporter="source", destination_workload="frontend"}[5m]))
+          labels:
+            service: frontend
+        - record: slo:service_error_rate:ratio5m
+          expr: >-
+            sum(rate(istio_requests_total{reporter="source", destination_workload="frontend", response_code=~"5.."}[5m]))
+            /
+            sum(rate(istio_requests_total{reporter="source", destination_workload="frontend"}[5m]))
+          labels:
+            service: frontend
+        - record: slo:service_availability:ratio5m
+          expr: >-
+            1 - (
+              sum(rate(istio_requests_total{reporter="source", destination_workload="frontend", response_code=~"5.."}[5m]))
+              /
+              sum(rate(istio_requests_total{reporter="source", destination_workload="frontend"}[5m]))
+            )
+          labels:
+            service: frontend
+        - record: slo:service_latency_p99:seconds
+          expr: >-
+            histogram_quantile(0.99,
+              sum(rate(istio_request_duration_milliseconds_bucket{reporter="source", destination_workload="frontend"}[5m])) by (le)
+            ) / 1000
+          labels:
+            service: frontend
+        - record: slo:service_latency_p95:seconds
+          expr: >-
+            histogram_quantile(0.95,
+              sum(rate(istio_request_duration_milliseconds_bucket{reporter="source", destination_workload="frontend"}[5m])) by (le)
+            ) / 1000
+          labels:
+            service: frontend
+
+        # ===================== cartservice =====================
+        - record: slo:service_rps:rate5m
+          expr: >-
+            sum(rate(istio_requests_total{reporter="source", destination_workload="cartservice"}[5m]))
+          labels:
+            service: cartservice
+        - record: slo:service_error_rate:ratio5m
+          expr: >-
+            sum(rate(istio_requests_total{reporter="source", destination_workload="cartservice", response_code=~"5.."}[5m]))
+            /
+            sum(rate(istio_requests_total{reporter="source", destination_workload="cartservice"}[5m]))
+          labels:
+            service: cartservice
+        - record: slo:service_availability:ratio5m
+          expr: >-
+            1 - (
+              sum(rate(istio_requests_total{reporter="source", destination_workload="cartservice", response_code=~"5.."}[5m]))
+              /
+              sum(rate(istio_requests_total{reporter="source", destination_workload="cartservice"}[5m]))
+            )
+          labels:
+            service: cartservice
+        - record: slo:service_latency_p99:seconds
+          expr: >-
+            histogram_quantile(0.99,
+              sum(rate(istio_request_duration_milliseconds_bucket{reporter="source", destination_workload="cartservice"}[5m])) by (le)
+            ) / 1000
+          labels:
+            service: cartservice
+        - record: slo:service_latency_p95:seconds
+          expr: >-
+            histogram_quantile(0.95,
+              sum(rate(istio_request_duration_milliseconds_bucket{reporter="source", destination_workload="cartservice"}[5m])) by (le)
+            ) / 1000
+          labels:
+            service: cartservice
+
+        # ===================== checkoutservice =====================
+        - record: slo:service_rps:rate5m
+          expr: >-
+            sum(rate(istio_requests_total{reporter="source", destination_workload="checkoutservice"}[5m]))
+          labels:
+            service: checkoutservice
+        - record: slo:service_error_rate:ratio5m
+          expr: >-
+            sum(rate(istio_requests_total{reporter="source", destination_workload="checkoutservice", response_code=~"5.."}[5m]))
+            /
+            sum(rate(istio_requests_total{reporter="source", destination_workload="checkoutservice"}[5m]))
+          labels:
+            service: checkoutservice
+        - record: slo:service_availability:ratio5m
+          expr: >-
+            1 - (
+              sum(rate(istio_requests_total{reporter="source", destination_workload="checkoutservice", response_code=~"5.."}[5m]))
+              /
+              sum(rate(istio_requests_total{reporter="source", destination_workload="checkoutservice"}[5m]))
+            )
+          labels:
+            service: checkoutservice
+        - record: slo:service_latency_p99:seconds
+          expr: >-
+            histogram_quantile(0.99,
+              sum(rate(istio_request_duration_milliseconds_bucket{reporter="source", destination_workload="checkoutservice"}[5m])) by (le)
+            ) / 1000
+          labels:
+            service: checkoutservice
+        - record: slo:service_latency_p95:seconds
+          expr: >-
+            histogram_quantile(0.95,
+              sum(rate(istio_request_duration_milliseconds_bucket{reporter="source", destination_workload="checkoutservice"}[5m])) by (le)
+            ) / 1000
+          labels:
+            service: checkoutservice
+
+        # ===================== productcatalogservice =====================
+        - record: slo:service_rps:rate5m
+          expr: >-
+            sum(rate(istio_requests_total{reporter="source", destination_workload="productcatalogservice"}[5m]))
+          labels:
+            service: productcatalogservice
+        - record: slo:service_error_rate:ratio5m
+          expr: >-
+            sum(rate(istio_requests_total{reporter="source", destination_workload="productcatalogservice", response_code=~"5.."}[5m]))
+            /
+            sum(rate(istio_requests_total{reporter="source", destination_workload="productcatalogservice"}[5m]))
+          labels:
+            service: productcatalogservice
+        - record: slo:service_availability:ratio5m
+          expr: >-
+            1 - (
+              sum(rate(istio_requests_total{reporter="source", destination_workload="productcatalogservice", response_code=~"5.."}[5m]))
+              /
+              sum(rate(istio_requests_total{reporter="source", destination_workload="productcatalogservice"}[5m]))
+            )
+          labels:
+            service: productcatalogservice
+        - record: slo:service_latency_p99:seconds
+          expr: >-
+            histogram_quantile(0.99,
+              sum(rate(istio_request_duration_milliseconds_bucket{reporter="source", destination_workload="productcatalogservice"}[5m])) by (le)
+            ) / 1000
+          labels:
+            service: productcatalogservice
+        - record: slo:service_latency_p95:seconds
+          expr: >-
+            histogram_quantile(0.95,
+              sum(rate(istio_request_duration_milliseconds_bucket{reporter="source", destination_workload="productcatalogservice"}[5m])) by (le)
+            ) / 1000
+          labels:
+            service: productcatalogservice
+
+        # ===================== currencyservice =====================
+        - record: slo:service_rps:rate5m
+          expr: >-
+            sum(rate(istio_requests_total{reporter="source", destination_workload="currencyservice"}[5m]))
+          labels:
+            service: currencyservice
+        - record: slo:service_error_rate:ratio5m
+          expr: >-
+            sum(rate(istio_requests_total{reporter="source", destination_workload="currencyservice", response_code=~"5.."}[5m]))
+            /
+            sum(rate(istio_requests_total{reporter="source", destination_workload="currencyservice"}[5m]))
+          labels:
+            service: currencyservice
+        - record: slo:service_availability:ratio5m
+          expr: >-
+            1 - (
+              sum(rate(istio_requests_total{reporter="source", destination_workload="currencyservice", response_code=~"5.."}[5m]))
+              /
+              sum(rate(istio_requests_total{reporter="source", destination_workload="currencyservice"}[5m]))
+            )
+          labels:
+            service: currencyservice
+        - record: slo:service_latency_p99:seconds
+          expr: >-
+            histogram_quantile(0.99,
+              sum(rate(istio_request_duration_milliseconds_bucket{reporter="source", destination_workload="currencyservice"}[5m])) by (le)
+            ) / 1000
+          labels:
+            service: currencyservice
+        - record: slo:service_latency_p95:seconds
+          expr: >-
+            histogram_quantile(0.95,
+              sum(rate(istio_request_duration_milliseconds_bucket{reporter="source", destination_workload="currencyservice"}[5m])) by (le)
+            ) / 1000
+          labels:
+            service: currencyservice
+
+        # ===================== paymentservice =====================
+        - record: slo:service_rps:rate5m
+          expr: >-
+            sum(rate(istio_requests_total{reporter="source", destination_workload="paymentservice"}[5m]))
+          labels:
+            service: paymentservice
+        - record: slo:service_error_rate:ratio5m
+          expr: >-
+            sum(rate(istio_requests_total{reporter="source", destination_workload="paymentservice", response_code=~"5.."}[5m]))
+            /
+            sum(rate(istio_requests_total{reporter="source", destination_workload="paymentservice"}[5m]))
+          labels:
+            service: paymentservice
+        - record: slo:service_availability:ratio5m
+          expr: >-
+            1 - (
+              sum(rate(istio_requests_total{reporter="source", destination_workload="paymentservice", response_code=~"5.."}[5m]))
+              /
+              sum(rate(istio_requests_total{reporter="source", destination_workload="paymentservice"}[5m]))
+            )
+          labels:
+            service: paymentservice
+        - record: slo:service_latency_p99:seconds
+          expr: >-
+            histogram_quantile(0.99,
+              sum(rate(istio_request_duration_milliseconds_bucket{reporter="source", destination_workload="paymentservice"}[5m])) by (le)
+            ) / 1000
+          labels:
+            service: paymentservice
+        - record: slo:service_latency_p95:seconds
+          expr: >-
+            histogram_quantile(0.95,
+              sum(rate(istio_request_duration_milliseconds_bucket{reporter="source", destination_workload="paymentservice"}[5m])) by (le)
+            ) / 1000
+          labels:
+            service: paymentservice
+
+        # ===================== shippingservice =====================
+        - record: slo:service_rps:rate5m
+          expr: >-
+            sum(rate(istio_requests_total{reporter="source", destination_workload="shippingservice"}[5m]))
+          labels:
+            service: shippingservice
+        - record: slo:service_error_rate:ratio5m
+          expr: >-
+            sum(rate(istio_requests_total{reporter="source", destination_workload="shippingservice", response_code=~"5.."}[5m]))
+            /
+            sum(rate(istio_requests_total{reporter="source", destination_workload="shippingservice"}[5m]))
+          labels:
+            service: shippingservice
+        - record: slo:service_availability:ratio5m
+          expr: >-
+            1 - (
+              sum(rate(istio_requests_total{reporter="source", destination_workload="shippingservice", response_code=~"5.."}[5m]))
+              /
+              sum(rate(istio_requests_total{reporter="source", destination_workload="shippingservice"}[5m]))
+            )
+          labels:
+            service: shippingservice
+        - record: slo:service_latency_p99:seconds
+          expr: >-
+            histogram_quantile(0.99,
+              sum(rate(istio_request_duration_milliseconds_bucket{reporter="source", destination_workload="shippingservice"}[5m])) by (le)
+            ) / 1000
+          labels:
+            service: shippingservice
+        - record: slo:service_latency_p95:seconds
+          expr: >-
+            histogram_quantile(0.95,
+              sum(rate(istio_request_duration_milliseconds_bucket{reporter="source", destination_workload="shippingservice"}[5m])) by (le)
+            ) / 1000
+          labels:
+            service: shippingservice
+
+        # ===================== emailservice =====================
+        - record: slo:service_rps:rate5m
+          expr: >-
+            sum(rate(istio_requests_total{reporter="source", destination_workload="emailservice"}[5m]))
+          labels:
+            service: emailservice
+        - record: slo:service_error_rate:ratio5m
+          expr: >-
+            sum(rate(istio_requests_total{reporter="source", destination_workload="emailservice", response_code=~"5.."}[5m]))
+            /
+            sum(rate(istio_requests_total{reporter="source", destination_workload="emailservice"}[5m]))
+          labels:
+            service: emailservice
+        - record: slo:service_availability:ratio5m
+          expr: >-
+            1 - (
+              sum(rate(istio_requests_total{reporter="source", destination_workload="emailservice", response_code=~"5.."}[5m]))
+              /
+              sum(rate(istio_requests_total{reporter="source", destination_workload="emailservice"}[5m]))
+            )
+          labels:
+            service: emailservice
+        - record: slo:service_latency_p99:seconds
+          expr: >-
+            histogram_quantile(0.99,
+              sum(rate(istio_request_duration_milliseconds_bucket{reporter="source", destination_workload="emailservice"}[5m])) by (le)
+            ) / 1000
+          labels:
+            service: emailservice
+        - record: slo:service_latency_p95:seconds
+          expr: >-
+            histogram_quantile(0.95,
+              sum(rate(istio_request_duration_milliseconds_bucket{reporter="source", destination_workload="emailservice"}[5m])) by (le)
+            ) / 1000
+          labels:
+            service: emailservice
+
+        # ===================== recommendationservice =====================
+        - record: slo:service_rps:rate5m
+          expr: >-
+            sum(rate(istio_requests_total{reporter="source", destination_workload="recommendationservice"}[5m]))
+          labels:
+            service: recommendationservice
+        - record: slo:service_error_rate:ratio5m
+          expr: >-
+            sum(rate(istio_requests_total{reporter="source", destination_workload="recommendationservice", response_code=~"5.."}[5m]))
+            /
+            sum(rate(istio_requests_total{reporter="source", destination_workload="recommendationservice"}[5m]))
+          labels:
+            service: recommendationservice
+        - record: slo:service_availability:ratio5m
+          expr: >-
+            1 - (
+              sum(rate(istio_requests_total{reporter="source", destination_workload="recommendationservice", response_code=~"5.."}[5m]))
+              /
+              sum(rate(istio_requests_total{reporter="source", destination_workload="recommendationservice"}[5m]))
+            )
+          labels:
+            service: recommendationservice
+        - record: slo:service_latency_p99:seconds
+          expr: >-
+            histogram_quantile(0.99,
+              sum(rate(istio_request_duration_milliseconds_bucket{reporter="source", destination_workload="recommendationservice"}[5m])) by (le)
+            ) / 1000
+          labels:
+            service: recommendationservice
+        - record: slo:service_latency_p95:seconds
+          expr: >-
+            histogram_quantile(0.95,
+              sum(rate(istio_request_duration_milliseconds_bucket{reporter="source", destination_workload="recommendationservice"}[5m])) by (le)
+            ) / 1000
+          labels:
+            service: recommendationservice
+
+        # ===================== adservice =====================
+        - record: slo:service_rps:rate5m
+          expr: >-
+            sum(rate(istio_requests_total{reporter="source", destination_workload="adservice"}[5m]))
+          labels:
+            service: adservice
+        - record: slo:service_error_rate:ratio5m
+          expr: >-
+            sum(rate(istio_requests_total{reporter="source", destination_workload="adservice", response_code=~"5.."}[5m]))
+            /
+            sum(rate(istio_requests_total{reporter="source", destination_workload="adservice"}[5m]))
+          labels:
+            service: adservice
+        - record: slo:service_availability:ratio5m
+          expr: >-
+            1 - (
+              sum(rate(istio_requests_total{reporter="source", destination_workload="adservice", response_code=~"5.."}[5m]))
+              /
+              sum(rate(istio_requests_total{reporter="source", destination_workload="adservice"}[5m]))
+            )
+          labels:
+            service: adservice
+        - record: slo:service_latency_p99:seconds
+          expr: >-
+            histogram_quantile(0.99,
+              sum(rate(istio_request_duration_milliseconds_bucket{reporter="source", destination_workload="adservice"}[5m])) by (le)
+            ) / 1000
+          labels:
+            service: adservice
+        - record: slo:service_latency_p95:seconds
+          expr: >-
+            histogram_quantile(0.95,
+              sum(rate(istio_request_duration_milliseconds_bucket{reporter="source", destination_workload="adservice"}[5m])) by (le)
+            ) / 1000
+          labels:
+            service: adservice
+
+    # ---------------------------------------------------------------
+    # Group 2: Error budget tracking (99.9% SLO = 0.001 error budget)
+    # 30-day rolling window: 30*24*60/5 = 8640 five-minute intervals
+    # ---------------------------------------------------------------
+    - name: service.slo.error_budget
+      interval: 1m
+      rules:
+        - record: slo:service_error_budget_remaining:ratio
+          expr: >-
+            1 - (
+              sum_over_time(slo:service_error_rate:ratio5m{service="frontend"}[30d])
+              / 8640
+            ) / 0.001
+          labels:
+            service: frontend
+        - record: slo:service_error_budget_remaining:ratio
+          expr: >-
+            1 - (
+              sum_over_time(slo:service_error_rate:ratio5m{service="cartservice"}[30d])
+              / 8640
+            ) / 0.001
+          labels:
+            service: cartservice
+        - record: slo:service_error_budget_remaining:ratio
+          expr: >-
+            1 - (
+              sum_over_time(slo:service_error_rate:ratio5m{service="checkoutservice"}[30d])
+              / 8640
+            ) / 0.001
+          labels:
+            service: checkoutservice
+        - record: slo:service_error_budget_remaining:ratio
+          expr: >-
+            1 - (
+              sum_over_time(slo:service_error_rate:ratio5m{service="productcatalogservice"}[30d])
+              / 8640
+            ) / 0.001
+          labels:
+            service: productcatalogservice
+        - record: slo:service_error_budget_remaining:ratio
+          expr: >-
+            1 - (
+              sum_over_time(slo:service_error_rate:ratio5m{service="currencyservice"}[30d])
+              / 8640
+            ) / 0.001
+          labels:
+            service: currencyservice
+        - record: slo:service_error_budget_remaining:ratio
+          expr: >-
+            1 - (
+              sum_over_time(slo:service_error_rate:ratio5m{service="paymentservice"}[30d])
+              / 8640
+            ) / 0.001
+          labels:
+            service: paymentservice
+        - record: slo:service_error_budget_remaining:ratio
+          expr: >-
+            1 - (
+              sum_over_time(slo:service_error_rate:ratio5m{service="shippingservice"}[30d])
+              / 8640
+            ) / 0.001
+          labels:
+            service: shippingservice
+        - record: slo:service_error_budget_remaining:ratio
+          expr: >-
+            1 - (
+              sum_over_time(slo:service_error_rate:ratio5m{service="emailservice"}[30d])
+              / 8640
+            ) / 0.001
+          labels:
+            service: emailservice
+        - record: slo:service_error_budget_remaining:ratio
+          expr: >-
+            1 - (
+              sum_over_time(slo:service_error_rate:ratio5m{service="recommendationservice"}[30d])
+              / 8640
+            ) / 0.001
+          labels:
+            service: recommendationservice
+        - record: slo:service_error_budget_remaining:ratio
+          expr: >-
+            1 - (
+              sum_over_time(slo:service_error_rate:ratio5m{service="adservice"}[30d])
+              / 8640
+            ) / 0.001
+          labels:
+            service: adservice
