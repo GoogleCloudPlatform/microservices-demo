@@ -72,7 +72,7 @@ python-socketio[client]==5.13.0
     # via locust
 pyzmq==27.1.0
     # via locust
-requests==2.32.5
+requests==2.33.0
     # via
     #   locust
     #   python-socketio
