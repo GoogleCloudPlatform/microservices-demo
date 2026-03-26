@@ -76,7 +76,7 @@ pyasn1-modules==0.3.0
     # via google-auth
 python-json-logger==4.0.0
     # via -r requirements.in
-requests==2.32.5
+requests==2.33.0
     # via
     #   -r requirements.in
     #   google-api-core
