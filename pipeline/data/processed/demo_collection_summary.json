@@ -1,0 +1,61 @@
+{
+  "collection_start": "2026-03-27T22:32:41.570Z",
+  "collection_end": "2026-03-27T22:38:50.999Z",
+  "duration_seconds": 369,
+  "poll_interval_s": 15,
+  "inject_service": "recommendationservice",
+  "failure_registry": {
+    "total_events": 1,
+    "events": [
+      {
+        "scenario_id": "b3a0ec9a-e69f-4440-a452-8b1dc7e75939",
+        "service_name": "recommendationservice",
+        "failure_type": "memory_leak",
+        "start_time": "2026-03-27T22:35:53.924865+00:00",
+        "end_time": "2026-03-27T22:37:30.432734+00:00",
+        "pre_failure_start": "2026-03-27T22:34:38.924865+00:00",
+        "duration_seconds": 96.507869
+      }
+    ],
+    "pre_failure_buffer_k": 5,
+    "timestep_seconds": 15,
+    "buffer_seconds": 75
+  },
+  "table_row_counts": {
+    "metrics": 176,
+    "logs": 3508,
+    "traces": 11449,
+    "log_aggregates": 190
+  },
+  "services_monitored": [
+    "frontend",
+    "cartservice",
+    "productcatalogservice",
+    "currencyservice",
+    "paymentservice",
+    "shippingservice",
+    "emailservice",
+    "checkoutservice",
+    "recommendationservice",
+    "adservice",
+    "prometheus",
+    "loki",
+    "jaeger",
+    "grafana",
+    "promtail",
+    "loadgenerator"
+  ],
+  "drain3_available": true,
+  "label_stats_metrics": {
+    "total_rows": 176,
+    "failure_rows": 3,
+    "pre_failure_rows": 2,
+    "future_failure_rows": 5,
+    "normal_rows": 171,
+    "failure_type_counts": {
+      "none": 171,
+      "memory_leak": 3,
+      "pre_memory_leak": 2
+    }
+  }
+}

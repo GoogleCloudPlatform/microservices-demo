@@ -29,7 +29,9 @@ vendor/
 
 # ── Hackathon pipeline data ──────────────────
 pipeline/data/raw_logs/
-pipeline/data/processed/
+# Ignore large binary data files but allow report artefacts (JSON, MD)
+pipeline/data/processed/*.parquet
+pipeline/data/processed/*.csv
 pipeline/data/models/*.pt
 pipeline/data/models/*.pkl
 pipeline/data/drain3_state.json
