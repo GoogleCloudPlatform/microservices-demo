@@ -26,3 +26,28 @@ obj/
 pkg/
 release/wi-kubernetes-manifests.yaml
 vendor/
+
+# ── Hackathon pipeline data ──────────────────
+pipeline/data/raw_logs/
+pipeline/data/processed/
+pipeline/data/models/*.pt
+pipeline/data/models/*.pkl
+pipeline/data/drain3_state.json
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+env/
+*.egg-info/
+
+# Node
+node_modules/
+dashboard/frontend/dist/
+
+# Environment
+.env
+.env.local
+
+# macOS
+.DS_Store
