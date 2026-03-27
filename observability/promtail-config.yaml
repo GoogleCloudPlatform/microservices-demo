@@ -1,0 +1,70 @@
+server:
+  http_listen_port: 9080
+  grpc_listen_port: 0
+  log_level: info
+
+positions:
+  filename: /tmp/positions.yaml
+
+clients:
+  - url: http://loki:3100/loki/api/v1/push
+    # Retry on failure
+    backoff_config:
+      min_period: 500ms
+      max_period: 5m
+      max_retries: 20
+
+scrape_configs:
+
+  # ── Collect all container logs from Docker socket ──────────────────
+  # Promtail 3.x uses Docker API v1.44+ automatically
+  - job_name: docker
+    docker_sd_configs:
+      - host: unix:///var/run/docker.sock
+        refresh_interval: 5s
+        filters:
+          # Only collect from our boutique network containers
+          - name: label
+            values: ["com.docker.compose.project=microservices-demo"]
+
+    relabel_configs:
+      # Container name → service label
+      - source_labels: ["__meta_docker_container_name"]
+        regex: "/(.*)"
+        target_label: "service"
+
+      # Compose service name
+      - source_labels: ["__meta_docker_container_label_com_docker_compose_service"]
+        target_label: "compose_service"
+
+      # Log stream (stdout/stderr)
+      - source_labels: ["__meta_docker_container_log_stream"]
+        target_label: "stream"
+
+      # Container image tag (useful for version tracking)
+      - source_labels: ["__meta_docker_container_image"]
+        target_label: "image"
+
+    pipeline_stages:
+      # Try to parse JSON-formatted log lines (most Go/Python services)
+      - json:
+          expressions:
+            level:    "level"
+            severity: "severity"
+            msg:      "message"
+            trace_id: "trace_id"
+
+      # Promote parsed fields to Loki labels
+      - labels:
+          level:
+          severity:
+          trace_id:
+
+      # Normalise severity→level for services that use "severity" instead of "level"
+      - template:
+          source: level
+          template: '{{ if eq .Value "" }}{{ .severity }}{{ else }}{{ .Value }}{{ end }}'
+
+      # Drop empty trace_id label (keeps cardinality low)
+      - labeldrop:
+          - trace_id

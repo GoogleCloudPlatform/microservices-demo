@@ -1,0 +1,51 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  external_labels:
+    cluster: "online-boutique"
+    environment: "docker-compose"
+
+# ── NOTE on app service metrics ────────────────────────────────────────────
+# The Online Boutique services emit metrics via OpenTelemetry SDK (OTLP), not
+# a Prometheus /metrics endpoint. To get app-level metrics in Prometheus you
+# would add an OpenTelemetry Collector (otel/opentelemetry-collector) that
+# receives OTLP metrics and exposes them in Prometheus format.
+#
+# For this stack the observability pillars are:
+#   Metrics  → Prometheus scrapes infrastructure (Jaeger, Loki, itself)
+#   Logs     → Loki via Promtail (all container stdout/stderr)
+#   Traces   → Jaeger via OTLP gRPC (ENABLE_TRACING=1 on supported services)
+# ───────────────────────────────────────────────────────────────────────────
+
+scrape_configs:
+
+  # ── Prometheus self-monitoring ──────────────────────
+  - job_name: "prometheus"
+    static_configs:
+      - targets: ["localhost:9090"]
+
+  # ── Jaeger internal metrics ─────────────────────────
+  # Jaeger exposes Prometheus metrics on port 14269
+  - job_name: "jaeger"
+    static_configs:
+      - targets: ["jaeger:14269"]
+    metrics_path: /metrics
+
+  # ── Loki metrics ────────────────────────────────────
+  - job_name: "loki"
+    static_configs:
+      - targets: ["loki:3100"]
+    metrics_path: /metrics
+
+  # ── Promtail metrics ─────────────────────────────────
+  - job_name: "promtail"
+    static_configs:
+      - targets: ["promtail:9080"]
+    metrics_path: /metrics
+
+  # ── Redis metrics (via redis INFO command over TCP) ──
+  # Redis doesn't expose Prometheus metrics natively; add redis_exporter
+  # for full metrics. The entry below is kept for future use.
+  # - job_name: "redis"
+  #   static_configs:
+  #     - targets: ["redis-exporter:9121"]

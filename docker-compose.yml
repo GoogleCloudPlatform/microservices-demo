@@ -1,0 +1,346 @@
+# ─────────────────────────────────────────────
+#  Online Boutique – full observability stack
+#  App services  : 11 microservices + Redis
+#  Observability : Prometheus · Loki · Jaeger · Grafana · Promtail
+# ─────────────────────────────────────────────
+
+x-logging: &loki-logging
+  driver: json-file
+  options:
+    tag: "{{.Name}}"
+
+# All Google-registry images are amd64-only;
+# Docker Desktop on Apple Silicon runs them via Rosetta emulation.
+x-platform: &amd64
+  platform: linux/amd64
+
+# Common tracing env vars shared by all services that support OTEL tracing
+x-tracing: &tracing-env
+  ENABLE_TRACING: "1"
+  COLLECTOR_SERVICE_ADDR: "jaeger:4317"
+
+services:
+
+  # ─── App Services ──────────────────────────
+
+  frontend:
+    <<: *amd64
+    image: us-central1-docker.pkg.dev/google-samples/microservices-demo/frontend:v0.10.5
+    container_name: frontend
+    ports:
+      - "8080:8080"
+    environment:
+      PORT: "8080"
+      PRODUCT_CATALOG_SERVICE_ADDR: "productcatalogservice:3550"
+      CURRENCY_SERVICE_ADDR: "currencyservice:7000"
+      CART_SERVICE_ADDR: "cartservice:7070"
+      RECOMMENDATION_SERVICE_ADDR: "recommendationservice:8080"
+      SHIPPING_SERVICE_ADDR: "shippingservice:50051"
+      CHECKOUT_SERVICE_ADDR: "checkoutservice:5050"
+      AD_SERVICE_ADDR: "adservice:9555"
+      SHOPPING_ASSISTANT_SERVICE_ADDR: "shoppingassistantservice:80"
+      ENABLE_PROFILER: "0"
+      <<: *tracing-env
+    depends_on:
+      - productcatalogservice
+      - currencyservice
+      - cartservice
+      - recommendationservice
+      - shippingservice
+      - checkoutservice
+      - adservice
+      - jaeger
+    logging: *loki-logging
+    networks:
+      - boutique
+
+  cartservice:
+    <<: *amd64
+    image: us-central1-docker.pkg.dev/google-samples/microservices-demo/cartservice:v0.10.5
+    container_name: cartservice
+    ports:
+      - "7070:7070"
+    environment:
+      REDIS_ADDR: "redis-cart:6379"
+      # cartservice (.NET) uses standard OTEL env vars
+      OTEL_EXPORTER_OTLP_ENDPOINT: "http://jaeger:4317"
+      OTEL_SERVICE_NAME: "cartservice"
+    depends_on:
+      - redis-cart
+    logging: *loki-logging
+    networks:
+      - boutique
+
+  productcatalogservice:
+    <<: *amd64
+    image: us-central1-docker.pkg.dev/google-samples/microservices-demo/productcatalogservice:v0.10.5
+    container_name: productcatalogservice
+    ports:
+      - "3550:3550"
+    environment:
+      PORT: "3550"
+      DISABLE_PROFILER: "1"
+      <<: *tracing-env
+    depends_on:
+      - jaeger
+    logging: *loki-logging
+    networks:
+      - boutique
+
+  currencyservice:
+    <<: *amd64
+    image: us-central1-docker.pkg.dev/google-samples/microservices-demo/currencyservice:v0.10.5
+    container_name: currencyservice
+    ports:
+      - "17000:7000"    # host 17000 → container 7000 (macOS ControlCenter owns 7000)
+    environment:
+      PORT: "7000"
+      DISABLE_PROFILER: "1"
+      <<: *tracing-env
+    depends_on:
+      - jaeger
+    logging: *loki-logging
+    networks:
+      - boutique
+
+  paymentservice:
+    <<: *amd64
+    image: us-central1-docker.pkg.dev/google-samples/microservices-demo/paymentservice:v0.10.5
+    container_name: paymentservice
+    ports:
+      - "50052:50051"
+    environment:
+      PORT: "50051"
+      DISABLE_PROFILER: "1"
+      <<: *tracing-env
+    depends_on:
+      - jaeger
+    logging: *loki-logging
+    networks:
+      - boutique
+
+  shippingservice:
+    <<: *amd64
+    image: us-central1-docker.pkg.dev/google-samples/microservices-demo/shippingservice:v0.10.5
+    container_name: shippingservice
+    ports:
+      - "50053:50051"
+    environment:
+      PORT: "50051"
+      DISABLE_PROFILER: "1"
+      # shippingservice has ENABLE_TRACING guard but tracing is not yet
+      # implemented in source ("TODO: Implement OpenTelemetry tracing")
+      ENABLE_TRACING: "0"
+    logging: *loki-logging
+    networks:
+      - boutique
+
+  emailservice:
+    <<: *amd64
+    image: us-central1-docker.pkg.dev/google-samples/microservices-demo/emailservice:v0.10.5
+    container_name: emailservice
+    ports:
+      - "8081:8080"
+    environment:
+      PORT: "8080"
+      DISABLE_PROFILER: "1"
+      <<: *tracing-env
+    depends_on:
+      - jaeger
+    logging: *loki-logging
+    networks:
+      - boutique
+
+  checkoutservice:
+    <<: *amd64
+    image: us-central1-docker.pkg.dev/google-samples/microservices-demo/checkoutservice:v0.10.5
+    container_name: checkoutservice
+    ports:
+      - "5050:5050"
+    environment:
+      PORT: "5050"
+      PRODUCT_CATALOG_SERVICE_ADDR: "productcatalogservice:3550"
+      SHIPPING_SERVICE_ADDR: "shippingservice:50051"
+      PAYMENT_SERVICE_ADDR: "paymentservice:50051"
+      EMAIL_SERVICE_ADDR: "emailservice:8080"
+      CURRENCY_SERVICE_ADDR: "currencyservice:7000"
+      CART_SERVICE_ADDR: "cartservice:7070"
+      <<: *tracing-env
+    depends_on:
+      - productcatalogservice
+      - shippingservice
+      - paymentservice
+      - emailservice
+      - currencyservice
+      - cartservice
+      - jaeger
+    logging: *loki-logging
+    networks:
+      - boutique
+
+  recommendationservice:
+    <<: *amd64
+    image: us-central1-docker.pkg.dev/google-samples/microservices-demo/recommendationservice:v0.10.5
+    container_name: recommendationservice
+    ports:
+      - "8082:8080"
+    environment:
+      PORT: "8080"
+      PRODUCT_CATALOG_SERVICE_ADDR: "productcatalogservice:3550"
+      DISABLE_PROFILER: "1"
+      <<: *tracing-env
+    depends_on:
+      - productcatalogservice
+      - jaeger
+    logging: *loki-logging
+    networks:
+      - boutique
+
+  adservice:
+    <<: *amd64
+    image: us-central1-docker.pkg.dev/google-samples/microservices-demo/adservice:v0.10.5
+    container_name: adservice
+    ports:
+      - "9555:9555"
+    environment:
+      PORT: "9555"
+      # adservice (Java) has OTEL TODO stub — no tracing implemented in source
+      OTEL_EXPORTER_OTLP_ENDPOINT: "http://jaeger:4317"
+      OTEL_SERVICE_NAME: "adservice"
+    logging: *loki-logging
+    networks:
+      - boutique
+
+  loadgenerator:
+    <<: *amd64
+    image: us-central1-docker.pkg.dev/google-samples/microservices-demo/loadgenerator:v0.10.5
+    container_name: loadgenerator
+    environment:
+      FRONTEND_ADDR: "frontend:8080"
+      USERS: "10"
+      RATE: "1"
+    depends_on:
+      - frontend
+    logging: *loki-logging
+    networks:
+      - boutique
+
+  # ─── Data Store ────────────────────────────
+
+  redis-cart:
+    image: redis:7-alpine
+    container_name: redis-cart
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    logging: *loki-logging
+    networks:
+      - boutique
+
+  # ─── Observability: Jaeger ─────────────────
+
+  jaeger:
+    image: jaegertracing/all-in-one:1.76.0
+    container_name: jaeger
+    ports:
+      - "16686:16686"   # Jaeger UI
+      - "4317:4317"     # OTLP gRPC  (used by services via COLLECTOR_SERVICE_ADDR)
+      - "4318:4318"     # OTLP HTTP
+      - "14268:14268"   # Jaeger HTTP thrift (legacy)
+      - "6831:6831/udp" # Jaeger UDP (legacy agent)
+    environment:
+      COLLECTOR_OTLP_ENABLED: "true"
+    logging: *loki-logging
+    networks:
+      - boutique
+
+  # ─── Observability: Loki ───────────────────
+
+  loki:
+    image: grafana/loki:3.7.1
+    container_name: loki
+    ports:
+      - "3100:3100"
+    command: -config.file=/etc/loki/local-config.yaml
+    volumes:
+      - ./observability/loki-config.yaml:/etc/loki/local-config.yaml:ro
+      - loki-data:/loki
+    logging: *loki-logging
+    networks:
+      - boutique
+
+  # ─── Observability: Promtail (log shipper) ─
+
+  promtail:
+    image: grafana/promtail:3.6.8
+    container_name: promtail
+    volumes:
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./observability/promtail-config.yaml:/etc/promtail/config.yaml:ro
+    command: -config.file=/etc/promtail/config.yaml
+    depends_on:
+      - loki
+    logging: *loki-logging
+    networks:
+      - boutique
+
+  # ─── Observability: Prometheus ─────────────
+
+  prometheus:
+    image: prom/prometheus:v3.3.1
+    container_name: prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./observability/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus-data:/prometheus
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.path=/prometheus"
+      - "--web.console.libraries=/usr/share/prometheus/console_libraries"
+      - "--web.console.templates=/usr/share/prometheus/consoles"
+      - "--web.enable-lifecycle"
+    logging: *loki-logging
+    networks:
+      - boutique
+
+  # ─── Observability: Grafana ────────────────
+
+  grafana:
+    image: grafana/grafana:12.0.2
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: admin
+      GF_USERS_ALLOW_SIGN_UP: "false"
+      # Disable login form CSRF protection that can block local access
+      GF_AUTH_DISABLE_LOGIN_FORM: "false"
+      GF_AUTH_ANONYMOUS_ENABLED: "false"
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./observability/grafana/provisioning:/etc/grafana/provisioning:ro
+    depends_on:
+      - prometheus
+      - loki
+      - jaeger
+    logging: *loki-logging
+    networks:
+      - boutique
+
+# ─── Volumes ───────────────────────────────────
+
+volumes:
+  redis-data:
+  loki-data:
+  prometheus-data:
+  grafana-data:
+
+# ─── Network ───────────────────────────────────
+
+networks:
+  boutique:
+    driver: bridge
