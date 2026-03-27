@@ -713,39 +713,43 @@ class LogAggregator:
 
 class FailureInjector:
     """
-    Injects a gradual memory leak into recommendationservice via docker exec.
+    Injects gradual failures into a target container via docker exec.
 
-    5-stage injection timeline:
-      Stage 0: normal baseline          (0 MB extra)
-      Stage 1: slight ramp              (30 MB)   — failure=0, pre_failure=0
-      Stage 2: pre-failure buffer start (80 MB)   — pre_failure=1 window opens
-      Stage 3: active failure begins    (150 MB)  — failure=1
-      Stage 4: peak failure             (200 MB)  — failure=1
-      Recovery: container restart
+    Supports three failure types:
+      memory_leak      — escalating bytearray allocations
+      cpu_starvation   — multi-threaded busy computation loops
+      network_latency  — high-volume loopback socket flood driving up network I/O
+
+    5-stage injection timeline (same for all failure types):
+      Stage 0: normal baseline        — failure=0, pre_failure=0
+      Stage 1: subtle ramp            — failure=0, pre_failure=0
+      Stage 2: pre-failure escalation — failure=0, pre_failure=1 (buffer opens)
+      Stage 3: active failure begins  — failure=1  (registered in label engine)
+      Stage 4: peak / sustained       — failure=1
+      Recovery: container restart clears everything
     """
 
     def __init__(
         self,
         docker_client: docker.DockerClient,
         registry: FailureEventRegistry,
+        target_service: str = INJECT_SERVICE,
     ) -> None:
-        self._client   = docker_client
-        self._registry = registry
+        self._client         = docker_client
+        self._registry       = registry
+        self._target_service = target_service
         self._scenario_id: Optional[str] = None
-        self._alloc_handle: Optional[Any] = None
 
     def _find_container(self) -> Optional[Any]:
-        """Find the recommendationservice container."""
+        """Find the target container by name (supports bare name and Compose-prefixed)."""
+        svc = self._target_service
         try:
             for c in self._client.containers.list():
                 name = c.name.lstrip("/")
-                # Match bare name (our stack uses container_name:) OR
-                # Compose-prefixed name e.g. microservices-demo-recommendationservice-1
-                if name == INJECT_SERVICE or name.endswith(f"-{INJECT_SERVICE}-1") \
-                        or name.endswith(f"_{INJECT_SERVICE}_1"):
+                if name == svc or name.endswith(f"-{svc}-1") or name.endswith(f"_{svc}_1"):
                     return c
         except Exception as e:
-            log.warning("Could not find injection target: %s", e)
+            log.warning("Could not find injection target '%s': %s", svc, e)
         return None
 
     def _exec_python(self, container: Any, code: str) -> bool:
@@ -801,65 +805,128 @@ class FailureInjector:
             log.warning("Stage 2 injection failed: %s", e)
             return False
 
-    def stage3_active_failure(self) -> str:
+    def stage3_active_failure(self, failure_type: str = "memory_leak") -> str:
         """
-        Allocate ~150 MB — register failure start, return scenario_id.
-        This is the moment failure=1 begins.
+        Begin active failure injection — registers failure_start and returns scenario_id.
+        failure_type: "memory_leak" | "cpu_starvation" | "network_latency"
         """
         ctr = self._find_container()
         if ctr is None:
             return ""
 
-        # Register failure BEFORE allocating so timestamp is accurate
         sid = self._registry.register_failure_start(
-            service_name=INJECT_SERVICE,
-            failure_type="memory_leak",
+            service_name=self._target_service,
+            failure_type=failure_type,
         )
         self._scenario_id = sid
-        log.info("[INJECTOR] Stage 3 — ACTIVE FAILURE starts (150 MB) scenario=%s", sid)
+        log.info("[INJECTOR] Stage 3 — ACTIVE FAILURE (%s) on %s scenario=%s",
+                 failure_type, self._target_service, sid)
 
-        code = (
-            "import time\n"
-            "data = bytearray(150 * 1024 * 1024)\n"
-            "time.sleep(9999)\n"
-        )
+        if failure_type == "memory_leak":
+            code = "import time\ndata = bytearray(150 * 1024 * 1024)\ntime.sleep(9999)\n"
+        elif failure_type == "cpu_starvation":
+            code = (
+                "import threading, time\n"
+                "def _burn():\n"
+                "    while True:\n"
+                "        [i * i for i in range(80000)]\n"
+                "threads = [threading.Thread(target=_burn, daemon=True) for _ in range(4)]\n"
+                "[t.start() for t in threads]\n"
+                "time.sleep(9999)\n"
+            )
+        else:  # network_latency — loopback socket flood
+            code = (
+                "import socket, threading, time\n"
+                "PAYLOAD = b'X' * 65536\n"
+                "def _flood():\n"
+                "    while True:\n"
+                "        try:\n"
+                "            srv = socket.socket()\n"
+                "            srv.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)\n"
+                "            srv.bind(('127.0.0.1', 0))\n"
+                "            srv.listen(1)\n"
+                "            port = srv.getsockname()[1]\n"
+                "            cli = socket.socket()\n"
+                "            cli.connect(('127.0.0.1', port))\n"
+                "            conn, _ = srv.accept()\n"
+                "            for _ in range(50): cli.sendall(PAYLOAD)\n"
+                "            cli.close(); conn.close(); srv.close()\n"
+                "        except Exception: time.sleep(0.05)\n"
+                "threads = [threading.Thread(target=_flood, daemon=True) for _ in range(8)]\n"
+                "[t.start() for t in threads]\n"
+                "time.sleep(9999)\n"
+            )
+
         try:
             ctr.exec_run(["python3", "-c", code], detach=True)
         except Exception as e:
-            log.warning("Stage 3 allocation failed: %s", e)
+            log.warning("Stage 3 exec failed: %s", e)
 
         return sid
 
-    def stage4_peak(self) -> bool:
-        """Allocate ~200 MB — peak of injection."""
+    def stage4_peak(self, failure_type: str = "memory_leak") -> bool:
+        """Escalate the active injection to peak intensity."""
         ctr = self._find_container()
         if ctr is None:
             return False
-        log.info("[INJECTOR] Stage 4 — peak failure (200 MB)")
-        code = (
-            "import time\n"
-            "data = bytearray(200 * 1024 * 1024)\n"
-            "time.sleep(9999)\n"
-        )
+        log.info("[INJECTOR] Stage 4 — peak (%s)", failure_type)
+
+        if failure_type == "memory_leak":
+            code = "import time\ndata = bytearray(200 * 1024 * 1024)\ntime.sleep(9999)\n"
+        elif failure_type == "cpu_starvation":
+            # Spawn more threads for higher saturation
+            code = (
+                "import threading, time\n"
+                "def _burn():\n"
+                "    while True:\n"
+                "        [i * i for i in range(80000)]\n"
+                "threads = [threading.Thread(target=_burn, daemon=True) for _ in range(4)]\n"
+                "[t.start() for t in threads]\n"
+                "time.sleep(9999)\n"
+            )
+        else:  # network_latency — more flood threads
+            code = (
+                "import socket, threading, time\n"
+                "PAYLOAD = b'X' * 65536\n"
+                "def _flood():\n"
+                "    while True:\n"
+                "        try:\n"
+                "            srv = socket.socket()\n"
+                "            srv.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)\n"
+                "            srv.bind(('127.0.0.1', 0))\n"
+                "            srv.listen(1)\n"
+                "            port = srv.getsockname()[1]\n"
+                "            cli = socket.socket()\n"
+                "            cli.connect(('127.0.0.1', port))\n"
+                "            conn, _ = srv.accept()\n"
+                "            for _ in range(100): cli.sendall(PAYLOAD)\n"
+                "            cli.close(); conn.close(); srv.close()\n"
+                "        except Exception: time.sleep(0.05)\n"
+                "threads = [threading.Thread(target=_flood, daemon=True) for _ in range(16)]\n"
+                "[t.start() for t in threads]\n"
+                "time.sleep(9999)\n"
+            )
+
         try:
             ctr.exec_run(["python3", "-c", code], detach=True)
             return True
         except Exception as e:
-            log.warning("Stage 4 injection failed: %s", e)
+            log.warning("Stage 4 exec failed: %s", e)
             return False
 
     def recover(self) -> None:
-        """Restart the container to clear all allocations."""
+        """Register failure end and restart the container to clear all injections."""
         ctr = self._find_container()
         if self._scenario_id:
             self._registry.register_failure_end(self._scenario_id)
-            log.info("[INJECTOR] Registered failure end for scenario=%s", self._scenario_id)
+            log.info("[INJECTOR] Failure end registered — scenario=%s", self._scenario_id)
+            self._scenario_id = None
 
         if ctr is None:
             return
         try:
-            log.info("[INJECTOR] Restarting %s for recovery", INJECT_SERVICE)
-            ctr.restart(timeout=10)
+            log.info("[INJECTOR] Restarting %s for recovery", self._target_service)
+            ctr.restart(timeout=15)
         except Exception as e:
             log.warning("Container restart failed: %s", e)
 
@@ -984,12 +1051,12 @@ def run_collection() -> None:
                 stage2_done = True
 
             if elapsed >= (NORMAL_PHASE_S + PRE_FAIL_PHASE_S) and not stage3_done:
-                injector.stage3_active_failure()
+                injector.stage3_active_failure("memory_leak")
                 stage3_done = True
 
             active_midpoint = NORMAL_PHASE_S + PRE_FAIL_PHASE_S + ACTIVE_FAIL_S * 0.4
             if elapsed >= active_midpoint and not stage4_done:
-                injector.stage4_peak()
+                injector.stage4_peak("memory_leak")
                 stage4_done = True
 
             if elapsed >= (NORMAL_PHASE_S + PRE_FAIL_PHASE_S + ACTIVE_FAIL_S) and not recovery_done:
