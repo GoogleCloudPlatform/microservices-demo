@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # start_platform.sh — Launch the full AI Observability Platform
-# Starts: FastAPI backend (port 8001) + React dashboard (port 3000)
+# Starts: FastAPI backend (port 8001) + React dashboard (port 5173)
 #
 # Usage:   bash infra/start_platform.sh
 # Stop:    bash infra/stop_platform.sh
@@ -57,7 +57,7 @@ for i in $(seq 1 15); do
 done
 
 # ── 3. Start React dashboard ──────────────────────────────────
-echo "[3/3] Starting React dashboard on port 3000..."
+echo "[3/3] Starting React dashboard on port 5173..."
 cd "$REPO_ROOT/dashboard"
 if [ ! -d node_modules ]; then
     echo "      Installing npm packages..."
@@ -75,7 +75,7 @@ echo "  Platform started!"
 echo ""
 echo "  API:        http://localhost:8001"
 echo "  API docs:   http://localhost:8001/docs"
-echo "  Dashboard:  http://localhost:3000"
+echo "  Dashboard:  http://localhost:5173"
 echo ""
 echo "  Logs:"
 echo "    tail -f $LOG_DIR/api.log"

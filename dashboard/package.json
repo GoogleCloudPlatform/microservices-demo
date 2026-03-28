@@ -2,7 +2,7 @@
   "name": "ai-observability-dashboard",
   "version": "1.0.0",
   "scripts": {
-    "dev": "vite --port 3000",
+    "dev": "vite --port 5173",
     "build": "vite build",
     "preview": "vite preview"
   },
