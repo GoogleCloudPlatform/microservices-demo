@@ -20,6 +20,7 @@ This repository is no longer using fake runtime scoring. The backend expects and
 - [Incident Memory and Persistence](#incident-memory-and-persistence)
 - [Frontend Breakdown](#frontend-breakdown)
 - [Observability Stack](#observability-stack)
+- [Beginner Localhost Startup Guide](#beginner-localhost-startup-guide)
 - [Deployment Paths](#deployment-paths)
 - [Configuration](#configuration)
 - [Security Model](#security-model)
@@ -472,6 +473,157 @@ The platform manifests under [deploy/platform](/Users/ishu/Hackathon/microservic
 - redis-exporter
 
 The repo does not fabricate missing telemetry. If a signal source is unavailable, the backend and UI should report that honestly.
+
+## Beginner Localhost Startup Guide
+
+If you are opening this repo for the first time and just want to run AEGIS on your laptop, use this section.
+
+### What you are starting
+
+You are starting two layers:
+
+1. The application and observability stack in Docker:
+   - Online Boutique microservices
+   - Redis
+   - Prometheus
+   - Loki
+   - Promtail
+   - Jaeger
+   - Grafana
+2. The AEGIS control plane locally:
+   - FastAPI backend on port `8001`
+   - React dashboard on port `5173`
+
+### Prerequisites
+
+Make sure these are installed before you start:
+
+- Docker Desktop
+- Python 3
+- Node.js and npm
+
+Optional but useful:
+
+- `jq` for checking JSON endpoints in the terminal
+
+### Step 1: Open the repo
+
+```bash
+cd /Users/ishu/Hackathon/microservices-demo
+```
+
+### Step 2: Start the application and observability stack
+
+This starts the boutique services plus Prometheus, Loki, Promtail, Jaeger, and Grafana.
+
+```bash
+docker compose up -d
+```
+
+You can confirm the containers are up with:
+
+```bash
+docker compose ps
+```
+
+### Step 3: Start the AEGIS backend and dashboard
+
+This starts:
+
+- backend: `http://localhost:8001`
+- dashboard: `http://localhost:5173`
+
+```bash
+bash infra/start_platform.sh
+```
+
+### Step 4: Open the product
+
+Open these in your browser:
+
+- Storefront: `http://localhost:8080`
+- AEGIS dashboard: `http://localhost:5173`
+- Backend API docs: `http://localhost:8001/docs`
+- Grafana: `http://localhost:3000`
+- Prometheus: `http://localhost:9090`
+- Jaeger: `http://localhost:16686`
+
+### Step 5: Verify that everything is alive
+
+In a terminal, run:
+
+```bash
+curl http://localhost:8001/health
+curl http://localhost:8001/infrastructure
+curl http://localhost:8001/ml/insights
+```
+
+What you should expect:
+
+- `/health` returns `status: ok`
+- `/infrastructure` returns real workload data
+- `/ml/insights` may start with low or zero `ready_service_count` right after boot, then fill in as the LSTM sequence window warms up
+
+### Step 6: Generate live traffic
+
+The load generator usually creates traffic automatically, but you can also open the storefront and browse around to help the model windows fill faster.
+
+### Step 7: Run the autonomous demo
+
+From the dashboard, click `RUN DEMO`.
+
+What should happen:
+
+- AEGIS intentionally disrupts `recommendationservice`
+- the system detects the runtime degradation
+- remediation runs automatically
+- the timeline, logs, and report update live
+- the system restores the service and stores the report for download
+
+### If the dashboard says `Backend offline`
+
+Run this exact recovery sequence:
+
+```bash
+bash infra/stop_platform.sh
+bash infra/start_platform.sh
+```
+
+Then refresh `http://localhost:5173`.
+
+If you still want to verify manually:
+
+```bash
+curl http://localhost:8001/health
+lsof -iTCP:8001 -sTCP:LISTEN -n -P
+lsof -iTCP:5173 -sTCP:LISTEN -n -P
+```
+
+### If Model Insights looks empty just after startup
+
+That is usually normal for the first short window after boot.
+
+The LSTM needs live sequential data before it can move services from warm-up into `ready`. Give it a little time, keep the system running, and generate some traffic in the storefront.
+
+### How to stop everything
+
+Stop the AEGIS backend and dashboard:
+
+```bash
+bash infra/stop_platform.sh
+```
+
+Stop the Docker services:
+
+```bash
+docker compose down
+```
+
+If you want to remove volumes too:
+
+```bash
+docker compose down -v
+```
 
 ## Deployment Paths
 
