@@ -65,7 +65,7 @@ function getPageFromLocation() {
 
 function AppInner() {
   const { theme, dark, setDark } = useTheme()
-  const { data, connected, error, fetchWindow, triggerRemediation } = useTopology()
+  const { data, connected, error, fetchWindow, triggerRemediation, triggerDemo } = useTopology()
   const { history, incidents } = useHistory()
   const infrastructure = useInfrastructure()
   const modelInsights = useModelInsights()
@@ -74,6 +74,7 @@ function AppInner() {
   const [windowData, setWindowData] = useState(null)
   const [windowLoading, setWindowLoading] = useState(false)
   const [page, setPage] = useState(getPageFromLocation)
+  const [demoBusy, setDemoBusy] = useState(false)
   const [, setTick] = useState(0)
 
   useEffect(() => {
@@ -114,7 +115,21 @@ function AppInner() {
   }, [selectedService, fetchWindow])
 
   const selectedData = data?.services?.[selectedService]
+  const latestDemo = data?.demo_run || null
+  const demoRunning = latestDemo?.status === 'running'
   const DOT_GRID = `radial-gradient(circle, ${theme.bgDot} 1px, transparent 1px)`
+
+  const handleDemoRun = useCallback(async () => {
+    setDemoBusy(true)
+    try {
+      await triggerDemo('recommendationservice', 'admin')
+      setPage('logs')
+    } catch (demoError) {
+      console.error('Demo run failed to start:', demoError)
+    } finally {
+      setDemoBusy(false)
+    }
+  }, [triggerDemo])
 
   const navBtn = (key, label, hint) => ({
     style: {
@@ -163,6 +178,40 @@ function AppInner() {
             <button {...navBtn('infra', 'INFRASTRUCTURE', 'Cluster operations')} />
             <button {...navBtn('models', 'MODEL INSIGHTS', 'ML telemetry')} />
             <button {...navBtn('logs', 'SYSTEM LOGS', 'Timeline and persistence')} />
+            <button
+              onClick={handleDemoRun}
+              disabled={demoBusy || demoRunning}
+              style={{
+                fontFamily: theme.displayFont || theme.font,
+                fontSize: 12,
+                fontWeight: 600,
+                letterSpacing: 0.8,
+                padding: '7px 14px 8px',
+                borderRadius: 999,
+                border: `1px solid ${demoRunning ? theme.accent : theme.borderLight}`,
+                background: demoRunning ? theme.accent : 'transparent',
+                color: demoRunning ? theme.bg : theme.text,
+                cursor: demoBusy || demoRunning ? 'not-allowed' : 'pointer',
+                transition: 'all 0.2s',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'flex-start',
+                minWidth: 132,
+                opacity: demoBusy || demoRunning ? 0.8 : 1,
+              }}
+            >
+              <span>{demoRunning ? 'DEMO RUNNING' : demoBusy ? 'STARTING DEMO' : 'RUN DEMO'}</span>
+              <span style={{
+                fontFamily: theme.font,
+                fontSize: 8,
+                letterSpacing: 1.2,
+                color: demoRunning ? theme.bg : theme.textMuted,
+                marginTop: 2,
+                textTransform: 'uppercase',
+              }}>
+                {demoRunning ? latestDemo?.service || 'Autonomous recovery' : 'Attack + autonomous fix'}
+              </span>
+            </button>
           </div>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 14, fontSize: 10, flexWrap: 'wrap', justifyContent: 'flex-end' }}>

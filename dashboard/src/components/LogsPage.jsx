@@ -26,6 +26,10 @@ function formatClock(iso) {
   return new Date(iso).toLocaleTimeString('en-US', { hour12: false })
 }
 
+function formatDemoStage(stage) {
+  return (stage || 'pending').replace(/_/g, ' ')
+}
+
 function downloadBlob(filename, content, type) {
   const blob = new Blob([content], { type })
   const url = URL.createObjectURL(blob)
@@ -150,6 +154,15 @@ export default function LogsPage({ events, logs, timestamp, topology, connected 
 
   const latestTimeline = topology?.timeline || []
   const activeIncidents = topology?.active_incidents || []
+  const demoRun = topology?.demo_run || null
+  const demoEvents = useMemo(() => {
+    if (!demoRun?.id) return []
+    return events.filter(item => item.category === 'demo' || item.payload?.run_id === demoRun.id)
+  }, [demoRun, events])
+  const demoLogHighlights = useMemo(() => {
+    const lines = demoRun?.summary_json?.noteworthy_logs || []
+    return Array.isArray(lines) ? lines.slice(0, 4) : []
+  }, [demoRun])
 
   const buttonStyle = active => ({
     fontSize: 10,
@@ -174,6 +187,24 @@ export default function LogsPage({ events, logs, timestamp, topology, connected 
       } else {
         const text = await res.text()
         downloadBlob(`aegis-system-report-${Date.now()}.md`, text, 'text/markdown')
+      }
+    } finally {
+      setDownloading(false)
+    }
+  }
+
+  async function downloadDemoReport(format) {
+    if (!demoRun?.id) return
+    try {
+      setDownloading(true)
+      const res = await fetch(`${API_BASE}/demo/report/${demoRun.id}?format=${format}`)
+      if (!res.ok) throw new Error(`HTTP ${res.status}`)
+      if (format === 'json') {
+        const payload = await res.json()
+        downloadBlob(`aegis-demo-report-${demoRun.id}.json`, JSON.stringify(payload, null, 2), 'application/json')
+      } else {
+        const text = await res.text()
+        downloadBlob(`aegis-demo-report-${demoRun.id}.md`, text, 'text/markdown')
       }
     } finally {
       setDownloading(false)
@@ -221,6 +252,82 @@ export default function LogsPage({ events, logs, timestamp, topology, connected 
             <div style={{ fontSize: 11, color: theme.textMuted, marginTop: 10, lineHeight: 1.6, overflowWrap: 'anywhere' }}>{meta}</div>
           </div>
         ))}
+      </div>
+
+      <div style={{ marginBottom: 18 }}>
+        <Section
+          eyebrow="Autonomous attack and recovery"
+          title="Demo Run Summary"
+          theme={theme}
+          actions={demoRun?.download_ready ? (
+            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+              <button type="button" onClick={() => downloadDemoReport('markdown')} disabled={downloading} style={buttonStyle(false)}>
+                {downloading ? 'Preparing…' : 'Download demo report'}
+              </button>
+              <button type="button" onClick={() => downloadDemoReport('json')} disabled={downloading} style={buttonStyle(false)}>
+                Download demo JSON
+              </button>
+            </div>
+          ) : null}
+        >
+          {demoRun ? (
+            <div style={{ display: 'grid', gridTemplateColumns: 'minmax(280px, 0.95fr) minmax(0, 1.05fr)', gap: 18 }}>
+              <div style={{ display: 'grid', gap: 12, minWidth: 0 }}>
+                <div style={{ border: `1px solid ${theme.borderLight}`, borderRadius: 18, padding: 16, background: theme.card, minWidth: 0 }}>
+                  <div style={{ fontSize: 10, letterSpacing: '0.18em', textTransform: 'uppercase', color: theme.textMuted }}>Current run</div>
+                  <div style={{ fontFamily: theme.displayFont, fontSize: 28, lineHeight: 1, marginTop: 10, color: demoRun.status === 'resolved' ? '#2a8a2a' : demoRun.status === 'failed' ? '#cc2222' : '#c45c0a', overflowWrap: 'anywhere' }}>
+                    {demoRun.service}
+                  </div>
+                  <div style={{ fontSize: 11, color: theme.textMuted, marginTop: 10, lineHeight: 1.7, overflowWrap: 'anywhere' }}>
+                    Status {demoRun.status} · Stage {formatDemoStage(demoRun.stage)} · Platform {demoRun.platform}
+                  </div>
+                  <div style={{ fontSize: 11, color: theme.textMuted, marginTop: 10, lineHeight: 1.7, overflowWrap: 'anywhere' }}>
+                    Attack {demoRun.attack_action?.replace(/_/g, ' ')} · Fix {demoRun.fix_action ? demoRun.fix_action.replace(/_/g, ' ') : 'awaiting remediation decision'}
+                  </div>
+                  <div style={{ fontSize: 11, color: theme.text, marginTop: 12, lineHeight: 1.8, overflowWrap: 'anywhere' }}>
+                    {demoRun.summary_text || 'The backend is still assembling the final summary for this demo run.'}
+                  </div>
+                </div>
+
+                <div style={{ border: `1px solid ${theme.borderLight}`, borderRadius: 18, padding: 16, background: theme.card, minWidth: 0 }}>
+                  <div style={{ fontSize: 10, letterSpacing: '0.18em', textTransform: 'uppercase', color: theme.textMuted }}>Key backend findings</div>
+                  <div style={{ display: 'grid', gap: 10, marginTop: 12 }}>
+                    <div style={{ fontSize: 11, color: theme.textMuted, lineHeight: 1.7 }}>
+                      Incident {demoRun.incident_id || demoRun.summary_json?.incident_id || 'not created'} · Events {demoRun.summary_json?.event_count ?? 0} · Logs {demoRun.summary_json?.log_count ?? 0}
+                    </div>
+                    <div style={{ fontSize: 11, color: theme.textMuted, lineHeight: 1.7 }}>
+                      Final workload state {demoRun.summary_json?.status || 'pending'} · Execution steps {(demoRun.summary_json?.execution_steps || []).join(', ') || 'not yet recorded'}
+                    </div>
+                    {demoLogHighlights.length > 0 ? demoLogHighlights.map(line => (
+                      <div key={line} style={{ fontSize: 11, color: theme.text, lineHeight: 1.7, overflowWrap: 'anywhere' }}>
+                        {line}
+                      </div>
+                    )) : (
+                      <div style={{ fontSize: 11, color: theme.textMuted, lineHeight: 1.7 }}>
+                        Log highlights will appear here as soon as the backend captures warning or error lines during the demo.
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              <div style={{ border: `1px solid ${theme.borderLight}`, borderRadius: 18, padding: 16, background: theme.card, minWidth: 0 }}>
+                <div style={{ fontSize: 10, letterSpacing: '0.18em', textTransform: 'uppercase', color: theme.textMuted }}>Demo timeline</div>
+                <div style={{ display: 'grid', gap: 2, marginTop: 8 }}>
+                  {demoEvents.length > 0 ? demoEvents.slice(0, 10).map(item => <EventRow key={`${item.id}-${item.created_at}`} item={item} theme={theme} />) : (
+                    <div style={{ fontSize: 11, color: theme.textMuted, lineHeight: 1.7 }}>
+                      Demo milestones will stream here once the intentional outage begins and the recovery pipeline reacts.
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div style={{ fontSize: 11, color: theme.textMuted, lineHeight: 1.7 }}>
+              No autonomous demo run has been recorded yet. Start one from the top bar to capture the attack, repair sequence, log summary, and downloadable report.
+            </div>
+          )}
+        </Section>
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1.15fr) minmax(320px, 0.85fr)', gap: 18, marginBottom: 18 }}>

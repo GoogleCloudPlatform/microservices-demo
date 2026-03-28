@@ -108,6 +108,7 @@ class AppState:
         self.predictive_cooldowns: Dict[str, float] = {}
         self.runtime_health: Dict[str, Dict[str, Any]] = {}
         self.system_store: Optional[SQLiteSystemStore] = None
+        self.demo_task: Optional[asyncio.Task] = None
 
         self.window_state = None
         self.ingestion_pipeline = None
@@ -152,6 +153,249 @@ def init_system_store() -> None:
     root_logger = logging.getLogger()
     if not any(isinstance(handler, SQLiteLogHandler) for handler in root_logger.handlers):
         root_logger.addHandler(SQLiteLogHandler(state.system_store))
+
+
+def latest_demo_run() -> Optional[Dict[str, Any]]:
+    if state.system_store is None:
+        return None
+    try:
+        return state.system_store.latest_demo_run()
+    except Exception as exc:
+        logger.debug("Failed to fetch latest demo run: %s", exc)
+        return None
+
+
+def _demo_summary_text(run: Dict[str, Any]) -> str:
+    service = run.get("service", "service")
+    status = run.get("status", "unknown")
+    stage = run.get("stage", "unknown")
+    summary = run.get("summary_text", "")
+    return summary or f"Demo run for {service} is {status} at stage {stage}."
+
+
+def _build_demo_report(run_id: int, service: str, started_at: str, remediation_result: Dict[str, Any], platform: str) -> Dict[str, Any]:
+    if state.system_store is None:
+        return {
+            "summary_text": f"Demo run {run_id} completed without a system store.",
+            "summary_json": {},
+            "report_markdown": "",
+            "report_json": {},
+        }
+
+    events = state.system_store.list_events_since(started_at, limit=160, service=service)
+    logs = state.system_store.list_logs_since(started_at, limit=220)
+    error_logs = [item for item in logs if item.get("level") in {"ERROR", "CRITICAL"}]
+    warning_logs = [item for item in logs if item.get("level") == "WARNING"]
+    final_state = state.remediation_engine.orchestrator.inspect_service(service) if state.remediation_engine else None
+    final_ok = bool(final_state and final_state.exists and final_state.running and final_state.status not in {"not_found", "dead", "exited"})
+    execution_steps = remediation_result.get("execution_steps", [])
+    step_names = [step.get("action") for step in execution_steps if step.get("action")]
+    event_titles = [item.get("title") for item in events[:6] if item.get("title")]
+    noteworthy_logs = [item.get("message") for item in error_logs[:3]] or [item.get("message") for item in warning_logs[:3]]
+
+    summary_text = (
+        f"AEGIS demo attacked {service} on {platform}, observed the outage, "
+        f"applied {remediation_result.get('decision', {}).get('action', 'a recovery action')}, "
+        f"and ended with the workload {'healthy' if final_ok else 'still degraded'}."
+    )
+    summary_json = {
+        "run_id": run_id,
+        "service": service,
+        "platform": platform,
+        "status": "resolved" if final_ok else "degraded",
+        "incident_id": remediation_result.get("incident_id"),
+        "decision_action": remediation_result.get("decision", {}).get("action"),
+        "within_target": remediation_result.get("within_target"),
+        "elapsed_s": remediation_result.get("elapsed_s"),
+        "event_count": len(events),
+        "log_count": len(logs),
+        "error_log_count": len(error_logs),
+        "warning_log_count": len(warning_logs),
+        "event_titles": event_titles,
+        "noteworthy_logs": noteworthy_logs,
+        "execution_steps": step_names,
+        "final_state": final_state.to_dict() if final_state else {},
+    }
+    markdown_lines = [
+        "# AEGIS Autonomous Demo Report",
+        "",
+        f"Run ID: {run_id}",
+        f"Service attacked: {service}",
+        f"Platform: {platform}",
+        f"Generated at: {utc_now_iso()}",
+        "",
+        "## Summary",
+        "",
+        summary_text,
+        "",
+        f"- Incident ID: {remediation_result.get('incident_id') or 'n/a'}",
+        f"- Recovery action: {remediation_result.get('decision', {}).get('action', 'n/a')}",
+        f"- Within target: {remediation_result.get('within_target')}",
+        f"- Elapsed seconds: {remediation_result.get('elapsed_s')}",
+        f"- Events recorded: {len(events)}",
+        f"- Logs recorded: {len(logs)}",
+        "",
+        "## Timeline Highlights",
+        "",
+    ]
+    markdown_lines.extend([f"- {title}" for title in event_titles] or ["- No notable events were captured."])
+    markdown_lines.extend(["", "## Log Highlights", ""])
+    markdown_lines.extend([f"- {line}" for line in noteworthy_logs] or ["- No warning or error log highlights were captured."])
+    markdown_lines.extend(["", "## Execution Steps", ""])
+    markdown_lines.extend([f"- {name}" for name in step_names] or ["- No execution steps recorded."])
+    return {
+        "summary_text": summary_text,
+        "summary_json": summary_json,
+        "report_markdown": "\n".join(markdown_lines),
+        "report_json": {
+            "generated_at": utc_now_iso(),
+            "summary": summary_json,
+            "events": events,
+            "logs": logs,
+            "remediation_result": remediation_result,
+        },
+    }
+
+
+async def run_autonomous_demo(run_id: int, service: str, owner: str) -> None:
+    orchestrator = state.remediation_engine.orchestrator if state.remediation_engine else None
+    if orchestrator is None or state.system_store is None or state.remediation_engine is None:
+        return
+
+    demo = state.system_store.get_demo_run(run_id)
+    started_at = demo["created_at"] if demo else utc_now_iso()
+    platform = orchestrator.platform
+
+    try:
+        state.system_store.update_demo_run(run_id, stage="attacking", status="running")
+        emit_system_event(
+            event_type="demo_started",
+            category="demo",
+            severity="warning",
+            title=f"Autonomous demo started for {service}",
+            message="AEGIS is intentionally disrupting a service to prove detection and recovery.",
+            service=service,
+            status="open",
+            payload={"run_id": run_id, "owner": owner, "platform": platform},
+        )
+
+        ok, message, details = orchestrator.stop_service(service)
+        emit_system_event(
+            event_type="demo_attack_injected",
+            category="demo",
+            severity="warning" if ok else "critical",
+            title=f"Intentional failure injected for {service}",
+            message=message if ok else f"Failed to inject demo failure: {message}",
+            service=service,
+            status="open",
+            payload={"run_id": run_id, "details": details},
+        )
+        if not ok:
+            report = _build_demo_report(run_id, service, started_at, {}, platform)
+            state.system_store.update_demo_run(
+                run_id,
+                status="failed",
+                stage="failed",
+                summary_text=report["summary_text"],
+                summary_json=report["summary_json"],
+                report_markdown=report["report_markdown"],
+                report_json=report["report_json"],
+            )
+            return
+
+        await asyncio.sleep(3.0)
+        state.system_store.update_demo_run(run_id, stage="remediating", status="running")
+        emit_system_event(
+            event_type="demo_recovery_started",
+            category="demo",
+            severity="info",
+            title=f"Autonomous recovery started for {service}",
+            message="AEGIS is now running its remediation workflow against the intentionally disrupted service.",
+            service=service,
+            status="open",
+            payload={"run_id": run_id},
+        )
+
+        evidence = _build_evidence(service, "service_unhealthy", state.current_scores)
+        evidence["summary"] = (
+            f"Autonomous demo run intentionally stopped {service}; the system must detect and restore the workload."
+        )
+        proposal = ActionProposal(
+            source="demo",
+            proposed_action="start_service",
+            target=service,
+            confidence=0.99,
+            rationale="Autonomous demo recovery after an intentional service stop.",
+        )
+        remediation_result = state.remediation_engine.remediate(
+            service=service,
+            failure_type="service_unhealthy",
+            severity="critical",
+            affected_services=[service],
+            evidence=evidence,
+            proposal=proposal,
+        )
+
+        state.system_store.update_demo_run(
+            run_id,
+            stage="evaluating",
+            status="running",
+            incident_id=remediation_result.get("incident_id"),
+            fix_action=remediation_result.get("decision", {}).get("action", ""),
+        )
+
+        for _ in range(8):
+            runtime_state = orchestrator.inspect_service(service)
+            if runtime_state.exists and runtime_state.running and runtime_state.status not in {"not_found", "dead", "exited"}:
+                break
+            await asyncio.sleep(1.5)
+
+        report = _build_demo_report(run_id, service, started_at, remediation_result, platform)
+        final_status = "resolved" if report["summary_json"].get("status") == "resolved" else "failed"
+        state.system_store.update_demo_run(
+            run_id,
+            status=final_status,
+            stage="completed",
+            summary_text=report["summary_text"],
+            summary_json=report["summary_json"],
+            report_markdown=report["report_markdown"],
+            report_json=report["report_json"],
+        )
+        emit_system_event(
+            event_type="demo_completed",
+            category="demo",
+            severity="info" if final_status == "resolved" else "warning",
+            title=f"Autonomous demo completed for {service}",
+            message=report["summary_text"],
+            service=service,
+            status="closed" if final_status == "resolved" else "open",
+            payload={"run_id": run_id, "incident_id": remediation_result.get("incident_id"), "summary": report["summary_json"]},
+        )
+    except Exception as exc:
+        logger.exception("Autonomous demo run failed")
+        if state.system_store is not None:
+            report = _build_demo_report(run_id, service, started_at, {"operator_summary": str(exc)}, platform)
+            state.system_store.update_demo_run(
+                run_id,
+                status="failed",
+                stage="failed",
+                summary_text=f"Demo run failed: {exc}",
+                summary_json={**report["summary_json"], "error": str(exc)},
+                report_markdown=report["report_markdown"],
+                report_json=report["report_json"],
+            )
+        emit_system_event(
+            event_type="demo_failed",
+            category="demo",
+            severity="critical",
+            title=f"Autonomous demo failed for {service}",
+            message=str(exc),
+            service=service,
+            status="open",
+            payload={"run_id": run_id},
+        )
+    finally:
+        state.demo_task = None
 
 
 def load_models():
@@ -1021,6 +1265,11 @@ class RemediatePayload(BaseModel):
     proposal: Optional[ActionProposalPayload] = None
 
 
+class DemoRunPayload(BaseModel):
+    service: str = "recommendationservice"
+    owner: str = "operator"
+
+
 @app.get("/health")
 async def health():
     return {
@@ -1063,6 +1312,7 @@ async def status():
         "alerts": alerts,
         "predictive_alerts": list(state.predictive_alerts.values()),
         "timeline": _timeline_snapshot(limit=8),
+        "demo_run": latest_demo_run(),
         "recommendation": recommendation,
         "active_incidents": state.remediation_engine.list_active_incidents() if state.remediation_engine else [],
         "recent_incidents": state.remediation_engine.list_incident_history(limit=10) if state.remediation_engine else [],
@@ -1177,6 +1427,44 @@ async def remediate(payload: RemediatePayload):
         "result": result,
         "timestamp": utc_now_iso(),
     }
+
+
+@app.post("/demo/run", dependencies=[Depends(require_operator_access)])
+async def demo_run(payload: DemoRunPayload):
+    if state.remediation_engine is None or state.system_store is None:
+        raise HTTPException(503, "Demo control plane is not available")
+    if payload.service not in ALL_SERVICES:
+        raise HTTPException(404, f"Unknown service: {payload.service}")
+
+    latest = latest_demo_run()
+    if state.demo_task is not None and not state.demo_task.done():
+        raise HTTPException(409, "A demo run is already active")
+    if latest and latest.get("status") == "running":
+        raise HTTPException(409, "The latest demo run is still in progress")
+
+    run = state.system_store.start_demo_run(
+        service=payload.service,
+        platform=state.remediation_engine.orchestrator.platform,
+        started_by=payload.owner,
+        attack_action="stop_service",
+    )
+    state.demo_task = asyncio.create_task(run_autonomous_demo(run["id"], payload.service, payload.owner))
+    return {"demo_run": run, "timestamp": utc_now_iso()}
+
+
+@app.get("/demo/latest")
+async def demo_latest():
+    return {"demo_run": latest_demo_run(), "timestamp": utc_now_iso()}
+
+
+@app.get("/demo/report/{run_id}")
+async def demo_report(run_id: int, format: str = Query(default="markdown", pattern="^(markdown|json)$")):
+    run = latest_demo_run() if run_id == -1 else (state.system_store.get_demo_run(run_id) if state.system_store else None)
+    if run is None:
+        raise HTTPException(404, f"Demo run {run_id} not found")
+    if format == "json":
+        return run.get("report_json") or {"summary": run.get("summary_json", {})}
+    return PlainTextResponse(run.get("report_markdown") or run.get("summary_text", "Demo report unavailable.\n"), media_type="text/markdown")
 
 
 @app.get("/incidents/active")
@@ -1350,6 +1638,7 @@ async def topology():
         "alerts": [{"service": svc, **v} for svc, v in scores.items() if v.get("combined_score", 0) > 0.7],
         "predictive_alerts": list(state.predictive_alerts.values()),
         "timeline": _timeline_snapshot(limit=12),
+        "demo_run": latest_demo_run(),
         "system_summary": state.system_store.summarize() if state.system_store else {},
         "recommendation": recommendation,
         "active_incidents": state.remediation_engine.list_active_incidents() if state.remediation_engine else [],

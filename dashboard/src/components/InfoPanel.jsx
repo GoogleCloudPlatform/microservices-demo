@@ -94,6 +94,10 @@ function MetricCard({ title, subtitle, value, status, statusLabel, theme, styles
   )
 }
 
+function formatDemoStage(stage) {
+  return (stage || 'pending').replace(/_/g, ' ')
+}
+
 function PanelCard({ title, subtitle, children, styles }) {
   return (
     <div style={styles.card}>
@@ -135,6 +139,7 @@ export default function InfoPanel({ topology, children }) {
   const predictiveAlerts = topology?.predictive_alerts || []
   const topPredictiveAlert = [...predictiveAlerts].sort((a, b) => (b.lstm_score || 0) - (a.lstm_score || 0))[0]
   const timeline = topology?.timeline || []
+  const demoRun = topology?.demo_run || null
 
   const healthStatus = health === '—' ? 'STABLE' : health < 60 ? 'CRITICAL' : health < 80 ? 'DEGRADING' : 'STABLE'
   const momentumStatus = Math.abs(momentum) < 2 ? 'STABLE' : momentum > 0 ? 'CRITICAL' : 'OK'
@@ -216,6 +221,36 @@ export default function InfoPanel({ topology, children }) {
           </>
         ) : (
           <div style={{ ...styles.meta, color: '#2a8a2a' }}>No pre-failure alert is active.</div>
+        )}
+      </PanelCard>
+
+      <PanelCard
+        title="Autonomous Demo"
+        subtitle="Intentional attack, self-heal, and stored operator report."
+        styles={styles}
+      >
+        {demoRun ? (
+          <>
+            <div style={{ ...styles.strongText, color: demoRun.status === 'resolved' ? '#2a8a2a' : demoRun.status === 'failed' ? '#cc2222' : '#c45c0a' }}>
+              {demoRun.service}
+            </div>
+            <div style={styles.meta}>
+              Status {demoRun.status} · Stage {formatDemoStage(demoRun.stage)}
+            </div>
+            <div style={styles.meta}>
+              Attack {demoRun.attack_action?.replace(/_/g, ' ')} · Fix {demoRun.fix_action ? demoRun.fix_action.replace(/_/g, ' ') : 'awaiting recovery decision'}
+            </div>
+            <div style={styles.meta}>
+              {demoRun.summary_text || 'The latest demo report is still being assembled by the backend.'}
+            </div>
+            <div style={{ ...styles.badge, color: demoRun.download_ready ? theme.accent : theme.textMuted }}>
+              {demoRun.download_ready ? 'Report ready in system logs' : 'Report will appear after recovery closes'}
+            </div>
+          </>
+        ) : (
+          <div style={styles.meta}>
+            No demo run has been launched yet. Use the top-bar demo button to trigger an intentional outage and watch the autonomous recovery path.
+          </div>
         )}
       </PanelCard>
 

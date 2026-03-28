@@ -48,5 +48,18 @@ export function useTopology() {
     return await res.json()
   }, [])
 
-  return { data, connected, error, fetchWindow, triggerRemediation }
+  const triggerDemo = useCallback(async (service = 'recommendationservice', owner = 'operator') => {
+    const res = await fetch(`${API_BASE}/demo/run`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', ...OPERATOR_HEADERS },
+      body: JSON.stringify({ service, owner }),
+    })
+    if (!res.ok) {
+      const payload = await res.json().catch(() => ({}))
+      throw new Error(payload?.detail || `HTTP ${res.status}`)
+    }
+    return await res.json()
+  }, [])
+
+  return { data, connected, error, fetchWindow, triggerRemediation, triggerDemo }
 }

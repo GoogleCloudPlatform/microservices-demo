@@ -81,6 +81,27 @@ class SQLiteSystemStore:
                 )
                 """
             )
+            conn.execute(
+                """
+                CREATE TABLE IF NOT EXISTS demo_runs (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    created_at TEXT NOT NULL,
+                    updated_at TEXT NOT NULL,
+                    service TEXT NOT NULL,
+                    platform TEXT NOT NULL,
+                    started_by TEXT NOT NULL,
+                    attack_action TEXT NOT NULL,
+                    fix_action TEXT NOT NULL DEFAULT '',
+                    status TEXT NOT NULL,
+                    stage TEXT NOT NULL,
+                    incident_id TEXT,
+                    summary_text TEXT NOT NULL DEFAULT '',
+                    summary_json TEXT NOT NULL DEFAULT '{}',
+                    report_markdown TEXT NOT NULL DEFAULT '',
+                    report_json TEXT NOT NULL DEFAULT '{}'
+                )
+                """
+            )
 
     def add_event(
         self,
@@ -193,6 +214,165 @@ class SQLiteSystemStore:
             rows = conn.execute(sql, tuple(params)).fetchall()
         return [self._log_row_to_dict(row) for row in rows]
 
+    def list_events_since(
+        self,
+        since_iso: str,
+        *,
+        limit: int = 200,
+        service: Optional[str] = None,
+        category: Optional[str] = None,
+    ) -> List[Dict[str, Any]]:
+        clauses = ["created_at >= ?"]
+        params: List[Any] = [since_iso]
+        if service:
+            clauses.append("(service = ? OR service IS NULL)")
+            params.append(service)
+        if category:
+            clauses.append("category = ?")
+            params.append(category)
+        params.append(limit)
+        sql = f"""
+            SELECT * FROM system_events
+            WHERE {' AND '.join(clauses)}
+            ORDER BY created_at DESC, id DESC
+            LIMIT ?
+        """
+        with self._connect() as conn:
+            rows = conn.execute(sql, tuple(params)).fetchall()
+        return [self._event_row_to_dict(row) for row in rows]
+
+    def list_logs_since(
+        self,
+        since_iso: str,
+        *,
+        limit: int = 300,
+        query: str = "",
+    ) -> List[Dict[str, Any]]:
+        clauses = ["created_at >= ?"]
+        params: List[Any] = [since_iso]
+        if query:
+            clauses.append("(message LIKE ? OR logger LIKE ?)")
+            params.extend([f"%{query}%", f"%{query}%"])
+        params.append(limit)
+        sql = f"""
+            SELECT * FROM system_logs
+            WHERE {' AND '.join(clauses)}
+            ORDER BY created_at DESC, id DESC
+            LIMIT ?
+        """
+        with self._connect() as conn:
+            rows = conn.execute(sql, tuple(params)).fetchall()
+        return [self._log_row_to_dict(row) for row in rows]
+
+    def start_demo_run(
+        self,
+        *,
+        service: str,
+        platform: str,
+        started_by: str,
+        attack_action: str,
+    ) -> Dict[str, Any]:
+        created_at = utcnow_iso()
+        row = {
+            "created_at": created_at,
+            "updated_at": created_at,
+            "service": service,
+            "platform": platform,
+            "started_by": started_by,
+            "attack_action": attack_action,
+            "fix_action": "",
+            "status": "running",
+            "stage": "initiated",
+            "incident_id": None,
+            "summary_text": "",
+            "summary_json": {},
+            "report_markdown": "",
+            "report_json": {},
+        }
+        with self._lock:
+            with self._connect() as conn:
+                cur = conn.execute(
+                    """
+                    INSERT INTO demo_runs (
+                        created_at, updated_at, service, platform, started_by, attack_action,
+                        fix_action, status, stage, incident_id, summary_text, summary_json,
+                        report_markdown, report_json
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    """,
+                    (
+                        row["created_at"],
+                        row["updated_at"],
+                        row["service"],
+                        row["platform"],
+                        row["started_by"],
+                        row["attack_action"],
+                        row["fix_action"],
+                        row["status"],
+                        row["stage"],
+                        row["incident_id"],
+                        row["summary_text"],
+                        json.dumps(row["summary_json"]),
+                        row["report_markdown"],
+                        json.dumps(row["report_json"]),
+                    ),
+                )
+                row["id"] = cur.lastrowid
+        return row
+
+    def update_demo_run(self, run_id: int, **fields: Any) -> Dict[str, Any]:
+        allowed = {
+            "updated_at",
+            "fix_action",
+            "status",
+            "stage",
+            "incident_id",
+            "summary_text",
+            "summary_json",
+            "report_markdown",
+            "report_json",
+        }
+        payload = {key: value for key, value in fields.items() if key in allowed}
+        if not payload:
+            demo = self.get_demo_run(run_id)
+            if demo is None:
+                raise KeyError(f"Demo run {run_id} not found")
+            return demo
+        payload["updated_at"] = utcnow_iso()
+        assignments = []
+        params: List[Any] = []
+        for key, value in payload.items():
+            assignments.append(f"{key} = ?")
+            if key in {"summary_json", "report_json"}:
+                params.append(json.dumps(value or {}))
+            else:
+                params.append(value)
+        params.append(run_id)
+        with self._lock:
+            with self._connect() as conn:
+                conn.execute(
+                    f"UPDATE demo_runs SET {', '.join(assignments)} WHERE id = ?",
+                    tuple(params),
+                )
+        demo = self.get_demo_run(run_id)
+        if demo is None:
+            raise KeyError(f"Demo run {run_id} not found")
+        return demo
+
+    def get_demo_run(self, run_id: int) -> Optional[Dict[str, Any]]:
+        with self._connect() as conn:
+            row = conn.execute(
+                "SELECT * FROM demo_runs WHERE id = ? LIMIT 1",
+                (run_id,),
+            ).fetchone()
+        return self._demo_row_to_dict(row) if row else None
+
+    def latest_demo_run(self) -> Optional[Dict[str, Any]]:
+        with self._connect() as conn:
+            row = conn.execute(
+                "SELECT * FROM demo_runs ORDER BY created_at DESC, id DESC LIMIT 1"
+            ).fetchone()
+        return self._demo_row_to_dict(row) if row else None
+
     def summarize(self) -> Dict[str, Any]:
         with self._connect() as conn:
             latest_event = conn.execute(
@@ -304,6 +484,13 @@ class SQLiteSystemStore:
     def _log_row_to_dict(self, row: sqlite3.Row) -> Dict[str, Any]:
         item = dict(row)
         item["context"] = json.loads(item.pop("context_json", "{}"))
+        return item
+
+    def _demo_row_to_dict(self, row: sqlite3.Row) -> Dict[str, Any]:
+        item = dict(row)
+        item["summary_json"] = json.loads(item.pop("summary_json", "{}"))
+        item["report_json"] = json.loads(item.pop("report_json", "{}"))
+        item["download_ready"] = bool(item.get("report_markdown") or item.get("report_json"))
         return item
 
 
