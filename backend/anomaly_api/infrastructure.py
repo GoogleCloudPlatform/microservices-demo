@@ -110,7 +110,6 @@ def build_infrastructure_payload(
             "cluster_name": settings.cluster_name,
             "namespace": settings.k8s_namespace,
             "orchestrator": remediation_engine.orchestrator.platform if remediation_engine else "unknown",
-            "demo_mode": topology.get("demo_mode", False),
             "collector_ready": settings.infrastructure_collectors_enabled,
             "history_points": len(history),
         },

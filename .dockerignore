@@ -5,6 +5,7 @@ dashboard/node_modules
 dashboard/dist
 pipeline/logs
 backend/.runtime
+backend/backend/.runtime
 __pycache__
 **/__pycache__
 *.pyc
@@ -12,3 +13,8 @@ __pycache__
 env
 .idea
 .vscode
+ml/isolation_forest/data
+ml/lstm/data
+pipeline/data/training
+models/aegis_models/X_*.npy
+models/aegis_models/y_labels.npy

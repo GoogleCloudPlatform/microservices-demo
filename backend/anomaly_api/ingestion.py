@@ -13,6 +13,8 @@ import json
 import math
 import logging
 import threading
+import os
+from datetime import datetime, timezone
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
 import numpy as np
@@ -23,7 +25,9 @@ logger = logging.getLogger(__name__)
 WINDOW_SIZE = 20          # observations per service
 DOCKER_POLL_INTERVAL = 5.0   # seconds
 LOKI_POLL_INTERVAL = 10.0    # seconds
-LOKI_URL = "http://localhost:3100"
+TRACE_POLL_INTERVAL = 15.0   # seconds
+LOKI_URL = os.getenv("AEGIS_LOKI_URL", "http://localhost:3100")
+JAEGER_URL = os.getenv("AEGIS_JAEGER_URL", "http://localhost:16686")
 
 ALL_SERVICES = [
     "frontend", "productcatalogservice", "cartservice", "recommendationservice",
@@ -59,6 +63,16 @@ class Observation:
     timeout_count: int = 0
     template_entropy: float = 0.0   # Shannon entropy of message length distribution
     log_volume_per_sec: float = 0.0
+    unique_templates: int = 0
+    new_templates_seen: int = 0
+    oom_mention_count: int = 0
+    avg_message_length: float = 0.0
+    log_volume_change_pct: float = 0.0
+
+    # Jaeger trace features
+    trace_count: int = 0
+    trace_error_count: int = 0
+    trace_duration_mean: float = 0.0
 
 
 class SlidingWindowState:
@@ -161,11 +175,10 @@ class DockerStatsCollector:
                 block_r_mbs = max(0.0, (cum_br - prev["block_r"]) / elapsed / 1e6)
                 block_w_mbs = max(0.0, (cum_bw - prev["block_w"]) / elapsed / 1e6)
             else:
-                # First sample — use neutral values
-                net_rx_mbs = 5.0
-                net_tx_mbs = 6.0
-                block_r_mbs = 0.06
-                block_w_mbs = 1.6
+                net_rx_mbs = 0.0
+                net_tx_mbs = 0.0
+                block_r_mbs = 0.0
+                block_w_mbs = 0.0
 
             return {
                 "svc": svc,
@@ -241,6 +254,10 @@ class DockerStatsCollector:
 class LokiCollector:
     """Collects log features from Loki for all services."""
 
+    def __init__(self) -> None:
+        self._seen_templates_global = set()
+        self._prev_totals: Dict[str, int] = {}
+
     def _compute_template_entropy(self, messages: List[str]) -> float:
         """
         Shannon entropy of first-30-char message templates as a proxy
@@ -269,7 +286,12 @@ class LokiCollector:
             "info_count": 0,
             "exception_count": 0,
             "timeout_count": 0,
+            "oom_mention_count": 0,
             "template_entropy": 0.0,
+            "unique_templates": 0,
+            "new_templates_seen": 0,
+            "avg_message_length": 0.0,
+            "log_volume_change_pct": 0.0,
             "recent_messages": [],
         }
         try:
@@ -293,7 +315,10 @@ class LokiCollector:
             info_count = 0
             exception_count = 0
             timeout_count = 0
+            oom_mention_count = 0
             messages = []
+            templates = []
+            message_lengths = []
 
             for stream in result_streams:
                 values = stream.get("values", [])
@@ -346,10 +371,21 @@ class LokiCollector:
                         exception_count += 1
                     if "timeout" in msg_lower or "timed out" in msg_lower or "timeout" in line_lower:
                         timeout_count += 1
+                    if "out of memory" in msg_lower or "oom" in msg_lower or "killed" in msg_lower:
+                        oom_mention_count += 1
 
                     messages.append(msg)
+                    templates.append((msg[:48] if len(msg) >= 48 else msg).strip())
+                    message_lengths.append(len(msg))
 
             template_entropy = self._compute_template_entropy(messages)
+            unique_templates = len(set(templates))
+            new_templates_seen = len(set(templates) - self._seen_templates_global)
+            self._seen_templates_global.update(templates)
+            avg_message_length = float(np.mean(message_lengths)) if message_lengths else 0.0
+            prev_total = self._prev_totals.get(svc, 0)
+            log_volume_change_pct = ((log_count / prev_total - 1.0) * 100.0) if prev_total > 0 else 0.0
+            self._prev_totals[svc] = log_count
 
             # Keep last 5 messages for display
             recent_messages = messages[-5:] if messages else []
@@ -361,7 +397,12 @@ class LokiCollector:
                 "info_count": info_count,
                 "exception_count": exception_count,
                 "timeout_count": timeout_count,
+                "oom_mention_count": oom_mention_count,
                 "template_entropy": template_entropy,
+                "unique_templates": unique_templates,
+                "new_templates_seen": new_templates_seen,
+                "avg_message_length": round(avg_message_length, 2),
+                "log_volume_change_pct": round(log_volume_change_pct, 4),
                 "recent_messages": recent_messages,
             }
 
@@ -401,6 +442,84 @@ class LokiCollector:
         return results
 
 
+class JaegerCollector:
+    """Collects short-range trace aggregates from Jaeger."""
+
+    def _query_service(self, svc: str, start_us: int, end_us: int) -> Dict:
+        empty = {
+            "trace_count": 0,
+            "trace_error_count": 0,
+            "trace_duration_mean": 0.0,
+        }
+        try:
+            resp = requests.get(
+                f"{JAEGER_URL}/api/traces",
+                params={
+                    "service": svc,
+                    "start": str(start_us),
+                    "end": str(end_us),
+                    "limit": "50",
+                },
+                timeout=8,
+            )
+            if resp.status_code in (400, 404):
+                return empty
+            resp.raise_for_status()
+            data = resp.json()
+        except Exception:
+            return empty
+
+        span_count = 0
+        error_count = 0
+        durations = []
+
+        for trace in data.get("data", []):
+            for span in trace.get("spans", []):
+                proc_id = span.get("processID", "")
+                process = (trace.get("processes") or {}).get(proc_id, {})
+                service_name = process.get("serviceName", svc)
+                if service_name != svc:
+                    continue
+                span_count += 1
+                duration_ms = float(span.get("duration", 0) or 0) / 1000.0
+                durations.append(duration_ms)
+                tags = {tag.get("key"): tag.get("value") for tag in span.get("tags", [])}
+                http_status = int(tags.get("http.status_code", 0) or 0)
+                otel_status = str(tags.get("otel.status_code", "") or "").upper()
+                if otel_status == "ERROR" or http_status >= 500 or bool(tags.get("error", False)):
+                    error_count += 1
+
+        return {
+            "trace_count": span_count,
+            "trace_error_count": error_count,
+            "trace_duration_mean": round(float(np.mean(durations)) if durations else 0.0, 4),
+        }
+
+    def poll(self, lookback_seconds: float = TRACE_POLL_INTERVAL) -> Dict[str, Dict]:
+        end_dt = datetime.now(timezone.utc)
+        start_dt = end_dt.timestamp() - lookback_seconds
+        end_us = int(end_dt.timestamp() * 1e6)
+        start_us = int(start_dt * 1e6)
+
+        results: Dict[str, Dict] = {}
+        with ThreadPoolExecutor(max_workers=len(ALL_SERVICES)) as executor:
+            futures = {
+                executor.submit(self._query_service, svc, start_us, end_us): svc
+                for svc in ALL_SERVICES
+            }
+            for future in as_completed(futures):
+                svc = futures[future]
+                try:
+                    results[svc] = future.result()
+                except Exception:
+                    results[svc] = {
+                        "trace_count": 0,
+                        "trace_error_count": 0,
+                        "trace_duration_mean": 0.0,
+                    }
+        return results
+
+
 class IngestionPipeline:
     """Orchestrates all collectors and feeds the sliding window."""
 
@@ -408,10 +527,13 @@ class IngestionPipeline:
         self.window_state = window_state
         self.docker = DockerStatsCollector()
         self.loki = LokiCollector()
+        self.jaeger = JaegerCollector()
         self._running = False
         self._thread: Optional[threading.Thread] = None
         self._last_loki_poll = 0.0
+        self._last_trace_poll = 0.0
         self._loki_cache: Dict[str, Dict] = {}  # last Loki results per service
+        self._trace_cache: Dict[str, Dict] = {}
 
     def start(self):
         self._running = True
@@ -437,11 +559,18 @@ class IngestionPipeline:
                         self._last_loki_poll = now
                     except Exception as e:
                         logger.warning(f"Loki poll error: {e}")
+                if now - self._last_trace_poll >= TRACE_POLL_INTERVAL:
+                    try:
+                        self._trace_cache = self.jaeger.poll(lookback_seconds=TRACE_POLL_INTERVAL + 2)
+                        self._last_trace_poll = now
+                    except Exception as e:
+                        logger.warning(f"Jaeger poll error: {e}")
 
                 # Build and push one Observation per service
                 for svc in ALL_SERVICES:
                     ds = docker_stats.get(svc, {})
                     ls = self._loki_cache.get(svc, {})
+                    ts = self._trace_cache.get(svc, {})
 
                     log_count = ls.get("log_count", 0)
                     error_count = ls.get("error_count", 0)
@@ -468,6 +597,14 @@ class IngestionPipeline:
                         timeout_count=ls.get("timeout_count", 0),
                         template_entropy=ls.get("template_entropy", 0.0),
                         log_volume_per_sec=log_count / LOKI_POLL_INTERVAL,
+                        unique_templates=ls.get("unique_templates", 0),
+                        new_templates_seen=ls.get("new_templates_seen", 0),
+                        oom_mention_count=ls.get("oom_mention_count", 0),
+                        avg_message_length=ls.get("avg_message_length", 0.0),
+                        log_volume_change_pct=ls.get("log_volume_change_pct", 0.0),
+                        trace_count=ts.get("trace_count", 0),
+                        trace_error_count=ts.get("trace_error_count", 0),
+                        trace_duration_mean=ts.get("trace_duration_mean", 0.0),
                     )
                     self.window_state.push(obs)
 

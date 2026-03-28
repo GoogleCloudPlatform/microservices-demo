@@ -10,7 +10,7 @@
 - This path uses:
   - FastAPI with local Python
   - Vite dev server for the dashboard
-  - optional demo-mode scoring when models are unavailable
+  - real uploaded model artifacts from `models/aegis_models`
 
 ### 2. Local production-style Compose validation
 - Start the boutique application and observability stack:
@@ -41,13 +41,15 @@ Environment variables are defined in [.env.example](/Users/ishu/Hackathon/micros
 - `AEGIS_RUNTIME_MODE=production`
 - `AEGIS_AUTH_ENABLED=true`
 - `AEGIS_API_TOKEN=<strong secret>`
-- `AEGIS_ALLOW_DEMO_MODE=false`
 - `AEGIS_ALLOWED_ORIGINS=<dashboard origin list>`
 - `AEGIS_ORCHESTRATOR=kubernetes`
+- `AEGIS_MODEL_DIR=models/aegis_models`
+- The packaged backend image copies the runtime model artifacts from `models/` and installs CPU-targeted PyTorch wheels for container use.
 
 ## Security Notes
 - Mutating endpoints require `X-Aegis-Token` when auth is enabled.
-- Production mode fails closed when models are missing and demo fallback is disabled.
+- Startup fails closed when the required trained artifacts are missing.
 - The dashboard should talk to the backend through `/api` behind ingress or nginx, not directly to localhost.
 - The backend is cluster-internal by default in Kubernetes; only the dashboard is exposed via ingress.
-- The production overlay enables TLS-ready ingress configuration and disables wildcard/demo defaults.
+- The packaged dashboard proxy can inject the backend operator token from container env, which avoids putting the secret in the browser bundle.
+- The production overlay enables TLS-ready ingress configuration and disables wildcard defaults.

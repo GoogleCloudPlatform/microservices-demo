@@ -16,7 +16,7 @@ data:
   AEGIS_JAEGER_URL: "http://jaeger.aegis-system.svc.cluster.local:16686"
   AEGIS_GRAFANA_URL: "http://grafana.aegis-system.svc.cluster.local:3000"
   AEGIS_OTEL_COLLECTOR_URL: "http://otel-collector.aegis-system.svc.cluster.local:8889"
-  AEGIS_ALLOW_DEMO_MODE: "true"
+  AEGIS_MODEL_DIR: "models/aegis_models"
   AEGIS_REMEDIATION_COOLDOWN_S: "30"
   AEGIS_REMEDIATION_LOCK_TIMEOUT_S: "300"
   AEGIS_INCIDENT_MEMORY_LIMIT: "5000"

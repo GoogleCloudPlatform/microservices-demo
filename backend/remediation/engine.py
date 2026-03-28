@@ -31,7 +31,6 @@ class RemediationEngine:
         self,
         score_provider: Optional[Callable[[], Dict[str, Dict]]] = None,
         target_seconds: int = 15,
-        demo_mode: bool = False,
         orchestrator: Optional[OrchestratorAdapter] = None,
         memory_store: Optional[SQLiteIncidentMemoryStore] = None,
         orchestrator_target: str = "auto",
@@ -42,7 +41,6 @@ class RemediationEngine:
         memory_retention_days: int = 30,
     ) -> None:
         self.target_seconds = target_seconds
-        self.demo_mode = demo_mode
         self.score_provider = score_provider or (lambda: {})
         self.orchestrator_target = orchestrator_target
         self.kubernetes_namespace = kubernetes_namespace
@@ -70,7 +68,7 @@ class RemediationEngine:
         if self.orchestrator_target == "docker":
             return DockerOrchestratorAdapter()
         docker = DockerOrchestratorAdapter()
-        if docker.available and not self.demo_mode:
+        if docker.available:
             return docker
         return KubernetesOrchestratorAdapter(namespace=self.kubernetes_namespace)
 
@@ -190,7 +188,6 @@ class RemediationEngine:
             "elapsed_s": elapsed,
             "within_target": elapsed <= self.target_seconds,
             "platform": self.orchestrator.platform,
-            "demo_mode": self.demo_mode,
         }
 
     def validate_proposal(
@@ -327,7 +324,6 @@ class RemediationEngine:
                     "elapsed_s": 0.0,
                     "within_target": True,
                     "platform": self.orchestrator.platform,
-                    "demo_mode": self.demo_mode,
                 }
 
         cooldown_until = self.service_cooldowns.get(incident.root_cause_service, 0.0)
@@ -358,7 +354,6 @@ class RemediationEngine:
                 "elapsed_s": 0.0,
                 "within_target": True,
                 "platform": self.orchestrator.platform,
-                "demo_mode": self.demo_mode,
             }
         return None
 
@@ -414,5 +409,5 @@ class RemediationEngine:
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
-    engine = RemediationEngine(score_provider=lambda: {}, demo_mode=True)
+    engine = RemediationEngine(score_provider=lambda: {})
     print(engine.remediate("recommendationservice", "memory_leak"))

@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
-import { API_BASE } from '../api'
+import { API_BASE, OPERATOR_HEADERS } from '../api'
 const POLL_MS = 2000
 
 export function useTopology() {
@@ -42,7 +42,7 @@ export function useTopology() {
   const triggerRemediation = useCallback(async (service, failureType = 'generic_anomaly') => {
     const res = await fetch(`${API_BASE}/remediate`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', ...OPERATOR_HEADERS },
       body: JSON.stringify({ service, failure_type: failureType }),
     })
     return await res.json()

@@ -16,6 +16,12 @@ spec:
         - name: web
           image: aegis-dashboard:dev
           imagePullPolicy: IfNotPresent
+          env:
+            - name: AEGIS_API_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: aegis-secrets
+                  key: AEGIS_API_TOKEN
           ports:
             - containerPort: 8080
               name: http

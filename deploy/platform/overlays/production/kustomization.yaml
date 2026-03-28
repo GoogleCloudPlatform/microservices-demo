@@ -16,9 +16,6 @@ patches:
         path: /data/AEGIS_AUTH_ENABLED
         value: "true"
       - op: replace
-        path: /data/AEGIS_ALLOW_DEMO_MODE
-        value: "false"
-      - op: replace
         path: /data/AEGIS_ALLOWED_ORIGINS
         value: https://aegis.example.com
   - target:

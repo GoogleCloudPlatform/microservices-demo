@@ -19,7 +19,6 @@ Port: 8001
 from __future__ import annotations
 
 import asyncio
-import math
 import os
 import sys
 import time
@@ -42,6 +41,16 @@ for _p in [_backend, _repo_root]:
 
 from anomaly_api.correlation import CorrelationEngine
 from anomaly_api.infrastructure import build_infrastructure_payload
+from anomaly_api.model_features import (
+    IF_FEATURES,
+    LSTM_SEQUENCE_WINDOW,
+    SEQUENCE_FEATURES,
+    build_if_feature_vector,
+    build_sequence_rows,
+    rows_to_sequence_array,
+    top_if_contributors,
+    top_sequence_features,
+)
 from anomaly_api.security import require_operator_token
 from anomaly_api.settings import load_settings
 from remediation.engine import RemediationEngine
@@ -66,8 +75,6 @@ ALL_SERVICES = [
     "redis-cart",
 ]
 
-DEMO_PHASES = {svc: i * 0.6 for i, svc in enumerate(ALL_SERVICES)}
-
 
 def utc_now_iso() -> str:
     return datetime.now(timezone.utc).isoformat()
@@ -75,15 +82,14 @@ def utc_now_iso() -> str:
 
 class AppState:
     def __init__(self):
-        self.demo_mode = True
         self.models_loaded = False
         self.if_inference = None
         self.lstm_inference = None
-        self.lstm_per_service: Dict[str, Any] = {}
         self.correlation_engine = None
         self.remediation_engine: Optional[RemediationEngine] = None
 
         self.current_scores: Dict[str, Dict] = {}
+        self.current_model_insights: Dict[str, Dict] = {}
         self.history: deque = deque(maxlen=100)
         self.last_update: float = 0.0
 
@@ -95,47 +101,20 @@ state = AppState()
 
 
 def load_models():
-    loaded_if = False
-    loaded_lstm = False
+    from ml.isolation_forest.inference import IFInference
+    from ml.lstm.inference import LSTMInference
 
-    try:
-        from ml.isolation_forest.inference import IFInference
+    inf = IFInference()
+    inf.load()
+    state.if_inference = inf
+    logger.info("Isolation Forest model loaded from %s", inf.loaded_from)
 
-        inf = IFInference()
-        if inf.load():
-            state.if_inference = inf
-            loaded_if = True
-            logger.info("IF model loaded")
-    except Exception as exc:
-        logger.warning("IF model load failed: %s", exc)
+    lstm = LSTMInference()
+    lstm.load()
+    state.lstm_inference = lstm
+    logger.info("LSTM model loaded from %s", lstm.loaded_from)
 
-    try:
-        from ml.lstm.inference import LSTMInference
-
-        lstm = LSTMInference()
-        if lstm.load():
-            state.lstm_inference = lstm
-            loaded_lstm = True
-            logger.info("LSTM model loaded")
-            for svc in ALL_SERVICES:
-                inst = LSTMInference()
-                inst.model = lstm.model
-                inst.model_type = lstm.model_type
-                inst.demo_mode = lstm.demo_mode
-                inst._demo_offset = hash(svc) % 100
-                state.lstm_per_service[svc] = inst
-    except Exception as exc:
-        logger.warning("LSTM model load failed: %s", exc)
-
-    state.models_loaded = loaded_if and loaded_lstm
-    state.demo_mode = SETTINGS.runtime_mode == "demo" or (not state.models_loaded and SETTINGS.allow_demo_mode)
-
-    if not state.models_loaded and SETTINGS.requires_models:
-        raise RuntimeError("Production mode requires trained models; demo fallback is disabled")
-
-    if state.demo_mode:
-        logger.info("Running in DEMO MODE (sinusoidal scores)")
-
+    state.models_loaded = True
     try:
         state.correlation_engine = CorrelationEngine()
         logger.info("Correlation engine loaded")
@@ -146,7 +125,6 @@ def load_models():
         state.remediation_engine = RemediationEngine(
             score_provider=lambda: state.current_scores or compute_all_scores(),
             target_seconds=15,
-            demo_mode=state.demo_mode,
             orchestrator_target=SETTINGS.orchestrator_target,
             kubernetes_namespace=SETTINGS.k8s_namespace,
             cooldown_s=SETTINGS.remediation_cooldown_s,
@@ -157,27 +135,6 @@ def load_models():
         logger.info("Remediation engine loaded")
     except Exception as exc:
         logger.warning("Remediation engine load failed: %s", exc)
-
-
-def _demo_score(service: str, t: Optional[float] = None) -> Dict:
-    if t is None:
-        t = time.time()
-    phase_offset = DEMO_PHASES.get(service, 0.0)
-
-    if_phase = (t / 30.0 + phase_offset) * 2 * math.pi
-    lstm_phase = (t / 45.0 + phase_offset + 0.5) * 2 * math.pi
-    incident_phase = (t / 180.0 + phase_offset * 0.3) * 2 * math.pi
-    incident_boost = max(0, math.sin(incident_phase)) * 0.3
-
-    if_score = float(max(0, min(1, 0.2 + 0.15 * math.sin(if_phase) + incident_boost)))
-    lstm_score = float(max(0, min(1, 0.2 + 0.15 * math.sin(lstm_phase) + incident_boost)))
-    combined = 0.6 * lstm_score + 0.4 * if_score
-
-    return {
-        "if_score": round(if_score, 3),
-        "lstm_score": round(lstm_score, 3),
-        "combined_score": round(combined, 3),
-    }
 
 
 def _score_status(combined: float) -> str:
@@ -191,53 +148,81 @@ def _score_status(combined: float) -> str:
 def compute_all_scores() -> Dict[str, Dict]:
     from anomaly_api.features import extract_features
 
-    t = time.time()
     scores = {}
+    state.current_model_insights = {}
 
     for svc in ALL_SERVICES:
         window = state.window_state.get_window(svc) if state.window_state else []
         features = extract_features(svc, window) if window else {}
-
-        if not state.demo_mode and state.if_inference and features:
-            feat_vec = {
-                "cpu_percent": features.get("cpu_percent_mean", 0),
-                "mem_percent": features.get("mem_percent_mean", 0),
-                "net_rx_mb": features.get("net_rx_mbps_mean", 0),
-                "net_tx_mb": features.get("net_tx_mbps_mean", 0),
-                "block_read_mb": features.get("block_read_mbps_mean", 0),
-                "block_write_mb": features.get("block_write_mbps_mean", 0),
-                "log_count": features.get("log_count_mean", 0),
-                "error_rate": features.get("error_rate_mean", 0),
-                "warn_rate": features.get("warn_rate_mean", 0),
-                "template_entropy": features.get("template_entropy_mean", 0),
-            }
-            if_score = state.if_inference.score(feat_vec)
-            lstm_inst = state.lstm_per_service.get(svc) if state.lstm_per_service else None
-            lstm_score = lstm_inst._demo_score() if lstm_inst else _demo_score(svc, t)["lstm_score"]
-            combined = 0.6 * lstm_score + 0.4 * if_score
+        sequence_rows = build_sequence_rows(window, sequence_window=LSTM_SEQUENCE_WINDOW)
+        sequence_array = rows_to_sequence_array(sequence_rows)
+        if not len(sequence_rows):
             snapshot = {
-                "if_score": round(if_score, 3),
-                "lstm_score": round(lstm_score, 3),
-                "combined_score": round(combined, 3),
-                "cpu_percent": features.get("cpu_percent_mean", 0),
-                "mem_percent": features.get("mem_percent_mean", 0),
-                "feature_flags": features.get("feature_flags", []),
-                "error_rate": features.get("error_rate_mean", 0),
-                "warn_rate": features.get("warn_rate_mean", 0),
-                "log_count": features.get("log_count_mean", 0),
+                "if_score": None,
+                "lstm_score": None,
+                "combined_score": 0.0,
+                "cpu_percent": 0.0,
+                "mem_percent": 0.0,
+                "feature_flags": [],
+                "error_rate": 0.0,
+                "warn_rate": 0.0,
+                "log_count": 0.0,
+                "model_state": "warming_up",
+                "sequence_fill": 0.0,
             }
-        else:
-            snapshot = _demo_score(svc, t)
-            snapshot.update(
-                {
-                    "cpu_percent": 0.0,
-                    "mem_percent": 0.0,
-                    "feature_flags": [],
-                    "error_rate": 0.0,
-                    "warn_rate": 0.0,
-                    "log_count": 0.0,
-                }
-            )
+            state.current_model_insights[svc] = {
+                "service": svc,
+                "sequence_length": 0,
+                "required_sequence_length": LSTM_SEQUENCE_WINDOW,
+                "if_feature_count": len(IF_FEATURES),
+                "sequence_feature_count": len(SEQUENCE_FEATURES),
+                "status": "warming_up",
+                "if_contributors": [],
+                "sequence_highlights": [],
+            }
+            snapshot["status"] = "normal"
+            scores[svc] = snapshot
+            continue
+
+        if_vector = build_if_feature_vector(sequence_array)
+        ordered_if_values = [if_vector[name] for name in IF_FEATURES]
+        if_score = state.if_inference.score_vector(ordered_if_values)
+        lstm_score = None
+        if sequence_array.shape[0] >= LSTM_SEQUENCE_WINDOW:
+            lstm_score = state.lstm_inference.predict(sequence_array[-LSTM_SEQUENCE_WINDOW:])
+        combined = if_score if lstm_score is None else (0.45 * if_score + 0.55 * lstm_score)
+        snapshot = {
+            "if_score": round(if_score, 3),
+            "lstm_score": round(lstm_score, 3) if lstm_score is not None else None,
+            "combined_score": round(float(combined), 3),
+            "cpu_percent": features.get("cpu_percent_mean", 0),
+            "mem_percent": features.get("mem_percent_mean", 0),
+            "feature_flags": features.get("feature_flags", []),
+            "error_rate": features.get("error_rate_mean", 0),
+            "warn_rate": features.get("warn_rate_mean", 0),
+            "log_count": features.get("log_count_mean", 0),
+            "model_state": "ready" if lstm_score is not None else "if_only",
+            "sequence_fill": round(min(sequence_array.shape[0] / LSTM_SEQUENCE_WINDOW, 1.0), 3),
+        }
+        state.current_model_insights[svc] = {
+            "service": svc,
+            "sequence_length": int(sequence_array.shape[0]),
+            "required_sequence_length": LSTM_SEQUENCE_WINDOW,
+            "if_feature_count": len(IF_FEATURES),
+            "sequence_feature_count": len(SEQUENCE_FEATURES),
+            "status": snapshot["model_state"],
+            "if_score": round(if_score, 4),
+            "lstm_score": round(lstm_score, 4) if lstm_score is not None else None,
+            "combined_score": round(float(combined), 4),
+            "if_features": if_vector,
+            "latest_sequence_row": sequence_rows[-1],
+            "if_contributors": top_if_contributors(
+                if_vector,
+                state.if_inference.scaler_mean,
+                state.if_inference.scaler_scale,
+            ),
+            "sequence_highlights": top_sequence_features(sequence_rows[-1]),
+        }
 
         snapshot["status"] = _score_status(snapshot["combined_score"])
         scores[svc] = snapshot
@@ -376,7 +361,7 @@ async def startup_event():
     state.ingestion_pipeline.start()
 
     asyncio.create_task(update_scores_loop())
-    logger.info("Platform started. demo_mode=%s", state.demo_mode)
+    logger.info("Platform started. models_loaded=%s", state.models_loaded)
 
 
 def require_operator_access(x_aegis_token: str = Header(default="")) -> None:
@@ -425,8 +410,8 @@ async def health():
         "runtime_mode": SETTINGS.runtime_mode,
         "environment": SETTINGS.environment_name,
         "orchestrator": state.remediation_engine.orchestrator.platform if state.remediation_engine else None,
-        "demo_mode": state.demo_mode,
         "models_loaded": state.models_loaded,
+        "model_dir": SETTINGS.model_dir,
         "services_tracked": len(ALL_SERVICES),
         "last_update": datetime.fromtimestamp(state.last_update, tz=timezone.utc).isoformat() if state.last_update else None,
         "active_incidents": len(state.remediation_engine.list_active_incidents()) if state.remediation_engine else 0,
@@ -454,7 +439,6 @@ async def status():
 
     return {
         "timestamp": utc_now_iso(),
-        "demo_mode": state.demo_mode,
         "services": scores,
         "root_cause": root_cause,
         "alerts": alerts,
@@ -466,6 +450,8 @@ async def status():
 
 @app.post("/ingest", dependencies=[Depends(require_operator_access)])
 async def ingest(payload: IngestPayload):
+    from anomaly_api.ingestion import Observation
+
     updated = 0
 
     for metric in payload.metrics:
@@ -473,37 +459,44 @@ async def ingest(payload: IngestPayload):
         if not svc or svc not in ALL_SERVICES:
             continue
 
-        features = {
-            "cpu_percent": float(metric.get("cpu_percent", metric.get("cpu_usage_percent", 0))),
-            "mem_percent": float(metric.get("mem_percent", metric.get("memory_usage_percent", 0))),
-            "net_rx_mb": float(metric.get("net_rx_mb", 0)),
-            "net_tx_mb": float(metric.get("net_tx_mb", 0)),
-            "block_read_mb": float(metric.get("block_read_mb", 0)),
-            "block_write_mb": float(metric.get("block_write_mb", 0)),
-            "log_count": float(metric.get("log_count", 0)),
-            "error_rate": float(metric.get("error_rate", 0)),
-            "warn_rate": float(metric.get("warn_rate", 0)),
-            "template_entropy": float(metric.get("template_entropy", 0)),
-        }
+        observation = Observation(
+            timestamp=time.time(),
+            service=svc,
+            cpu_percent=float(metric.get("cpu_percent", metric.get("cpu_usage_percent", 0.0))),
+            mem_percent=float(metric.get("mem_percent", metric.get("memory_usage_percent", 0.0))),
+            mem_bytes=float(metric.get("mem_bytes", metric.get("memory_usage_bytes", 0.0))),
+            mem_limit_bytes=float(metric.get("mem_limit_bytes", metric.get("memory_limit_bytes", 0.0))),
+            net_rx_mbps=float(metric.get("net_rx_mbps", metric.get("network_rx_bytes_per_sec", 0.0))) / 1e6,
+            net_tx_mbps=float(metric.get("net_tx_mbps", metric.get("network_tx_bytes_per_sec", 0.0))) / 1e6,
+            block_read_mbps=float(metric.get("block_read_mbps", metric.get("fs_reads_per_sec", 0.0))) / 1e6,
+            block_write_mbps=float(metric.get("block_write_mbps", metric.get("fs_writes_per_sec", 0.0))) / 1e6,
+            log_count=int(metric.get("log_count", metric.get("total_log_lines", 0))),
+            error_count=int(metric.get("error_count", 0)),
+            warn_count=int(metric.get("warn_count", metric.get("warning_count", 0))),
+            info_count=int(metric.get("info_count", 0)),
+            error_rate=float(metric.get("error_rate", metric.get("error_rate_logs", 0.0))),
+            warn_rate=float(metric.get("warn_rate", metric.get("warning_rate_logs", 0.0))),
+            exception_count=int(metric.get("exception_count", 0)),
+            timeout_count=int(metric.get("timeout_count", 0)),
+            template_entropy=float(metric.get("template_entropy", 0.0)),
+            log_volume_per_sec=float(metric.get("log_volume_per_sec", 0.0)),
+            unique_templates=int(metric.get("unique_templates", 0)),
+            new_templates_seen=int(metric.get("new_templates_seen", 0)),
+            oom_mention_count=int(metric.get("oom_mention_count", 0)),
+            avg_message_length=float(metric.get("avg_message_length", 0.0)),
+            log_volume_change_pct=float(metric.get("log_volume_change_pct", 0.0)),
+            trace_count=int(metric.get("trace_count", 0)),
+            trace_error_count=int(metric.get("trace_error_count", 0)),
+            trace_duration_mean=float(metric.get("trace_duration_mean", 0.0)),
+        )
+        if state.window_state:
+            state.window_state.push(observation)
+        updated += 1
 
-        if not state.demo_mode and state.if_inference:
-            if_score = state.if_inference.score(features)
-            lstm_score = 0.2
-            if state.lstm_inference:
-                result = state.lstm_inference.predict_from_features(features)
-                if result is not None:
-                    lstm_score = result
+    if updated:
+        state.current_scores = compute_all_scores()
 
-            combined = 0.6 * lstm_score + 0.4 * if_score
-            state.current_scores[svc] = {
-                "if_score": round(if_score, 3),
-                "lstm_score": round(lstm_score, 3),
-                "combined_score": round(combined, 3),
-                "status": _score_status(combined),
-            }
-            updated += 1
-
-    return {"status": "ok", "updated_services": updated, "demo_mode": state.demo_mode}
+    return {"status": "ok", "updated_services": updated}
 
 
 @app.post("/decision/validate", dependencies=[Depends(require_operator_access)])
@@ -697,6 +690,7 @@ async def topology():
             "recent_logs": recent_logs,
             "latest_incident": recent_incident_map.get(svc),
             "similar_incidents": similar,
+            "ml": state.current_model_insights.get(svc, {}),
         }
 
     root_cause = get_root_cause_analysis(scores)
@@ -708,7 +702,6 @@ async def topology():
         "runtime_mode": SETTINGS.runtime_mode,
         "health_score": health_score,
         "failure_momentum": momentum,
-        "demo_mode": state.demo_mode,
         "services": service_data,
         "dependency_graph": DEPENDENCY_GRAPH,
         "root_cause": root_cause,
@@ -731,6 +724,40 @@ async def infrastructure():
     )
     payload["timestamp"] = utc_now_iso()
     return payload
+
+
+@app.get("/ml/insights")
+async def ml_insights():
+    scores = state.current_scores or compute_all_scores()
+    services = []
+    for svc in ALL_SERVICES:
+        snapshot = scores.get(svc, {})
+        insight = state.current_model_insights.get(svc, {})
+        services.append(
+            {
+                "service": svc,
+                "status": snapshot.get("status", "unknown"),
+                "model_state": snapshot.get("model_state", "unknown"),
+                "if_score": snapshot.get("if_score"),
+                "lstm_score": snapshot.get("lstm_score"),
+                "combined_score": snapshot.get("combined_score"),
+                "sequence_fill": snapshot.get("sequence_fill", 0.0),
+                "feature_flags": snapshot.get("feature_flags", []),
+                "if_contributors": insight.get("if_contributors", []),
+                "sequence_highlights": insight.get("sequence_highlights", []),
+                "latest_sequence_row": insight.get("latest_sequence_row", {}),
+            }
+        )
+    services.sort(key=lambda item: item.get("combined_score", 0) or 0, reverse=True)
+    return {
+        "timestamp": utc_now_iso(),
+        "models": {
+            "isolation_forest": state.if_inference.metadata() if state.if_inference else {"loaded": False},
+            "lstm": state.lstm_inference.metadata() if state.lstm_inference else {"loaded": False},
+        },
+        "required_sequence_length": LSTM_SEQUENCE_WINDOW,
+        "services": services,
+    }
 
 
 @app.get("/window/{service}")

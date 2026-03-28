@@ -2,11 +2,13 @@ import { Component, useState, useEffect, useCallback } from 'react'
 import { useTopology } from './hooks/useTopology'
 import { useHistory } from './hooks/useHistory'
 import { useInfrastructure } from './hooks/useInfrastructure'
+import { useModelInsights } from './hooks/useModelInsights'
 import { ThemeProvider, useTheme } from './ThemeContext'
 import SolarSystem from './components/SolarSystem'
 import InfoPanel from './components/InfoPanel'
 import ServiceDetail from './components/ServiceDetail'
 import InfraPage from './components/InfraPage'
+import ModelsPage from './components/ModelsPage'
 
 class InfraPageBoundary extends Component {
   constructor(props) {
@@ -53,7 +55,9 @@ class InfraPageBoundary extends Component {
 function getPageFromLocation() {
   if (typeof window === 'undefined') return 'solar'
   const hash = window.location.hash.replace('#', '').trim().toLowerCase()
-  return hash === 'infra' ? 'infra' : 'solar'
+  if (hash === 'infra') return 'infra'
+  if (hash === 'models') return 'models'
+  return 'solar'
 }
 
 function AppInner() {
@@ -61,6 +65,7 @@ function AppInner() {
   const { data, connected, error, fetchWindow, triggerRemediation } = useTopology()
   const { history, incidents } = useHistory()
   const infrastructure = useInfrastructure()
+  const modelInsights = useModelInsights()
   const [selectedService, setSelectedService] = useState(null)
   const [windowData, setWindowData] = useState(null)
   const [windowLoading, setWindowLoading] = useState(false)
@@ -80,7 +85,7 @@ function AppInner() {
   }, [])
 
   useEffect(() => {
-    const nextHash = page === 'infra' ? '#infra' : '#solar'
+    const nextHash = page === 'infra' ? '#infra' : page === 'models' ? '#models' : '#solar'
     if (window.location.hash !== nextHash) {
       window.history.replaceState(null, '', nextHash)
     }
@@ -152,6 +157,7 @@ function AppInner() {
           <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
             <button {...navBtn('solar', 'SOLAR SYSTEM', 'Service topology')} />
             <button {...navBtn('infra', 'INFRASTRUCTURE', 'Cluster operations')} />
+            <button {...navBtn('models', 'MODEL INSIGHTS', 'ML telemetry')} />
           </div>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 14, fontSize: 10, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
@@ -161,9 +167,8 @@ function AppInner() {
             letterSpacing: 1.4,
             textTransform: 'uppercase',
           }}>
-            {page === 'infra' ? 'View: Infrastructure' : 'View: Solar System'}
+            {page === 'infra' ? 'View: Infrastructure' : page === 'models' ? 'View: Model Insights' : 'View: Solar System'}
           </span>
-          {data?.demo_mode && <span style={{ border: `1px solid ${theme.accent}`, color: theme.accent, padding: '2px 6px', fontSize: 9, letterSpacing: 1 }}>DEMO SCORING ACTIVE</span>}
           <span style={{ display: 'flex', alignItems: 'center', gap: 5, color: connected ? '#2a8a2a' : '#cc2222' }}>
             <span style={{ width: 7, height: 7, borderRadius: '50%', display: 'inline-block', background: connected ? '#2a8a2a' : '#cc2222', animation: connected ? 'pulse 2s infinite' : 'none' }} />
             {connected ? 'Backend connected' : `Backend offline${error ? `: ${error}` : ''}`}
@@ -188,14 +193,16 @@ function AppInner() {
             </InfoPanel>
           </div>
         </div>
-      ) : (
+      ) : page === 'infra' ? (
         <InfraPageBoundary resetKey={`${page}-${data?.timestamp || 'none'}-${infrastructure?.timestamp || 'none'}`} theme={theme}>
           <InfraPage topology={data} history={history} incidents={incidents} connected={connected} infrastructure={infrastructure} />
         </InfraPageBoundary>
+      ) : (
+        <ModelsPage insights={modelInsights} connected={connected} />
       )}
 
       <div style={{ height: 26, borderTop: `1px solid ${theme.borderLight}`, display: 'flex', alignItems: 'center', padding: '0 16px', gap: 20, fontSize: 9, color: theme.textMuted, background: theme.bg, flexShrink: 0 }}>
-        <span>{page === 'infra' ? 'Direct link: #infra' : 'Direct link: #solar'}</span>
+        <span>{page === 'infra' ? 'Direct link: #infra' : page === 'models' ? 'Direct link: #models' : 'Direct link: #solar'}</span>
         <span style={{ marginLeft: 'auto' }}>{data ? `${Object.keys(data.services || {}).length} services monitored` : 'Connecting...'}</span>
         {selectedService && page === 'solar' && <span style={{ color: theme.accent }}>SELECTED: {selectedService} · Click again to deselect</span>}
       </div>

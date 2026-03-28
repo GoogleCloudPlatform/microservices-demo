@@ -115,14 +115,14 @@ def inject_stress(service_name, dry_run=False):
             pass
 
     print_warn(f"Could not inject stress (container not found or Docker unavailable)")
-    print_info(f"Scores will still rise in demo mode")
+    print_info("Continue by observing live telemetry and remediation flow.")
     return False
 
 
 def trigger_remediation(service, failure_type, dry_run=False):
     if dry_run:
         print_info(f"[DRY-RUN] Would POST /remediate with service={service}, failure_type={failure_type}")
-        return {"result": {"success": True, "elapsed_s": 0.5, "demo_mode": True, "actions_taken": ["[DRY-RUN]"]}}
+        return {"result": {"success": True, "elapsed_s": 0.5, "actions_taken": ["[DRY-RUN]"]}}
 
     try:
         resp = requests.post(
@@ -197,7 +197,10 @@ def main():
     elif dry_run and not health:
         print_warn("[DRY-RUN] API not running but continuing anyway")
     else:
-        print_ok(f"API healthy: demo_mode={health.get('demo_mode')}, models_loaded={health.get('models_loaded')}")
+        print_ok(
+            f"API healthy: runtime_mode={health.get('runtime_mode')}, "
+            f"models_loaded={health.get('models_loaded')}"
+        )
 
     # --- Ngrok URLs ---
     ngrok = get_ngrok_urls()
@@ -251,7 +254,7 @@ def main():
         if score:
             print_warn(f"{TARGET_SERVICE} score reached {score:.3f} (> 0.6 threshold)")
         else:
-            print_info("Score didn't cross 0.6 threshold in time (demo mode may have low scores)")
+            print_info("Score didn't cross 0.6 threshold in time")
     else:
         print_info("[DRY-RUN] Would poll every 5s, waiting for score > 0.6")
 

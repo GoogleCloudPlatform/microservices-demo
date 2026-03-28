@@ -1,132 +1,101 @@
 #!/usr/bin/env python3
-"""
-Isolation Forest Inference
 
-Class IFInference with:
-  - load(): loads model + scaler
-  - score(feature_dict) -> float [0-1], higher = more anomalous
-  - Falls back to demo_mode if model file is missing
-"""
+from __future__ import annotations
 
 import os
-import sys
-import math
-import time
 import pickle
-import numpy as np
 from pathlib import Path
-from typing import Dict
+from typing import Dict, List, Optional
+
+import numpy as np
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 
-# Feature order must match training
-FEATURE_COLUMNS = [
-    "cpu_percent",
-    "mem_percent",
-    "net_rx_mb",
-    "net_tx_mb",
-    "block_read_mb",
-    "block_write_mb",
-    "log_count",
-    "error_rate",
-    "warn_rate",
-    "template_entropy",
-]
 
-MODEL_PATH = REPO_ROOT / "ml" / "isolation_forest" / "model" / "if_model.pkl"
-SCALER_PATH = REPO_ROOT / "ml" / "isolation_forest" / "data" / "scaler.pkl"
+def _model_dir() -> Path:
+    configured = os.getenv("AEGIS_MODEL_DIR", "models/aegis_models")
+    path = Path(configured)
+    return path if path.is_absolute() else REPO_ROOT / path
 
 
 class IFInference:
-    def __init__(self):
+    def __init__(self) -> None:
         self.model = None
         self.scaler = None
-        self.threshold = None
-        self.score_min = None
-        self.score_max = None
-        self.demo_mode = False
-        self._demo_offset = hash(id(self)) % 100  # unique phase per instance
+        self.threshold: Optional[float] = None
+        self.feature_count = 66
+        self.loaded_from: Optional[str] = None
 
     def load(self) -> bool:
-        """Load model and scaler. Returns True if successful, False = demo_mode."""
-        try:
-            if not MODEL_PATH.exists():
-                print(f"[IFInference] Model not found at {MODEL_PATH} - using demo_mode")
-                self.demo_mode = True
-                return False
+        model_dir = _model_dir()
+        model_path = model_dir / "if_model.pkl"
+        scaler_path = model_dir / "scaler.pkl"
+        if not model_path.exists():
+            raise FileNotFoundError(f"Isolation Forest artifact not found at {model_path}")
+        if not scaler_path.exists():
+            raise FileNotFoundError(f"Isolation Forest scaler not found at {scaler_path}")
 
-            with open(str(MODEL_PATH), "rb") as f:
-                data = pickle.load(f)
+        with open(model_path, "rb") as handle:
+            payload = pickle.load(handle)
+        if isinstance(payload, dict):
+            self.model = payload.get("model")
+            self.threshold = float(payload.get("threshold", 0.0))
+        else:
+            self.model = payload
+            self.threshold = 0.0
+        with open(scaler_path, "rb") as handle:
+            self.scaler = pickle.load(handle)
 
-            self.model = data["model"]
-            self.threshold = data["threshold"]
-            self.score_min, self.score_max = data["score_range"]
+        if self.model is None or self.scaler is None:
+            raise RuntimeError("Isolation Forest artifacts loaded but model or scaler is missing")
+        self.feature_count = int(getattr(self.scaler, "n_features_in_", self.feature_count))
+        self.loaded_from = str(model_dir)
+        return True
 
-            if SCALER_PATH.exists():
-                with open(str(SCALER_PATH), "rb") as f:
-                    self.scaler = pickle.load(f)
+    def score_vector(self, feature_vector: Dict[str, float] | List[float] | np.ndarray) -> float:
+        if self.model is None or self.scaler is None:
+            raise RuntimeError("Isolation Forest model is not loaded")
 
-            print(f"[IFInference] Model loaded. threshold={self.threshold:.4f}")
-            self.demo_mode = False
-            return True
+        if isinstance(feature_vector, dict):
+            values = list(feature_vector.values())
+        else:
+            values = feature_vector
+        arr = np.array(values, dtype=np.float32).reshape(1, -1)
+        if arr.shape[1] != self.feature_count:
+            raise ValueError(f"Isolation Forest expected {self.feature_count} features but received {arr.shape[1]}")
 
-        except Exception as e:
-            print(f"[IFInference] Failed to load model: {e} - using demo_mode")
-            self.demo_mode = True
-            return False
+        scaled = self.scaler.transform(arr)
+        raw = float(self.model.decision_function(scaled)[0])
+        threshold = float(self.threshold or 0.0)
+        # Lower decision_function values are more anomalous. Map threshold-crossing behavior to [0, 1].
+        delta = threshold - raw
+        score = 1.0 / (1.0 + np.exp(-6.0 * delta))
+        return float(np.clip(score, 0.0, 1.0))
 
-    def _features_to_array(self, feature_dict: Dict) -> np.ndarray:
-        """Convert feature dict to numpy array in correct order."""
-        arr = np.zeros((1, len(FEATURE_COLUMNS)), dtype=np.float32)
-        for i, col in enumerate(FEATURE_COLUMNS):
-            arr[0, i] = float(feature_dict.get(col, 0.0))
-        return arr
+    def score(self, feature_vector: Dict[str, float] | List[float] | np.ndarray) -> float:
+        return self.score_vector(feature_vector)
 
-    def score(self, feature_dict: Dict) -> float:
-        """
-        Returns anomaly score [0-1]. Higher = more anomalous.
-        """
-        if self.demo_mode:
-            return self._demo_score()
+    def metadata(self) -> Dict[str, object]:
+        if self.model is None or self.scaler is None:
+            return {"loaded": False}
+        return {
+            "loaded": True,
+            "type": type(self.model).__name__,
+            "feature_count": self.feature_count,
+            "threshold": self.threshold,
+            "path": self.loaded_from,
+        }
 
-        try:
-            arr = self._features_to_array(feature_dict)
+    @property
+    def scaler_mean(self) -> Optional[np.ndarray]:
+        return getattr(self.scaler, "mean_", None)
 
-            if self.scaler is not None:
-                arr = self.scaler.transform(arr)
-
-            # decision_function: higher = more normal (negative = anomalous)
-            raw = self.model.decision_function(arr)[0]
-
-            # Normalize to 0-1: invert so higher = more anomalous
-            score_range = self.score_max - self.score_min
-            if score_range < 1e-9:
-                return 0.5
-
-            # Clamp to known range
-            raw_clamped = max(self.score_min, min(self.score_max, raw))
-            # Invert: score_min -> 1.0, score_max -> 0.0
-            normalized = 1.0 - (raw_clamped - self.score_min) / score_range
-            return float(np.clip(normalized, 0.0, 1.0))
-
-        except Exception as e:
-            print(f"[IFInference] Score error: {e}")
-            return self._demo_score()
-
-    def _demo_score(self) -> float:
-        """Sinusoidal demo score based on time."""
-        t = time.time()
-        phase = (t / 30.0 + self._demo_offset * 0.1) * 2 * math.pi
-        # Score oscillates between 0.1 and 0.5
-        return 0.3 + 0.2 * math.sin(phase)
-
-    def score_batch(self, feature_dicts) -> list:
-        """Score a list of feature dicts."""
-        return [self.score(fd) for fd in feature_dicts]
+    @property
+    def scaler_scale(self) -> Optional[np.ndarray]:
+        return getattr(self.scaler, "scale_", None)
 
 
-# Convenience singleton
-_instance = None
+_instance: Optional[IFInference] = None
 
 
 def get_instance() -> IFInference:
@@ -135,10 +104,3 @@ def get_instance() -> IFInference:
         _instance = IFInference()
         _instance.load()
     return _instance
-
-
-if __name__ == "__main__":
-    inf = IFInference()
-    inf.load()
-    test_feat = {col: 0.5 for col in FEATURE_COLUMNS}
-    print(f"Test score: {inf.score(test_feat):.4f}")

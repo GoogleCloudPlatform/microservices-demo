@@ -18,7 +18,7 @@ services:
       AEGIS_JAEGER_URL: ${AEGIS_JAEGER_URL:-http://jaeger:16686}
       AEGIS_GRAFANA_URL: ${AEGIS_GRAFANA_URL:-http://grafana:3000}
       AEGIS_OTEL_COLLECTOR_URL: ${AEGIS_OTEL_COLLECTOR_URL:-http://otel-collector:8889}
-      AEGIS_ALLOW_DEMO_MODE: ${AEGIS_ALLOW_DEMO_MODE:-true}
+      AEGIS_MODEL_DIR: ${AEGIS_MODEL_DIR:-models/aegis_models}
     ports:
       - "8001:8001"
     healthcheck:
@@ -37,6 +37,8 @@ services:
       args:
         VITE_API_BASE_URL: /api
     container_name: aegis-dashboard
+    environment:
+      AEGIS_API_TOKEN: ${AEGIS_API_TOKEN:-}
     depends_on:
       aegis-backend:
         condition: service_healthy

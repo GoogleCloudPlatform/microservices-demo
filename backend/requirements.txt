@@ -9,3 +9,4 @@ pandas>=2.0.0
 pyarrow>=12.0.0
 requests>=2.31.0
 kubernetes>=30.1.0
+torch>=2.4.0

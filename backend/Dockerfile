@@ -6,10 +6,12 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 WORKDIR /app
 
 COPY backend/requirements.txt /app/backend/requirements.txt
-RUN pip install --no-cache-dir -r /app/backend/requirements.txt
+ARG PIP_EXTRA_INDEX_URL=https://download.pytorch.org/whl/cpu
+RUN pip install --no-cache-dir --extra-index-url ${PIP_EXTRA_INDEX_URL} -r /app/backend/requirements.txt
 
 COPY backend /app/backend
 COPY ml /app/ml
+COPY models /app/models
 
 ENV PYTHONPATH=/app:/app/backend \
     AEGIS_API_HOST=0.0.0.0 \

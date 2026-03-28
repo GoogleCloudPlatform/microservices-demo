@@ -60,25 +60,20 @@ class Settings:
     incident_memory_retention_days: int
     remediation_cooldown_s: float
     remediation_lock_timeout_s: float
-    allow_demo_mode: bool
     infrastructure_collectors_enabled: bool
+    model_dir: str
 
     @property
     def is_production(self) -> bool:
         return self.runtime_mode == "production"
 
-    @property
-    def requires_models(self) -> bool:
-        return self.is_production and not self.allow_demo_mode
-
 
 def load_settings() -> Settings:
     runtime_mode = os.getenv("AEGIS_RUNTIME_MODE", "dev").strip().lower()
-    if runtime_mode not in {"dev", "demo", "production"}:
+    if runtime_mode not in {"dev", "production"}:
         runtime_mode = "dev"
 
     default_origins = "http://localhost:5173,http://127.0.0.1:5173"
-    allow_demo_mode = _env_bool("AEGIS_ALLOW_DEMO_MODE", runtime_mode != "production")
     auth_default = runtime_mode == "production"
 
     return Settings(
@@ -103,6 +98,6 @@ def load_settings() -> Settings:
         incident_memory_retention_days=_env_int("AEGIS_INCIDENT_MEMORY_RETENTION_DAYS", 30),
         remediation_cooldown_s=_env_float("AEGIS_REMEDIATION_COOLDOWN_S", 30.0),
         remediation_lock_timeout_s=_env_float("AEGIS_REMEDIATION_LOCK_TIMEOUT_S", 300.0),
-        allow_demo_mode=allow_demo_mode,
         infrastructure_collectors_enabled=_env_bool("AEGIS_INFRA_COLLECTORS_ENABLED", True),
+        model_dir=os.getenv("AEGIS_MODEL_DIR", "models/aegis_models"),
     )

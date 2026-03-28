@@ -84,7 +84,6 @@ class InfrastructurePayloadTests(unittest.TestCase):
             settings=settings,
             topology={
                 "timestamp": "2026-03-28T10:00:00Z",
-                "demo_mode": False,
                 "services": {
                     "frontend": {
                         "status": "normal",

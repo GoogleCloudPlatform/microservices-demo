@@ -402,8 +402,10 @@ function StackHealth({ topology, services, theme, infrastructure }) {
     },
     {
       name: 'Pipeline',
-      status: topology?.demo_mode ? 'demo' : 'active',
-      detail: topology?.demo_mode ? 'demo scoring fallback active' : 'live inference and remediation active',
+      status: trackedServices.some(service => service.model_state === 'warming_up') ? 'warming' : 'active',
+      detail: trackedServices.some(service => service.model_state === 'warming_up')
+        ? 'live telemetry is filling the model windows'
+        : 'live inference and remediation active',
       meta: infraObs.otel_collector?.available ? 'ingest -> features -> detect -> remediate -> collector online' : 'ingest -> features -> detect -> remediate',
     },
   ]
@@ -636,9 +638,11 @@ export default function InfraPage({ topology, history, incidents, connected, inf
     },
     {
       label: 'trace activity',
-      value: safeTopology.demo_mode ? 'Demo' : 'Live',
-      meta: safeTopology.demo_mode ? 'Demo scoring still active' : 'Inference + remediation pipeline active',
-      tone: safeTopology.demo_mode ? severityTone(0.55, theme) : theme.accent,
+      value: safeTopology.services && Object.values(safeTopology.services).some(service => service.model_state === 'warming_up') ? 'Warming' : 'Live',
+      meta: safeTopology.services && Object.values(safeTopology.services).some(service => service.model_state === 'warming_up')
+        ? 'ML windows are filling from live telemetry'
+        : 'Inference + remediation pipeline active',
+      tone: safeTopology.services && Object.values(safeTopology.services).some(service => service.model_state === 'warming_up') ? severityTone(0.55, theme) : theme.accent,
     },
   ]
 
@@ -667,7 +671,7 @@ export default function InfraPage({ topology, history, incidents, connected, inf
         </div>
         <div className="infra-header-meta">
           <StatusPill label={connected ? 'backend connected' : 'backend offline'} tone={connected ? theme.accent : severityTone(0.92, theme)} />
-          <Badge label={safeTopology.demo_mode ? 'demo scoring' : 'live inference'} tone={safeTopology.demo_mode ? 'warning' : 'ok'} />
+          <Badge label={Object.values(services).some(service => service.model_state === 'warming_up') ? 'model warmup' : 'live inference'} tone={Object.values(services).some(service => service.model_state === 'warming_up') ? 'warning' : 'ok'} />
           <Badge label={safeInfrastructure?.cluster?.available ? 'kubernetes live' : 'kubernetes ready'} />
         </div>
       </div>
