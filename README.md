@@ -1,188 +1,694 @@
 # AEGIS
 
-AEGIS is an observability and automated remediation control plane built on top of Google Online Boutique. It collects live service telemetry, scores anomalies with trained models, performs heuristic root-cause analysis, executes controlled remediation actions, and records incident memory for future decisions.
+AEGIS is an observability, prediction, and automated remediation control plane built on top of Google’s Online Boutique microservices demo. It watches live service telemetry, converts that telemetry into model-ready features, scores service behavior with trained models, runs heuristic root-cause analysis, executes bounded remediation workflows, records what happened, and exposes the whole flow through a multi-page operational dashboard.
 
-This repo now runs with the uploaded trained artifacts in [models/aegis_models](/Users/ishu/Hackathon/microservices-demo/models/aegis_models). There is no demo or sinusoidal scoring path in the backend runtime anymore.
+This repository is no longer using fake runtime scoring. The backend expects and uses real uploaded artifacts from [models/aegis_models](/Users/ishu/Hackathon/microservices-demo/models/aegis_models), and the dashboard surfaces those live model outputs through the `Solar System`, `Infrastructure`, `Model Insights`, and `System Logs` pages.
 
-Required runtime artifacts:
-- `models/aegis_models/if_model.pkl`
-- `models/aegis_models/scaler.pkl`
-- `models/aegis_models/lstm_model.pth`
+## Table of Contents
 
-The larger `X_*.npy` and `y_labels.npy` files are treated as local training assets and are not required for runtime packaging.
+- [What This Project Is](#what-this-project-is)
+- [What Is Actually Real Today](#what-is-actually-real-today)
+- [What Is Still Heuristic or Intentionally Partial](#what-is-still-heuristic-or-intentionally-partial)
+- [System Goals](#system-goals)
+- [High-Level Architecture](#high-level-architecture)
+- [The End-to-End Intelligence Pipeline](#the-end-to-end-intelligence-pipeline)
+- [Technology Stack](#technology-stack)
+- [Repository Structure](#repository-structure)
+- [Backend Breakdown](#backend-breakdown)
+- [Model Integration](#model-integration)
+- [Remediation and Containment](#remediation-and-containment)
+- [Incident Memory and Persistence](#incident-memory-and-persistence)
+- [Frontend Breakdown](#frontend-breakdown)
+- [Observability Stack](#observability-stack)
+- [Deployment Paths](#deployment-paths)
+- [Configuration](#configuration)
+- [Security Model](#security-model)
+- [API Surface](#api-surface)
+- [Testing and Validation](#testing-and-validation)
+- [Operational Proving](#operational-proving)
+- [Known Limitations and Honest Status](#known-limitations-and-honest-status)
+- [Related Documentation](#related-documentation)
 
-## What Is Live In This Repo
+## What This Project Is
 
-- Real telemetry ingestion from Docker stats, Loki, and Jaeger
-- Real trained model loading for:
-  - Isolation Forest anomaly scoring
-  - PyTorch LSTM sequence prediction
-- Real remediation pipeline:
+AEGIS is trying to behave like an operator-facing resilience layer for a microservices application:
+
+1. It ingests runtime, log, and trace-adjacent signals from the running system.
+2. It keeps per-service sliding windows of recent behavior.
+3. It transforms those windows into model features.
+4. It scores services with a trained Isolation Forest and a trained PyTorch LSTM.
+5. It classifies anomalies and raises pre-failure alerts when the LSTM sees trouble forming.
+6. It runs heuristic root-cause analysis and recommendation generation.
+7. It validates and executes remediation actions through a bounded policy engine.
+8. It evaluates whether the action helped.
+9. It retries, contains, isolates, reroutes, or escalates when recovery fails.
+10. It stores incidents, logs, and event history so the next similar failure has memory.
+
+The project is designed for two runtime modes:
+
+- `Docker now`: works against the local Compose-based Online Boutique stack.
+- `Kubernetes ready`: includes a real platform deployment path and a Kubernetes-aware orchestrator path, with live `kind` proving already documented.
+
+## What Is Actually Real Today
+
+These parts are implemented as live runtime paths in this repository:
+
+- FastAPI backend with live ingestion and scoring
+- Sliding-window telemetry collection
+- Feature extraction for both UI and model inference
+- Real model loading from [models/aegis_models](/Users/ishu/Hackathon/microservices-demo/models/aegis_models)
+- Isolation Forest scoring
+- PyTorch LSTM sequence scoring
+- Predictive pre-failure alerting driven by the LSTM
+- Real remediation pipeline with:
   - decision validation
-  - execution
+  - action execution
   - post-action evaluation
-  - retry / isolate / reroute / escalate containment
-  - incident memory persistence
-- Real dashboard surfaces:
-  - `Solar System` service topology
-  - `Infrastructure` cluster / observability / remediation page
-  - `Model Insights` page for ML telemetry and feature drivers
-  - `System Logs` page for persisted backend events and logs
+  - bounded retry
+  - containment and escalation
+  - incident memory
+- SQLite-backed persisted system events and backend logs
+- Dashboard with four pages:
+  - `#solar`
+  - `#infra`
+  - `#models`
+  - `#logs`
+- Local packaged deployment path for backend + dashboard
+- Kubernetes manifests for the platform itself
+- Real cluster proving notes for pod kill, crash loop, dependency failure, containment, and acknowledgement
 
-## Deliberately Heuristic / Hardcoded
+## What Is Still Heuristic or Intentionally Partial
 
-These two areas are still rule-based by design in the current product:
+These are intentionally not model-driven today:
 
 - Root-cause analysis
 - Recommendation text
 
-Everything else is expected to run from real inputs, real models, and real execution paths.
+These are materially implemented but still operationally bounded:
 
-## Repository Layout
+- `reroute_service` is best-effort only and needs explicitly configured healthy alternatives
+- rollback semantics are safe and conservative rather than advanced rollout rollback automation
+- some Kubernetes telemetry panels depend on what the target cluster and workloads actually export
 
-- [src](/Users/ishu/Hackathon/microservices-demo/src): Google Online Boutique source services
-- [docker-compose.yml](/Users/ishu/Hackathon/microservices-demo/docker-compose.yml): boutique app plus local observability stack
-- [docker-compose.platform.yml](/Users/ishu/Hackathon/microservices-demo/docker-compose.platform.yml): packaged AEGIS backend + dashboard
-- [backend](/Users/ishu/Hackathon/microservices-demo/backend): FastAPI API, ingestion, scoring, remediation, memory
-- [dashboard](/Users/ishu/Hackathon/microservices-demo/dashboard): React frontend
-- [deploy/platform](/Users/ishu/Hackathon/microservices-demo/deploy/platform): Kubernetes manifests and overlays for AEGIS itself
-- [models/aegis_models](/Users/ishu/Hackathon/microservices-demo/models/aegis_models): trained model artifacts currently used by the backend
-- [pipeline](/Users/ishu/Hackathon/microservices-demo/pipeline): data collection, labeling, and dataset generation
-- [observability](/Users/ishu/Hackathon/microservices-demo/observability): local Prometheus, Loki, Promtail, Grafana config
+## System Goals
 
-## Runtime Architecture
+AEGIS is trying to solve five practical problems:
 
-### Backend
+1. Detect service instability early enough to matter.
+2. Predict failures before they become obvious outages when there is enough sequential evidence.
+3. Take constrained, explainable actions instead of blindly restarting everything.
+4. Preserve a durable incident trail for operators and later model work.
+5. Present all of this in a single product surface that can be demoed, debugged, and extended.
 
-The FastAPI service in [backend/anomaly_api/main.py](/Users/ishu/Hackathon/microservices-demo/backend/anomaly_api/main.py):
+## High-Level Architecture
 
-- maintains sliding windows of live observations
-- extracts rich features for UI, heuristics, and remediation context
-- builds the real 33-feature LSTM sequence input from live telemetry
-- derives the real 66-feature Isolation Forest input from sequence statistics
-- loads the uploaded model artifacts from `models/aegis_models`
-- raises LSTM-backed pre-failure alerts and can trigger preventive actions before the service crosses the main incident threshold
-- persists structured events and backend logs into SQLite for timeline and log replay
-- exposes:
-  - `/health`
-  - `/status`
-  - `/topology`
-  - `/infrastructure`
-  - `/ml/insights`
-  - `/events`
-  - `/logs`
-  - `/history`
-  - `/window/{service}`
-  - remediation and incident endpoints
+At a high level, the system is layered like this:
+
+```text
+Online Boutique services
+    ↓
+Docker / Kubernetes runtime + observability stack
+    ↓
+AEGIS ingestion + feature extraction
+    ↓
+Isolation Forest + LSTM inference
+    ↓
+Heuristic root cause + recommendations
+    ↓
+Policy validation + remediation execution
+    ↓
+Evaluation + containment + escalation
+    ↓
+Incident memory + logs + dashboard surfaces
+```
+
+There are three main product surfaces:
+
+- the application layer: Google Online Boutique
+- the observability and platform layer: Prometheus, Loki, Promtail, Jaeger, Grafana, exporters, collector
+- the AEGIS control plane: backend, remediation engine, persistent memory, dashboard
+
+## The End-to-End Intelligence Pipeline
+
+This repo now effectively implements the later productionized version of the originally proposed 10-stage pipeline.
+
+### 1. Ingest
+
+The backend continuously polls and ingests runtime and observability signals. In Docker mode, that includes container/runtime stats plus cached log inputs; in Kubernetes mode, runtime telemetry can come through Prometheus and cAdvisor-backed collection.
+
+### 2. Feature Extraction
+
+The backend converts recent observations into:
+
+- service-level summaries for UI
+- heuristic flags for remediation context
+- model-specific features for Isolation Forest and LSTM inference
+
+This logic lives primarily in:
+
+- [backend/anomaly_api/features.py](/Users/ishu/Hackathon/microservices-demo/backend/anomaly_api/features.py)
+- [backend/anomaly_api/model_features.py](/Users/ishu/Hackathon/microservices-demo/backend/anomaly_api/model_features.py)
+
+### 3. Anomaly Scoring
+
+Two model paths run:
+
+- Isolation Forest for point-in-time statistical deviation
+- LSTM for sequence-aware risk and pre-failure prediction
+
+The backend combines those signals into a single service-level anomaly score while also preserving the individual model outputs.
+
+### 4. Root Cause Analysis
+
+Root cause is still heuristic. The correlation engine walks dependency relationships and score propagation patterns to estimate:
+
+- likely root cause service
+- confidence
+- failure type
+- affected services
+- propagation path
+
+This lives in [backend/anomaly_api/correlation.py](/Users/ishu/Hackathon/microservices-demo/backend/anomaly_api/correlation.py).
+
+### 5. Recommendation
+
+Recommendation text is also heuristic. It is designed to be operationally useful rather than model-generated.
+
+### 6. Action Decision
+
+Once a service crosses a remediation threshold, the system builds an incident context and validates any proposed action against policy.
+
+This includes:
+
+- failure type classification
+- safety checks
+- cooldown windows
+- retry budgets
+- action compatibility with the active orchestrator
+
+### 7. Action Execution
+
+The remediation engine executes through orchestrator adapters. Today that means:
+
+- Docker-backed execution for local runtime
+- Kubernetes-aware execution for workload recovery and proving scenarios
+
+### 8. Post-Action Evaluation
+
+After an action, the backend evaluates whether:
+
+- service health improved
+- readiness recovered
+- anomaly pressure dropped
+- blast radius shrank
+
+### 9. Retry and Containment
+
+If the first action fails, AEGIS can:
+
+- retry within bounded policy rules
+- isolate
+- attempt reroute when supported
+- escalate and require manual ownership
+
+### 10. Memory Update
+
+All of this is persisted into SQLite-backed stores so:
+
+- incidents can be recalled later
+- event timelines can be replayed
+- reports can be exported
+- future repeated failures have context
+
+## Technology Stack
+
+### Application Layer
+
+- Google Online Boutique microservices
+- Polyglot services in Go, C#, Node.js, Python, and Java under [src](/Users/ishu/Hackathon/microservices-demo/src)
+
+### Backend / Control Plane
+
+- Python
+- FastAPI
+- Pydantic
+- Uvicorn
+- SQLite
+- Docker SDK / Docker-aware runtime integration
+- Kubernetes-aware orchestration path
+
+### Machine Learning Runtime
+
+- scikit-learn artifact loading for Isolation Forest
+- PyTorch for LSTM inference
+- NumPy-style sequence and feature construction
 
 ### Frontend
 
-The dashboard has four views:
+- React 18
+- Vite
+- D3
+- plain React component styling with the project’s editorial theme system
+- ESLint
+- Vitest
 
-- `#solar`: service topology and remediation controls
-- `#infra`: infrastructure, observability, incidents, containment, and memory
-- `#models`: model metadata, service-level ML states, feature drivers, and sequence highlights
-- `#logs`: persisted system timeline and backend log stream
+### Observability / Platform
 
-### Remediation
+- Prometheus
+- Loki
+- Promtail
+- Grafana
+- Jaeger
+- OpenTelemetry Collector
+- kube-state-metrics
+- node-exporter
+- cAdvisor
+- redis-exporter
 
-The remediation subsystem under [backend/remediation](/Users/ishu/Hackathon/microservices-demo/backend/remediation) implements:
+### Deployment / Packaging
 
-- policy-driven action validation
-- Docker executor today
-- Kubernetes-aware executor path for deployments and pod recovery
-- cooldowns and service leases
-- containment and escalation
-- SQLite-backed incident memory
+- Docker
+- Docker Compose
+- Kubernetes
+- `kustomize` overlays
+- `kind`
+- Ingress-NGINX-style ingress deployment path
+- CI via GitHub Actions
+
+## Repository Structure
+
+Top-level layout:
+
+- [backend](/Users/ishu/Hackathon/microservices-demo/backend): FastAPI API, ingestion, scoring, remediation, persistence, tests
+- [dashboard](/Users/ishu/Hackathon/microservices-demo/dashboard): React frontend and production dashboard container assets
+- [deploy/platform](/Users/ishu/Hackathon/microservices-demo/deploy/platform): Kubernetes manifests for AEGIS itself
+- [docs](/Users/ishu/Hackathon/microservices-demo/docs): deployment, telemetry, audit, and proving documentation
+- [infra](/Users/ishu/Hackathon/microservices-demo/infra): helper scripts for local and Kubernetes workflows
+- [ml](/Users/ishu/Hackathon/microservices-demo/ml): model loading code and training-side assets
+- [models/aegis_models](/Users/ishu/Hackathon/microservices-demo/models/aegis_models): runtime artifacts actually used by the backend
+- [observability](/Users/ishu/Hackathon/microservices-demo/observability): local observability config
+- [pipeline](/Users/ishu/Hackathon/microservices-demo/pipeline): dataset collection and training preparation scripts
+- [release](/Users/ishu/Hackathon/microservices-demo/release): Online Boutique Kubernetes manifests
+- [src](/Users/ishu/Hackathon/microservices-demo/src): original boutique service source
+
+## Backend Breakdown
+
+The backend is centered on [backend/anomaly_api/main.py](/Users/ishu/Hackathon/microservices-demo/backend/anomaly_api/main.py).
+
+### Core responsibilities
+
+- boot the API
+- load required model artifacts
+- initialize system persistence
+- run the background score-update loop
+- publish topology, infrastructure, model, event, log, and incident endpoints
+- coordinate remediation and predictive alert flows
+
+### Important backend modules
+
+- [backend/anomaly_api/ingestion.py](/Users/ishu/Hackathon/microservices-demo/backend/anomaly_api/ingestion.py)
+  - runtime telemetry collection
+  - log and trace reachability checks
+  - Docker and Kubernetes telemetry pathways
+- [backend/anomaly_api/features.py](/Users/ishu/Hackathon/microservices-demo/backend/anomaly_api/features.py)
+  - per-window feature extraction
+- [backend/anomaly_api/model_features.py](/Users/ishu/Hackathon/microservices-demo/backend/anomaly_api/model_features.py)
+  - canonical live feature contract for IF and LSTM
+- [backend/anomaly_api/correlation.py](/Users/ishu/Hackathon/microservices-demo/backend/anomaly_api/correlation.py)
+  - heuristic root-cause inference
+- [backend/anomaly_api/infrastructure.py](/Users/ishu/Hackathon/microservices-demo/backend/anomaly_api/infrastructure.py)
+  - aggregated infrastructure payload builder
+- [backend/anomaly_api/settings.py](/Users/ishu/Hackathon/microservices-demo/backend/anomaly_api/settings.py)
+  - environment-driven configuration
+- [backend/anomaly_api/security.py](/Users/ishu/Hackathon/microservices-demo/backend/anomaly_api/security.py)
+  - operator token checks
+- [backend/anomaly_api/system_store.py](/Users/ishu/Hackathon/microservices-demo/backend/anomaly_api/system_store.py)
+  - SQLite-backed event/log storage and report generation
 
 ## Model Integration
 
-The backend uses:
+Runtime model artifacts live in [models/aegis_models](/Users/ishu/Hackathon/microservices-demo/models/aegis_models):
 
-- [models/aegis_models/if_model.pkl](/Users/ishu/Hackathon/microservices-demo/models/aegis_models/if_model.pkl)
-- [models/aegis_models/scaler.pkl](/Users/ishu/Hackathon/microservices-demo/models/aegis_models/scaler.pkl)
-- [models/aegis_models/lstm_model.pth](/Users/ishu/Hackathon/microservices-demo/models/aegis_models/lstm_model.pth)
+- `if_model.pkl`
+- `scaler.pkl`
+- `lstm_model.pth`
+
+The backend expects those artifacts to exist. In production mode it fails closed rather than silently swapping in demo behavior.
+
+### Runtime feature contract
 
 Current live model contract:
 
 - LSTM input: `8 x 33` timestep features
-- Isolation Forest input: `66` interleaved `mean/std` features derived from the same sequence family
+- Isolation Forest input: `66` features built from interleaved sequence statistics
 
-The canonical live feature builder is in [backend/anomaly_api/model_features.py](/Users/ishu/Hackathon/microservices-demo/backend/anomaly_api/model_features.py).
+The canonical feature builder is [backend/anomaly_api/model_features.py](/Users/ishu/Hackathon/microservices-demo/backend/anomaly_api/model_features.py).
 
-## How To Run
+### What the dashboard exposes
 
-### Local dev
+The `Model Insights` page shows:
+
+- model registry and artifact metadata
+- service-level IF/LSTM scores
+- score trajectories from stored history
+- predictive alert stream
+- dominant IF contributors
+- latest sequence feature highlights
+
+## Remediation and Containment
+
+The remediation subsystem lives under [backend/remediation](/Users/ishu/Hackathon/microservices-demo/backend/remediation).
+
+Key modules:
+
+- [backend/remediation/engine.py](/Users/ishu/Hackathon/microservices-demo/backend/remediation/engine.py)
+- [backend/remediation/policy.py](/Users/ishu/Hackathon/microservices-demo/backend/remediation/policy.py)
+- [backend/remediation/orchestrator.py](/Users/ishu/Hackathon/microservices-demo/backend/remediation/orchestrator.py)
+- [backend/remediation/action_executor.py](/Users/ishu/Hackathon/microservices-demo/backend/remediation/action_executor.py)
+- [backend/remediation/evaluator.py](/Users/ishu/Hackathon/microservices-demo/backend/remediation/evaluator.py)
+- [backend/remediation/containment.py](/Users/ishu/Hackathon/microservices-demo/backend/remediation/containment.py)
+- [backend/remediation/memory.py](/Users/ishu/Hackathon/microservices-demo/backend/remediation/memory.py)
+- [backend/remediation/models.py](/Users/ishu/Hackathon/microservices-demo/backend/remediation/models.py)
+
+### What it does
+
+- accepts a remediation request or runtime-triggered incident
+- validates action proposals against policy
+- chooses safe actions for the active runtime
+- enforces cooldowns and lock windows
+- executes restart / containment workflows
+- evaluates post-action health
+- escalates when automation should stop
+- preserves incidents for later recall
+
+### Failure patterns this repo is designed to handle
+
+- unhealthy or disappeared workloads
+- restart loops
+- memory pressure and OOM-style failure patterns
+- CPU saturation patterns
+- dependency failure, especially shared dependencies like `redis-cart`
+- log or exception storms
+- multi-service propagation
+
+## Incident Memory and Persistence
+
+AEGIS uses SQLite for two persistence concerns:
+
+1. system events and backend logs
+2. incident memory and remediation history
+
+Relevant runtime DB paths currently include:
+
+- [backend/.runtime/aegis_system.db](/Users/ishu/Hackathon/microservices-demo/backend/.runtime/aegis_system.db)
+- [backend/.runtime/incident_memory.db](/Users/ishu/Hackathon/microservices-demo/backend/.runtime/incident_memory.db)
+
+What is persisted:
+
+- structured events
+- backend log lines
+- remediation incident records
+- similar incident recall metadata
+- downloadable incident/log reports
+
+## Frontend Breakdown
+
+The frontend is a React/Vite application under [dashboard](/Users/ishu/Hackathon/microservices-demo/dashboard).
+
+### Pages
+
+- `#solar`
+  - live service topology
+  - orbit-based service map
+  - right-side operator rail
+  - service detail drilldown
+- `#infra`
+  - cluster/workload health
+  - observability stack status
+  - incidents, memory, operator context
+- `#models`
+  - model telemetry and feature interpretation
+- `#logs`
+  - live event flow
+  - backend log stream
+  - recovery stories
+  - downloadable report generation
+
+### Frontend tooling
+
+- dev server: `npm run dev`
+- lint: `npm run lint`
+- test: `npm test`
+- build: `npm run build`
+
+## Observability Stack
+
+### Local observability path
+
+The Compose stack and [observability](/Users/ishu/Hackathon/microservices-demo/observability) config provide:
+
+- Prometheus
+- Loki
+- Promtail
+- Grafana
+- Jaeger
+
+### Kubernetes-ready platform observability
+
+The platform manifests under [deploy/platform](/Users/ishu/Hackathon/microservices-demo/deploy/platform) include:
+
+- backend and RBAC
+- dashboard
+- ingress
+- Prometheus
+- Loki
+- Promtail
+- Grafana
+- Jaeger
+- OTEL collector
+- kube-state-metrics
+- node-exporter
+- cAdvisor
+- redis-exporter
+
+The repo does not fabricate missing telemetry. If a signal source is unavailable, the backend and UI should report that honestly.
+
+## Deployment Paths
+
+### 1. Local development
+
+Start the application and local observability stack:
 
 ```bash
 docker compose up -d
+```
+
+Start the AEGIS control plane in development mode:
+
+```bash
 bash infra/start_platform.sh
 ```
 
-This starts the boutique app and local observability stack, then runs the backend and dashboard in development mode.
+This path uses:
 
-### Local packaged runtime
+- local Python FastAPI process
+- Vite dev server
+- real runtime model artifacts
+
+### 2. Local production-style Compose validation
 
 ```bash
 docker compose up -d
-bash infra/compose-up.sh
+docker compose -f docker-compose.yml -f docker-compose.platform.yml up -d --build
 ```
 
-This validates the production-style backend and dashboard containers locally.
+Expected endpoints:
 
-### Kubernetes (`kind` first)
+- backend: `http://localhost:8001`
+- dashboard: `http://localhost:8088`
+
+### 3. Kubernetes (`kind` first)
+
+Bootstrap cluster and ingress:
 
 ```bash
 bash infra/k8s/bootstrap-kind.sh
+```
+
+Build and load images:
+
+```bash
 bash infra/k8s/build-kind-images.sh
+```
+
+Deploy the application layer:
+
+```bash
 kubectl apply -f release/kubernetes-manifests.yaml
+```
+
+Deploy the platform:
+
+```bash
 bash infra/k8s/deploy-kind.sh
 ```
 
+More detail: [docs/DEPLOYMENT.md](/Users/ishu/Hackathon/microservices-demo/docs/DEPLOYMENT.md)
+
 ## Configuration
 
-See [.env.example](/Users/ishu/Hackathon/microservices-demo/.env.example).
+Environment variables are defined in [.env.example](/Users/ishu/Hackathon/microservices-demo/.env.example).
 
-Important values:
+Key variables:
 
 - `AEGIS_RUNTIME_MODE`
+- `AEGIS_ENVIRONMENT`
+- `AEGIS_CLUSTER_NAME`
+- `AEGIS_ALLOWED_ORIGINS`
 - `AEGIS_AUTH_ENABLED`
 - `AEGIS_API_TOKEN`
-- `AEGIS_ALLOWED_ORIGINS`
 - `AEGIS_ORCHESTRATOR`
-- `AEGIS_MODEL_DIR`
+- `AEGIS_K8S_NAMESPACE`
 - `AEGIS_PROMETHEUS_URL`
 - `AEGIS_LOKI_URL`
 - `AEGIS_PROMTAIL_URL`
 - `AEGIS_JAEGER_URL`
 - `AEGIS_GRAFANA_URL`
 - `AEGIS_OTEL_COLLECTOR_URL`
+- `AEGIS_MODEL_DIR`
+- `AEGIS_SYSTEM_DB`
+- `AEGIS_REMEDIATION_COOLDOWN_S`
+- `AEGIS_REMEDIATION_LOCK_TIMEOUT_S`
+- `AEGIS_INCIDENT_MEMORY_LIMIT`
+- `AEGIS_INCIDENT_MEMORY_RETENTION_DAYS`
+- `AEGIS_PREDICTIVE_ALERT_THRESHOLD`
+- `AEGIS_PREDICTIVE_AUTO_ACTION_THRESHOLD`
+- `AEGIS_PREDICTIVE_ACTION_COOLDOWN_S`
 
-## Security Notes
+## Security Model
 
-- Mutating endpoints require `X-Aegis-Token` when auth is enabled.
-- In the packaged dashboard path, nginx injects the operator token into proxied `/api` requests so the browser does not need to embed that secret.
-- The Kubernetes dashboard ingress is protected with basic auth by default.
-- Rotate the checked-in placeholder secrets before any real deployment.
+Current security posture:
 
-## Validation Status
+- mutating operator endpoints require `X-Aegis-Token` when auth is enabled
+- CORS is controlled by configured allowed origins
+- the packaged dashboard talks to the backend through `/api`
+- the packaged dashboard can inject operator auth at the proxy layer
+- Kubernetes dashboard ingress is protected with basic auth by default
+- placeholder secrets in the repo must be rotated for any serious environment
 
-Validated in this repo after the current integration pass:
+This is a practical production-hardening baseline, not full enterprise identity.
 
-- backend unit tests
-- model artifact load and scoring tests
-- frontend tests
-- frontend production build
-- Python module compilation
-- Kubernetes manifest rendering for `kind` and `production` overlays
+## API Surface
 
-Not fully validated in this local environment:
+Important live endpoints:
 
-- live end-to-end `kind` deployment, because `kind` is not installed here
-- a full local Docker image verification pass, because earlier host-daemon metadata resolution stalled on this machine
+- `GET /health`
+- `GET /status`
+- `GET /topology`
+- `GET /infrastructure`
+- `GET /ml/insights`
+- `GET /events`
+- `GET /logs`
+- `GET /logs/report`
+- `GET /history`
+- `GET /window/{service}`
+- `GET /incidents/active`
+- `GET /incidents/history`
+- `GET /incidents/similar`
+- `POST /remediate`
+- `POST /decision/validate`
+- `POST /incidents/{incident_id}/acknowledge`
 
-## Docs
+Broadly:
+
+- `topology` powers the solar page and service drilldown
+- `infrastructure` powers the infra page
+- `ml/insights` powers the model page
+- `events`, `logs`, and `logs/report` power the logs page and report exports
+
+## Testing and Validation
+
+### Backend
+
+Current backend test files include:
+
+- [backend/tests/test_engine.py](/Users/ishu/Hackathon/microservices-demo/backend/tests/test_engine.py)
+- [backend/tests/test_infrastructure.py](/Users/ishu/Hackathon/microservices-demo/backend/tests/test_infrastructure.py)
+- [backend/tests/test_main_runtime.py](/Users/ishu/Hackathon/microservices-demo/backend/tests/test_main_runtime.py)
+- [backend/tests/test_memory.py](/Users/ishu/Hackathon/microservices-demo/backend/tests/test_memory.py)
+- [backend/tests/test_model_features.py](/Users/ishu/Hackathon/microservices-demo/backend/tests/test_model_features.py)
+- [backend/tests/test_model_runtime.py](/Users/ishu/Hackathon/microservices-demo/backend/tests/test_model_runtime.py)
+- [backend/tests/test_policy.py](/Users/ishu/Hackathon/microservices-demo/backend/tests/test_policy.py)
+- [backend/tests/test_settings.py](/Users/ishu/Hackathon/microservices-demo/backend/tests/test_settings.py)
+- [backend/tests/test_system_store.py](/Users/ishu/Hackathon/microservices-demo/backend/tests/test_system_store.py)
+
+Typical backend validation:
+
+```bash
+python3 -m unittest discover -s backend/tests -p 'test_*.py'
+python3 -m py_compile backend/anomaly_api/*.py backend/remediation/*.py
+```
+
+### Frontend
+
+```bash
+cd dashboard
+npm run lint
+npm test
+npm run build
+```
+
+### Kubernetes manifests
+
+The repo also validates manifest rendering for `kind` and production overlays.
+
+## Operational Proving
+
+The non-ML runtime path has a documented live `kind` proving pass in [docs/KIND_PROVING.md](/Users/ishu/Hackathon/microservices-demo/docs/KIND_PROVING.md).
+
+Validated scenarios include:
+
+- pod kill and controller recovery
+- persistent crash and containment
+- Redis dependency break
+- operator acknowledgement flow
+
+That proving work also tightened several runtime behaviors:
+
+- cold telemetry does not create fake model confidence
+- generic predictive spikes do not automatically self-remediate
+- runtime degradation and recovery are persisted as first-class events
+- dependency-aware decisions survive memory lookup rather than being overwritten incorrectly
+
+## Known Limitations and Honest Status
+
+This repo is strong as a working prototype and increasingly production-oriented, but it is important to be explicit about what that means.
+
+### Strong today
+
+- real runtime model loading
+- real backend ingestion and scoring path
+- real dashboard integration
+- real remediation workflow
+- real persistent incident and log storage
+- real Kubernetes packaging and documented cluster proving
+
+### Still not the same as “finished production software”
+
+- root-cause analysis is still heuristic
+- recommendation text is still heuristic
+- reroute behavior is still limited by explicit healthy alternatives
+- some telemetry quality depends on what the target application actually exports
+- enterprise auth/SSO and advanced rollback semantics are not present
+- cluster-specific operational quality still needs environment-by-environment validation
+
+### Most honest summary
+
+This is not a toy demo anymore, but it is also not pretending to be a fully finished enterprise platform. It is a real, integrated prototype with production-shaped deployment and remediation architecture, live model inference, and a documented proving path.
+
+## Related Documentation
 
 - [Deployment Guide](/Users/ishu/Hackathon/microservices-demo/docs/DEPLOYMENT.md)
 - [Telemetry Coverage](/Users/ishu/Hackathon/microservices-demo/docs/TELEMETRY.md)
 - [Production Audit](/Users/ishu/Hackathon/microservices-demo/docs/PRODUCTION_AUDIT.md)
+- [KIND Operational Proving](/Users/ishu/Hackathon/microservices-demo/docs/KIND_PROVING.md)
