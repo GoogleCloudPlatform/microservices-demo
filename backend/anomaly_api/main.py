@@ -17,8 +17,9 @@ import sys
 import os
 import time
 import logging
+import threading
 from datetime import datetime, timezone
-from collections import deque
+from collections import deque, defaultdict
 from typing import Any, Dict, List, Optional
 
 # Add repo root and backend to sys.path for imports
@@ -72,6 +73,16 @@ class AppState:
         # Live score store: service -> {if_score, lstm_score, combined_score}
         self.current_scores: Dict[str, Dict] = {}
 
+        # Live Docker stats: service -> {cpu_percent, mem_percent, ...}
+        self.live_docker_stats: Dict[str, Dict] = {}
+        self._docker_client = None
+        self._docker_available = False
+        # Previous cumulative network/block values for rate computation
+        self._prev_cumulative: Dict[str, Dict] = {}
+        self._prev_poll_time: float = 0.0
+        # Per-service LSTM inference instances (each with own rolling buffer)
+        self.lstm_per_service: Dict[str, Any] = {}
+
         # History: deque of score snapshots
         self.history: deque = deque(maxlen=100)
 
@@ -110,6 +121,14 @@ def load_models():
             state.lstm_inference = lstm
             loaded_lstm = True
             logger.info("LSTM model loaded")
+            # Create per-service instances (share the same underlying model)
+            for svc in ALL_SERVICES:
+                inst = LSTMInference()
+                inst.model = lstm.model
+                inst.model_type = lstm.model_type
+                inst.demo_mode = lstm.demo_mode
+                inst._demo_offset = hash(svc) % 100  # unique phase per service
+                state.lstm_per_service[svc] = inst
     except Exception as e:
         logger.warning(f"LSTM model load failed: {e}")
 
@@ -177,37 +196,146 @@ def _score_status(combined: float) -> str:
         return "critical"
 
 
+def _poll_docker_stats_sync():
+    """
+    Poll real Docker container stats for all services.
+    Computes per-second rates for network/block I/O by diffing
+    against previous cumulative values. Runs in a thread executor.
+    """
+    try:
+        import docker as docker_sdk
+        if state._docker_client is None:
+            state._docker_client = docker_sdk.from_env()
+        client = state._docker_client
+
+        now = time.time()
+        elapsed = now - state._prev_poll_time if state._prev_poll_time > 0 else 8.0
+        state._prev_poll_time = now
+
+        containers = client.containers.list()
+        stats_map: Dict[str, Dict] = {}
+        new_cumulative: Dict[str, Dict] = {}
+
+        for container in containers:
+            raw_name = container.name
+            svc = None
+            for s in ALL_SERVICES:
+                if s in raw_name:
+                    svc = s
+                    break
+            if svc is None:
+                continue
+
+            try:
+                raw = container.stats(stream=False)
+
+                # ── CPU % ──────────────────────────────────────────
+                cpu_delta = (raw["cpu_stats"]["cpu_usage"]["total_usage"] -
+                             raw["precpu_stats"]["cpu_usage"]["total_usage"])
+                sys_delta  = (raw["cpu_stats"]["system_cpu_usage"] -
+                              raw["precpu_stats"]["system_cpu_usage"])
+                n_cpus = raw["cpu_stats"].get("online_cpus") or \
+                         len(raw["cpu_stats"]["cpu_usage"].get("percpu_usage", [1]))
+                cpu_pct = (cpu_delta / sys_delta) * n_cpus * 100.0 if sys_delta > 0 else 0.0
+
+                # ── Memory % ────────────────────────────────────────
+                mem_usage = raw["memory_stats"].get("usage", 0)
+                mem_limit = raw["memory_stats"].get("limit", 1)
+                mem_pct = (mem_usage / mem_limit) * 100.0 if mem_limit > 0 else 0.0
+
+                # ── Network cumulative bytes ─────────────────────────
+                nets = raw.get("networks", {})
+                cum_rx = sum(v.get("rx_bytes", 0) for v in nets.values())
+                cum_tx = sum(v.get("tx_bytes", 0) for v in nets.values())
+
+                # ── Block I/O cumulative bytes ────────────────────────
+                bio = raw.get("blkio_stats", {}).get("io_service_bytes_recursive") or []
+                cum_br = sum(e.get("value", 0) for e in bio if e.get("op", "").lower() == "read")
+                cum_bw = sum(e.get("value", 0) for e in bio if e.get("op", "").lower() == "write")
+
+                new_cumulative[svc] = {
+                    "net_rx": cum_rx, "net_tx": cum_tx,
+                    "block_r": cum_br, "block_w": cum_bw,
+                }
+
+                # ── Compute rates (bytes/s → MB/s) ────────────────────
+                prev = state._prev_cumulative.get(svc, {})
+                if prev:
+                    net_rx_mbs = max(0.0, (cum_rx - prev["net_rx"]) / elapsed / 1e6)
+                    net_tx_mbs = max(0.0, (cum_tx - prev["net_tx"]) / elapsed / 1e6)
+                    block_r_mbs = max(0.0, (cum_br - prev["block_r"]) / elapsed / 1e6)
+                    block_w_mbs = max(0.0, (cum_bw - prev["block_w"]) / elapsed / 1e6)
+                else:
+                    # First sample — use neutral training-distribution values
+                    net_rx_mbs = 5.0
+                    net_tx_mbs = 6.0
+                    block_r_mbs = 0.06
+                    block_w_mbs = 1.6
+
+                stats_map[svc] = {
+                    "cpu_percent":      round(min(cpu_pct, 100.0), 2),
+                    "mem_percent":      round(min(mem_pct, 100.0), 2),
+                    "net_rx_mb":        round(net_rx_mbs, 4),
+                    "net_tx_mb":        round(net_tx_mbs, 4),
+                    "block_read_mb":    round(block_r_mbs, 4),
+                    "block_write_mb":   round(block_w_mbs, 4),
+                    "log_count":        0.0,
+                    "error_rate":       0.0,
+                    "warn_rate":        0.0,
+                    "template_entropy": 0.0,
+                }
+            except Exception:
+                pass
+
+        if stats_map:
+            state.live_docker_stats = stats_map
+            state._docker_available = True
+        state._prev_cumulative = new_cumulative
+
+    except Exception as e:
+        state._docker_available = False
+        logger.debug(f"Docker stats poll failed: {e}")
+
+
 def compute_all_scores() -> Dict[str, Dict]:
-    """Compute scores for all services."""
+    """
+    Compute anomaly scores for all services.
+    - If Docker stats are available: feed real per-service metrics into IF model.
+    - If demo_mode: sinusoidal scores.
+    - Fallback: sinusoidal.
+    """
     t = time.time()
     scores = {}
 
     for svc in ALL_SERVICES:
-        if state.demo_mode:
-            s = _demo_score(svc, t)
-        else:
-            # Use loaded models
-            dummy_features = {
-                "cpu_percent": 0.5,
-                "mem_percent": 0.5,
-                "net_rx_mb": 0.1,
-                "net_tx_mb": 0.1,
-                "block_read_mb": 0.01,
-                "block_write_mb": 0.01,
-                "log_count": 10.0,
-                "error_rate": 0.01,
-                "warn_rate": 0.02,
-                "template_entropy": 1.5,
-            }
-            if_score = state.if_inference.score(dummy_features) if state.if_inference else _demo_score(svc, t)["if_score"]
-            lstm_score = state.lstm_inference._demo_score() if state.lstm_inference else _demo_score(svc, t)["lstm_score"]
-            combined = 0.6 * lstm_score + 0.4 * if_score
-            s = {
-                "if_score": round(if_score, 3),
-                "lstm_score": round(lstm_score, 3),
-                "combined_score": round(combined, 3),
-            }
+        # Try real model + real Docker stats
+        if not state.demo_mode and state.if_inference and state._docker_available:
+            docker_feats = state.live_docker_stats.get(svc)
+            if docker_feats is not None:
+                if_score = state.if_inference.score(docker_feats)
+                # LSTM: use per-service rolling buffer
+                lstm_inst = state.lstm_per_service.get(svc) or state.lstm_inference
+                lstm_score = 0.15
+                if lstm_inst:
+                    result = lstm_inst.predict_from_features(docker_feats)
+                    if result is not None:
+                        lstm_score = result
+                    else:
+                        lstm_score = lstm_inst._demo_score()
+                combined = 0.6 * lstm_score + 0.4 * if_score
+                s = {
+                    "if_score":      round(if_score, 3),
+                    "lstm_score":    round(lstm_score, 3),
+                    "combined_score":round(combined, 3),
+                    "cpu_percent":   docker_feats["cpu_percent"],
+                    "mem_percent":   docker_feats["mem_percent"],
+                }
+                s["status"] = _score_status(s["combined_score"])
+                scores[svc] = s
+                continue
 
+        # Fallback: sinusoidal demo scores
+        s = _demo_score(svc, t)
         s["status"] = _score_status(s["combined_score"])
         scores[svc] = s
 
@@ -264,9 +392,16 @@ def get_recommendation(root_cause: Dict, scores: Dict) -> str:
 # =============================================
 
 async def update_scores_loop():
-    """Background task that updates demo scores every 2 seconds."""
+    """Background task: polls Docker stats + updates scores every 2 seconds."""
+    tick = 0
     while True:
         try:
+            # Poll Docker stats every 4 ticks (8s) — Docker stats are slow
+            if tick % 4 == 0:
+                loop = asyncio.get_event_loop()
+                await loop.run_in_executor(None, _poll_docker_stats_sync)
+
+            tick += 1
             scores = compute_all_scores()
             state.current_scores = scores
             state.last_update = time.time()
