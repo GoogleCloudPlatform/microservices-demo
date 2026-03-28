@@ -1,0 +1,471 @@
+{
+  "completed_runs": 5,
+  "run_results": [
+    {
+      "run_idx": 0,
+      "target_service": "recommendationservice",
+      "start_time": "2026-03-28T06:57:06.938Z",
+      "end_time": "2026-03-28T08:27:31.947Z",
+      "events": [
+        {
+          "failure_type": "memory_leak",
+          "intensity": "mild"
+        },
+        {
+          "failure_type": "cpu_starvation",
+          "intensity": "heavy"
+        },
+        {
+          "failure_type": "network_latency",
+          "intensity": "medium"
+        },
+        {
+          "failure_type": "memory_leak",
+          "intensity": "heavy"
+        }
+      ],
+      "rows_this_run": {
+        "metrics": 5728,
+        "logs": 21071,
+        "traces": 20797,
+        "log_aggregates": 2985
+      },
+      "cumulative_rows": {
+        "training_metrics": 5728,
+        "training_logs": 21071,
+        "training_traces": 20797,
+        "training_log_aggregates": 2985
+      },
+      "label_stats": {
+        "metrics": {
+          "total_rows": 5728,
+          "failure_rows": 80,
+          "pre_failure_rows": 48,
+          "future_failure_rows": 128,
+          "normal_rows": 5600,
+          "failure_type_counts": {
+            "none": 5600,
+            "memory_leak": 40,
+            "pre_memory_leak": 24,
+            "cpu_starvation": 20,
+            "network_latency": 20,
+            "pre_cpu_starvation": 12,
+            "pre_network_latency": 12
+          }
+        },
+        "logs": {
+          "total_rows": 21071,
+          "failure_rows": 434,
+          "pre_failure_rows": 238,
+          "future_failure_rows": 672,
+          "normal_rows": 20399,
+          "failure_type_counts": {
+            "none": 20399,
+            "memory_leak": 209,
+            "network_latency": 124,
+            "pre_memory_leak": 115,
+            "cpu_starvation": 101,
+            "pre_cpu_starvation": 68,
+            "pre_network_latency": 55
+          }
+        },
+        "traces": {
+          "total_rows": 20797,
+          "failure_rows": 2915,
+          "pre_failure_rows": 1869,
+          "future_failure_rows": 4784,
+          "normal_rows": 16013,
+          "failure_type_counts": {
+            "none": 16013,
+            "network_latency": 1219,
+            "cpu_starvation": 1066,
+            "pre_cpu_starvation": 636,
+            "memory_leak": 630,
+            "pre_network_latency": 628,
+            "pre_memory_leak": 605
+          }
+        }
+      },
+      "failure_events": [
+        {
+          "scenario_id": "0b8e812d-5cb6-4ed1-a70c-6b1a711d4c4d",
+          "service_name": "recommendationservice",
+          "failure_type": "memory_leak",
+          "start_time": "2026-03-28T07:12:07.132372+00:00",
+          "end_time": "2026-03-28T07:17:07.208693+00:00",
+          "pre_failure_start": "2026-03-28T07:09:07.132372+00:00",
+          "duration_seconds": 300.076321
+        },
+        {
+          "scenario_id": "3116aebb-0a6b-4775-b16d-a10fe3f3ced3",
+          "service_name": "recommendationservice",
+          "failure_type": "cpu_starvation",
+          "start_time": "2026-03-28T07:27:18.635227+00:00",
+          "end_time": "2026-03-28T07:32:18.661753+00:00",
+          "pre_failure_start": "2026-03-28T07:24:18.635227+00:00",
+          "duration_seconds": 300.026526
+        },
+        {
+          "scenario_id": "2972cde3-f839-4761-bbb1-e1276403bc11",
+          "service_name": "recommendationservice",
+          "failure_type": "network_latency",
+          "start_time": "2026-03-28T07:42:14.534131+00:00",
+          "end_time": "2026-03-28T07:47:14.589768+00:00",
+          "pre_failure_start": "2026-03-28T07:39:14.534131+00:00",
+          "duration_seconds": 300.055637
+        },
+        {
+          "scenario_id": "15a3ea2f-1122-4a86-bc7f-352a512844ff",
+          "service_name": "recommendationservice",
+          "failure_type": "memory_leak",
+          "start_time": "2026-03-28T07:57:10.408666+00:00",
+          "end_time": "2026-03-28T08:02:10.547112+00:00",
+          "pre_failure_start": "2026-03-28T07:54:10.408666+00:00",
+          "duration_seconds": 300.138446
+        }
+      ]
+    },
+    {
+      "run_idx": 1,
+      "target_service": "emailservice",
+      "start_time": "2026-03-28T08:28:01.975Z",
+      "end_time": "2026-03-28T09:58:42.033Z",
+      "events": [
+        {
+          "failure_type": "cpu_starvation",
+          "intensity": "mild"
+        },
+        {
+          "failure_type": "network_latency",
+          "intensity": "heavy"
+        },
+        {
+          "failure_type": "memory_leak",
+          "intensity": "medium"
+        },
+        {
+          "failure_type": "cpu_starvation",
+          "intensity": "heavy"
+        }
+      ],
+      "rows_this_run": {
+        "metrics": 5728,
+        "logs": 20930,
+        "traces": 8950,
+        "log_aggregates": 2963
+      },
+      "cumulative_rows": {
+        "training_metrics": 11456,
+        "training_logs": 42001,
+        "training_traces": 29747,
+        "training_log_aggregates": 5948
+      },
+      "label_stats": {
+        "metrics": {
+          "total_rows": 5728,
+          "failure_rows": 80,
+          "pre_failure_rows": 48,
+          "future_failure_rows": 128,
+          "normal_rows": 5600,
+          "failure_type_counts": {
+            "none": 5600,
+            "cpu_starvation": 40,
+            "pre_cpu_starvation": 24,
+            "network_latency": 20,
+            "memory_leak": 20,
+            "pre_network_latency": 12,
+            "pre_memory_leak": 12
+          }
+        },
+        "logs": {
+          "total_rows": 20930,
+          "failure_rows": 16,
+          "pre_failure_rows": 7,
+          "future_failure_rows": 23,
+          "normal_rows": 20907,
+          "failure_type_counts": {
+            "none": 20907,
+            "cpu_starvation": 8,
+            "network_latency": 4,
+            "memory_leak": 4,
+            "pre_cpu_starvation": 3,
+            "pre_network_latency": 2,
+            "pre_memory_leak": 2
+          }
+        },
+        "traces": {
+          "total_rows": 8950,
+          "failure_rows": 0,
+          "pre_failure_rows": 0,
+          "future_failure_rows": 0,
+          "normal_rows": 8950,
+          "failure_type_counts": {
+            "none": 8950
+          }
+        }
+      },
+      "failure_events": [
+        {
+          "scenario_id": "1b0eca19-d340-4fcc-93a6-23d8fa99e2fa",
+          "service_name": "emailservice",
+          "failure_type": "cpu_starvation",
+          "start_time": "2026-03-28T08:43:02.370261+00:00",
+          "end_time": "2026-03-28T08:48:02.437348+00:00",
+          "pre_failure_start": "2026-03-28T08:40:02.370261+00:00",
+          "duration_seconds": 300.067087
+        },
+        {
+          "scenario_id": "3c4f6049-ed72-46d4-b612-74827ac75be7",
+          "service_name": "emailservice",
+          "failure_type": "network_latency",
+          "start_time": "2026-03-28T08:58:13.349801+00:00",
+          "end_time": "2026-03-28T09:03:13.483535+00:00",
+          "pre_failure_start": "2026-03-28T08:55:13.349801+00:00",
+          "duration_seconds": 300.133734
+        },
+        {
+          "scenario_id": "c9587762-da30-4c40-b712-d6c883e9c41a",
+          "service_name": "emailservice",
+          "failure_type": "memory_leak",
+          "start_time": "2026-03-28T09:13:09.381060+00:00",
+          "end_time": "2026-03-28T09:18:09.526594+00:00",
+          "pre_failure_start": "2026-03-28T09:10:09.381060+00:00",
+          "duration_seconds": 300.145534
+        },
+        {
+          "scenario_id": "e7c768d4-5984-45be-b4d7-4123e131dd41",
+          "service_name": "emailservice",
+          "failure_type": "cpu_starvation",
+          "start_time": "2026-03-28T09:28:05.314664+00:00",
+          "end_time": "2026-03-28T09:33:05.388233+00:00",
+          "pre_failure_start": "2026-03-28T09:25:05.314664+00:00",
+          "duration_seconds": 300.073569
+        }
+      ]
+    },
+    {
+      "run_idx": 2,
+      "target_service": "recommendationservice",
+      "start_time": "2026-03-28T09:59:12.058Z",
+      "end_time": "2026-03-28T11:29:26.156Z",
+      "events": [
+        {
+          "failure_type": "network_latency",
+          "intensity": "mild"
+        },
+        {
+          "failure_type": "memory_leak",
+          "intensity": "heavy"
+        },
+        {
+          "failure_type": "cpu_starvation",
+          "intensity": "medium"
+        },
+        {
+          "failure_type": "network_latency",
+          "intensity": "heavy"
+        }
+      ],
+      "rows_this_run": {
+        "metrics": 5370,
+        "logs": 20019,
+        "traces": 0,
+        "log_aggregates": 3116
+      },
+      "cumulative_rows": {
+        "training_metrics": 16826,
+        "training_logs": 62020,
+        "training_traces": 29747,
+        "training_log_aggregates": 9064
+      },
+      "label_stats": {
+        "metrics": {
+          "total_rows": 5370,
+          "failure_rows": 80,
+          "pre_failure_rows": 48,
+          "future_failure_rows": 128,
+          "normal_rows": 5242,
+          "failure_type_counts": {
+            "none": 5242,
+            "network_latency": 40,
+            "pre_network_latency": 24,
+            "memory_leak": 20,
+            "cpu_starvation": 20,
+            "pre_memory_leak": 12,
+            "pre_cpu_starvation": 12
+          }
+        },
+        "logs": {
+          "total_rows": 20019,
+          "failure_rows": 417,
+          "pre_failure_rows": 230,
+          "future_failure_rows": 647,
+          "normal_rows": 19372,
+          "failure_type_counts": {
+            "none": 19372,
+            "network_latency": 203,
+            "memory_leak": 117,
+            "pre_network_latency": 115,
+            "cpu_starvation": 97,
+            "pre_memory_leak": 64,
+            "pre_cpu_starvation": 51
+          }
+        }
+      },
+      "failure_events": [
+        {
+          "scenario_id": "3c4d8473-ff40-4f4b-a768-43302ef7bd5a",
+          "service_name": "recommendationservice",
+          "failure_type": "network_latency",
+          "start_time": "2026-03-28T10:14:12.292566+00:00",
+          "end_time": "2026-03-28T10:19:12.371968+00:00",
+          "pre_failure_start": "2026-03-28T10:11:12.292566+00:00",
+          "duration_seconds": 300.079402
+        },
+        {
+          "scenario_id": "6050aa52-d271-4270-a683-50fcf8be6b32",
+          "service_name": "recommendationservice",
+          "failure_type": "memory_leak",
+          "start_time": "2026-03-28T10:29:22.414342+00:00",
+          "end_time": "2026-03-28T10:34:22.500248+00:00",
+          "pre_failure_start": "2026-03-28T10:26:22.414342+00:00",
+          "duration_seconds": 300.085906
+        },
+        {
+          "scenario_id": "3a4714e5-93ca-47e9-8eba-35861f44e62c",
+          "service_name": "recommendationservice",
+          "failure_type": "cpu_starvation",
+          "start_time": "2026-03-28T10:44:18.299713+00:00",
+          "end_time": "2026-03-28T10:49:18.368549+00:00",
+          "pre_failure_start": "2026-03-28T10:41:18.299713+00:00",
+          "duration_seconds": 300.068836
+        },
+        {
+          "scenario_id": "7712b5bd-de85-46d0-81e3-d43937339e05",
+          "service_name": "recommendationservice",
+          "failure_type": "network_latency",
+          "start_time": "2026-03-28T10:59:13.778168+00:00",
+          "end_time": "2026-03-28T11:04:13.838798+00:00",
+          "pre_failure_start": "2026-03-28T10:56:13.778168+00:00",
+          "duration_seconds": 300.06063
+        }
+      ]
+    },
+    {
+      "run_idx": 3,
+      "target_service": "emailservice",
+      "start_time": "2026-03-28T11:29:56.173Z",
+      "end_time": "2026-03-28T13:00:11.419Z",
+      "events": [
+        {
+          "failure_type": "memory_leak",
+          "intensity": "medium"
+        },
+        {
+          "failure_type": "cpu_starvation",
+          "intensity": "mild"
+        },
+        {
+          "failure_type": "network_latency",
+          "intensity": "heavy"
+        },
+        {
+          "failure_type": "memory_leak",
+          "intensity": "heavy"
+        }
+      ],
+      "rows_this_run": {
+        "metrics": 5370,
+        "logs": 18620,
+        "traces": 0,
+        "log_aggregates": 3051
+      },
+      "cumulative_rows": {
+        "training_metrics": 22196,
+        "training_logs": 80640,
+        "training_traces": 29747,
+        "training_log_aggregates": 12115
+      },
+      "label_stats": {
+        "metrics": {
+          "total_rows": 5370,
+          "failure_rows": 80,
+          "pre_failure_rows": 48,
+          "future_failure_rows": 128,
+          "normal_rows": 5242,
+          "failure_type_counts": {
+            "none": 5242,
+            "memory_leak": 40,
+            "pre_memory_leak": 24,
+            "cpu_starvation": 20,
+            "network_latency": 20,
+            "pre_cpu_starvation": 12,
+            "pre_network_latency": 12
+          }
+        },
+        "logs": {
+          "total_rows": 18620,
+          "failure_rows": 39,
+          "pre_failure_rows": 22,
+          "future_failure_rows": 61,
+          "normal_rows": 18559,
+          "failure_type_counts": {
+            "none": 18559,
+            "memory_leak": 17,
+            "pre_memory_leak": 14,
+            "cpu_starvation": 13,
+            "network_latency": 9,
+            "pre_cpu_starvation": 4,
+            "pre_network_latency": 4
+          }
+        }
+      },
+      "failure_events": [
+        {
+          "scenario_id": "edb5c79b-c8ed-4e1a-be81-7d866237a746",
+          "service_name": "emailservice",
+          "failure_type": "memory_leak",
+          "start_time": "2026-03-28T11:44:56.373998+00:00",
+          "end_time": "2026-03-28T11:49:56.435029+00:00",
+          "pre_failure_start": "2026-03-28T11:41:56.373998+00:00",
+          "duration_seconds": 300.061031
+        },
+        {
+          "scenario_id": "4532c044-a4b6-4b7b-8a09-9a9c6ab21325",
+          "service_name": "emailservice",
+          "failure_type": "cpu_starvation",
+          "start_time": "2026-03-28T12:00:07.096161+00:00",
+          "end_time": "2026-03-28T12:05:07.165523+00:00",
+          "pre_failure_start": "2026-03-28T11:57:07.096161+00:00",
+          "duration_seconds": 300.069362
+        },
+        {
+          "scenario_id": "0df21219-b214-498d-b0c2-45f1332b328e",
+          "service_name": "emailservice",
+          "failure_type": "network_latency",
+          "start_time": "2026-03-28T12:15:02.850522+00:00",
+          "end_time": "2026-03-28T12:20:02.919820+00:00",
+          "pre_failure_start": "2026-03-28T12:12:02.850522+00:00",
+          "duration_seconds": 300.069298
+        },
+        {
+          "scenario_id": "8380207e-ad07-4291-8cf3-e78b6d60a411",
+          "service_name": "emailservice",
+          "failure_type": "memory_leak",
+          "start_time": "2026-03-28T12:29:58.758076+00:00",
+          "end_time": "2026-03-28T12:34:58.889370+00:00",
+          "pre_failure_start": "2026-03-28T12:26:58.758076+00:00",
+          "duration_seconds": 300.131294
+        }
+      ]
+    },
+    {
+      "run_idx": 4,
+      "error": "max_workers must be greater than 0",
+      "rows_this_run": {},
+      "cumulative_rows": {},
+      "label_stats": {},
+      "failure_events": []
+    }
+  ]
+}
