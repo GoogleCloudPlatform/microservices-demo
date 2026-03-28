@@ -19,7 +19,6 @@ Usage:
 
 import sys
 import time
-import json
 import argparse
 import subprocess
 from datetime import datetime
@@ -31,7 +30,6 @@ except ImportError:
     sys.exit(1)
 
 API_BASE = "http://localhost:8001"
-NGROK_API = "http://localhost:4040/api/tunnels"
 TARGET_SERVICE = "recommendationservice"
 FAILURE_TYPE = "memory_leak"
 
@@ -78,20 +76,6 @@ def get_status():
         return resp.json()
     except Exception as e:
         return None
-
-
-def get_ngrok_urls():
-    try:
-        resp = requests.get(NGROK_API, timeout=3)
-        tunnels = resp.json().get("tunnels", [])
-        urls = {}
-        for t in tunnels:
-            name = t.get("name", "")
-            pub = t.get("public_url", "")
-            urls[name] = pub
-        return urls
-    except Exception:
-        return {}
 
 
 def inject_stress(service_name, dry_run=False):
@@ -201,15 +185,6 @@ def main():
             f"API healthy: runtime_mode={health.get('runtime_mode')}, "
             f"models_loaded={health.get('models_loaded')}"
         )
-
-    # --- Ngrok URLs ---
-    ngrok = get_ngrok_urls()
-    if ngrok:
-        print_info("Ngrok tunnels:")
-        for name, url in ngrok.items():
-            print_ok(f"  {name}: {url}")
-    else:
-        print_info("Ngrok not running (optional)")
 
     # ============================
     # t=0: Normal operation
@@ -365,9 +340,6 @@ def main():
     print_info("  4. Automated remediation restarted the service")
     print_info("  5. System recovered within SLA")
     print_info("")
-    if ngrok:
-        for name, url in ngrok.items():
-            print_info(f"  Dashboard: {url}")
 
 
 if __name__ == "__main__":
