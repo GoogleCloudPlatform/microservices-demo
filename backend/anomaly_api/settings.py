@@ -62,6 +62,10 @@ class Settings:
     remediation_lock_timeout_s: float
     infrastructure_collectors_enabled: bool
     model_dir: str
+    system_db_path: str
+    predictive_alert_threshold: float
+    predictive_auto_action_threshold: float
+    predictive_action_cooldown_s: float
 
     @property
     def is_production(self) -> bool:
@@ -100,4 +104,8 @@ def load_settings() -> Settings:
         remediation_lock_timeout_s=_env_float("AEGIS_REMEDIATION_LOCK_TIMEOUT_S", 300.0),
         infrastructure_collectors_enabled=_env_bool("AEGIS_INFRA_COLLECTORS_ENABLED", True),
         model_dir=os.getenv("AEGIS_MODEL_DIR", "models/aegis_models"),
+        system_db_path=os.getenv("AEGIS_SYSTEM_DB", "backend/.runtime/aegis_system.db"),
+        predictive_alert_threshold=_env_float("AEGIS_PREDICTIVE_ALERT_THRESHOLD", 0.68),
+        predictive_auto_action_threshold=_env_float("AEGIS_PREDICTIVE_AUTO_ACTION_THRESHOLD", 0.88),
+        predictive_action_cooldown_s=_env_float("AEGIS_PREDICTIVE_ACTION_COOLDOWN_S", 300.0),
     )

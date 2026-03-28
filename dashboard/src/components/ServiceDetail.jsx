@@ -55,6 +55,7 @@ export default function ServiceDetail({ service, data, windowData, onRemediate, 
   const logs = data?.recent_logs || []
   const latestIncident = data?.latest_incident || null
   const similarIncidents = data?.similar_incidents || []
+  const predictiveAlert = data?.predictive_alert || null
   const box = { border: `1px solid ${theme.borderLight}`, padding: '10px 12px', marginBottom: 10, background: theme.card }
 
   return (
@@ -118,6 +119,21 @@ export default function ServiceDetail({ service, data, windowData, onRemediate, 
               </span>
             ))}
           </div>
+        </div>
+      )}
+
+      {predictiveAlert && predictiveAlert.status !== 'resolved' && (
+        <div style={box}>
+          <div style={{ fontSize: 10, fontWeight: 'bold', color: theme.textMuted, marginBottom: 6, letterSpacing: 1 }}>PRE-FAILURE ALERT</div>
+          <div style={{ fontSize: 11, color: predictiveAlert.severity === 'critical' ? '#cc2222' : '#c45c0a', fontWeight: 'bold' }}>
+            LSTM risk {Math.round((predictiveAlert.lstm_score || 0) * 100)}% · {predictiveAlert.failure_type?.replace(/_/g, ' ')}
+          </div>
+          <div style={{ fontSize: 9, color: theme.textMuted, lineHeight: 1.5, marginTop: 6 }}>{predictiveAlert.message}</div>
+          {(predictiveAlert.preventive_actions || []).slice(0, 2).map(item => (
+            <div key={item.action} style={{ fontSize: 9, color: theme.textMuted, marginTop: 6 }}>
+              <span style={{ color: theme.text, fontWeight: 'bold' }}>{item.action.replace(/_/g, ' ')}</span> · {item.summary}
+            </div>
+          ))}
         </div>
       )}
 

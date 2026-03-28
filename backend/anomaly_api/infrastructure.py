@@ -157,6 +157,8 @@ def build_infrastructure_payload(
         "remediation": {
             "active_incidents": active_incidents,
             "recent_incidents": recent_incidents,
+            "predictive_alerts": topology.get("predictive_alerts", []),
+            "timeline": topology.get("timeline", []),
             "cooldowns": remediation_engine.cooldown_snapshot() if remediation_engine else {},
             "leases": remediation_engine.lease_snapshot() if remediation_engine else {},
             "target_seconds": remediation_engine.target_seconds if remediation_engine else None,
@@ -164,5 +166,8 @@ def build_infrastructure_payload(
         "memory": {
             "recent": memory_recent,
             "count": len(memory_recent),
+        },
+        "system": {
+            "summary": topology.get("system_summary", {}),
         },
     }

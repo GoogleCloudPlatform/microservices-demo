@@ -27,6 +27,7 @@ The larger `X_*.npy` and `y_labels.npy` files are treated as local training asse
   - `Solar System` service topology
   - `Infrastructure` cluster / observability / remediation page
   - `Model Insights` page for ML telemetry and feature drivers
+  - `System Logs` page for persisted backend events and logs
 
 ## Deliberately Heuristic / Hardcoded
 
@@ -60,23 +61,28 @@ The FastAPI service in [backend/anomaly_api/main.py](/Users/ishu/Hackathon/micro
 - builds the real 33-feature LSTM sequence input from live telemetry
 - derives the real 66-feature Isolation Forest input from sequence statistics
 - loads the uploaded model artifacts from `models/aegis_models`
+- raises LSTM-backed pre-failure alerts and can trigger preventive actions before the service crosses the main incident threshold
+- persists structured events and backend logs into SQLite for timeline and log replay
 - exposes:
   - `/health`
   - `/status`
   - `/topology`
   - `/infrastructure`
   - `/ml/insights`
+  - `/events`
+  - `/logs`
   - `/history`
   - `/window/{service}`
   - remediation and incident endpoints
 
 ### Frontend
 
-The dashboard has three views:
+The dashboard has four views:
 
 - `#solar`: service topology and remediation controls
 - `#infra`: infrastructure, observability, incidents, containment, and memory
 - `#models`: model metadata, service-level ML states, feature drivers, and sequence highlights
+- `#logs`: persisted system timeline and backend log stream
 
 ### Remediation
 

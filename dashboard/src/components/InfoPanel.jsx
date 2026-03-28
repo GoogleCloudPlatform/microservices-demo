@@ -18,6 +18,25 @@ function MetricCard({ title, subtitle, value, status, statusLabel, theme }) {
   )
 }
 
+function TimelineItem({ event, theme }) {
+  const tones = { critical: '#cc2222', warning: '#c45c0a', info: theme.textMuted }
+  const tone = tones[event?.severity] || theme.textMuted
+  return (
+    <div style={{ display: 'grid', gridTemplateColumns: '12px minmax(0, 1fr)', gap: 8, marginTop: 10 }}>
+      <div style={{ display: 'flex', justifyContent: 'center' }}>
+        <span style={{ width: 8, height: 8, borderRadius: '50%', background: tone, marginTop: 4 }} />
+      </div>
+      <div>
+        <div style={{ fontSize: 10, color: theme.text, fontWeight: 'bold' }}>{event?.title || 'Event'}</div>
+        <div style={{ fontSize: 9, color: theme.textMuted, marginTop: 2, lineHeight: 1.5 }}>{event?.message}</div>
+        <div style={{ fontSize: 8, color: theme.textDim, marginTop: 4, textTransform: 'uppercase', letterSpacing: 1 }}>
+          {event?.service ? `${event.service} · ` : ''}{event?.created_at ? new Date(event.created_at).toLocaleTimeString('en-US', { hour12: false }) : ''}
+        </div>
+      </div>
+    </div>
+  )
+}
+
 export default function InfoPanel({ topology, children }) {
   const { theme } = useTheme()
   const health = topology?.health_score ?? '—'
@@ -26,6 +45,9 @@ export default function InfoPanel({ topology, children }) {
   const recommendation = topology?.recommendation || 'Monitoring...'
   const activeIncidents = topology?.active_incidents || []
   const recentIncidents = topology?.recent_incidents || []
+  const predictiveAlerts = topology?.predictive_alerts || []
+  const topPredictiveAlert = [...predictiveAlerts].sort((a, b) => (b.lstm_score || 0) - (a.lstm_score || 0))[0]
+  const timeline = topology?.timeline || []
 
   const healthStatus = health === '—' ? 'STABLE' : health < 60 ? 'CRITICAL' : health < 80 ? 'DEGRADING' : 'STABLE'
   const momentumStatus = Math.abs(momentum) < 2 ? 'STABLE' : momentum > 0 ? 'CRITICAL' : 'OK'
@@ -67,6 +89,36 @@ export default function InfoPanel({ topology, children }) {
       </div>
 
       <div style={{ border: `2px solid ${theme.border}`, padding: '10px 14px', marginBottom: 10, background: theme.card }}>
+        <div style={{ fontSize: 10, fontWeight: 'bold', letterSpacing: 0.5, color: theme.text }}>Pre-Failure Predictor</div>
+        <div style={{ fontSize: 9, color: theme.textMuted }}>LSTM-based early warning and preventive action planner</div>
+        {topPredictiveAlert ? (
+          <>
+            <div style={{ fontSize: 20, fontWeight: 'bold', color: topPredictiveAlert.severity === 'critical' ? '#cc2222' : '#c45c0a', margin: '8px 0 2px' }}>
+              {topPredictiveAlert.service}
+            </div>
+            <div style={{ fontSize: 9, color: theme.textMuted, lineHeight: 1.5 }}>
+              {topPredictiveAlert.message}
+            </div>
+            <div style={{ fontSize: 9, color: theme.textMuted, marginTop: 8 }}>
+              Predicted window: {topPredictiveAlert.predicted_window} · LSTM risk {Math.round((topPredictiveAlert.lstm_score || 0) * 100)}%
+            </div>
+            <div style={{ marginTop: 8 }}>
+              {(topPredictiveAlert.preventive_actions || []).slice(0, 2).map(item => (
+                <div key={item.action} style={{ borderLeft: `2px solid ${item.automatic ? '#cc2222' : theme.accent}`, paddingLeft: 8, marginTop: 6 }}>
+                  <div style={{ fontSize: 9, color: theme.text, fontWeight: 'bold' }}>
+                    {item.action.replace(/_/g, ' ')}{item.automatic ? ' · automatic' : ''}
+                  </div>
+                  <div style={{ fontSize: 8, color: theme.textMuted, lineHeight: 1.5 }}>{item.summary}</div>
+                </div>
+              ))}
+            </div>
+          </>
+        ) : (
+          <div style={{ fontSize: 10, color: '#2a8a2a', marginTop: 8 }}>No pre-failure alert is active.</div>
+        )}
+      </div>
+
+      <div style={{ border: `2px solid ${theme.border}`, padding: '10px 14px', marginBottom: 10, background: theme.card }}>
         <div style={{ fontSize: 10, fontWeight: 'bold', letterSpacing: 0.5, color: theme.text }}>Incident Summary</div>
         <div style={{ fontSize: 9, color: theme.textMuted, marginTop: 4 }}>
           Active incidents: {activeIncidents.length} · Recent incidents: {recentIncidents.length}
@@ -82,6 +134,16 @@ export default function InfoPanel({ topology, children }) {
           ))
         ) : (
           <div style={{ fontSize: 10, color: '#2a8a2a', marginTop: 8 }}>No active incidents.</div>
+        )}
+      </div>
+
+      <div style={{ border: `2px solid ${theme.border}`, padding: '10px 14px', marginBottom: 10, background: theme.card }}>
+        <div style={{ fontSize: 10, fontWeight: 'bold', letterSpacing: 0.5, color: theme.text }}>Live Timeline</div>
+        <div style={{ fontSize: 9, color: theme.textMuted }}>Backend events, preventive actions, and remediation milestones</div>
+        {timeline.length > 0 ? (
+          timeline.slice(0, 6).map(event => <TimelineItem key={`${event.id}-${event.created_at}`} event={event} theme={theme} />)
+        ) : (
+          <div style={{ fontSize: 10, color: theme.textMuted, marginTop: 8 }}>Timeline will populate as the system observes events.</div>
         )}
       </div>
 

@@ -53,6 +53,7 @@ from anomaly_api.model_features import (
 )
 from anomaly_api.security import require_operator_token
 from anomaly_api.settings import load_settings
+from anomaly_api.system_store import SQLiteLogHandler, SQLiteSystemStore
 from remediation.engine import RemediationEngine
 from remediation.models import ActionProposal
 from remediation.policy import DEPENDENCY_GRAPH
@@ -92,12 +93,53 @@ class AppState:
         self.current_model_insights: Dict[str, Dict] = {}
         self.history: deque = deque(maxlen=100)
         self.last_update: float = 0.0
+        self.predictive_alerts: Dict[str, Dict[str, Any]] = {}
+        self.predictive_cooldowns: Dict[str, float] = {}
+        self.system_store: Optional[SQLiteSystemStore] = None
 
         self.window_state = None
         self.ingestion_pipeline = None
 
 
 state = AppState()
+
+
+def emit_system_event(
+    *,
+    event_type: str,
+    category: str,
+    severity: str,
+    title: str,
+    message: str,
+    service: Optional[str] = None,
+    status: str = "open",
+    payload: Optional[Dict[str, Any]] = None,
+) -> Optional[Dict[str, Any]]:
+    if state.system_store is None:
+        return None
+    try:
+        return state.system_store.add_event(
+            event_type=event_type,
+            category=category,
+            severity=severity,
+            title=title,
+            message=message,
+            service=service,
+            status=status,
+            payload=payload,
+        )
+    except Exception as exc:
+        logger.debug("Failed to persist event %s: %s", event_type, exc)
+        return None
+
+
+def init_system_store() -> None:
+    if state.system_store is not None:
+        return
+    state.system_store = SQLiteSystemStore(SETTINGS.system_db_path)
+    root_logger = logging.getLogger()
+    if not any(isinstance(handler, SQLiteLogHandler) for handler in root_logger.handlers):
+        root_logger.addHandler(SQLiteLogHandler(state.system_store))
 
 
 def load_models():
@@ -143,6 +185,64 @@ def _score_status(combined: float) -> str:
     if combined < 0.7:
         return "warning"
     return "critical"
+
+
+def _predict_failure_type(snapshot: Dict[str, Any], features: Dict[str, Any]) -> str:
+    flags = set(snapshot.get("feature_flags", []) or features.get("feature_flags", []))
+    mem = float(snapshot.get("mem_percent") or features.get("mem_percent_mean") or 0.0)
+    cpu = float(snapshot.get("cpu_percent") or features.get("cpu_percent_mean") or 0.0)
+    err = float(snapshot.get("error_rate") or features.get("error_rate_mean") or 0.0)
+    timeouts = float(features.get("timeout_count_mean") or 0.0)
+    if "memory_pressure" in flags or mem > 82:
+        return "memory_leak"
+    if "cpu_pressure" in flags or cpu > 82:
+        return "cpu_starvation"
+    if "network_pressure" in flags or timeouts > 0:
+        return "network_latency"
+    if "error_burst" in flags or err > 0.08:
+        return "log_exception_storm"
+    return "generic_anomaly"
+
+
+def _predictive_actions(service: str, failure_type: str, score: float) -> List[Dict[str, Any]]:
+    automatic = score >= SETTINGS.predictive_auto_action_threshold
+    plans = {
+        "memory_leak": [
+            ("restart_service", "Refresh the workload before OOM kill and clear transient memory pressure."),
+            ("isolate_service", "Contain repeat memory flaps if the service restarts but does not stabilize."),
+        ],
+        "cpu_starvation": [
+            ("restart_service", "Recycle the hot workload and re-check CPU pressure on the next window."),
+            ("reroute_service", "Shift demand only if a healthy alternative target exists."),
+        ],
+        "network_latency": [
+            ("restart_dependency_chain", "Recover the suspected dependency path before the timeout spreads."),
+            ("escalate_incident", "Escalate quickly if downstream services remain impacted."),
+        ],
+        "log_exception_storm": [
+            ("restart_service", "Clear the failing process before exceptions propagate into user impact."),
+            ("escalate_incident", "Escalate if the exception storm returns after one recovery attempt."),
+        ],
+        "generic_anomaly": [
+            ("restart_service", "Apply the safest self-heal path before the anomaly hardens into a real outage."),
+            ("escalate_incident", "Escalate if the predictive risk continues to rise."),
+        ],
+    }
+    return [
+        {
+            "action": action,
+            "summary": summary,
+            "automatic": automatic and idx == 0,
+            "target": service,
+        }
+        for idx, (action, summary) in enumerate(plans.get(failure_type, plans["generic_anomaly"]))
+    ]
+
+
+def _timeline_snapshot(limit: int = 10) -> List[Dict[str, Any]]:
+    if state.system_store is None:
+        return []
+    return state.system_store.list_events(limit=limit)
 
 
 def compute_all_scores() -> Dict[str, Dict]:
@@ -312,12 +412,181 @@ def _build_evidence(service: str, failure_type: str, scores: Optional[Dict[str, 
     }
 
 
+def _service_has_active_incident(service: str) -> bool:
+    if state.remediation_engine is None:
+        return False
+    return any(incident.get("root_cause_service") == service for incident in state.remediation_engine.list_active_incidents())
+
+
+async def process_predictive_alerts(scores: Dict[str, Dict]) -> None:
+    from anomaly_api.features import extract_features
+
+    now = time.time()
+    next_alerts: Dict[str, Dict[str, Any]] = {}
+
+    for svc, snapshot in scores.items():
+        lstm_score = snapshot.get("lstm_score")
+        if snapshot.get("model_state") != "ready" or lstm_score is None:
+            existing = state.predictive_alerts.get(svc)
+            if existing and existing.get("status") != "resolved":
+                resolved = {
+                    **existing,
+                    "status": "resolved",
+                    "resolved_at": utc_now_iso(),
+                    "message": "Predictive window cooled down before a hard failure formed.",
+                }
+                next_alerts[svc] = resolved
+                emit_system_event(
+                    event_type="predictive_alert_resolved",
+                    category="prediction",
+                    severity="info",
+                    title=f"Predictive risk cleared for {svc}",
+                    message=resolved["message"],
+                    service=svc,
+                    status="closed",
+                    payload=resolved,
+                )
+            continue
+
+        if float(lstm_score) < SETTINGS.predictive_alert_threshold * 0.85:
+            existing = state.predictive_alerts.get(svc)
+            if existing and existing.get("status") != "resolved":
+                resolved = {
+                    **existing,
+                    "status": "resolved",
+                    "resolved_at": utc_now_iso(),
+                    "message": "LSTM risk dropped below the pre-failure threshold.",
+                }
+                next_alerts[svc] = resolved
+                emit_system_event(
+                    event_type="predictive_alert_resolved",
+                    category="prediction",
+                    severity="info",
+                    title=f"Predictive risk cooled for {svc}",
+                    message=resolved["message"],
+                    service=svc,
+                    status="closed",
+                    payload=resolved,
+                )
+            continue
+
+        window = state.window_state.get_window(svc) if state.window_state else []
+        features = extract_features(svc, window) if window else {}
+        failure_type = _predict_failure_type(snapshot, features)
+        actions = _predictive_actions(svc, failure_type, float(lstm_score))
+        severity = "critical" if float(lstm_score) >= SETTINGS.predictive_auto_action_threshold else "warning"
+        existing = state.predictive_alerts.get(svc)
+        auto_action = actions[0]["action"] if actions else "restart_service"
+        cooldown_until = state.predictive_cooldowns.get(svc, 0.0)
+        can_auto_act = (
+            float(lstm_score) >= SETTINGS.predictive_auto_action_threshold
+            and now >= cooldown_until
+            and not _service_has_active_incident(svc)
+            and state.remediation_engine is not None
+        )
+
+        alert = {
+            "service": svc,
+            "status": "mitigating" if can_auto_act else "active",
+            "severity": severity,
+            "failure_type": failure_type,
+            "lstm_score": round(float(lstm_score), 4),
+            "combined_score": round(float(snapshot.get("combined_score", 0.0)), 4),
+            "predicted_window": f"next ~{LSTM_SEQUENCE_WINDOW * 5} seconds",
+            "detected_at": existing.get("detected_at") if existing else utc_now_iso(),
+            "updated_at": utc_now_iso(),
+            "feature_flags": snapshot.get("feature_flags", []),
+            "preventive_actions": actions,
+            "message": (
+                f"LSTM predicts a likely {failure_type.replace('_', ' ')} on {svc}. "
+                f"Risk is {round(float(lstm_score) * 100)}% before the service crosses the incident threshold."
+            ),
+            "auto_action": {
+                "eligible": can_auto_act,
+                "action": auto_action,
+                "cooldown_until": existing.get("auto_action", {}).get("cooldown_until") if existing else None,
+                "last_result": existing.get("auto_action", {}).get("last_result") if existing else None,
+            },
+        }
+
+        is_new_or_changed = (
+            existing is None
+            or existing.get("failure_type") != failure_type
+            or abs(float(existing.get("lstm_score", 0.0)) - float(lstm_score)) >= 0.05
+            or existing.get("status") == "resolved"
+        )
+        if is_new_or_changed:
+            emit_system_event(
+                event_type="predictive_alert",
+                category="prediction",
+                severity=severity,
+                title=f"Pre-failure alert on {svc}",
+                message=alert["message"],
+                service=svc,
+                status="open",
+                payload=alert,
+            )
+
+        if can_auto_act:
+            state.predictive_cooldowns[svc] = now + SETTINGS.predictive_action_cooldown_s
+            alert["auto_action"]["cooldown_until"] = datetime.fromtimestamp(
+                state.predictive_cooldowns[svc], tz=timezone.utc
+            ).isoformat()
+            emit_system_event(
+                event_type="preventive_action_started",
+                category="prediction",
+                severity="warning",
+                title=f"Preventive action started for {svc}",
+                message=f"Executing {auto_action} before the predicted failure hardens.",
+                service=svc,
+                status="open",
+                payload={"service": svc, "action": auto_action, "failure_type": failure_type},
+            )
+            proposal = ActionProposal(
+                source="rule",
+                proposed_action=auto_action,
+                target=svc,
+                confidence=float(lstm_score),
+                rationale=f"Predictive prevention for {failure_type}",
+            )
+            result = await asyncio.to_thread(
+                state.remediation_engine.remediate,
+                service=svc,
+                failure_type=failure_type,
+                severity="warning",
+                affected_services=[svc],
+                evidence=_build_evidence(svc, failure_type, scores),
+                proposal=proposal,
+            )
+            alert["status"] = "mitigated" if result.get("status") == "resolved" else "manual_required"
+            alert["auto_action"]["last_result"] = {
+                "status": result.get("status"),
+                "incident_id": result.get("incident_id"),
+                "operator_summary": result.get("operator_summary"),
+            }
+            emit_system_event(
+                event_type="preventive_action_finished",
+                category="prediction",
+                severity="info" if result.get("status") == "resolved" else "warning",
+                title=f"Preventive action finished for {svc}",
+                message=result.get("operator_summary") or f"{auto_action} completed for {svc}",
+                service=svc,
+                status="closed" if result.get("status") == "resolved" else "open",
+                payload={"service": svc, "action": auto_action, "result": result},
+            )
+
+        next_alerts[svc] = alert
+
+    state.predictive_alerts = next_alerts
+
+
 async def update_scores_loop():
     while True:
         try:
             scores = compute_all_scores()
             state.current_scores = scores
             state.last_update = time.time()
+            await process_predictive_alerts(scores)
 
             state.history.append(
                 {
@@ -352,6 +621,16 @@ async def startup_event():
     logger.info("Starting AI Observability Platform...")
     if SETTINGS.auth_enabled and not SETTINGS.api_token:
         raise RuntimeError("AEGIS auth is enabled but AEGIS_API_TOKEN is not configured")
+    init_system_store()
+    emit_system_event(
+        event_type="platform_start",
+        category="system",
+        severity="info",
+        title="AEGIS startup",
+        message="Backend startup sequence started.",
+        status="closed",
+        payload={"runtime_mode": SETTINGS.runtime_mode, "environment": SETTINGS.environment_name},
+    )
     load_models()
 
     from anomaly_api.ingestion import SlidingWindowState, IngestionPipeline
@@ -362,6 +641,15 @@ async def startup_event():
 
     asyncio.create_task(update_scores_loop())
     logger.info("Platform started. models_loaded=%s", state.models_loaded)
+    emit_system_event(
+        event_type="platform_ready",
+        category="system",
+        severity="info",
+        title="AEGIS ready",
+        message="Backend started, models loaded, and ingestion loop is running.",
+        status="closed",
+        payload={"models_loaded": state.models_loaded, "orchestrator": SETTINGS.orchestrator_target},
+    )
 
 
 def require_operator_access(x_aegis_token: str = Header(default="")) -> None:
@@ -412,6 +700,7 @@ async def health():
         "orchestrator": state.remediation_engine.orchestrator.platform if state.remediation_engine else None,
         "models_loaded": state.models_loaded,
         "model_dir": SETTINGS.model_dir,
+        "system_db": SETTINGS.system_db_path,
         "services_tracked": len(ALL_SERVICES),
         "last_update": datetime.fromtimestamp(state.last_update, tz=timezone.utc).isoformat() if state.last_update else None,
         "active_incidents": len(state.remediation_engine.list_active_incidents()) if state.remediation_engine else 0,
@@ -442,6 +731,8 @@ async def status():
         "services": scores,
         "root_cause": root_cause,
         "alerts": alerts,
+        "predictive_alerts": list(state.predictive_alerts.values()),
+        "timeline": _timeline_snapshot(limit=8),
         "recommendation": recommendation,
         "active_incidents": state.remediation_engine.list_active_incidents() if state.remediation_engine else [],
         "recent_incidents": state.remediation_engine.list_incident_history(limit=10) if state.remediation_engine else [],
@@ -538,6 +829,16 @@ async def remediate(payload: RemediatePayload):
         evidence=evidence,
         proposal=proposal,
     )
+    emit_system_event(
+        event_type="manual_remediation",
+        category="remediation",
+        severity="info" if result.get("status") == "resolved" else "warning",
+        title=f"Remediation finished for {payload.service}",
+        message=result.get("operator_summary") or f"Remediation finished for {payload.service}",
+        service=payload.service,
+        status="closed" if result.get("status") == "resolved" else "open",
+        payload={"service": payload.service, "failure_type": payload.failure_type, "result": result},
+    )
 
     return {
         "service": payload.service,
@@ -568,6 +869,16 @@ async def acknowledge_incident(incident_id: str, owner: str = Query(default="ope
         incident = state.remediation_engine.acknowledge_incident(incident_id, owner=owner)
     except KeyError as exc:
         raise HTTPException(404, str(exc))
+    emit_system_event(
+        event_type="incident_acknowledged",
+        category="remediation",
+        severity="info",
+        title=f"Incident acknowledged by {owner}",
+        message=f"Incident {incident_id} is now owned by {owner}.",
+        service=incident.get("root_cause_service"),
+        status="closed",
+        payload=incident,
+    )
     return {"incident": incident, "timestamp": utc_now_iso()}
 
 
@@ -690,6 +1001,7 @@ async def topology():
             "recent_logs": recent_logs,
             "latest_incident": recent_incident_map.get(svc),
             "similar_incidents": similar,
+            "predictive_alert": state.predictive_alerts.get(svc),
             "ml": state.current_model_insights.get(svc, {}),
         }
 
@@ -706,6 +1018,9 @@ async def topology():
         "dependency_graph": DEPENDENCY_GRAPH,
         "root_cause": root_cause,
         "alerts": [{"service": svc, **v} for svc, v in scores.items() if v.get("combined_score", 0) > 0.7],
+        "predictive_alerts": list(state.predictive_alerts.values()),
+        "timeline": _timeline_snapshot(limit=12),
+        "system_summary": state.system_store.summarize() if state.system_store else {},
         "recommendation": recommendation,
         "active_incidents": state.remediation_engine.list_active_incidents() if state.remediation_engine else [],
         "recent_incidents": state.remediation_engine.list_incident_history(limit=12) if state.remediation_engine else [],
@@ -724,6 +1039,22 @@ async def infrastructure():
     )
     payload["timestamp"] = utc_now_iso()
     return payload
+
+
+@app.get("/events")
+async def events(limit: int = Query(default=100, ge=1, le=500), category: Optional[str] = Query(default=None)):
+    events_payload = state.system_store.list_events(limit=limit, category=category) if state.system_store else []
+    return {"count": len(events_payload), "events": events_payload, "timestamp": utc_now_iso()}
+
+
+@app.get("/logs")
+async def logs(
+    limit: int = Query(default=200, ge=1, le=1000),
+    level: Optional[str] = Query(default=None),
+    query: str = Query(default=""),
+):
+    logs_payload = state.system_store.list_logs(limit=limit, level=level, query=query) if state.system_store else []
+    return {"count": len(logs_payload), "logs": logs_payload, "timestamp": utc_now_iso()}
 
 
 @app.get("/ml/insights")

@@ -44,6 +44,10 @@ Environment variables are defined in [.env.example](/Users/ishu/Hackathon/micros
 - `AEGIS_ALLOWED_ORIGINS=<dashboard origin list>`
 - `AEGIS_ORCHESTRATOR=kubernetes`
 - `AEGIS_MODEL_DIR=models/aegis_models`
+- `AEGIS_SYSTEM_DB=backend/.runtime/aegis_system.db`
+- `AEGIS_PREDICTIVE_ALERT_THRESHOLD`
+- `AEGIS_PREDICTIVE_AUTO_ACTION_THRESHOLD`
+- `AEGIS_PREDICTIVE_ACTION_COOLDOWN_S`
 - The packaged backend image copies the runtime model artifacts from `models/` and installs CPU-targeted PyTorch wheels for container use.
 
 ## Security Notes
