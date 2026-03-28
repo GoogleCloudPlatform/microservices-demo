@@ -1,0 +1,23 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: aegis-config
+data:
+  AEGIS_RUNTIME_MODE: "dev"
+  AEGIS_ENVIRONMENT: "kubernetes"
+  AEGIS_CLUSTER_NAME: "online-boutique"
+  AEGIS_ALLOWED_ORIGINS: "http://localhost"
+  AEGIS_AUTH_ENABLED: "false"
+  AEGIS_ORCHESTRATOR: "kubernetes"
+  AEGIS_K8S_NAMESPACE: "default"
+  AEGIS_PROMETHEUS_URL: "http://prometheus.aegis-system.svc.cluster.local:9090"
+  AEGIS_LOKI_URL: "http://loki.aegis-system.svc.cluster.local:3100"
+  AEGIS_PROMTAIL_URL: "http://promtail.aegis-system.svc.cluster.local:9080"
+  AEGIS_JAEGER_URL: "http://jaeger.aegis-system.svc.cluster.local:16686"
+  AEGIS_GRAFANA_URL: "http://grafana.aegis-system.svc.cluster.local:3000"
+  AEGIS_OTEL_COLLECTOR_URL: "http://otel-collector.aegis-system.svc.cluster.local:8889"
+  AEGIS_ALLOW_DEMO_MODE: "true"
+  AEGIS_REMEDIATION_COOLDOWN_S: "30"
+  AEGIS_REMEDIATION_LOCK_TIMEOUT_S: "300"
+  AEGIS_INCIDENT_MEMORY_LIMIT: "5000"
+  AEGIS_INCIDENT_MEMORY_RETENTION_DAYS: "30"

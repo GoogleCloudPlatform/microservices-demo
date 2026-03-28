@@ -1,126 +1,155 @@
-import { getPlanetPos, statusColor, SERVICE_SHORT, theme } from '../styles/theme'
+import { anomalyGlowColor, anomalyScoreColor, getPlanetPos, SERVICE_SHORT } from '../styles/theme'
+import { useTheme } from '../ThemeContext'
 
-const PLANET_RADIUS = {
-  normal: 22,
-  warning: 26,
-  critical: 28,
+// Dynamic planet radius: 16–26px based on stress
+function getRadius(data) {
+  const base = 16
+  const score = data?.combined_score || 0
+  const cpu   = (data?.cpu_mean || 0) / 100
+  const mem   = (data?.mem_mean || 0) / 100
+  const stress = Math.max(score, cpu * 0.4, mem * 0.3)
+  return Math.round(base + stress * 10)  // 16 → 26
 }
 
-export default function PlanetNode({ service, data, isSelected, isRootCause, onClick }) {
-  const pos = getPlanetPos(service)
-  const status = data?.status || 'normal'
-  const score = data?.combined_score || 0
-  const r = PLANET_RADIUS[status]
-  const fill = statusColor(status, 'fill')
-  const stroke = statusColor(status, 'stroke')
+// Animated arc ring using stroke-dasharray (starts at 12 o'clock via rotate(-90deg))
+function RingArc({ radius, pct, color, strokeW = 2.5, anomaly = false }) {
+  const circ = 2 * Math.PI * radius
+  const dash = Math.max(0, Math.min(pct, 100)) / 100 * circ
+  const gap  = circ - dash
+  return (
+    <g style={{ transform: 'rotate(-90deg)' }}>
+      {/* Track */}
+      <circle r={radius} fill="none" stroke={color} strokeWidth={strokeW}
+        opacity={anomaly ? 0.22 : 0.13} />
+      {/* Fill */}
+      {dash > 0.5 && (
+        <circle r={radius} fill="none" stroke={color} strokeWidth={strokeW}
+          strokeDasharray={`${dash.toFixed(2)} ${gap.toFixed(2)}`}
+          strokeLinecap="round"
+          opacity={anomaly ? 1.0 : 0.85}
+          style={{ transition: 'stroke-dasharray 0.5s ease' }}
+        />
+      )}
+    </g>
+  )
+}
+
+function contrastTextColor(fill, theme) {
+  const hex = (fill || '').replace('#', '')
+  if (hex.length !== 6) return theme.text
+  const r = Number.parseInt(hex.slice(0, 2), 16)
+  const g = Number.parseInt(hex.slice(2, 4), 16)
+  const b = Number.parseInt(hex.slice(4, 6), 16)
+  const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255
+  return luminance < 0.58 ? '#f8fafc' : '#111827'
+}
+
+export default function PlanetNode({ service, data, isSelected, isRootCause, onClick, orbitRing = 2 }) {
+  const { theme } = useTheme()
+  const pos      = getPlanetPos(service)
+  const status   = data?.status || 'normal'
+  const score    = data?.combined_score || 0
+  const r        = getRadius(data)
+  const fill     = anomalyScoreColor(score, 'fill', theme)
+  const stroke   = anomalyScoreColor(score, 'stroke', theme)
+  const scoreText = contrastTextColor(fill, theme)
+  const scoreOutline = scoreText === '#f8fafc' ? 'rgba(15, 23, 42, 0.55)' : 'rgba(255, 255, 255, 0.55)'
   const shortName = SERVICE_SHORT[service] || service
   const isAnomaly = status !== 'normal'
+
+  // Metric values
+  const cpu      = Math.min(data?.cpu_mean   || 0, 100)
+  const mem      = Math.min(data?.mem_mean   || 0, 100)
+  const errRate  = Math.min(data?.features?.error_rate_pct ?? data?.error_rate ?? 0, 100)
+  const anomScore = Math.min((score || 0) * 100, 100)
   const scoreLabel = Math.round(score * 100)
 
-  // CPU/MEM mini arc (shows CPU as partial arc around planet)
-  const cpu = Math.min(data?.cpu_mean || 0, 100)
-  const mem = Math.min(data?.mem_mean || 0, 100)
-
-  // SVG arc path for CPU usage indicator
-  const arcPath = (pct, outerR, innerR = outerR - 4, startAngle = -90) => {
-    const sweep = (pct / 100) * 360
-    const endAngle = startAngle + sweep
-    const toRad = a => a * Math.PI / 180
-    const x1 = Math.cos(toRad(startAngle)) * outerR
-    const y1 = Math.sin(toRad(startAngle)) * outerR
-    const x2 = Math.cos(toRad(endAngle)) * outerR
-    const y2 = Math.sin(toRad(endAngle)) * outerR
-    const large = sweep > 180 ? 1 : 0
-    return `M ${x1} ${y1} A ${outerR} ${outerR} 0 ${large} 1 ${x2} ${y2}`
-  }
+  // Ring offsets — scale tighter for inner orbit (ring 1 = redis)
+  const rs = orbitRing === 1 ? 0.6 : 1.0
+  const R1 = r + Math.round(7  * rs)   // CPU
+  const R2 = r + Math.round(13 * rs)   // MEM
+  const R3 = r + Math.round(19 * rs)   // Error
+  const R4 = r + Math.round(25 * rs)   // Anomaly
+  const ringStroke = orbitRing === 1 ? 2 : 2.5
 
   return (
     <g
       transform={`translate(${pos.x}, ${pos.y})`}
       onClick={() => onClick(service)}
       style={{ cursor: 'pointer' }}
-      className={isAnomaly ? 'planet-anomaly' : ''}
     >
-      {/* Selection ring */}
-      {isSelected && (
-        <circle r={r + 8} fill="none" stroke="#555" strokeWidth="1.5" strokeDasharray="4 3" />
-      )}
-
-      {/* Root cause ring */}
-      {isRootCause && (
-        <circle r={r + 12} fill="none" stroke="#c45c0a" strokeWidth="2"
-          style={{ animation: 'spin 4s linear infinite' }}
-        />
-      )}
-
-      {/* Glow for anomalous */}
+      {/* Anomaly ambient glow */}
       {isAnomaly && (
-        <circle r={r + 6} fill={status === 'critical' ? 'rgba(255,0,0,0.12)' : 'rgba(196,92,10,0.12)'}
+        <circle r={R4 + 5} fill={anomalyGlowColor(score)}
           style={{ animation: 'pulse 2s ease-in-out infinite' }}
         />
       )}
 
+      {/* Root cause spinning ring */}
+      {isRootCause && (
+        <circle r={R4 + 10} fill="none" stroke="#c45c0a" strokeWidth="1.5"
+          strokeDasharray="6 4"
+          style={{ animation: 'spin 3s linear infinite', transformOrigin: '0 0' }}
+        />
+      )}
+
+      {/* Selection dashed ring */}
+      {isSelected && (
+        <circle r={R4 + 8} fill="none" stroke={theme.text} strokeWidth="1.5"
+          strokeDasharray="5 3" opacity="0.6" />
+      )}
+
+      {/* Concentric metric rings */}
+      <RingArc radius={R1} pct={cpu}       color="#c45c0a" strokeW={ringStroke} anomaly={isAnomaly} />
+      <RingArc radius={R2} pct={mem}       color="#5588cc" strokeW={ringStroke} anomaly={isAnomaly} />
+      <RingArc radius={R3} pct={errRate}   color="#cc2222" strokeW={ringStroke - 0.5} anomaly={isAnomaly} />
+      <RingArc radius={R4} pct={anomScore} color="#9944bb" strokeW={ringStroke - 0.5} anomaly={isAnomaly} />
+
       {/* Planet body */}
-      <circle
-        r={r}
-        fill={fill}
-        stroke={stroke}
+      <circle r={r} fill={fill} stroke={stroke}
         strokeWidth={isSelected || isRootCause ? 2.5 : 1.5}
+        style={{ transition: 'r 0.5s ease, fill 0.35s ease, stroke 0.35s ease' }}
       />
 
-      {/* CPU arc indicator (orange arc outside planet) */}
-      {cpu > 0 && (
-        <path
-          d={arcPath(cpu, r + 5)}
-          fill="none"
-          stroke="#c45c0a"
-          strokeWidth="3"
-          strokeLinecap="round"
-          opacity="0.8"
-        />
-      )}
+      {/* Score label in center */}
+      <text textAnchor="middle" dy="4px"
+        fontSize={r > 20 ? '10' : '9'}
+        fontFamily="'IBM Plex Mono', monospace"
+        fill={scoreText}
+        stroke={scoreOutline}
+        strokeWidth="0.7"
+        paintOrder="stroke"
+        fontWeight={score >= 0.35 ? 'bold' : '600'}
+        style={{ userSelect: 'none', pointerEvents: 'none', transition: 'fill 0.35s ease, stroke 0.35s ease' }}
+      >
+        {scoreLabel}
+      </text>
 
-      {/* Memory arc (inner, blue-ish) */}
-      {mem > 0 && (
-        <path
-          d={arcPath(mem, r + 5, r + 1, 90)}
-          fill="none"
-          stroke="#5588cc"
-          strokeWidth="2"
-          strokeLinecap="round"
-          opacity="0.6"
-        />
-      )}
+      {/* Service name */}
+      <text textAnchor="middle" dy={r + 14} fontSize="10"
+        fontFamily="'IBM Plex Mono', monospace" fill={theme.text}
+        style={{ userSelect: 'none', pointerEvents: 'none' }}
+      >
+        {shortName}
+      </text>
 
-      {/* Anomaly lightning bolt */}
-      {isAnomaly && (
-        <text x={-4} y={4} fontSize="11" fill={status === 'critical' ? '#cc0000' : '#c45c0a'}
-          style={{ userSelect: 'none', pointerEvents: 'none' }}
-        >⚡</text>
-      )}
+      {/* CPU / MEM compact stats */}
+      <text textAnchor="middle" dy={r + 26} fontSize="10"
+        fontFamily="'IBM Plex Mono', monospace" fill={theme.textMuted}
+        style={{ userSelect: 'none', pointerEvents: 'none' }}
+      >
+        {`CPU ${Math.round(cpu)}% · Memory ${Math.round(mem)}%`}
+      </text>
 
-      {/* Score label (center of planet for normal, top for anomalous) */}
-      {!isAnomaly && (
-        <text textAnchor="middle" dy="4px" fontSize="9" fontFamily="'IBM Plex Mono', monospace"
-          fill="#555" style={{ userSelect: 'none', pointerEvents: 'none' }}
-        >{scoreLabel}</text>
-      )}
-
-      {/* Anomaly score above planet */}
-      {isAnomaly && (
-        <text x={0} y={-r - 10} textAnchor="middle" fontSize="10"
-          fontFamily="'IBM Plex Mono', monospace" fill="#c45c0a" fontWeight="bold"
+      {/* Error badge */}
+      {errRate > 0.5 && (
+        <text textAnchor="middle" dy={r + 38} fontSize="9"
+          fontFamily="'IBM Plex Mono', monospace" fill="#cc2222"
           style={{ userSelect: 'none', pointerEvents: 'none' }}
         >
-          {`${scoreLabel}`}
+          {`ERRORS ${Math.round(errRate)}%`}
         </text>
       )}
-
-      {/* Service name below */}
-      <text textAnchor="middle" dy={r + 16} fontSize="9"
-        fontFamily="'IBM Plex Mono', monospace" fill="#333"
-        style={{ userSelect: 'none', pointerEvents: 'none' }}
-      >{shortName}</text>
     </g>
   )
 }

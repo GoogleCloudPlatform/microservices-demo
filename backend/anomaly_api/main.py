@@ -28,7 +28,7 @@ from collections import deque
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
 
-from fastapi import FastAPI, HTTPException, Query
+from fastapi import Depends, FastAPI, Header, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
@@ -41,12 +41,16 @@ for _p in [_backend, _repo_root]:
         sys.path.insert(0, _p)
 
 from anomaly_api.correlation import CorrelationEngine
+from anomaly_api.infrastructure import build_infrastructure_payload
+from anomaly_api.security import require_operator_token
+from anomaly_api.settings import load_settings
 from remediation.engine import RemediationEngine
 from remediation.models import ActionProposal
 from remediation.policy import DEPENDENCY_GRAPH
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+SETTINGS = load_settings()
 
 ALL_SERVICES = [
     "frontend",
@@ -124,7 +128,10 @@ def load_models():
         logger.warning("LSTM model load failed: %s", exc)
 
     state.models_loaded = loaded_if and loaded_lstm
-    state.demo_mode = not state.models_loaded
+    state.demo_mode = SETTINGS.runtime_mode == "demo" or (not state.models_loaded and SETTINGS.allow_demo_mode)
+
+    if not state.models_loaded and SETTINGS.requires_models:
+        raise RuntimeError("Production mode requires trained models; demo fallback is disabled")
 
     if state.demo_mode:
         logger.info("Running in DEMO MODE (sinusoidal scores)")
@@ -139,7 +146,13 @@ def load_models():
         state.remediation_engine = RemediationEngine(
             score_provider=lambda: state.current_scores or compute_all_scores(),
             target_seconds=15,
-            demo_mode=False,
+            demo_mode=state.demo_mode,
+            orchestrator_target=SETTINGS.orchestrator_target,
+            kubernetes_namespace=SETTINGS.k8s_namespace,
+            cooldown_s=SETTINGS.remediation_cooldown_s,
+            lock_timeout_s=SETTINGS.remediation_lock_timeout_s,
+            memory_limit=SETTINGS.incident_memory_limit,
+            memory_retention_days=SETTINGS.incident_memory_retention_days,
         )
         logger.info("Remediation engine loaded")
     except Exception as exc:
@@ -342,8 +355,8 @@ app = FastAPI(
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
+    allow_origins=SETTINGS.cors_origins,
+    allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
 )
@@ -352,6 +365,8 @@ app.add_middleware(
 @app.on_event("startup")
 async def startup_event():
     logger.info("Starting AI Observability Platform...")
+    if SETTINGS.auth_enabled and not SETTINGS.api_token:
+        raise RuntimeError("AEGIS auth is enabled but AEGIS_API_TOKEN is not configured")
     load_models()
 
     from anomaly_api.ingestion import SlidingWindowState, IngestionPipeline
@@ -362,6 +377,10 @@ async def startup_event():
 
     asyncio.create_task(update_scores_loop())
     logger.info("Platform started. demo_mode=%s", state.demo_mode)
+
+
+def require_operator_access(x_aegis_token: str = Header(default="")) -> None:
+    require_operator_token(SETTINGS, x_aegis_token)
 
 
 class IngestPayload(BaseModel):
@@ -403,6 +422,9 @@ class RemediatePayload(BaseModel):
 async def health():
     return {
         "status": "ok",
+        "runtime_mode": SETTINGS.runtime_mode,
+        "environment": SETTINGS.environment_name,
+        "orchestrator": state.remediation_engine.orchestrator.platform if state.remediation_engine else None,
         "demo_mode": state.demo_mode,
         "models_loaded": state.models_loaded,
         "services_tracked": len(ALL_SERVICES),
@@ -442,7 +464,7 @@ async def status():
     }
 
 
-@app.post("/ingest")
+@app.post("/ingest", dependencies=[Depends(require_operator_access)])
 async def ingest(payload: IngestPayload):
     updated = 0
 
@@ -484,7 +506,7 @@ async def ingest(payload: IngestPayload):
     return {"status": "ok", "updated_services": updated, "demo_mode": state.demo_mode}
 
 
-@app.post("/decision/validate")
+@app.post("/decision/validate", dependencies=[Depends(require_operator_access)])
 async def validate_decision(payload: RemediatePayload):
     if state.remediation_engine is None:
         raise HTTPException(503, "Remediation engine is not available")
@@ -507,7 +529,7 @@ async def validate_decision(payload: RemediatePayload):
     )
 
 
-@app.post("/remediate")
+@app.post("/remediate", dependencies=[Depends(require_operator_access)])
 async def remediate(payload: RemediatePayload):
     if state.remediation_engine is None:
         raise HTTPException(503, "Remediation engine is not available")
@@ -543,6 +565,17 @@ async def active_incidents():
 async def incident_history(limit: int = Query(default=20, ge=1, le=100)):
     incidents = state.remediation_engine.list_incident_history(limit=limit) if state.remediation_engine else []
     return {"count": len(incidents), "incidents": incidents, "timestamp": utc_now_iso()}
+
+
+@app.post("/incidents/{incident_id}/acknowledge", dependencies=[Depends(require_operator_access)])
+async def acknowledge_incident(incident_id: str, owner: str = Query(default="operator")):
+    if state.remediation_engine is None:
+        raise HTTPException(503, "Remediation engine is not available")
+    try:
+        incident = state.remediation_engine.acknowledge_incident(incident_id, owner=owner)
+    except KeyError as exc:
+        raise HTTPException(404, str(exc))
+    return {"incident": incident, "timestamp": utc_now_iso()}
 
 
 @app.get("/incidents/similar")
@@ -671,6 +704,8 @@ async def topology():
 
     return {
         "timestamp": utc_now_iso(),
+        "environment": SETTINGS.environment_name,
+        "runtime_mode": SETTINGS.runtime_mode,
         "health_score": health_score,
         "failure_momentum": momentum,
         "demo_mode": state.demo_mode,
@@ -682,6 +717,20 @@ async def topology():
         "active_incidents": state.remediation_engine.list_active_incidents() if state.remediation_engine else [],
         "recent_incidents": state.remediation_engine.list_incident_history(limit=12) if state.remediation_engine else [],
     }
+
+
+@app.get("/infrastructure")
+async def infrastructure():
+    topology_payload = await topology()
+    history_payload = list(state.history)
+    payload = build_infrastructure_payload(
+        settings=SETTINGS,
+        topology=topology_payload,
+        history=history_payload,
+        remediation_engine=state.remediation_engine,
+    )
+    payload["timestamp"] = utc_now_iso()
+    return payload
 
 
 @app.get("/window/{service}")
@@ -713,4 +762,4 @@ async def get_window(service: str):
 if __name__ == "__main__":
     import uvicorn
 
-    uvicorn.run(app, host="0.0.0.0", port=8001, reload=False)
+    uvicorn.run(app, host=SETTINGS.api_host, port=SETTINGS.api_port, reload=False)

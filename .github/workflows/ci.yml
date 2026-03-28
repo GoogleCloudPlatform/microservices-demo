@@ -1,0 +1,62 @@
+name: ci
+
+on:
+  push:
+    branches: ["main", "codex/**"]
+  pull_request:
+
+jobs:
+  backend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install backend dependencies
+        run: pip install -r backend/requirements.txt
+      - name: Run backend unit tests
+        run: python -m unittest discover -s backend/tests -p 'test_*.py'
+      - name: Compile backend modules
+        run: python -m py_compile backend/anomaly_api/main.py backend/anomaly_api/ingestion.py backend/remediation/*.py
+
+  frontend:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: dashboard
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+          cache-dependency-path: dashboard/package-lock.json
+      - name: Install frontend dependencies
+        run: npm ci
+      - name: Run frontend tests
+        run: npm test
+      - name: Build frontend
+        run: npm run build
+
+  packaging:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build backend image
+        run: docker build -f backend/Dockerfile -t aegis-backend:ci .
+      - name: Build dashboard image
+        run: docker build -f dashboard/Dockerfile -t aegis-dashboard:ci .
+
+  manifests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install kubectl
+        uses: azure/setup-kubectl@v4
+        with:
+          version: v1.34.1
+      - name: Validate kind overlay
+        run: kubectl kustomize deploy/platform/overlays/kind > /tmp/kind-manifests.yaml
+      - name: Validate production overlay
+        run: kubectl kustomize deploy/platform/overlays/production > /tmp/prod-manifests.yaml

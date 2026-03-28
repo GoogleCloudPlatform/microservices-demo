@@ -1,160 +1,66 @@
-# AI Observability & Self-Healing Platform
+# AEGIS: Observability and Self-Healing Platform
 
-An autonomous observability and self-healing platform built on top of a live microservices application. The system continuously collects logs, metrics, and traces from 11 running microservices, feeds them into a machine learning layer that detects anomalies in real time and predicts failures 1–5 minutes before they occur, then automatically triggers remediation playbooks via the Docker API — all surfaced on a real-time React dashboard with Claude AI-generated natural language explanations of every incident.
+AEGIS is a control plane built on top of Google Online Boutique. It ingests runtime stats and logs, computes anomaly signals, infers likely root cause, and executes remediation workflows with retry, containment, and incident memory. The ML layer is part of the repo, but the platform is designed to run cleanly without pretending trained models exist in production.
 
----
+## What Is In This Repo
 
-## Architecture
+- `src/`: upstream Online Boutique service source
+- `docker-compose.yml`: boutique app plus local observability stack
+- `docker-compose.platform.yml`: packaged AEGIS backend + dashboard services for local production-style validation
+- `backend/`: FastAPI API, ingestion, correlation, remediation engine, incident memory
+- `dashboard/`: React dashboard
+- `deploy/platform/`: Kubernetes manifests and `kustomize` overlays for the AEGIS platform
+- `observability/`: local Prometheus, Loki, Promtail, Grafana config
+- `pipeline/` and `ml/`: data collection, training, and inference artifacts
 
-```
-┌─────────────────────────────────────────────────────────────────┐
-│               Online Boutique (11 Microservices)                │
-│  frontend · cart · checkout · payment · currency · shipping     │
-│  email · productcatalog · recommendation · ad · loadgenerator   │
-└──────────────┬──────────────────────────────┬───────────────────┘
-               │ metrics (OTLP)               │ logs (stdout)
-               ▼                              ▼
-┌──────────────────────────┐    ┌─────────────────────────────────┐
-│  Prometheus  │  Jaeger   │    │   Loki  ◄──── Promtail          │
-│  (metrics)   │  (traces) │    │   (logs)                        │
-└──────────────┬───────────┘    └──────────────┬──────────────────┘
-               │                               │
-               └──────────────┬────────────────┘
-                              │
-                              ▼
-┌─────────────────────────────────────────────────────────────────┐
-│                        ML Layer                                 │
-│                                                                 │
-│  ┌─────────────────────────┐  ┌──────────────────────────────┐  │
-│  │   Isolation Forest      │  │       Predictive LSTM        │  │
-│  │  (real-time anomaly     │  │  (failure prediction 1-5min  │  │
-│  │   detection on metrics) │  │   ahead on time-series data) │  │
-│  └─────────────────────────┘  └──────────────────────────────┘  │
-└──────────────────────────────┬──────────────────────────────────┘
-                               │ anomaly scores + predictions
-                               ▼
-┌─────────────────────────────────────────────────────────────────┐
-│                    Remediation Engine                           │
-│         (Docker API · escalating playbooks · auto-heal)        │
-└──────────────────────────────┬──────────────────────────────────┘
-                               │
-                               ▼
-┌─────────────────────────────────────────────────────────────────┐
-│                   Real-Time Dashboard                           │
-│   React + Tailwind · live anomaly scores · incident timeline    │
-│   Claude AI incident explanations · remediation audit log       │
-└─────────────────────────────────────────────────────────────────┘
-```
-
----
-
-## ML Approach
-
-### Isolation Forest — Unsupervised Anomaly Detection
-Runs continuously on a sliding window of Prometheus metrics (error rates, latency percentiles, request throughput, container CPU/memory). Isolation Forest assigns an anomaly score to each service at every tick; scores above the contamination threshold trigger an alert and feed the remediation engine. No labelled training data required — it learns the "normal" baseline from live traffic.
-
-### Predictive LSTM — Failure Prediction Before It Happens
-A sequence-to-one LSTM trained on historical failure scenario data (injected fault recordings + Drain3-parsed log feature vectors + Prometheus time-series). Given the last *N* minutes of system state, it predicts the probability of a failure event occurring in the next 1–5 minutes. This allows the remediation engine to act *before* a service actually goes down rather than reacting after the fact.
-
----
-
-## Stack
+## Current Stack
 
 | Layer | Technology |
 |---|---|
-| **Application** | Google Online Boutique (11 microservices, Docker Compose) |
-| **Metrics** | Prometheus v3.3.1 |
-| **Logs** | Loki 3.7.1 + Promtail 3.6.8 |
-| **Traces** | Jaeger 1.76.0 (OTLP gRPC) |
-| **Dashboards** | Grafana 12.0.2 |
-| **Log parsing** | Drain3 (log template mining for feature extraction) |
-| **Anomaly detection** | Python · scikit-learn · Isolation Forest |
-| **Failure prediction** | Python · PyTorch · LSTM |
-| **Backend API** | FastAPI (anomaly + prediction API) |
-| **Dashboard API** | Node.js / Express |
-| **Frontend** | React + Tailwind CSS |
-| **AI Explanations** | Claude API (Anthropic) |
-| **Local tunnel** | ngrok |
+| Application | Google Online Boutique |
+| Backend API | FastAPI |
+| Frontend | React + Vite |
+| Metrics | Prometheus |
+| Logs | Loki + Promtail |
+| Traces | Jaeger |
+| Collector | OpenTelemetry Collector |
+| Cluster Telemetry | kube-state-metrics + node-exporter + cadvisor + redis-exporter |
+| Remediation | Docker SDK + Kubernetes client |
+| Memory | SQLite |
+| Kubernetes Packaging | Kustomize overlays |
 
----
+## Run Paths
 
-## Repository Structure
-
-```
-microservices-demo/
-├── src/                    # All Online Boutique microservice source code
-├── docker-compose.yml      # Full stack: 11 services + observability
-├── observability/          # Prometheus, Loki, Grafana, Promtail configs
-│
-├── pipeline/               # Data collection and preprocessing
-│   ├── scripts/            # Collection, injection, feature-extraction scripts
-│   ├── notebooks/          # EDA and model training notebooks
-│   └── data/
-│       ├── raw_logs/       # Raw log dumps (normal/ and failures/)
-│       ├── processed/      # Feature matrices ready for training
-│       └── models/         # Saved model weights (.pt, .pkl)
-│
-├── ml/
-│   ├── lstm/               # LSTM model definition, training, inference
-│   ├── isolation_forest/   # Isolation Forest training and scoring
-│   └── shared/             # Feature engineering, data loaders, utils
-│
-├── backend/
-│   ├── anomaly_api/        # FastAPI service: scores + predictions endpoint
-│   └── remediation/        # Remediation engine + Docker API playbooks
-│
-├── dashboard/
-│   ├── frontend/           # React + Tailwind real-time dashboard
-│   └── api/                # Node.js API bridging dashboard to backend
-│
-└── infra/
-    └── ngrok/              # ngrok tunnel config for public URL exposure
-```
-
----
-
-## How to Run
-
-### Prerequisites
-- Docker 20+ and Docker Compose 2.0+
-- Python 3.9+
-- Node.js 18+
-- ngrok account + auth token
-- Anthropic API key
-
-### Start the Full Observability Stack
-
+### Local dev
 ```bash
-# Clone and start all 17 containers
-git clone https://github.com/ishitac1205/microservices-demo
-cd microservices-demo
 docker compose up -d
-
-# Verify all containers are running
-docker compose ps
+bash infra/start_platform.sh
 ```
 
-### Access the UIs
+### Local production-style packaging
+```bash
+docker compose up -d
+bash infra/compose-up.sh
+```
 
-| Service | URL |
-|---|---|
-| Online Boutique | http://localhost:8080 |
-| Grafana | http://localhost:3000 (admin / admin) |
-| Prometheus | http://localhost:9090 |
-| Jaeger Traces | http://localhost:16686 |
-| Loki | http://localhost:3100 |
+### Kubernetes (`kind` first)
+```bash
+bash infra/k8s/bootstrap-kind.sh
+bash infra/k8s/build-kind-images.sh
+kubectl apply -f release/kubernetes-manifests.yaml
+bash infra/k8s/deploy-kind.sh
+```
 
-### ML Pipeline, Backend, and Dashboard
-> Setup instructions for the ML pipeline, backend API, and dashboard will be added as each component is built.
+## Important Reality Notes
 
----
+- Production mode is fail-closed for missing models when `AEGIS_ALLOW_DEMO_MODE=false`.
+- The dashboard talks to the backend through `/api`; it should not depend on hardcoded localhost URLs in production.
+- Kubernetes support now includes real manifests for backend, dashboard, Prometheus, Loki, Promtail, Grafana, Jaeger, OTEL collector, and exporters, plus a remediation adapter with workload actions.
+- The dashboard ingress is protected with basic auth by default in the base manifests. Rotate the checked-in placeholder secret before any real deployment.
+- Some infrastructure sections intentionally report unavailable telemetry when the backing system is not deployed. The platform does not fabricate missing signals.
 
-## Team
+## Docs
 
-[Team Member Names]
-
----
-
-## Hackathon
-
-Built for [Hackathon Name] — 36 hours
+- [Deployment Guide](/Users/ishu/Hackathon/microservices-demo/docs/DEPLOYMENT.md)
+- [Telemetry Coverage](/Users/ishu/Hackathon/microservices-demo/docs/TELEMETRY.md)
+- [Production Audit](/Users/ishu/Hackathon/microservices-demo/docs/PRODUCTION_AUDIT.md)

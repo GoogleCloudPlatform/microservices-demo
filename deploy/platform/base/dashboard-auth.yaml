@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: aegis-dashboard-auth
+type: Opaque
+stringData:
+  auth: |-
+    admin:$apr1$KSVbUEpt$8tK9YSrNiERO4X.iWmIf4/

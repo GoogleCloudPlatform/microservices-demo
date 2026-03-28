@@ -1,0 +1,1210 @@
+import { useMemo } from 'react'
+import { anomalyScoreColor, SERVICE_SHORT } from '../styles/theme'
+import { useTheme } from '../ThemeContext'
+
+function clamp(value, min, max) {
+  return Math.max(min, Math.min(max, value))
+}
+
+function formatPercent(value, digits = 0) {
+  const num = Number(value || 0)
+  return `${num.toFixed(digits)}%`
+}
+
+function formatSigned(value, digits = 1, suffix = '') {
+  const num = Number(value || 0)
+  const prefix = num > 0 ? '+' : ''
+  return `${prefix}${num.toFixed(digits)}${suffix}`
+}
+
+function formatTime(iso) {
+  if (!iso) return 'Awaiting signal'
+  const date = new Date(iso)
+  if (Number.isNaN(date.getTime())) return 'Awaiting signal'
+  return date.toLocaleTimeString('en-US', {
+    hour12: false,
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+  })
+}
+
+function formatRelative(iso) {
+  if (!iso) return 'No timestamp'
+  const ts = new Date(iso).getTime()
+  if (Number.isNaN(ts)) return 'No timestamp'
+  const delta = Math.max(0, Math.round((Date.now() - ts) / 1000))
+  if (delta < 60) return `${delta}s ago`
+  if (delta < 3600) return `${Math.round(delta / 60)}m ago`
+  return `${Math.round(delta / 3600)}h ago`
+}
+
+function formatNumber(value, digits = 0) {
+  return Number(value || 0).toFixed(digits)
+}
+
+function formatStatusLabel(status) {
+  return String(status || 'unknown').replace(/_/g, ' ')
+}
+
+function severityTone(score, theme) {
+  return anomalyScoreColor(clamp(score, 0, 1), 'fill', theme)
+}
+
+function statusTone(status, score, theme) {
+  if (status === 'critical') return severityTone(Math.max(score, 0.82), theme)
+  if (status === 'warning') return severityTone(Math.max(score, 0.55), theme)
+  return severityTone(Math.min(score, 0.18), theme)
+}
+
+function topMemoryMatches(services) {
+  return Object.entries(services || {})
+    .flatMap(([service, snapshot]) =>
+      (snapshot.similar_incidents || []).map(match => ({
+        service,
+        ...match,
+      }))
+    )
+    .sort((a, b) => (b.similarity_score || 0) - (a.similarity_score || 0))
+    .slice(0, 6)
+}
+
+function latestServiceIncidents(services) {
+  return Object.entries(services || {})
+    .map(([service, snapshot]) => snapshot.latest_incident ? { service, ...snapshot.latest_incident } : null)
+    .filter(Boolean)
+    .sort((a, b) => {
+      const ta = new Date(a.detected_at || 0).getTime()
+      const tb = new Date(b.detected_at || 0).getTime()
+      return tb - ta
+    })
+}
+
+function miniSparkPath(points, width, height) {
+  if (!points.length) return ''
+  return points
+    .map((value, index) => {
+      const x = points.length === 1 ? width / 2 : (index / (points.length - 1)) * width
+      const y = height - clamp(value, 0, 1) * height
+      return `${index === 0 ? 'M' : 'L'} ${x.toFixed(2)} ${y.toFixed(2)}`
+    })
+    .join(' ')
+}
+
+function Section({ title, eyebrow, children, theme, tight = false }) {
+  return (
+    <section className="infra-section" style={{ '--section-gap': tight ? '12px' : '18px' }}>
+      <div className="infra-section-header">
+        <span className="infra-section-eyebrow">{eyebrow}</span>
+        <h2 className="infra-section-title" style={{ fontFamily: theme.displayFont }}>{title}</h2>
+      </div>
+      <div className="infra-section-body">{children}</div>
+    </section>
+  )
+}
+
+function SummaryCard({ label, value, meta, tone, theme }) {
+  return (
+    <div className="infra-summary-card">
+      <span className="infra-summary-label">{label}</span>
+      <div className="infra-summary-value" style={{ color: tone, fontFamily: theme.displayFont }}>{value}</div>
+      <span className="infra-summary-meta">{meta}</span>
+    </div>
+  )
+}
+
+function Badge({ label, tone = 'muted' }) {
+  return <span className={`infra-badge infra-badge-${tone}`}>{label}</span>
+}
+
+function StatusPill({ label, tone }) {
+  return (
+    <span className="infra-status-pill">
+      <span className="infra-status-dot" style={{ background: tone }} />
+      {label}
+    </span>
+  )
+}
+
+function TrendRibbon({ history, services, theme }) {
+  const width = 520
+  const height = 128
+  const avgScores = history.map(item => {
+    const scores = Object.values(item.scores || {})
+    if (!scores.length) return 0
+    return scores.reduce((sum, value) => sum + value, 0) / scores.length
+  })
+  const alertCounts = history.map(item =>
+    Object.values(item.scores || {}).filter(value => value > 0.7).length / Math.max(Object.keys(services || {}).length, 1)
+  )
+  const avgPath = miniSparkPath(avgScores, width, height)
+  const alertPath = miniSparkPath(alertCounts, width, height)
+
+  return (
+    <div className="infra-chart-shell">
+      <svg viewBox={`0 0 ${width} ${height}`} className="infra-trend-chart" preserveAspectRatio="none">
+        {[0.25, 0.5, 0.75].map(mark => (
+          <line
+            key={mark}
+            x1="0"
+            y1={height - height * mark}
+            x2={width}
+            y2={height - height * mark}
+            stroke="currentColor"
+            strokeOpacity="0.09"
+            strokeWidth="1"
+          />
+        ))}
+        {avgPath && <path d={avgPath} fill="none" stroke={theme.accent} strokeWidth="2.1" strokeLinecap="round" />}
+        {alertPath && <path d={alertPath} fill="none" stroke={theme.textMuted} strokeWidth="1.35" strokeDasharray="5 5" strokeLinecap="round" />}
+      </svg>
+      <div className="infra-chart-legend">
+        <span><i style={{ background: theme.accent }} /> anomaly trend</span>
+        <span><i style={{ background: theme.textMuted }} /> alert density</span>
+      </div>
+    </div>
+  )
+}
+
+function RootCauseSpotlight({ topology, services, theme }) {
+  const root = topology?.root_cause || {}
+  const rootService = root.service
+  const service = rootService ? services[rootService] : null
+  const tone = statusTone(service?.status, service?.combined_score || root.confidence || 0, theme)
+
+  return (
+    <div className="infra-spotlight">
+      <div>
+        <div className="infra-kicker">Current suspected root cause</div>
+        <div className="infra-headline" style={{ fontFamily: theme.displayFont }}>
+          {rootService ? (SERVICE_SHORT[rootService] || rootService) : 'System nominal'}
+        </div>
+      </div>
+      <div className="infra-spotlight-meta">
+        <StatusPill label={rootService ? formatStatusLabel(root.failure_type || 'generic_anomaly') : 'no active root cause'} tone={tone} />
+        <span>{rootService ? `${Math.round((root.confidence || 0) * 100)}% confidence` : 'No anomalous cascade detected'}</span>
+      </div>
+      <div className="infra-copy">
+        {rootService
+          ? `Blast radius across ${(root.affected_services || []).length || 1} service${(root.affected_services || []).length === 1 ? '' : 's'}. ${topology?.recommendation || ''}`
+          : 'All monitored services are currently trending within the normal operating envelope.'}
+      </div>
+    </div>
+  )
+}
+
+function FleetSummary({ services, theme }) {
+  const entries = Object.entries(services || {})
+  const active = entries.filter(([, svc]) => svc.latest_incident?.status === 'active')
+  const isolated = active.filter(([, svc]) => svc.latest_incident?.containment?.containment_mode === 'isolate')
+  const manualRequired = active.filter(([, svc]) => svc.latest_incident?.containment?.manual_required)
+
+  const rows = [
+    { label: 'healthy', value: entries.filter(([, svc]) => svc.status === 'normal').length, tone: severityTone(0.12, theme) },
+    { label: 'warning', value: entries.filter(([, svc]) => svc.status === 'warning').length, tone: severityTone(0.55, theme) },
+    { label: 'critical', value: entries.filter(([, svc]) => svc.status === 'critical').length, tone: severityTone(0.92, theme) },
+    { label: 'isolated', value: isolated.length, tone: theme.accent },
+    { label: 'manual', value: manualRequired.length, tone: theme.text },
+  ]
+
+  return (
+    <div className="infra-metric-grid">
+      {rows.map(row => (
+        <div key={row.label} className="infra-mini-card">
+          <span className="infra-mini-label">{row.label}</span>
+          <strong style={{ color: row.tone }}>{row.value}</strong>
+        </div>
+      ))}
+    </div>
+  )
+}
+
+function WorkloadMatrix({ services, topology, theme }) {
+  const ranked = Object.entries(services || {})
+    .map(([service, snapshot]) => ({
+      service,
+      snapshot,
+      score: snapshot.combined_score || 0,
+    }))
+    .sort((a, b) => b.score - a.score)
+
+  const affected = new Set(topology?.root_cause?.affected_services || [])
+
+  return (
+    <div className="infra-workload-list">
+      {ranked.map(({ service, snapshot }) => {
+        const status = snapshot.status || 'normal'
+        const tone = statusTone(status, snapshot.combined_score || 0, theme)
+        const workload = snapshot.latest_incident?.decision?.target || service
+        const state = snapshot.latest_incident?.status || (status === 'normal' ? 'stable' : 'watch')
+        const memory = snapshot.memory_pressure || 0
+        const cpu = snapshot.cpu_pressure || 0
+        const network = snapshot.network_pressure || 0
+        const lineMax = Math.max(cpu, memory, network, 1)
+
+        return (
+          <div key={service} className="infra-workload-row">
+            <div className="infra-workload-main">
+              <div className="infra-workload-title-wrap">
+                <span className="infra-service-mark" style={{ background: tone }} />
+                <div>
+                  <div className="infra-workload-title" style={{ fontFamily: theme.displayFont }}>
+                    {SERVICE_SHORT[service] || service}
+                  </div>
+                  <div className="infra-workload-sub">
+                    {workload} · {state} {affected.has(service) ? '· in blast radius' : ''}
+                  </div>
+                </div>
+              </div>
+              <div className="infra-badge-row">
+                <Badge label={formatStatusLabel(status)} tone={status === 'critical' ? 'critical' : status === 'warning' ? 'warning' : 'ok'} />
+                {(snapshot.feature_flags || []).slice(0, 2).map(flag => (
+                  <Badge key={flag} label={flag.replace(/_/g, ' ')} />
+                ))}
+              </div>
+            </div>
+            <div className="infra-signal-stack">
+              {[
+                ['cpu', cpu, snapshot.cpu_mean || 0],
+                ['mem', memory, snapshot.mem_mean || 0],
+                ['net', network, snapshot.net_rx_mean + snapshot.net_tx_mean || 0],
+              ].map(([label, rawValue, displayValue]) => (
+                <div key={label} className="infra-signal-row">
+                  <span>{label}</span>
+                  <div className="infra-signal-bar">
+                    <span style={{ width: `${clamp((rawValue / lineMax) * 100, 8, 100)}%`, background: tone }} />
+                  </div>
+                  <span>{label === 'net' ? formatNumber(displayValue, 2) : formatPercent(displayValue)}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )
+      })}
+    </div>
+  )
+}
+
+function ClusterReadyPanels({ theme, services, infrastructure }) {
+  const cluster = infrastructure?.cluster
+  if (cluster?.available) {
+    const rows = [
+      ['Nodes ready', `${cluster.nodes?.ready || 0}/${cluster.nodes?.total || 0}`],
+      ['Running pods', `${cluster.pods?.running || 0}/${cluster.pods?.total || 0}`],
+      ['Pending pods', `${cluster.pods?.pending || 0}`],
+      ['Failed pods', `${cluster.pods?.failed || 0}`],
+      ['Unavailable deployments', `${cluster.deployments?.unavailable || 0}/${cluster.deployments?.total || 0}`],
+    ]
+    return (
+      <div className="infra-placeholder-grid">
+        {rows.map(([title, copy]) => (
+          <div key={title} className="infra-placeholder-card">
+            <div className="infra-placeholder-top">
+              <span className="infra-placeholder-dot" style={{ background: theme.accent }} />
+              <span className="infra-placeholder-label">{title}</span>
+            </div>
+            <div className="infra-placeholder-copy">{copy}</div>
+          </div>
+        ))}
+        <div className="infra-placeholder-card infra-placeholder-card-accent">
+          <div className="infra-placeholder-top">
+            <span className="infra-placeholder-label">Cluster summary</span>
+            <Badge label={cluster.platform} tone="ok" />
+          </div>
+          <div className="infra-placeholder-copy">{cluster.summary}</div>
+        </div>
+      </div>
+    )
+  }
+
+  const rows = [
+    ['Node readiness', 'Awaiting Kubernetes node telemetry'],
+    ['Control plane', 'Awaiting API server / scheduler / etcd health feed'],
+    ['Replica posture', 'Awaiting desired vs ready deployment counts'],
+    ['Capacity saturation', 'Awaiting CPU, memory, and ephemeral disk headroom'],
+    ['Autoscaling', 'Awaiting HPA and eviction signals'],
+  ]
+
+  return (
+    <div className="infra-placeholder-grid">
+      {rows.map(([title, copy]) => (
+        <div key={title} className="infra-placeholder-card">
+          <div className="infra-placeholder-top">
+            <span className="infra-placeholder-dot" style={{ background: theme.textDim }} />
+            <span className="infra-placeholder-label">{title}</span>
+          </div>
+          <div className="infra-placeholder-copy">{copy}</div>
+        </div>
+      ))}
+      <div className="infra-placeholder-card infra-placeholder-card-accent">
+        <div className="infra-placeholder-top">
+          <span className="infra-placeholder-label">Mode</span>
+          <Badge label="Docker Compose live" tone="ok" />
+        </div>
+        <div className="infra-placeholder-copy">
+          {Object.keys(services || {}).length} app workloads are monitored now. This panel is already laid out for node, pod, deployment, rollout, and HPA metrics once the Kubernetes feed is wired.
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function StackHealth({ topology, services, theme, infrastructure }) {
+  const trackedServices = Object.values(services || {})
+  const logRich = trackedServices.filter(service => (service.recent_logs || []).length > 0).length
+  const filledWindows = trackedServices.filter(service => service.window_filled).length
+  const traceReady = ['frontend', 'productcatalogservice', 'currencyservice', 'paymentservice', 'emailservice', 'checkoutservice', 'recommendationservice', 'cartservice']
+  const infraObs = infrastructure?.observability || {}
+
+  const items = [
+    {
+      name: 'Prometheus',
+      status: infraObs.prometheus?.available ? 'active' : topology ? 'configured' : 'waiting',
+      detail: infraObs.prometheus?.available
+        ? `${infraObs.prometheus.healthy_targets || 0}/${infraObs.prometheus.active_targets || 0} scrape targets healthy`
+        : topology ? `${filledWindows}/${trackedServices.length || 1} windows filled` : 'Awaiting topology payload',
+      meta: infraObs.prometheus?.error || 'scrape freshness derived from backend update cadence',
+    },
+    {
+      name: 'Loki',
+      status: infraObs.loki?.available ? 'active' : logRich > 0 ? 'configured' : 'waiting',
+      detail: `${logRich} services with live recent log samples`,
+      meta: infraObs.loki?.error || 'log ingest visibility is live through Loki cache',
+    },
+    {
+      name: 'Promtail',
+      status: infraObs.promtail?.available ? 'active' : topology ? 'configured' : 'waiting',
+      detail: infraObs.promtail?.available ? 'promtail readiness endpoint reachable' : 'shipping pipeline provisioned',
+      meta: infraObs.promtail?.error || 'dropped lines and lag are telemetry-ready placeholders',
+    },
+    {
+      name: 'Jaeger',
+      status: infraObs.jaeger?.available ? 'active' : topology ? 'configured' : 'waiting',
+      detail: infraObs.jaeger?.available
+        ? `${infraObs.jaeger.service_count || 0} traced services discovered`
+        : `${traceReady.length} services trace-ready in compose`,
+      meta: infraObs.jaeger?.error || 'latency-heavy service ranking awaits trace query aggregation',
+    },
+    {
+      name: 'Grafana',
+      status: infraObs.grafana?.available ? 'active' : topology ? 'configured' : 'waiting',
+      detail: infraObs.grafana?.available ? 'health endpoint reachable' : 'datasources provisioned',
+      meta: infraObs.grafana?.error || 'dashboard responsiveness awaits live datasource probing',
+    },
+    {
+      name: 'Pipeline',
+      status: topology?.demo_mode ? 'demo' : 'active',
+      detail: topology?.demo_mode ? 'demo scoring fallback active' : 'live inference and remediation active',
+      meta: infraObs.otel_collector?.available ? 'ingest -> features -> detect -> remediate -> collector online' : 'ingest -> features -> detect -> remediate',
+    },
+  ]
+
+  return (
+    <div className="infra-stack-grid">
+      {items.map(item => {
+        const tone = item.status === 'active'
+          ? severityTone(0.18, theme)
+          : item.status === 'configured'
+            ? theme.accent
+            : item.status === 'demo'
+              ? severityTone(0.55, theme)
+              : theme.textDim
+        return (
+          <div key={item.name} className="infra-stack-card">
+            <div className="infra-stack-top">
+              <span className="infra-stack-name" style={{ fontFamily: theme.displayFont }}>{item.name}</span>
+              <StatusPill label={item.status} tone={tone} />
+            </div>
+            <div className="infra-stack-detail">{item.detail}</div>
+            <div className="infra-stack-meta">{item.meta}</div>
+          </div>
+        )
+      })}
+    </div>
+  )
+}
+
+function PipelineReadiness({ services, topology, theme }) {
+  const tracked = Object.values(services || {})
+  const filled = tracked.filter(service => service.window_filled).length
+  const flagged = tracked.filter(service => (service.feature_flags || []).length > 0).length
+  const withMemory = tracked.filter(service => (service.similar_incidents || []).length > 0).length
+  const stages = [
+    { label: 'ingest', value: `${filled}/${tracked.length || 1}`, meta: 'windows ready' },
+    { label: 'features', value: `${flagged}`, meta: 'services with active flags' },
+    { label: 'decision', value: `${(topology?.active_incidents || []).length}`, meta: 'active incident workflows' },
+    { label: 'memory', value: `${withMemory}`, meta: 'services with recall matches' },
+  ]
+
+  return (
+    <div className="infra-readiness">
+      {stages.map(stage => (
+        <div key={stage.label} className="infra-readiness-card">
+          <span className="infra-mini-label">{stage.label}</span>
+          <strong style={{ fontFamily: theme.displayFont }}>{stage.value}</strong>
+          <span className="infra-summary-meta">{stage.meta}</span>
+        </div>
+      ))}
+    </div>
+  )
+}
+
+function IncidentsRail({ topology, incidents, services, theme }) {
+  const active = topology?.active_incidents || []
+  const historyFeed = [...active, ...(incidents || [])]
+    .sort((a, b) => new Date(b.detected_at || b.created_at || 0).getTime() - new Date(a.detected_at || a.created_at || 0).getTime())
+    .slice(0, 8)
+
+  if (!historyFeed.length) {
+    return (
+      <div className="infra-empty">
+        <div className="infra-headline" style={{ fontFamily: theme.displayFont }}>No incident pressure</div>
+        <div className="infra-copy">The remediation rail will populate as soon as the backend records an incident lifecycle.</div>
+      </div>
+    )
+  }
+
+  return (
+    <div className="infra-timeline">
+      {historyFeed.map((incident, index) => {
+        const service = incident.root_cause_service || incident.service || 'unknown'
+        const snapshot = services[service] || {}
+        const tone = statusTone(snapshot.status || incident.status, snapshot.combined_score || 0.7, theme)
+        const mode = incident.containment?.containment_mode || 'observe'
+        const manual = incident.containment?.manual_required
+        return (
+          <div key={`${incident.id || service}-${index}`} className="infra-timeline-item">
+            <div className="infra-timeline-axis">
+              <span className="infra-timeline-node" style={{ background: tone }} />
+              {index < historyFeed.length - 1 && <span className="infra-timeline-line" />}
+            </div>
+            <div className="infra-timeline-body">
+              <div className="infra-timeline-top">
+                <span className="infra-workload-title" style={{ fontFamily: theme.displayFont }}>{SERVICE_SHORT[service] || service}</span>
+                <span className="infra-summary-meta">{formatRelative(incident.detected_at || incident.created_at)}</span>
+              </div>
+              <div className="infra-badge-row">
+                <Badge label={formatStatusLabel(incident.failure_type || 'generic_anomaly')} tone={incident.status === 'resolved' ? 'ok' : 'critical'} />
+                <Badge label={formatStatusLabel(mode)} tone={mode === 'escalate' ? 'critical' : mode === 'isolate' ? 'warning' : 'muted'} />
+                {manual && <Badge label="manual required" tone="warning" />}
+              </div>
+              <div className="infra-copy">
+                {incident.operator_summary || incident.evaluation?.message || incident.decision?.rationale || 'Awaiting evaluation narrative.'}
+              </div>
+              <div className="infra-summary-meta">
+                action: {incident.decision?.action || incident.proposal?.proposed_action || 'pending'} · retry {incident.retry_count || 0}
+              </div>
+            </div>
+          </div>
+        )
+      })}
+    </div>
+  )
+}
+
+function MemoryRecall({ services, theme, infrastructure }) {
+  const matches = infrastructure?.memory?.recent?.length
+    ? infrastructure.memory.recent.map(match => ({ service: match.service, ...match }))
+    : topMemoryMatches(services)
+
+  if (!matches.length) {
+    return (
+      <div className="infra-placeholder-card">
+        <div className="infra-placeholder-top">
+          <span className="infra-placeholder-label">Incident memory</span>
+          <Badge label="warming up" />
+        </div>
+        <div className="infra-placeholder-copy">
+          Similar-failure recall will appear here once repeat incidents are stored in the remediation memory layer.
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div className="infra-memory-list">
+      {matches.map((match, index) => (
+        <div key={`${match.incident_id || index}-${match.service}`} className="infra-memory-item">
+          <div className="infra-memory-top">
+            <span className="infra-workload-title" style={{ fontFamily: theme.displayFont }}>
+              {SERVICE_SHORT[match.service] || match.service}
+            </span>
+            <span className="infra-summary-meta">{Math.round((match.similarity_score || 0) * 100)}% match</span>
+          </div>
+          <div className="infra-copy">
+            {match.evidence_summary || match.notes || 'No evidence summary available yet.'}
+          </div>
+          <div className="infra-summary-meta">
+            action {match.selected_action || 'n/a'} · outcome {match.outcome || 'unknown'}
+          </div>
+        </div>
+      ))}
+    </div>
+  )
+}
+
+function OperatorNotes({ topology, services, theme }) {
+  const recent = latestServiceIncidents(services).slice(0, 3)
+  const clusterLabel = topology?.environment || 'docker compose'
+
+  return (
+    <div className="infra-notes">
+      <div className="infra-placeholder-card infra-placeholder-card-accent">
+        <div className="infra-placeholder-top">
+          <span className="infra-placeholder-label">Cluster mode</span>
+          <Badge label={clusterLabel} tone="ok" />
+        </div>
+        <div className="infra-placeholder-copy">
+          Kubernetes management cards are already designed into this page. When kube telemetry lands, this rail can surface node readiness, pending pods, rollout state, HPA signals, and namespace pressure without another redesign.
+        </div>
+      </div>
+      {recent.map(item => (
+        <div key={item.id} className="infra-note-item">
+          <div className="infra-note-title" style={{ fontFamily: theme.displayFont }}>
+            {SERVICE_SHORT[item.service] || item.service}
+          </div>
+          <div className="infra-copy">
+            {item.operator_summary || item.evaluation?.message || 'Recent incident archived without operator summary.'}
+          </div>
+        </div>
+      ))}
+    </div>
+  )
+}
+
+export default function InfraPage({ topology, history, incidents, connected, infrastructure }) {
+  const { theme, dark } = useTheme()
+  const services = topology?.services || {}
+  const serviceEntries = Object.entries(services)
+  const healthScore = topology?.health_score ?? 0
+  const alerts = topology?.alerts || []
+  const activeIncidents = topology?.active_incidents || []
+  const warningCount = serviceEntries.filter(([, svc]) => svc.status === 'warning').length
+  const criticalCount = serviceEntries.filter(([, svc]) => svc.status === 'critical').length
+  const latestOutcome = useMemo(() => {
+    const feed = [...(topology?.recent_incidents || []), ...(incidents || [])]
+    const resolved = feed.find(item => item.status === 'resolved')
+    return resolved || feed[0] || null
+  }, [topology, incidents])
+
+  const topCards = [
+    {
+      label: 'global health',
+      value: `${healthScore || '—'}`,
+      meta: topology ? `${serviceEntries.length} monitored services` : 'Awaiting topology feed',
+      tone: severityTone(clamp(1 - healthScore / 100, 0, 1), theme),
+    },
+    {
+      label: 'active incidents',
+      value: `${activeIncidents.length}`,
+      meta: activeIncidents.length ? `${criticalCount} critical services in focus` : 'No active remediation workflow',
+      tone: activeIncidents.length ? severityTone(0.86, theme) : severityTone(0.12, theme),
+    },
+    {
+      label: 'alerts',
+      value: `${alerts.length}`,
+      meta: `${criticalCount} critical · ${warningCount} warning`,
+      tone: alerts.length ? severityTone(0.62, theme) : theme.textMuted,
+    },
+    {
+      label: 'automation',
+      value: connected ? 'Online' : 'Offline',
+      meta: latestOutcome ? `Last action ${formatRelative(latestOutcome.detected_at || latestOutcome.created_at)}` : 'No recorded action yet',
+      tone: connected ? theme.accent : severityTone(0.92, theme),
+    },
+    {
+      label: 'prometheus freshness',
+      value: infrastructure?.timestamp ? formatRelative(infrastructure.timestamp) : topology?.timestamp ? formatRelative(topology.timestamp) : '—',
+      meta: infrastructure?.observability?.prometheus?.available
+        ? `${infrastructure.observability.prometheus.healthy_targets || 0}/${infrastructure.observability.prometheus.active_targets || 0} targets healthy`
+        : topology ? `Updated ${formatTime(topology.timestamp)}` : 'Awaiting backend poll',
+      tone: infrastructure?.observability?.prometheus?.available || topology ? severityTone(0.2, theme) : theme.textDim,
+    },
+    {
+      label: 'trace activity',
+      value: topology?.demo_mode ? 'Demo' : 'Live',
+      meta: topology?.demo_mode ? 'Demo scoring still active' : 'Inference + remediation pipeline active',
+      tone: topology?.demo_mode ? severityTone(0.55, theme) : theme.accent,
+    },
+  ]
+
+  return (
+    <div
+      className={`infra-page ${dark ? 'infra-dark' : 'infra-light'}`}
+      style={{
+        '--infra-bg': theme.bg,
+        '--infra-card': theme.card,
+        '--infra-line': theme.borderLight,
+        '--infra-border': theme.border,
+        '--infra-text': theme.text,
+        '--infra-muted': theme.textMuted,
+        '--infra-dim': theme.textDim,
+        '--infra-accent': theme.accent,
+        '--infra-soft': dark ? 'rgba(255,255,255,0.035)' : 'rgba(26,26,26,0.03)',
+        '--infra-soft-strong': dark ? 'rgba(255,255,255,0.06)' : 'rgba(26,26,26,0.05)',
+      }}
+    >
+      <div className="infra-header">
+        <div>
+          <span className="infra-page-kicker">Infrastructure</span>
+          <h1 className="infra-page-title" style={{ fontFamily: theme.displayFont }}>
+            Editorial ops surface for cluster health, observability, and remediation
+          </h1>
+        </div>
+        <div className="infra-header-meta">
+          <StatusPill label={connected ? 'backend connected' : 'backend offline'} tone={connected ? theme.accent : severityTone(0.92, theme)} />
+          <Badge label={topology?.demo_mode ? 'demo scoring' : 'live inference'} tone={topology?.demo_mode ? 'warning' : 'ok'} />
+          <Badge label={infrastructure?.cluster?.available ? 'kubernetes live' : 'kubernetes ready'} />
+        </div>
+      </div>
+
+      <div className="infra-summary-rail">
+        {topCards.map(card => (
+          <SummaryCard key={card.label} {...card} theme={theme} />
+        ))}
+      </div>
+
+      <div className="infra-layout">
+        <div className="infra-column infra-column-left">
+          <Section title="System Overview" eyebrow="Overview" theme={theme}>
+            <RootCauseSpotlight topology={topology} services={services} theme={theme} />
+            <div className="infra-dual">
+              <div className="infra-subsection">
+                <div className="infra-kicker">Environment identity</div>
+                <div className="infra-definition-list">
+                  <div><span>environment</span><strong>{infrastructure?.environment?.cluster_name || 'online-boutique'}</strong></div>
+                  <div><span>mode</span><strong>{infrastructure?.environment?.orchestrator || 'docker'}</strong></div>
+                  <div><span>namespace</span><strong>{infrastructure?.environment?.namespace || 'default / local'}</strong></div>
+                  <div><span>collector</span><strong>{infrastructure?.environment?.collector_ready ? 'collector configured' : 'collector pending'}</strong></div>
+                </div>
+              </div>
+              <div className="infra-subsection">
+                <div className="infra-kicker">Fleet summary</div>
+                <FleetSummary services={services} theme={theme} />
+              </div>
+            </div>
+            <div className="infra-subsection">
+              <div className="infra-kicker">Failure momentum and anomaly ribbon</div>
+              <div className="infra-ribbon-meta">
+                <span>{formatSigned(topology?.failure_momentum || 0, 1, ' points/min')}</span>
+                <span>{history?.length || 0} stored snapshots</span>
+              </div>
+              <TrendRibbon history={history || []} services={services} theme={theme} />
+            </div>
+          </Section>
+
+          <Section title="Cluster & Workload Health" eyebrow="Live now + ready states" theme={theme}>
+            <div className="infra-subsection">
+              <div className="infra-kicker">Runtime service saturation</div>
+              <WorkloadMatrix services={services} topology={topology} theme={theme} />
+            </div>
+            <div className="infra-subsection">
+              <div className="infra-kicker">Kubernetes management panels</div>
+              <ClusterReadyPanels theme={theme} services={services} infrastructure={infrastructure} />
+            </div>
+          </Section>
+        </div>
+
+        <div className="infra-column infra-column-center">
+          <Section title="Observability Stack Health" eyebrow="Metrics · logs · traces" theme={theme}>
+            <div className="infra-subsection">
+              <div className="infra-kicker">Stack posture</div>
+              <StackHealth topology={topology} services={services} theme={theme} infrastructure={infrastructure} />
+            </div>
+            <div className="infra-subsection">
+              <div className="infra-kicker">Pipeline readiness</div>
+              <PipelineReadiness services={services} topology={topology} theme={theme} />
+            </div>
+          </Section>
+
+          <Section title="Service Telemetry Lens" eyebrow="High-signal comparisons" theme={theme}>
+            <div className="infra-telemetry-grid">
+              {Object.entries(services)
+                .sort((a, b) => (b[1].combined_score || 0) - (a[1].combined_score || 0))
+                .slice(0, 6)
+                .map(([service, snapshot]) => {
+                  const tone = statusTone(snapshot.status, snapshot.combined_score || 0, theme)
+                  return (
+                    <div key={service} className="infra-telemetry-card">
+                      <div className="infra-telemetry-top">
+                        <span className="infra-workload-title" style={{ fontFamily: theme.displayFont }}>
+                          {SERVICE_SHORT[service] || service}
+                        </span>
+                        <span className="infra-summary-meta">{Math.round((snapshot.combined_score || 0) * 100)}</span>
+                      </div>
+                      <div className="infra-telemetry-row">
+                        <span>cpu</span>
+                        <strong style={{ color: tone }}>{formatPercent(snapshot.cpu_mean || 0)}</strong>
+                      </div>
+                      <div className="infra-telemetry-row">
+                        <span>mem</span>
+                        <strong>{formatPercent(snapshot.mem_mean || 0)}</strong>
+                      </div>
+                      <div className="infra-telemetry-row">
+                        <span>errors</span>
+                        <strong>{formatPercent((snapshot.error_rate_mean || 0) * 100, 1)}</strong>
+                      </div>
+                      <div className="infra-telemetry-row">
+                        <span>logs/sec</span>
+                        <strong>{formatNumber(snapshot.log_volume_per_sec || 0, 2)}</strong>
+                      </div>
+                    </div>
+                  )
+                })}
+            </div>
+          </Section>
+        </div>
+
+        <div className="infra-column infra-column-right">
+          <Section title="Incidents & Remediation" eyebrow="Retry · isolate · reroute · escalate" theme={theme} tight>
+            <IncidentsRail topology={topology} incidents={incidents} services={services} theme={theme} />
+          </Section>
+
+          <Section title="Memory Recall" eyebrow="Previous failures" theme={theme} tight>
+            <MemoryRecall services={services} theme={theme} infrastructure={infrastructure} />
+          </Section>
+
+          <Section title="Operator Notes" eyebrow="Ready states and archived context" theme={theme} tight>
+            <OperatorNotes topology={topology} services={services} theme={theme} />
+          </Section>
+        </div>
+      </div>
+
+      <style>{`
+        .infra-page {
+          flex: 1;
+          min-height: 0;
+          overflow-y: auto;
+          padding: 28px 28px 36px;
+          background:
+            radial-gradient(circle at top left, color-mix(in srgb, var(--infra-accent) 8%, transparent), transparent 28%),
+            linear-gradient(to bottom, transparent, transparent),
+            var(--infra-bg);
+          color: var(--infra-text);
+        }
+        .infra-page * {
+          box-sizing: border-box;
+        }
+        .infra-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: flex-start;
+          gap: 20px;
+          padding-bottom: 20px;
+          margin-bottom: 20px;
+          border-bottom: 1px solid var(--infra-line);
+        }
+        .infra-page-kicker,
+        .infra-section-eyebrow,
+        .infra-summary-label,
+        .infra-mini-label,
+        .infra-kicker,
+        .infra-placeholder-label {
+          text-transform: uppercase;
+          letter-spacing: 0.18em;
+          font-size: 10px;
+          color: var(--infra-muted);
+        }
+        .infra-page-title {
+          margin-top: 8px;
+          max-width: 720px;
+          font-size: clamp(28px, 3vw, 44px);
+          line-height: 0.98;
+          font-weight: 400;
+          letter-spacing: -0.03em;
+        }
+        .infra-header-meta {
+          display: flex;
+          flex-wrap: wrap;
+          justify-content: flex-end;
+          gap: 10px;
+        }
+        .infra-summary-rail {
+          display: grid;
+          grid-template-columns: repeat(6, minmax(0, 1fr));
+          gap: 12px;
+          margin-bottom: 24px;
+        }
+        .infra-summary-card,
+        .infra-section,
+        .infra-mini-card,
+        .infra-stack-card,
+        .infra-telemetry-card,
+        .infra-placeholder-card,
+        .infra-memory-item,
+        .infra-note-item,
+        .infra-readiness-card {
+          background: linear-gradient(180deg, var(--infra-soft) 0%, transparent 100%);
+          border: 1px solid var(--infra-line);
+          border-radius: 18px;
+          backdrop-filter: blur(6px);
+        }
+        .infra-summary-card {
+          padding: 14px 16px;
+          display: flex;
+          flex-direction: column;
+          min-height: 104px;
+        }
+        .infra-summary-value {
+          font-size: 30px;
+          line-height: 1;
+          margin: 10px 0 12px;
+          font-weight: 500;
+          letter-spacing: -0.04em;
+        }
+        .infra-summary-meta,
+        .infra-copy,
+        .infra-stack-meta,
+        .infra-stack-detail,
+        .infra-workload-sub,
+        .infra-ribbon-meta,
+        .infra-placeholder-copy,
+        .infra-definition-list span,
+        .infra-definition-list strong,
+        .infra-telemetry-row,
+        .infra-badge,
+        .infra-status-pill,
+        .infra-chart-legend span {
+          font-family: ${theme.font};
+        }
+        .infra-summary-meta,
+        .infra-copy,
+        .infra-stack-meta,
+        .infra-workload-sub,
+        .infra-placeholder-copy {
+          font-size: 11px;
+          line-height: 1.5;
+          color: var(--infra-muted);
+        }
+        .infra-layout {
+          display: grid;
+          grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.95fr) minmax(300px, 0.78fr);
+          gap: 18px;
+          align-items: start;
+        }
+        .infra-column {
+          display: flex;
+          flex-direction: column;
+          gap: 18px;
+          min-width: 0;
+        }
+        .infra-section {
+          padding: 18px;
+        }
+        .infra-section-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: flex-start;
+          gap: 14px;
+          margin-bottom: 16px;
+        }
+        .infra-section-title {
+          font-size: 26px;
+          font-weight: 400;
+          letter-spacing: -0.03em;
+          line-height: 1;
+        }
+        .infra-section-body {
+          display: flex;
+          flex-direction: column;
+          gap: var(--section-gap);
+        }
+        .infra-spotlight {
+          display: flex;
+          flex-direction: column;
+          gap: 12px;
+          padding: 20px;
+          border-radius: 18px;
+          background: var(--infra-soft);
+          border: 1px solid var(--infra-line);
+        }
+        .infra-headline {
+          font-size: 28px;
+          line-height: 1;
+          letter-spacing: -0.04em;
+          font-weight: 400;
+        }
+        .infra-spotlight-meta,
+        .infra-badge-row,
+        .infra-placeholder-top,
+        .infra-memory-top,
+        .infra-timeline-top,
+        .infra-stack-top,
+        .infra-chart-legend,
+        .infra-ribbon-meta {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 8px 10px;
+          align-items: center;
+        }
+        .infra-dual {
+          display: grid;
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+          gap: 12px;
+        }
+        .infra-subsection {
+          display: flex;
+          flex-direction: column;
+          gap: 12px;
+        }
+        .infra-definition-list {
+          display: grid;
+          gap: 8px;
+        }
+        .infra-definition-list div {
+          display: flex;
+          justify-content: space-between;
+          gap: 12px;
+          padding-bottom: 8px;
+          border-bottom: 1px solid var(--infra-line);
+        }
+        .infra-definition-list strong {
+          color: var(--infra-text);
+          font-weight: 500;
+          font-size: 11px;
+          text-transform: uppercase;
+          letter-spacing: 0.06em;
+        }
+        .infra-metric-grid,
+        .infra-readiness,
+        .infra-stack-grid,
+        .infra-placeholder-grid,
+        .infra-telemetry-grid {
+          display: grid;
+          gap: 10px;
+        }
+        .infra-metric-grid {
+          grid-template-columns: repeat(5, minmax(0, 1fr));
+        }
+        .infra-mini-card,
+        .infra-readiness-card {
+          padding: 14px 12px;
+          display: flex;
+          flex-direction: column;
+          gap: 8px;
+        }
+        .infra-mini-card strong,
+        .infra-readiness-card strong {
+          font-size: 26px;
+          line-height: 1;
+          font-weight: 500;
+        }
+        .infra-chart-shell {
+          padding: 14px 14px 10px;
+          background: var(--infra-soft);
+          border: 1px solid var(--infra-line);
+          border-radius: 18px;
+        }
+        .infra-trend-chart {
+          width: 100%;
+          height: 128px;
+          color: var(--infra-text);
+        }
+        .infra-chart-legend {
+          margin-top: 8px;
+          color: var(--infra-muted);
+          font-size: 10px;
+          letter-spacing: 0.08em;
+          text-transform: uppercase;
+        }
+        .infra-chart-legend i {
+          display: inline-block;
+          width: 14px;
+          height: 2px;
+          vertical-align: middle;
+          margin-right: 6px;
+        }
+        .infra-workload-list,
+        .infra-timeline,
+        .infra-memory-list,
+        .infra-notes {
+          display: flex;
+          flex-direction: column;
+          gap: 10px;
+        }
+        .infra-workload-row {
+          display: grid;
+          grid-template-columns: minmax(0, 1fr) minmax(230px, 0.9fr);
+          gap: 16px;
+          padding: 15px 16px;
+          border-radius: 18px;
+          background: var(--infra-soft);
+          border: 1px solid var(--infra-line);
+        }
+        .infra-workload-main,
+        .infra-signal-stack {
+          display: flex;
+          flex-direction: column;
+          gap: 10px;
+          min-width: 0;
+        }
+        .infra-workload-title-wrap {
+          display: flex;
+          gap: 12px;
+          align-items: flex-start;
+        }
+        .infra-service-mark,
+        .infra-status-dot,
+        .infra-placeholder-dot,
+        .infra-timeline-node {
+          width: 10px;
+          height: 10px;
+          border-radius: 999px;
+          flex: 0 0 auto;
+        }
+        .infra-workload-title,
+        .infra-stack-name,
+        .infra-note-title {
+          font-size: 20px;
+          line-height: 1;
+          font-weight: 400;
+          letter-spacing: -0.03em;
+          overflow-wrap: anywhere;
+        }
+        .infra-badge-row {
+          align-items: flex-start;
+        }
+        .infra-badge,
+        .infra-status-pill {
+          display: inline-flex;
+          align-items: center;
+          gap: 8px;
+          padding: 5px 9px;
+          border-radius: 999px;
+          border: 1px solid var(--infra-line);
+          font-size: 10px;
+          letter-spacing: 0.1em;
+          text-transform: uppercase;
+          color: var(--infra-muted);
+          background: transparent;
+        }
+        .infra-badge-ok {
+          color: #2f8e54;
+          border-color: color-mix(in srgb, #2f8e54 50%, var(--infra-line));
+        }
+        .infra-badge-warning {
+          color: #c27a12;
+          border-color: color-mix(in srgb, #c27a12 50%, var(--infra-line));
+        }
+        .infra-badge-critical {
+          color: #cb4741;
+          border-color: color-mix(in srgb, #cb4741 50%, var(--infra-line));
+        }
+        .infra-signal-row,
+        .infra-telemetry-row {
+          display: grid;
+          grid-template-columns: 30px minmax(0, 1fr) 56px;
+          gap: 10px;
+          align-items: center;
+          font-size: 10px;
+          letter-spacing: 0.1em;
+          text-transform: uppercase;
+          color: var(--infra-muted);
+        }
+        .infra-signal-bar {
+          height: 7px;
+          border-radius: 999px;
+          background: var(--infra-soft-strong);
+          overflow: hidden;
+        }
+        .infra-signal-bar span {
+          display: block;
+          height: 100%;
+          border-radius: inherit;
+        }
+        .infra-placeholder-grid {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+        .infra-placeholder-card {
+          padding: 16px;
+          min-height: 108px;
+        }
+        .infra-placeholder-card-accent {
+          background:
+            linear-gradient(180deg, color-mix(in srgb, var(--infra-accent) 8%, transparent), transparent 80%),
+            var(--infra-soft);
+        }
+        .infra-stack-grid {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+        .infra-stack-card,
+        .infra-telemetry-card,
+        .infra-memory-item,
+        .infra-note-item {
+          padding: 15px 16px;
+        }
+        .infra-telemetry-grid {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+        .infra-timeline-item {
+          display: grid;
+          grid-template-columns: 20px minmax(0, 1fr);
+          gap: 12px;
+        }
+        .infra-timeline-axis {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+        }
+        .infra-timeline-line {
+          width: 1px;
+          flex: 1;
+          background: var(--infra-line);
+          margin-top: 8px;
+        }
+        .infra-timeline-body {
+          padding: 0 0 14px;
+          border-bottom: 1px solid var(--infra-line);
+        }
+        .infra-empty {
+          padding: 18px;
+          background: var(--infra-soft);
+          border: 1px solid var(--infra-line);
+          border-radius: 18px;
+          display: flex;
+          flex-direction: column;
+          gap: 10px;
+        }
+        @media (max-width: 1360px) {
+          .infra-summary-rail {
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+          }
+          .infra-layout {
+            grid-template-columns: minmax(0, 1fr);
+          }
+          .infra-column-right {
+            order: 3;
+          }
+          .infra-column-center {
+            order: 2;
+          }
+          .infra-column-left {
+            order: 1;
+          }
+        }
+        @media (max-width: 960px) {
+          .infra-page {
+            padding: 20px 16px 28px;
+          }
+          .infra-header,
+          .infra-dual,
+          .infra-workload-row,
+          .infra-placeholder-grid,
+          .infra-stack-grid,
+          .infra-telemetry-grid,
+          .infra-metric-grid,
+          .infra-summary-rail {
+            grid-template-columns: minmax(0, 1fr);
+          }
+          .infra-header {
+            flex-direction: column;
+          }
+          .infra-workload-row {
+            display: flex;
+            flex-direction: column;
+          }
+        }
+      `}</style>
+    </div>
+  )
+}

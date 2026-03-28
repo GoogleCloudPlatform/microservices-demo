@@ -1,0 +1,14 @@
+.git
+.gitignore
+.DS_Store
+dashboard/node_modules
+dashboard/dist
+pipeline/logs
+backend/.runtime
+__pycache__
+**/__pycache__
+*.pyc
+.venv
+env
+.idea
+.vscode

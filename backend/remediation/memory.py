@@ -1,8 +1,8 @@
 from __future__ import annotations
 
 import json
-import math
 import sqlite3
+import time
 from pathlib import Path
 from typing import Dict, List, Optional
 
@@ -26,18 +26,40 @@ class IncidentMemoryStore:
 
 
 class SQLiteIncidentMemoryStore(IncidentMemoryStore):
-    def __init__(self, db_path: Path) -> None:
+    SCHEMA_VERSION = 1
+
+    def __init__(self, db_path: Path, max_records: int = 5000, retention_days: int = 30) -> None:
         self.db_path = Path(db_path)
+        self.max_records = max_records
+        self.retention_days = retention_days
         self.db_path.parent.mkdir(parents=True, exist_ok=True)
         self._init_db()
 
     def _connect(self) -> sqlite3.Connection:
-        conn = sqlite3.connect(self.db_path)
-        conn.row_factory = sqlite3.Row
-        return conn
+        try:
+            conn = sqlite3.connect(self.db_path)
+            conn.row_factory = sqlite3.Row
+            return conn
+        except sqlite3.DatabaseError:
+            backup = self.db_path.with_suffix(f".corrupt-{int(time.time())}.db")
+            if self.db_path.exists():
+                self.db_path.rename(backup)
+            conn = sqlite3.connect(self.db_path)
+            conn.row_factory = sqlite3.Row
+            return conn
 
     def _init_db(self) -> None:
         with self._connect() as conn:
+            conn.execute(
+                """
+                CREATE TABLE IF NOT EXISTS schema_version (
+                    version INTEGER NOT NULL
+                )
+                """
+            )
+            existing = conn.execute("SELECT version FROM schema_version LIMIT 1").fetchone()
+            if existing is None:
+                conn.execute("INSERT INTO schema_version (version) VALUES (?)", (self.SCHEMA_VERSION,))
             conn.execute(
                 """
                 CREATE TABLE IF NOT EXISTS incident_memory (
@@ -115,6 +137,7 @@ class SQLiteIncidentMemoryStore(IncidentMemoryStore):
                 )
             except sqlite3.OperationalError:
                 pass
+            self._prune(conn)
 
     def list_recent(self, limit: int = 20) -> List[Dict]:
         with self._connect() as conn:
@@ -127,6 +150,9 @@ class SQLiteIncidentMemoryStore(IncidentMemoryStore):
                 (limit,),
             ).fetchall()
         return [self._row_to_dict(row) for row in rows]
+
+    def export_recent(self, limit: int = 200) -> List[Dict]:
+        return self.list_recent(limit=limit)
 
     def find_similar(
         self,
@@ -201,3 +227,26 @@ class SQLiteIncidentMemoryStore(IncidentMemoryStore):
         item["feature_flags"] = json.loads(item.pop("feature_flags_json", "[]"))
         item["metric_signature"] = json.loads(item.pop("metric_signature_json", "{}"))
         return item
+
+    def _prune(self, conn: sqlite3.Connection) -> None:
+        if self.retention_days > 0:
+            conn.execute(
+                """
+                DELETE FROM incident_memory
+                WHERE julianday('now') - julianday(created_at) > ?
+                """,
+                (self.retention_days,),
+            )
+        if self.max_records > 0:
+            conn.execute(
+                """
+                DELETE FROM incident_memory
+                WHERE incident_id IN (
+                    SELECT incident_id
+                    FROM incident_memory
+                    ORDER BY created_at DESC
+                    LIMIT -1 OFFSET ?
+                )
+                """,
+                (self.max_records,),
+            )

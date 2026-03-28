@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: redis-exporter
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: redis-exporter
+  template:
+    metadata:
+      labels:
+        app: redis-exporter
+    spec:
+      containers:
+        - name: redis-exporter
+          image: oliver006/redis_exporter:v1.67.0
+          env:
+            - name: REDIS_ADDR
+              value: redis://redis-cart.default.svc.cluster.local:6379
+          ports:
+            - containerPort: 9121
+              name: http
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: redis-exporter
+spec:
+  selector:
+    app: redis-exporter
+  ports:
+    - port: 9121
+      targetPort: http
+      name: http

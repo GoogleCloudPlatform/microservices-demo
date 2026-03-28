@@ -57,6 +57,24 @@ class MemoryStoreTests(unittest.TestCase):
             self.assertEqual(matches[0]["incident_id"], "1")
             self.assertGreater(matches[0]["similarity_score"], matches[1]["similarity_score"])
 
+    def test_store_prunes_to_max_records(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            store = SQLiteIncidentMemoryStore(Path(tmpdir) / "incidents.db", max_records=2, retention_days=365)
+            for incident_id in ["1", "2", "3"]:
+                store.save(
+                    MemoryRecord(
+                        incident_id=incident_id,
+                        service="frontend",
+                        failure_type="generic_anomaly",
+                        severity="warning",
+                        selected_action="restart_service",
+                        outcome="resolved",
+                    )
+                )
+            recent = store.list_recent(limit=10)
+            self.assertEqual(len(recent), 2)
+            self.assertEqual({item["incident_id"] for item in recent}, {"2", "3"})
+
 
 if __name__ == "__main__":
     unittest.main()

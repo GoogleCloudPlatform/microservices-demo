@@ -1,0 +1,52 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: prometheus-config
+data:
+  prometheus.yml: |
+    global:
+      scrape_interval: 15s
+      evaluation_interval: 15s
+    scrape_configs:
+      - job_name: prometheus
+        static_configs:
+          - targets: ['localhost:9090']
+      - job_name: aegis-backend
+        static_configs:
+          - targets: ['aegis-backend:8001']
+      - job_name: grafana
+        metrics_path: /metrics
+        static_configs:
+          - targets: ['grafana:3000']
+      - job_name: loki
+        static_configs:
+          - targets: ['loki:3100']
+      - job_name: promtail
+        static_configs:
+          - targets: ['promtail:9080']
+      - job_name: jaeger
+        static_configs:
+          - targets: ['jaeger:14269']
+      - job_name: otel-collector
+        static_configs:
+          - targets: ['otel-collector:8889']
+      - job_name: kube-state-metrics
+        static_configs:
+          - targets: ['kube-state-metrics:8080']
+      - job_name: redis-exporter
+        static_configs:
+          - targets: ['redis-exporter:9121']
+      - job_name: node-exporter
+        kubernetes_sd_configs:
+          - role: endpoints
+        relabel_configs:
+          - source_labels: [__meta_kubernetes_service_name]
+            action: keep
+            regex: node-exporter
+      - job_name: cadvisor
+        kubernetes_sd_configs:
+          - role: endpoints
+        relabel_configs:
+          - source_labels: [__meta_kubernetes_service_name]
+            action: keep
+            regex: cadvisor

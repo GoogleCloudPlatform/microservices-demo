@@ -149,6 +149,12 @@ class Incident:
     containment: ContainmentState = field(default_factory=ContainmentState)
     memory_matches: List[Dict[str, Any]] = field(default_factory=list)
     operator_summary: str = ""
+    acknowledged: bool = False
+    acknowledged_by: Optional[str] = None
+    acknowledged_at: Optional[str] = None
+    manual_owner: Optional[str] = None
+    automation_locked: bool = False
+    cooldown_until: Optional[str] = None
 
     @classmethod
     def create(

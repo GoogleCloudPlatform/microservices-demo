@@ -1,0 +1,52 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: aegis-dashboard
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: aegis-dashboard
+  template:
+    metadata:
+      labels:
+        app: aegis-dashboard
+    spec:
+      containers:
+        - name: web
+          image: aegis-dashboard:dev
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8080
+              name: http
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            initialDelaySeconds: 15
+            periodSeconds: 20
+          resources:
+            requests:
+              cpu: 100m
+              memory: 64Mi
+            limits:
+              cpu: 300m
+              memory: 256Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: aegis-dashboard
+spec:
+  selector:
+    app: aegis-dashboard
+  ports:
+    - port: 80
+      targetPort: http
+      name: http

@@ -129,6 +129,35 @@ class RemediationEngineTests(unittest.TestCase):
             self.assertEqual(result["containment"]["containment_mode"], "isolate")
             self.assertIn(result["status"], {"contained", "manual_required"})
 
+    def test_engine_blocks_repeat_action_during_cooldown(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            scores = iter(
+                [
+                    {"recommendationservice": {"combined_score": 0.92}},
+                    {"recommendationservice": {"combined_score": 0.12}},
+                ]
+            )
+            engine = RemediationEngine(
+                score_provider=lambda: next(scores),
+                orchestrator=FakeOrchestrator(becomes_healthy=True),
+                memory_store=SQLiteIncidentMemoryStore(Path(tmpdir) / "incidents.db"),
+                cooldown_s=60.0,
+            )
+            engine.policy_engine = FakePolicyEngine(
+                ActionDecision(
+                    action="restart_service",
+                    target="recommendationservice",
+                    retry_budget=0,
+                    evaluation_window_s=0.0,
+                    containment_actions=["isolate_service", "escalate_incident"],
+                )
+            )
+            first = engine.remediate("recommendationservice", "memory_leak")
+            second = engine.remediate("recommendationservice", "memory_leak")
+            self.assertEqual(first["status"], "resolved")
+            self.assertEqual(second["status"], "manual_required")
+            self.assertEqual(second["current_phase"], "guard")
+
 
 if __name__ == "__main__":
     unittest.main()

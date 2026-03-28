@@ -1,0 +1,57 @@
+services:
+  aegis-backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    container_name: aegis-backend
+    environment:
+      AEGIS_RUNTIME_MODE: ${AEGIS_RUNTIME_MODE:-dev}
+      AEGIS_ENVIRONMENT: ${AEGIS_ENVIRONMENT:-compose}
+      AEGIS_CLUSTER_NAME: ${AEGIS_CLUSTER_NAME:-online-boutique}
+      AEGIS_ALLOWED_ORIGINS: ${AEGIS_ALLOWED_ORIGINS:-http://localhost:8088}
+      AEGIS_AUTH_ENABLED: ${AEGIS_AUTH_ENABLED:-false}
+      AEGIS_API_TOKEN: ${AEGIS_API_TOKEN:-}
+      AEGIS_ORCHESTRATOR: ${AEGIS_ORCHESTRATOR:-docker}
+      AEGIS_PROMETHEUS_URL: ${AEGIS_PROMETHEUS_URL:-http://prometheus:9090}
+      AEGIS_LOKI_URL: ${AEGIS_LOKI_URL:-http://loki:3100}
+      AEGIS_PROMTAIL_URL: ${AEGIS_PROMTAIL_URL:-http://promtail:9080}
+      AEGIS_JAEGER_URL: ${AEGIS_JAEGER_URL:-http://jaeger:16686}
+      AEGIS_GRAFANA_URL: ${AEGIS_GRAFANA_URL:-http://grafana:3000}
+      AEGIS_OTEL_COLLECTOR_URL: ${AEGIS_OTEL_COLLECTOR_URL:-http://otel-collector:8889}
+      AEGIS_ALLOW_DEMO_MODE: ${AEGIS_ALLOW_DEMO_MODE:-true}
+    ports:
+      - "8001:8001"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8001/health')"]
+      interval: 20s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+    networks:
+      - boutique
+
+  aegis-dashboard:
+    build:
+      context: .
+      dockerfile: dashboard/Dockerfile
+      args:
+        VITE_API_BASE_URL: /api
+    container_name: aegis-dashboard
+    depends_on:
+      aegis-backend:
+        condition: service_healthy
+    ports:
+      - "8088:8080"
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:8080/healthz"]
+      interval: 20s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+    networks:
+      - boutique
+
+networks:
+  boutique:
+    name: microservices-demo_boutique
+    external: true

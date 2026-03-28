@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# start_platform.sh — Launch the full AI Observability Platform
-# Starts: FastAPI backend (port 8001) + React dashboard (port 5173)
+# start_platform.sh — Local development launcher
+# Starts: FastAPI backend (port 8001) + React dashboard dev server (port 5173)
 #
 # Usage:   bash infra/start_platform.sh
 # Stop:    bash infra/stop_platform.sh
@@ -16,7 +16,7 @@ API_PID_FILE="$LOG_DIR/api.pid"
 DASH_PID_FILE="$LOG_DIR/dashboard.pid"
 
 echo "============================================================"
-echo "  AI Observability & Self-Healing Platform"
+echo "  AEGIS local development mode"
 echo "============================================================"
 
 # ── Guard: API already running ────────────────────────────────
@@ -35,7 +35,7 @@ echo "[1/3] Installing backend dependencies..."
 pip3 install -r "$REPO_ROOT/backend/requirements.txt" --quiet
 
 # ── 2. Start FastAPI ──────────────────────────────────────────
-echo "[2/3] Starting FastAPI backend on port 8001..."
+echo "[2/3] Starting FastAPI backend in development mode on port 8001..."
 cd "$REPO_ROOT"
 nohup python3 -m uvicorn backend.anomaly_api.main:app \
     --host 0.0.0.0 \
@@ -57,7 +57,7 @@ for i in $(seq 1 15); do
 done
 
 # ── 3. Start React dashboard ──────────────────────────────────
-echo "[3/3] Starting React dashboard on port 5173..."
+echo "[3/3] Starting React dashboard dev server on port 5173..."
 cd "$REPO_ROOT/dashboard"
 if [ ! -d node_modules ]; then
     echo "      Installing npm packages..."

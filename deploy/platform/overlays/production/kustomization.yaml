@@ -1,0 +1,53 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - ../../base
+
+patches:
+  - target:
+      kind: ConfigMap
+      name: aegis-config
+    patch: |-
+      - op: replace
+        path: /data/AEGIS_RUNTIME_MODE
+        value: production
+      - op: replace
+        path: /data/AEGIS_AUTH_ENABLED
+        value: "true"
+      - op: replace
+        path: /data/AEGIS_ALLOW_DEMO_MODE
+        value: "false"
+      - op: replace
+        path: /data/AEGIS_ALLOWED_ORIGINS
+        value: https://aegis.example.com
+  - target:
+      kind: Deployment
+      name: aegis-backend
+    patch: |-
+      - op: replace
+        path: /spec/replicas
+        value: 2
+  - target:
+      kind: Deployment
+      name: aegis-dashboard
+    patch: |-
+      - op: replace
+        path: /spec/replicas
+        value: 2
+  - target:
+      kind: Ingress
+      name: aegis-dashboard
+    patch: |-
+      - op: replace
+        path: /metadata/annotations/nginx.ingress.kubernetes.io~1ssl-redirect
+        value: "true"
+      - op: add
+        path: /spec/tls
+        value:
+          - hosts:
+              - aegis.example.com
+            secretName: aegis-dashboard-tls
+      - op: replace
+        path: /spec/rules/0/host
+        value: aegis.example.com

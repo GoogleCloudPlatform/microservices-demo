@@ -1,0 +1,58 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: aegis-backend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: aegis-backend
+  template:
+    metadata:
+      labels:
+        app: aegis-backend
+    spec:
+      serviceAccountName: aegis-backend
+      containers:
+        - name: api
+          image: aegis-backend:dev
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8001
+              name: http
+          envFrom:
+            - configMapRef:
+                name: aegis-config
+            - secretRef:
+                name: aegis-secrets
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 20
+            periodSeconds: 20
+          resources:
+            requests:
+              cpu: 250m
+              memory: 256Mi
+            limits:
+              cpu: 1000m
+              memory: 1Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: aegis-backend
+spec:
+  selector:
+    app: aegis-backend
+  ports:
+    - port: 8001
+      targetPort: http
+      name: http
