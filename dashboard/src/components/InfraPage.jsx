@@ -101,7 +101,7 @@ function miniSparkPath(points, width, height) {
 
 function Section({ title, eyebrow, children, theme, tight = false }) {
   return (
-    <section className="infra-section" style={{ '--section-gap': tight ? '12px' : '18px' }}>
+    <section className="infra-section" style={{ '--section-gap': tight ? 'var(--infra-subsection-gap-tight)' : 'var(--infra-subsection-gap)' }}>
       <div className="infra-section-header">
         <span className="infra-section-eyebrow">{eyebrow}</span>
         <h2 className="infra-section-title" style={{ fontFamily: theme.displayFont }}>{title}</h2>
@@ -213,7 +213,7 @@ function FleetSummary({ services, theme }) {
     { label: 'warning', value: entries.filter(([, svc]) => svc.status === 'warning').length, tone: severityTone(0.55, theme) },
     { label: 'critical', value: entries.filter(([, svc]) => svc.status === 'critical').length, tone: severityTone(0.92, theme) },
     { label: 'isolated', value: isolated.length, tone: theme.accent },
-    { label: 'manual', value: manualRequired.length, tone: theme.text },
+    { label: 'manual required', value: manualRequired.length, tone: theme.text },
   ]
 
   return (
@@ -705,6 +705,13 @@ export default function InfraPage({ topology, history, incidents, connected, inf
         '--infra-accent': theme.accent,
         '--infra-soft': dark ? 'rgba(255,255,255,0.035)' : 'rgba(26,26,26,0.03)',
         '--infra-soft-strong': dark ? 'rgba(255,255,255,0.06)' : 'rgba(26,26,26,0.05)',
+        '--infra-page-padding': '28px',
+        '--infra-section-padding': '20px',
+        '--infra-header-gap': '18px',
+        '--infra-subsection-gap': '16px',
+        '--infra-subsection-gap-tight': '12px',
+        '--infra-card-gap': '12px',
+        '--infra-rail-gap': '22px',
       }}
     >
       <div className="infra-header">
@@ -727,8 +734,8 @@ export default function InfraPage({ topology, history, incidents, connected, inf
         ))}
       </div>
 
-      <div className="infra-layout">
-        <div className="infra-column infra-column-left">
+      <div className="infra-main-grid">
+        <div className="infra-main-left">
           <Section title="Cluster & Workload Health" eyebrow="Live now + ready states" theme={theme}>
             <div className="infra-subsection">
               <div className="infra-kicker">Runtime service saturation</div>
@@ -770,9 +777,7 @@ export default function InfraPage({ topology, history, incidents, connected, inf
               <TrendRibbon history={safeHistory} services={services} theme={theme} />
             </div>
           </Section>
-        </div>
 
-        <div className="infra-column infra-column-center">
           <Section title="Service Telemetry Lens" eyebrow="High-signal comparisons" theme={theme}>
             <div className="infra-telemetry-grid">
               {Object.entries(services)
@@ -809,20 +814,9 @@ export default function InfraPage({ topology, history, incidents, connected, inf
                 })}
             </div>
           </Section>
-
-          <Section title="Observability Stack Health" eyebrow="Metrics · logs · traces" theme={theme}>
-            <div className="infra-subsection">
-              <div className="infra-kicker">Stack posture</div>
-              <StackHealth topology={safeTopology} services={services} theme={theme} infrastructure={safeInfrastructure} />
-            </div>
-            <div className="infra-subsection">
-              <div className="infra-kicker">Pipeline readiness</div>
-              <PipelineReadiness services={services} topology={safeTopology} theme={theme} />
-            </div>
-          </Section>
         </div>
 
-        <div className="infra-column infra-column-right">
+        <div className="infra-main-right">
           <Section title="Incidents & Remediation" eyebrow="Retry · isolate · reroute · escalate" theme={theme} tight>
             <IncidentsRail topology={safeTopology} incidents={safeIncidents} services={services} theme={theme} />
           </Section>
@@ -837,12 +831,27 @@ export default function InfraPage({ topology, history, incidents, connected, inf
         </div>
       </div>
 
+      <div className="infra-bottom-band">
+        <Section title="Observability Stack Health" eyebrow="Metrics · logs · traces" theme={theme}>
+          <div className="infra-bottom-grid">
+            <div className="infra-subsection">
+              <div className="infra-kicker">Stack posture</div>
+              <StackHealth topology={safeTopology} services={services} theme={theme} infrastructure={safeInfrastructure} />
+            </div>
+            <div className="infra-subsection">
+              <div className="infra-kicker">Pipeline readiness</div>
+              <PipelineReadiness services={services} topology={safeTopology} theme={theme} />
+            </div>
+          </div>
+        </Section>
+      </div>
+
       <style>{`
         .infra-page {
           flex: 1;
           min-height: 0;
           overflow-y: auto;
-          padding: 28px 28px 36px;
+          padding: var(--infra-page-padding) var(--infra-page-padding) 36px;
           background:
             radial-gradient(circle at top left, color-mix(in srgb, var(--infra-accent) 8%, transparent), transparent 28%),
             linear-gradient(to bottom, transparent, transparent),
@@ -858,7 +867,7 @@ export default function InfraPage({ topology, history, incidents, connected, inf
           align-items: flex-start;
           gap: 20px;
           padding-bottom: 20px;
-          margin-bottom: 20px;
+          margin-bottom: var(--infra-header-gap);
           border-bottom: 1px solid var(--infra-line);
         }
         .infra-page-kicker,
@@ -889,8 +898,8 @@ export default function InfraPage({ topology, history, incidents, connected, inf
         .infra-summary-rail {
           display: grid;
           grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-          gap: 14px;
-          margin-bottom: 26px;
+          gap: var(--infra-card-gap);
+          margin-bottom: calc(var(--infra-card-gap) * 2);
         }
         .infra-summary-card,
         .infra-section,
@@ -946,9 +955,36 @@ export default function InfraPage({ topology, history, incidents, connected, inf
           color: var(--infra-muted);
         }
         .infra-layout {
+          display: none;
+        }
+        .infra-main-grid {
           display: grid;
-          grid-template-columns: minmax(360px, 1.12fr) minmax(320px, 1fr) minmax(300px, 0.88fr);
-          gap: 22px;
+          grid-template-columns: minmax(0, 1.6fr) minmax(300px, 0.78fr);
+          gap: var(--infra-rail-gap);
+          align-items: start;
+          margin-bottom: var(--infra-rail-gap);
+        }
+        .infra-main-left {
+          display: flex;
+          flex-direction: column;
+          gap: var(--infra-rail-gap);
+          min-width: 0;
+        }
+        .infra-main-right {
+          display: flex;
+          flex-direction: column;
+          gap: var(--infra-rail-gap);
+          min-width: 0;
+        }
+        .infra-bottom-band {
+          display: flex;
+          flex-direction: column;
+          gap: var(--infra-card-gap);
+        }
+        .infra-bottom-grid {
+          display: grid;
+          grid-template-columns: minmax(0, 1.12fr) minmax(300px, 0.88fr);
+          gap: var(--infra-rail-gap);
           align-items: start;
         }
         .infra-column {
@@ -958,7 +994,7 @@ export default function InfraPage({ topology, history, incidents, connected, inf
           min-width: 0;
         }
         .infra-section {
-          padding: 20px;
+          padding: var(--infra-section-padding);
           min-width: 0;
         }
         .infra-section-header {
@@ -1012,12 +1048,12 @@ export default function InfraPage({ topology, history, incidents, connected, inf
         .infra-dual {
           display: grid;
           grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-          gap: 14px;
+          gap: var(--infra-card-gap);
         }
         .infra-subsection {
           display: flex;
           flex-direction: column;
-          gap: 12px;
+          gap: var(--infra-card-gap);
           min-width: 0;
         }
         .infra-definition-list {
@@ -1047,7 +1083,7 @@ export default function InfraPage({ topology, history, incidents, connected, inf
           gap: 12px;
         }
         .infra-metric-grid {
-          grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+          grid-template-columns: repeat(auto-fit, minmax(128px, 1fr));
         }
         .infra-mini-card,
         .infra-readiness-card {
@@ -1097,7 +1133,7 @@ export default function InfraPage({ topology, history, incidents, connected, inf
         .infra-notes {
           display: flex;
           flex-direction: column;
-          gap: 10px;
+          gap: var(--infra-card-gap);
         }
         .infra-workload-row {
           display: grid;
@@ -1155,13 +1191,14 @@ export default function InfraPage({ topology, history, incidents, connected, inf
           padding: 5px 9px;
           border-radius: 999px;
           border: 1px solid var(--infra-line);
-          font-size: 10px;
+          font-size: 9px;
           letter-spacing: 0.1em;
           text-transform: uppercase;
           color: var(--infra-muted);
           background: transparent;
           max-width: 100%;
           overflow-wrap: anywhere;
+          white-space: normal;
         }
         .infra-badge-ok {
           color: #2f8e54;
@@ -1178,7 +1215,7 @@ export default function InfraPage({ topology, history, incidents, connected, inf
         .infra-signal-row,
         .infra-telemetry-row {
           display: grid;
-          grid-template-columns: 72px minmax(0, 1fr) 72px;
+          grid-template-columns: minmax(84px, 0.9fr) minmax(0, 1fr) minmax(74px, auto);
           gap: 10px;
           align-items: center;
           font-size: 10px;
@@ -1186,6 +1223,13 @@ export default function InfraPage({ topology, history, incidents, connected, inf
           text-transform: uppercase;
           color: var(--infra-muted);
           min-width: 0;
+        }
+        .infra-signal-row > span,
+        .infra-telemetry-row > span,
+        .infra-signal-row strong,
+        .infra-telemetry-row strong {
+          min-width: 0;
+          overflow-wrap: anywhere;
         }
         .infra-signal-bar {
           height: 7px;
@@ -1233,6 +1277,7 @@ export default function InfraPage({ topology, history, incidents, connected, inf
           flex-direction: column;
           gap: 10px;
           justify-content: flex-start;
+          min-height: 0;
         }
         .infra-telemetry-top {
           display: flex;
@@ -1276,26 +1321,22 @@ export default function InfraPage({ topology, history, incidents, connected, inf
         .infra-recent-grid {
           display: grid;
           grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-          gap: 12px;
+          gap: var(--infra-card-gap);
         }
         .infra-copy,
         .infra-summary-meta,
         .infra-placeholder-copy,
-        .infra-workload-sub {
+        .infra-workload-sub,
+        .infra-summary-label,
+        .infra-mini-label,
+        .infra-kicker,
+        .infra-placeholder-label {
           overflow-wrap: anywhere;
         }
         @media (max-width: 1360px) {
-          .infra-layout {
+          .infra-main-grid,
+          .infra-bottom-grid {
             grid-template-columns: minmax(0, 1fr);
-          }
-          .infra-column-right {
-            order: 3;
-          }
-          .infra-column-center {
-            order: 2;
-          }
-          .infra-column-left {
-            order: 1;
           }
         }
         @media (max-width: 960px) {
