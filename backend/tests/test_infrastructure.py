@@ -78,7 +78,7 @@ class InfrastructurePayloadTests(unittest.TestCase):
             {"ok": True, "json": {}},
             {"ok": True, "json": {}},
         ]
-        with patch.dict(os.environ, {}, clear=True):
+        with patch.dict(os.environ, {"AEGIS_INFRA_COLLECTORS_ENABLED": "true"}, clear=True):
             settings = load_settings()
         payload = build_infrastructure_payload(
             settings=settings,

@@ -275,6 +275,8 @@ services:
   promtail:
     image: grafana/promtail:3.6.8
     container_name: promtail
+    ports:
+      - "9080:9080"
     volumes:
       - /var/lib/docker/containers:/var/lib/docker/containers:ro
       - /var/run/docker.sock:/var/run/docker.sock:ro

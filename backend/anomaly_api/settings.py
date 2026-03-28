@@ -79,6 +79,7 @@ def load_settings() -> Settings:
 
     default_origins = "http://localhost:5173,http://127.0.0.1:5173"
     auth_default = runtime_mode == "production"
+    collectors_default = runtime_mode == "production"
 
     return Settings(
         runtime_mode=runtime_mode,
@@ -102,7 +103,7 @@ def load_settings() -> Settings:
         incident_memory_retention_days=_env_int("AEGIS_INCIDENT_MEMORY_RETENTION_DAYS", 30),
         remediation_cooldown_s=_env_float("AEGIS_REMEDIATION_COOLDOWN_S", 30.0),
         remediation_lock_timeout_s=_env_float("AEGIS_REMEDIATION_LOCK_TIMEOUT_S", 300.0),
-        infrastructure_collectors_enabled=_env_bool("AEGIS_INFRA_COLLECTORS_ENABLED", True),
+        infrastructure_collectors_enabled=_env_bool("AEGIS_INFRA_COLLECTORS_ENABLED", collectors_default),
         model_dir=os.getenv("AEGIS_MODEL_DIR", "models/aegis_models"),
         system_db_path=os.getenv("AEGIS_SYSTEM_DB", "backend/.runtime/aegis_system.db"),
         predictive_alert_threshold=_env_float("AEGIS_PREDICTIVE_ALERT_THRESHOLD", 0.68),

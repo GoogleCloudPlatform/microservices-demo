@@ -81,7 +81,11 @@ def build_infrastructure_payload(
     grafana_health = _safe_json(f"{settings.grafana_url}/api/health")
     jaeger_services = _safe_json(f"{settings.jaeger_url}/api/services")
     promtail_ready = _safe_json(f"{settings.promtail_url}/ready")
-    otel_metrics = _safe_json(f"{settings.otel_collector_url}/metrics")
+    otel_metrics = (
+        _safe_json(f"{settings.otel_collector_url}/metrics")
+        if settings.infrastructure_collectors_enabled and settings.otel_collector_url
+        else {"ok": False, "error": None, "json": {}, "configured": False}
+    )
 
     workloads = []
     cluster_summary: Dict[str, Any] = {
@@ -136,6 +140,7 @@ def build_infrastructure_payload(
             },
             "promtail": {
                 "available": promtail_ready["ok"],
+                "configured": True,
                 "error": promtail_ready.get("error"),
             },
             "grafana": {
@@ -150,6 +155,7 @@ def build_infrastructure_payload(
             },
             "otel_collector": {
                 "available": otel_metrics["ok"],
+                "configured": settings.infrastructure_collectors_enabled and bool(settings.otel_collector_url),
                 "error": otel_metrics.get("error"),
             },
         },
