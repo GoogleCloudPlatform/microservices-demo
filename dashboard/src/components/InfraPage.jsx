@@ -65,6 +65,39 @@ function statusTone(status, score, theme) {
   return severityTone(Math.min(score, 0.18), theme)
 }
 
+function arrayToMap(items, key = 'service') {
+  return asArray(items).reduce((acc, item) => {
+    const itemKey = item?.[key]
+    if (itemKey) acc[itemKey] = item
+    return acc
+  }, {})
+}
+
+function runtimeHealthScore(runtime) {
+  if (!runtime?.exists) return 0.04
+  if (!runtime?.running) return 0.2
+  if (!runtime?.healthy) return 0.45
+  return 0.98
+}
+
+function pressureScore(snapshot = {}) {
+  return clamp(
+    Math.max(
+      snapshot.cpu_pressure || 0,
+      snapshot.memory_pressure || 0,
+      snapshot.network_pressure || 0,
+      snapshot.combined_score || 0,
+      (snapshot.error_rate_mean || 0) * 4
+    ),
+    0,
+    1
+  )
+}
+
+function restartScore(runtime) {
+  return clamp((Number(runtime?.restart_count || 0) || 0) / 5, 0, 1)
+}
+
 function topMemoryMatches(services) {
   return Object.entries(asObject(services))
     .flatMap(([service, snapshot]) =>
@@ -202,18 +235,19 @@ function RootCauseSpotlight({ topology, services, theme }) {
   )
 }
 
-function FleetSummary({ services, theme }) {
+function FleetSummary({ services, theme, infrastructure }) {
   const entries = Object.entries(asObject(services))
+  const summary = asObject(infrastructure?.fleet_summary)
   const active = entries.filter(([, svc]) => svc.latest_incident?.status === 'active')
   const isolated = active.filter(([, svc]) => svc.latest_incident?.containment?.containment_mode === 'isolate')
   const manualRequired = active.filter(([, svc]) => svc.latest_incident?.containment?.manual_required)
 
   const rows = [
-    { label: 'healthy', value: entries.filter(([, svc]) => svc.status === 'normal').length, tone: severityTone(0.12, theme) },
-    { label: 'warning', value: entries.filter(([, svc]) => svc.status === 'warning').length, tone: severityTone(0.55, theme) },
-    { label: 'critical', value: entries.filter(([, svc]) => svc.status === 'critical').length, tone: severityTone(0.92, theme) },
-    { label: 'isolated', value: isolated.length, tone: theme.accent },
-    { label: 'manual required', value: manualRequired.length, tone: theme.text },
+    { label: 'healthy', value: summary.healthy ?? entries.filter(([, svc]) => svc.status === 'normal').length, tone: severityTone(0.12, theme) },
+    { label: 'warning', value: summary.warning ?? entries.filter(([, svc]) => svc.status === 'warning').length, tone: severityTone(0.55, theme) },
+    { label: 'critical', value: summary.critical ?? entries.filter(([, svc]) => svc.status === 'critical').length, tone: severityTone(0.92, theme) },
+    { label: 'isolated', value: summary.isolated ?? isolated.length, tone: theme.accent },
+    { label: 'manual required', value: summary.manual_required ?? manualRequired.length, tone: theme.text },
   ]
 
   return (
@@ -228,7 +262,7 @@ function FleetSummary({ services, theme }) {
   )
 }
 
-function WorkloadMatrix({ services, topology, theme }) {
+function WorkloadMatrix({ services, topology, theme, workloads, demoRun }) {
   const ranked = Object.entries(asObject(services))
     .map(([service, snapshot]) => ({
       service,
@@ -243,13 +277,26 @@ function WorkloadMatrix({ services, topology, theme }) {
     <div className="infra-workload-list">
       {ranked.map(({ service, snapshot }) => {
         const status = snapshot.status || 'normal'
-        const tone = statusTone(status, snapshot.combined_score || 0, theme)
-        const workload = snapshot.latest_incident?.decision?.target || service
-        const state = snapshot.latest_incident?.status || (status === 'normal' ? 'stable' : 'watch')
-        const memory = snapshot.memory_pressure || 0
-        const cpu = snapshot.cpu_pressure || 0
-        const network = snapshot.network_pressure || 0
-        const lineMax = Math.max(cpu, memory, network, 1)
+        const runtime = workloads?.[service]?.runtime || {}
+        const runtimeScore = runtimeHealthScore(runtime)
+        const anomalyPressure = pressureScore(snapshot)
+        const restartPressure = restartScore(runtime)
+        const tone = statusTone(
+          !runtime.exists || !runtime.running || !runtime.healthy ? 'critical' : status,
+          Math.max(anomalyPressure, 1 - runtimeScore),
+          theme
+        )
+        const workload = snapshot.latest_incident?.decision?.target || workloads?.[service]?.service || service
+        const state = runtime.status || snapshot.latest_incident?.status || (status === 'normal' ? 'stable' : 'watch')
+        const cpuPercent = workloads?.[service]?.cpu_percent ?? snapshot.cpu_mean ?? 0
+        const memoryPercent = workloads?.[service]?.memory_percent ?? snapshot.mem_mean ?? 0
+        const networkValue = (workloads?.[service]?.network_rx_mbps || 0) + (workloads?.[service]?.network_tx_mbps || 0)
+        const demoActive = demoRun?.service === service && demoRun?.status === 'running'
+        const signalRows = [
+          ['runtime', runtimeScore, runtime.healthy ? 'healthy' : runtime.running ? 'degraded' : runtime.exists ? 'stopped' : 'missing'],
+          ['pressure', anomalyPressure, `${Math.round((snapshot.combined_score || 0) * 100)} score`],
+          ['restarts', restartPressure, `${runtime.restart_count || 0}`],
+        ]
 
         return (
           <div key={service} className="infra-workload-row">
@@ -261,29 +308,30 @@ function WorkloadMatrix({ services, topology, theme }) {
                     {SERVICE_SHORT[service] || service}
                   </div>
                   <div className="infra-workload-sub">
-                    {workload} · {state} {affected.has(service) ? '· in blast radius' : ''}
+                    {workload} · {state} {affected.has(service) ? '· in blast radius' : ''}{demoActive ? ' · demo target' : ''}
                   </div>
                 </div>
               </div>
               <div className="infra-badge-row">
                 <Badge label={formatStatusLabel(status)} tone={status === 'critical' ? 'critical' : status === 'warning' ? 'warning' : 'ok'} />
+                <Badge label={runtime.healthy ? 'runtime healthy' : runtime.running ? 'runtime degraded' : runtime.exists ? 'runtime stopped' : 'runtime missing'} tone={runtime.healthy ? 'ok' : 'critical'} />
+                {demoActive && <Badge label={`demo ${formatStatusLabel(demoRun.stage)}`} tone="warning" />}
                 {(snapshot.feature_flags || []).slice(0, 2).map(flag => (
                   <Badge key={flag} label={flag.replace(/_/g, ' ')} />
                 ))}
               </div>
+              <div className="infra-workload-sub">
+                CPU {formatPercent(cpuPercent || 0)} · memory {formatPercent(memoryPercent || 0)} · network {formatNumber(networkValue || 0, 2)} Mbps
+              </div>
             </div>
             <div className="infra-signal-stack">
-              {[
-                ['cpu', cpu, snapshot.cpu_mean || 0],
-                ['mem', memory, snapshot.mem_mean || 0],
-                ['net', network, snapshot.net_rx_mean + snapshot.net_tx_mean || 0],
-              ].map(([label, rawValue, displayValue]) => (
+              {signalRows.map(([label, rawValue, displayValue]) => (
                 <div key={label} className="infra-signal-row">
                   <span>{label}</span>
                   <div className="infra-signal-bar">
-                    <span style={{ width: `${clamp((rawValue / lineMax) * 100, 8, 100)}%`, background: tone }} />
+                    <span style={{ width: `${clamp((rawValue || 0) * 100, 8, 100)}%`, background: tone }} />
                   </div>
-                  <span>{label === 'net' ? formatNumber(displayValue, 2) : formatPercent(displayValue)}</span>
+                  <span>{displayValue}</span>
                 </div>
               ))}
             </div>
@@ -464,6 +512,7 @@ function RecentChangeSummary({ topology, infrastructure, theme }) {
   const timeline = asArray(topology?.timeline).slice(0, 4)
   const latestOutcome = asArray(topology?.recent_incidents).find(item => item.status === 'resolved')
   const predictiveAlerts = asArray(topology?.predictive_alerts)
+  const demoRun = topology?.demo_run
 
   const items = [
     {
@@ -477,6 +526,11 @@ function RecentChangeSummary({ topology, infrastructure, theme }) {
       meta: predictiveAlerts.length
         ? `${predictiveAlerts[0]?.service || 'A service'} is currently under predictive watch.`
         : 'No predictive alert is active right now.',
+    },
+    {
+      label: 'demo run',
+      value: demoRun ? `${SERVICE_SHORT[demoRun.service] || demoRun.service} · ${formatStatusLabel(demoRun.stage)}` : 'No demo active',
+      meta: demoRun?.summary_text || 'Use the demo button to inject a failure and watch the full recovery path populate this page.',
     },
     {
       label: 'latest timeline marker',
@@ -636,6 +690,7 @@ export default function InfraPage({ topology, history, incidents, connected, inf
   const safeHistory = asArray(history)
   const safeIncidents = asArray(incidents)
   const services = asObject(safeTopology.services)
+  const workloads = arrayToMap(safeInfrastructure.workloads)
   const serviceEntries = Object.entries(services)
   const healthScore = Number.isFinite(safeTopology.health_score) ? safeTopology.health_score : null
   const alerts = asArray(safeTopology.alerts)
@@ -739,7 +794,7 @@ export default function InfraPage({ topology, history, incidents, connected, inf
           <Section title="Cluster & Workload Health" eyebrow="Live now + ready states" theme={theme}>
             <div className="infra-subsection">
               <div className="infra-kicker">Runtime service saturation</div>
-              <WorkloadMatrix services={services} topology={safeTopology} theme={theme} />
+              <WorkloadMatrix services={services} topology={safeTopology} theme={theme} workloads={workloads} demoRun={safeTopology.demo_run} />
             </div>
             <div className="infra-subsection">
               <div className="infra-kicker">Kubernetes management panels</div>
@@ -761,7 +816,7 @@ export default function InfraPage({ topology, history, incidents, connected, inf
               </div>
               <div className="infra-subsection">
                 <div className="infra-kicker">Fleet summary</div>
-                <FleetSummary services={services} theme={theme} />
+                <FleetSummary services={services} theme={theme} infrastructure={safeInfrastructure} />
               </div>
             </div>
             <div className="infra-subsection">
@@ -784,7 +839,11 @@ export default function InfraPage({ topology, history, incidents, connected, inf
                 .sort((a, b) => (b[1].combined_score || 0) - (a[1].combined_score || 0))
                 .slice(0, 6)
                 .map(([service, snapshot]) => {
+                  const runtime = workloads[service] || {}
                   const tone = statusTone(snapshot.status, snapshot.combined_score || 0, theme)
+                  const cpuValue = runtime.cpu_percent ?? snapshot.cpu_mean ?? 0
+                  const memoryValue = runtime.memory_percent ?? snapshot.mem_mean ?? 0
+                  const networkValue = (runtime.network_rx_mbps || 0) + (runtime.network_tx_mbps || 0)
                   return (
                     <div key={service} className="infra-telemetry-card">
                       <div className="infra-telemetry-top">
@@ -795,19 +854,19 @@ export default function InfraPage({ topology, history, incidents, connected, inf
                       </div>
                       <div className="infra-telemetry-row">
                         <span>CPU usage</span>
-                        <strong style={{ color: tone }}>{formatPercent(snapshot.cpu_mean || 0)}</strong>
+                        <strong style={{ color: tone }}>{formatPercent(cpuValue)}</strong>
                       </div>
                       <div className="infra-telemetry-row">
                         <span>Memory usage</span>
-                        <strong>{formatPercent(snapshot.mem_mean || 0)}</strong>
+                        <strong>{formatPercent(memoryValue)}</strong>
                       </div>
                       <div className="infra-telemetry-row">
                         <span>Error rate</span>
                         <strong>{formatPercent((snapshot.error_rate_mean || 0) * 100, 1)}</strong>
                       </div>
                       <div className="infra-telemetry-row">
-                        <span>Logs per second</span>
-                        <strong>{formatNumber(snapshot.log_volume_per_sec || 0, 2)}</strong>
+                        <span>{networkValue > 0 ? 'Network Mbps' : 'Logs per second'}</span>
+                        <strong>{networkValue > 0 ? formatNumber(networkValue, 2) : formatNumber(snapshot.log_volume_per_sec || 0, 2)}</strong>
                       </div>
                     </div>
                   )
