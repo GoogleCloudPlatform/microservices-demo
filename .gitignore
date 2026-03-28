@@ -36,6 +36,25 @@ pipeline/data/models/*.pt
 pipeline/data/models/*.pkl
 pipeline/data/drain3_state.json
 
+# ML model binaries and data arrays
+ml/isolation_forest/data/*.npy
+ml/isolation_forest/model/*.pkl
+ml/lstm/data/*.npy
+ml/lstm/model/*.pkl
+ml/lstm/model/*.keras
+ml/lstm/model/*.h5
+
+# Training data (large)
+pipeline/data/training/*.parquet
+pipeline/data/training/*.csv
+
+# Runtime logs and PIDs
+pipeline/logs/*.log
+pipeline/logs/*.pid
+
+# Dashboard build output
+dashboard/dist/
+
 # Python
 __pycache__/
 *.pyc

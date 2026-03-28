@@ -1,0 +1,20 @@
+version: '3.8'
+services:
+  ngrok-api:
+    image: ngrok/ngrok:latest
+    command: http host.docker.internal:8001 --log stdout
+    environment:
+      - NGROK_AUTHTOKEN=${NGROK_AUTHTOKEN:-}
+    ports:
+      - "4040:4040"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+  ngrok-dashboard:
+    image: ngrok/ngrok:latest
+    command: http host.docker.internal:3000 --log stdout
+    environment:
+      - NGROK_AUTHTOKEN=${NGROK_AUTHTOKEN:-}
+    ports:
+      - "4041:4040"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
