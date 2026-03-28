@@ -5,6 +5,7 @@ import logging
 import sqlite3
 import threading
 import time
+from collections import Counter
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
@@ -209,6 +210,61 @@ class SQLiteSystemStore:
             "latest_event": self._event_row_to_dict(latest_event) if latest_event else None,
             "recent_error_logs": int(error_logs["count"]) if error_logs else 0,
         }
+
+    def build_report(self, *, event_limit: int = 120, log_limit: int = 200) -> Dict[str, Any]:
+        events = self.list_events(limit=event_limit)
+        logs = self.list_logs(limit=log_limit)
+        severity_counts = Counter(item["severity"] for item in events)
+        level_counts = Counter(
+            "ERROR" if item["level"] in {"ERROR", "CRITICAL"} else item["level"]
+            for item in logs
+        )
+        services = Counter(item["service"] for item in events if item.get("service"))
+        open_events = [item for item in events if item.get("status") != "closed"]
+        return {
+            "generated_at": utcnow_iso(),
+            "summary": {
+                "event_count": len(events),
+                "log_count": len(logs),
+                "open_event_count": len(open_events),
+                "severity_counts": dict(severity_counts),
+                "log_level_counts": dict(level_counts),
+                "services_with_activity": dict(services.most_common(12)),
+            },
+            "events": events,
+            "logs": logs,
+        }
+
+    def render_markdown_report(self, *, event_limit: int = 120, log_limit: int = 200) -> str:
+        report = self.build_report(event_limit=event_limit, log_limit=log_limit)
+        summary = report["summary"]
+        lines = [
+            "# AEGIS System Activity Report",
+            "",
+            f"Generated at: {report['generated_at']}",
+            "",
+            "## Summary",
+            "",
+            f"- Events captured: {summary['event_count']}",
+            f"- Log lines captured: {summary['log_count']}",
+            f"- Open events: {summary['open_event_count']}",
+            f"- Event severities: {json.dumps(summary['severity_counts'], sort_keys=True)}",
+            f"- Log levels: {json.dumps(summary['log_level_counts'], sort_keys=True)}",
+            "",
+            "## Recent Event Timeline",
+            "",
+        ]
+        for item in report["events"][:40]:
+            lines.append(
+                f"- {item['created_at']} | {item['severity'].upper()} | "
+                f"{item.get('service') or 'platform'} | {item['title']} | {item['message']}"
+            )
+        lines.extend(["", "## Recent Backend Logs", ""])
+        for item in report["logs"][:80]:
+            lines.append(
+                f"- {item['created_at']} | {item['level']} | {item['logger']} | {item['message']}"
+            )
+        return "\n".join(lines)
 
     def _prune_events(self, conn: sqlite3.Connection) -> None:
         if self.max_events > 0:

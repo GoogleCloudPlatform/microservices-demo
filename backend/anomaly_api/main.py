@@ -28,6 +28,7 @@ from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
 
 from fastapi import Depends, FastAPI, Header, HTTPException, Query
+from fastapi.responses import PlainTextResponse
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
@@ -1386,13 +1387,43 @@ async def logs(
     return {"count": len(logs_payload), "logs": logs_payload, "timestamp": utc_now_iso()}
 
 
+@app.get("/logs/report")
+async def logs_report(
+    format: str = Query(default="markdown", pattern="^(markdown|json)$"),
+    event_limit: int = Query(default=160, ge=10, le=500),
+    log_limit: int = Query(default=240, ge=10, le=1000),
+):
+    if state.system_store is None:
+        if format == "json":
+            return {"generated_at": utc_now_iso(), "summary": {}, "events": [], "logs": []}
+        return PlainTextResponse("AEGIS report unavailable: system store is not initialized.\n", media_type="text/markdown")
+
+    if format == "json":
+        return state.system_store.build_report(event_limit=event_limit, log_limit=log_limit)
+
+    return PlainTextResponse(
+        state.system_store.render_markdown_report(event_limit=event_limit, log_limit=log_limit),
+        media_type="text/markdown",
+    )
+
+
 @app.get("/ml/insights")
 async def ml_insights():
     scores = state.current_scores or compute_all_scores()
     services = []
+    history_tail = list(state.history)[-30:]
+    score_history: Dict[str, List[Dict[str, Any]]] = {svc: [] for svc in ALL_SERVICES}
     for svc in ALL_SERVICES:
         snapshot = scores.get(svc, {})
         insight = state.current_model_insights.get(svc, {})
+        predictive_alert = state.predictive_alerts.get(svc)
+        for item in history_tail:
+            score_history[svc].append(
+                {
+                    "timestamp": item.get("timestamp"),
+                    "score": item.get("scores", {}).get(svc, 0),
+                }
+            )
         services.append(
             {
                 "service": svc,
@@ -1406,9 +1437,27 @@ async def ml_insights():
                 "if_contributors": insight.get("if_contributors", []),
                 "sequence_highlights": insight.get("sequence_highlights", []),
                 "latest_sequence_row": insight.get("latest_sequence_row", {}),
+                "predictive_alert": predictive_alert,
+                "score_history": score_history[svc],
             }
         )
     services.sort(key=lambda item: item.get("combined_score", 0) or 0, reverse=True)
+    ready_services = [service for service in services if service.get("model_state") == "ready"]
+    lstm_ready = [service for service in services if isinstance(service.get("lstm_score"), (float, int))]
+    if_ready = [service for service in services if isinstance(service.get("if_score"), (float, int))]
+    top_lstm = max(lstm_ready, key=lambda item: item.get("lstm_score", 0), default=None)
+    top_if = max(if_ready, key=lambda item: item.get("if_score", 0), default=None)
+    aggregate_contributors: Dict[str, float] = {}
+    for service in services:
+        for contributor in service.get("if_contributors", [])[:5]:
+            feature = contributor.get("feature")
+            z_score = float(contributor.get("z_score", 0.0) or 0.0)
+            if feature:
+                aggregate_contributors[feature] = aggregate_contributors.get(feature, 0.0) + abs(z_score)
+    dominant_features = [
+        {"feature": feature, "weight": round(weight, 3)}
+        for feature, weight in sorted(aggregate_contributors.items(), key=lambda item: item[1], reverse=True)[:10]
+    ]
     return {
         "timestamp": utc_now_iso(),
         "models": {
@@ -1416,6 +1465,19 @@ async def ml_insights():
             "lstm": state.lstm_inference.metadata() if state.lstm_inference else {"loaded": False},
         },
         "required_sequence_length": LSTM_SEQUENCE_WINDOW,
+        "summary": {
+            "service_count": len(services),
+            "ready_service_count": len(ready_services),
+            "predictive_alert_count": len(state.predictive_alerts),
+            "highest_combined_service": services[0]["service"] if services else None,
+            "highest_combined_score": services[0].get("combined_score") if services else None,
+            "highest_lstm_service": top_lstm["service"] if top_lstm else None,
+            "highest_lstm_score": top_lstm.get("lstm_score") if top_lstm else None,
+            "highest_if_service": top_if["service"] if top_if else None,
+            "highest_if_score": top_if.get("if_score") if top_if else None,
+        },
+        "predictive_alerts": list(state.predictive_alerts.values()),
+        "dominant_features": dominant_features,
         "services": services,
     }
 

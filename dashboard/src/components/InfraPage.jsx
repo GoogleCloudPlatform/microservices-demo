@@ -460,6 +460,51 @@ function PipelineReadiness({ services, topology, theme }) {
   )
 }
 
+function RecentChangeSummary({ topology, infrastructure, theme }) {
+  const timeline = asArray(topology?.timeline).slice(0, 4)
+  const latestOutcome = asArray(topology?.recent_incidents).find(item => item.status === 'resolved')
+  const predictiveAlerts = asArray(topology?.predictive_alerts)
+
+  const items = [
+    {
+      label: 'latest remediation',
+      value: latestOutcome?.decision?.action ? formatStatusLabel(latestOutcome.decision.action) : 'No closure yet',
+      meta: latestOutcome?.operator_summary || 'No resolved incident has been recorded in the current history window.',
+    },
+    {
+      label: 'preventive alerts',
+      value: `${predictiveAlerts.length}`,
+      meta: predictiveAlerts.length
+        ? `${predictiveAlerts[0]?.service || 'A service'} is currently under predictive watch.`
+        : 'No predictive alert is active right now.',
+    },
+    {
+      label: 'latest timeline marker',
+      value: timeline[0]?.title || 'Awaiting event flow',
+      meta: timeline[0]?.message || 'The persisted timeline feed will summarize remediation and recovery here.',
+    },
+    {
+      label: 'cluster posture',
+      value: infrastructure?.cluster?.available ? 'Kubernetes live' : 'Telemetry ready',
+      meta: infrastructure?.cluster?.summary || 'Node, pod, rollout, and capacity panels are waiting on the full cluster feed.',
+    },
+  ]
+
+  return (
+    <div className="infra-recent-grid">
+      {items.map(item => (
+        <div key={item.label} className="infra-note-item">
+          <div className="infra-kicker">{item.label}</div>
+          <div className="infra-copy" style={{ color: theme.text, fontSize: 13 }}>
+            {item.value}
+          </div>
+          <div className="infra-summary-meta">{item.meta}</div>
+        </div>
+      ))}
+    </div>
+  )
+}
+
 function IncidentsRail({ topology, incidents, services, theme }) {
   const active = asArray(topology?.active_incidents)
   const historyFeed = [...active, ...asArray(incidents)]
@@ -684,6 +729,17 @@ export default function InfraPage({ topology, history, incidents, connected, inf
 
       <div className="infra-layout">
         <div className="infra-column infra-column-left">
+          <Section title="Cluster & Workload Health" eyebrow="Live now + ready states" theme={theme}>
+            <div className="infra-subsection">
+              <div className="infra-kicker">Runtime service saturation</div>
+              <WorkloadMatrix services={services} topology={safeTopology} theme={theme} />
+            </div>
+            <div className="infra-subsection">
+              <div className="infra-kicker">Kubernetes management panels</div>
+              <ClusterReadyPanels theme={theme} services={services} infrastructure={safeInfrastructure} />
+            </div>
+          </Section>
+
           <Section title="System Overview" eyebrow="Overview" theme={theme}>
             <RootCauseSpotlight topology={safeTopology} services={services} theme={theme} />
             <div className="infra-dual">
@@ -702,6 +758,10 @@ export default function InfraPage({ topology, history, incidents, connected, inf
               </div>
             </div>
             <div className="infra-subsection">
+              <div className="infra-kicker">Recent change summary</div>
+              <RecentChangeSummary topology={safeTopology} infrastructure={safeInfrastructure} theme={theme} />
+            </div>
+            <div className="infra-subsection">
               <div className="infra-kicker">Failure momentum and anomaly ribbon</div>
               <div className="infra-ribbon-meta">
                 <span>{formatSigned(safeTopology?.failure_momentum || 0, 1, ' points/min')}</span>
@@ -710,31 +770,9 @@ export default function InfraPage({ topology, history, incidents, connected, inf
               <TrendRibbon history={safeHistory} services={services} theme={theme} />
             </div>
           </Section>
-
-          <Section title="Cluster & Workload Health" eyebrow="Live now + ready states" theme={theme}>
-            <div className="infra-subsection">
-              <div className="infra-kicker">Runtime service saturation</div>
-              <WorkloadMatrix services={services} topology={safeTopology} theme={theme} />
-            </div>
-            <div className="infra-subsection">
-              <div className="infra-kicker">Kubernetes management panels</div>
-              <ClusterReadyPanels theme={theme} services={services} infrastructure={safeInfrastructure} />
-            </div>
-          </Section>
         </div>
 
         <div className="infra-column infra-column-center">
-          <Section title="Observability Stack Health" eyebrow="Metrics · logs · traces" theme={theme}>
-            <div className="infra-subsection">
-              <div className="infra-kicker">Stack posture</div>
-              <StackHealth topology={safeTopology} services={services} theme={theme} infrastructure={safeInfrastructure} />
-            </div>
-            <div className="infra-subsection">
-              <div className="infra-kicker">Pipeline readiness</div>
-              <PipelineReadiness services={services} topology={safeTopology} theme={theme} />
-            </div>
-          </Section>
-
           <Section title="Service Telemetry Lens" eyebrow="High-signal comparisons" theme={theme}>
             <div className="infra-telemetry-grid">
               {Object.entries(services)
@@ -751,24 +789,35 @@ export default function InfraPage({ topology, history, incidents, connected, inf
                         <span className="infra-summary-meta">{Math.round((snapshot.combined_score || 0) * 100)}</span>
                       </div>
                       <div className="infra-telemetry-row">
-                        <span>cpu</span>
+                        <span>CPU usage</span>
                         <strong style={{ color: tone }}>{formatPercent(snapshot.cpu_mean || 0)}</strong>
                       </div>
                       <div className="infra-telemetry-row">
-                        <span>mem</span>
+                        <span>Memory usage</span>
                         <strong>{formatPercent(snapshot.mem_mean || 0)}</strong>
                       </div>
                       <div className="infra-telemetry-row">
-                        <span>errors</span>
+                        <span>Error rate</span>
                         <strong>{formatPercent((snapshot.error_rate_mean || 0) * 100, 1)}</strong>
                       </div>
                       <div className="infra-telemetry-row">
-                        <span>logs/sec</span>
+                        <span>Logs per second</span>
                         <strong>{formatNumber(snapshot.log_volume_per_sec || 0, 2)}</strong>
                       </div>
                     </div>
                   )
                 })}
+            </div>
+          </Section>
+
+          <Section title="Observability Stack Health" eyebrow="Metrics · logs · traces" theme={theme}>
+            <div className="infra-subsection">
+              <div className="infra-kicker">Stack posture</div>
+              <StackHealth topology={safeTopology} services={services} theme={theme} infrastructure={safeInfrastructure} />
+            </div>
+            <div className="infra-subsection">
+              <div className="infra-kicker">Pipeline readiness</div>
+              <PipelineReadiness services={services} topology={safeTopology} theme={theme} />
             </div>
           </Section>
         </div>
@@ -839,9 +888,9 @@ export default function InfraPage({ topology, history, incidents, connected, inf
         }
         .infra-summary-rail {
           display: grid;
-          grid-template-columns: repeat(6, minmax(0, 1fr));
-          gap: 12px;
-          margin-bottom: 24px;
+          grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+          gap: 14px;
+          margin-bottom: 26px;
         }
         .infra-summary-card,
         .infra-section,
@@ -858,17 +907,19 @@ export default function InfraPage({ topology, history, incidents, connected, inf
           backdrop-filter: blur(6px);
         }
         .infra-summary-card {
-          padding: 14px 16px;
+          padding: 16px;
           display: flex;
           flex-direction: column;
-          min-height: 104px;
+          gap: 8px;
+          min-width: 0;
         }
         .infra-summary-value {
           font-size: 30px;
           line-height: 1;
-          margin: 10px 0 12px;
+          margin: 8px 0 0;
           font-weight: 500;
           letter-spacing: -0.04em;
+          overflow-wrap: anywhere;
         }
         .infra-summary-meta,
         .infra-copy,
@@ -896,36 +947,39 @@ export default function InfraPage({ topology, history, incidents, connected, inf
         }
         .infra-layout {
           display: grid;
-          grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.95fr) minmax(300px, 0.78fr);
-          gap: 18px;
+          grid-template-columns: minmax(360px, 1.12fr) minmax(320px, 1fr) minmax(300px, 0.88fr);
+          gap: 22px;
           align-items: start;
         }
         .infra-column {
           display: flex;
           flex-direction: column;
-          gap: 18px;
+          gap: 22px;
           min-width: 0;
         }
         .infra-section {
-          padding: 18px;
+          padding: 20px;
+          min-width: 0;
         }
         .infra-section-header {
           display: flex;
           justify-content: space-between;
           align-items: flex-start;
           gap: 14px;
-          margin-bottom: 16px;
+          margin-bottom: 18px;
         }
         .infra-section-title {
           font-size: 26px;
           font-weight: 400;
           letter-spacing: -0.03em;
           line-height: 1;
+          margin: 0;
         }
         .infra-section-body {
           display: flex;
           flex-direction: column;
-          gap: var(--section-gap);
+          gap: max(var(--section-gap), 14px);
+          min-width: 0;
         }
         .infra-spotlight {
           display: flex;
@@ -957,13 +1011,14 @@ export default function InfraPage({ topology, history, incidents, connected, inf
         }
         .infra-dual {
           display: grid;
-          grid-template-columns: repeat(2, minmax(0, 1fr));
-          gap: 12px;
+          grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+          gap: 14px;
         }
         .infra-subsection {
           display: flex;
           flex-direction: column;
           gap: 12px;
+          min-width: 0;
         }
         .infra-definition-list {
           display: grid;
@@ -989,10 +1044,10 @@ export default function InfraPage({ topology, history, incidents, connected, inf
         .infra-placeholder-grid,
         .infra-telemetry-grid {
           display: grid;
-          gap: 10px;
+          gap: 12px;
         }
         .infra-metric-grid {
-          grid-template-columns: repeat(5, minmax(0, 1fr));
+          grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
         }
         .infra-mini-card,
         .infra-readiness-card {
@@ -1000,12 +1055,16 @@ export default function InfraPage({ topology, history, incidents, connected, inf
           display: flex;
           flex-direction: column;
           gap: 8px;
+          align-items: flex-start;
+          justify-content: flex-start;
+          min-width: 0;
         }
         .infra-mini-card strong,
         .infra-readiness-card strong {
-          font-size: 26px;
+          font-size: 24px;
           line-height: 1;
           font-weight: 500;
+          overflow-wrap: anywhere;
         }
         .infra-chart-shell {
           padding: 14px 14px 10px;
@@ -1042,12 +1101,13 @@ export default function InfraPage({ topology, history, incidents, connected, inf
         }
         .infra-workload-row {
           display: grid;
-          grid-template-columns: minmax(0, 1fr) minmax(230px, 0.9fr);
-          gap: 16px;
+          grid-template-columns: minmax(0, 1.15fr) minmax(220px, 0.85fr);
+          gap: 14px;
           padding: 15px 16px;
           border-radius: 18px;
           background: var(--infra-soft);
           border: 1px solid var(--infra-line);
+          min-width: 0;
         }
         .infra-workload-main,
         .infra-signal-stack {
@@ -1060,6 +1120,10 @@ export default function InfraPage({ topology, history, incidents, connected, inf
           display: flex;
           gap: 12px;
           align-items: flex-start;
+          min-width: 0;
+        }
+        .infra-workload-title-wrap > div {
+          min-width: 0;
         }
         .infra-service-mark,
         .infra-status-dot,
@@ -1081,6 +1145,7 @@ export default function InfraPage({ topology, history, incidents, connected, inf
         }
         .infra-badge-row {
           align-items: flex-start;
+          min-width: 0;
         }
         .infra-badge,
         .infra-status-pill {
@@ -1095,6 +1160,8 @@ export default function InfraPage({ topology, history, incidents, connected, inf
           text-transform: uppercase;
           color: var(--infra-muted);
           background: transparent;
+          max-width: 100%;
+          overflow-wrap: anywhere;
         }
         .infra-badge-ok {
           color: #2f8e54;
@@ -1111,13 +1178,14 @@ export default function InfraPage({ topology, history, incidents, connected, inf
         .infra-signal-row,
         .infra-telemetry-row {
           display: grid;
-          grid-template-columns: 30px minmax(0, 1fr) 56px;
+          grid-template-columns: 72px minmax(0, 1fr) 72px;
           gap: 10px;
           align-items: center;
           font-size: 10px;
           letter-spacing: 0.1em;
           text-transform: uppercase;
           color: var(--infra-muted);
+          min-width: 0;
         }
         .infra-signal-bar {
           height: 7px;
@@ -1131,11 +1199,16 @@ export default function InfraPage({ topology, history, incidents, connected, inf
           border-radius: inherit;
         }
         .infra-placeholder-grid {
-          grid-template-columns: repeat(2, minmax(0, 1fr));
+          grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
         }
         .infra-placeholder-card {
           padding: 16px;
-          min-height: 108px;
+          min-height: 0;
+          display: flex;
+          flex-direction: column;
+          justify-content: flex-start;
+          gap: 10px;
+          min-width: 0;
         }
         .infra-placeholder-card-accent {
           background:
@@ -1143,16 +1216,33 @@ export default function InfraPage({ topology, history, incidents, connected, inf
             var(--infra-soft);
         }
         .infra-stack-grid {
-          grid-template-columns: repeat(2, minmax(0, 1fr));
+          grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
         }
         .infra-stack-card,
         .infra-telemetry-card,
         .infra-memory-item,
         .infra-note-item {
           padding: 15px 16px;
+          min-width: 0;
         }
         .infra-telemetry-grid {
-          grid-template-columns: repeat(2, minmax(0, 1fr));
+          grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        }
+        .infra-telemetry-card {
+          display: flex;
+          flex-direction: column;
+          gap: 10px;
+          justify-content: flex-start;
+        }
+        .infra-telemetry-top {
+          display: flex;
+          justify-content: space-between;
+          gap: 12px;
+          align-items: flex-start;
+          min-width: 0;
+        }
+        .infra-telemetry-top > span:first-child {
+          min-width: 0;
         }
         .infra-timeline-item {
           display: grid;
@@ -1183,10 +1273,18 @@ export default function InfraPage({ topology, history, incidents, connected, inf
           flex-direction: column;
           gap: 10px;
         }
+        .infra-recent-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+          gap: 12px;
+        }
+        .infra-copy,
+        .infra-summary-meta,
+        .infra-placeholder-copy,
+        .infra-workload-sub {
+          overflow-wrap: anywhere;
+        }
         @media (max-width: 1360px) {
-          .infra-summary-rail {
-            grid-template-columns: repeat(3, minmax(0, 1fr));
-          }
           .infra-layout {
             grid-template-columns: minmax(0, 1fr);
           }

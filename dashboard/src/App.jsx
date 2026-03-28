@@ -166,14 +166,6 @@ function AppInner() {
           </div>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 14, fontSize: 10, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
-          <span style={{
-            fontFamily: theme.font,
-            color: theme.textMuted,
-            letterSpacing: 1.4,
-            textTransform: 'uppercase',
-          }}>
-            {page === 'infra' ? 'View: Infrastructure' : page === 'models' ? 'View: Model Insights' : page === 'logs' ? 'View: System Logs' : 'View: Solar System'}
-          </span>
           <span style={{ display: 'flex', alignItems: 'center', gap: 5, color: connected ? '#2a8a2a' : '#cc2222' }}>
             <span style={{ width: 7, height: 7, borderRadius: '50%', display: 'inline-block', background: connected ? '#2a8a2a' : '#cc2222', animation: connected ? 'pulse 2s infinite' : 'none' }} />
             {connected ? 'Backend connected' : `Backend offline${error ? `: ${error}` : ''}`}
@@ -203,9 +195,9 @@ function AppInner() {
           <InfraPage topology={data} history={history} incidents={incidents} connected={connected} infrastructure={infrastructure} />
         </InfraPageBoundary>
       ) : page === 'models' ? (
-        <ModelsPage insights={modelInsights} connected={connected} />
+        <ModelsPage insights={modelInsights} topology={data} history={history} connected={connected} />
       ) : (
-        <LogsPage events={systemLogs.events} logs={systemLogs.logs} connected={connected} />
+        <LogsPage events={systemLogs.events} logs={systemLogs.logs} timestamp={systemLogs.timestamp} topology={data} connected={connected} />
       )}
 
       <div style={{ height: 26, borderTop: `1px solid ${theme.borderLight}`, display: 'flex', alignItems: 'center', padding: '0 16px', gap: 20, fontSize: 9, color: theme.textMuted, background: theme.bg, flexShrink: 0 }}>
