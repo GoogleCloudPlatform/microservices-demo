@@ -2,13 +2,14 @@ import { anomalyGlowColor, anomalyScoreColor, getPlanetPos, SERVICE_SHORT } from
 import { useTheme } from '../ThemeContext'
 
 // Dynamic planet radius: 16–26px based on stress
-function getRadius(data) {
+function getRadius(service, data) {
   const base = 16
   const score = data?.combined_score || 0
   const cpu   = (data?.cpu_mean || 0) / 100
   const mem   = (data?.mem_mean || 0) / 100
   const stress = Math.max(score, cpu * 0.4, mem * 0.3)
-  return Math.round(base + stress * 10)  // 16 → 26
+  const radius = Math.round(base + stress * 10)  // 16 → 26
+  return service === 'redis-cart' ? Math.max(12, radius - 3) : radius
 }
 
 // Animated arc ring using stroke-dasharray (starts at 12 o'clock via rotate(-90deg))
@@ -49,7 +50,7 @@ export default function PlanetNode({ service, data, isSelected, isRootCause, onC
   const pos      = getPlanetPos(service)
   const status   = data?.status || 'normal'
   const score    = data?.combined_score || 0
-  const r        = getRadius(data)
+  const r        = getRadius(service, data)
   const fill     = anomalyScoreColor(score, 'fill', theme)
   const stroke   = anomalyScoreColor(score, 'stroke', theme)
   const scoreText = contrastTextColor(fill, theme)

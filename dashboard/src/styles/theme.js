@@ -46,7 +46,7 @@ export const darkTheme = {
 export const theme = lightTheme
 
 export const ORBIT_CONFIGS = {
-  'redis-cart':            { ring: 1, angle: 0 },
+  'redis-cart':            { ring: 1, angle: 8 },
   'productcatalogservice': { ring: 2, angle: 0 },
   'paymentservice':        { ring: 2, angle: 60 },
   'shippingservice':       { ring: 2, angle: 120 },
@@ -59,7 +59,7 @@ export const ORBIT_CONFIGS = {
   'frontend':              { ring: 5, angle: 45 },
 }
 
-export const RING_RADII = [0, 100, 195, 300, 390, 480]
+export const RING_RADII = [0, 92, 195, 300, 390, 480]
 
 export const SERVICE_SHORT = {
   frontend: 'frontend',
