@@ -56,7 +56,7 @@ from anomaly_api.settings import load_settings
 from anomaly_api.system_store import SQLiteLogHandler, SQLiteSystemStore
 from remediation.engine import RemediationEngine
 from remediation.models import ActionProposal
-from remediation.policy import DEPENDENCY_GRAPH
+from remediation.policy import CRITICAL_SHARED_SERVICES, DEPENDENCY_GRAPH
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -75,6 +75,15 @@ ALL_SERVICES = [
     "adservice",
     "redis-cart",
 ]
+RUNTIME_FAILURE_TRIGGER_COUNT = 2
+RUNTIME_RESTART_LOOP_THRESHOLD = 3
+RUNTIME_STARTUP_GRACE_POLLS = 10
+RUNTIME_AUTOMATION_WARMUP_S = 60
+
+REVERSE_DEPENDENCY_GRAPH: Dict[str, List[str]] = {}
+for _service_name, _dependencies in DEPENDENCY_GRAPH.items():
+    for _dependency in _dependencies:
+        REVERSE_DEPENDENCY_GRAPH.setdefault(_dependency, []).append(_service_name)
 
 
 def utc_now_iso() -> str:
@@ -83,6 +92,7 @@ def utc_now_iso() -> str:
 
 class AppState:
     def __init__(self):
+        self.started_at = time.time()
         self.models_loaded = False
         self.if_inference = None
         self.lstm_inference = None
@@ -95,6 +105,7 @@ class AppState:
         self.last_update: float = 0.0
         self.predictive_alerts: Dict[str, Dict[str, Any]] = {}
         self.predictive_cooldowns: Dict[str, float] = {}
+        self.runtime_health: Dict[str, Dict[str, Any]] = {}
         self.system_store: Optional[SQLiteSystemStore] = None
 
         self.window_state = None
@@ -239,10 +250,64 @@ def _predictive_actions(service: str, failure_type: str, score: float) -> List[D
     ]
 
 
+def _predictive_auto_action_allowed(snapshot: Dict[str, Any], failure_type: str, lstm_score: float) -> bool:
+    if float(lstm_score) < SETTINGS.predictive_auto_action_threshold:
+        return False
+    if failure_type == "generic_anomaly":
+        return False
+
+    combined_score = float(snapshot.get("combined_score", 0.0) or 0.0)
+    feature_flags = set(snapshot.get("feature_flags", []) or [])
+    corroborating_flags = {
+        "memory_pressure",
+        "cpu_pressure",
+        "network_pressure",
+        "error_burst",
+        "memory_high",
+        "cpu_spike",
+        "exceptions_detected",
+        "error_rate_high",
+    }
+    return combined_score >= SETTINGS.predictive_alert_threshold and bool(feature_flags.intersection(corroborating_flags))
+
+
 def _timeline_snapshot(limit: int = 10) -> List[Dict[str, Any]]:
     if state.system_store is None:
         return []
     return state.system_store.list_events(limit=limit)
+
+
+def _has_usable_telemetry(features: Dict[str, Any], sequence_rows: List[Dict[str, Any]]) -> bool:
+    if not sequence_rows:
+        return False
+    latest = sequence_rows[-1]
+    signal_keys = [
+        "cpu_usage_percent",
+        "memory_usage_bytes",
+        "memory_limit_bytes",
+        "memory_usage_percent",
+        "network_rx_bytes_per_sec",
+        "network_tx_bytes_per_sec",
+        "fs_reads_per_sec",
+        "fs_writes_per_sec",
+        "request_rate",
+        "error_rate",
+        "total_log_lines",
+        "trace_count",
+    ]
+    if any(float(latest.get(key, 0.0) or 0.0) > 0.0 for key in signal_keys):
+        return True
+    if float(features.get("cpu_percent_mean", 0.0) or 0.0) > 0.0:
+        return True
+    if float(features.get("mem_percent_mean", 0.0) or 0.0) > 0.0:
+        return True
+    if float(features.get("log_count_mean", 0.0) or 0.0) > 0.0:
+        return True
+    if float(latest.get("memory_limit_bytes", 0.0) or 0.0) > 0.0:
+        return True
+    if float(latest.get("trace_count", 0.0) or 0.0) > 0.0:
+        return True
+    return False
 
 
 def compute_all_scores() -> Dict[str, Dict]:
@@ -279,6 +344,35 @@ def compute_all_scores() -> Dict[str, Dict]:
                 "status": "warming_up",
                 "if_contributors": [],
                 "sequence_highlights": [],
+            }
+            snapshot["status"] = "normal"
+            scores[svc] = snapshot
+            continue
+
+        if not _has_usable_telemetry(features, sequence_rows):
+            snapshot = {
+                "if_score": None,
+                "lstm_score": None,
+                "combined_score": 0.0,
+                "cpu_percent": features.get("cpu_percent_mean", 0.0),
+                "mem_percent": features.get("mem_percent_mean", 0.0),
+                "feature_flags": features.get("feature_flags", []),
+                "error_rate": features.get("error_rate_mean", 0.0),
+                "warn_rate": features.get("warn_rate_mean", 0.0),
+                "log_count": features.get("log_count_mean", 0.0),
+                "model_state": "warming_up",
+                "sequence_fill": round(min(sequence_array.shape[0] / LSTM_SEQUENCE_WINDOW, 1.0), 3),
+            }
+            state.current_model_insights[svc] = {
+                "service": svc,
+                "sequence_length": int(sequence_array.shape[0]),
+                "required_sequence_length": LSTM_SEQUENCE_WINDOW,
+                "if_feature_count": len(IF_FEATURES),
+                "sequence_feature_count": len(SEQUENCE_FEATURES),
+                "status": "warming_up",
+                "if_contributors": [],
+                "sequence_highlights": top_sequence_features(sequence_rows[-1]) if sequence_rows else [],
+                "latest_sequence_row": sequence_rows[-1] if sequence_rows else {},
             }
             snapshot["status"] = "normal"
             scores[svc] = snapshot
@@ -418,6 +512,210 @@ def _service_has_active_incident(service: str) -> bool:
     return any(incident.get("root_cause_service") == service for incident in state.remediation_engine.list_active_incidents())
 
 
+def _runtime_failure_context(service: str, workload: Any, scores: Dict[str, Dict[str, Any]]) -> Optional[Dict[str, Any]]:
+    snapshot = scores.get(service, {})
+    metadata = workload.metadata or {}
+    desired_replicas = int(metadata.get("desired_replicas", 0) or 0)
+    ready_replicas = int(metadata.get("ready_replicas", 0) or 0)
+    available_replicas = int(metadata.get("available_replicas", 0) or 0)
+    if not workload.exists:
+        degraded = True
+        reasons = ["workload_missing"]
+    else:
+        degraded = False
+        reasons = []
+        if not workload.running:
+            degraded = True
+            reasons.append("workload_not_running")
+        if not workload.healthy:
+            degraded = True
+            reasons.append("workload_unhealthy")
+        if workload.oom_killed:
+            degraded = True
+            reasons.append("oom_killed")
+        if int(workload.restart_count or 0) >= RUNTIME_RESTART_LOOP_THRESHOLD:
+            degraded = True
+            reasons.append("restart_loop_detected")
+
+    if not degraded:
+        return None
+
+    feature_flags = list(snapshot.get("feature_flags", []) or [])
+    affected_services = [service]
+    if service in CRITICAL_SHARED_SERVICES:
+        affected_services.extend(REVERSE_DEPENDENCY_GRAPH.get(service, []))
+    affected_services = list(dict.fromkeys(affected_services))
+
+    if service in CRITICAL_SHARED_SERVICES and len(affected_services) > 1:
+        failure_type = "dependency_failure"
+    elif workload.oom_killed or "memory_pressure" in feature_flags:
+        failure_type = "memory_leak"
+    elif "cpu_pressure" in feature_flags:
+        failure_type = "cpu_starvation"
+    elif "network_pressure" in feature_flags:
+        failure_type = "network_latency"
+    else:
+        failure_type = "service_unhealthy"
+
+    evidence = _build_evidence(service, failure_type, scores)
+    runtime_snapshot = workload.to_dict()
+    startup_grace = (
+        desired_replicas > 0
+        and workload.running
+        and not workload.healthy
+        and not workload.oom_killed
+        and int(workload.restart_count or 0) == 0
+        and ready_replicas < desired_replicas
+        and available_replicas < desired_replicas
+    )
+    evidence["runtime_state"] = runtime_snapshot
+    evidence["feature_flags"] = list(dict.fromkeys(feature_flags + reasons))
+    if failure_type == "dependency_failure" and len(affected_services) > 1:
+        downstream = ", ".join(affected_services[1:])
+        evidence["summary"] = (
+            f"Critical dependency {service} degraded and may impact downstream services: {downstream}."
+        )
+    else:
+        evidence["summary"] = (
+            f"Runtime health degraded on {service}: {', '.join(reasons)}; "
+            f"status={runtime_snapshot.get('status')}, restarts={runtime_snapshot.get('restart_count', 0)}."
+        )
+
+    return {
+        "failure_type": failure_type,
+        "affected_services": affected_services,
+        "evidence": evidence,
+        "reasons": reasons,
+        "workload": runtime_snapshot,
+        "trigger_count": RUNTIME_STARTUP_GRACE_POLLS if startup_grace else RUNTIME_FAILURE_TRIGGER_COUNT,
+        "startup_grace": startup_grace,
+    }
+
+
+async def monitor_runtime_workloads(scores: Dict[str, Dict]) -> None:
+    if state.remediation_engine is None:
+        return
+    automation_warmed_up = (time.time() - state.started_at) >= RUNTIME_AUTOMATION_WARMUP_S
+
+    for svc in ALL_SERVICES:
+        try:
+            workload = state.remediation_engine.orchestrator.inspect_service(svc)
+        except Exception as exc:
+            logger.debug("Runtime workload inspection failed for %s: %s", svc, exc)
+            continue
+
+        tracker = state.runtime_health.get(svc, {})
+        context = _runtime_failure_context(svc, workload, scores)
+
+        if context is None:
+            if tracker.get("degraded"):
+                resolved_at = utc_now_iso()
+                emit_system_event(
+                    event_type="runtime_recovered",
+                    category="runtime",
+                    severity="info",
+                    title=f"Runtime recovered for {svc}",
+                    message=(
+                        f"{svc} recovered after {tracker.get('count', 1)} unhealthy polls. "
+                        f"Current status is {workload.status}."
+                    ),
+                    service=svc,
+                    status="closed",
+                    payload={
+                        "service": svc,
+                        "resolved_at": resolved_at,
+                        "previous_incident_id": tracker.get("incident_id"),
+                        "workload": workload.to_dict(),
+                    },
+                )
+            state.runtime_health.pop(svc, None)
+            continue
+
+        count = int(tracker.get("count", 0)) + 1 if tracker.get("degraded") else 1
+        updated_tracker = {
+            "degraded": True,
+            "count": count,
+            "first_detected_at": tracker.get("first_detected_at", utc_now_iso()),
+            "updated_at": utc_now_iso(),
+            "incident_triggered": bool(tracker.get("incident_triggered", False)),
+            "incident_id": tracker.get("incident_id"),
+            "failure_type": context["failure_type"],
+            "reasons": context["reasons"],
+        }
+
+        if not tracker.get("degraded"):
+            emit_system_event(
+                event_type="runtime_degradation_detected",
+                category="runtime",
+                severity="critical" if context["failure_type"] == "dependency_failure" else "warning",
+                title=f"Runtime degradation detected on {svc}",
+                message=(
+                    f"{svc} became unhealthy: {', '.join(context['reasons']) or 'runtime degradation detected'}."
+                ),
+                service=svc,
+                status="open",
+                payload={
+                    "service": svc,
+                    "failure_type": context["failure_type"],
+                    "affected_services": context["affected_services"],
+                    "workload": context["workload"],
+                },
+            )
+
+        should_trigger = (
+            automation_warmed_up
+            and
+            count >= int(context.get("trigger_count", RUNTIME_FAILURE_TRIGGER_COUNT))
+            and not updated_tracker["incident_triggered"]
+            and not _service_has_active_incident(svc)
+        )
+        if should_trigger:
+            emit_system_event(
+                event_type="runtime_auto_remediation_started",
+                category="runtime",
+                severity="warning",
+                title=f"Runtime remediation started for {svc}",
+                message=(
+                    f"Persistent runtime degradation on {svc} triggered automated remediation "
+                    f"for {context['failure_type']}."
+                ),
+                service=svc,
+                status="open",
+                payload={
+                    "service": svc,
+                    "failure_type": context["failure_type"],
+                    "affected_services": context["affected_services"],
+                    "reasons": context["reasons"],
+                },
+            )
+            result = await asyncio.to_thread(
+                state.remediation_engine.remediate,
+                service=svc,
+                failure_type=context["failure_type"],
+                severity="critical" if context["failure_type"] == "dependency_failure" else "warning",
+                affected_services=context["affected_services"],
+                evidence=context["evidence"],
+            )
+            updated_tracker["incident_triggered"] = True
+            updated_tracker["incident_id"] = result.get("incident_id")
+            emit_system_event(
+                event_type="runtime_auto_remediation_finished",
+                category="runtime",
+                severity="info" if result.get("status") == "resolved" else "warning",
+                title=f"Runtime remediation finished for {svc}",
+                message=result.get("operator_summary") or f"Automated remediation finished for {svc}.",
+                service=svc,
+                status="closed" if result.get("status") == "resolved" else "open",
+                payload={
+                    "service": svc,
+                    "failure_type": context["failure_type"],
+                    "result": result,
+                },
+            )
+
+        state.runtime_health[svc] = updated_tracker
+
+
 async def process_predictive_alerts(scores: Dict[str, Dict]) -> None:
     from anomaly_api.features import extract_features
 
@@ -426,6 +724,13 @@ async def process_predictive_alerts(scores: Dict[str, Dict]) -> None:
 
     for svc, snapshot in scores.items():
         lstm_score = snapshot.get("lstm_score")
+        runtime_ready = True
+        if state.remediation_engine is not None:
+            try:
+                workload = state.remediation_engine.orchestrator.inspect_service(svc)
+                runtime_ready = bool(workload.running and workload.healthy)
+            except Exception as exc:
+                logger.debug("Predictive runtime check failed for %s: %s", svc, exc)
         if snapshot.get("model_state") != "ready" or lstm_score is None:
             existing = state.predictive_alerts.get(svc)
             if existing and existing.get("status") != "resolved":
@@ -441,6 +746,28 @@ async def process_predictive_alerts(scores: Dict[str, Dict]) -> None:
                     category="prediction",
                     severity="info",
                     title=f"Predictive risk cleared for {svc}",
+                    message=resolved["message"],
+                    service=svc,
+                    status="closed",
+                    payload=resolved,
+                )
+            continue
+
+        if not runtime_ready:
+            existing = state.predictive_alerts.get(svc)
+            if existing and existing.get("status") != "resolved":
+                resolved = {
+                    **existing,
+                    "status": "resolved",
+                    "resolved_at": utc_now_iso(),
+                    "message": "Predictive alerts are suppressed while the workload is not yet healthy.",
+                }
+                next_alerts[svc] = resolved
+                emit_system_event(
+                    event_type="predictive_alert_resolved",
+                    category="prediction",
+                    severity="info",
+                    title=f"Predictive risk gated for {svc}",
                     message=resolved["message"],
                     service=svc,
                     status="closed",
@@ -479,7 +806,7 @@ async def process_predictive_alerts(scores: Dict[str, Dict]) -> None:
         auto_action = actions[0]["action"] if actions else "restart_service"
         cooldown_until = state.predictive_cooldowns.get(svc, 0.0)
         can_auto_act = (
-            float(lstm_score) >= SETTINGS.predictive_auto_action_threshold
+            _predictive_auto_action_allowed(snapshot, failure_type, float(lstm_score))
             and now >= cooldown_until
             and not _service_has_active_incident(svc)
             and state.remediation_engine is not None
@@ -587,6 +914,7 @@ async def update_scores_loop():
             state.current_scores = scores
             state.last_update = time.time()
             await process_predictive_alerts(scores)
+            await monitor_runtime_workloads(scores)
 
             state.history.append(
                 {
@@ -619,6 +947,7 @@ app.add_middleware(
 @app.on_event("startup")
 async def startup_event():
     logger.info("Starting AI Observability Platform...")
+    state.started_at = time.time()
     if SETTINGS.auth_enabled and not SETTINGS.api_token:
         raise RuntimeError("AEGIS auth is enabled but AEGIS_API_TOKEN is not configured")
     init_system_store()

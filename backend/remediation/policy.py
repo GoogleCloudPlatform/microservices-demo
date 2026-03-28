@@ -164,16 +164,23 @@ class ActionPolicyEngine:
     def _normalize_failure_type(self, incident: Incident, runtime_state: WorkloadState) -> str:
         failure_type = incident.failure_type or "generic_anomaly"
         flags = incident.evidence.get("feature_flags") or []
+        affected = set(incident.affected_services or [])
+        impacted_shared_dependency = any(service in CRITICAL_SHARED_SERVICES for service in affected)
         if not runtime_state.exists or runtime_state.status in {"not_found", "exited", "dead"}:
             return "service_unhealthy"
+        if failure_type == "dependency_failure":
+            return "dependency_failure"
+        if (
+            len(incident.affected_services) > 1
+            and (incident.root_cause_service in CRITICAL_SHARED_SERVICES or impacted_shared_dependency)
+        ):
+            return "dependency_failure"
         if runtime_state.oom_killed or "memory_high" in flags or failure_type in {"oom_killed", "memory_pressure"}:
             return "memory_leak"
         if "cpu_spike" in flags or "cpu_trending_up" in flags:
             return "cpu_starvation"
         if "exceptions_detected" in flags or "error_rate_high" in flags:
             return "log_exception_storm"
-        if len(incident.affected_services) > 1 and incident.root_cause_service in CRITICAL_SHARED_SERVICES:
-            return "dependency_failure"
         if failure_type in DEFAULT_POLICIES:
             return failure_type
         return "generic_anomaly"
@@ -196,7 +203,16 @@ class ActionPolicyEngine:
         if similar_incidents:
             for match in similar_incidents:
                 action = match.get("selected_action")
-                if action in policy.allowed_actions and match.get("outcome") in {"resolved", "contained"}:
+                if action not in policy.allowed_actions or match.get("outcome") not in {"resolved", "contained"}:
+                    continue
+                if match.get("failure_type") != incident.failure_type:
+                    continue
+                if (
+                    incident.failure_type == "dependency_failure"
+                    and match.get("service") != incident.root_cause_service
+                ):
+                    continue
+                if action in policy.allowed_actions:
                     return action
 
         if policy.default_action == "restart_service" and not runtime_state.running and runtime_state.exists:

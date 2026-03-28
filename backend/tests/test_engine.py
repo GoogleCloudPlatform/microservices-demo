@@ -128,6 +128,37 @@ class RemediationEngineTests(unittest.TestCase):
             result = engine.remediate("recommendationservice", "generic_anomaly")
             self.assertEqual(result["containment"]["containment_mode"], "isolate")
             self.assertIn(result["status"], {"contained", "manual_required"})
+            self.assertEqual(len(engine.list_active_incidents()), 1)
+
+    def test_manual_required_incident_can_be_acknowledged(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            scores = iter(
+                [
+                    {"recommendationservice": {"combined_score": 0.95}},
+                    {"recommendationservice": {"combined_score": 0.94}},
+                    {"recommendationservice": {"combined_score": 0.94}},
+                ]
+            )
+            engine = RemediationEngine(
+                score_provider=lambda: next(scores),
+                orchestrator=FakeOrchestrator(becomes_healthy=False),
+                memory_store=SQLiteIncidentMemoryStore(Path(tmpdir) / "incidents.db"),
+            )
+            engine.policy_engine = FakePolicyEngine(
+                ActionDecision(
+                    action="restart_service",
+                    target="recommendationservice",
+                    retry_budget=0,
+                    evaluation_window_s=0.0,
+                    containment_actions=["isolate_service", "escalate_incident"],
+                )
+            )
+            result = engine.remediate("recommendationservice", "generic_anomaly")
+            incident_id = result["incident_id"]
+            acknowledged = engine.acknowledge_incident(incident_id, owner="ishu")
+            self.assertTrue(acknowledged["acknowledged"])
+            self.assertEqual(acknowledged["acknowledged_by"], "ishu")
+            self.assertEqual(acknowledged["current_phase"], "manual_acknowledged")
 
     def test_engine_blocks_repeat_action_during_cooldown(self):
         with tempfile.TemporaryDirectory() as tmpdir:

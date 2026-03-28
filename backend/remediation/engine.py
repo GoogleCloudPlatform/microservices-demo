@@ -170,7 +170,7 @@ class RemediationEngine:
         incident.operator_summary = self._build_operator_summary(incident, runtime_state)
         self._persist_memory(incident)
         self.incident_history.appendleft(incident)
-        if incident.status != "active":
+        if incident.status == "resolved":
             self.active_incidents.pop(incident.id, None)
         self._release_service(incident)
         self._apply_cooldown(service)
@@ -245,6 +245,7 @@ class RemediationEngine:
         incident.acknowledged_by = owner
         incident.acknowledged_at = datetime.now(timezone.utc).isoformat()
         incident.manual_owner = owner
+        incident.current_phase = "manual_acknowledged"
         return incident.to_dict()
 
     def cooldown_snapshot(self) -> Dict[str, Dict[str, object]]:

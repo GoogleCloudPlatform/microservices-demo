@@ -49,6 +49,55 @@ class PolicyEngineTests(unittest.TestCase):
         self.assertEqual(decision.action, "restart_service")
         self.assertNotIn("delete_namespace", decision.allowed_actions)
 
+    def test_dependency_failure_is_not_overridden_by_oom_signal(self):
+        incident = Incident.create(
+            service="cartservice",
+            failure_type="dependency_failure",
+            affected_services=["cartservice", "redis-cart"],
+            evidence={"feature_flags": ["memory_high"]},
+        )
+        runtime = WorkloadState(
+            service="cartservice",
+            exists=True,
+            running=True,
+            healthy=False,
+            status="degraded",
+            oom_killed=True,
+        )
+        decision = self.engine.build_decision(incident, runtime, [], None)
+        self.assertEqual(incident.failure_type, "dependency_failure")
+        self.assertEqual(decision.action, "restart_dependency_chain")
+        self.assertEqual(decision.parameters["chain"], ["redis-cart", "cartservice"])
+
+    def test_dependency_failure_ignores_mismatched_memory_match(self):
+        incident = Incident.create(
+            service="redis-cart",
+            failure_type="dependency_failure",
+            affected_services=["redis-cart", "cartservice"],
+        )
+        runtime = WorkloadState(
+            service="redis-cart",
+            exists=True,
+            running=True,
+            healthy=False,
+            status="degraded",
+        )
+        decision = self.engine.build_decision(
+            incident,
+            runtime,
+            [
+                {
+                    "service": "recommendationservice",
+                    "failure_type": "service_unhealthy",
+                    "selected_action": "restart_service",
+                    "outcome": "contained",
+                }
+            ],
+            None,
+        )
+        self.assertEqual(decision.action, "restart_dependency_chain")
+        self.assertEqual(decision.parameters["chain"], ["redis-cart"])
+
 
 if __name__ == "__main__":
     unittest.main()

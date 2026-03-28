@@ -16,18 +16,27 @@ data:
     schema_config:
       configs:
         - from: 2024-01-01
-          store: tsdb
+          store: boltdb-shipper
           object_store: filesystem
-          schema: v13
+          schema: v12
           index:
             prefix: index_
             period: 24h
     storage_config:
+      boltdb_shipper:
+        active_index_directory: /loki/index
+        cache_location: /loki/cache
+        shared_store: filesystem
       filesystem:
-        chunks_directory: /loki/chunks
-        rules_directory: /loki/rules
+        directory: /loki/chunks
     compactor:
       working_directory: /loki/compactor
+      shared_store: filesystem
+    ruler:
+      storage:
+        type: local
+        local:
+          directory: /loki/rules
     limits_config:
       ingestion_rate_mb: 8
       ingestion_burst_size_mb: 16

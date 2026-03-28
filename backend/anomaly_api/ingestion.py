@@ -28,6 +28,9 @@ LOKI_POLL_INTERVAL = 10.0    # seconds
 TRACE_POLL_INTERVAL = 15.0   # seconds
 LOKI_URL = os.getenv("AEGIS_LOKI_URL", "http://localhost:3100")
 JAEGER_URL = os.getenv("AEGIS_JAEGER_URL", "http://localhost:16686")
+PROMETHEUS_URL = os.getenv("AEGIS_PROMETHEUS_URL", "http://localhost:9090")
+ORCHESTRATOR = os.getenv("AEGIS_ORCHESTRATOR", "auto").strip().lower()
+K8S_NAMESPACE = os.getenv("AEGIS_K8S_NAMESPACE", "default")
 
 ALL_SERVICES = [
     "frontend", "productcatalogservice", "cartservice", "recommendationservice",
@@ -249,6 +252,111 @@ class DockerStatsCollector:
             logger.warning(f"DockerStatsCollector.poll error: {e}")
             self._available = False
             return {}
+
+
+class PrometheusStatsCollector:
+    """Collects per-pod resource metrics from Prometheus for Kubernetes workloads."""
+
+    def __init__(self, base_url: str = PROMETHEUS_URL, namespace: str = K8S_NAMESPACE):
+        self.base_url = base_url.rstrip("/")
+        self.namespace = namespace
+
+    def _query(self, promql: str) -> List[Dict]:
+        try:
+            response = requests.get(
+                f"{self.base_url}/api/v1/query",
+                params={"query": promql},
+                timeout=3.0,
+            )
+            response.raise_for_status()
+            payload = response.json()
+            if payload.get("status") != "success":
+                return []
+            return payload.get("data", {}).get("result", []) or []
+        except Exception as exc:
+            logger.debug("PrometheusStatsCollector query failed: %s", exc)
+            return []
+
+    @staticmethod
+    def _service_from_pod_name(pod_name: str) -> Optional[str]:
+        for service in ALL_SERVICES:
+            if pod_name == service or pod_name.startswith(f"{service}-"):
+                return service
+        return None
+
+    @staticmethod
+    def _sample_value(series: Dict) -> float:
+        value = series.get("value", [None, "0"])
+        try:
+            return float(value[1])
+        except (TypeError, ValueError, IndexError):
+            return 0.0
+
+    def poll(self) -> Dict[str, Dict]:
+        query_map = {
+            "cpu_percent": (
+                f'sum by (container_label_io_kubernetes_pod_name) ('
+                f'rate(container_cpu_usage_seconds_total{{'
+                f'container_label_io_kubernetes_pod_namespace="{self.namespace}",'
+                'image!=""}[2m])) * 100'
+            ),
+            "mem_bytes": (
+                f'sum by (container_label_io_kubernetes_pod_name) ('
+                f'container_memory_working_set_bytes{{'
+                f'container_label_io_kubernetes_pod_namespace="{self.namespace}",'
+                'image!=""})'
+            ),
+            "mem_limit_bytes": (
+                f'sum by (container_label_io_kubernetes_pod_name) ('
+                f'container_spec_memory_limit_bytes{{'
+                f'container_label_io_kubernetes_pod_namespace="{self.namespace}",'
+                'image!=""})'
+            ),
+            "net_rx_mbps": (
+                f'sum by (container_label_io_kubernetes_pod_name) ('
+                f'rate(container_network_receive_bytes_total{{'
+                f'container_label_io_kubernetes_pod_namespace="{self.namespace}"}}[2m])) / 1e6'
+            ),
+            "net_tx_mbps": (
+                f'sum by (container_label_io_kubernetes_pod_name) ('
+                f'rate(container_network_transmit_bytes_total{{'
+                f'container_label_io_kubernetes_pod_namespace="{self.namespace}"}}[2m])) / 1e6'
+            ),
+            "block_read_mbps": (
+                f'sum by (container_label_io_kubernetes_pod_name) ('
+                f'rate(container_fs_reads_bytes_total{{'
+                f'container_label_io_kubernetes_pod_namespace="{self.namespace}",'
+                'image!=""}[2m])) / 1e6'
+            ),
+            "block_write_mbps": (
+                f'sum by (container_label_io_kubernetes_pod_name) ('
+                f'rate(container_fs_writes_bytes_total{{'
+                f'container_label_io_kubernetes_pod_namespace="{self.namespace}",'
+                'image!=""}[2m])) / 1e6'
+            ),
+        }
+
+        stats_map: Dict[str, Dict] = {service: {} for service in ALL_SERVICES}
+        for field, query in query_map.items():
+            for series in self._query(query):
+                pod_name = series.get("metric", {}).get("container_label_io_kubernetes_pod_name", "")
+                service = self._service_from_pod_name(pod_name)
+                if service is None:
+                    continue
+                stats_map.setdefault(service, {})[field] = self._sample_value(series)
+
+        for service, metrics in stats_map.items():
+            mem_bytes = float(metrics.get("mem_bytes", 0.0))
+            mem_limit_bytes = float(metrics.get("mem_limit_bytes", 0.0))
+            metrics.setdefault("cpu_percent", 0.0)
+            metrics.setdefault("mem_bytes", mem_bytes)
+            metrics.setdefault("mem_limit_bytes", mem_limit_bytes)
+            metrics.setdefault("mem_percent", (mem_bytes / mem_limit_bytes * 100.0) if mem_limit_bytes > 0 else 0.0)
+            metrics.setdefault("net_rx_mbps", 0.0)
+            metrics.setdefault("net_tx_mbps", 0.0)
+            metrics.setdefault("block_read_mbps", 0.0)
+            metrics.setdefault("block_write_mbps", 0.0)
+        return stats_map
 
 
 class LokiCollector:
@@ -525,7 +633,10 @@ class IngestionPipeline:
 
     def __init__(self, window_state: SlidingWindowState):
         self.window_state = window_state
-        self.docker = DockerStatsCollector()
+        if ORCHESTRATOR == "kubernetes":
+            self.metrics_collector = PrometheusStatsCollector()
+        else:
+            self.metrics_collector = DockerStatsCollector()
         self.loki = LokiCollector()
         self.jaeger = JaegerCollector()
         self._running = False
@@ -548,8 +659,8 @@ class IngestionPipeline:
     def _loop(self):
         while self._running:
             try:
-                # Docker stats every poll cycle
-                docker_stats = self.docker.poll()
+                # Resource stats every poll cycle
+                resource_stats = self.metrics_collector.poll()
 
                 # Loki every LOKI_POLL_INTERVAL
                 now = time.time()
@@ -568,7 +679,7 @@ class IngestionPipeline:
 
                 # Build and push one Observation per service
                 for svc in ALL_SERVICES:
-                    ds = docker_stats.get(svc, {})
+                    ds = resource_stats.get(svc, {})
                     ls = self._loki_cache.get(svc, {})
                     ts = self._trace_cache.get(svc, {})
 

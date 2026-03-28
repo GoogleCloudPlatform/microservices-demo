@@ -359,9 +359,10 @@ class KubernetesOrchestratorAdapter(OrchestratorAdapter):
         available_replicas = int(status.available_replicas or 0)
         unavailable_replicas = int(status.unavailable_replicas or 0)
         pod_runtime = self._collect_pod_runtime(pods)
-        healthy = desired == 0 or (ready_replicas >= desired and available_replicas >= desired and unavailable_replicas == 0)
-        running = desired == 0 or pod_runtime["running_pods"] >= max(desired, 1)
-        rollout_status = "healthy" if healthy else "degraded"
+        isolated = desired == 0
+        healthy = (ready_replicas >= desired and available_replicas >= desired and unavailable_replicas == 0) if not isolated else False
+        running = pod_runtime["running_pods"] >= max(desired, 1) if not isolated else False
+        rollout_status = "isolated" if isolated else ("healthy" if healthy else "degraded")
 
         return WorkloadState(
             service=service_name,
