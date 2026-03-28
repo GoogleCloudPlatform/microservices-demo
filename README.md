@@ -628,23 +628,29 @@ docker compose down -v
 
 ## Google Login and Public Access
 
-AEGIS now supports browser sign-in with Google Identity Services.
+The Google sign-in path is currently paused for the working prototype build.
 
-What it does:
+What is in the repo:
 
-- every Google user can sign in and view the dashboard
-- user profile details are stored in the backend SQLite system store
-- session state is persisted with an HTTP-only cookie
-- operator actions can be restricted to configured Google emails through `AEGIS_OPERATOR_EMAILS`
+- Google Identity Services integration code
+- backend session storage for browser logins
+- frontend login gate components
+- operator email allowlist support for a future hosted version
 
-What you need to configure:
+Current runtime behavior:
+
+- the live prototype does not require Google sign-in
+- all dashboard pages stay open without browser auth
+- the Google integration remains in the codebase, but is intentionally disabled until it is revisited
+
+What you would need later:
 
 - `AEGIS_GOOGLE_OAUTH_ENABLED=true`
 - `AEGIS_GOOGLE_CLIENT_ID=...apps.googleusercontent.com`
 - `AEGIS_SESSION_COOKIE_SECURE=true` when serving over HTTPS
 - `AEGIS_OPERATOR_EMAILS=you@example.com` if you want only certain users to run demo/remediation actions
 
-For public hosting from this machine, the important detail is that Google validates the browser origin. If you publish the dashboard at a new ngrok URL every run, you must update the Google OAuth client's **Authorized JavaScript origins** every time unless you reserve a stable ngrok domain.
+For future public hosting with Google login, the important detail is that Google validates the browser origin. If you publish the dashboard at a new ngrok URL every run, you must update the Google OAuth client's **Authorized JavaScript origins** every time unless you reserve a stable ngrok domain.
 
 ## Deployment Paths
 

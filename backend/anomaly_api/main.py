@@ -167,7 +167,10 @@ def latest_demo_run() -> Optional[Dict[str, Any]]:
 
 
 def login_required() -> bool:
-    return SETTINGS.google_oauth_enabled
+    # Google OAuth is intentionally paused for the working prototype.
+    # Keep the integration code in place, but force the live runtime open
+    # until the hosted auth flow is revisited.
+    return False
 
 
 def _public_auth_paths(path: str) -> bool:
