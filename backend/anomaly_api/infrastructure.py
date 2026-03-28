@@ -21,11 +21,21 @@ def _safe_json(url: str, timeout: float = 3.0) -> Dict[str, Any]:
         return {"ok": False, "error": str(exc), "json": {}}
 
 
-def _service_workload(service: str, snapshot: Dict[str, Any], workload: Dict[str, Any]) -> Dict[str, Any]:
+def _service_workload(
+    service: str,
+    snapshot: Dict[str, Any],
+    workload: Dict[str, Any],
+    active_incident: Dict[str, Any] | None = None,
+) -> Dict[str, Any]:
     metadata = workload.get("metadata", {})
+    status = snapshot.get("status", "unknown")
+    if not workload.get("exists", False) or not workload.get("running", False):
+        status = "critical"
+    elif not workload.get("healthy", False):
+        status = "warning"
     return {
         "service": service,
-        "status": snapshot.get("status", "unknown"),
+        "status": status,
         "combined_score": snapshot.get("combined_score", 0.0),
         "cpu_percent": snapshot.get("cpu_mean", snapshot.get("cpu_percent", 0.0)),
         "memory_percent": snapshot.get("mem_mean", snapshot.get("mem_percent", 0.0)),
@@ -44,7 +54,8 @@ def _service_workload(service: str, snapshot: Dict[str, Any], workload: Dict[str
             "message": workload.get("message", ""),
             "metadata": metadata,
         },
-        "latest_incident": snapshot.get("latest_incident"),
+        "active_incident": active_incident,
+        "latest_incident": active_incident or snapshot.get("latest_incident"),
         "memory_matches": snapshot.get("similar_incidents", []),
     }
 
@@ -59,22 +70,12 @@ def build_infrastructure_payload(
     services = topology.get("services", {})
     active_incidents = topology.get("active_incidents", [])
     recent_incidents = topology.get("recent_incidents", [])
+    active_incident_by_service = {
+        incident.get("root_cause_service"): incident
+        for incident in active_incidents
+        if incident.get("root_cause_service")
+    }
     service_names = list(services.keys())
-    tracked = list(services.values())
-
-    healthy = sum(1 for item in tracked if item.get("status") == "normal")
-    warning = sum(1 for item in tracked if item.get("status") == "warning")
-    critical = sum(1 for item in tracked if item.get("status") == "critical")
-    isolated = sum(
-        1
-        for item in tracked
-        if (item.get("latest_incident") or {}).get("containment", {}).get("containment_mode") == "isolate"
-    )
-    manual_required = sum(
-        1
-        for item in tracked
-        if (item.get("latest_incident") or {}).get("containment", {}).get("manual_required")
-    )
 
     prometheus = _safe_json(f"{settings.prometheus_url}/api/v1/targets")
     loki_ready = _safe_json(f"{settings.loki_url}/ready")
@@ -97,10 +98,31 @@ def build_infrastructure_payload(
     if remediation_engine is not None:
         for service in service_names:
             inspected = remediation_engine.orchestrator.inspect_service(service).to_dict()
-            workloads.append(_service_workload(service, services.get(service, {}), inspected))
+            workloads.append(
+                _service_workload(
+                    service,
+                    services.get(service, {}),
+                    inspected,
+                    active_incident=active_incident_by_service.get(service),
+                )
+            )
         cluster_summary = remediation_engine.orchestrator.cluster_overview()
 
     memory_recent = remediation_engine.memory_store.list_recent(limit=10) if remediation_engine else []
+
+    healthy = sum(1 for item in workloads if item.get("status") == "normal")
+    warning = sum(1 for item in workloads if item.get("status") == "warning")
+    critical = sum(1 for item in workloads if item.get("status") == "critical")
+    isolated = sum(
+        1
+        for item in workloads
+        if (item.get("active_incident") or {}).get("containment", {}).get("containment_mode") == "isolate"
+    )
+    manual_required = sum(
+        1
+        for item in workloads
+        if (item.get("active_incident") or {}).get("containment", {}).get("manual_required")
+    )
 
     targets = prometheus.get("json", {}).get("data", {}).get("activeTargets", [])
     active_targets = len(targets)

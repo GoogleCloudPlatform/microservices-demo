@@ -231,6 +231,35 @@ class RemediationEngine:
     def list_incident_history(self, limit: int = 20) -> List[Dict]:
         return [incident.to_dict() for incident in list(self.incident_history)[:limit]]
 
+    def close_recovered_incident(self, service: str, note: str = "") -> Optional[Dict]:
+        incident: Optional[Incident] = None
+        for incident_id, active_incident in list(self.active_incidents.items()):
+            if active_incident.root_cause_service != service:
+                continue
+            incident = active_incident
+            self.active_incidents.pop(incident_id, None)
+            break
+
+        if incident is None:
+            return None
+
+        incident.status = "resolved"
+        incident.current_phase = "recovered"
+        incident.containment = ContainmentState(
+            active=False,
+            containment_mode="none",
+            next_action=None,
+            escalated=False,
+            manual_required=False,
+            reason=note or "Workload recovered and incident closed automatically",
+            notes=[],
+        )
+        if note:
+            incident.operator_summary = f"{incident.operator_summary} {note}".strip()
+        self._persist_memory(incident)
+        self.incident_history.appendleft(incident)
+        return incident.to_dict()
+
     def acknowledge_incident(self, incident_id: str, owner: str) -> Dict:
         incident = self.active_incidents.get(incident_id)
         if incident is None:

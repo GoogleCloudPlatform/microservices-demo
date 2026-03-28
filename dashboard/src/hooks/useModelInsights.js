@@ -1,29 +1,33 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { API_BASE } from '../api'
+
+const POLL_MS = 2000
 
 export function useModelInsights() {
   const [insights, setInsights] = useState(null)
+  const abortRef = useRef(null)
+
+  const fetchInsights = async () => {
+    abortRef.current?.abort()
+    const ctrl = new AbortController()
+    abortRef.current = ctrl
+    try {
+      const res = await fetch(`${API_BASE}/ml/insights`, { signal: ctrl.signal })
+      if (!res.ok) return
+      const payload = await res.json()
+      if (!ctrl.signal.aborted) setInsights(payload)
+    } catch {}
+  }
 
   useEffect(() => {
-    let cancelled = false
-
-    const fetchInsights = async () => {
-      try {
-        const res = await fetch(`${API_BASE}/ml/insights`)
-        if (!res.ok) return
-        const payload = await res.json()
-        if (!cancelled) setInsights(payload)
-      } catch {}
-    }
-
     fetchInsights()
-    const timer = setInterval(fetchInsights, 5000)
+    const timer = setInterval(fetchInsights, POLL_MS)
 
     return () => {
-      cancelled = true
+      abortRef.current?.abort()
       clearInterval(timer)
     }
   }, [])
 
-  return insights
+  return { insights, refreshInsights: fetchInsights }
 }

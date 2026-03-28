@@ -1,29 +1,33 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { API_BASE } from '../api'
+
+const POLL_MS = 2000
 
 export function useInfrastructure() {
   const [infrastructure, setInfrastructure] = useState(null)
+  const abortRef = useRef(null)
+
+  const fetchInfrastructure = async () => {
+    abortRef.current?.abort()
+    const ctrl = new AbortController()
+    abortRef.current = ctrl
+    try {
+      const res = await fetch(`${API_BASE}/infrastructure`, { signal: ctrl.signal })
+      if (!res.ok) return
+      const payload = await res.json()
+      if (!ctrl.signal.aborted) setInfrastructure(payload)
+    } catch {}
+  }
 
   useEffect(() => {
-    let cancelled = false
-
-    const fetchInfrastructure = async () => {
-      try {
-        const res = await fetch(`${API_BASE}/infrastructure`)
-        if (!res.ok) return
-        const payload = await res.json()
-        if (!cancelled) setInfrastructure(payload)
-      } catch {}
-    }
-
     fetchInfrastructure()
-    const timer = setInterval(fetchInfrastructure, 5000)
+    const timer = setInterval(fetchInfrastructure, POLL_MS)
 
     return () => {
-      cancelled = true
+      abortRef.current?.abort()
       clearInterval(timer)
     }
   }, [])
 
-  return infrastructure
+  return { infrastructure, refreshInfrastructure: fetchInfrastructure }
 }

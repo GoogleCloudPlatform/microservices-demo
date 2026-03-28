@@ -1,4 +1,4 @@
-import { Component, useState, useEffect, useCallback } from 'react'
+import { Component, useState, useEffect, useCallback, useRef } from 'react'
 import { useTopology } from './hooks/useTopology'
 import { useHistory } from './hooks/useHistory'
 import { useInfrastructure } from './hooks/useInfrastructure'
@@ -12,14 +12,14 @@ import InfraPage from './components/InfraPage'
 import ModelsPage from './components/ModelsPage'
 import LogsPage from './components/LogsPage'
 
-class InfraPageBoundary extends Component {
+class PageBoundary extends Component {
   constructor(props) {
     super(props)
     this.state = { hasError: false, message: '' }
   }
 
   static getDerivedStateFromError(error) {
-    return { hasError: true, message: error?.message || 'Unknown infrastructure page error' }
+    return { hasError: true, message: error?.message || 'Unknown page error' }
   }
 
   componentDidUpdate(prevProps) {
@@ -29,19 +29,19 @@ class InfraPageBoundary extends Component {
   }
 
   render() {
-    const { theme } = this.props
+    const { theme, label } = this.props
     if (this.state.hasError) {
       return (
         <div style={{ flex: 1, padding: 32, color: theme.text, background: theme.bg, overflowY: 'auto' }}>
           <div style={{ maxWidth: 760, border: `1px solid ${theme.borderLight}`, background: theme.card, padding: 24 }}>
             <div style={{ fontSize: 12, letterSpacing: 1.6, textTransform: 'uppercase', color: theme.textMuted, marginBottom: 10 }}>
-              Infrastructure
+              {label || 'Page Error'}
             </div>
             <div style={{ fontSize: 28, lineHeight: 1.05, marginBottom: 12 }}>
-              The infrastructure page hit a rendering error.
+              This page hit a rendering error.
             </div>
             <div style={{ fontSize: 12, lineHeight: 1.6, color: theme.textMuted }}>
-              The rest of the dashboard is still available. I’ve added guards so partial backend payloads do not break this page, but this fallback keeps the UI usable if a new field shape slips through.
+              The rest of the dashboard is still available. Navigate to another tab or try refreshing.
             </div>
             <div style={{ marginTop: 16, fontSize: 11, color: theme.accent }}>
               {this.state.message}
@@ -65,22 +65,17 @@ function getPageFromLocation() {
 
 function AppInner() {
   const { theme, dark, setDark } = useTheme()
-  const { data, connected, error, fetchWindow, triggerRemediation, triggerDemo } = useTopology()
+  const { data, connected, error, fetchWindow, triggerRemediation, triggerDemo, refreshTopology } = useTopology()
   const { history, incidents } = useHistory()
-  const infrastructure = useInfrastructure()
-  const modelInsights = useModelInsights()
+  const { infrastructure, refreshInfrastructure } = useInfrastructure()
+  const { insights: modelInsights, refreshInsights } = useModelInsights()
   const systemLogs = useSystemLogs()
   const [selectedService, setSelectedService] = useState(null)
   const [windowData, setWindowData] = useState(null)
   const [windowLoading, setWindowLoading] = useState(false)
   const [page, setPage] = useState(getPageFromLocation)
   const [demoBusy, setDemoBusy] = useState(false)
-  const [, setTick] = useState(0)
-
-  useEffect(() => {
-    const t = setInterval(() => setTick(n => n + 1), 500)
-    return () => clearInterval(t)
-  }, [])
+  const windowAbortRef = useRef(null)
 
   useEffect(() => {
     const onHashChange = () => setPage(getPageFromLocation())
@@ -98,20 +93,30 @@ function AppInner() {
 
   const handleSelectService = useCallback(async (svc) => {
     if (svc === selectedService) { setSelectedService(null); setWindowData(null); return }
+    windowAbortRef.current?.abort()
+    const ctrl = new AbortController()
+    windowAbortRef.current = ctrl
     setSelectedService(svc)
     setWindowLoading(true)
-    const wd = await fetchWindow(svc)
-    setWindowData(wd)
-    setWindowLoading(false)
+    const wd = await fetchWindow(svc, ctrl.signal)
+    if (!ctrl.signal.aborted) {
+      setWindowData(wd)
+      setWindowLoading(false)
+    }
   }, [selectedService, fetchWindow])
 
   useEffect(() => {
     if (!selectedService) return
+    const ctrl = new AbortController()
+    windowAbortRef.current = ctrl
     const interval = setInterval(async () => {
-      const wd = await fetchWindow(selectedService)
-      setWindowData(wd)
+      const wd = await fetchWindow(selectedService, ctrl.signal)
+      if (!ctrl.signal.aborted) setWindowData(wd)
     }, 5000)
-    return () => clearInterval(interval)
+    return () => {
+      ctrl.abort()
+      clearInterval(interval)
+    }
   }, [selectedService, fetchWindow])
 
   const selectedData = data?.services?.[selectedService]
@@ -123,15 +128,20 @@ function AppInner() {
     setDemoBusy(true)
     try {
       await triggerDemo('recommendationservice', 'admin')
+      refreshTopology()
+      refreshInfrastructure()
+      refreshInsights()
+      systemLogs.refreshLogs()
       setPage('logs')
     } catch (demoError) {
       console.error('Demo run failed to start:', demoError)
     } finally {
       setDemoBusy(false)
     }
-  }, [triggerDemo])
+  }, [refreshInfrastructure, refreshInsights, refreshTopology, systemLogs, triggerDemo])
 
   const navBtn = (key, label, hint) => ({
+    type: 'button',
     style: {
       fontFamily: theme.displayFont || theme.font,
       fontSize: 12,
@@ -227,26 +237,32 @@ function AppInner() {
       </div>
 
       {page === 'solar' ? (
-        <div style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
-          <div style={{ flex: 1, position: 'relative', borderRight: `2px solid ${theme.border}`, overflow: 'hidden' }}>
-            <SolarSystem topology={data} selectedService={selectedService} onSelectService={handleSelectService} />
+        <PageBoundary resetKey={`solar-${data?.timestamp || 'none'}`} theme={theme} label="Solar System">
+          <div style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
+            <div style={{ flex: 1, position: 'relative', borderRight: `2px solid ${theme.border}`, overflow: 'hidden' }}>
+              <SolarSystem topology={data} selectedService={selectedService} onSelectService={handleSelectService} />
+            </div>
+            <div style={{ width: 300, flexShrink: 0, background: theme.bg, overflowY: 'auto' }}>
+              <InfoPanel topology={data}>
+                {selectedService && selectedData && (
+                  <ServiceDetail service={selectedService} data={selectedData} windowData={windowLoading ? null : windowData} onRemediate={triggerRemediation} onClose={() => { setSelectedService(null); setWindowData(null) }} />
+                )}
+              </InfoPanel>
+            </div>
           </div>
-          <div style={{ width: 300, flexShrink: 0, background: theme.bg, overflowY: 'auto' }}>
-            <InfoPanel topology={data}>
-              {selectedService && (
-                <ServiceDetail service={selectedService} data={selectedData} windowData={windowLoading ? null : windowData} onRemediate={triggerRemediation} onClose={() => { setSelectedService(null); setWindowData(null) }} />
-              )}
-            </InfoPanel>
-          </div>
-        </div>
+        </PageBoundary>
       ) : page === 'infra' ? (
-        <InfraPageBoundary resetKey={`${page}-${data?.timestamp || 'none'}-${infrastructure?.timestamp || 'none'}`} theme={theme}>
+        <PageBoundary resetKey={`infra-${data?.timestamp || 'none'}-${infrastructure?.timestamp || 'none'}`} theme={theme} label="Infrastructure">
           <InfraPage topology={data} history={history} incidents={incidents} connected={connected} infrastructure={infrastructure} />
-        </InfraPageBoundary>
+        </PageBoundary>
       ) : page === 'models' ? (
-        <ModelsPage insights={modelInsights} topology={data} history={history} connected={connected} />
+        <PageBoundary resetKey={`models-${data?.timestamp || 'none'}`} theme={theme} label="Model Insights">
+          <ModelsPage insights={modelInsights} topology={data} history={history} connected={connected} />
+        </PageBoundary>
       ) : (
-        <LogsPage events={systemLogs.events} logs={systemLogs.logs} timestamp={systemLogs.timestamp} topology={data} connected={connected} />
+        <PageBoundary resetKey={`logs-${systemLogs.timestamp || 'none'}`} theme={theme} label="System Logs">
+          <LogsPage events={systemLogs.events} logs={systemLogs.logs} timestamp={systemLogs.timestamp} topology={data} connected={connected} />
+        </PageBoundary>
       )}
 
       <div style={{ height: 26, borderTop: `1px solid ${theme.borderLight}`, display: 'flex', alignItems: 'center', padding: '0 16px', gap: 20, fontSize: 9, color: theme.textMuted, background: theme.bg, flexShrink: 0 }}>

@@ -19,16 +19,29 @@ class PostActionEvaluator:
         before_scores: Dict[str, Dict],
     ) -> IncidentEvaluation:
         wait_s = max(0.0, float(decision.evaluation_window_s))
-        if wait_s > 0:
-            time.sleep(wait_s)
+        if decision.action in {"start_service", "restart_service", "restart_dependency_chain"} and self.orchestrator.platform == "kubernetes":
+            wait_s = max(wait_s, 10.0)
 
-        after_scores = self.score_provider() or {}
         service = incident.root_cause_service
         before_snapshot = before_scores.get(service, {})
-        after_snapshot = after_scores.get(service, {})
         before_score = float(before_snapshot.get("combined_score", 0.0) or 0.0)
-        after_score = float(after_snapshot.get("combined_score", 0.0) or 0.0)
         workload = self.orchestrator.inspect_service(service)
+        deadline = time.time() + wait_s
+
+        while time.time() < deadline:
+            if decision.action in {"isolate_service", "stop_service"}:
+                if not workload.running:
+                    break
+            elif decision.action == "reroute_service":
+                break
+            elif workload.running and workload.healthy:
+                break
+            time.sleep(1.0)
+            workload = self.orchestrator.inspect_service(service)
+
+        after_scores = self.score_provider() or {}
+        after_snapshot = after_scores.get(service, {})
+        after_score = float(after_snapshot.get("combined_score", 0.0) or 0.0)
         score_delta = round(after_score - before_score, 3)
 
         if decision.action in {"isolate_service", "stop_service"}:

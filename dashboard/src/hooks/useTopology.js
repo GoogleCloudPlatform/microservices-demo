@@ -6,46 +6,69 @@ export function useTopology() {
   const [data, setData] = useState(null)
   const [connected, setConnected] = useState(false)
   const [error, setError] = useState(null)
-  const intervalRef = useRef(null)
+  const abortRef = useRef(null)
+  const inFlightRef = useRef(false)
 
   const fetchTopology = useCallback(async () => {
+    if (inFlightRef.current) return
+    inFlightRef.current = true
+    abortRef.current?.abort()
     const ctrl = new AbortController()
+    abortRef.current = ctrl
     const timer = setTimeout(() => ctrl.abort(), 4000)
     try {
       const res = await fetch(`${API_BASE}/topology`, { signal: ctrl.signal })
       clearTimeout(timer)
       if (!res.ok) throw new Error(`HTTP ${res.status}`)
       const json = await res.json()
-      setData(json)
-      setConnected(true)
-      setError(null)
+      if (!ctrl.signal.aborted) {
+        setData(json)
+        setConnected(true)
+        setError(null)
+      }
     } catch (e) {
       clearTimeout(timer)
-      setConnected(false)
-      setError(e.name === 'AbortError' ? 'API timeout' : e.message)
+      if (!ctrl.signal.aborted) {
+        setConnected(false)
+        setError(e.name === 'AbortError' ? 'API timeout' : e.message)
+      }
+    } finally {
+      inFlightRef.current = false
     }
   }, [])
 
   useEffect(() => {
     fetchTopology()
-    intervalRef.current = setInterval(fetchTopology, POLL_MS)
-    return () => clearInterval(intervalRef.current)
+    const interval = setInterval(fetchTopology, POLL_MS)
+    return () => {
+      clearInterval(interval)
+      abortRef.current?.abort()
+    }
   }, [fetchTopology])
 
-  const fetchWindow = useCallback(async (service) => {
+  const fetchWindow = useCallback(async (service, signal) => {
     try {
-      const res = await fetch(`${API_BASE}/window/${service}`)
+      const res = await fetch(`${API_BASE}/window/${service}`, signal ? { signal } : undefined)
+      if (!res.ok) return null
       return await res.json()
     } catch { return null }
   }, [])
 
   const triggerRemediation = useCallback(async (service, failureType = 'generic_anomaly') => {
-    const res = await fetch(`${API_BASE}/remediate`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', ...OPERATOR_HEADERS },
-      body: JSON.stringify({ service, failure_type: failureType }),
-    })
-    return await res.json()
+    try {
+      const res = await fetch(`${API_BASE}/remediate`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', ...OPERATOR_HEADERS },
+        body: JSON.stringify({ service, failure_type: failureType }),
+      })
+      if (!res.ok) {
+        const payload = await res.json().catch(() => ({}))
+        throw new Error(payload?.detail || `HTTP ${res.status}`)
+      }
+      return await res.json()
+    } catch (e) {
+      return { result: { status: 'manual_required', operator_summary: e.message } }
+    }
   }, [])
 
   const triggerDemo = useCallback(async (service = 'recommendationservice', owner = 'operator') => {
@@ -61,5 +84,5 @@ export function useTopology() {
     return await res.json()
   }, [])
 
-  return { data, connected, error, fetchWindow, triggerRemediation, triggerDemo }
+  return { data, connected, error, fetchWindow, triggerRemediation, triggerDemo, refreshTopology: fetchTopology }
 }

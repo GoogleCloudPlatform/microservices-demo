@@ -21,6 +21,17 @@ class ContainmentController:
                 notes=["Retry budget not exhausted"],
             )
 
+        if decision.action == "start_service" and self.orchestrator.platform == "kubernetes":
+            return ContainmentState(
+                active=True,
+                containment_mode="escalate",
+                next_action="escalate_incident",
+                escalated=True,
+                manual_required=True,
+                reason="Kubernetes workload did not become ready after bounded recovery attempts",
+                notes=["Escalating instead of re-isolating a service that is already recovering"],
+            )
+
         if "isolate_service" in decision.containment_actions:
             return ContainmentState(
                 active=True,

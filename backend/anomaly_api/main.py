@@ -173,6 +173,25 @@ def _demo_summary_text(run: Dict[str, Any]) -> str:
     return summary or f"Demo run for {service} is {status} at stage {stage}."
 
 
+def _current_service_snapshot(service: str) -> Dict[str, Any]:
+    snapshot = dict(state.current_scores.get(service, {}))
+    workload = None
+    if state.remediation_engine is not None:
+        try:
+            workload = state.remediation_engine.orchestrator.inspect_service(service).to_dict()
+        except Exception as exc:
+            workload = {"status": "unavailable", "message": str(exc)}
+    return {
+        "service": service,
+        "score": round(float(snapshot.get("combined_score", 0.0) or 0.0), 4),
+        "if_score": round(float(snapshot.get("if_score", 0.0) or 0.0), 4),
+        "lstm_score": round(float(snapshot.get("lstm_score", 0.0) or 0.0), 4) if snapshot.get("lstm_score") is not None else None,
+        "model_state": snapshot.get("model_state"),
+        "feature_flags": snapshot.get("feature_flags", []),
+        "workload": workload or {},
+    }
+
+
 def _build_demo_report(run_id: int, service: str, started_at: str, remediation_result: Dict[str, Any], platform: str) -> Dict[str, Any]:
     if state.system_store is None:
         return {
@@ -267,7 +286,14 @@ async def run_autonomous_demo(run_id: int, service: str, owner: str) -> None:
     platform = orchestrator.platform
 
     try:
-        state.system_store.update_demo_run(run_id, stage="attacking", status="running")
+        baseline = _current_service_snapshot(service)
+        state.system_store.update_demo_run(
+            run_id,
+            stage="priming",
+            status="running",
+            summary_text=f"Preparing controlled failure sequence for {service} on {platform}.",
+            summary_json={"baseline": baseline, "stage_history": [{"stage": "priming", "at": utc_now_iso()}]},
+        )
         logger.info(
             "Autonomous demo started for %s on %s",
             service,
@@ -282,9 +308,33 @@ async def run_autonomous_demo(run_id: int, service: str, owner: str) -> None:
             message="AEGIS is intentionally disrupting a service to prove detection and recovery.",
             service=service,
             status="open",
-            payload={"run_id": run_id, "owner": owner, "platform": platform},
+            payload={"run_id": run_id, "owner": owner, "platform": platform, "baseline": baseline},
         )
+        emit_system_event(
+            event_type="demo_pressure_building",
+            category="demo",
+            severity="info",
+            title=f"Controlled pressure building on {service}",
+            message=(
+                f"AEGIS is capturing the live baseline for {service} before injecting the failure. "
+                f"Current score is {baseline['score']:.3f}."
+            ),
+            service=service,
+            status="open",
+            payload={"run_id": run_id, "baseline": baseline},
+        )
+        await asyncio.sleep(2.5)
 
+        state.system_store.update_demo_run(
+            run_id,
+            stage="pressure_building",
+            status="running",
+            summary_text=f"Baseline captured for {service}; failure injection is about to start.",
+            summary_json={"baseline": baseline, "stage_history": [{"stage": "priming", "at": utc_now_iso()}, {"stage": "pressure_building", "at": utc_now_iso()}]},
+        )
+        await asyncio.sleep(2.5)
+
+        state.system_store.update_demo_run(run_id, stage="attacking", status="running")
         ok, message, details = orchestrator.stop_service(service)
         logger.info(
             "Demo attack injected for %s: %s",
@@ -315,7 +365,24 @@ async def run_autonomous_demo(run_id: int, service: str, owner: str) -> None:
             )
             return
 
-        await asyncio.sleep(3.0)
+        state.system_store.update_demo_run(
+            run_id,
+            stage="observing_failure",
+            status="running",
+            summary_text=f"Failure injected into {service}; observing cluster impact before remediation.",
+        )
+        emit_system_event(
+            event_type="demo_failure_observed",
+            category="demo",
+            severity="warning",
+            title=f"Watching failure propagation on {service}",
+            message="The workload has been disrupted; AEGIS is waiting for the live telemetry and runtime signals to reflect the failure.",
+            service=service,
+            status="open",
+            payload={"run_id": run_id, "post_attack_state": _current_service_snapshot(service)},
+        )
+
+        await asyncio.sleep(6.0)
         state.system_store.update_demo_run(run_id, stage="remediating", status="running")
         logger.info(
             "Autonomous recovery started for %s",
@@ -370,6 +437,10 @@ async def run_autonomous_demo(run_id: int, service: str, owner: str) -> None:
             status="running",
             incident_id=remediation_result.get("incident_id"),
             fix_action=remediation_result.get("decision", {}).get("action", ""),
+            summary_text=(
+                f"Remediation triggered for {service}; evaluating whether "
+                f"{remediation_result.get('decision', {}).get('action', 'the selected action')} restored health."
+            ),
         )
 
         for _ in range(8):
@@ -893,6 +964,15 @@ async def monitor_runtime_workloads(scores: Dict[str, Dict]) -> None:
         if context is None:
             if tracker.get("degraded"):
                 resolved_at = utc_now_iso()
+                closed_incident = None
+                if tracker.get("incident_id") and state.remediation_engine is not None:
+                    closed_incident = state.remediation_engine.close_recovered_incident(
+                        svc,
+                        note=(
+                            f"Runtime health recovered automatically at {resolved_at}; "
+                            f"workload status returned to {workload.status}."
+                        ),
+                    )
                 emit_system_event(
                     event_type="runtime_recovered",
                     category="runtime",
@@ -908,6 +988,7 @@ async def monitor_runtime_workloads(scores: Dict[str, Dict]) -> None:
                         "service": svc,
                         "resolved_at": resolved_at,
                         "previous_incident_id": tracker.get("incident_id"),
+                        "closed_incident": closed_incident,
                         "workload": workload.to_dict(),
                     },
                 )
