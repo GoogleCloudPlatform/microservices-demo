@@ -4,6 +4,7 @@ import { useHistory } from './hooks/useHistory'
 import { useInfrastructure } from './hooks/useInfrastructure'
 import { useModelInsights } from './hooks/useModelInsights'
 import { useSystemLogs } from './hooks/useSystemLogs'
+import { useAuth } from './hooks/useAuth'
 import { ThemeProvider, useTheme } from './ThemeContext'
 import SolarSystem from './components/SolarSystem'
 import InfoPanel from './components/InfoPanel'
@@ -11,6 +12,7 @@ import ServiceDetail from './components/ServiceDetail'
 import InfraPage from './components/InfraPage'
 import ModelsPage from './components/ModelsPage'
 import LogsPage from './components/LogsPage'
+import AuthGate from './components/AuthGate'
 
 class PageBoundary extends Component {
   constructor(props) {
@@ -63,7 +65,7 @@ function getPageFromLocation() {
   return 'solar'
 }
 
-function AppInner() {
+function DashboardApp({ auth, onLogout }) {
   const { theme, dark, setDark } = useTheme()
   const { data, connected, error, fetchWindow, triggerRemediation, triggerDemo, refreshTopology } = useTopology()
   const { history, incidents } = useHistory()
@@ -122,12 +124,13 @@ function AppInner() {
   const selectedData = data?.services?.[selectedService]
   const latestDemo = data?.demo_run || null
   const demoRunning = latestDemo?.status === 'running'
+  const canOperate = !auth?.config?.login_required || Boolean(auth?.user?.operator)
   const DOT_GRID = `radial-gradient(circle, ${theme.bgDot} 1px, transparent 1px)`
 
   const handleDemoRun = useCallback(async () => {
     setDemoBusy(true)
     try {
-      await triggerDemo('recommendationservice', 'admin')
+      await triggerDemo('recommendationservice', auth?.user?.email || auth?.user?.name || 'operator')
       refreshTopology()
       refreshInfrastructure()
       refreshInsights()
@@ -138,7 +141,7 @@ function AppInner() {
     } finally {
       setDemoBusy(false)
     }
-  }, [refreshInfrastructure, refreshInsights, refreshTopology, systemLogs, triggerDemo])
+  }, [auth, refreshInfrastructure, refreshInsights, refreshTopology, systemLogs, triggerDemo])
 
   const navBtn = (key, label, hint) => ({
     type: 'button',
@@ -190,7 +193,7 @@ function AppInner() {
             <button {...navBtn('logs', 'SYSTEM LOGS', 'Timeline and persistence')} />
             <button
               onClick={handleDemoRun}
-              disabled={demoBusy || demoRunning}
+              disabled={demoBusy || demoRunning || !canOperate}
               style={{
                 fontFamily: theme.displayFont || theme.font,
                 fontSize: 12,
@@ -201,13 +204,13 @@ function AppInner() {
                 border: `1px solid ${demoRunning ? theme.accent : theme.borderLight}`,
                 background: demoRunning ? theme.accent : 'transparent',
                 color: demoRunning ? theme.bg : theme.text,
-                cursor: demoBusy || demoRunning ? 'not-allowed' : 'pointer',
+                cursor: demoBusy || demoRunning || !canOperate ? 'not-allowed' : 'pointer',
                 transition: 'all 0.2s',
                 display: 'flex',
                 flexDirection: 'column',
                 alignItems: 'flex-start',
                 minWidth: 132,
-                opacity: demoBusy || demoRunning ? 0.8 : 1,
+                opacity: demoBusy || demoRunning || !canOperate ? 0.8 : 1,
               }}
             >
               <span>{demoRunning ? 'DEMO RUNNING' : demoBusy ? 'STARTING DEMO' : 'RUN DEMO'}</span>
@@ -219,17 +222,51 @@ function AppInner() {
                 marginTop: 2,
                 textTransform: 'uppercase',
               }}>
-                {demoRunning ? latestDemo?.service || 'Autonomous recovery' : 'Attack + autonomous fix'}
+                {demoRunning ? latestDemo?.service || 'Autonomous recovery' : canOperate ? 'Attack + autonomous fix' : 'Operator access required'}
               </span>
             </button>
           </div>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 14, fontSize: 10, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
+          {auth?.user ? (
+            <span style={{ display: 'flex', alignItems: 'center', gap: 8, color: theme.text }}>
+              {auth.user.picture_url ? (
+                <img
+                  src={auth.user.picture_url}
+                  alt={auth.user.name || auth.user.email}
+                  style={{ width: 22, height: 22, borderRadius: '50%', objectFit: 'cover', border: `1px solid ${theme.borderLight}` }}
+                />
+              ) : null}
+              <span style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', lineHeight: 1.1 }}>
+                <span style={{ fontSize: 10 }}>{auth.user.name || auth.user.email}</span>
+                <span style={{ color: theme.textMuted, fontSize: 8, letterSpacing: 1.2, textTransform: 'uppercase' }}>
+                  {auth.user.operator ? 'operator' : 'viewer'}
+                </span>
+              </span>
+            </span>
+          ) : null}
           <span style={{ display: 'flex', alignItems: 'center', gap: 5, color: connected ? '#2a8a2a' : '#cc2222' }}>
             <span style={{ width: 7, height: 7, borderRadius: '50%', display: 'inline-block', background: connected ? '#2a8a2a' : '#cc2222', animation: connected ? 'pulse 2s infinite' : 'none' }} />
             {connected ? 'Backend connected' : `Backend offline${error ? `: ${error}` : ''}`}
           </span>
           <span style={{ color: theme.textMuted }}>{new Date().toLocaleTimeString('en-US', { hour12: false })}</span>
+          {auth?.config?.login_required ? (
+            <button
+              onClick={onLogout}
+              style={{
+                fontFamily: theme.font,
+                fontSize: 10,
+                padding: '3px 10px',
+                border: `1px solid ${theme.borderLight}`,
+                background: 'transparent',
+                color: theme.textMuted,
+                cursor: 'pointer',
+                letterSpacing: 1,
+              }}
+            >
+              LOG OUT
+            </button>
+          ) : null}
           <button onClick={() => setDark(d => !d)} style={{ fontFamily: theme.font, fontSize: 10, padding: '3px 10px', border: `1px solid ${theme.borderLight}`, background: 'transparent', color: theme.textMuted, cursor: 'pointer', letterSpacing: 1 }}>
             {dark ? '☀ LIGHT' : '◑ DARK'}
           </button>
@@ -245,7 +282,7 @@ function AppInner() {
             <div style={{ width: 300, flexShrink: 0, background: theme.bg, overflowY: 'auto' }}>
               <InfoPanel topology={data}>
                 {selectedService && selectedData && (
-                  <ServiceDetail service={selectedService} data={selectedData} windowData={windowLoading ? null : windowData} onRemediate={triggerRemediation} onClose={() => { setSelectedService(null); setWindowData(null) }} />
+                  <ServiceDetail service={selectedService} data={selectedData} windowData={windowLoading ? null : windowData} onRemediate={canOperate ? triggerRemediation : null} onClose={() => { setSelectedService(null); setWindowData(null) }} />
                 )}
               </InfoPanel>
             </div>
@@ -280,6 +317,34 @@ function AppInner() {
       `}</style>
     </div>
   )
+}
+
+function AppInner() {
+  const { theme } = useTheme()
+  const auth = useAuth()
+
+  const handleLogin = useCallback(async (credential) => {
+    await auth.loginWithGoogle(credential)
+    await auth.refreshAuth()
+  }, [auth])
+
+  const handleLogout = useCallback(async () => {
+    await auth.logout()
+  }, [auth])
+
+  if (auth.loading && !auth.config) {
+    return (
+      <div style={{ width: '100vw', height: '100vh', display: 'grid', placeItems: 'center', background: theme.bg, color: theme.textMuted }}>
+        Checking access…
+      </div>
+    )
+  }
+
+  if (auth.config?.login_required && !auth.authenticated) {
+    return <AuthGate theme={theme} config={auth.config} loading={auth.loading} error={auth.error} onLogin={handleLogin} />
+  }
+
+  return <DashboardApp auth={auth} onLogout={handleLogout} />
 }
 
 export default function App() {

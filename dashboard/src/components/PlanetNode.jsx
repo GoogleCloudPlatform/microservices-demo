@@ -14,8 +14,9 @@ function getRadius(service, data) {
 
 // Animated arc ring using stroke-dasharray (starts at 12 o'clock via rotate(-90deg))
 function RingArc({ radius, pct, color, strokeW = 2.5, anomaly = false }) {
+  const safePct = Number.isFinite(pct) ? Math.max(0, Math.min(pct, 100)) : 0
   const circ = 2 * Math.PI * radius
-  const dash = Math.max(0, Math.min(pct, 100)) / 100 * circ
+  const dash = safePct / 100 * circ
   const gap  = circ - dash
   return (
     <g style={{ transform: 'rotate(-90deg)' }}>

@@ -74,7 +74,7 @@ function statusTone(status, theme) {
     ? '#cc2222'
     : status === 'DEGRADING'
       ? '#c45c0a'
-      : status === 'OK'
+      : status === 'RECOVERING' || status === 'OK'
         ? '#2a8a2a'
         : theme.textMuted
 }
@@ -136,13 +136,13 @@ export default function InfoPanel({ topology, children }) {
   const recommendation = topology?.recommendation || 'Monitoring the live platform state.'
   const activeIncidents = topology?.active_incidents || []
   const recentIncidents = topology?.recent_incidents || []
-  const predictiveAlerts = topology?.predictive_alerts || []
-  const topPredictiveAlert = [...predictiveAlerts].sort((a, b) => (b.lstm_score || 0) - (a.lstm_score || 0))[0]
+  const predictiveAlerts = Array.isArray(topology?.predictive_alerts) ? topology.predictive_alerts : []
+  const topPredictiveAlert = predictiveAlerts.length ? [...predictiveAlerts].sort((a, b) => (b.lstm_score || 0) - (a.lstm_score || 0))[0] : null
   const timeline = topology?.timeline || []
   const demoRun = topology?.demo_run || null
 
   const healthStatus = health === '—' ? 'STABLE' : health < 60 ? 'CRITICAL' : health < 80 ? 'DEGRADING' : 'STABLE'
-  const momentumStatus = Math.abs(momentum) < 2 ? 'STABLE' : momentum > 0 ? 'CRITICAL' : 'OK'
+  const momentumStatus = Math.abs(momentum) < 2 ? 'STABLE' : momentum > 0 ? 'CRITICAL' : 'RECOVERING'
 
   return (
     <div style={styles.shell}>
@@ -163,7 +163,7 @@ export default function InfoPanel({ topology, children }) {
         subtitle="How quickly system risk is rising or falling."
         value={`${momentum > 0 ? '+' : ''}${momentum} points/min`}
         status={momentumStatus}
-        statusLabel={momentumStatus === 'STABLE' ? 'Stable' : momentumStatus === 'CRITICAL' ? 'Rising' : 'Falling'}
+        statusLabel={momentumStatus === 'STABLE' ? 'Stable' : momentumStatus === 'CRITICAL' ? 'Rising' : 'Recovering'}
         theme={theme}
         styles={styles}
       />

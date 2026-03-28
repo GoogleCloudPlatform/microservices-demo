@@ -1,7 +1,9 @@
 from __future__ import annotations
 
 import json
+import hashlib
 import logging
+import secrets
 import sqlite3
 import threading
 import time
@@ -17,7 +19,7 @@ def utcnow_iso() -> str:
 
 
 class SQLiteSystemStore:
-    SCHEMA_VERSION = 1
+    SCHEMA_VERSION = 2
 
     def __init__(self, db_path: Path, max_logs: int = 10000, max_events: int = 5000) -> None:
         self.db_path = Path(db_path)
@@ -102,6 +104,47 @@ class SQLiteSystemStore:
                 )
                 """
             )
+            conn.execute(
+                """
+                CREATE TABLE IF NOT EXISTS user_accounts (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    google_sub TEXT NOT NULL UNIQUE,
+                    email TEXT NOT NULL,
+                    name TEXT NOT NULL,
+                    picture_url TEXT NOT NULL DEFAULT '',
+                    verified_email INTEGER NOT NULL DEFAULT 0,
+                    role TEXT NOT NULL DEFAULT 'viewer',
+                    created_at TEXT NOT NULL,
+                    updated_at TEXT NOT NULL,
+                    last_login_at TEXT NOT NULL
+                )
+                """
+            )
+            conn.execute(
+                """
+                CREATE TABLE IF NOT EXISTS user_sessions (
+                    token_hash TEXT PRIMARY KEY,
+                    user_id INTEGER NOT NULL,
+                    created_at TEXT NOT NULL,
+                    updated_at TEXT NOT NULL,
+                    expires_at TEXT NOT NULL,
+                    user_agent TEXT NOT NULL DEFAULT '',
+                    ip_address TEXT NOT NULL DEFAULT '',
+                    FOREIGN KEY(user_id) REFERENCES user_accounts(id)
+                )
+                """
+            )
+            conn.execute(
+                "CREATE INDEX IF NOT EXISTS idx_user_sessions_expires_at ON user_sessions(expires_at)"
+            )
+            conn.execute(
+                "CREATE INDEX IF NOT EXISTS idx_user_accounts_email ON user_accounts(email)"
+            )
+            conn.execute(
+                "UPDATE schema_version SET version = ?",
+                (self.SCHEMA_VERSION,),
+            )
+            self._prune_expired_sessions(conn)
 
     def add_event(
         self,
@@ -391,6 +434,160 @@ class SQLiteSystemStore:
             "recent_error_logs": int(error_logs["count"]) if error_logs else 0,
         }
 
+    def upsert_user_account(
+        self,
+        *,
+        google_sub: str,
+        email: str,
+        name: str,
+        picture_url: str = "",
+        verified_email: bool = False,
+        role: str = "viewer",
+    ) -> Dict[str, Any]:
+        now = utcnow_iso()
+        with self._lock:
+            with self._connect() as conn:
+                existing = conn.execute(
+                    "SELECT id FROM user_accounts WHERE google_sub = ? LIMIT 1",
+                    (google_sub,),
+                ).fetchone()
+                if existing:
+                    conn.execute(
+                        """
+                        UPDATE user_accounts
+                        SET email = ?, name = ?, picture_url = ?, verified_email = ?, role = ?, updated_at = ?, last_login_at = ?
+                        WHERE google_sub = ?
+                        """,
+                        (
+                            email,
+                            name,
+                            picture_url,
+                            1 if verified_email else 0,
+                            role,
+                            now,
+                            now,
+                            google_sub,
+                        ),
+                    )
+                    user_id = int(existing["id"])
+                else:
+                    cur = conn.execute(
+                        """
+                        INSERT INTO user_accounts (
+                            google_sub, email, name, picture_url, verified_email, role,
+                            created_at, updated_at, last_login_at
+                        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                        """,
+                        (
+                            google_sub,
+                            email,
+                            name,
+                            picture_url,
+                            1 if verified_email else 0,
+                            role,
+                            now,
+                            now,
+                            now,
+                        ),
+                    )
+                    user_id = int(cur.lastrowid)
+                row = conn.execute(
+                    "SELECT * FROM user_accounts WHERE id = ? LIMIT 1",
+                    (user_id,),
+                ).fetchone()
+        return self._user_row_to_dict(row) if row else {}
+
+    def create_user_session(
+        self,
+        *,
+        user_id: int,
+        ttl_seconds: int,
+        user_agent: str = "",
+        ip_address: str = "",
+    ) -> Dict[str, Any]:
+        created_at = utcnow_iso()
+        expires_epoch = time.time() + max(ttl_seconds, 300)
+        expires_at = datetime_from_epoch(expires_epoch)
+        raw_token = secrets.token_urlsafe(32)
+        token_hash = self._hash_session_token(raw_token)
+        with self._lock:
+            with self._connect() as conn:
+                conn.execute(
+                    """
+                    INSERT INTO user_sessions (
+                        token_hash, user_id, created_at, updated_at, expires_at, user_agent, ip_address
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?)
+                    """,
+                    (
+                        token_hash,
+                        user_id,
+                        created_at,
+                        created_at,
+                        expires_at,
+                        user_agent,
+                        ip_address,
+                    ),
+                )
+                row = conn.execute(
+                    """
+                    SELECT s.*, u.google_sub, u.email, u.name, u.picture_url, u.verified_email, u.role
+                    FROM user_sessions s
+                    JOIN user_accounts u ON u.id = s.user_id
+                    WHERE s.token_hash = ?
+                    LIMIT 1
+                    """,
+                    (token_hash,),
+                ).fetchone()
+        session = self._session_row_to_dict(row) if row else {}
+        session["token"] = raw_token
+        return session
+
+    def get_user_session(self, raw_token: str) -> Optional[Dict[str, Any]]:
+        if not raw_token:
+            return None
+        token_hash = self._hash_session_token(raw_token)
+        now = utcnow_iso()
+        with self._lock:
+            with self._connect() as conn:
+                row = conn.execute(
+                    """
+                    SELECT s.*, u.google_sub, u.email, u.name, u.picture_url, u.verified_email, u.role
+                    FROM user_sessions s
+                    JOIN user_accounts u ON u.id = s.user_id
+                    WHERE s.token_hash = ?
+                    LIMIT 1
+                    """,
+                    (token_hash,),
+                ).fetchone()
+                if row is None:
+                    return None
+                if row["expires_at"] <= now:
+                    conn.execute("DELETE FROM user_sessions WHERE token_hash = ?", (token_hash,))
+                    return None
+                conn.execute(
+                    "UPDATE user_sessions SET updated_at = ? WHERE token_hash = ?",
+                    (now, token_hash),
+                )
+                refreshed = conn.execute(
+                    """
+                    SELECT s.*, u.google_sub, u.email, u.name, u.picture_url, u.verified_email, u.role
+                    FROM user_sessions s
+                    JOIN user_accounts u ON u.id = s.user_id
+                    WHERE s.token_hash = ?
+                    LIMIT 1
+                    """,
+                    (token_hash,),
+                ).fetchone()
+        return self._session_row_to_dict(refreshed) if refreshed else None
+
+    def revoke_user_session(self, raw_token: str) -> None:
+        if not raw_token:
+            return
+        token_hash = self._hash_session_token(raw_token)
+        with self._lock:
+            with self._connect() as conn:
+                conn.execute("DELETE FROM user_sessions WHERE token_hash = ?", (token_hash,))
+
     def build_report(self, *, event_limit: int = 120, log_limit: int = 200) -> Dict[str, Any]:
         events = self.list_events(limit=event_limit)
         logs = self.list_logs(limit=log_limit)
@@ -476,6 +673,12 @@ class SQLiteSystemStore:
                 (self.max_logs,),
             )
 
+    def _prune_expired_sessions(self, conn: sqlite3.Connection) -> None:
+        conn.execute(
+            "DELETE FROM user_sessions WHERE expires_at <= ?",
+            (utcnow_iso(),),
+        )
+
     def _event_row_to_dict(self, row: sqlite3.Row) -> Dict[str, Any]:
         item = dict(row)
         item["payload"] = json.loads(item.pop("payload_json", "{}"))
@@ -492,6 +695,48 @@ class SQLiteSystemStore:
         item["report_json"] = json.loads(item.pop("report_json", "{}"))
         item["download_ready"] = bool(item.get("report_markdown") or item.get("report_json"))
         return item
+
+    def _user_row_to_dict(self, row: sqlite3.Row) -> Dict[str, Any]:
+        return {
+            "id": int(row["id"]),
+            "google_sub": row["google_sub"],
+            "email": row["email"],
+            "name": row["name"],
+            "picture_url": row["picture_url"],
+            "verified_email": bool(row["verified_email"]),
+            "role": row["role"],
+            "created_at": row["created_at"],
+            "updated_at": row["updated_at"],
+            "last_login_at": row["last_login_at"],
+        }
+
+    def _session_row_to_dict(self, row: sqlite3.Row) -> Dict[str, Any]:
+        return {
+            "user_id": int(row["user_id"]),
+            "created_at": row["created_at"],
+            "updated_at": row["updated_at"],
+            "expires_at": row["expires_at"],
+            "user_agent": row["user_agent"],
+            "ip_address": row["ip_address"],
+            "user": {
+                "google_sub": row["google_sub"],
+                "email": row["email"],
+                "name": row["name"],
+                "picture_url": row["picture_url"],
+                "verified_email": bool(row["verified_email"]),
+                "role": row["role"],
+            },
+        }
+
+    @staticmethod
+    def _hash_session_token(raw_token: str) -> str:
+        return hashlib.sha256(raw_token.encode("utf-8")).hexdigest()
+
+
+def datetime_from_epoch(epoch_seconds: float) -> str:
+    from datetime import datetime, timezone
+
+    return datetime.fromtimestamp(epoch_seconds, tz=timezone.utc).isoformat()
 
 
 class SQLiteLogHandler(logging.Handler):

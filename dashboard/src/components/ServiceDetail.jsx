@@ -110,6 +110,7 @@ export default function ServiceDetail({ service, data, windowData, onRemediate, 
   const [remResult, setRemResult] = useState(null)
 
   const handleRemediate = async () => {
+    if (!onRemediate) return
     setRemediating(true)
     try {
       const result = await onRemediate(service, data?.latest_incident?.failure_type || data?.failure_type || 'generic_anomaly')
@@ -120,10 +121,10 @@ export default function ServiceDetail({ service, data, windowData, onRemediate, 
     setRemediating(false)
   }
 
-  const obs = windowData?.observations || []
-  const cpuHistory = obs.map(o => o.cpu_percent)
-  const memHistory = obs.map(o => o.mem_percent)
-  const errHistory = obs.map(o => o.error_rate * 100)
+  const obs = (windowData?.observations || []).filter(o => o != null)
+  const cpuHistory = obs.map(o => o?.cpu_percent ?? 0)
+  const memHistory = obs.map(o => o?.mem_percent ?? 0)
+  const errHistory = obs.map(o => (o?.error_rate ?? 0) * 100)
 
   const status = data?.status || 'normal'
   const score = data?.combined_score || 0
@@ -205,7 +206,7 @@ export default function ServiceDetail({ service, data, windowData, onRemediate, 
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
             {flags.map(flag => (
               <span key={flag} style={{ fontSize: 9, padding: '2px 6px', border: `1px solid ${theme.accent}`, color: theme.accent, fontFamily: theme.font }}>
-                {flag.replace(/_/g, ' ')}
+                {(flag || '').replace(/_/g, ' ')}
               </span>
             ))}
           </div>
@@ -219,12 +220,12 @@ export default function ServiceDetail({ service, data, windowData, onRemediate, 
           styles={styles}
         >
           <div style={{ fontSize: 11, color: predictiveAlert.severity === 'critical' ? '#cc2222' : '#c45c0a', fontWeight: 700 }}>
-            LSTM risk {Math.round((predictiveAlert.lstm_score || 0) * 100)}% · {predictiveAlert.failure_type?.replace(/_/g, ' ')}
+            LSTM risk {Math.round((predictiveAlert.lstm_score || 0) * 100)}% · {(predictiveAlert.failure_type || '').replace(/_/g, ' ')}
           </div>
           <div style={styles.meta}>{predictiveAlert.message}</div>
-          {(predictiveAlert.preventive_actions || []).slice(0, 2).map(item => (
-            <div key={item.action} style={styles.meta}>
-              <span style={{ color: theme.text, fontWeight: 700 }}>{item.action.replace(/_/g, ' ')}</span> · {item.summary}
+          {(predictiveAlert.preventive_actions || []).slice(0, 2).map((item, idx) => (
+            <div key={item?.action || idx} style={styles.meta}>
+              <span style={{ color: theme.text, fontWeight: 700 }}>{(item?.action || '').replace(/_/g, ' ')}</span> · {item?.summary}
             </div>
           ))}
         </DetailCard>
@@ -261,40 +262,57 @@ export default function ServiceDetail({ service, data, windowData, onRemediate, 
               key={index}
               style={{
                 fontSize: 9,
-                color: log.includes('ERROR') ? '#cc2222' : log.includes('WARN') ? '#c45c0a' : theme.textMuted,
+                color: String(log).includes('ERROR') ? '#cc2222' : String(log).includes('WARN') ? '#c45c0a' : theme.textMuted,
                 fontFamily: theme.font,
                 marginBottom: 4,
                 wordBreak: 'break-all',
-                borderLeft: `2px solid ${log.includes('ERROR') ? '#cc2222' : log.includes('WARN') ? '#c45c0a' : theme.borderLight}`,
+                borderLeft: `2px solid ${String(log).includes('ERROR') ? '#cc2222' : String(log).includes('WARN') ? '#c45c0a' : theme.borderLight}`,
                 paddingLeft: 6,
                 lineHeight: 1.5,
               }}
             >
-              {log.slice(0, 80)}{log.length > 80 ? '…' : ''}
+              {String(log || '').slice(0, 80)}{String(log || '').length > 80 ? '…' : ''}
             </div>
           ))}
         </DetailCard>
       )}
 
-      <button
-        onClick={handleRemediate}
-        disabled={remediating}
-        style={{
-          width: '100%',
-          padding: '8px',
-          fontFamily: theme.font,
-          fontSize: 11,
-          fontWeight: 700,
-          border: `2px solid ${theme.border}`,
-          background: remediating ? theme.borderLight : theme.border,
-          color: theme.bg,
-          cursor: remediating ? 'not-allowed' : 'pointer',
-          letterSpacing: 1,
-          transition: 'all 0.2s',
-        }}
-      >
-        {remediating ? '⏳ RUNNING REMEDIATION...' : '⚙ RUN REMEDIATION'}
-      </button>
+      {onRemediate ? (
+        <button
+          onClick={handleRemediate}
+          disabled={remediating}
+          style={{
+            width: '100%',
+            padding: '8px',
+            fontFamily: theme.font,
+            fontSize: 11,
+            fontWeight: 700,
+            border: `2px solid ${theme.border}`,
+            background: remediating ? theme.borderLight : theme.border,
+            color: theme.bg,
+            cursor: remediating ? 'not-allowed' : 'pointer',
+            letterSpacing: 1,
+            transition: 'all 0.2s',
+          }}
+        >
+          {remediating ? '⏳ RUNNING REMEDIATION...' : '⚙ RUN REMEDIATION'}
+        </button>
+      ) : (
+        <div
+          style={{
+            width: '100%',
+            padding: '8px 10px',
+            fontFamily: theme.font,
+            fontSize: 10,
+            border: `1px solid ${theme.borderLight}`,
+            color: theme.textMuted,
+            textAlign: 'center',
+            letterSpacing: 1,
+          }}
+        >
+          VIEWER MODE · OPERATOR ACCESS REQUIRED FOR REMEDIATION
+        </div>
+      )}
 
       {remResult && (
         <div

@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
-import { API_BASE } from '../api'
+import { apiFetch } from '../api'
 
 const HISTORY_POLL_MS = 4000
 const INCIDENT_POLL_MS = 4000
@@ -15,7 +15,7 @@ export function useHistory() {
 
     const fetchH = async () => {
       try {
-        const res = await fetch(`${API_BASE}/history`, { signal: ctrl.signal })
+        const res = await apiFetch('/history', { signal: ctrl.signal })
         if (res.ok) {
           const payload = await res.json()
           setHistory(Array.isArray(payload.snapshots || payload) ? (payload.snapshots || payload) : [])
@@ -24,7 +24,7 @@ export function useHistory() {
     }
     const fetchI = async () => {
       try {
-        const res = await fetch(`${API_BASE}/incidents/history?limit=20`, { signal: ctrl.signal })
+        const res = await apiFetch('/incidents/history?limit=20', { signal: ctrl.signal })
         if (res.ok) {
           const payload = await res.json()
           setIncidents(Array.isArray(payload.incidents || payload) ? (payload.incidents || payload) : [])

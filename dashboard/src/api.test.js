@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { getApiBase, getApiToken, getOperatorHeaders } from './api'
+import { apiUrl, getApiBase, getApiToken, getOperatorHeaders } from './api'
 
 describe('getApiBase', () => {
   it('defaults to the in-app API path', () => {
@@ -8,6 +8,13 @@ describe('getApiBase', () => {
 
   it('normalizes a configured API base URL', () => {
     expect(getApiBase({ VITE_API_BASE_URL: 'https://example.com/api/' })).toBe('https://example.com/api')
+  })
+})
+
+describe('apiUrl', () => {
+  it('prefixes relative paths with /api', () => {
+    expect(apiUrl('/health')).toBe('/api/health')
+    expect(apiUrl('health')).toBe('/api/health')
   })
 })
 

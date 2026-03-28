@@ -47,6 +47,12 @@ class Settings:
     cors_origins: List[str]
     auth_enabled: bool
     api_token: str
+    google_oauth_enabled: bool
+    google_client_id: str
+    session_cookie_name: str
+    session_cookie_secure: bool
+    session_ttl_seconds: int
+    operator_emails: List[str]
     orchestrator_target: str
     prometheus_url: str
     loki_url: str
@@ -80,6 +86,7 @@ def load_settings() -> Settings:
     default_origins = "http://localhost:5173,http://127.0.0.1:5173"
     auth_default = runtime_mode == "production"
     collectors_default = runtime_mode == "production"
+    secure_cookie_default = runtime_mode == "production"
 
     return Settings(
         runtime_mode=runtime_mode,
@@ -90,6 +97,12 @@ def load_settings() -> Settings:
         cors_origins=_env_csv("AEGIS_ALLOWED_ORIGINS", default_origins),
         auth_enabled=_env_bool("AEGIS_AUTH_ENABLED", auth_default),
         api_token=os.getenv("AEGIS_API_TOKEN", ""),
+        google_oauth_enabled=_env_bool("AEGIS_GOOGLE_OAUTH_ENABLED", False),
+        google_client_id=os.getenv("AEGIS_GOOGLE_CLIENT_ID", "").strip(),
+        session_cookie_name=os.getenv("AEGIS_SESSION_COOKIE_NAME", "aegis_session"),
+        session_cookie_secure=_env_bool("AEGIS_SESSION_COOKIE_SECURE", secure_cookie_default),
+        session_ttl_seconds=_env_int("AEGIS_SESSION_TTL_SECONDS", 7 * 24 * 60 * 60),
+        operator_emails=_env_csv("AEGIS_OPERATOR_EMAILS", ""),
         orchestrator_target=os.getenv("AEGIS_ORCHESTRATOR", "auto").strip().lower(),
         prometheus_url=os.getenv("AEGIS_PROMETHEUS_URL", "http://localhost:9090"),
         loki_url=os.getenv("AEGIS_LOKI_URL", "http://localhost:3100"),

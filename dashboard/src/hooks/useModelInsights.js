@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { API_BASE } from '../api'
+import { apiFetch } from '../api'
 
 const POLL_MS = 2000
 
@@ -12,7 +12,7 @@ export function useModelInsights() {
     const ctrl = new AbortController()
     abortRef.current = ctrl
     try {
-      const res = await fetch(`${API_BASE}/ml/insights`, { signal: ctrl.signal })
+      const res = await apiFetch('/ml/insights', { signal: ctrl.signal })
       if (!res.ok) return
       const payload = await res.json()
       if (!ctrl.signal.aborted) setInsights(payload)

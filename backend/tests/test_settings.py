@@ -28,6 +28,23 @@ class SettingsTests(unittest.TestCase):
             self.assertGreater(settings.predictive_alert_threshold, 0.0)
             self.assertGreater(settings.predictive_auto_action_threshold, settings.predictive_alert_threshold)
 
+    def test_google_oauth_settings_are_loaded(self):
+        with patch.dict(
+            os.environ,
+            {
+                "AEGIS_GOOGLE_OAUTH_ENABLED": "true",
+                "AEGIS_GOOGLE_CLIENT_ID": "client-id.apps.googleusercontent.com",
+                "AEGIS_SESSION_COOKIE_SECURE": "true",
+                "AEGIS_OPERATOR_EMAILS": "owner@example.com,ops@example.com",
+            },
+            clear=True,
+        ):
+            settings = load_settings()
+            self.assertTrue(settings.google_oauth_enabled)
+            self.assertEqual(settings.google_client_id, "client-id.apps.googleusercontent.com")
+            self.assertTrue(settings.session_cookie_secure)
+            self.assertEqual(settings.operator_emails, ["owner@example.com", "ops@example.com"])
+
 
 if __name__ == "__main__":
     unittest.main()

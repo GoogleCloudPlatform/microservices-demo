@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { API_BASE } from '../api'
+import { apiFetch } from '../api'
 import { useTheme } from '../ThemeContext'
 
 function Section({ eyebrow, title, actions, children, theme }) {
@@ -111,6 +111,7 @@ export default function LogsPage({ events, logs, timestamp, topology, connected 
   const { theme, dark } = useTheme()
   const [levelFilter, setLevelFilter] = useState('ALL')
   const [downloading, setDownloading] = useState(false)
+  const [downloadError, setDownloadError] = useState(null)
 
   const filteredLogs = useMemo(() => {
     if (levelFilter === 'ALL') return logs
@@ -179,7 +180,8 @@ export default function LogsPage({ events, logs, timestamp, topology, connected 
   async function downloadReport(format) {
     try {
       setDownloading(true)
-      const res = await fetch(`${API_BASE}/logs/report?format=${format}&event_limit=200&log_limit=300`)
+      setDownloadError(null)
+      const res = await apiFetch(`/logs/report?format=${format}&event_limit=200&log_limit=300`)
       if (!res.ok) throw new Error(`HTTP ${res.status}`)
       if (format === 'json') {
         const payload = await res.json()
@@ -188,6 +190,8 @@ export default function LogsPage({ events, logs, timestamp, topology, connected 
         const text = await res.text()
         downloadBlob(`aegis-system-report-${Date.now()}.md`, text, 'text/markdown')
       }
+    } catch (err) {
+      setDownloadError(`Download failed: ${err.message}`)
     } finally {
       setDownloading(false)
     }
@@ -197,7 +201,8 @@ export default function LogsPage({ events, logs, timestamp, topology, connected 
     if (!demoRun?.id) return
     try {
       setDownloading(true)
-      const res = await fetch(`${API_BASE}/demo/report/${demoRun.id}?format=${format}`)
+      setDownloadError(null)
+      const res = await apiFetch(`/demo/report/${demoRun.id}?format=${format}`)
       if (!res.ok) throw new Error(`HTTP ${res.status}`)
       if (format === 'json') {
         const payload = await res.json()
@@ -206,6 +211,8 @@ export default function LogsPage({ events, logs, timestamp, topology, connected 
         const text = await res.text()
         downloadBlob(`aegis-demo-report-${demoRun.id}.md`, text, 'text/markdown')
       }
+    } catch (err) {
+      setDownloadError(`Demo report download failed: ${err.message}`)
     } finally {
       setDownloading(false)
     }
@@ -233,7 +240,7 @@ export default function LogsPage({ events, logs, timestamp, topology, connected 
             {connected ? 'backend connected' : 'backend offline'}
           </span>
           <span style={{ border: `1px solid ${theme.borderLight}`, borderRadius: 999, padding: '6px 10px', fontSize: 10, color: theme.textMuted }}>
-            refreshes every 3s · {timestamp ? formatClock(timestamp) : 'awaiting refresh'}
+            refreshes every 5s · {timestamp ? formatClock(timestamp) : 'awaiting refresh'}
           </span>
         </div>
       </div>
@@ -298,8 +305,8 @@ export default function LogsPage({ events, logs, timestamp, topology, connected 
                     <div style={{ fontSize: 11, color: theme.textMuted, lineHeight: 1.7 }}>
                       Final workload state {demoRun.summary_json?.status || 'pending'} · Execution steps {(demoRun.summary_json?.execution_steps || []).join(', ') || 'not yet recorded'}
                     </div>
-                    {demoLogHighlights.length > 0 ? demoLogHighlights.map(line => (
-                      <div key={line} style={{ fontSize: 11, color: theme.text, lineHeight: 1.7, overflowWrap: 'anywhere' }}>
+                    {demoLogHighlights.length > 0 ? demoLogHighlights.map((line, idx) => (
+                      <div key={`log-${idx}`} style={{ fontSize: 11, color: theme.text, lineHeight: 1.7, overflowWrap: 'anywhere' }}>
                         {line}
                       </div>
                     )) : (
@@ -329,6 +336,12 @@ export default function LogsPage({ events, logs, timestamp, topology, connected 
           )}
         </Section>
       </div>
+
+      {downloadError && (
+        <div style={{ margin: '0 0 12px', padding: '8px 12px', fontSize: 11, color: '#cc2222', border: '1px solid #cc2222', borderRadius: 8, background: theme.card }}>
+          {downloadError}
+        </div>
+      )}
 
       <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1.15fr) minmax(320px, 0.85fr)', gap: 18, marginBottom: 18 }}>
         <Section eyebrow="Timeline" title="Live Event Flow" theme={theme}>

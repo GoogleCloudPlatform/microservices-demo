@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
-import { API_BASE, OPERATOR_HEADERS } from '../api'
+import { OPERATOR_HEADERS, apiFetch, apiJson } from '../api'
 const POLL_MS = 2000
 
 export function useTopology() {
@@ -17,10 +17,8 @@ export function useTopology() {
     abortRef.current = ctrl
     const timer = setTimeout(() => ctrl.abort(), 4000)
     try {
-      const res = await fetch(`${API_BASE}/topology`, { signal: ctrl.signal })
+      const json = await apiJson('/topology', { signal: ctrl.signal })
       clearTimeout(timer)
-      if (!res.ok) throw new Error(`HTTP ${res.status}`)
-      const json = await res.json()
       if (!ctrl.signal.aborted) {
         setData(json)
         setConnected(true)
@@ -48,7 +46,7 @@ export function useTopology() {
 
   const fetchWindow = useCallback(async (service, signal) => {
     try {
-      const res = await fetch(`${API_BASE}/window/${service}`, signal ? { signal } : undefined)
+      const res = await apiFetch(`/window/${service}`, signal ? { signal } : undefined)
       if (!res.ok) return null
       return await res.json()
     } catch { return null }
@@ -56,7 +54,7 @@ export function useTopology() {
 
   const triggerRemediation = useCallback(async (service, failureType = 'generic_anomaly') => {
     try {
-      const res = await fetch(`${API_BASE}/remediate`, {
+      const res = await apiFetch('/remediate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', ...OPERATOR_HEADERS },
         body: JSON.stringify({ service, failure_type: failureType }),
@@ -72,7 +70,7 @@ export function useTopology() {
   }, [])
 
   const triggerDemo = useCallback(async (service = 'recommendationservice', owner = 'operator') => {
-    const res = await fetch(`${API_BASE}/demo/run`, {
+    const res = await apiFetch('/demo/run', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', ...OPERATOR_HEADERS },
       body: JSON.stringify({ service, owner }),

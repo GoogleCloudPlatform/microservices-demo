@@ -27,8 +27,8 @@ from collections import deque
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
 
-from fastapi import Depends, FastAPI, Header, HTTPException, Query
-from fastapi.responses import PlainTextResponse
+from fastapi import Depends, FastAPI, Header, HTTPException, Query, Request, Response
+from fastapi.responses import JSONResponse, PlainTextResponse
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
@@ -41,6 +41,7 @@ for _p in [_backend, _repo_root]:
         sys.path.insert(0, _p)
 
 from anomaly_api.correlation import CorrelationEngine
+from anomaly_api.google_identity import verify_google_credential
 from anomaly_api.infrastructure import build_infrastructure_payload
 from anomaly_api.model_features import (
     IF_FEATURES,
@@ -52,7 +53,7 @@ from anomaly_api.model_features import (
     top_if_contributors,
     top_sequence_features,
 )
-from anomaly_api.security import require_operator_token
+from anomaly_api.security import is_operator_user, require_operator_token
 from anomaly_api.settings import load_settings
 from anomaly_api.system_store import SQLiteLogHandler, SQLiteSystemStore
 from remediation.engine import RemediationEngine
@@ -163,6 +164,55 @@ def latest_demo_run() -> Optional[Dict[str, Any]]:
     except Exception as exc:
         logger.debug("Failed to fetch latest demo run: %s", exc)
         return None
+
+
+def login_required() -> bool:
+    return SETTINGS.google_oauth_enabled
+
+
+def _public_auth_paths(path: str) -> bool:
+    if path in {"/health", "/auth/config", "/auth/google", "/auth/me", "/auth/logout", "/openapi.json"}:
+        return True
+    return path.startswith("/docs") or path.startswith("/redoc")
+
+
+def _session_cookie_name() -> str:
+    return SETTINGS.session_cookie_name or "aegis_session"
+
+
+def _set_session_cookie(response: Response, token: str) -> None:
+    response.set_cookie(
+        key=_session_cookie_name(),
+        value=token,
+        max_age=SETTINGS.session_ttl_seconds,
+        httponly=True,
+        secure=SETTINGS.session_cookie_secure,
+        samesite="lax",
+        path="/",
+    )
+
+
+def _clear_session_cookie(response: Response) -> None:
+    response.delete_cookie(
+        key=_session_cookie_name(),
+        path="/",
+        secure=SETTINGS.session_cookie_secure,
+        samesite="lax",
+    )
+
+
+def _resolve_authenticated_session(request: Request) -> Optional[Dict[str, Any]]:
+    if state.system_store is None:
+        return None
+    raw_token = request.cookies.get(_session_cookie_name(), "")
+    if not raw_token:
+        return None
+    session = state.system_store.get_user_session(raw_token)
+    if session is None:
+        return None
+    request.state.user = session.get("user")
+    request.state.session = session
+    return session
 
 
 def _demo_summary_text(run: Dict[str, Any]) -> str:
@@ -1302,10 +1352,27 @@ app = FastAPI(
 app.add_middleware(
     CORSMiddleware,
     allow_origins=SETTINGS.cors_origins,
-    allow_credentials=False,
+    allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+@app.middleware("http")
+async def session_auth_middleware(request: Request, call_next):
+    if request.method == "OPTIONS" or not login_required() or _public_auth_paths(request.url.path):
+        return await call_next(request)
+
+    session = _resolve_authenticated_session(request)
+    if session is None:
+        return JSONResponse(
+            status_code=401,
+            content={
+                "detail": "Google sign-in required",
+                "code": "login_required",
+            },
+        )
+    return await call_next(request)
 
 
 @app.on_event("startup")
@@ -1314,6 +1381,8 @@ async def startup_event():
     state.started_at = time.time()
     if SETTINGS.auth_enabled and not SETTINGS.api_token:
         raise RuntimeError("AEGIS auth is enabled but AEGIS_API_TOKEN is not configured")
+    if SETTINGS.google_oauth_enabled and not SETTINGS.google_client_id:
+        raise RuntimeError("Google OAuth is enabled but AEGIS_GOOGLE_CLIENT_ID is not configured")
     init_system_store()
     emit_system_event(
         event_type="platform_start",
@@ -1345,7 +1414,13 @@ async def startup_event():
     )
 
 
-def require_operator_access(x_aegis_token: str = Header(default="")) -> None:
+def require_operator_access(request: Request, x_aegis_token: str = Header(default="")) -> None:
+    if login_required():
+        user = getattr(request.state, "user", None)
+        if user is None:
+            raise HTTPException(status_code=401, detail="Google sign-in required")
+        if not is_operator_user(SETTINGS, user):
+            raise HTTPException(status_code=403, detail="This Google account does not have operator access")
     require_operator_token(SETTINGS, x_aegis_token)
 
 
@@ -1387,6 +1462,113 @@ class RemediatePayload(BaseModel):
 class DemoRunPayload(BaseModel):
     service: str = "recommendationservice"
     owner: str = "operator"
+
+
+class GoogleAuthPayload(BaseModel):
+    credential: str = Field(min_length=10)
+
+
+@app.get("/auth/config")
+async def auth_config():
+    return {
+        "login_required": login_required(),
+        "google_client_id": SETTINGS.google_client_id if login_required() else "",
+        "operator_emails_configured": bool(SETTINGS.operator_emails),
+        "timestamp": utc_now_iso(),
+    }
+
+
+@app.get("/auth/me")
+async def auth_me(request: Request):
+    if not login_required():
+        return {
+            "authenticated": True,
+            "login_required": False,
+            "user": None,
+            "timestamp": utc_now_iso(),
+        }
+
+    session = _resolve_authenticated_session(request)
+    if session is None:
+        return {
+            "authenticated": False,
+            "login_required": True,
+            "user": None,
+            "timestamp": utc_now_iso(),
+        }
+    user = dict(session.get("user") or {})
+    user["operator"] = is_operator_user(SETTINGS, user)
+    return {
+        "authenticated": True,
+        "login_required": True,
+        "user": user,
+        "timestamp": utc_now_iso(),
+    }
+
+
+@app.post("/auth/google")
+async def auth_google(payload: GoogleAuthPayload, request: Request):
+    if not login_required():
+        raise HTTPException(status_code=400, detail="Google sign-in is not enabled for this environment")
+    if state.system_store is None:
+        raise HTTPException(status_code=503, detail="System store is not ready")
+
+    try:
+        claims = verify_google_credential(payload.credential, SETTINGS.google_client_id)
+    except Exception as exc:
+        raise HTTPException(status_code=401, detail=f"Google credential verification failed: {exc}")
+
+    user_email = (claims.get("email") or "").strip()
+    google_sub = str(claims.get("sub") or "").strip()
+    if not user_email:
+        raise HTTPException(status_code=401, detail="Google account email is missing")
+    if not google_sub:
+        raise HTTPException(status_code=401, detail="Google account subject is missing")
+
+    role = "operator" if is_operator_user(SETTINGS, {"email": user_email}) else "viewer"
+    user = state.system_store.upsert_user_account(
+        google_sub=google_sub,
+        email=user_email,
+        name=(claims.get("name") or user_email).strip(),
+        picture_url=(claims.get("picture") or "").strip(),
+        verified_email=bool(claims.get("email_verified")),
+        role=role,
+    )
+    session = state.system_store.create_user_session(
+        user_id=user["id"],
+        ttl_seconds=SETTINGS.session_ttl_seconds,
+        user_agent=request.headers.get("user-agent", ""),
+        ip_address=request.client.host if request.client else "",
+    )
+    emit_system_event(
+        event_type="user_login",
+        category="system",
+        severity="info",
+        title=f"{user['name']} signed in",
+        message=f"{user['email']} signed in with Google.",
+        status="closed",
+        payload={"email": user["email"], "role": user["role"]},
+    )
+    response = JSONResponse(
+        {
+            "authenticated": True,
+            "login_required": True,
+            "user": {**session["user"], "operator": is_operator_user(SETTINGS, session["user"])},
+            "timestamp": utc_now_iso(),
+        }
+    )
+    _set_session_cookie(response, session["token"])
+    return response
+
+
+@app.post("/auth/logout")
+async def auth_logout(request: Request):
+    raw_token = request.cookies.get(_session_cookie_name())
+    if state.system_store is not None and raw_token:
+        state.system_store.revoke_user_session(raw_token)
+    payload = JSONResponse({"authenticated": False, "login_required": login_required(), "timestamp": utc_now_iso()})
+    _clear_session_cookie(payload)
+    return payload
 
 
 @app.get("/health")

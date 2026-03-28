@@ -21,6 +21,7 @@ This repository is no longer using fake runtime scoring. The backend expects and
 - [Frontend Breakdown](#frontend-breakdown)
 - [Observability Stack](#observability-stack)
 - [Beginner Localhost Startup Guide](#beginner-localhost-startup-guide)
+- [Google Login and Public Access](#google-login-and-public-access)
 - [Deployment Paths](#deployment-paths)
 - [Configuration](#configuration)
 - [Security Model](#security-model)
@@ -625,6 +626,26 @@ If you want to remove volumes too:
 docker compose down -v
 ```
 
+## Google Login and Public Access
+
+AEGIS now supports browser sign-in with Google Identity Services.
+
+What it does:
+
+- every Google user can sign in and view the dashboard
+- user profile details are stored in the backend SQLite system store
+- session state is persisted with an HTTP-only cookie
+- operator actions can be restricted to configured Google emails through `AEGIS_OPERATOR_EMAILS`
+
+What you need to configure:
+
+- `AEGIS_GOOGLE_OAUTH_ENABLED=true`
+- `AEGIS_GOOGLE_CLIENT_ID=...apps.googleusercontent.com`
+- `AEGIS_SESSION_COOKIE_SECURE=true` when serving over HTTPS
+- `AEGIS_OPERATOR_EMAILS=you@example.com` if you want only certain users to run demo/remediation actions
+
+For public hosting from this machine, the important detail is that Google validates the browser origin. If you publish the dashboard at a new ngrok URL every run, you must update the Google OAuth client's **Authorized JavaScript origins** every time unless you reserve a stable ngrok domain.
+
 ## Deployment Paths
 
 ### 1. Local development
@@ -659,6 +680,12 @@ Expected endpoints:
 - backend: `http://localhost:8001`
 - dashboard: `http://localhost:8088`
 
+To run this path with Google sign-in enabled, create a public env file from [.env.public.example](/Users/ishu/Hackathon/microservices-demo/.env.public.example) and use:
+
+```bash
+docker compose --env-file .env.public -f docker-compose.platform.yml up -d --build
+```
+
 ### 3. Kubernetes (`kind` first)
 
 Bootstrap cluster and ingress:
@@ -687,6 +714,17 @@ bash infra/k8s/deploy-kind.sh
 
 More detail: [docs/DEPLOYMENT.md](/Users/ishu/Hackathon/microservices-demo/docs/DEPLOYMENT.md)
 
+### 4. Public website from this PC
+
+The supported public path is:
+
+1. run the app + observability stack locally with Docker
+2. run the AEGIS backend + dashboard locally with `docker-compose.platform.yml`
+3. expose only the dashboard with ngrok
+4. keep the backend private behind the dashboard reverse proxy
+
+Full guide: [Public Hosting From Your Own PC](/Users/ishu/Hackathon/microservices-demo/docs/PUBLIC_HOSTING.md)
+
 ## Configuration
 
 Environment variables are defined in [.env.example](/Users/ishu/Hackathon/microservices-demo/.env.example).
@@ -699,6 +737,12 @@ Key variables:
 - `AEGIS_ALLOWED_ORIGINS`
 - `AEGIS_AUTH_ENABLED`
 - `AEGIS_API_TOKEN`
+- `AEGIS_GOOGLE_OAUTH_ENABLED`
+- `AEGIS_GOOGLE_CLIENT_ID`
+- `AEGIS_SESSION_COOKIE_NAME`
+- `AEGIS_SESSION_COOKIE_SECURE`
+- `AEGIS_SESSION_TTL_SECONDS`
+- `AEGIS_OPERATOR_EMAILS`
 - `AEGIS_ORCHESTRATOR`
 - `AEGIS_K8S_NAMESPACE`
 - `AEGIS_PROMETHEUS_URL`
@@ -722,6 +766,9 @@ Key variables:
 Current security posture:
 
 - mutating operator endpoints require `X-Aegis-Token` when auth is enabled
+- optional Google browser sign-in gates dashboard/API access for viewers
+- signed-in users are stored in SQLite with persisted session records
+- operator privileges can be limited to specific Google emails with `AEGIS_OPERATOR_EMAILS`
 - CORS is controlled by configured allowed origins
 - the packaged dashboard talks to the backend through `/api`
 - the packaged dashboard can inject operator auth at the proxy layer
@@ -734,6 +781,10 @@ This is a practical production-hardening baseline, not full enterprise identity.
 
 Important live endpoints:
 
+- `GET /auth/config`
+- `GET /auth/me`
+- `POST /auth/google`
+- `POST /auth/logout`
 - `GET /health`
 - `GET /status`
 - `GET /topology`
@@ -841,6 +892,7 @@ This is not a toy demo anymore, but it is also not pretending to be a fully fini
 ## Related Documentation
 
 - [Deployment Guide](/Users/ishu/Hackathon/microservices-demo/docs/DEPLOYMENT.md)
+- [Public Hosting From Your Own PC](/Users/ishu/Hackathon/microservices-demo/docs/PUBLIC_HOSTING.md)
 - [Telemetry Coverage](/Users/ishu/Hackathon/microservices-demo/docs/TELEMETRY.md)
 - [Production Audit](/Users/ishu/Hackathon/microservices-demo/docs/PRODUCTION_AUDIT.md)
 - [KIND Operational Proving](/Users/ishu/Hackathon/microservices-demo/docs/KIND_PROVING.md)

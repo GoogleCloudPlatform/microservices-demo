@@ -20,3 +20,35 @@ export function getOperatorHeaders(env = import.meta.env) {
 
 export const API_BASE = getApiBase()
 export const OPERATOR_HEADERS = getOperatorHeaders()
+
+export function apiUrl(path) {
+  const normalized = path.startsWith('/') ? path : `/${path}`
+  return `${API_BASE}${normalized}`
+}
+
+export async function apiFetch(path, options = {}) {
+  const headers = { ...(options.headers || {}) }
+  return fetch(apiUrl(path), {
+    credentials: 'include',
+    ...options,
+    headers,
+  })
+}
+
+export async function apiJson(path, options = {}) {
+  const res = await apiFetch(path, options)
+  let payload = null
+  try {
+    payload = await res.json()
+  } catch {
+    payload = null
+  }
+  if (!res.ok) {
+    const message = payload?.detail || payload?.message || `HTTP ${res.status}`
+    const error = new Error(message)
+    error.status = res.status
+    error.payload = payload
+    throw error
+  }
+  return payload
+}

@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { API_BASE } from '../api'
+import { apiFetch } from '../api'
 
 const POLL_MS = 2000
 
@@ -15,8 +15,8 @@ export function useSystemLogs() {
     abortRef.current = ctrl
     try {
       const [eventsRes, logsRes] = await Promise.all([
-        fetch(`${API_BASE}/events?limit=120`, { signal: ctrl.signal }),
-        fetch(`${API_BASE}/logs?limit=250`, { signal: ctrl.signal }),
+        apiFetch('/events?limit=120', { signal: ctrl.signal }),
+        apiFetch('/logs?limit=250', { signal: ctrl.signal }),
       ])
 
       if (!ctrl.signal.aborted && eventsRes.ok) {

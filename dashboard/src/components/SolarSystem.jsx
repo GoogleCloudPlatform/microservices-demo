@@ -21,7 +21,6 @@ export default function SolarSystem({ topology, selectedService, onSelectService
   const svgRef = useRef(null)
   const gRef   = useRef(null)
   const transformRef = useRef('translate(0,0) scale(1)')
-  const [, forceUpdate] = [null, () => {}]
 
   useEffect(() => {
     if (!svgRef.current || !gRef.current) return

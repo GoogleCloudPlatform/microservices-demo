@@ -46,6 +46,34 @@ class SystemStoreTests(unittest.TestCase):
             self.assertEqual(logs[0]["level"], "WARNING")
             self.assertEqual(logs[0]["context"]["service"], "frontend")
 
+    def test_user_accounts_and_sessions_are_persisted(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            db_path = Path(temp_dir) / "system.db"
+            store = SQLiteSystemStore(db_path)
+
+            user = store.upsert_user_account(
+                google_sub="google-sub-123",
+                email="owner@example.com",
+                name="Owner",
+                picture_url="https://example.com/avatar.png",
+                verified_email=True,
+                role="operator",
+            )
+            session = store.create_user_session(
+                user_id=user["id"],
+                ttl_seconds=3600,
+                user_agent="pytest",
+                ip_address="127.0.0.1",
+            )
+            looked_up = store.get_user_session(session["token"])
+
+            self.assertIsNotNone(looked_up)
+            self.assertEqual(looked_up["user"]["email"], "owner@example.com")
+            self.assertEqual(looked_up["user"]["role"], "operator")
+
+            store.revoke_user_session(session["token"])
+            self.assertIsNone(store.get_user_session(session["token"]))
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -1,0 +1,9 @@
+version: "3"
+
+agent:
+  authtoken: YOUR_NGROK_AUTHTOKEN
+
+endpoints:
+  aegis-dashboard:
+    proto: http
+    addr: 8088

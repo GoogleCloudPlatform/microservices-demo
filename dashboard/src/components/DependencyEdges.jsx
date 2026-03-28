@@ -1,4 +1,4 @@
-import { getPlanetPos } from '../styles/theme'
+import { getPlanetPos, ORBIT_CONFIGS } from '../styles/theme'
 import { useTheme } from '../ThemeContext'
 
 const CX = 490, CY = 340
@@ -17,8 +17,8 @@ export default function DependencyEdges({ graph, services, selectedService, prop
 
   const edges = []
   Object.entries(graph).forEach(([from, deps]) => {
-    deps.forEach(to => {
-      if (!getPlanetPos(from) || !getPlanetPos(to)) return
+    (Array.isArray(deps) ? deps : []).forEach(to => {
+      if (!ORBIT_CONFIGS[from] || !ORBIT_CONFIGS[to]) return
       edges.push({ from, to })
     })
   })
