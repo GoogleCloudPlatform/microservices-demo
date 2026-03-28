@@ -46,6 +46,7 @@ class FailureEvent:
     service_name: str
     start_time: datetime       # UTC — when injection began (failure=1 starts)
     end_time: Optional[datetime] = None   # UTC — when injection ended / container restarted
+    buffer_seconds: int = BUFFER_SECONDS  # configurable pre-failure window (default 75s)
     pre_failure_type: str = field(init=False)
 
     def __post_init__(self) -> None:
@@ -53,8 +54,8 @@ class FailureEvent:
 
     @property
     def pre_failure_start(self) -> datetime:
-        """First timestep where pre_failure=1 (BUFFER_SECONDS before injection)."""
-        return self.start_time - timedelta(seconds=BUFFER_SECONDS)
+        """First timestep where pre_failure=1 (buffer_seconds before injection)."""
+        return self.start_time - timedelta(seconds=self.buffer_seconds)
 
     def is_active_at(self, ts: datetime) -> bool:
         """True if ts falls within the active injection window."""
@@ -70,7 +71,7 @@ class FailureEvent:
 
     def future_failure_horizon(self) -> datetime:
         """
-        Any timestamp t where t <= start_time < t + BUFFER_SECONDS
+        Any timestamp t where t <= start_time < t + buffer_seconds
         will have future_failure=1 (i.e. a failure begins within the next K steps).
         """
         return self.start_time
@@ -97,9 +98,10 @@ class FailureEventRegistry:
                                                 svc_col="service_name")
     """
 
-    def __init__(self) -> None:
+    def __init__(self, buffer_seconds: int = BUFFER_SECONDS) -> None:
         self._events: Dict[str, FailureEvent] = {}   # scenario_id → event
         self._active: Optional[str] = None            # scenario_id of current injection
+        self._buffer_seconds = buffer_seconds         # pre-failure window length
 
     # ── Registration API ──────────────────────────────────────────────────────
 
@@ -135,6 +137,7 @@ class FailureEventRegistry:
             failure_type=failure_type,
             service_name=service_name,
             start_time=start_time,
+            buffer_seconds=self._buffer_seconds,
         )
         self._events[scenario_id] = event
         self._active = scenario_id
@@ -261,6 +264,79 @@ class FailureEventRegistry:
         df["scenario_id"] = sids
 
         # Enforce integer dtype (never bool, never float)
+        for col in ("failure", "pre_failure", "future_failure"):
+            df[col] = df[col].astype(int)
+
+        return df
+
+    # ── Global (service-agnostic) labelling — used for traces ─────────────────
+
+    def _get_labels_any_service(
+        self, ts: datetime
+    ) -> Tuple[int, int, int, str, str]:
+        """
+        Like get_labels_for_timestamp() but matches ANY service's failure events.
+        Used for traces where the span's reported service name may differ from
+        the Docker injection target name.
+        """
+        failure = pre_failure = future_failure = 0
+        failure_type = "none"
+        scenario_id_out = ""
+
+        for sid, ev in self._events.items():
+            if ev.is_active_at(ts):
+                failure = 1
+                pre_failure = 0
+                future_failure = 1
+                failure_type = ev.failure_type
+                scenario_id_out = sid
+                break
+
+            if ev.is_pre_failure_at(ts):
+                pre_failure = 1
+                future_failure = 1
+                failure_type = ev.pre_failure_type
+                scenario_id_out = sid
+
+            horizon = ev.future_failure_horizon()
+            if ts <= horizon < ts + timedelta(seconds=ev.buffer_seconds):
+                future_failure = 1
+
+        return failure, pre_failure, future_failure, failure_type, scenario_id_out
+
+    def compute_global_labels_for_dataframe(
+        self,
+        df: pd.DataFrame,
+        ts_col: str = "timestamp",
+    ) -> pd.DataFrame:
+        """
+        Stamp labels onto traces/logs using timestamp-only matching (no service filter).
+        Any span executing during a failure window is labeled — regardless of what
+        service name Jaeger recorded for the process.
+        """
+        ts_series = pd.to_datetime(df[ts_col], utc=True)
+
+        failures: List[int] = []
+        pre_failures: List[int] = []
+        future_failures: List[int] = []
+        ftypes: List[str] = []
+        sids: List[str] = []
+
+        for ts in ts_series:
+            f, pf, ff, ft, sid = self._get_labels_any_service(ts)
+            failures.append(f)
+            pre_failures.append(pf)
+            future_failures.append(ff)
+            ftypes.append(ft)
+            sids.append(sid)
+
+        df = df.copy()
+        df["failure"] = failures
+        df["pre_failure"] = pre_failures
+        df["future_failure"] = future_failures
+        df["failure_type"] = ftypes
+        df["scenario_id"] = sids
+
         for col in ("failure", "pre_failure", "future_failure"):
             df[col] = df[col].astype(int)
 
