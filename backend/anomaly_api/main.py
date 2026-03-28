@@ -8,6 +8,8 @@ Port: 8001
 - /remediate    POST Trigger remediation for a service
 - /history      GET  Last 100 score snapshots
 - /alerts       GET  Active alerts (score > 0.7)
+- /topology     GET  Rich service topology with features (solar system dashboard)
+- /window/{svc} GET  Raw window observations for sparklines
 """
 
 import asyncio
@@ -67,21 +69,12 @@ class AppState:
         self.models_loaded = False
         self.if_inference = None
         self.lstm_inference = None
+        self.lstm_per_service: Dict[str, Any] = {}
         self.correlation_engine = None
         self.remediation_engine = None
 
         # Live score store: service -> {if_score, lstm_score, combined_score}
         self.current_scores: Dict[str, Dict] = {}
-
-        # Live Docker stats: service -> {cpu_percent, mem_percent, ...}
-        self.live_docker_stats: Dict[str, Dict] = {}
-        self._docker_client = None
-        self._docker_available = False
-        # Previous cumulative network/block values for rate computation
-        self._prev_cumulative: Dict[str, Dict] = {}
-        self._prev_poll_time: float = 0.0
-        # Per-service LSTM inference instances (each with own rolling buffer)
-        self.lstm_per_service: Dict[str, Any] = {}
 
         # History: deque of score snapshots
         self.history: deque = deque(maxlen=100)
@@ -91,6 +84,10 @@ class AppState:
 
         # Demo tick counter
         self._demo_tick: float = 0.0
+
+        # Stage 1 & 2
+        self.window_state = None   # SlidingWindowState — set at startup
+        self.ingestion_pipeline = None  # IngestionPipeline — set at startup
 
 
 state = AppState()
@@ -196,146 +193,50 @@ def _score_status(combined: float) -> str:
         return "critical"
 
 
-def _poll_docker_stats_sync():
-    """
-    Poll real Docker container stats for all services.
-    Computes per-second rates for network/block I/O by diffing
-    against previous cumulative values. Runs in a thread executor.
-    """
-    try:
-        import docker as docker_sdk
-        if state._docker_client is None:
-            state._docker_client = docker_sdk.from_env()
-        client = state._docker_client
-
-        now = time.time()
-        elapsed = now - state._prev_poll_time if state._prev_poll_time > 0 else 8.0
-        state._prev_poll_time = now
-
-        containers = client.containers.list()
-        stats_map: Dict[str, Dict] = {}
-        new_cumulative: Dict[str, Dict] = {}
-
-        for container in containers:
-            raw_name = container.name
-            svc = None
-            for s in ALL_SERVICES:
-                if s in raw_name:
-                    svc = s
-                    break
-            if svc is None:
-                continue
-
-            try:
-                raw = container.stats(stream=False)
-
-                # ── CPU % ──────────────────────────────────────────
-                cpu_delta = (raw["cpu_stats"]["cpu_usage"]["total_usage"] -
-                             raw["precpu_stats"]["cpu_usage"]["total_usage"])
-                sys_delta  = (raw["cpu_stats"]["system_cpu_usage"] -
-                              raw["precpu_stats"]["system_cpu_usage"])
-                n_cpus = raw["cpu_stats"].get("online_cpus") or \
-                         len(raw["cpu_stats"]["cpu_usage"].get("percpu_usage", [1]))
-                cpu_pct = (cpu_delta / sys_delta) * n_cpus * 100.0 if sys_delta > 0 else 0.0
-
-                # ── Memory % ────────────────────────────────────────
-                mem_usage = raw["memory_stats"].get("usage", 0)
-                mem_limit = raw["memory_stats"].get("limit", 1)
-                mem_pct = (mem_usage / mem_limit) * 100.0 if mem_limit > 0 else 0.0
-
-                # ── Network cumulative bytes ─────────────────────────
-                nets = raw.get("networks", {})
-                cum_rx = sum(v.get("rx_bytes", 0) for v in nets.values())
-                cum_tx = sum(v.get("tx_bytes", 0) for v in nets.values())
-
-                # ── Block I/O cumulative bytes ────────────────────────
-                bio = raw.get("blkio_stats", {}).get("io_service_bytes_recursive") or []
-                cum_br = sum(e.get("value", 0) for e in bio if e.get("op", "").lower() == "read")
-                cum_bw = sum(e.get("value", 0) for e in bio if e.get("op", "").lower() == "write")
-
-                new_cumulative[svc] = {
-                    "net_rx": cum_rx, "net_tx": cum_tx,
-                    "block_r": cum_br, "block_w": cum_bw,
-                }
-
-                # ── Compute rates (bytes/s → MB/s) ────────────────────
-                prev = state._prev_cumulative.get(svc, {})
-                if prev:
-                    net_rx_mbs = max(0.0, (cum_rx - prev["net_rx"]) / elapsed / 1e6)
-                    net_tx_mbs = max(0.0, (cum_tx - prev["net_tx"]) / elapsed / 1e6)
-                    block_r_mbs = max(0.0, (cum_br - prev["block_r"]) / elapsed / 1e6)
-                    block_w_mbs = max(0.0, (cum_bw - prev["block_w"]) / elapsed / 1e6)
-                else:
-                    # First sample — use neutral training-distribution values
-                    net_rx_mbs = 5.0
-                    net_tx_mbs = 6.0
-                    block_r_mbs = 0.06
-                    block_w_mbs = 1.6
-
-                stats_map[svc] = {
-                    "cpu_percent":      round(min(cpu_pct, 100.0), 2),
-                    "mem_percent":      round(min(mem_pct, 100.0), 2),
-                    "net_rx_mb":        round(net_rx_mbs, 4),
-                    "net_tx_mb":        round(net_tx_mbs, 4),
-                    "block_read_mb":    round(block_r_mbs, 4),
-                    "block_write_mb":   round(block_w_mbs, 4),
-                    "log_count":        0.0,
-                    "error_rate":       0.0,
-                    "warn_rate":        0.0,
-                    "template_entropy": 0.0,
-                }
-            except Exception:
-                pass
-
-        if stats_map:
-            state.live_docker_stats = stats_map
-            state._docker_available = True
-        state._prev_cumulative = new_cumulative
-
-    except Exception as e:
-        state._docker_available = False
-        logger.debug(f"Docker stats poll failed: {e}")
-
-
 def compute_all_scores() -> Dict[str, Dict]:
     """
-    Compute anomaly scores for all services.
-    - If Docker stats are available: feed real per-service metrics into IF model.
-    - If demo_mode: sinusoidal scores.
-    - Fallback: sinusoidal.
+    Compute anomaly scores for all services using the sliding window features.
+    Falls back to sinusoidal demo scores when models are not loaded.
     """
+    from anomaly_api.features import extract_features
+
     t = time.time()
     scores = {}
 
     for svc in ALL_SERVICES:
-        # Try real model + real Docker stats
-        if not state.demo_mode and state.if_inference and state._docker_available:
-            docker_feats = state.live_docker_stats.get(svc)
-            if docker_feats is not None:
-                if_score = state.if_inference.score(docker_feats)
-                # LSTM: use per-service rolling buffer
-                lstm_inst = state.lstm_per_service.get(svc) or state.lstm_inference
-                lstm_score = 0.15
-                if lstm_inst:
-                    result = lstm_inst.predict_from_features(docker_feats)
-                    if result is not None:
-                        lstm_score = result
-                    else:
-                        lstm_score = lstm_inst._demo_score()
-                combined = 0.6 * lstm_score + 0.4 * if_score
-                s = {
-                    "if_score":      round(if_score, 3),
-                    "lstm_score":    round(lstm_score, 3),
-                    "combined_score":round(combined, 3),
-                    "cpu_percent":   docker_feats["cpu_percent"],
-                    "mem_percent":   docker_feats["mem_percent"],
-                }
-                s["status"] = _score_status(s["combined_score"])
-                scores[svc] = s
-                continue
+        window = state.window_state.get_window(svc) if state.window_state else []
+        features = extract_features(svc, window) if window else {}
 
-        # Fallback: sinusoidal demo scores
-        s = _demo_score(svc, t)
+        if not state.demo_mode and state.if_inference and features:
+            # Build the 10-feature vector for IF
+            feat_vec = {
+                "cpu_percent": features.get("cpu_percent_mean", 0),
+                "mem_percent": features.get("mem_percent_mean", 0),
+                "net_rx_mb": features.get("net_rx_mbps_mean", 0),
+                "net_tx_mb": features.get("net_tx_mbps_mean", 0),
+                "block_read_mb": features.get("block_read_mbps_mean", 0),
+                "block_write_mb": features.get("block_write_mbps_mean", 0),
+                "log_count": features.get("log_count_mean", 0),
+                "error_rate": features.get("error_rate_mean", 0),
+                "warn_rate": features.get("warn_rate_mean", 0),
+                "template_entropy": features.get("template_entropy_mean", 0),
+            }
+            if_score = state.if_inference.score(feat_vec)
+            lstm_inst = state.lstm_per_service.get(svc) if state.lstm_per_service else None
+            lstm_score = lstm_inst._demo_score() if lstm_inst else _demo_score(svc, t)["lstm_score"]
+            combined = 0.6 * lstm_score + 0.4 * if_score
+            s = {
+                "if_score": round(if_score, 3),
+                "lstm_score": round(lstm_score, 3),
+                "combined_score": round(combined, 3),
+                "cpu_percent": features.get("cpu_percent_mean", 0),
+                "mem_percent": features.get("mem_percent_mean", 0),
+                "feature_flags": features.get("feature_flags", []),
+            }
+        else:
+            s = _demo_score(svc, t)
+            s["feature_flags"] = []
+
         s["status"] = _score_status(s["combined_score"])
         scores[svc] = s
 
@@ -392,16 +293,9 @@ def get_recommendation(root_cause: Dict, scores: Dict) -> str:
 # =============================================
 
 async def update_scores_loop():
-    """Background task: polls Docker stats + updates scores every 2 seconds."""
-    tick = 0
+    """Background task: updates scores every 2 seconds."""
     while True:
         try:
-            # Poll Docker stats every 4 ticks (8s) — Docker stats are slow
-            if tick % 4 == 0:
-                loop = asyncio.get_event_loop()
-                await loop.run_in_executor(None, _poll_docker_stats_sync)
-
-            tick += 1
             scores = compute_all_scores()
             state.current_scores = scores
             state.last_update = time.time()
@@ -409,6 +303,7 @@ async def update_scores_loop():
             # Add to history
             snapshot = {
                 "timestamp": datetime.now(timezone.utc).isoformat(),
+                "ts_epoch": time.time(),
                 "scores": {svc: v["combined_score"] for svc, v in scores.items()},
             }
             state.history.append(snapshot)
@@ -442,6 +337,13 @@ app.add_middleware(
 async def startup_event():
     logger.info("Starting AI Observability Platform...")
     load_models()
+
+    # Stage 1: start ingestion pipeline
+    from anomaly_api.ingestion import SlidingWindowState, IngestionPipeline
+    state.window_state = SlidingWindowState()
+    state.ingestion_pipeline = IngestionPipeline(state.window_state)
+    state.ingestion_pipeline.start()
+
     # Start background score update loop
     asyncio.create_task(update_scores_loop())
     logger.info(f"Platform started. demo_mode={state.demo_mode}")
@@ -620,6 +522,130 @@ async def alerts():
         "alerts": active_alerts,
         "count": len(active_alerts),
         "timestamp": datetime.now(timezone.utc).isoformat(),
+    }
+
+
+@app.get("/topology")
+async def topology():
+    """Main endpoint for solar system dashboard — rich per-service data."""
+    from anomaly_api.features import extract_features
+
+    scores = state.current_scores or compute_all_scores()
+
+    # Compute health score: H = 100 - avg(combined_score) * 100
+    avg_score = sum(v["combined_score"] for v in scores.values()) / max(len(scores), 1)
+    health_score = round(100 - avg_score * 100)
+
+    # Compute failure momentum: dP/dt — rate of score change from history
+    momentum = 0.0
+    if len(state.history) >= 2:
+        recent = list(state.history)[-10:]
+        if len(recent) >= 2:
+            first_avg = sum(recent[0]["scores"].values()) / max(len(recent[0]["scores"]), 1)
+            last_avg = sum(recent[-1]["scores"].values()) / max(len(recent[-1]["scores"]), 1)
+            dt_minutes = (
+                recent[-1].get("ts_epoch", time.time()) - recent[0].get("ts_epoch", time.time())
+            ) / 60.0
+            if dt_minutes > 0:
+                momentum = round((last_avg - first_avg) / dt_minutes * 100, 2)
+
+    # Build rich service data including features
+    service_data = {}
+    for svc in ALL_SERVICES:
+        s = scores.get(svc, {})
+        window = state.window_state.get_window(svc) if state.window_state else []
+        features = extract_features(svc, window) if window else {}
+
+        # Recent logs from Loki cache
+        recent_logs = []
+        if state.ingestion_pipeline and state.ingestion_pipeline._loki_cache:
+            recent_logs = (
+                state.ingestion_pipeline._loki_cache.get(svc, {}).get("recent_messages", [])[:3]
+            )
+
+        service_data[svc] = {
+            **s,
+            # Rich features
+            "cpu_mean": round(features.get("cpu_percent_mean", 0), 2),
+            "cpu_max": round(features.get("cpu_percent_max", 0), 2),
+            "cpu_std": round(features.get("cpu_percent_std", 0), 2),
+            "cpu_slope": round(features.get("cpu_percent_slope", 0), 4),
+            "mem_mean": round(features.get("mem_percent_mean", 0), 2),
+            "mem_max": round(features.get("mem_percent_max", 0), 2),
+            "net_rx_mean": round(features.get("net_rx_mbps_mean", 0), 4),
+            "net_tx_mean": round(features.get("net_tx_mbps_mean", 0), 4),
+            "error_rate_mean": round(features.get("error_rate_mean", 0), 4),
+            "error_rate_slope": round(features.get("error_rate_slope", 0), 6),
+            "warn_rate_mean": round(features.get("warn_rate_mean", 0), 4),
+            "log_count_mean": round(features.get("log_count_mean", 0), 1),
+            "log_volume_per_sec": round(features.get("log_volume_per_sec_mean", 0), 2),
+            "exception_count_mean": round(features.get("exception_count_mean", 0), 2),
+            "template_entropy_mean": round(features.get("template_entropy_mean", 0), 3),
+            "cpu_pressure": round(features.get("cpu_pressure", 0), 3),
+            "memory_pressure": round(features.get("memory_pressure", 0), 3),
+            "network_pressure": round(features.get("network_pressure", 0), 4),
+            "error_momentum": round(features.get("error_momentum", 0), 6),
+            "log_anomaly_score": round(features.get("log_anomaly_score", 0), 4),
+            "io_pressure": round(features.get("io_pressure", 0), 4),
+            "window_size": len(window),
+            "window_filled": len(window) >= 20,
+            "feature_flags": features.get("feature_flags", []),
+            "recent_logs": recent_logs,
+        }
+
+    root_cause = get_root_cause_analysis(scores)
+    recommendation = get_recommendation(root_cause, scores)
+
+    return {
+        "timestamp": datetime.now(timezone.utc).isoformat(),
+        "health_score": health_score,
+        "failure_momentum": momentum,
+        "demo_mode": state.demo_mode,
+        "services": service_data,
+        "dependency_graph": {
+            "frontend": ["productcatalogservice", "cartservice", "recommendationservice",
+                         "currencyservice", "checkoutservice", "shippingservice", "adservice"],
+            "checkoutservice": ["cartservice", "emailservice", "paymentservice",
+                                "productcatalogservice", "shippingservice", "currencyservice"],
+            "productcatalogservice": [],
+            "cartservice": ["redis-cart"],
+            "recommendationservice": ["productcatalogservice"],
+            "paymentservice": [],
+            "shippingservice": [],
+            "emailservice": [],
+            "currencyservice": [],
+            "adservice": [],
+            "redis-cart": [],
+        },
+        "root_cause": root_cause,
+        "alerts": [{"service": svc, **v} for svc, v in scores.items() if v.get("combined_score", 0) > 0.7],
+        "recommendation": recommendation,
+    }
+
+
+@app.get("/window/{service}")
+async def get_window(service: str):
+    """Return raw window observations for sparklines."""
+    if service not in ALL_SERVICES:
+        raise HTTPException(404, f"Unknown service: {service}")
+    window = state.window_state.get_window(service) if state.window_state else []
+    return {
+        "service": service,
+        "observations": [
+            {
+                "timestamp": obs.timestamp,
+                "cpu_percent": obs.cpu_percent,
+                "mem_percent": obs.mem_percent,
+                "net_rx_mbps": obs.net_rx_mbps,
+                "net_tx_mbps": obs.net_tx_mbps,
+                "error_rate": obs.error_rate,
+                "log_count": obs.log_count,
+                "exception_count": obs.exception_count,
+            }
+            for obs in window
+        ],
+        "count": len(window),
+        "filled": len(window) >= 20,
     }
 
 
