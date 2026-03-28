@@ -2,6 +2,14 @@ import { useMemo } from 'react'
 import { anomalyScoreColor, SERVICE_SHORT } from '../styles/theme'
 import { useTheme } from '../ThemeContext'
 
+function asArray(value) {
+  return Array.isArray(value) ? value : []
+}
+
+function asObject(value) {
+  return value && typeof value === 'object' && !Array.isArray(value) ? value : {}
+}
+
 function clamp(value, min, max) {
   return Math.max(min, Math.min(max, value))
 }
@@ -58,9 +66,9 @@ function statusTone(status, score, theme) {
 }
 
 function topMemoryMatches(services) {
-  return Object.entries(services || {})
+  return Object.entries(asObject(services))
     .flatMap(([service, snapshot]) =>
-      (snapshot.similar_incidents || []).map(match => ({
+      asArray(snapshot?.similar_incidents).map(match => ({
         service,
         ...match,
       }))
@@ -70,7 +78,7 @@ function topMemoryMatches(services) {
 }
 
 function latestServiceIncidents(services) {
-  return Object.entries(services || {})
+  return Object.entries(asObject(services))
     .map(([service, snapshot]) => snapshot.latest_incident ? { service, ...snapshot.latest_incident } : null)
     .filter(Boolean)
     .sort((a, b) => {
@@ -129,13 +137,14 @@ function StatusPill({ label, tone }) {
 function TrendRibbon({ history, services, theme }) {
   const width = 520
   const height = 128
-  const avgScores = history.map(item => {
+  const safeHistory = asArray(history)
+  const avgScores = safeHistory.map(item => {
     const scores = Object.values(item.scores || {})
     if (!scores.length) return 0
     return scores.reduce((sum, value) => sum + value, 0) / scores.length
   })
-  const alertCounts = history.map(item =>
-    Object.values(item.scores || {}).filter(value => value > 0.7).length / Math.max(Object.keys(services || {}).length, 1)
+  const alertCounts = safeHistory.map(item =>
+    Object.values(item.scores || {}).filter(value => value > 0.7).length / Math.max(Object.keys(asObject(services)).length, 1)
   )
   const avgPath = miniSparkPath(avgScores, width, height)
   const alertPath = miniSparkPath(alertCounts, width, height)
@@ -194,7 +203,7 @@ function RootCauseSpotlight({ topology, services, theme }) {
 }
 
 function FleetSummary({ services, theme }) {
-  const entries = Object.entries(services || {})
+  const entries = Object.entries(asObject(services))
   const active = entries.filter(([, svc]) => svc.latest_incident?.status === 'active')
   const isolated = active.filter(([, svc]) => svc.latest_incident?.containment?.containment_mode === 'isolate')
   const manualRequired = active.filter(([, svc]) => svc.latest_incident?.containment?.manual_required)
@@ -220,7 +229,7 @@ function FleetSummary({ services, theme }) {
 }
 
 function WorkloadMatrix({ services, topology, theme }) {
-  const ranked = Object.entries(services || {})
+  const ranked = Object.entries(asObject(services))
     .map(([service, snapshot]) => ({
       service,
       snapshot,
@@ -339,10 +348,10 @@ function ClusterReadyPanels({ theme, services, infrastructure }) {
       <div className="infra-placeholder-card infra-placeholder-card-accent">
         <div className="infra-placeholder-top">
           <span className="infra-placeholder-label">Mode</span>
-          <Badge label="Docker Compose live" tone="ok" />
+          <Badge label={`${infrastructure?.environment?.orchestrator || 'docker'} live`} tone="ok" />
         </div>
         <div className="infra-placeholder-copy">
-          {Object.keys(services || {}).length} app workloads are monitored now. This panel is already laid out for node, pod, deployment, rollout, and HPA metrics once the Kubernetes feed is wired.
+          {Object.keys(asObject(services)).length} app workloads are monitored now. This panel is already laid out for node, pod, deployment, rollout, and HPA metrics once the Kubernetes feed is wired.
         </div>
       </div>
     </div>
@@ -350,7 +359,7 @@ function ClusterReadyPanels({ theme, services, infrastructure }) {
 }
 
 function StackHealth({ topology, services, theme, infrastructure }) {
-  const trackedServices = Object.values(services || {})
+  const trackedServices = Object.values(asObject(services))
   const logRich = trackedServices.filter(service => (service.recent_logs || []).length > 0).length
   const filledWindows = trackedServices.filter(service => service.window_filled).length
   const traceReady = ['frontend', 'productcatalogservice', 'currencyservice', 'paymentservice', 'emailservice', 'checkoutservice', 'recommendationservice', 'cartservice']
@@ -425,7 +434,7 @@ function StackHealth({ topology, services, theme, infrastructure }) {
 }
 
 function PipelineReadiness({ services, topology, theme }) {
-  const tracked = Object.values(services || {})
+  const tracked = Object.values(asObject(services))
   const filled = tracked.filter(service => service.window_filled).length
   const flagged = tracked.filter(service => (service.feature_flags || []).length > 0).length
   const withMemory = tracked.filter(service => (service.similar_incidents || []).length > 0).length
@@ -450,8 +459,8 @@ function PipelineReadiness({ services, topology, theme }) {
 }
 
 function IncidentsRail({ topology, incidents, services, theme }) {
-  const active = topology?.active_incidents || []
-  const historyFeed = [...active, ...(incidents || [])]
+  const active = asArray(topology?.active_incidents)
+  const historyFeed = [...active, ...asArray(incidents)]
     .sort((a, b) => new Date(b.detected_at || b.created_at || 0).getTime() - new Date(a.detected_at || a.created_at || 0).getTime())
     .slice(0, 8)
 
@@ -503,8 +512,9 @@ function IncidentsRail({ topology, incidents, services, theme }) {
 }
 
 function MemoryRecall({ services, theme, infrastructure }) {
-  const matches = infrastructure?.memory?.recent?.length
-    ? infrastructure.memory.recent.map(match => ({ service: match.service, ...match }))
+  const memoryRecent = asArray(infrastructure?.memory?.recent)
+  const matches = memoryRecent.length
+    ? memoryRecent.map(match => ({ service: match.service, ...match }))
     : topMemoryMatches(services)
 
   if (!matches.length) {
@@ -543,9 +553,9 @@ function MemoryRecall({ services, theme, infrastructure }) {
   )
 }
 
-function OperatorNotes({ topology, services, theme }) {
+function OperatorNotes({ topology, services, theme, infrastructure }) {
   const recent = latestServiceIncidents(services).slice(0, 3)
-  const clusterLabel = topology?.environment || 'docker compose'
+  const clusterLabel = infrastructure?.environment?.orchestrator || topology?.environment || 'docker compose'
 
   return (
     <div className="infra-notes">
@@ -574,25 +584,29 @@ function OperatorNotes({ topology, services, theme }) {
 
 export default function InfraPage({ topology, history, incidents, connected, infrastructure }) {
   const { theme, dark } = useTheme()
-  const services = topology?.services || {}
+  const safeTopology = asObject(topology)
+  const safeInfrastructure = asObject(infrastructure)
+  const safeHistory = asArray(history)
+  const safeIncidents = asArray(incidents)
+  const services = asObject(safeTopology.services)
   const serviceEntries = Object.entries(services)
-  const healthScore = topology?.health_score ?? 0
-  const alerts = topology?.alerts || []
-  const activeIncidents = topology?.active_incidents || []
+  const healthScore = Number.isFinite(safeTopology.health_score) ? safeTopology.health_score : null
+  const alerts = asArray(safeTopology.alerts)
+  const activeIncidents = asArray(safeTopology.active_incidents)
   const warningCount = serviceEntries.filter(([, svc]) => svc.status === 'warning').length
   const criticalCount = serviceEntries.filter(([, svc]) => svc.status === 'critical').length
   const latestOutcome = useMemo(() => {
-    const feed = [...(topology?.recent_incidents || []), ...(incidents || [])]
+    const feed = [...asArray(safeTopology.recent_incidents), ...safeIncidents]
     const resolved = feed.find(item => item.status === 'resolved')
     return resolved || feed[0] || null
-  }, [topology, incidents])
+  }, [safeTopology.recent_incidents, safeIncidents])
 
   const topCards = [
     {
       label: 'global health',
-      value: `${healthScore || '—'}`,
-      meta: topology ? `${serviceEntries.length} monitored services` : 'Awaiting topology feed',
-      tone: severityTone(clamp(1 - healthScore / 100, 0, 1), theme),
+      value: healthScore == null ? '—' : `${healthScore}`,
+      meta: serviceEntries.length ? `${serviceEntries.length} monitored services` : 'Awaiting topology feed',
+      tone: severityTone(clamp(1 - ((healthScore ?? 100) / 100), 0, 1), theme),
     },
     {
       label: 'active incidents',
@@ -614,17 +628,17 @@ export default function InfraPage({ topology, history, incidents, connected, inf
     },
     {
       label: 'prometheus freshness',
-      value: infrastructure?.timestamp ? formatRelative(infrastructure.timestamp) : topology?.timestamp ? formatRelative(topology.timestamp) : '—',
-      meta: infrastructure?.observability?.prometheus?.available
-        ? `${infrastructure.observability.prometheus.healthy_targets || 0}/${infrastructure.observability.prometheus.active_targets || 0} targets healthy`
-        : topology ? `Updated ${formatTime(topology.timestamp)}` : 'Awaiting backend poll',
-      tone: infrastructure?.observability?.prometheus?.available || topology ? severityTone(0.2, theme) : theme.textDim,
+      value: safeInfrastructure.timestamp ? formatRelative(safeInfrastructure.timestamp) : safeTopology.timestamp ? formatRelative(safeTopology.timestamp) : '—',
+      meta: safeInfrastructure?.observability?.prometheus?.available
+        ? `${safeInfrastructure.observability.prometheus.healthy_targets || 0}/${safeInfrastructure.observability.prometheus.active_targets || 0} targets healthy`
+        : safeTopology.timestamp ? `Updated ${formatTime(safeTopology.timestamp)}` : 'Awaiting backend poll',
+      tone: safeInfrastructure?.observability?.prometheus?.available || safeTopology.timestamp ? severityTone(0.2, theme) : theme.textDim,
     },
     {
       label: 'trace activity',
-      value: topology?.demo_mode ? 'Demo' : 'Live',
-      meta: topology?.demo_mode ? 'Demo scoring still active' : 'Inference + remediation pipeline active',
-      tone: topology?.demo_mode ? severityTone(0.55, theme) : theme.accent,
+      value: safeTopology.demo_mode ? 'Demo' : 'Live',
+      meta: safeTopology.demo_mode ? 'Demo scoring still active' : 'Inference + remediation pipeline active',
+      tone: safeTopology.demo_mode ? severityTone(0.55, theme) : theme.accent,
     },
   ]
 
@@ -653,8 +667,8 @@ export default function InfraPage({ topology, history, incidents, connected, inf
         </div>
         <div className="infra-header-meta">
           <StatusPill label={connected ? 'backend connected' : 'backend offline'} tone={connected ? theme.accent : severityTone(0.92, theme)} />
-          <Badge label={topology?.demo_mode ? 'demo scoring' : 'live inference'} tone={topology?.demo_mode ? 'warning' : 'ok'} />
-          <Badge label={infrastructure?.cluster?.available ? 'kubernetes live' : 'kubernetes ready'} />
+          <Badge label={safeTopology.demo_mode ? 'demo scoring' : 'live inference'} tone={safeTopology.demo_mode ? 'warning' : 'ok'} />
+          <Badge label={safeInfrastructure?.cluster?.available ? 'kubernetes live' : 'kubernetes ready'} />
         </div>
       </div>
 
@@ -667,15 +681,15 @@ export default function InfraPage({ topology, history, incidents, connected, inf
       <div className="infra-layout">
         <div className="infra-column infra-column-left">
           <Section title="System Overview" eyebrow="Overview" theme={theme}>
-            <RootCauseSpotlight topology={topology} services={services} theme={theme} />
+            <RootCauseSpotlight topology={safeTopology} services={services} theme={theme} />
             <div className="infra-dual">
               <div className="infra-subsection">
                 <div className="infra-kicker">Environment identity</div>
                 <div className="infra-definition-list">
-                  <div><span>environment</span><strong>{infrastructure?.environment?.cluster_name || 'online-boutique'}</strong></div>
-                  <div><span>mode</span><strong>{infrastructure?.environment?.orchestrator || 'docker'}</strong></div>
-                  <div><span>namespace</span><strong>{infrastructure?.environment?.namespace || 'default / local'}</strong></div>
-                  <div><span>collector</span><strong>{infrastructure?.environment?.collector_ready ? 'collector configured' : 'collector pending'}</strong></div>
+                  <div><span>environment</span><strong>{safeInfrastructure?.environment?.cluster_name || 'online-boutique'}</strong></div>
+                  <div><span>mode</span><strong>{safeInfrastructure?.environment?.orchestrator || 'docker'}</strong></div>
+                  <div><span>namespace</span><strong>{safeInfrastructure?.environment?.namespace || 'default / local'}</strong></div>
+                  <div><span>collector</span><strong>{safeInfrastructure?.environment?.collector_ready ? 'collector configured' : 'collector pending'}</strong></div>
                 </div>
               </div>
               <div className="infra-subsection">
@@ -686,21 +700,21 @@ export default function InfraPage({ topology, history, incidents, connected, inf
             <div className="infra-subsection">
               <div className="infra-kicker">Failure momentum and anomaly ribbon</div>
               <div className="infra-ribbon-meta">
-                <span>{formatSigned(topology?.failure_momentum || 0, 1, ' points/min')}</span>
-                <span>{history?.length || 0} stored snapshots</span>
+                <span>{formatSigned(safeTopology?.failure_momentum || 0, 1, ' points/min')}</span>
+                <span>{safeHistory.length || 0} stored snapshots</span>
               </div>
-              <TrendRibbon history={history || []} services={services} theme={theme} />
+              <TrendRibbon history={safeHistory} services={services} theme={theme} />
             </div>
           </Section>
 
           <Section title="Cluster & Workload Health" eyebrow="Live now + ready states" theme={theme}>
             <div className="infra-subsection">
               <div className="infra-kicker">Runtime service saturation</div>
-              <WorkloadMatrix services={services} topology={topology} theme={theme} />
+              <WorkloadMatrix services={services} topology={safeTopology} theme={theme} />
             </div>
             <div className="infra-subsection">
               <div className="infra-kicker">Kubernetes management panels</div>
-              <ClusterReadyPanels theme={theme} services={services} infrastructure={infrastructure} />
+              <ClusterReadyPanels theme={theme} services={services} infrastructure={safeInfrastructure} />
             </div>
           </Section>
         </div>
@@ -709,11 +723,11 @@ export default function InfraPage({ topology, history, incidents, connected, inf
           <Section title="Observability Stack Health" eyebrow="Metrics · logs · traces" theme={theme}>
             <div className="infra-subsection">
               <div className="infra-kicker">Stack posture</div>
-              <StackHealth topology={topology} services={services} theme={theme} infrastructure={infrastructure} />
+              <StackHealth topology={safeTopology} services={services} theme={theme} infrastructure={safeInfrastructure} />
             </div>
             <div className="infra-subsection">
               <div className="infra-kicker">Pipeline readiness</div>
-              <PipelineReadiness services={services} topology={topology} theme={theme} />
+              <PipelineReadiness services={services} topology={safeTopology} theme={theme} />
             </div>
           </Section>
 
@@ -757,15 +771,15 @@ export default function InfraPage({ topology, history, incidents, connected, inf
 
         <div className="infra-column infra-column-right">
           <Section title="Incidents & Remediation" eyebrow="Retry · isolate · reroute · escalate" theme={theme} tight>
-            <IncidentsRail topology={topology} incidents={incidents} services={services} theme={theme} />
+            <IncidentsRail topology={safeTopology} incidents={safeIncidents} services={services} theme={theme} />
           </Section>
 
           <Section title="Memory Recall" eyebrow="Previous failures" theme={theme} tight>
-            <MemoryRecall services={services} theme={theme} infrastructure={infrastructure} />
+            <MemoryRecall services={services} theme={theme} infrastructure={safeInfrastructure} />
           </Section>
 
           <Section title="Operator Notes" eyebrow="Ready states and archived context" theme={theme} tight>
-            <OperatorNotes topology={topology} services={services} theme={theme} />
+            <OperatorNotes topology={safeTopology} services={services} theme={theme} infrastructure={safeInfrastructure} />
           </Section>
         </div>
       </div>

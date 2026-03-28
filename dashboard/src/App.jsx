@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react'
+import { Component, useState, useEffect, useCallback } from 'react'
 import { useTopology } from './hooks/useTopology'
 import { useHistory } from './hooks/useHistory'
 import { useInfrastructure } from './hooks/useInfrastructure'
@@ -7,6 +7,48 @@ import SolarSystem from './components/SolarSystem'
 import InfoPanel from './components/InfoPanel'
 import ServiceDetail from './components/ServiceDetail'
 import InfraPage from './components/InfraPage'
+
+class InfraPageBoundary extends Component {
+  constructor(props) {
+    super(props)
+    this.state = { hasError: false, message: '' }
+  }
+
+  static getDerivedStateFromError(error) {
+    return { hasError: true, message: error?.message || 'Unknown infrastructure page error' }
+  }
+
+  componentDidUpdate(prevProps) {
+    if (prevProps.resetKey !== this.props.resetKey && this.state.hasError) {
+      this.setState({ hasError: false, message: '' })
+    }
+  }
+
+  render() {
+    const { theme } = this.props
+    if (this.state.hasError) {
+      return (
+        <div style={{ flex: 1, padding: 32, color: theme.text, background: theme.bg, overflowY: 'auto' }}>
+          <div style={{ maxWidth: 760, border: `1px solid ${theme.borderLight}`, background: theme.card, padding: 24 }}>
+            <div style={{ fontSize: 12, letterSpacing: 1.6, textTransform: 'uppercase', color: theme.textMuted, marginBottom: 10 }}>
+              Infrastructure
+            </div>
+            <div style={{ fontSize: 28, lineHeight: 1.05, marginBottom: 12 }}>
+              The infrastructure page hit a rendering error.
+            </div>
+            <div style={{ fontSize: 12, lineHeight: 1.6, color: theme.textMuted }}>
+              The rest of the dashboard is still available. I’ve added guards so partial backend payloads do not break this page, but this fallback keeps the UI usable if a new field shape slips through.
+            </div>
+            <div style={{ marginTop: 16, fontSize: 11, color: theme.accent }}>
+              {this.state.message}
+            </div>
+          </div>
+        </div>
+      )
+    }
+    return this.props.children
+  }
+}
 
 function getPageFromLocation() {
   if (typeof window === 'undefined') return 'solar'
@@ -147,7 +189,9 @@ function AppInner() {
           </div>
         </div>
       ) : (
-        <InfraPage topology={data} history={history} incidents={incidents} connected={connected} infrastructure={infrastructure} />
+        <InfraPageBoundary resetKey={`${page}-${data?.timestamp || 'none'}-${infrastructure?.timestamp || 'none'}`} theme={theme}>
+          <InfraPage topology={data} history={history} incidents={incidents} connected={connected} infrastructure={infrastructure} />
+        </InfraPageBoundary>
       )}
 
       <div style={{ height: 26, borderTop: `1px solid ${theme.borderLight}`, display: 'flex', alignItems: 'center', padding: '0 16px', gap: 20, fontSize: 9, color: theme.textMuted, background: theme.bg, flexShrink: 0 }}>
