@@ -1,0 +1,2270 @@
+{
+  "completed_runs": 42,
+  "run_results": [
+    {
+      "run_idx": 0,
+      "failure_type": "none",
+      "target_service": "none",
+      "start_time": "2026-03-27T23:32:47.967Z",
+      "end_time": "2026-03-27T23:38:41.983Z",
+      "rows_this_run": {
+        "metrics": 176,
+        "logs": 3519,
+        "traces": 7386,
+        "log_aggregates": 183
+      },
+      "cumulative_rows": {
+        "full_metrics": 176,
+        "full_logs": 3519,
+        "full_traces": 7386,
+        "full_log_aggregates": 183
+      },
+      "label_stats": {
+        "metrics": {
+          "total_rows": 176,
+          "failure_rows": 0,
+          "pre_failure_rows": 0,
+          "future_failure_rows": 0,
+          "normal_rows": 176,
+          "failure_type_counts": {
+            "none": 176
+          }
+        },
+        "logs": {
+          "total_rows": 3519,
+          "failure_rows": 0,
+          "pre_failure_rows": 0,
+          "future_failure_rows": 0,
+          "normal_rows": 3519,
+          "failure_type_counts": {
+            "none": 3519
+          }
+        }
+      },
+      "failure_events": []
+    },
+    {
+      "run_idx": 1,
+      "failure_type": "memory_leak",
+      "target_service": "recommendationservice",
+      "start_time": "2026-03-27T23:39:01.995Z",
+      "end_time": "2026-03-27T23:45:15.760Z",
+      "rows_this_run": {
+        "metrics": 176,
+        "logs": 3513,
+        "traces": 7496,
+        "log_aggregates": 199
+      },
+      "cumulative_rows": {
+        "full_metrics": 352,
+        "full_logs": 7032,
+        "full_traces": 14882,
+        "full_log_aggregates": 382
+      },
+      "label_stats": {
+        "metrics": {
+          "total_rows": 176,
+          "failure_rows": 3,
+          "pre_failure_rows": 2,
+          "future_failure_rows": 5,
+          "normal_rows": 171,
+          "failure_type_counts": {
+            "none": 171,
+            "memory_leak": 3,
+            "pre_memory_leak": 2
+          }
+        },
+        "logs": {
+          "total_rows": 3513,
+          "failure_rows": 68,
+          "pre_failure_rows": 62,
+          "future_failure_rows": 130,
+          "normal_rows": 3383,
+          "failure_type_counts": {
+            "none": 3383,
+            "memory_leak": 68,
+            "pre_memory_leak": 62
+          }
+        }
+      },
+      "failure_events": [
+        {
+          "scenario_id": "2ce43025-476f-4fce-9296-0f5ca4b9302d",
+          "service_name": "recommendationservice",
+          "failure_type": "memory_leak",
+          "start_time": "2026-03-27T23:42:14.410050+00:00",
+          "end_time": "2026-03-27T23:43:50.972505+00:00",
+          "pre_failure_start": "2026-03-27T23:40:59.410050+00:00",
+          "duration_seconds": 96.562455
+        }
+      ]
+    },
+    {
+      "run_idx": 2,
+      "failure_type": "memory_leak",
+      "target_service": "emailservice",
+      "start_time": "2026-03-27T23:45:35.773Z",
+      "end_time": "2026-03-27T23:51:49.331Z",
+      "rows_this_run": {
+        "metrics": 176,
+        "logs": 3489,
+        "traces": 7358,
+        "log_aggregates": 191
+      },
+      "cumulative_rows": {
+        "full_metrics": 528,
+        "full_logs": 10521,
+        "full_traces": 22240,
+        "full_log_aggregates": 573
+      },
+      "label_stats": {
+        "metrics": {
+          "total_rows": 176,
+          "failure_rows": 3,
+          "pre_failure_rows": 2,
+          "future_failure_rows": 5,
+          "normal_rows": 171,
+          "failure_type_counts": {
+            "none": 171,
+            "memory_leak": 3,
+            "pre_memory_leak": 2
+          }
+        },
+        "logs": {
+          "total_rows": 3489,
+          "failure_rows": 5,
+          "pre_failure_rows": 3,
+          "future_failure_rows": 8,
+          "normal_rows": 3481,
+          "failure_type_counts": {
+            "none": 3481,
+            "memory_leak": 5,
+            "pre_memory_leak": 3
+          }
+        }
+      },
+      "failure_events": [
+        {
+          "scenario_id": "74b37e36-7b13-4630-94df-bb4798063b10",
+          "service_name": "emailservice",
+          "failure_type": "memory_leak",
+          "start_time": "2026-03-27T23:48:48.157287+00:00",
+          "end_time": "2026-03-27T23:50:24.664940+00:00",
+          "pre_failure_start": "2026-03-27T23:47:33.157287+00:00",
+          "duration_seconds": 96.507653
+        }
+      ]
+    },
+    {
+      "run_idx": 3,
+      "failure_type": "memory_leak",
+      "target_service": "recommendationservice",
+      "start_time": "2026-03-27T23:52:09.342Z",
+      "end_time": "2026-03-27T23:58:23.241Z",
+      "rows_this_run": {
+        "metrics": 176,
+        "logs": 3487,
+        "traces": 7200,
+        "log_aggregates": 193
+      },
+      "cumulative_rows": {
+        "full_metrics": 704,
+        "full_logs": 14008,
+        "full_traces": 29440,
+        "full_log_aggregates": 766
+      },
+      "label_stats": {
+        "metrics": {
+          "total_rows": 176,
+          "failure_rows": 3,
+          "pre_failure_rows": 2,
+          "future_failure_rows": 5,
+          "normal_rows": 171,
+          "failure_type_counts": {
+            "none": 171,
+            "memory_leak": 3,
+            "pre_memory_leak": 2
+          }
+        },
+        "logs": {
+          "total_rows": 3487,
+          "failure_rows": 85,
+          "pre_failure_rows": 47,
+          "future_failure_rows": 132,
+          "normal_rows": 3355,
+          "failure_type_counts": {
+            "none": 3355,
+            "memory_leak": 85,
+            "pre_memory_leak": 47
+          }
+        }
+      },
+      "failure_events": [
+        {
+          "scenario_id": "523b05c5-c0b0-496a-bef4-a43de7cfb6e7",
+          "service_name": "recommendationservice",
+          "failure_type": "memory_leak",
+          "start_time": "2026-03-27T23:55:21.804767+00:00",
+          "end_time": "2026-03-27T23:56:58.277529+00:00",
+          "pre_failure_start": "2026-03-27T23:54:06.804767+00:00",
+          "duration_seconds": 96.472762
+        }
+      ]
+    },
+    {
+      "run_idx": 4,
+      "failure_type": "memory_leak",
+      "target_service": "emailservice",
+      "start_time": "2026-03-27T23:58:43.253Z",
+      "end_time": "2026-03-28T00:04:56.939Z",
+      "rows_this_run": {
+        "metrics": 176,
+        "logs": 3459,
+        "traces": 7605,
+        "log_aggregates": 178
+      },
+      "cumulative_rows": {
+        "full_metrics": 880,
+        "full_logs": 17467,
+        "full_traces": 37045,
+        "full_log_aggregates": 944
+      },
+      "label_stats": {
+        "metrics": {
+          "total_rows": 176,
+          "failure_rows": 3,
+          "pre_failure_rows": 2,
+          "future_failure_rows": 5,
+          "normal_rows": 171,
+          "failure_type_counts": {
+            "none": 171,
+            "memory_leak": 3,
+            "pre_memory_leak": 2
+          }
+        },
+        "logs": {
+          "total_rows": 3459,
+          "failure_rows": 4,
+          "pre_failure_rows": 1,
+          "future_failure_rows": 5,
+          "normal_rows": 3454,
+          "failure_type_counts": {
+            "none": 3454,
+            "memory_leak": 4,
+            "pre_memory_leak": 1
+          }
+        }
+      },
+      "failure_events": [
+        {
+          "scenario_id": "ff8dd1d7-5efe-48ec-a423-d3f29d9a8cde",
+          "service_name": "emailservice",
+          "failure_type": "memory_leak",
+          "start_time": "2026-03-28T00:01:55.663456+00:00",
+          "end_time": "2026-03-28T00:03:32.143450+00:00",
+          "pre_failure_start": "2026-03-28T00:00:40.663456+00:00",
+          "duration_seconds": 96.479994
+        }
+      ]
+    },
+    {
+      "run_idx": 5,
+      "failure_type": "memory_leak",
+      "target_service": "recommendationservice",
+      "start_time": "2026-03-28T00:05:16.955Z",
+      "end_time": "2026-03-28T00:11:30.851Z",
+      "rows_this_run": {
+        "metrics": 176,
+        "logs": 3497,
+        "traces": 7353,
+        "log_aggregates": 189
+      },
+      "cumulative_rows": {
+        "full_metrics": 1056,
+        "full_logs": 20964,
+        "full_traces": 44398,
+        "full_log_aggregates": 1133
+      },
+      "label_stats": {
+        "metrics": {
+          "total_rows": 176,
+          "failure_rows": 3,
+          "pre_failure_rows": 2,
+          "future_failure_rows": 5,
+          "normal_rows": 171,
+          "failure_type_counts": {
+            "none": 171,
+            "memory_leak": 3,
+            "pre_memory_leak": 2
+          }
+        },
+        "logs": {
+          "total_rows": 3497,
+          "failure_rows": 80,
+          "pre_failure_rows": 56,
+          "future_failure_rows": 136,
+          "normal_rows": 3361,
+          "failure_type_counts": {
+            "none": 3361,
+            "memory_leak": 80,
+            "pre_memory_leak": 56
+          }
+        }
+      },
+      "failure_events": [
+        {
+          "scenario_id": "5a58755c-180e-4505-b077-3817426b12a2",
+          "service_name": "recommendationservice",
+          "failure_type": "memory_leak",
+          "start_time": "2026-03-28T00:08:29.371543+00:00",
+          "end_time": "2026-03-28T00:10:05.888631+00:00",
+          "pre_failure_start": "2026-03-28T00:07:14.371543+00:00",
+          "duration_seconds": 96.517088
+        }
+      ]
+    },
+    {
+      "run_idx": 6,
+      "failure_type": "memory_leak",
+      "target_service": "emailservice",
+      "start_time": "2026-03-28T00:11:50.862Z",
+      "end_time": "2026-03-28T00:18:04.660Z",
+      "rows_this_run": {
+        "metrics": 176,
+        "logs": 3535,
+        "traces": 7348,
+        "log_aggregates": 188
+      },
+      "cumulative_rows": {
+        "full_metrics": 1232,
+        "full_logs": 24499,
+        "full_traces": 51746,
+        "full_log_aggregates": 1321
+      },
+      "label_stats": {
+        "metrics": {
+          "total_rows": 176,
+          "failure_rows": 3,
+          "pre_failure_rows": 2,
+          "future_failure_rows": 5,
+          "normal_rows": 171,
+          "failure_type_counts": {
+            "none": 171,
+            "memory_leak": 3,
+            "pre_memory_leak": 2
+          }
+        },
+        "logs": {
+          "total_rows": 3535,
+          "failure_rows": 4,
+          "pre_failure_rows": 2,
+          "future_failure_rows": 6,
+          "normal_rows": 3529,
+          "failure_type_counts": {
+            "none": 3529,
+            "memory_leak": 4,
+            "pre_memory_leak": 2
+          }
+        }
+      },
+      "failure_events": [
+        {
+          "scenario_id": "0ce820dc-75a8-4248-99df-fa6721182e90",
+          "service_name": "emailservice",
+          "failure_type": "memory_leak",
+          "start_time": "2026-03-28T00:15:03.258944+00:00",
+          "end_time": "2026-03-28T00:16:39.878189+00:00",
+          "pre_failure_start": "2026-03-28T00:13:48.258944+00:00",
+          "duration_seconds": 96.619245
+        }
+      ]
+    },
+    {
+      "run_idx": 7,
+      "failure_type": "none",
+      "target_service": "none",
+      "start_time": "2026-03-28T00:18:24.667Z",
+      "end_time": "2026-03-28T00:24:18.772Z",
+      "rows_this_run": {
+        "metrics": 176,
+        "logs": 3562,
+        "traces": 7329,
+        "log_aggregates": 186
+      },
+      "cumulative_rows": {
+        "full_metrics": 1408,
+        "full_logs": 28061,
+        "full_traces": 59075,
+        "full_log_aggregates": 1507
+      },
+      "label_stats": {
+        "metrics": {
+          "total_rows": 176,
+          "failure_rows": 0,
+          "pre_failure_rows": 0,
+          "future_failure_rows": 0,
+          "normal_rows": 176,
+          "failure_type_counts": {
+            "none": 176
+          }
+        },
+        "logs": {
+          "total_rows": 3562,
+          "failure_rows": 0,
+          "pre_failure_rows": 0,
+          "future_failure_rows": 0,
+          "normal_rows": 3562,
+          "failure_type_counts": {
+            "none": 3562
+          }
+        }
+      },
+      "failure_events": []
+    },
+    {
+      "run_idx": 8,
+      "failure_type": "memory_leak",
+      "target_service": "recommendationservice",
+      "start_time": "2026-03-28T00:24:38.786Z",
+      "end_time": "2026-03-28T00:30:52.817Z",
+      "rows_this_run": {
+        "metrics": 176,
+        "logs": 3469,
+        "traces": 7620,
+        "log_aggregates": 202
+      },
+      "cumulative_rows": {
+        "full_metrics": 1584,
+        "full_logs": 31530,
+        "full_traces": 66695,
+        "full_log_aggregates": 1709
+      },
+      "label_stats": {
+        "metrics": {
+          "total_rows": 176,
+          "failure_rows": 3,
+          "pre_failure_rows": 2,
+          "future_failure_rows": 5,
+          "normal_rows": 171,
+          "failure_type_counts": {
+            "none": 171,
+            "memory_leak": 3,
+            "pre_memory_leak": 2
+          }
+        },
+        "logs": {
+          "total_rows": 3469,
+          "failure_rows": 75,
+          "pre_failure_rows": 60,
+          "future_failure_rows": 135,
+          "normal_rows": 3334,
+          "failure_type_counts": {
+            "none": 3334,
+            "memory_leak": 75,
+            "pre_memory_leak": 60
+          }
+        }
+      },
+      "failure_events": [
+        {
+          "scenario_id": "116eeb09-494a-42dd-b1ff-60ae333d2992",
+          "service_name": "recommendationservice",
+          "failure_type": "memory_leak",
+          "start_time": "2026-03-28T00:27:51.100699+00:00",
+          "end_time": "2026-03-28T00:29:27.693694+00:00",
+          "pre_failure_start": "2026-03-28T00:26:36.100699+00:00",
+          "duration_seconds": 96.592995
+        }
+      ]
+    },
+    {
+      "run_idx": 9,
+      "failure_type": "memory_leak",
+      "target_service": "emailservice",
+      "start_time": "2026-03-28T00:31:12.827Z",
+      "end_time": "2026-03-28T00:37:26.671Z",
+      "rows_this_run": {
+        "metrics": 176,
+        "logs": 3494,
+        "traces": 7611,
+        "log_aggregates": 187
+      },
+      "cumulative_rows": {
+        "full_metrics": 1760,
+        "full_logs": 35024,
+        "full_traces": 74306,
+        "full_log_aggregates": 1896
+      },
+      "label_stats": {
+        "metrics": {
+          "total_rows": 176,
+          "failure_rows": 3,
+          "pre_failure_rows": 2,
+          "future_failure_rows": 5,
+          "normal_rows": 171,
+          "failure_type_counts": {
+            "none": 171,
+            "memory_leak": 3,
+            "pre_memory_leak": 2
+          }
+        },
+        "logs": {
+          "total_rows": 3494,
+          "failure_rows": 4,
+          "pre_failure_rows": 3,
+          "future_failure_rows": 7,
+          "normal_rows": 3487,
+          "failure_type_counts": {
+            "none": 3487,
+            "memory_leak": 4,
+            "pre_memory_leak": 3
+          }
+        }
+      },
+      "failure_events": [
+        {
+          "scenario_id": "4821ddf8-9e45-4320-a2a1-02893aebafb0",
+          "service_name": "emailservice",
+          "failure_type": "memory_leak",
+          "start_time": "2026-03-28T00:34:25.161324+00:00",
+          "end_time": "2026-03-28T00:36:01.743347+00:00",
+          "pre_failure_start": "2026-03-28T00:33:10.161324+00:00",
+          "duration_seconds": 96.582023
+        }
+      ]
+    },
+    {
+      "run_idx": 10,
+      "failure_type": "memory_leak",
+      "target_service": "recommendationservice",
+      "start_time": "2026-03-28T00:37:46.682Z",
+      "end_time": "2026-03-28T00:44:00.999Z",
+      "rows_this_run": {
+        "metrics": 176,
+        "logs": 3468,
+        "traces": 7358,
+        "log_aggregates": 199
+      },
+      "cumulative_rows": {
+        "full_metrics": 1936,
+        "full_logs": 38492,
+        "full_traces": 81664,
+        "full_log_aggregates": 2095
+      },
+      "label_stats": {
+        "metrics": {
+          "total_rows": 176,
+          "failure_rows": 3,
+          "pre_failure_rows": 2,
+          "future_failure_rows": 5,
+          "normal_rows": 171,
+          "failure_type_counts": {
+            "none": 171,
+            "memory_leak": 3,
+            "pre_memory_leak": 2
+          }
+        },
+        "logs": {
+          "total_rows": 3468,
+          "failure_rows": 82,
+          "pre_failure_rows": 49,
+          "future_failure_rows": 131,
+          "normal_rows": 3337,
+          "failure_type_counts": {
+            "none": 3337,
+            "memory_leak": 82,
+            "pre_memory_leak": 49
+          }
+        }
+      },
+      "failure_events": [
+        {
+          "scenario_id": "e75fd798-bab7-4d99-87f3-067458e0ef33",
+          "service_name": "recommendationservice",
+          "failure_type": "memory_leak",
+          "start_time": "2026-03-28T00:40:59.232683+00:00",
+          "end_time": "2026-03-28T00:42:35.844504+00:00",
+          "pre_failure_start": "2026-03-28T00:39:44.232683+00:00",
+          "duration_seconds": 96.611821
+        }
+      ]
+    },
+    {
+      "run_idx": 11,
+      "failure_type": "memory_leak",
+      "target_service": "emailservice",
+      "start_time": "2026-03-28T00:44:21.009Z",
+      "end_time": "2026-03-28T00:50:35.810Z",
+      "rows_this_run": {
+        "metrics": 176,
+        "logs": 3481,
+        "traces": 7183,
+        "log_aggregates": 185
+      },
+      "cumulative_rows": {
+        "full_metrics": 2112,
+        "full_logs": 41973,
+        "full_traces": 88847,
+        "full_log_aggregates": 2280
+      },
+      "label_stats": {
+        "metrics": {
+          "total_rows": 176,
+          "failure_rows": 3,
+          "pre_failure_rows": 2,
+          "future_failure_rows": 5,
+          "normal_rows": 171,
+          "failure_type_counts": {
+            "none": 171,
+            "memory_leak": 3,
+            "pre_memory_leak": 2
+          }
+        },
+        "logs": {
+          "total_rows": 3481,
+          "failure_rows": 7,
+          "pre_failure_rows": 0,
+          "future_failure_rows": 7,
+          "normal_rows": 3474,
+          "failure_type_counts": {
+            "none": 3474,
+            "memory_leak": 7
+          }
+        }
+      },
+      "failure_events": [
+        {
+          "scenario_id": "69cc1d04-e8e3-4b35-be83-cf92b81c9d1f",
+          "service_name": "emailservice",
+          "failure_type": "memory_leak",
+          "start_time": "2026-03-28T00:47:34.001928+00:00",
+          "end_time": "2026-03-28T00:49:10.100007+00:00",
+          "pre_failure_start": "2026-03-28T00:46:19.001928+00:00",
+          "duration_seconds": 96.098079
+        }
+      ]
+    },
+    {
+      "run_idx": 12,
+      "failure_type": "memory_leak",
+      "target_service": "recommendationservice",
+      "start_time": "2026-03-28T00:50:55.821Z",
+      "end_time": "2026-03-28T00:57:09.738Z",
+      "rows_this_run": {
+        "metrics": 176,
+        "logs": 3483,
+        "traces": 7604,
+        "log_aggregates": 181
+      },
+      "cumulative_rows": {
+        "full_metrics": 2288,
+        "full_logs": 45456,
+        "full_traces": 96451,
+        "full_log_aggregates": 2461
+      },
+      "label_stats": {
+        "metrics": {
+          "total_rows": 176,
+          "failure_rows": 3,
+          "pre_failure_rows": 2,
+          "future_failure_rows": 5,
+          "normal_rows": 171,
+          "failure_type_counts": {
+            "none": 171,
+            "memory_leak": 3,
+            "pre_memory_leak": 2
+          }
+        },
+        "logs": {
+          "total_rows": 3483,
+          "failure_rows": 81,
+          "pre_failure_rows": 68,
+          "future_failure_rows": 149,
+          "normal_rows": 3334,
+          "failure_type_counts": {
+            "none": 3334,
+            "memory_leak": 81,
+            "pre_memory_leak": 68
+          }
+        }
+      },
+      "failure_events": [
+        {
+          "scenario_id": "986ecd5b-79e3-4ba4-bd2f-0e2e465e4d27",
+          "service_name": "recommendationservice",
+          "failure_type": "memory_leak",
+          "start_time": "2026-03-28T00:54:08.200028+00:00",
+          "end_time": "2026-03-28T00:55:44.720098+00:00",
+          "pre_failure_start": "2026-03-28T00:52:53.200028+00:00",
+          "duration_seconds": 96.52007
+        }
+      ]
+    },
+    {
+      "run_idx": 13,
+      "failure_type": "memory_leak",
+      "target_service": "emailservice",
+      "start_time": "2026-03-28T00:57:29.751Z",
+      "end_time": "2026-03-28T01:03:43.830Z",
+      "rows_this_run": {
+        "metrics": 176,
+        "logs": 3528,
+        "traces": 7445,
+        "log_aggregates": 186
+      },
+      "cumulative_rows": {
+        "full_metrics": 2464,
+        "full_logs": 48984,
+        "full_traces": 103896,
+        "full_log_aggregates": 2647
+      },
+      "label_stats": {
+        "metrics": {
+          "total_rows": 176,
+          "failure_rows": 3,
+          "pre_failure_rows": 2,
+          "future_failure_rows": 5,
+          "normal_rows": 171,
+          "failure_type_counts": {
+            "none": 171,
+            "memory_leak": 3,
+            "pre_memory_leak": 2
+          }
+        },
+        "logs": {
+          "total_rows": 3528,
+          "failure_rows": 2,
+          "pre_failure_rows": 3,
+          "future_failure_rows": 5,
+          "normal_rows": 3523,
+          "failure_type_counts": {
+            "none": 3523,
+            "pre_memory_leak": 3,
+            "memory_leak": 2
+          }
+        }
+      },
+      "failure_events": [
+        {
+          "scenario_id": "eb389064-0e33-46a8-bc5b-8b270517fcb6",
+          "service_name": "emailservice",
+          "failure_type": "memory_leak",
+          "start_time": "2026-03-28T01:00:42.183108+00:00",
+          "end_time": "2026-03-28T01:02:18.693508+00:00",
+          "pre_failure_start": "2026-03-28T00:59:27.183108+00:00",
+          "duration_seconds": 96.5104
+        }
+      ]
+    },
+    {
+      "run_idx": 14,
+      "failure_type": "none",
+      "target_service": "none",
+      "start_time": "2026-03-28T01:04:03.840Z",
+      "end_time": "2026-03-28T01:09:58.311Z",
+      "rows_this_run": {
+        "metrics": 176,
+        "logs": 3484,
+        "traces": 7563,
+        "log_aggregates": 205
+      },
+      "cumulative_rows": {
+        "full_metrics": 2640,
+        "full_logs": 52468,
+        "full_traces": 111459,
+        "full_log_aggregates": 2852
+      },
+      "label_stats": {
+        "metrics": {
+          "total_rows": 176,
+          "failure_rows": 0,
+          "pre_failure_rows": 0,
+          "future_failure_rows": 0,
+          "normal_rows": 176,
+          "failure_type_counts": {
+            "none": 176
+          }
+        },
+        "logs": {
+          "total_rows": 3484,
+          "failure_rows": 0,
+          "pre_failure_rows": 0,
+          "future_failure_rows": 0,
+          "normal_rows": 3484,
+          "failure_type_counts": {
+            "none": 3484
+          }
+        }
+      },
+      "failure_events": []
+    },
+    {
+      "run_idx": 15,
+      "failure_type": "cpu_starvation",
+      "target_service": "recommendationservice",
+      "start_time": "2026-03-28T01:10:18.319Z",
+      "end_time": "2026-03-28T01:16:32.056Z",
+      "rows_this_run": {
+        "metrics": 176,
+        "logs": 3427,
+        "traces": 7723,
+        "log_aggregates": 202
+      },
+      "cumulative_rows": {
+        "full_metrics": 2816,
+        "full_logs": 55895,
+        "full_traces": 119182,
+        "full_log_aggregates": 3054
+      },
+      "label_stats": {
+        "metrics": {
+          "total_rows": 176,
+          "failure_rows": 3,
+          "pre_failure_rows": 2,
+          "future_failure_rows": 5,
+          "normal_rows": 171,
+          "failure_type_counts": {
+            "none": 171,
+            "cpu_starvation": 3,
+            "pre_cpu_starvation": 2
+          }
+        },
+        "logs": {
+          "total_rows": 3427,
+          "failure_rows": 80,
+          "pre_failure_rows": 56,
+          "future_failure_rows": 136,
+          "normal_rows": 3291,
+          "failure_type_counts": {
+            "none": 3291,
+            "cpu_starvation": 80,
+            "pre_cpu_starvation": 56
+          }
+        }
+      },
+      "failure_events": [
+        {
+          "scenario_id": "784236d5-8421-4ccb-8a7d-2a2fefe266a5",
+          "service_name": "recommendationservice",
+          "failure_type": "cpu_starvation",
+          "start_time": "2026-03-28T01:13:30.746743+00:00",
+          "end_time": "2026-03-28T01:15:06.994293+00:00",
+          "pre_failure_start": "2026-03-28T01:12:15.746743+00:00",
+          "duration_seconds": 96.24755
+        }
+      ]
+    },
+    {
+      "run_idx": 16,
+      "failure_type": "cpu_starvation",
+      "target_service": "emailservice",
+      "start_time": "2026-03-28T01:16:52.066Z",
+      "end_time": "2026-03-28T01:23:05.981Z",
+      "rows_this_run": {
+        "metrics": 176,
+        "logs": 3367,
+        "traces": 6912,
+        "log_aggregates": 196
+      },
+      "cumulative_rows": {
+        "full_metrics": 2992,
+        "full_logs": 59262,
+        "full_traces": 126094,
+        "full_log_aggregates": 3250
+      },
+      "label_stats": {
+        "metrics": {
+          "total_rows": 176,
+          "failure_rows": 3,
+          "pre_failure_rows": 2,
+          "future_failure_rows": 5,
+          "normal_rows": 171,
+          "failure_type_counts": {
+            "none": 171,
+            "cpu_starvation": 3,
+            "pre_cpu_starvation": 2
+          }
+        },
+        "logs": {
+          "total_rows": 3367,
+          "failure_rows": 2,
+          "pre_failure_rows": 0,
+          "future_failure_rows": 2,
+          "normal_rows": 3365,
+          "failure_type_counts": {
+            "none": 3365,
+            "cpu_starvation": 2
+          }
+        }
+      },
+      "failure_events": [
+        {
+          "scenario_id": "cf9dbcd8-ca30-47ee-91ad-934ae5e51c81",
+          "service_name": "emailservice",
+          "failure_type": "cpu_starvation",
+          "start_time": "2026-03-28T01:20:04.591531+00:00",
+          "end_time": "2026-03-28T01:21:40.796823+00:00",
+          "pre_failure_start": "2026-03-28T01:18:49.591531+00:00",
+          "duration_seconds": 96.205292
+        }
+      ]
+    },
+    {
+      "run_idx": 17,
+      "failure_type": "cpu_starvation",
+      "target_service": "recommendationservice",
+      "start_time": "2026-03-28T01:23:25.992Z",
+      "end_time": "2026-03-28T01:29:40.162Z",
+      "rows_this_run": {
+        "metrics": 176,
+        "logs": 3452,
+        "traces": 7388,
+        "log_aggregates": 188
+      },
+      "cumulative_rows": {
+        "full_metrics": 3168,
+        "full_logs": 62714,
+        "full_traces": 133482,
+        "full_log_aggregates": 3438
+      },
+      "label_stats": {
+        "metrics": {
+          "total_rows": 176,
+          "failure_rows": 3,
+          "pre_failure_rows": 2,
+          "future_failure_rows": 5,
+          "normal_rows": 171,
+          "failure_type_counts": {
+            "none": 171,
+            "cpu_starvation": 3,
+            "pre_cpu_starvation": 2
+          }
+        },
+        "logs": {
+          "total_rows": 3452,
+          "failure_rows": 75,
+          "pre_failure_rows": 61,
+          "future_failure_rows": 136,
+          "normal_rows": 3316,
+          "failure_type_counts": {
+            "none": 3316,
+            "cpu_starvation": 75,
+            "pre_cpu_starvation": 61
+          }
+        }
+      },
+      "failure_events": [
+        {
+          "scenario_id": "54008608-5bc2-4ae4-8b71-70c2a39655b9",
+          "service_name": "recommendationservice",
+          "failure_type": "cpu_starvation",
+          "start_time": "2026-03-28T01:26:38.519280+00:00",
+          "end_time": "2026-03-28T01:28:14.980793+00:00",
+          "pre_failure_start": "2026-03-28T01:25:23.519280+00:00",
+          "duration_seconds": 96.461513
+        }
+      ]
+    },
+    {
+      "run_idx": 18,
+      "failure_type": "cpu_starvation",
+      "target_service": "emailservice",
+      "start_time": "2026-03-28T01:30:00.176Z",
+      "end_time": "2026-03-28T01:36:14.536Z",
+      "rows_this_run": {
+        "metrics": 176,
+        "logs": 3431,
+        "traces": 7629,
+        "log_aggregates": 183
+      },
+      "cumulative_rows": {
+        "full_metrics": 3344,
+        "full_logs": 66145,
+        "full_traces": 141111,
+        "full_log_aggregates": 3621
+      },
+      "label_stats": {
+        "metrics": {
+          "total_rows": 176,
+          "failure_rows": 3,
+          "pre_failure_rows": 2,
+          "future_failure_rows": 5,
+          "normal_rows": 171,
+          "failure_type_counts": {
+            "none": 171,
+            "cpu_starvation": 3,
+            "pre_cpu_starvation": 2
+          }
+        },
+        "logs": {
+          "total_rows": 3431,
+          "failure_rows": 3,
+          "pre_failure_rows": 4,
+          "future_failure_rows": 7,
+          "normal_rows": 3424,
+          "failure_type_counts": {
+            "none": 3424,
+            "pre_cpu_starvation": 4,
+            "cpu_starvation": 3
+          }
+        }
+      },
+      "failure_events": [
+        {
+          "scenario_id": "b2f02856-6803-4dca-b8a2-5dfe8e285ee3",
+          "service_name": "emailservice",
+          "failure_type": "cpu_starvation",
+          "start_time": "2026-03-28T01:33:12.759025+00:00",
+          "end_time": "2026-03-28T01:34:48.861784+00:00",
+          "pre_failure_start": "2026-03-28T01:31:57.759025+00:00",
+          "duration_seconds": 96.102759
+        }
+      ]
+    },
+    {
+      "run_idx": 19,
+      "failure_type": "cpu_starvation",
+      "target_service": "recommendationservice",
+      "start_time": "2026-03-28T01:36:34.548Z",
+      "end_time": "2026-03-28T01:42:48.633Z",
+      "rows_this_run": {
+        "metrics": 176,
+        "logs": 3355,
+        "traces": 7431,
+        "log_aggregates": 192
+      },
+      "cumulative_rows": {
+        "full_metrics": 3520,
+        "full_logs": 69500,
+        "full_traces": 148542,
+        "full_log_aggregates": 3813
+      },
+      "label_stats": {
+        "metrics": {
+          "total_rows": 176,
+          "failure_rows": 3,
+          "pre_failure_rows": 2,
+          "future_failure_rows": 5,
+          "normal_rows": 171,
+          "failure_type_counts": {
+            "none": 171,
+            "cpu_starvation": 3,
+            "pre_cpu_starvation": 2
+          }
+        },
+        "logs": {
+          "total_rows": 3355,
+          "failure_rows": 70,
+          "pre_failure_rows": 56,
+          "future_failure_rows": 126,
+          "normal_rows": 3229,
+          "failure_type_counts": {
+            "none": 3229,
+            "cpu_starvation": 70,
+            "pre_cpu_starvation": 56
+          }
+        }
+      },
+      "failure_events": [
+        {
+          "scenario_id": "d9aa5a22-7c86-43a1-ae7b-f42183afe879",
+          "service_name": "recommendationservice",
+          "failure_type": "cpu_starvation",
+          "start_time": "2026-03-28T01:39:47.062653+00:00",
+          "end_time": "2026-03-28T01:41:23.217277+00:00",
+          "pre_failure_start": "2026-03-28T01:38:32.062653+00:00",
+          "duration_seconds": 96.154624
+        }
+      ]
+    },
+    {
+      "run_idx": 20,
+      "failure_type": "cpu_starvation",
+      "target_service": "emailservice",
+      "start_time": "2026-03-28T01:43:08.649Z",
+      "end_time": "2026-03-28T01:49:22.628Z",
+      "rows_this_run": {
+        "metrics": 176,
+        "logs": 3417,
+        "traces": 7138,
+        "log_aggregates": 207
+      },
+      "cumulative_rows": {
+        "full_metrics": 3696,
+        "full_logs": 72917,
+        "full_traces": 155680,
+        "full_log_aggregates": 4020
+      },
+      "label_stats": {
+        "metrics": {
+          "total_rows": 176,
+          "failure_rows": 3,
+          "pre_failure_rows": 2,
+          "future_failure_rows": 5,
+          "normal_rows": 171,
+          "failure_type_counts": {
+            "none": 171,
+            "cpu_starvation": 3,
+            "pre_cpu_starvation": 2
+          }
+        },
+        "logs": {
+          "total_rows": 3417,
+          "failure_rows": 6,
+          "pre_failure_rows": 2,
+          "future_failure_rows": 8,
+          "normal_rows": 3409,
+          "failure_type_counts": {
+            "none": 3409,
+            "cpu_starvation": 6,
+            "pre_cpu_starvation": 2
+          }
+        }
+      },
+      "failure_events": [
+        {
+          "scenario_id": "1ec8846a-ec28-4822-9009-0372737627d7",
+          "service_name": "emailservice",
+          "failure_type": "cpu_starvation",
+          "start_time": "2026-03-28T01:46:21.160811+00:00",
+          "end_time": "2026-03-28T01:47:57.340837+00:00",
+          "pre_failure_start": "2026-03-28T01:45:06.160811+00:00",
+          "duration_seconds": 96.180026
+        }
+      ]
+    },
+    {
+      "run_idx": 21,
+      "failure_type": "none",
+      "target_service": "none",
+      "start_time": "2026-03-28T01:49:42.647Z",
+      "end_time": "2026-03-28T01:55:37.819Z",
+      "rows_this_run": {
+        "metrics": 176,
+        "logs": 3486,
+        "traces": 7179,
+        "log_aggregates": 183
+      },
+      "cumulative_rows": {
+        "full_metrics": 3872,
+        "full_logs": 76403,
+        "full_traces": 162859,
+        "full_log_aggregates": 4203
+      },
+      "label_stats": {
+        "metrics": {
+          "total_rows": 176,
+          "failure_rows": 0,
+          "pre_failure_rows": 0,
+          "future_failure_rows": 0,
+          "normal_rows": 176,
+          "failure_type_counts": {
+            "none": 176
+          }
+        },
+        "logs": {
+          "total_rows": 3486,
+          "failure_rows": 0,
+          "pre_failure_rows": 0,
+          "future_failure_rows": 0,
+          "normal_rows": 3486,
+          "failure_type_counts": {
+            "none": 3486
+          }
+        }
+      },
+      "failure_events": []
+    },
+    {
+      "run_idx": 22,
+      "failure_type": "cpu_starvation",
+      "target_service": "recommendationservice",
+      "start_time": "2026-03-28T01:55:57.840Z",
+      "end_time": "2026-03-28T02:02:12.101Z",
+      "rows_this_run": {
+        "metrics": 176,
+        "logs": 3404,
+        "traces": 7349,
+        "log_aggregates": 184
+      },
+      "cumulative_rows": {
+        "full_metrics": 4048,
+        "full_logs": 79807,
+        "full_traces": 170208,
+        "full_log_aggregates": 4387
+      },
+      "label_stats": {
+        "metrics": {
+          "total_rows": 176,
+          "failure_rows": 3,
+          "pre_failure_rows": 2,
+          "future_failure_rows": 5,
+          "normal_rows": 171,
+          "failure_type_counts": {
+            "none": 171,
+            "cpu_starvation": 3,
+            "pre_cpu_starvation": 2
+          }
+        },
+        "logs": {
+          "total_rows": 3404,
+          "failure_rows": 78,
+          "pre_failure_rows": 63,
+          "future_failure_rows": 141,
+          "normal_rows": 3263,
+          "failure_type_counts": {
+            "none": 3263,
+            "cpu_starvation": 78,
+            "pre_cpu_starvation": 63
+          }
+        }
+      },
+      "failure_events": [
+        {
+          "scenario_id": "a185b576-d5ed-44fe-9c48-3fa8e442a055",
+          "service_name": "recommendationservice",
+          "failure_type": "cpu_starvation",
+          "start_time": "2026-03-28T01:59:10.450563+00:00",
+          "end_time": "2026-03-28T02:00:46.637735+00:00",
+          "pre_failure_start": "2026-03-28T01:57:55.450563+00:00",
+          "duration_seconds": 96.187172
+        }
+      ]
+    },
+    {
+      "run_idx": 23,
+      "failure_type": "cpu_starvation",
+      "target_service": "emailservice",
+      "start_time": "2026-03-28T02:02:32.114Z",
+      "end_time": "2026-03-28T02:08:46.517Z",
+      "rows_this_run": {
+        "metrics": 176,
+        "logs": 3352,
+        "traces": 7230,
+        "log_aggregates": 195
+      },
+      "cumulative_rows": {
+        "full_metrics": 4224,
+        "full_logs": 83159,
+        "full_traces": 177438,
+        "full_log_aggregates": 4582
+      },
+      "label_stats": {
+        "metrics": {
+          "total_rows": 176,
+          "failure_rows": 3,
+          "pre_failure_rows": 2,
+          "future_failure_rows": 5,
+          "normal_rows": 171,
+          "failure_type_counts": {
+            "none": 171,
+            "cpu_starvation": 3,
+            "pre_cpu_starvation": 2
+          }
+        },
+        "logs": {
+          "total_rows": 3352,
+          "failure_rows": 2,
+          "pre_failure_rows": 1,
+          "future_failure_rows": 3,
+          "normal_rows": 3349,
+          "failure_type_counts": {
+            "none": 3349,
+            "cpu_starvation": 2,
+            "pre_cpu_starvation": 1
+          }
+        }
+      },
+      "failure_events": [
+        {
+          "scenario_id": "133eb6ee-ba98-47e1-be51-8a28067eae31",
+          "service_name": "emailservice",
+          "failure_type": "cpu_starvation",
+          "start_time": "2026-03-28T02:05:44.760601+00:00",
+          "end_time": "2026-03-28T02:07:20.939413+00:00",
+          "pre_failure_start": "2026-03-28T02:04:29.760601+00:00",
+          "duration_seconds": 96.178812
+        }
+      ]
+    },
+    {
+      "run_idx": 24,
+      "failure_type": "cpu_starvation",
+      "target_service": "recommendationservice",
+      "start_time": "2026-03-28T02:09:06.535Z",
+      "end_time": "2026-03-28T02:15:20.899Z",
+      "rows_this_run": {
+        "metrics": 176,
+        "logs": 3473,
+        "traces": 7047,
+        "log_aggregates": 180
+      },
+      "cumulative_rows": {
+        "full_metrics": 4400,
+        "full_logs": 86632,
+        "full_traces": 184485,
+        "full_log_aggregates": 4762
+      },
+      "label_stats": {
+        "metrics": {
+          "total_rows": 176,
+          "failure_rows": 3,
+          "pre_failure_rows": 2,
+          "future_failure_rows": 5,
+          "normal_rows": 171,
+          "failure_type_counts": {
+            "none": 171,
+            "cpu_starvation": 3,
+            "pre_cpu_starvation": 2
+          }
+        },
+        "logs": {
+          "total_rows": 3473,
+          "failure_rows": 79,
+          "pre_failure_rows": 62,
+          "future_failure_rows": 141,
+          "normal_rows": 3332,
+          "failure_type_counts": {
+            "none": 3332,
+            "cpu_starvation": 79,
+            "pre_cpu_starvation": 62
+          }
+        }
+      },
+      "failure_events": [
+        {
+          "scenario_id": "88e4f0ab-ac03-435a-9556-863ee67f0e9a",
+          "service_name": "recommendationservice",
+          "failure_type": "cpu_starvation",
+          "start_time": "2026-03-28T02:12:19.219265+00:00",
+          "end_time": "2026-03-28T02:13:55.406517+00:00",
+          "pre_failure_start": "2026-03-28T02:11:04.219265+00:00",
+          "duration_seconds": 96.187252
+        }
+      ]
+    },
+    {
+      "run_idx": 25,
+      "failure_type": "cpu_starvation",
+      "target_service": "emailservice",
+      "start_time": "2026-03-28T02:15:40.915Z",
+      "end_time": "2026-03-28T02:21:55.505Z",
+      "rows_this_run": {
+        "metrics": 176,
+        "logs": 3425,
+        "traces": 7869,
+        "log_aggregates": 202
+      },
+      "cumulative_rows": {
+        "full_metrics": 4576,
+        "full_logs": 90057,
+        "full_traces": 192354,
+        "full_log_aggregates": 4964
+      },
+      "label_stats": {
+        "metrics": {
+          "total_rows": 176,
+          "failure_rows": 3,
+          "pre_failure_rows": 2,
+          "future_failure_rows": 5,
+          "normal_rows": 171,
+          "failure_type_counts": {
+            "none": 171,
+            "cpu_starvation": 3,
+            "pre_cpu_starvation": 2
+          }
+        },
+        "logs": {
+          "total_rows": 3425,
+          "failure_rows": 4,
+          "pre_failure_rows": 5,
+          "future_failure_rows": 9,
+          "normal_rows": 3416,
+          "failure_type_counts": {
+            "none": 3416,
+            "pre_cpu_starvation": 5,
+            "cpu_starvation": 4
+          }
+        }
+      },
+      "failure_events": [
+        {
+          "scenario_id": "2f5cd4ef-31d8-4a39-a776-739aab9fb7b5",
+          "service_name": "emailservice",
+          "failure_type": "cpu_starvation",
+          "start_time": "2026-03-28T02:18:53.553315+00:00",
+          "end_time": "2026-03-28T02:20:29.891487+00:00",
+          "pre_failure_start": "2026-03-28T02:17:38.553315+00:00",
+          "duration_seconds": 96.338172
+        }
+      ]
+    },
+    {
+      "run_idx": 26,
+      "failure_type": "cpu_starvation",
+      "target_service": "recommendationservice",
+      "start_time": "2026-03-28T02:22:15.512Z",
+      "end_time": "2026-03-28T02:28:29.783Z",
+      "rows_this_run": {
+        "metrics": 176,
+        "logs": 3349,
+        "traces": 7322,
+        "log_aggregates": 185
+      },
+      "cumulative_rows": {
+        "full_metrics": 4752,
+        "full_logs": 93406,
+        "full_traces": 199676,
+        "full_log_aggregates": 5149
+      },
+      "label_stats": {
+        "metrics": {
+          "total_rows": 176,
+          "failure_rows": 3,
+          "pre_failure_rows": 2,
+          "future_failure_rows": 5,
+          "normal_rows": 171,
+          "failure_type_counts": {
+            "none": 171,
+            "cpu_starvation": 3,
+            "pre_cpu_starvation": 2
+          }
+        },
+        "logs": {
+          "total_rows": 3349,
+          "failure_rows": 79,
+          "pre_failure_rows": 55,
+          "future_failure_rows": 134,
+          "normal_rows": 3215,
+          "failure_type_counts": {
+            "none": 3215,
+            "cpu_starvation": 79,
+            "pre_cpu_starvation": 55
+          }
+        }
+      },
+      "failure_events": [
+        {
+          "scenario_id": "2c75f2d8-2324-40ef-937e-f6fe15550cd8",
+          "service_name": "recommendationservice",
+          "failure_type": "cpu_starvation",
+          "start_time": "2026-03-28T02:25:28.157393+00:00",
+          "end_time": "2026-03-28T02:27:04.305605+00:00",
+          "pre_failure_start": "2026-03-28T02:24:13.157393+00:00",
+          "duration_seconds": 96.148212
+        }
+      ]
+    },
+    {
+      "run_idx": 27,
+      "failure_type": "cpu_starvation",
+      "target_service": "emailservice",
+      "start_time": "2026-03-28T02:28:49.797Z",
+      "end_time": "2026-03-28T02:35:04.034Z",
+      "rows_this_run": {
+        "metrics": 176,
+        "logs": 3312,
+        "traces": 7384,
+        "log_aggregates": 180
+      },
+      "cumulative_rows": {
+        "full_metrics": 4928,
+        "full_logs": 96718,
+        "full_traces": 207060,
+        "full_log_aggregates": 5329
+      },
+      "label_stats": {
+        "metrics": {
+          "total_rows": 176,
+          "failure_rows": 3,
+          "pre_failure_rows": 2,
+          "future_failure_rows": 5,
+          "normal_rows": 171,
+          "failure_type_counts": {
+            "none": 171,
+            "cpu_starvation": 3,
+            "pre_cpu_starvation": 2
+          }
+        },
+        "logs": {
+          "total_rows": 3312,
+          "failure_rows": 1,
+          "pre_failure_rows": 2,
+          "future_failure_rows": 3,
+          "normal_rows": 3309,
+          "failure_type_counts": {
+            "none": 3309,
+            "pre_cpu_starvation": 2,
+            "cpu_starvation": 1
+          }
+        }
+      },
+      "failure_events": [
+        {
+          "scenario_id": "30edec07-996d-4a05-9f5c-a8b5a0af4050",
+          "service_name": "emailservice",
+          "failure_type": "cpu_starvation",
+          "start_time": "2026-03-28T02:32:02.323796+00:00",
+          "end_time": "2026-03-28T02:33:38.529401+00:00",
+          "pre_failure_start": "2026-03-28T02:30:47.323796+00:00",
+          "duration_seconds": 96.205605
+        }
+      ]
+    },
+    {
+      "run_idx": 28,
+      "failure_type": "none",
+      "target_service": "none",
+      "start_time": "2026-03-28T02:35:24.050Z",
+      "end_time": "2026-03-28T02:41:19.042Z",
+      "rows_this_run": {
+        "metrics": 176,
+        "logs": 3483,
+        "traces": 7156,
+        "log_aggregates": 189
+      },
+      "cumulative_rows": {
+        "full_metrics": 5104,
+        "full_logs": 100201,
+        "full_traces": 214216,
+        "full_log_aggregates": 5518
+      },
+      "label_stats": {
+        "metrics": {
+          "total_rows": 176,
+          "failure_rows": 0,
+          "pre_failure_rows": 0,
+          "future_failure_rows": 0,
+          "normal_rows": 176,
+          "failure_type_counts": {
+            "none": 176
+          }
+        },
+        "logs": {
+          "total_rows": 3483,
+          "failure_rows": 0,
+          "pre_failure_rows": 0,
+          "future_failure_rows": 0,
+          "normal_rows": 3483,
+          "failure_type_counts": {
+            "none": 3483
+          }
+        }
+      },
+      "failure_events": []
+    },
+    {
+      "run_idx": 29,
+      "failure_type": "network_latency",
+      "target_service": "recommendationservice",
+      "start_time": "2026-03-28T02:41:39.048Z",
+      "end_time": "2026-03-28T02:47:53.987Z",
+      "rows_this_run": {
+        "metrics": 176,
+        "logs": 3429,
+        "traces": 7648,
+        "log_aggregates": 187
+      },
+      "cumulative_rows": {
+        "full_metrics": 5280,
+        "full_logs": 103630,
+        "full_traces": 221864,
+        "full_log_aggregates": 5705
+      },
+      "label_stats": {
+        "metrics": {
+          "total_rows": 176,
+          "failure_rows": 3,
+          "pre_failure_rows": 2,
+          "future_failure_rows": 5,
+          "normal_rows": 171,
+          "failure_type_counts": {
+            "none": 171,
+            "network_latency": 3,
+            "pre_network_latency": 2
+          }
+        },
+        "logs": {
+          "total_rows": 3429,
+          "failure_rows": 71,
+          "pre_failure_rows": 56,
+          "future_failure_rows": 127,
+          "normal_rows": 3302,
+          "failure_type_counts": {
+            "none": 3302,
+            "network_latency": 71,
+            "pre_network_latency": 56
+          }
+        }
+      },
+      "failure_events": [
+        {
+          "scenario_id": "d81682be-3ffc-4919-b389-e54ab0d0de31",
+          "service_name": "recommendationservice",
+          "failure_type": "network_latency",
+          "start_time": "2026-03-28T02:44:51.459120+00:00",
+          "end_time": "2026-03-28T02:46:28.183680+00:00",
+          "pre_failure_start": "2026-03-28T02:43:36.459120+00:00",
+          "duration_seconds": 96.72456
+        }
+      ]
+    },
+    {
+      "run_idx": 30,
+      "failure_type": "network_latency",
+      "target_service": "emailservice",
+      "start_time": "2026-03-28T02:48:14.004Z",
+      "end_time": "2026-03-28T02:54:29.162Z",
+      "rows_this_run": {
+        "metrics": 176,
+        "logs": 3562,
+        "traces": 7262,
+        "log_aggregates": 173
+      },
+      "cumulative_rows": {
+        "full_metrics": 5456,
+        "full_logs": 107192,
+        "full_traces": 229126,
+        "full_log_aggregates": 5878
+      },
+      "label_stats": {
+        "metrics": {
+          "total_rows": 176,
+          "failure_rows": 3,
+          "pre_failure_rows": 2,
+          "future_failure_rows": 5,
+          "normal_rows": 171,
+          "failure_type_counts": {
+            "none": 171,
+            "network_latency": 3,
+            "pre_network_latency": 2
+          }
+        },
+        "logs": {
+          "total_rows": 3562,
+          "failure_rows": 5,
+          "pre_failure_rows": 2,
+          "future_failure_rows": 7,
+          "normal_rows": 3555,
+          "failure_type_counts": {
+            "none": 3555,
+            "network_latency": 5,
+            "pre_network_latency": 2
+          }
+        }
+      },
+      "failure_events": [
+        {
+          "scenario_id": "232b7b6c-2541-421f-8497-3ee029b6f2f7",
+          "service_name": "emailservice",
+          "failure_type": "network_latency",
+          "start_time": "2026-03-28T02:51:26.599681+00:00",
+          "end_time": "2026-03-28T02:53:03.312042+00:00",
+          "pre_failure_start": "2026-03-28T02:50:11.599681+00:00",
+          "duration_seconds": 96.712361
+        }
+      ]
+    },
+    {
+      "run_idx": 31,
+      "failure_type": "network_latency",
+      "target_service": "recommendationservice",
+      "start_time": "2026-03-28T02:54:49.178Z",
+      "end_time": "2026-03-28T03:01:04.316Z",
+      "rows_this_run": {
+        "metrics": 176,
+        "logs": 3509,
+        "traces": 7350,
+        "log_aggregates": 198
+      },
+      "cumulative_rows": {
+        "full_metrics": 5632,
+        "full_logs": 110701,
+        "full_traces": 236476,
+        "full_log_aggregates": 6076
+      },
+      "label_stats": {
+        "metrics": {
+          "total_rows": 176,
+          "failure_rows": 3,
+          "pre_failure_rows": 2,
+          "future_failure_rows": 5,
+          "normal_rows": 171,
+          "failure_type_counts": {
+            "none": 171,
+            "network_latency": 3,
+            "pre_network_latency": 2
+          }
+        },
+        "logs": {
+          "total_rows": 3509,
+          "failure_rows": 80,
+          "pre_failure_rows": 56,
+          "future_failure_rows": 136,
+          "normal_rows": 3373,
+          "failure_type_counts": {
+            "none": 3373,
+            "network_latency": 80,
+            "pre_network_latency": 56
+          }
+        }
+      },
+      "failure_events": [
+        {
+          "scenario_id": "72f5e697-0f94-4d92-8651-5f018f5779cc",
+          "service_name": "recommendationservice",
+          "failure_type": "network_latency",
+          "start_time": "2026-03-28T02:58:01.731915+00:00",
+          "end_time": "2026-03-28T02:59:38.345523+00:00",
+          "pre_failure_start": "2026-03-28T02:56:46.731915+00:00",
+          "duration_seconds": 96.613608
+        }
+      ]
+    },
+    {
+      "run_idx": 32,
+      "failure_type": "network_latency",
+      "target_service": "emailservice",
+      "start_time": "2026-03-28T03:01:24.330Z",
+      "end_time": "2026-03-28T03:07:39.188Z",
+      "rows_this_run": {
+        "metrics": 176,
+        "logs": 3482,
+        "traces": 7079,
+        "log_aggregates": 193
+      },
+      "cumulative_rows": {
+        "full_metrics": 5808,
+        "full_logs": 114183,
+        "full_traces": 243555,
+        "full_log_aggregates": 6269
+      },
+      "label_stats": {
+        "metrics": {
+          "total_rows": 176,
+          "failure_rows": 3,
+          "pre_failure_rows": 2,
+          "future_failure_rows": 5,
+          "normal_rows": 171,
+          "failure_type_counts": {
+            "none": 171,
+            "network_latency": 3,
+            "pre_network_latency": 2
+          }
+        },
+        "logs": {
+          "total_rows": 3482,
+          "failure_rows": 6,
+          "pre_failure_rows": 2,
+          "future_failure_rows": 8,
+          "normal_rows": 3474,
+          "failure_type_counts": {
+            "none": 3474,
+            "network_latency": 6,
+            "pre_network_latency": 2
+          }
+        }
+      },
+      "failure_events": [
+        {
+          "scenario_id": "26abcfef-b7e7-4cdc-879f-2742f90901d5",
+          "service_name": "emailservice",
+          "failure_type": "network_latency",
+          "start_time": "2026-03-28T03:04:36.839914+00:00",
+          "end_time": "2026-03-28T03:06:13.398210+00:00",
+          "pre_failure_start": "2026-03-28T03:03:21.839914+00:00",
+          "duration_seconds": 96.558296
+        }
+      ]
+    },
+    {
+      "run_idx": 33,
+      "failure_type": "network_latency",
+      "target_service": "recommendationservice",
+      "start_time": "2026-03-28T03:07:59.196Z",
+      "end_time": "2026-03-28T03:14:13.993Z",
+      "rows_this_run": {
+        "metrics": 176,
+        "logs": 3502,
+        "traces": 7126,
+        "log_aggregates": 184
+      },
+      "cumulative_rows": {
+        "full_metrics": 5984,
+        "full_logs": 117685,
+        "full_traces": 250681,
+        "full_log_aggregates": 6453
+      },
+      "label_stats": {
+        "metrics": {
+          "total_rows": 176,
+          "failure_rows": 3,
+          "pre_failure_rows": 2,
+          "future_failure_rows": 5,
+          "normal_rows": 171,
+          "failure_type_counts": {
+            "none": 171,
+            "network_latency": 3,
+            "pre_network_latency": 2
+          }
+        },
+        "logs": {
+          "total_rows": 3502,
+          "failure_rows": 86,
+          "pre_failure_rows": 47,
+          "future_failure_rows": 133,
+          "normal_rows": 3369,
+          "failure_type_counts": {
+            "none": 3369,
+            "network_latency": 86,
+            "pre_network_latency": 47
+          }
+        }
+      },
+      "failure_events": [
+        {
+          "scenario_id": "af272e29-7a4d-4a91-9079-6a1eafcac5b1",
+          "service_name": "recommendationservice",
+          "failure_type": "network_latency",
+          "start_time": "2026-03-28T03:11:11.789384+00:00",
+          "end_time": "2026-03-28T03:12:48.333970+00:00",
+          "pre_failure_start": "2026-03-28T03:09:56.789384+00:00",
+          "duration_seconds": 96.544586
+        }
+      ]
+    },
+    {
+      "run_idx": 34,
+      "failure_type": "network_latency",
+      "target_service": "emailservice",
+      "start_time": "2026-03-28T03:14:34.003Z",
+      "end_time": "2026-03-28T03:20:49.077Z",
+      "rows_this_run": {
+        "metrics": 176,
+        "logs": 3505,
+        "traces": 7286,
+        "log_aggregates": 190
+      },
+      "cumulative_rows": {
+        "full_metrics": 6160,
+        "full_logs": 121190,
+        "full_traces": 257967,
+        "full_log_aggregates": 6643
+      },
+      "label_stats": {
+        "metrics": {
+          "total_rows": 176,
+          "failure_rows": 3,
+          "pre_failure_rows": 2,
+          "future_failure_rows": 5,
+          "normal_rows": 171,
+          "failure_type_counts": {
+            "none": 171,
+            "network_latency": 3,
+            "pre_network_latency": 2
+          }
+        },
+        "logs": {
+          "total_rows": 3505,
+          "failure_rows": 4,
+          "pre_failure_rows": 2,
+          "future_failure_rows": 6,
+          "normal_rows": 3499,
+          "failure_type_counts": {
+            "none": 3499,
+            "network_latency": 4,
+            "pre_network_latency": 2
+          }
+        }
+      },
+      "failure_events": [
+        {
+          "scenario_id": "78e7a02a-bd29-4d5f-825f-e0135e2853a7",
+          "service_name": "emailservice",
+          "failure_type": "network_latency",
+          "start_time": "2026-03-28T03:17:46.574163+00:00",
+          "end_time": "2026-03-28T03:19:23.216488+00:00",
+          "pre_failure_start": "2026-03-28T03:16:31.574163+00:00",
+          "duration_seconds": 96.642325
+        }
+      ]
+    },
+    {
+      "run_idx": 35,
+      "failure_type": "none",
+      "target_service": "none",
+      "start_time": "2026-03-28T03:21:09.098Z",
+      "end_time": "2026-03-28T03:27:04.382Z",
+      "rows_this_run": {
+        "metrics": 176,
+        "logs": 3505,
+        "traces": 7492,
+        "log_aggregates": 182
+      },
+      "cumulative_rows": {
+        "full_metrics": 6336,
+        "full_logs": 124695,
+        "full_traces": 265459,
+        "full_log_aggregates": 6825
+      },
+      "label_stats": {
+        "metrics": {
+          "total_rows": 176,
+          "failure_rows": 0,
+          "pre_failure_rows": 0,
+          "future_failure_rows": 0,
+          "normal_rows": 176,
+          "failure_type_counts": {
+            "none": 176
+          }
+        },
+        "logs": {
+          "total_rows": 3505,
+          "failure_rows": 0,
+          "pre_failure_rows": 0,
+          "future_failure_rows": 0,
+          "normal_rows": 3505,
+          "failure_type_counts": {
+            "none": 3505
+          }
+        }
+      },
+      "failure_events": []
+    },
+    {
+      "run_idx": 36,
+      "failure_type": "network_latency",
+      "target_service": "recommendationservice",
+      "start_time": "2026-03-28T03:27:24.366Z",
+      "end_time": "2026-03-28T03:33:39.120Z",
+      "rows_this_run": {
+        "metrics": 176,
+        "logs": 3547,
+        "traces": 6742,
+        "log_aggregates": 184
+      },
+      "cumulative_rows": {
+        "full_metrics": 6512,
+        "full_logs": 128242,
+        "full_traces": 272201,
+        "full_log_aggregates": 7009
+      },
+      "label_stats": {
+        "metrics": {
+          "total_rows": 176,
+          "failure_rows": 3,
+          "pre_failure_rows": 2,
+          "future_failure_rows": 5,
+          "normal_rows": 171,
+          "failure_type_counts": {
+            "none": 171,
+            "network_latency": 3,
+            "pre_network_latency": 2
+          }
+        },
+        "logs": {
+          "total_rows": 3547,
+          "failure_rows": 72,
+          "pre_failure_rows": 56,
+          "future_failure_rows": 128,
+          "normal_rows": 3419,
+          "failure_type_counts": {
+            "none": 3419,
+            "network_latency": 72,
+            "pre_network_latency": 56
+          }
+        }
+      },
+      "failure_events": [
+        {
+          "scenario_id": "87b5efe4-850d-4807-b360-f9f9aab5a853",
+          "service_name": "recommendationservice",
+          "failure_type": "network_latency",
+          "start_time": "2026-03-28T03:30:36.831310+00:00",
+          "end_time": "2026-03-28T03:32:13.382664+00:00",
+          "pre_failure_start": "2026-03-28T03:29:21.831310+00:00",
+          "duration_seconds": 96.551354
+        }
+      ]
+    },
+    {
+      "run_idx": 37,
+      "failure_type": "network_latency",
+      "target_service": "emailservice",
+      "start_time": "2026-03-28T03:33:59.131Z",
+      "end_time": "2026-03-28T03:40:14.000Z",
+      "rows_this_run": {
+        "metrics": 176,
+        "logs": 3511,
+        "traces": 7533,
+        "log_aggregates": 179
+      },
+      "cumulative_rows": {
+        "full_metrics": 6688,
+        "full_logs": 131753,
+        "full_traces": 279734,
+        "full_log_aggregates": 7188
+      },
+      "label_stats": {
+        "metrics": {
+          "total_rows": 176,
+          "failure_rows": 3,
+          "pre_failure_rows": 2,
+          "future_failure_rows": 5,
+          "normal_rows": 171,
+          "failure_type_counts": {
+            "none": 171,
+            "network_latency": 3,
+            "pre_network_latency": 2
+          }
+        },
+        "logs": {
+          "total_rows": 3511,
+          "failure_rows": 3,
+          "pre_failure_rows": 3,
+          "future_failure_rows": 6,
+          "normal_rows": 3505,
+          "failure_type_counts": {
+            "none": 3505,
+            "pre_network_latency": 3,
+            "network_latency": 3
+          }
+        }
+      },
+      "failure_events": [
+        {
+          "scenario_id": "0329d902-9af6-4acc-8097-a2c9b054b764",
+          "service_name": "emailservice",
+          "failure_type": "network_latency",
+          "start_time": "2026-03-28T03:37:11.652947+00:00",
+          "end_time": "2026-03-28T03:38:48.239418+00:00",
+          "pre_failure_start": "2026-03-28T03:35:56.652947+00:00",
+          "duration_seconds": 96.586471
+        }
+      ]
+    },
+    {
+      "run_idx": 38,
+      "failure_type": "network_latency",
+      "target_service": "recommendationservice",
+      "start_time": "2026-03-28T03:40:34.013Z",
+      "end_time": "2026-03-28T03:46:49.030Z",
+      "rows_this_run": {
+        "metrics": 176,
+        "logs": 3544,
+        "traces": 7786,
+        "log_aggregates": 195
+      },
+      "cumulative_rows": {
+        "full_metrics": 6864,
+        "full_logs": 135297,
+        "full_traces": 287520,
+        "full_log_aggregates": 7383
+      },
+      "label_stats": {
+        "metrics": {
+          "total_rows": 176,
+          "failure_rows": 3,
+          "pre_failure_rows": 2,
+          "future_failure_rows": 5,
+          "normal_rows": 171,
+          "failure_type_counts": {
+            "none": 171,
+            "network_latency": 3,
+            "pre_network_latency": 2
+          }
+        },
+        "logs": {
+          "total_rows": 3544,
+          "failure_rows": 80,
+          "pre_failure_rows": 59,
+          "future_failure_rows": 139,
+          "normal_rows": 3405,
+          "failure_type_counts": {
+            "none": 3405,
+            "network_latency": 80,
+            "pre_network_latency": 59
+          }
+        }
+      },
+      "failure_events": [
+        {
+          "scenario_id": "28b86c44-7218-408e-9e4a-0c7f221ef303",
+          "service_name": "recommendationservice",
+          "failure_type": "network_latency",
+          "start_time": "2026-03-28T03:43:46.605114+00:00",
+          "end_time": "2026-03-28T03:45:23.105311+00:00",
+          "pre_failure_start": "2026-03-28T03:42:31.605114+00:00",
+          "duration_seconds": 96.500197
+        }
+      ]
+    },
+    {
+      "run_idx": 39,
+      "failure_type": "network_latency",
+      "target_service": "emailservice",
+      "start_time": "2026-03-28T03:47:09.045Z",
+      "end_time": "2026-03-28T03:53:26.796Z",
+      "rows_this_run": {
+        "metrics": 176,
+        "logs": 3530,
+        "traces": 7301,
+        "log_aggregates": 200
+      },
+      "cumulative_rows": {
+        "full_metrics": 7040,
+        "full_logs": 138827,
+        "full_traces": 294821,
+        "full_log_aggregates": 7583
+      },
+      "label_stats": {
+        "metrics": {
+          "total_rows": 176,
+          "failure_rows": 3,
+          "pre_failure_rows": 2,
+          "future_failure_rows": 5,
+          "normal_rows": 171,
+          "failure_type_counts": {
+            "none": 171,
+            "network_latency": 3,
+            "pre_network_latency": 2
+          }
+        },
+        "logs": {
+          "total_rows": 3530,
+          "failure_rows": 7,
+          "pre_failure_rows": 2,
+          "future_failure_rows": 9,
+          "normal_rows": 3521,
+          "failure_type_counts": {
+            "none": 3521,
+            "network_latency": 7,
+            "pre_network_latency": 2
+          }
+        }
+      },
+      "failure_events": [
+        {
+          "scenario_id": "c67b3af0-408e-4dd3-8011-e464757cb3a0",
+          "service_name": "emailservice",
+          "failure_type": "network_latency",
+          "start_time": "2026-03-28T03:50:21.603288+00:00",
+          "end_time": "2026-03-28T03:51:58.180712+00:00",
+          "pre_failure_start": "2026-03-28T03:49:06.603288+00:00",
+          "duration_seconds": 96.577424
+        }
+      ]
+    },
+    {
+      "run_idx": 40,
+      "failure_type": "network_latency",
+      "target_service": "recommendationservice",
+      "start_time": "2026-03-28T03:53:46.817Z",
+      "end_time": "2026-03-28T04:00:02.633Z",
+      "rows_this_run": {
+        "metrics": 176,
+        "logs": 3527,
+        "traces": 7452,
+        "log_aggregates": 194
+      },
+      "cumulative_rows": {
+        "full_metrics": 7216,
+        "full_logs": 142354,
+        "full_traces": 302273,
+        "full_log_aggregates": 7777
+      },
+      "label_stats": {
+        "metrics": {
+          "total_rows": 176,
+          "failure_rows": 3,
+          "pre_failure_rows": 2,
+          "future_failure_rows": 5,
+          "normal_rows": 171,
+          "failure_type_counts": {
+            "none": 171,
+            "network_latency": 3,
+            "pre_network_latency": 2
+          }
+        },
+        "logs": {
+          "total_rows": 3527,
+          "failure_rows": 77,
+          "pre_failure_rows": 64,
+          "future_failure_rows": 141,
+          "normal_rows": 3386,
+          "failure_type_counts": {
+            "none": 3386,
+            "network_latency": 77,
+            "pre_network_latency": 64
+          }
+        }
+      },
+      "failure_events": [
+        {
+          "scenario_id": "f115058b-42be-4554-8d73-50a528e01556",
+          "service_name": "recommendationservice",
+          "failure_type": "network_latency",
+          "start_time": "2026-03-28T03:56:59.550632+00:00",
+          "end_time": "2026-03-28T03:58:36.187175+00:00",
+          "pre_failure_start": "2026-03-28T03:55:44.550632+00:00",
+          "duration_seconds": 96.636543
+        }
+      ]
+    },
+    {
+      "run_idx": 41,
+      "failure_type": "network_latency",
+      "target_service": "emailservice",
+      "start_time": "2026-03-28T04:00:22.643Z",
+      "end_time": "2026-03-28T04:06:38.611Z",
+      "rows_this_run": {
+        "metrics": 176,
+        "logs": 3482,
+        "traces": 7661,
+        "log_aggregates": 185
+      },
+      "cumulative_rows": {
+        "full_metrics": 7392,
+        "full_logs": 145836,
+        "full_traces": 309934,
+        "full_log_aggregates": 7962
+      },
+      "label_stats": {
+        "metrics": {
+          "total_rows": 176,
+          "failure_rows": 3,
+          "pre_failure_rows": 2,
+          "future_failure_rows": 5,
+          "normal_rows": 171,
+          "failure_type_counts": {
+            "none": 171,
+            "network_latency": 3,
+            "pre_network_latency": 2
+          }
+        },
+        "logs": {
+          "total_rows": 3482,
+          "failure_rows": 0,
+          "pre_failure_rows": 3,
+          "future_failure_rows": 3,
+          "normal_rows": 3479,
+          "failure_type_counts": {
+            "none": 3479,
+            "pre_network_latency": 3
+          }
+        }
+      },
+      "failure_events": [
+        {
+          "scenario_id": "7b690dc8-2f04-43cc-a230-50cb50d09df6",
+          "service_name": "emailservice",
+          "failure_type": "network_latency",
+          "start_time": "2026-03-28T04:03:35.314269+00:00",
+          "end_time": "2026-03-28T04:05:12.409198+00:00",
+          "pre_failure_start": "2026-03-28T04:02:20.314269+00:00",
+          "duration_seconds": 97.094929
+        }
+      ]
+    }
+  ]
+}
