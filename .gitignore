@@ -51,6 +51,7 @@ pipeline/data/training/*.csv
 # Runtime logs and PIDs
 pipeline/logs/*.log
 pipeline/logs/*.pid
+backend/.runtime/*.db
 
 # Dashboard build output
 dashboard/dist/

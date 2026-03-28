@@ -2,27 +2,35 @@
 AI Observability Platform - FastAPI Backend
 
 Port: 8001
-- /health       GET  System health check
-- /status       GET  Full system status with anomaly scores
-- /ingest       POST Accept live metrics/logs, update scores
-- /remediate    POST Trigger remediation for a service
-- /history      GET  Last 100 score snapshots
-- /alerts       GET  Active alerts (score > 0.7)
-- /topology     GET  Rich service topology with features (solar system dashboard)
-- /window/{svc} GET  Raw window observations for sparklines
+- /health              GET  System health check
+- /status              GET  Full system status with anomaly scores + incident state
+- /ingest              POST Accept live metrics/logs, update scores
+- /remediate           POST Execute the staged remediation pipeline
+- /decision/validate   POST Validate an AI action proposal against policy
+- /incidents/active    GET  Active incidents
+- /incidents/history   GET  Recent incident history
+- /incidents/similar   GET  Similar incidents from memory
+- /history             GET  Last 100 score snapshots
+- /alerts              GET  Active alerts (score > 0.7)
+- /topology            GET  Rich service topology with features
+- /window/{service}    GET  Raw window observations for sparklines
 """
 
+from __future__ import annotations
+
 import asyncio
-import json
 import math
-import sys
 import os
+import sys
 import time
 import logging
-import threading
+from collections import deque
 from datetime import datetime, timezone
-from collections import deque, defaultdict
 from typing import Any, Dict, List, Optional
+
+from fastapi import FastAPI, HTTPException, Query
+from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel, Field
 
 # Add repo root and backend to sys.path for imports
 _file = os.path.abspath(__file__)
@@ -32,16 +40,14 @@ for _p in [_backend, _repo_root]:
     if _p not in sys.path:
         sys.path.insert(0, _p)
 
-from fastapi import FastAPI, HTTPException, BackgroundTasks
-from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
+from anomaly_api.correlation import CorrelationEngine
+from remediation.engine import RemediationEngine
+from remediation.models import ActionProposal
+from remediation.policy import DEPENDENCY_GRAPH
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# =============================================
-# Service list (Online Boutique)
-# =============================================
 ALL_SERVICES = [
     "frontend",
     "productcatalogservice",
@@ -56,12 +62,12 @@ ALL_SERVICES = [
     "redis-cart",
 ]
 
-# Demo mode phase offsets for sinusoidal scores
 DEMO_PHASES = {svc: i * 0.6 for i, svc in enumerate(ALL_SERVICES)}
 
-# =============================================
-# App state
-# =============================================
+
+def utc_now_iso() -> str:
+    return datetime.now(timezone.utc).isoformat()
+
 
 class AppState:
     def __init__(self):
@@ -71,63 +77,51 @@ class AppState:
         self.lstm_inference = None
         self.lstm_per_service: Dict[str, Any] = {}
         self.correlation_engine = None
-        self.remediation_engine = None
+        self.remediation_engine: Optional[RemediationEngine] = None
 
-        # Live score store: service -> {if_score, lstm_score, combined_score}
         self.current_scores: Dict[str, Dict] = {}
-
-        # History: deque of score snapshots
         self.history: deque = deque(maxlen=100)
-
-        # Last update time
         self.last_update: float = 0.0
 
-        # Demo tick counter
-        self._demo_tick: float = 0.0
-
-        # Stage 1 & 2
-        self.window_state = None   # SlidingWindowState — set at startup
-        self.ingestion_pipeline = None  # IngestionPipeline — set at startup
+        self.window_state = None
+        self.ingestion_pipeline = None
 
 
 state = AppState()
 
-# =============================================
-# Model loading
-# =============================================
 
 def load_models():
-    """Try to load IF and LSTM models. Sets demo_mode if either fails."""
     loaded_if = False
     loaded_lstm = False
 
     try:
         from ml.isolation_forest.inference import IFInference
+
         inf = IFInference()
         if inf.load():
             state.if_inference = inf
             loaded_if = True
             logger.info("IF model loaded")
-    except Exception as e:
-        logger.warning(f"IF model load failed: {e}")
+    except Exception as exc:
+        logger.warning("IF model load failed: %s", exc)
 
     try:
         from ml.lstm.inference import LSTMInference
+
         lstm = LSTMInference()
         if lstm.load():
             state.lstm_inference = lstm
             loaded_lstm = True
             logger.info("LSTM model loaded")
-            # Create per-service instances (share the same underlying model)
             for svc in ALL_SERVICES:
                 inst = LSTMInference()
                 inst.model = lstm.model
                 inst.model_type = lstm.model_type
                 inst.demo_mode = lstm.demo_mode
-                inst._demo_offset = hash(svc) % 100  # unique phase per service
+                inst._demo_offset = hash(svc) % 100
                 state.lstm_per_service[svc] = inst
-    except Exception as e:
-        logger.warning(f"LSTM model load failed: {e}")
+    except Exception as exc:
+        logger.warning("LSTM model load failed: %s", exc)
 
     state.models_loaded = loaded_if and loaded_lstm
     state.demo_mode = not state.models_loaded
@@ -135,41 +129,30 @@ def load_models():
     if state.demo_mode:
         logger.info("Running in DEMO MODE (sinusoidal scores)")
 
-    # Load correlation engine (always available)
     try:
-        from anomaly_api.correlation import CorrelationEngine
         state.correlation_engine = CorrelationEngine()
         logger.info("Correlation engine loaded")
-    except Exception as e:
-        logger.warning(f"Correlation engine load failed: {e}")
+    except Exception as exc:
+        logger.warning("Correlation engine load failed: %s", exc)
 
-    # Load remediation engine
     try:
-        from remediation.engine import RemediationEngine
         state.remediation_engine = RemediationEngine(
+            score_provider=lambda: state.current_scores or compute_all_scores(),
             target_seconds=15,
-            demo_mode=state.demo_mode
+            demo_mode=False,
         )
         logger.info("Remediation engine loaded")
-    except Exception as e:
-        logger.warning(f"Remediation engine load failed: {e}")
+    except Exception as exc:
+        logger.warning("Remediation engine load failed: %s", exc)
 
 
-# =============================================
-# Score computation
-# =============================================
-
-def _demo_score(service: str, t: float = None) -> Dict:
-    """Generate sinusoidal demo scores for a service."""
+def _demo_score(service: str, t: Optional[float] = None) -> Dict:
     if t is None:
         t = time.time()
     phase_offset = DEMO_PHASES.get(service, 0.0)
 
-    # Different frequencies for IF and LSTM to make it interesting
     if_phase = (t / 30.0 + phase_offset) * 2 * math.pi
     lstm_phase = (t / 45.0 + phase_offset + 0.5) * 2 * math.pi
-
-    # Add a slow "incident" wave every 3 minutes
     incident_phase = (t / 180.0 + phase_offset * 0.3) * 2 * math.pi
     incident_boost = max(0, math.sin(incident_phase)) * 0.3
 
@@ -187,17 +170,12 @@ def _demo_score(service: str, t: float = None) -> Dict:
 def _score_status(combined: float) -> str:
     if combined < 0.4:
         return "normal"
-    elif combined < 0.7:
+    if combined < 0.7:
         return "warning"
-    else:
-        return "critical"
+    return "critical"
 
 
 def compute_all_scores() -> Dict[str, Dict]:
-    """
-    Compute anomaly scores for all services using the sliding window features.
-    Falls back to sinusoidal demo scores when models are not loaded.
-    """
     from anomaly_api.features import extract_features
 
     t = time.time()
@@ -208,7 +186,6 @@ def compute_all_scores() -> Dict[str, Dict]:
         features = extract_features(svc, window) if window else {}
 
         if not state.demo_mode and state.if_inference and features:
-            # Build the 10-feature vector for IF
             feat_vec = {
                 "cpu_percent": features.get("cpu_percent_mean", 0),
                 "mem_percent": features.get("mem_percent_mean", 0),
@@ -225,26 +202,37 @@ def compute_all_scores() -> Dict[str, Dict]:
             lstm_inst = state.lstm_per_service.get(svc) if state.lstm_per_service else None
             lstm_score = lstm_inst._demo_score() if lstm_inst else _demo_score(svc, t)["lstm_score"]
             combined = 0.6 * lstm_score + 0.4 * if_score
-            s = {
+            snapshot = {
                 "if_score": round(if_score, 3),
                 "lstm_score": round(lstm_score, 3),
                 "combined_score": round(combined, 3),
                 "cpu_percent": features.get("cpu_percent_mean", 0),
                 "mem_percent": features.get("mem_percent_mean", 0),
                 "feature_flags": features.get("feature_flags", []),
+                "error_rate": features.get("error_rate_mean", 0),
+                "warn_rate": features.get("warn_rate_mean", 0),
+                "log_count": features.get("log_count_mean", 0),
             }
         else:
-            s = _demo_score(svc, t)
-            s["feature_flags"] = []
+            snapshot = _demo_score(svc, t)
+            snapshot.update(
+                {
+                    "cpu_percent": 0.0,
+                    "mem_percent": 0.0,
+                    "feature_flags": [],
+                    "error_rate": 0.0,
+                    "warn_rate": 0.0,
+                    "log_count": 0.0,
+                }
+            )
 
-        s["status"] = _score_status(s["combined_score"])
-        scores[svc] = s
+        snapshot["status"] = _score_status(snapshot["combined_score"])
+        scores[svc] = snapshot
 
     return scores
 
 
 def get_root_cause_analysis(scores: Dict[str, Dict]) -> Dict:
-    """Run correlation engine on current scores."""
     if state.correlation_engine is None:
         return {"root_cause": None, "confidence": 0.0, "failure_type": "none"}
 
@@ -258,13 +246,12 @@ def get_root_cause_analysis(scores: Dict[str, Dict]) -> Dict:
             "affected_services": result.get("affected_services", []),
             "propagation_path": result.get("propagation_path", []),
         }
-    except Exception as e:
-        logger.error(f"Correlation engine error: {e}")
+    except Exception as exc:
+        logger.error("Correlation engine error: %s", exc)
         return {"root_cause": None, "confidence": 0.0, "failure_type": "none"}
 
 
 def get_recommendation(root_cause: Dict, scores: Dict) -> str:
-    """Generate human-readable recommendation."""
     service = root_cause.get("service") or root_cause.get("root_cause")
     if not service:
         return "No anomalies detected. System operating normally."
@@ -274,10 +261,10 @@ def get_recommendation(root_cause: Dict, scores: Dict) -> str:
     affected = root_cause.get("affected_services", [])
 
     recs = {
-        "memory_leak": f"Memory leak detected in {service}. Recommend restart to reclaim memory.",
-        "cpu_starvation": f"CPU starvation in {service}. Consider scaling up or restarting.",
-        "network_latency": f"Network latency in {service}. Check upstream dependencies and restart if needed.",
-        "generic_anomaly": f"Anomaly detected in {service}. Recommend investigating logs and restarting.",
+        "memory_leak": "Restart the leaking workload and contain repeat memory flaps if they recur.",
+        "cpu_starvation": "Restart the saturated workload and monitor if CPU pressure remains elevated.",
+        "network_latency": "Restart the dependency chain in order and escalate if downstream impact remains.",
+        "generic_anomaly": "Run the staged remediation flow and fall back to containment on failure.",
         "none": "System operating normally.",
     }
 
@@ -288,40 +275,69 @@ def get_recommendation(root_cause: Dict, scores: Dict) -> str:
     return rec
 
 
-# =============================================
-# Background task
-# =============================================
+def _recent_incident_map(limit: int = 25) -> Dict[str, Dict]:
+    if state.remediation_engine is None:
+        return {}
+    latest: Dict[str, Dict] = {}
+    for incident in state.remediation_engine.list_incident_history(limit=limit):
+        service = incident["root_cause_service"]
+        latest.setdefault(service, incident)
+    return latest
+
+
+def _build_evidence(service: str, failure_type: str, scores: Optional[Dict[str, Dict]] = None) -> Dict[str, Any]:
+    from anomaly_api.features import extract_features
+
+    scores = scores or state.current_scores or compute_all_scores()
+    service_snapshot = dict(scores.get(service, {}))
+    window = state.window_state.get_window(service) if state.window_state else []
+    features = extract_features(service, window) if window else {}
+    recent_logs = []
+    if state.ingestion_pipeline and state.ingestion_pipeline._loki_cache:
+        recent_logs = state.ingestion_pipeline._loki_cache.get(service, {}).get("recent_messages", [])[:3]
+
+    summary = (
+        f"Service {service} shows {failure_type}; score={service_snapshot.get('combined_score', 0):.3f}, "
+        f"cpu={features.get('cpu_percent_mean', 0):.1f}, mem={features.get('mem_percent_mean', 0):.1f}."
+    )
+
+    return {
+        "summary": summary,
+        "service_snapshot": {
+            **service_snapshot,
+            "cpu_percent": features.get("cpu_percent_mean", service_snapshot.get("cpu_percent", 0)),
+            "mem_percent": features.get("mem_percent_mean", service_snapshot.get("mem_percent", 0)),
+            "error_rate_mean": features.get("error_rate_mean", service_snapshot.get("error_rate", 0)),
+        },
+        "feature_flags": features.get("feature_flags", []),
+        "recent_logs": recent_logs,
+    }
+
 
 async def update_scores_loop():
-    """Background task: updates scores every 2 seconds."""
     while True:
         try:
             scores = compute_all_scores()
             state.current_scores = scores
             state.last_update = time.time()
 
-            # Add to history
-            snapshot = {
-                "timestamp": datetime.now(timezone.utc).isoformat(),
-                "ts_epoch": time.time(),
-                "scores": {svc: v["combined_score"] for svc, v in scores.items()},
-            }
-            state.history.append(snapshot)
-
-        except Exception as e:
-            logger.error(f"Score update error: {e}")
+            state.history.append(
+                {
+                    "timestamp": utc_now_iso(),
+                    "ts_epoch": time.time(),
+                    "scores": {svc: v["combined_score"] for svc, v in scores.items()},
+                }
+            )
+        except Exception as exc:
+            logger.error("Score update error: %s", exc)
 
         await asyncio.sleep(2)
 
 
-# =============================================
-# FastAPI App
-# =============================================
-
 app = FastAPI(
     title="AI Observability Platform",
     description="Anomaly detection and self-healing for microservices",
-    version="1.0.0",
+    version="2.0.0",
 )
 
 app.add_middleware(
@@ -338,34 +354,50 @@ async def startup_event():
     logger.info("Starting AI Observability Platform...")
     load_models()
 
-    # Stage 1: start ingestion pipeline
     from anomaly_api.ingestion import SlidingWindowState, IngestionPipeline
+
     state.window_state = SlidingWindowState()
     state.ingestion_pipeline = IngestionPipeline(state.window_state)
     state.ingestion_pipeline.start()
 
-    # Start background score update loop
     asyncio.create_task(update_scores_loop())
-    logger.info(f"Platform started. demo_mode={state.demo_mode}")
+    logger.info("Platform started. demo_mode=%s", state.demo_mode)
 
-
-# =============================================
-# Pydantic models
-# =============================================
 
 class IngestPayload(BaseModel):
-    metrics: List[Dict[str, Any]] = []
-    logs: List[Dict[str, Any]] = []
+    metrics: List[Dict[str, Any]] = Field(default_factory=list)
+    logs: List[Dict[str, Any]] = Field(default_factory=list)
+
+
+class ActionProposalPayload(BaseModel):
+    source: str = "ai"
+    proposed_action: str
+    target: Optional[str] = None
+    parameters: Dict[str, Any] = Field(default_factory=dict)
+    confidence: float = 0.0
+    rationale: str = ""
+    containment_preference: Optional[str] = None
+
+    def to_action_proposal(self) -> ActionProposal:
+        return ActionProposal(
+            source=self.source,
+            proposed_action=self.proposed_action,
+            target=self.target,
+            parameters=self.parameters,
+            confidence=self.confidence,
+            rationale=self.rationale,
+            containment_preference=self.containment_preference,
+        )
 
 
 class RemediatePayload(BaseModel):
     service: str
     failure_type: str = "generic_anomaly"
+    severity: str = "warning"
+    affected_services: List[str] = Field(default_factory=list)
+    evidence: Dict[str, Any] = Field(default_factory=dict)
+    proposal: Optional[ActionProposalPayload] = None
 
-
-# =============================================
-# Endpoints
-# =============================================
 
 @app.get("/health")
 async def health():
@@ -375,22 +407,16 @@ async def health():
         "models_loaded": state.models_loaded,
         "services_tracked": len(ALL_SERVICES),
         "last_update": datetime.fromtimestamp(state.last_update, tz=timezone.utc).isoformat() if state.last_update else None,
+        "active_incidents": len(state.remediation_engine.list_active_incidents()) if state.remediation_engine else 0,
     }
 
 
 @app.get("/status")
 async def status():
-    # Use cached scores or compute fresh
-    if not state.current_scores:
-        scores = compute_all_scores()
-        state.current_scores = scores
-    else:
-        scores = state.current_scores
-
+    scores = state.current_scores or compute_all_scores()
     root_cause = get_root_cause_analysis(scores)
     recommendation = get_recommendation(root_cause, scores)
 
-    # Active alerts
     alerts = [
         {
             "service": svc,
@@ -398,37 +424,33 @@ async def status():
             "status": v["status"],
             "if_score": v["if_score"],
             "lstm_score": v["lstm_score"],
-            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "timestamp": utc_now_iso(),
         }
         for svc, v in scores.items()
         if v["combined_score"] > 0.7
     ]
 
     return {
-        "timestamp": datetime.now(timezone.utc).isoformat(),
+        "timestamp": utc_now_iso(),
         "demo_mode": state.demo_mode,
         "services": scores,
         "root_cause": root_cause,
         "alerts": alerts,
         "recommendation": recommendation,
+        "active_incidents": state.remediation_engine.list_active_incidents() if state.remediation_engine else [],
+        "recent_incidents": state.remediation_engine.list_incident_history(limit=10) if state.remediation_engine else [],
     }
 
 
 @app.post("/ingest")
 async def ingest(payload: IngestPayload):
-    """Accept live metrics/logs and update scores."""
     updated = 0
 
-    # Process metrics
     for metric in payload.metrics:
         svc = metric.get("service_name") or metric.get("service")
-        if not svc:
+        if not svc or svc not in ALL_SERVICES:
             continue
 
-        if svc not in ALL_SERVICES:
-            continue
-
-        # Extract features
         features = {
             "cpu_percent": float(metric.get("cpu_percent", metric.get("cpu_usage_percent", 0))),
             "mem_percent": float(metric.get("mem_percent", metric.get("memory_usage_percent", 0))),
@@ -444,7 +466,7 @@ async def ingest(payload: IngestPayload):
 
         if not state.demo_mode and state.if_inference:
             if_score = state.if_inference.score(features)
-            lstm_score = 0.2  # Default until buffer fills
+            lstm_score = 0.2
             if state.lstm_inference:
                 result = state.lstm_inference.predict_from_features(features)
                 if result is not None:
@@ -459,47 +481,94 @@ async def ingest(payload: IngestPayload):
             }
             updated += 1
 
-    return {
-        "status": "ok",
-        "updated_services": updated,
-        "demo_mode": state.demo_mode,
-    }
+    return {"status": "ok", "updated_services": updated, "demo_mode": state.demo_mode}
+
+
+@app.post("/decision/validate")
+async def validate_decision(payload: RemediatePayload):
+    if state.remediation_engine is None:
+        raise HTTPException(503, "Remediation engine is not available")
+
+    proposal = payload.proposal.to_action_proposal() if payload.proposal else ActionProposal(
+        source="rule",
+        proposed_action="restart_service",
+        target=payload.service,
+        rationale="Fallback deterministic action",
+    )
+    evidence = _build_evidence(payload.service, payload.failure_type, state.current_scores)
+    evidence.update(payload.evidence)
+    return state.remediation_engine.validate_proposal(
+        service=payload.service,
+        failure_type=payload.failure_type,
+        proposal=proposal,
+        severity=payload.severity,
+        affected_services=payload.affected_services or [payload.service],
+        evidence=evidence,
+    )
 
 
 @app.post("/remediate")
 async def remediate(payload: RemediatePayload):
-    """Trigger remediation for a service."""
     if state.remediation_engine is None:
-        # Fallback: create a demo engine
-        from remediation.engine import RemediationEngine
-        engine = RemediationEngine(target_seconds=15, demo_mode=True)
-    else:
-        engine = state.remediation_engine
+        raise HTTPException(503, "Remediation engine is not available")
 
-    logger.info(f"Remediation requested: service={payload.service}, type={payload.failure_type}")
-
-    result = engine.remediate(payload.service, payload.failure_type)
+    proposal = payload.proposal.to_action_proposal() if payload.proposal else None
+    evidence = _build_evidence(payload.service, payload.failure_type, state.current_scores)
+    evidence.update(payload.evidence)
+    result = state.remediation_engine.remediate(
+        service=payload.service,
+        failure_type=payload.failure_type,
+        severity=payload.severity,
+        affected_services=payload.affected_services or [payload.service],
+        evidence=evidence,
+        proposal=proposal,
+    )
 
     return {
         "service": payload.service,
         "failure_type": payload.failure_type,
+        "severity": payload.severity,
         "result": result,
-        "timestamp": datetime.now(timezone.utc).isoformat(),
+        "timestamp": utc_now_iso(),
     }
+
+
+@app.get("/incidents/active")
+async def active_incidents():
+    incidents = state.remediation_engine.list_active_incidents() if state.remediation_engine else []
+    return {"count": len(incidents), "incidents": incidents, "timestamp": utc_now_iso()}
+
+
+@app.get("/incidents/history")
+async def incident_history(limit: int = Query(default=20, ge=1, le=100)):
+    incidents = state.remediation_engine.list_incident_history(limit=limit) if state.remediation_engine else []
+    return {"count": len(incidents), "incidents": incidents, "timestamp": utc_now_iso()}
+
+
+@app.get("/incidents/similar")
+async def similar_incidents(service: str, failure_type: str, limit: int = Query(default=5, ge=1, le=20)):
+    if state.remediation_engine is None:
+        raise HTTPException(503, "Remediation engine is not available")
+
+    evidence = _build_evidence(service, failure_type, state.current_scores)
+    matches = state.remediation_engine.similar_incidents(
+        service=service,
+        failure_type=failure_type,
+        feature_flags=evidence.get("feature_flags", []),
+        metric_signature=evidence.get("service_snapshot", {}),
+        evidence_summary=evidence.get("summary", ""),
+        limit=limit,
+    )
+    return {"count": len(matches), "matches": matches, "timestamp": utc_now_iso()}
 
 
 @app.get("/history")
 async def history():
-    """Return last 100 score snapshots."""
-    return {
-        "count": len(state.history),
-        "snapshots": list(state.history),
-    }
+    return {"count": len(state.history), "snapshots": list(state.history)}
 
 
 @app.get("/alerts")
 async def alerts():
-    """Return active alerts (combined_score > 0.7)."""
     if not state.current_scores:
         return {"alerts": [], "count": 0}
 
@@ -510,33 +579,24 @@ async def alerts():
             "status": v["status"],
             "if_score": v["if_score"],
             "lstm_score": v["lstm_score"],
-            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "timestamp": utc_now_iso(),
         }
         for svc, v in state.current_scores.items()
         if v["combined_score"] > 0.7
     ]
-
     active_alerts.sort(key=lambda x: x["score"], reverse=True)
 
-    return {
-        "alerts": active_alerts,
-        "count": len(active_alerts),
-        "timestamp": datetime.now(timezone.utc).isoformat(),
-    }
+    return {"alerts": active_alerts, "count": len(active_alerts), "timestamp": utc_now_iso()}
 
 
 @app.get("/topology")
 async def topology():
-    """Main endpoint for solar system dashboard — rich per-service data."""
     from anomaly_api.features import extract_features
 
     scores = state.current_scores or compute_all_scores()
-
-    # Compute health score: H = 100 - avg(combined_score) * 100
     avg_score = sum(v["combined_score"] for v in scores.values()) / max(len(scores), 1)
     health_score = round(100 - avg_score * 100)
 
-    # Compute failure momentum: dP/dt — rate of score change from history
     momentum = 0.0
     if len(state.history) >= 2:
         recent = list(state.history)[-10:]
@@ -549,23 +609,34 @@ async def topology():
             if dt_minutes > 0:
                 momentum = round((last_avg - first_avg) / dt_minutes * 100, 2)
 
-    # Build rich service data including features
+    recent_incident_map = _recent_incident_map()
     service_data = {}
     for svc in ALL_SERVICES:
-        s = scores.get(svc, {})
+        snapshot = scores.get(svc, {})
         window = state.window_state.get_window(svc) if state.window_state else []
         features = extract_features(svc, window) if window else {}
 
-        # Recent logs from Loki cache
         recent_logs = []
         if state.ingestion_pipeline and state.ingestion_pipeline._loki_cache:
-            recent_logs = (
-                state.ingestion_pipeline._loki_cache.get(svc, {}).get("recent_messages", [])[:3]
+            recent_logs = state.ingestion_pipeline._loki_cache.get(svc, {}).get("recent_messages", [])[:3]
+
+        similar = []
+        if state.remediation_engine is not None:
+            similar = state.remediation_engine.similar_incidents(
+                service=svc,
+                failure_type=snapshot.get("failure_type", "generic_anomaly"),
+                feature_flags=features.get("feature_flags", []),
+                metric_signature={
+                    "combined_score": snapshot.get("combined_score", 0.0),
+                    "cpu_percent": features.get("cpu_percent_mean", 0.0),
+                    "mem_percent": features.get("mem_percent_mean", 0.0),
+                },
+                evidence_summary=" ".join(recent_logs),
+                limit=3,
             )
 
         service_data[svc] = {
-            **s,
-            # Rich features
+            **snapshot,
             "cpu_mean": round(features.get("cpu_percent_mean", 0), 2),
             "cpu_max": round(features.get("cpu_percent_max", 0), 2),
             "cpu_std": round(features.get("cpu_percent_std", 0), 2),
@@ -591,43 +662,33 @@ async def topology():
             "window_filled": len(window) >= 20,
             "feature_flags": features.get("feature_flags", []),
             "recent_logs": recent_logs,
+            "latest_incident": recent_incident_map.get(svc),
+            "similar_incidents": similar,
         }
 
     root_cause = get_root_cause_analysis(scores)
     recommendation = get_recommendation(root_cause, scores)
 
     return {
-        "timestamp": datetime.now(timezone.utc).isoformat(),
+        "timestamp": utc_now_iso(),
         "health_score": health_score,
         "failure_momentum": momentum,
         "demo_mode": state.demo_mode,
         "services": service_data,
-        "dependency_graph": {
-            "frontend": ["productcatalogservice", "cartservice", "recommendationservice",
-                         "currencyservice", "checkoutservice", "shippingservice", "adservice"],
-            "checkoutservice": ["cartservice", "emailservice", "paymentservice",
-                                "productcatalogservice", "shippingservice", "currencyservice"],
-            "productcatalogservice": [],
-            "cartservice": ["redis-cart"],
-            "recommendationservice": ["productcatalogservice"],
-            "paymentservice": [],
-            "shippingservice": [],
-            "emailservice": [],
-            "currencyservice": [],
-            "adservice": [],
-            "redis-cart": [],
-        },
+        "dependency_graph": DEPENDENCY_GRAPH,
         "root_cause": root_cause,
         "alerts": [{"service": svc, **v} for svc, v in scores.items() if v.get("combined_score", 0) > 0.7],
         "recommendation": recommendation,
+        "active_incidents": state.remediation_engine.list_active_incidents() if state.remediation_engine else [],
+        "recent_incidents": state.remediation_engine.list_incident_history(limit=12) if state.remediation_engine else [],
     }
 
 
 @app.get("/window/{service}")
 async def get_window(service: str):
-    """Return raw window observations for sparklines."""
     if service not in ALL_SERVICES:
         raise HTTPException(404, f"Unknown service: {service}")
+
     window = state.window_state.get_window(service) if state.window_state else []
     return {
         "service": service,
@@ -651,4 +712,5 @@ async def get_window(service: str):
 
 if __name__ == "__main__":
     import uvicorn
+
     uvicorn.run(app, host="0.0.0.0", port=8001, reload=False)
