@@ -1,247 +1,156 @@
+import { useState, useEffect, useCallback } from 'react'
+import { useTopology } from './hooks/useTopology'
 import { theme } from './styles/theme'
-import { useApiStatus } from './hooks/useApiStatus'
-import ServiceGrid from './components/ServiceGrid'
-import AnomalyChart from './components/AnomalyChart'
-import AlertPanel from './components/AlertPanel'
-import RootCausePanel from './components/RootCausePanel'
-import RemediationPanel from './components/RemediationPanel'
+import SolarSystem from './components/SolarSystem'
+import InfoPanel from './components/InfoPanel'
+import ServiceDetail from './components/ServiceDetail'
 
-const cardStyle = {
-  background: theme.colors.card,
-  border: `1px solid ${theme.colors.cardBorder}`,
-  borderRadius: '14px',
-  padding: '20px',
-  boxShadow: theme.shadows.card,
-}
-
-const sectionTitle = {
-  fontSize: '12px',
-  fontWeight: 700,
-  color: theme.colors.textMuted,
-  textTransform: 'uppercase',
-  letterSpacing: '1px',
-  marginBottom: '16px',
-  display: 'flex',
-  alignItems: 'center',
-  gap: '8px',
-}
+const DOT_GRID = `radial-gradient(circle, #c8c0b0 1px, transparent 1px)`
 
 export default function App() {
-  const { status, history, connected, error, loading, triggerRemediation } =
-    useApiStatus()
+  const { data, connected, error, fetchWindow, triggerRemediation } = useTopology()
+  const [selectedService, setSelectedService] = useState(null)
+  const [windowData, setWindowData] = useState(null)
+  const [windowLoading, setWindowLoading] = useState(false)
 
-  const services = status?.services || null
-  const rootCause = status?.root_cause || null
-  const alerts = status?.alerts || []
-  const recommendation = status?.recommendation || ''
-  const demoMode = status?.demo_mode ?? true
-  const rootCauseService = rootCause?.service || rootCause?.root_cause
+  const handleSelectService = useCallback(async (svc) => {
+    if (svc === selectedService) {
+      setSelectedService(null)
+      setWindowData(null)
+      return
+    }
+    setSelectedService(svc)
+    setWindowLoading(true)
+    const wd = await fetchWindow(svc)
+    setWindowData(wd)
+    setWindowLoading(false)
+  }, [selectedService, fetchWindow])
+
+  // Refresh window data every 5s when a service is selected
+  useEffect(() => {
+    if (!selectedService) return
+    const interval = setInterval(async () => {
+      const wd = await fetchWindow(selectedService)
+      setWindowData(wd)
+    }, 5000)
+    return () => clearInterval(interval)
+  }, [selectedService, fetchWindow])
+
+  const selectedData = data?.services?.[selectedService]
 
   return (
-    <div
-      style={{
-        minHeight: '100vh',
-        background: theme.colors.bg,
-        color: theme.colors.text,
-        fontFamily: "'Segoe UI', system-ui, sans-serif",
-      }}
-    >
+    <div style={{
+      width: '100vw', height: '100vh', display: 'flex', flexDirection: 'column',
+      background: theme.bg,
+      backgroundImage: DOT_GRID,
+      backgroundSize: '24px 24px',
+      fontFamily: theme.font,
+      overflow: 'hidden',
+    }}>
       {/* Top bar */}
-      <div
-        style={{
-          background: 'rgba(26, 31, 46, 0.95)',
-          backdropFilter: 'blur(10px)',
-          borderBottom: `1px solid ${theme.colors.cardBorder}`,
-          padding: '0 24px',
-          height: '60px',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          position: 'sticky',
-          top: 0,
-          zIndex: 100,
-        }}
-      >
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <div
-            style={{
-              fontSize: '20px',
-              fontWeight: 700,
-              background: `linear-gradient(135deg, ${theme.colors.accent}, #a29bfe)`,
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-            }}
+      <div style={{
+        height: 42, borderBottom: `2px solid ${theme.border}`,
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        padding: '0 20px', background: theme.bg, flexShrink: 0,
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+          <span style={{ fontSize: 13, fontWeight: 'bold', letterSpacing: 2, color: theme.text }}>
+            ⊕ MISSION CONTROL
+          </span>
+          <span style={{ fontSize: 9, color: theme.textMuted, letterSpacing: 1 }}>
+            AI OBSERVABILITY PLATFORM — SOLAR SYSTEM INTERFACE
+          </span>
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 14, fontSize: 10 }}>
+          {data?.demo_mode && (
+            <span style={{
+              border: `1px solid #c45c0a`, color: '#c45c0a',
+              padding: '2px 6px', fontSize: 9, letterSpacing: 1,
+            }}>DEMO MODE</span>
+          )}
+          <span style={{ display: 'flex', alignItems: 'center', gap: 5, color: connected ? '#2a8a2a' : '#cc2222' }}>
+            <span style={{
+              width: 7, height: 7, borderRadius: '50%', display: 'inline-block',
+              background: connected ? '#2a8a2a' : '#cc2222',
+              animation: connected ? 'pulse 2s infinite' : 'none',
+            }} />
+            {connected ? 'CONNECTED' : `OFFLINE${error ? ': ' + error : ''}`}
+          </span>
+          {data && (
+            <span style={{ color: theme.textMuted }}>
+              {new Date(data.timestamp).toLocaleTimeString()}
+            </span>
+          )}
+        </div>
+      </div>
+
+      {/* Main layout */}
+      <div style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
+        {/* Solar system canvas */}
+        <div style={{
+          flex: 1, position: 'relative', borderRight: `2px solid ${theme.border}`,
+          overflow: 'hidden',
+        }}>
+          <SolarSystem
+            topology={data}
+            selectedService={selectedService}
+            onSelectService={handleSelectService}
+          />
+        </div>
+
+        {/* Right panel */}
+        <div style={{
+          width: 300, flexShrink: 0, background: theme.bg,
+          overflowY: 'auto',
+        }}>
+          <InfoPanel
+            topology={data}
+            selectedService={selectedService}
+            serviceData={selectedData}
+            windowData={windowData}
+            onRemediate={triggerRemediation}
+            onClose={() => { setSelectedService(null); setWindowData(null) }}
           >
-            AI Observability Platform
-          </div>
-          {demoMode && (
-            <span
-              style={{
-                background: 'rgba(255, 165, 2, 0.15)',
-                border: `1px solid rgba(255,165,2,0.4)`,
-                color: theme.colors.warning,
-                fontSize: '10px',
-                fontWeight: 700,
-                padding: '3px 8px',
-                borderRadius: '4px',
-                letterSpacing: '0.5px',
-              }}
-            >
-              DEMO MODE
-            </span>
-          )}
+            {selectedService && (
+              <ServiceDetail
+                service={selectedService}
+                data={selectedData}
+                windowData={windowLoading ? null : windowData}
+                onRemediate={triggerRemediation}
+                onClose={() => { setSelectedService(null); setWindowData(null) }}
+              />
+            )}
+          </InfoPanel>
         </div>
+      </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-          {/* Connection status */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <div
-              style={{
-                width: '8px',
-                height: '8px',
-                borderRadius: '50%',
-                background: connected ? theme.colors.success : theme.colors.alertRed,
-                boxShadow: connected
-                  ? `0 0 8px ${theme.colors.success}`
-                  : `0 0 8px ${theme.colors.alertRed}`,
-              }}
-            />
-            <span
-              style={{
-                fontSize: '12px',
-                color: connected ? theme.colors.success : theme.colors.alertRed,
-              }}
-            >
-              {loading
-                ? 'Connecting...'
-                : connected
-                ? 'Connected'
-                : `Disconnected${error ? ': ' + error : ''}`}
-            </span>
-          </div>
-
-          {/* Alert badge */}
-          {alerts.length > 0 && (
-            <div
-              style={{
-                background: theme.colors.alertRed,
-                color: '#fff',
-                fontSize: '11px',
-                fontWeight: 700,
-                padding: '3px 8px',
-                borderRadius: '10px',
-                animation: 'pulse 1.5s infinite',
-              }}
-            >
-              {alerts.length} ALERT{alerts.length !== 1 ? 'S' : ''}
-            </div>
-          )}
-        </div>
+      {/* Bottom status bar */}
+      <div style={{
+        height: 26, borderTop: `1px solid ${theme.borderLight}`,
+        display: 'flex', alignItems: 'center', padding: '0 16px', gap: 20,
+        fontSize: 9, color: theme.textMuted, background: theme.bg, flexShrink: 0,
+      }}>
+        <span>Built with React + D3.js (2D) · All animations: CSS keyframes</span>
+        <span style={{ marginLeft: 'auto' }}>
+          {data ? `${Object.keys(data.services || {}).length} services monitored` : 'Connecting...'}
+        </span>
+        {selectedService && (
+          <span style={{ color: '#c45c0a' }}>
+            SELECTED: {selectedService} · Click again to deselect
+          </span>
+        )}
       </div>
 
       <style>{`
         @keyframes pulse {
           0%, 100% { opacity: 1; }
-          50% { opacity: 0.6; }
+          50% { opacity: 0.5; }
         }
+        * { box-sizing: border-box; }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: ${theme.bg}; }
+        ::-webkit-scrollbar-thumb { background: #aaa; }
       `}</style>
-
-      {/* Main content */}
-      <div style={{ padding: '24px', maxWidth: '1600px', margin: '0 auto' }}>
-        {/* Service Grid */}
-        <div style={{ ...cardStyle, marginBottom: '24px' }}>
-          <div style={sectionTitle}>
-            <span>⚙️</span>
-            <span>Service Health</span>
-            <span
-              style={{
-                marginLeft: 'auto',
-                fontSize: '11px',
-                color: theme.colors.textDim,
-                fontWeight: 400,
-                textTransform: 'none',
-                letterSpacing: 0,
-              }}
-            >
-              Score 0–100 (higher = more anomalous)
-            </span>
-          </div>
-          <ServiceGrid services={services} rootCauseService={rootCauseService} />
-        </div>
-
-        {/* Charts + Alerts row */}
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: '2fr 1fr',
-            gap: '24px',
-            marginBottom: '24px',
-          }}
-        >
-          {/* Anomaly Chart */}
-          <div style={cardStyle}>
-            <div style={sectionTitle}>
-              <span>📈</span>
-              <span>Anomaly Score Trends</span>
-              <span
-                style={{
-                  marginLeft: 'auto',
-                  fontSize: '11px',
-                  color: theme.colors.textDim,
-                  fontWeight: 400,
-                  textTransform: 'none',
-                  letterSpacing: 0,
-                }}
-              >
-                Top 3 services — last 30 samples
-              </span>
-            </div>
-            <AnomalyChart history={history} />
-          </div>
-
-          {/* Alert Panel */}
-          <div style={cardStyle}>
-            <div style={sectionTitle}>
-              <span>🚨</span>
-              <span>Active Alerts</span>
-            </div>
-            <AlertPanel alerts={alerts} />
-          </div>
-        </div>
-
-        {/* Root Cause + Remediation row */}
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: '1fr 1fr',
-            gap: '24px',
-          }}
-        >
-          {/* Root Cause */}
-          <div style={cardStyle}>
-            <div style={sectionTitle}>
-              <span>🔍</span>
-              <span>Root Cause Analysis</span>
-            </div>
-            <RootCausePanel
-              rootCause={rootCause}
-              recommendation={recommendation}
-            />
-          </div>
-
-          {/* Remediation */}
-          <div style={cardStyle}>
-            <div style={sectionTitle}>
-              <span>🔧</span>
-              <span>Self-Healing Remediation</span>
-            </div>
-            <RemediationPanel
-              rootCause={rootCause}
-              triggerRemediation={triggerRemediation}
-            />
-          </div>
-        </div>
-      </div>
     </div>
   )
 }
