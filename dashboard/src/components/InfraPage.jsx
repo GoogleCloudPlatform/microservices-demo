@@ -718,7 +718,7 @@ export default function InfraPage({ topology, history, incidents, connected, inf
         <div>
           <span className="infra-page-kicker">Infrastructure</span>
           <h1 className="infra-page-title" style={{ fontFamily: theme.displayFont }}>
-            Editorial ops surface for cluster health, observability, and remediation
+            Cluster health, observability, and remediation
           </h1>
         </div>
         <div className="infra-header-meta">
@@ -954,9 +954,6 @@ export default function InfraPage({ topology, history, incidents, connected, inf
           line-height: 1.5;
           color: var(--infra-muted);
         }
-        .infra-layout {
-          display: none;
-        }
         .infra-main-grid {
           display: grid;
           grid-template-columns: minmax(0, 1.6fr) minmax(300px, 0.78fr);
@@ -986,12 +983,6 @@ export default function InfraPage({ topology, history, incidents, connected, inf
           grid-template-columns: minmax(0, 1.12fr) minmax(300px, 0.88fr);
           gap: var(--infra-rail-gap);
           align-items: start;
-        }
-        .infra-column {
-          display: flex;
-          flex-direction: column;
-          gap: 22px;
-          min-width: 0;
         }
         .infra-section {
           padding: var(--infra-section-padding);
