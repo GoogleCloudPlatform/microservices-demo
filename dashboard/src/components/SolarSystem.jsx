@@ -64,15 +64,7 @@ export default function SolarSystem({ topology, selectedService, onSelectService
           background: topology ? '#2a8a2a' : '#cc2222',
           boxShadow: topology ? '0 0 6px #2a8a2a' : '0 0 6px #cc2222',
         }} />
-        {topology ? 'Live backend data' : 'Backend offline'}
-        {topology && (
-          <span style={{ color: theme.textDim, marginLeft: 8, display: 'flex', gap: 12, flexWrap: 'wrap' }}>
-            <span>System health: {topology.health_score}/100</span>
-            <span>
-              Failure momentum: {topology.failure_momentum > 0 ? '+' : ''}{topology.failure_momentum} points/min
-            </span>
-          </span>
-        )}
+        {topology ? 'Live' : 'Backend offline'}
       </div>
 
       {/* Reset zoom */}
