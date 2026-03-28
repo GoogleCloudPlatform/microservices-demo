@@ -268,6 +268,12 @@ async def run_autonomous_demo(run_id: int, service: str, owner: str) -> None:
 
     try:
         state.system_store.update_demo_run(run_id, stage="attacking", status="running")
+        logger.info(
+            "Autonomous demo started for %s on %s",
+            service,
+            platform,
+            extra={"service": service, "event_type": "demo_started"},
+        )
         emit_system_event(
             event_type="demo_started",
             category="demo",
@@ -280,6 +286,12 @@ async def run_autonomous_demo(run_id: int, service: str, owner: str) -> None:
         )
 
         ok, message, details = orchestrator.stop_service(service)
+        logger.info(
+            "Demo attack injected for %s: %s",
+            service,
+            message,
+            extra={"service": service, "event_type": "demo_attack_injected"},
+        )
         emit_system_event(
             event_type="demo_attack_injected",
             category="demo",
@@ -305,6 +317,11 @@ async def run_autonomous_demo(run_id: int, service: str, owner: str) -> None:
 
         await asyncio.sleep(3.0)
         state.system_store.update_demo_run(run_id, stage="remediating", status="running")
+        logger.info(
+            "Autonomous recovery started for %s",
+            service,
+            extra={"service": service, "event_type": "demo_recovery_started"},
+        )
         emit_system_event(
             event_type="demo_recovery_started",
             category="demo",
@@ -335,6 +352,17 @@ async def run_autonomous_demo(run_id: int, service: str, owner: str) -> None:
             evidence=evidence,
             proposal=proposal,
         )
+        logger.info(
+            "Demo remediation for %s selected %s and incident %s",
+            service,
+            remediation_result.get("decision", {}).get("action", "unknown"),
+            remediation_result.get("incident_id"),
+            extra={
+                "service": service,
+                "event_type": "demo_remediation_result",
+                "incident_id": remediation_result.get("incident_id"),
+            },
+        )
 
         state.system_store.update_demo_run(
             run_id,
@@ -360,6 +388,16 @@ async def run_autonomous_demo(run_id: int, service: str, owner: str) -> None:
             summary_json=report["summary_json"],
             report_markdown=report["report_markdown"],
             report_json=report["report_json"],
+        )
+        logger.info(
+            "Autonomous demo completed for %s with status %s",
+            service,
+            final_status,
+            extra={
+                "service": service,
+                "event_type": "demo_completed",
+                "incident_id": remediation_result.get("incident_id"),
+            },
         )
         emit_system_event(
             event_type="demo_completed",
