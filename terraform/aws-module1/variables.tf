@@ -7,7 +7,7 @@ variable "project_name" {
 variable "aws_region" {
   description = "AWS region where resources are created."
   type        = string
-  default     = "eu-west-3"
+  default     = "eu-south-1"
 }
 
 variable "vpc_cidr" {
