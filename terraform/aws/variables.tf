@@ -59,3 +59,21 @@ variable "availability_zones" {
     "eu-central-2b"
   ]
 }
+
+variable "enable_loadtest" {
+  type        = bool
+  description = "Enable the distributed Locust load testing infrastructure"
+  default     = false
+}
+
+variable "loadtest_worker_count" {
+  type        = number
+  description = "Number of Locust worker EC2 instances"
+  default     = 3
+}
+
+variable "loadtest_worker_instance_type" {
+  type        = string
+  description = "EC2 instance type for Locust workers"
+  default     = "t3.large"
+}

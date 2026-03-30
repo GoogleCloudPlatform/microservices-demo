@@ -45,3 +45,19 @@ module "alb" {
   security_group_id = module.security.alb_sg_id
   instance_id       = module.ec2.instance_id
 }
+
+module "loadtest" {
+  count  = var.enable_loadtest ? 1 : 0
+  source = "./modules/loadtest"
+
+  project_name         = var.project_name
+  vpc_id               = module.vpc.vpc_id
+  subnet_id            = module.vpc.public_subnet_ids[0]
+  ami_id               = var.ami_id
+  key_name             = var.key_name
+  instance_type_master = "t3.small"
+  instance_type_worker = var.loadtest_worker_instance_type
+  worker_count         = var.loadtest_worker_count
+  target_host          = "http://${module.alb.alb_dns_name}"
+  locustfile_content   = file("${path.root}/../../src/loadgenerator/locustfile.py")
+}
