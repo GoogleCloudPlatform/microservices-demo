@@ -59,7 +59,6 @@ Set `backend.hcl`:
 cat > backend.hcl <<EOF
 bucket         = "${TF_STATE_BUCKET}"
 key            = "module1/terraform.tfstate"
-region         = "eu-south-1"
 region         = "eu-west-3"
 dynamodb_table = "blackfriday-terraform-locks"
 encrypt        = true
@@ -82,7 +81,6 @@ terraform apply -var-file=terraform.tfvars
 cd /home/naxxer/Videos/microservices-demo/terraform/aws-module1
 aws eks update-kubeconfig \
   --name "$(terraform output -raw cluster_name)" \
-  --region eu-south-1 \
   --region eu-west-3 \
   --alias blackfriday-dev
 
@@ -94,7 +92,6 @@ If you get auth error (`server has asked for credentials`):
 
 ```bash
 aws sts get-caller-identity
-aws eks get-token --cluster-name "$(terraform output -raw cluster_name)" --region eu-south-1 > /dev/null && echo TOKEN_OK
 aws eks get-token --cluster-name "$(terraform output -raw cluster_name)" --region eu-west-3 > /dev/null && echo TOKEN_OK
 ```
 
