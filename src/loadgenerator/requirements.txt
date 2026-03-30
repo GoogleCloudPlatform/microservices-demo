@@ -60,7 +60,7 @@ pluggy==1.6.0
     # via pytest
 psutil==7.1.0
     # via locust
-pygments==2.19.2
+pygments==2.20.0
     # via pytest
 pytest==8.4.2
     # via locust
