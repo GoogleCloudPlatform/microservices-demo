@@ -6,22 +6,13 @@ data "aws_availability_zones" "available" {
   state = "available"
 }
 
-locals {
-  azs = slice(data.aws_availability_zones.available.names, 0, 3)
-  tags = merge(var.tags, {
-    Project     = var.project_name
-    Environment = terraform.workspace
-    ManagedBy   = "terraform"
-  })
-}
-
 data "aws_eks_cluster" "this" {
-  name       = module.eks.cluster_name
+  name       = local.cluster_name
   depends_on = [module.eks]
 }
 
 data "aws_eks_cluster_auth" "this" {
-  name       = module.eks.cluster_name
+  name       = local.cluster_name
   depends_on = [module.eks]
 }
 

@@ -17,6 +17,8 @@
 *.swp
 *.tfstate*
 *.tfvars
+*.tfplan
+.terraform.tfstate.lock.info
 terraform/aws-module1/backend.hcl
 *~
 bin/
@@ -27,5 +29,8 @@ obj/
 pkg/
 release/wi-kubernetes-manifests.yaml
 vendor/
- terraform/aws-module1/.terraform
 .terraform/
+
+# Local assistant/session artifacts
+.codex
+**/.codex

@@ -130,7 +130,7 @@ In our code we enable:
 Used as Terraform lock table.
 
 In our code:
-- Table name defaults to `blackfriday-terraform-locks`.
+- Table name defaults to `blackfriday-terraform-locks-mah-groupe1`.
 - Hash key is `LockID`.
 
 ### 3.3 Amazon VPC
@@ -269,12 +269,12 @@ Work in bootstrap folder:
 ```bash
 cd /home/naxxer/Videos/microservices-demo/terraform/aws-module1/bootstrap-state
 terraform init
-terraform plan -var='aws_region=eu-west-3' -var='state_bucket_name=blackfriday-terraform-state-<unique-suffix>'
-terraform apply -var='aws_region=eu-west-3' -var='state_bucket_name=blackfriday-terraform-state-<unique-suffix>'
+terraform plan -var='aws_region=eu-south-1' -var='state_bucket_name=blackfriday-terraform-state-mah-groupe1-<unique-suffix>'
+terraform apply -var='aws_region=eu-south-1' -var='state_bucket_name=blackfriday-terraform-state-mah-groupe1-<unique-suffix>'
 ```
 
 Example bucket naming pattern:
-- `blackfriday-terraform-state-mt5team01`
+- `blackfriday-terraform-state-mah-groupe1-eus1-20260306`
 
 Validate outputs:
 
@@ -294,10 +294,10 @@ Edit:
 Example:
 
 ```hcl
-bucket         = "blackfriday-terraform-state-mt5team01"
+bucket         = "blackfriday-terraform-state-mah-groupe1-eus1-20260306"
 key            = "module1/terraform.tfstate"
-region         = "eu-west-3"
-dynamodb_table = "blackfriday-terraform-locks"
+region         = "eu-south-1"
+dynamodb_table = "blackfriday-terraform-locks-mah-groupe1"
 encrypt        = true
 ```
 
@@ -328,7 +328,8 @@ Use:
 Current project values (for your current account constraints):
 
 ```hcl
-project_name             = "blackfriday-survival"
+project_name             = "blackfriday-survival-MAH-groupe1"
+name_suffix              = "MAH-groupe1"
 aws_region               = "eu-west-3"
 cluster_version          = "1.31"
 node_instance_types      = ["t3.micro"]

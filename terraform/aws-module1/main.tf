@@ -1,7 +1,7 @@
 module "vpc" {
   source = "./modules/vpc"
 
-  name                 = "${var.project_name}-${terraform.workspace}"
+  name                 = local.vpc_name
   vpc_cidr             = var.vpc_cidr
   availability_zones   = local.azs
   public_subnet_cidrs  = var.public_subnet_cidrs
@@ -12,7 +12,7 @@ module "vpc" {
 module "eks" {
   source = "./modules/eks"
 
-  cluster_name            = "${var.project_name}-${terraform.workspace}"
+  cluster_name            = local.cluster_name
   cluster_version         = var.cluster_version
   subnet_ids              = module.vpc.private_subnet_ids
   vpc_id                  = module.vpc.vpc_id

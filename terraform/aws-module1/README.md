@@ -23,7 +23,9 @@ Creer le backend Terraform avec le bootstrap infra dedie:
 ```bash
 cd bootstrap-state
 terraform init
-terraform apply -var='state_bucket_name=blackfriday-terraform-state-<suffix-unique>'
+terraform apply \
+  -var='state_bucket_name=blackfriday-terraform-state-mah-groupe1-<suffix-unique>' \
+  -var='lock_table_name=blackfriday-terraform-locks-mah-groupe1'
 cd ..
 ```
 
@@ -58,6 +60,8 @@ cp terraform.tfvars.example terraform.tfvars
 ```
 
 Adapter au besoin:
+- `project_name`
+- `name_suffix` (ex: `MAH-groupe1`, ajoute le suffixe aux noms AWS)
 - `aws_region`
 - tailles de node group
 - tags FinOps

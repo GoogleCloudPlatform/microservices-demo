@@ -1,5 +1,5 @@
-bucket         = "blackfriday-terraform-state"
+bucket         = "blackfriday-terraform-state-mah-groupe1"
 key            = "module1/terraform.tfstate"
 region         = "eu-west-3"
-dynamodb_table = "blackfriday-terraform-locks"
+dynamodb_table = "blackfriday-terraform-locks-mah-groupe1"
 encrypt        = true

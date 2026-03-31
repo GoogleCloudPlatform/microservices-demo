@@ -12,7 +12,7 @@ variable "state_bucket_name" {
 variable "lock_table_name" {
   description = "DynamoDB table name used for Terraform state locking."
   type        = string
-  default     = "blackfriday-terraform-locks"
+  default     = "blackfriday-terraform-locks-mah-groupe1"
 }
 
 variable "tags" {
@@ -20,6 +20,6 @@ variable "tags" {
   type        = map(string)
   default = {
     ManagedBy = "terraform"
-    Project   = "blackfriday-survival"
+    Project   = "blackfriday-survival-MAH-groupe1"
   }
 }

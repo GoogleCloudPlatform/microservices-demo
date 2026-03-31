@@ -1,0 +1,73 @@
+name: blackfriday-security-scans
+
+on:
+  pull_request:
+    paths:
+    - 'src/**'
+    - 'kustomize/**'
+    - 'terraform/**'
+    - '**/Dockerfile'
+    - '.github/workflows/blackfriday-security-scans.yaml'
+  push:
+    branches:
+    - main
+    paths:
+    - 'src/**'
+    - 'kustomize/**'
+    - 'terraform/**'
+    - '**/Dockerfile'
+    - '.github/workflows/blackfriday-security-scans.yaml'
+  workflow_dispatch:
+    inputs:
+      zap_target_url:
+        description: Public frontend URL to scan (example: http://1.2.3.4)
+        required: false
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  trivy-vulnerabilities:
+    runs-on: ubuntu-24.04
+    steps:
+    - uses: actions/checkout@v5
+    - name: Trivy scan (filesystem dependencies)
+      uses: aquasecurity/trivy-action@0.28.0
+      with:
+        scan-type: fs
+        scan-ref: .
+        vuln-type: os,library
+        severity: CRITICAL,HIGH
+        ignore-unfixed: true
+        format: table
+        exit-code: '1'
+
+  trivy-misconfigurations:
+    runs-on: ubuntu-24.04
+    steps:
+    - uses: actions/checkout@v5
+    - name: Trivy scan (IaC and Kubernetes manifests)
+      uses: aquasecurity/trivy-action@0.28.0
+      with:
+        scan-type: config
+        scan-ref: .
+        severity: CRITICAL,HIGH
+        format: table
+        exit-code: '1'
+
+  owasp-zap-baseline:
+    if: ${{ github.event_name == 'workflow_dispatch' && inputs.zap_target_url != '' }}
+    runs-on: ubuntu-24.04
+    needs:
+    - trivy-vulnerabilities
+    - trivy-misconfigurations
+    steps:
+    - uses: actions/checkout@v5
+    - name: OWASP ZAP baseline
+      uses: zaproxy/action-baseline@v0.14.0
+      with:
+        target: ${{ inputs.zap_target_url }}
+        fail_action: true
+        allow_issue_writing: false
+        cmd_options: -a

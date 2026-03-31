@@ -4,6 +4,12 @@ variable "project_name" {
   default     = "blackfriday-survival"
 }
 
+variable "name_suffix" {
+  description = "Suffix appended to AWS resource names."
+  type        = string
+  default     = "MAH-groupe1"
+}
+
 variable "aws_region" {
   description = "AWS region where resources are created."
   type        = string
