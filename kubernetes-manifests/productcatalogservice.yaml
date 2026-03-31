@@ -43,7 +43,7 @@ spec:
               - ALL
           privileged: false
           readOnlyRootFilesystem: true
-        image: productcatalogservice
+        image: gcr.io/google-samples/microservices-demo/productcatalogservice:v0.8.0
         ports:
         - containerPort: 3550
         env:
