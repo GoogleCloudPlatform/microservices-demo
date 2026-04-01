@@ -265,10 +265,28 @@ NAMESPACE=onlineboutique DEPLOYMENT=loadgenerator RATE_OVERRIDE=100 \
   - Approche: scribe dedie + timeline obligatoire.
 
 #### Resultat
-- [A renseigner] runbook execute, roles confirmes, cadence de communication tenue.
+- Drill incident execute avec journal horodate:
+  - `docs/blackfriday/evidence/week3/wk3-incident-20260402-0054.log`
+- Incident A (pod delete `frontend`) execute:
+  - `MTTR_frontend=96s`
+  - Service frontend retabli (pods recrees automatiquement par Kubernetes).
+- Incident B (rollout restart `recommendationservice`) execute:
+  - `MTTR_recommendation=33s`
+  - Rollout termine avec succes (`deployment "recommendationservice" successfully rolled out`).
+- Evidence operationnelle capturee:
+  - `FailedScheduling`: `Insufficient cpu` sur nodes on-demand.
+  - `NotTriggerScaleUp`: pods non planifies pendant backoff autoscaler.
+  - erreurs probes transitoires observees sur certains pods pendant le pic/rollout.
+- Cause racine identifiee pendant le drill:
+  - IAM du `Cluster Autoscaler` incomplet (`AccessDenied`).
+  - Actions manquantes detectees dans les logs:
+    - `autoscaling:SetDesiredCapacity`
+    - `autoscaling:TerminateInstanceInAutoScalingGroup`
+  - Impact: pas de scale-up on-demand effectif pendant certaines phases, d'ou pods `Pending`.
 
 #### Conclusion partielle
-- La procedure incident est standardisee et prete pour la simulation finale.
+- Le runbook est valide fonctionnellement (detection, mitigation, mesure MTTR, journalisation).
+- Le passage "pret production" est conditionne a la correction IAM du Cluster Autoscaler.
 
 ---
 
@@ -293,10 +311,18 @@ NAMESPACE=onlineboutique DEPLOYMENT=loadgenerator RATE_OVERRIDE=100 \
   - Approche: seuils d'alerte et criteres d'escalade pre-definis.
 
 #### Resultat
-- [A renseigner] War Room executee sans blocage organisationnel.
+- War Room techniquement testee en conditions reelles (charge + incidents) avec preuves:
+  - dashboards/utilitaires utilises: `kubectl`, HPA, events, logs autoscaler.
+  - cadence de suivi tenue pendant drill (collecte continue dans le fichier de preuve).
+- Blocage principal identifie:
+  - autoscaler en backoff suite a `AccessDenied` IAM, entrainant `No expansion options` et `NotTriggerScaleUp`.
+- Decision operationnelle:
+  - War Room prete sur l'axe organisation/procedure.
+  - War Room a valider a nouveau apres correction IAM pour confirmer la reponse infra complete.
 
 #### Conclusion partielle
-- L'organisation est prete pour une gestion d'incident en charge elevee.
+- L'organisation et les procedures sont operationnelles.
+- La fiabilite finale depend d'une remediation IAM autoscaler puis d'un re-test court de confirmation.
 
 ---
 
@@ -331,9 +357,10 @@ NAMESPACE=onlineboutique DEPLOYMENT=loadgenerator RATE_OVERRIDE=100 \
 - Les scripts rendent l'execution reproductible.
 
 ### Reserves a lever
-1. Stabilite post-charge sur certains services critiques.
-2. Mesure chifree definitive du cout sous repetition.
-3. Validation finale des KPI SLO/SLA pendant le 70K.
+1. Corriger IAM Cluster Autoscaler (`SetDesiredCapacity`, `TerminateInstanceInAutoScalingGroup`) puis valider scale-up/scale-down sans `AccessDenied`.
+2. Stabilite post-charge sur certains services critiques (pods `Pending`, probes transitoires).
+3. Mesure chifree definitive du cout sous repetition.
+4. Validation finale des KPI SLO/SLA pendant le 70K.
 
 ### Decision finale Week 3
 - [A renseigner en fin de semaine]
