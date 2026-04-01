@@ -373,4 +373,4 @@ NAMESPACE=onlineboutique DEPLOYMENT=loadgenerator RATE_OVERRIDE=100 \
 4. Validation finale des KPI SLO/SLA pendant le 70K.
 
 ### Decision finale Week 3
-- [A renseigner en fin de semaine]
+- `PASS_WITH_RESERVATIONS` (valide au `2026-04-02`): autoscaling fonctionnel et runbook valide; reserve ouverte sur `No expansion options`/capacity planning et consolidation KPI metier finaux.
