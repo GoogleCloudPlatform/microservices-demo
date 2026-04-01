@@ -216,10 +216,27 @@ NAMESPACE=onlineboutique DEPLOYMENT=loadgenerator RATE_OVERRIDE=100 \
   - Approche: rightsizing cible, verification probes, analyse post-run.
 
 #### Resultat
-- [A renseigner] replicas HPA au pic, erreurs applicatives, latence, stabilite post-charge.
+- Repetition 70K executee et observee en direct via `kubectl get hpa -w` et Grafana.
+- Scale-up HPA confirme pendant le pic:
+  - `frontend`: `2 -> 8` replicas
+  - `currencyservice`: `2 -> 7` replicas
+  - `recommendationservice`: `2 -> 6` replicas
+  - `productcatalogservice`: `2 -> 5` replicas
+  - `cartservice`: `2 -> 3` replicas
+  - `checkoutservice` et `paymentservice`: maintien a `2` replicas
+- Pression CPU observee au-dessus des cibles HPA sur plusieurs services pendant le run (exemples observes: `frontend`, `currencyservice`, `productcatalogservice`), suivie d'une augmentation automatique des replicas.
+- Snapshot Grafana (cluster) pendant le run:
+  - `CPU Utilisation`: ~`43.8%`
+  - `CPU Requests Commitment`: ~`106%`
+  - `CPU Limits Commitment`: ~`259%`
+  - `Memory Utilisation`: ~`20.0%`
+  - `Memory Requests Commitment`: ~`23.1%`
+  - `Memory Limits Commitment`: ~`71.8%`
+- Aucune panne cluster globale constatee pendant la repetition; le comportement observe est un scale horizontal progressif puis stabilisation.
 
 #### Conclusion partielle
-- Le run 70K est industrialise avec script et procedure de pilotage.
+- Le run 70K est valide sur l'axe autoscaling/stabilite plateforme.
+- Point restant pour cloture KPI metier: consolider les metriques `latence` (p95/p99) et `taux d'erreur` applicatif depuis les logs/metrics de charge.
 
 ---
 
