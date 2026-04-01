@@ -1,0 +1,7 @@
+apiVersion: kustomize.config.k8s.io/v1alpha1
+kind: Component
+patches:
+- path: set-frontend-capacity.patch.yaml
+- path: set-loadgenerator-capacity.patch.yaml
+- path: set-currencyservice-capacity.patch.yaml
+- path: set-recommendationservice-capacity.patch.yaml

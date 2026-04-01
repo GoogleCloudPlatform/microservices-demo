@@ -1,0 +1,16 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: recommendationservice
+spec:
+  template:
+    spec:
+      containers:
+      - name: server
+        resources:
+          requests:
+            cpu: 200m
+            memory: 256Mi
+          limits:
+            cpu: 600m
+            memory: 768Mi

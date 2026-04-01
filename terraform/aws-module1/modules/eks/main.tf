@@ -17,15 +17,44 @@ module "eks" {
     vpc-cni    = {}
   }
 
-  eks_managed_node_groups = {
-    default = {
-      min_size       = var.node_group_min_size
-      max_size       = var.node_group_max_size
-      desired_size   = var.node_group_desired_size
-      instance_types = var.node_instance_types
-      capacity_type  = "ON_DEMAND"
-    }
-  }
+  eks_managed_node_groups = merge(
+    {
+      default = {
+        min_size       = var.node_group_min_size
+        max_size       = var.node_group_max_size
+        desired_size   = var.node_group_desired_size
+        instance_types = var.node_instance_types
+        capacity_type  = "ON_DEMAND"
+
+        labels = {
+          "workload-tier" = "critical"
+          "capacity-type" = "on-demand"
+        }
+      }
+    },
+    var.enable_spot_node_group ? {
+      spot = {
+        min_size       = var.spot_node_group_min_size
+        max_size       = var.spot_node_group_max_size
+        desired_size   = var.spot_node_group_desired_size
+        instance_types = var.spot_node_instance_types
+        capacity_type  = "SPOT"
+
+        labels = {
+          "workload-tier" = "best-effort"
+          "capacity-type" = "spot"
+        }
+
+        taints = {
+          spot_only = {
+            key    = "spot-instance"
+            value  = "true"
+            effect = "NO_SCHEDULE"
+          }
+        }
+      }
+    } : {}
+  )
 
   tags = var.tags
 }

@@ -64,6 +64,8 @@ Adapter au besoin:
 - `name_suffix` (ex: `MAH-groupe1`, ajoute le suffixe aux noms AWS)
 - `aws_region`
 - tailles de node group
+- `enable_spot_node_group` (active un pool Spot pour workloads non critiques)
+- `spot_node_instance_types` + tailles `spot_node_group_*`
 - tags FinOps
 - `enable_cluster_bootstrap` (laisser `false` au premier apply)
 

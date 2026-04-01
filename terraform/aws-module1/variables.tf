@@ -51,27 +51,57 @@ variable "cluster_version" {
 }
 
 variable "node_instance_types" {
-  description = "EC2 instance types for EKS managed nodes."
+  description = "EC2 instance types for EKS managed nodes (on-demand baseline)."
   type        = list(string)
   default     = ["m6i.large"]
 }
 
 variable "node_group_min_size" {
-  description = "Minimum desired node count."
+  description = "Minimum desired node count for on-demand node group."
   type        = number
   default     = 3
 }
 
 variable "node_group_max_size" {
-  description = "Maximum desired node count."
+  description = "Maximum desired node count for on-demand node group."
   type        = number
   default     = 12
 }
 
 variable "node_group_desired_size" {
-  description = "Desired node count on creation."
+  description = "Desired node count on creation for on-demand node group."
   type        = number
   default     = 3
+}
+
+variable "enable_spot_node_group" {
+  description = "Enable an additional Spot node group for non-critical workloads."
+  type        = bool
+  default     = false
+}
+
+variable "spot_node_instance_types" {
+  description = "EC2 instance types for the Spot node group."
+  type        = list(string)
+  default     = ["m6i.large"]
+}
+
+variable "spot_node_group_min_size" {
+  description = "Minimum desired node count for Spot node group."
+  type        = number
+  default     = 0
+}
+
+variable "spot_node_group_max_size" {
+  description = "Maximum desired node count for Spot node group."
+  type        = number
+  default     = 10
+}
+
+variable "spot_node_group_desired_size" {
+  description = "Desired node count on creation for Spot node group."
+  type        = number
+  default     = 0
 }
 
 variable "argocd_chart_version" {

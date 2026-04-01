@@ -1,0 +1,16 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: currencyservice
+spec:
+  template:
+    spec:
+      containers:
+      - name: server
+        resources:
+          requests:
+            cpu: 200m
+            memory: 128Mi
+          limits:
+            cpu: 500m
+            memory: 512Mi

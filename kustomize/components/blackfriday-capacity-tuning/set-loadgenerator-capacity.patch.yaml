@@ -1,0 +1,16 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: loadgenerator
+spec:
+  template:
+    spec:
+      containers:
+      - name: main
+        resources:
+          requests:
+            cpu: 500m
+            memory: 512Mi
+          limits:
+            cpu: 2000m
+            memory: 2Gi

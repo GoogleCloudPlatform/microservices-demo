@@ -19,23 +19,53 @@ variable "vpc_id" {
 }
 
 variable "node_instance_types" {
-  description = "Node instance types."
+  description = "Node instance types for on-demand node group."
   type        = list(string)
 }
 
 variable "node_group_min_size" {
-  description = "Minimum node count."
+  description = "Minimum node count for on-demand node group."
   type        = number
 }
 
 variable "node_group_max_size" {
-  description = "Maximum node count."
+  description = "Maximum node count for on-demand node group."
   type        = number
 }
 
 variable "node_group_desired_size" {
-  description = "Desired node count."
+  description = "Desired node count for on-demand node group."
   type        = number
+}
+
+variable "enable_spot_node_group" {
+  description = "Enable an additional Spot node group for non-critical workloads."
+  type        = bool
+  default     = false
+}
+
+variable "spot_node_instance_types" {
+  description = "Node instance types for Spot node group."
+  type        = list(string)
+  default     = ["m6i.large"]
+}
+
+variable "spot_node_group_min_size" {
+  description = "Minimum node count for Spot node group."
+  type        = number
+  default     = 0
+}
+
+variable "spot_node_group_max_size" {
+  description = "Maximum node count for Spot node group."
+  type        = number
+  default     = 10
+}
+
+variable "spot_node_group_desired_size" {
+  description = "Desired node count for Spot node group."
+  type        = number
+  default     = 0
 }
 
 variable "tags" {

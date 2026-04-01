@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend
+spec:
+  template:
+    spec:
+      containers:
+      - name: server
+        resources:
+          requests:
+            cpu: 300m
+            memory: 256Mi
+          limits:
+            cpu: 1000m
+            memory: 1024Mi
+        readinessProbe:
+          timeoutSeconds: 3
+          failureThreshold: 5
+        livenessProbe:
+          timeoutSeconds: 3
+          failureThreshold: 5

@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: loadgenerator
+spec:
+  template:
+    spec:
+      tolerations:
+      - key: spot-instance
+        operator: Equal
+        value: "true"
+        effect: NoSchedule
+      affinity:
+        nodeAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            preference:
+              matchExpressions:
+              - key: capacity-type
+                operator: In
+                values:
+                - spot

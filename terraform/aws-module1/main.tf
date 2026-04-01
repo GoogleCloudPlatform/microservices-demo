@@ -12,15 +12,20 @@ module "vpc" {
 module "eks" {
   source = "./modules/eks"
 
-  cluster_name            = local.cluster_name
-  cluster_version         = var.cluster_version
-  subnet_ids              = module.vpc.private_subnet_ids
-  vpc_id                  = module.vpc.vpc_id
-  node_instance_types     = var.node_instance_types
-  node_group_min_size     = var.node_group_min_size
-  node_group_max_size     = var.node_group_max_size
-  node_group_desired_size = var.node_group_desired_size
-  tags                    = local.tags
+  cluster_name                 = local.cluster_name
+  cluster_version              = var.cluster_version
+  subnet_ids                   = module.vpc.private_subnet_ids
+  vpc_id                       = module.vpc.vpc_id
+  node_instance_types          = var.node_instance_types
+  node_group_min_size          = var.node_group_min_size
+  node_group_max_size          = var.node_group_max_size
+  node_group_desired_size      = var.node_group_desired_size
+  enable_spot_node_group       = var.enable_spot_node_group
+  spot_node_instance_types     = var.spot_node_instance_types
+  spot_node_group_min_size     = var.spot_node_group_min_size
+  spot_node_group_max_size     = var.spot_node_group_max_size
+  spot_node_group_desired_size = var.spot_node_group_desired_size
+  tags                         = local.tags
 }
 
 resource "kubernetes_namespace" "onlineboutique" {

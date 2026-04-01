@@ -45,7 +45,7 @@ Budget cible:
 
 #### Commandes (pas a pas)
 ```bash
-cd /home/naxxer/Videos/microservices-demo
+cd /home/naxxer/Videos/microservices-project
 
 # Drill 1: supprimer 1 pod frontend
 NAMESPACE=onlineboutique ./scripts/blackfriday/week3-chaos-drill.sh pod-delete frontend 1
@@ -99,44 +99,81 @@ NAMESPACE=onlineboutique ./scripts/blackfriday/week3-chaos-drill.sh scale-pulse 
 ### 3.2 Optimisation des couts (Spot Instances + rightsizing)
 
 #### Ce que nous avons implemente
-1. Support Terraform du type de capacite node group:
-   - `terraform/aws-module1/variables.tf` (nouvelle variable `node_capacity_type`)
-   - `terraform/aws-module1/main.tf` (passage de variable au module EKS)
-   - `terraform/aws-module1/modules/eks/variables.tf`
-   - `terraform/aws-module1/modules/eks/main.tf` (`capacity_type = upper(var.node_capacity_type)`)
-   - `terraform/aws-module1/terraform.tfvars.example` (champ documente)
-2. Rightsizing applicatif deja en place dans:
-   - `kustomize/components/blackfriday-capacity-tuning/`
+1. Strategie EKS mixte (stabilite + cout):
+   - node group `ON_DEMAND` pour les workloads critiques (socle stable),
+   - node group `SPOT` optionnel pour les workloads non critiques.
+   - fichiers modifies:
+     - `terraform/aws-module1/variables.tf`
+     - `terraform/aws-module1/main.tf`
+     - `terraform/aws-module1/modules/eks/variables.tf`
+     - `terraform/aws-module1/modules/eks/main.tf`
+     - `terraform/aws-module1/terraform.tfvars.example`
+2. Ciblage des workloads non critiques vers Spot (sans rigidite):
+   - component `kustomize/components/blackfriday-spot-workloads/`
+   - services cibles: `loadgenerator`, `recommendationservice`
+   - mecanisme:
+     - `tolerations` pour accepter le taint Spot,
+     - `nodeAffinity` en mode `preferred` vers `capacity-type=spot`.
+3. Rightsizing applicatif:
+   - component `kustomize/components/blackfriday-capacity-tuning/`
+   - tuning CPU/RAM sur `frontend`, `loadgenerator`, `currencyservice`, `recommendationservice`.
+
+#### Pourquoi cela reduit les couts
+- Spot Instances: baisse du cout unitaire des noeuds EC2.
+- Rightsizing: moins de gaspillage CPU/RAM reserve, meilleure densite de pods.
+- Effet combine: moins de noeuds * et des noeuds moins chers.
 
 #### Commandes (pas a pas)
 ```bash
-cd /home/naxxer/Videos/microservices-demo/terraform/aws-module1
+cd /home/naxxer/Videos/microservices-project/terraform/aws-module1
 
-# 1) Basculer le node group en SPOT pour les repetitions
-# Modifier terraform.tfvars:
-# node_capacity_type = "SPOT"
+# 1) Activer Spot pour workloads non critiques
+# Dans terraform.tfvars:
+# enable_spot_node_group = true
+# spot_node_instance_types = ["m6i.large"]
+# spot_node_group_min_size = 0
+# spot_node_group_max_size = 10
+# spot_node_group_desired_size = 1
 
 terraform plan -var-file=terraform.tfvars
 terraform apply -var-file=terraform.tfvars
 ```
 
-Retour au mode stable:
 ```bash
-# node_capacity_type = "ON_DEMAND"
+cd /home/naxxer/Videos/microservices-project
+
+# 2) Appliquer les composants kustomize (rightsizing + placement Spot)
+kubectl -n onlineboutique apply -k ./kustomize
+
+# 3) Verifier les labels/taints de noeuds
+kubectl get nodes --show-labels | grep -E "NAME|capacity-type"
+kubectl describe node <spot-node-name> | grep -A3 Taints
+
+# 4) Verifier le placement des workloads non critiques
+kubectl -n onlineboutique get pods -o wide | egrep "loadgenerator|recommendationservice"
+```
+
+Rollback (retour 100% on-demand):
+```bash
+cd /home/naxxer/Videos/microservices-project/terraform/aws-module1
+
+# enable_spot_node_group = false
 terraform apply -var-file=terraform.tfvars
 ```
 
 #### Problemes possibles et approche
-- Probleme: interruption Spot (eviction EC2 possible).
-  - Approche: utiliser SPOT sur les repetitions, ON_DEMAND sur fenetres critiques.
-- Probleme: sur-allocation de ressources.
-  - Approche: rightsizing base sur metriques (`kubectl top`, Grafana, HPA).
+- Probleme: interruption Spot (reclaim AWS).
+  - Approche: garder le coeur applicatif sur `ON_DEMAND`, Spot reserve aux workloads non critiques.
+- Probleme: Spot indisponible temporairement.
+  - Approche: `nodeAffinity preferred` (pas `required`), les pods peuvent revenir sur on-demand.
+- Probleme: OOM/latence apres rightsizing.
+  - Approche: ajustement progressif base metriques (`kubectl top`, Grafana, HPA).
 
 #### Resultat
-- [A renseigner] reduction de cout observee, impact performance, stabilite.
+- [A renseigner] reduction de cout observee, comportement de scheduling Spot, impact perf.
 
 #### Conclusion partielle
-- Le levier cout est implemente et pilotable via Terraform.
+- Le design cout est en place: stable pour le critique, optimise pour le non critique.
 
 ---
 
@@ -152,7 +189,7 @@ terraform apply -var-file=terraform.tfvars
 
 #### Commandes (pas a pas)
 ```bash
-cd /home/naxxer/Videos/microservices-demo
+cd /home/naxxer/Videos/microservices-project
 
 # Demarrer la repetition
 NAMESPACE=onlineboutique DEPLOYMENT=loadgenerator RATE_OVERRIDE=100 \
