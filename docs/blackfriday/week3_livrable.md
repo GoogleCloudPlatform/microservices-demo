@@ -286,7 +286,11 @@ NAMESPACE=onlineboutique DEPLOYMENT=loadgenerator RATE_OVERRIDE=100 \
 - Remediation appliquee apres drill:
   - policy inline `ClusterAutoscalerHotfixWeek3` appliquee au role `EKSClusterAutoscalerRoleMAH1`.
   - restart du deployment `kube-system/cluster-autoscaler-aws-cluster-autoscaler` effectue.
-  - controle post-fix (`--since=10m`) sans occurrence des motifs `AccessDenied` / `SetDesiredCapacity` / `TerminateInstanceInAutoScalingGroup` / `No expansion options` dans la commande de verification.
+  - controle post-fix (`--since=10m`) sans occurrence des motifs `AccessDenied` / `SetDesiredCapacity` / `TerminateInstanceInAutoScalingGroup` dans la commande de verification.
+- Validation post-hotfix sous charge (run court de confirmation):
+  - HPA observe en montee reelle apres correctif IAM (exemples): `frontend` jusqu'a `15` replicas, `currencyservice` jusqu'a `14`, `productcatalogservice` jusqu'a `10`, `recommendationservice` autour de `5`.
+  - logs autoscaler (fenetre `--since=10m`) sans `AccessDenied` sur actions autoscaling critiques.
+  - evenement residuel observe: `No expansion options` (2 occurrences), a traiter comme sujet de capacite/sizing et non comme erreur IAM.
 
 #### Conclusion partielle
 - Le runbook est valide fonctionnellement (detection, mitigation, mesure MTTR, journalisation).
@@ -363,7 +367,7 @@ NAMESPACE=onlineboutique DEPLOYMENT=loadgenerator RATE_OVERRIDE=100 \
 - Les scripts rendent l'execution reproductible.
 
 ### Reserves a lever
-1. Confirmer en test de charge court (post-hotfix IAM) le scale-up/scale-down sans retour d'erreurs autoscaler.
+1. Traiter les occurrences `No expansion options` (capacity planning: limites node groups, contraintes scheduling, reserve CPU).
 2. Stabilite post-charge sur certains services critiques (pods `Pending`, probes transitoires).
 3. Mesure chifree definitive du cout sous repetition.
 4. Validation finale des KPI SLO/SLA pendant le 70K.
