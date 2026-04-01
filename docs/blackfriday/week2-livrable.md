@@ -62,7 +62,7 @@ Pour chaque étape terminée, on ajoute:
 - [ ] Dashboards Grafana finalisés (screenshots + lecture)
 - [x] Activation/tuning HPA en runtime
 - [x] Déploiement Cluster Autoscaler
-- [ ] Tests 5K, 20K, 50K avec preuves et conclusion
+- [ ] Tests 20K, 50K avec preuves et conclusion
 
 ---
 
@@ -455,43 +455,178 @@ kubectl -n kube-system logs deployment/"$DEPLOY" --tail=120 | egrep -i "auto-dis
 
 ### Étape 2.6 - Test de charge 5K
 
-- Date:
+- Date: 2026-03-31
 - Paramètres:
+  - profil: `week2-5k`
+  - utilisateurs virtuels: `USERS=5000`
+  - taux de génération: `RATE=125`
+  - cible: `FRONTEND_ADDR=frontend:80`
+  - durée observée: ~15 min (fenêtre Grafana `19:32` -> `19:47` CEST)
 - Commandes:
 ```bash
-# à compléter
+cd /home/naxxer/Videos/microservices-demo
+NAMESPACE=onlineboutique DEPLOYMENT=loadgenerator ./scripts/blackfriday/set-load-profile.sh week2-5k
+kubectl -n onlineboutique set env deployment/loadgenerator FRONTEND_ADDR=frontend:80
+kubectl -n onlineboutique scale deployment/loadgenerator --replicas=1
+
+kubectl -n onlineboutique get hpa
+kubectl top nodes
+
+kubectl -n onlineboutique scale deployment/loadgenerator --replicas=0
 ```
 - Résultat (latence/erreurs/stabilité):
+  - stabilité cluster confirmée pendant la fenêtre observée.
+  - CPU cluster modéré (`~4.41%`) sans saturation.
+  - mémoire cluster stable (`~17.6%`) avec progression contrôlée.
+  - réseau stable en charge (RX/TX sans pic anormal) et `packet drops = 0`.
+  - HPA opérationnel sur 7 services (métriques CPU disponibles); en fin de test, les réplicas reviennent à `2` (minReplicas) après arrêt du loadgenerator.
+  - `kubectl top nodes` post-test:
+    - `ip-10-40-103-251`: `73m CPU`, `1224Mi MEM` (`17%`)
+    - `ip-10-40-64-253`: `53m CPU`, `807Mi MEM` (`11%`)
+    - `ip-10-40-88-52`: `85m CPU`, `1121Mi MEM` (`15%`)
 - Preuves:
-- Décision:
+  - captures Grafana fournies (CPU, mémoire, bandwidth, packet drops).
+  - sortie `kubectl -n onlineboutique get hpa` fournie (7 HPA actifs, targets CPU mesurées).
+  - sortie `kubectl top nodes` fournie.
+  - note: la sortie Locust `Aggregated` n'a pas été extraite sur ce run (commande logs lancée après arrêt du pod loadgenerator).
+- Décision: `OK` (palier 5K validé côté stabilité plateforme et autoscaling; KPI applicatifs Locust détaillés à renforcer sur les paliers 20K/50K).
 
 ---
 
 ### Étape 2.7 - Test de charge 20K
 
-- Date:
+- Date: 2026-03-31
 - Paramètres:
+  - profil: `week2-20k`
+  - utilisateurs virtuels cibles: `USERS=20000`
+  - taux de génération cible: `RATE=500`
 - Commandes:
 ```bash
-# à compléter
+cd /home/naxxer/Videos/microservices-demo
+NAMESPACE=onlineboutique DEPLOYMENT=loadgenerator ./scripts/blackfriday/set-load-profile.sh week2-20k
+kubectl -n onlineboutique set env deployment/loadgenerator FRONTEND_ADDR=frontend:80
+kubectl -n onlineboutique scale deployment/loadgenerator --replicas=1
+
+# Observabilité en parallèle
+kubectl -n onlineboutique get hpa -w
+kubectl top nodes
+kubectl top pods -n onlineboutique | head -n 20
+
+# Arrêt du test
+kubectl -n onlineboutique scale deployment/loadgenerator --replicas=0
 ```
 - Résultat (latence/erreurs/stabilité):
+  - capture Grafana fournie (snapshot cluster) avec charge visible et comportement global stable.
+  - KPI visibles sur la capture:
+    - `CPU Utilisation`: `6.05%`
+    - `CPU Requests Committed`: `53.9%`
+    - `CPU Limits Committed`: `74.7%`
+    - `Memory Utilisation`: `17.3%`
+    - `Memory Requests Committed`: `11.8%`
+    - `Memory Limits Committed`: `19.3%`
+  - première lecture:
+    - pas de saturation CPU/mémoire au niveau cluster sur ce snapshot.
+    - marge de capacité encore disponible sur l'infrastructure.
+  - comportement HPA observé en live (`kubectl get hpa -w`):
+    - `currencyservice` a dépassé la cible CPU (`98%/70%`, `91%/70%`, `79%/70%`) et a scalé de `2` à `3`, puis `4` replicas.
+    - après baisse de charge CPU (`1%/70%`, `2%/70%`), `currencyservice` est redescendu progressivement vers `3` puis `2` replicas.
+    - les autres services sont restés majoritairement à `2` replicas (minReplicas), indiquant une montée de charge concentrée sur un sous-ensemble de services.
+  - validation Grafana autoscaling (Prometheus queries):
+    - `kube_horizontalpodautoscaler_status_current_replicas{namespace="onlineboutique"}`: montée nette des replicas HPA pendant la fenêtre de charge puis retour au baseline.
+    - `kube_horizontalpodautoscaler_status_desired_replicas{namespace="onlineboutique"}`: courbe cohérente avec `current_replicas` (demandé puis absorbé).
+    - lecture visuelle: somme des replicas HPA ~`14` -> ~`48` au pic, puis retour ~`14`.
+  - validation autoscaling cluster (nodes):
+    - `count(kube_node_info)` observé constant à `3` pendant la fenêtre.
+    - interprétation factuelle: HPA a scalé les pods; Cluster Autoscaler n'a pas ajouté de nœuds sur ce run (capacité existante suffisante selon ses critères).
+  - snapshot dashboard cluster (Grafana):
+    - `CPU Utilisation`: `23.5%`
+    - `Memory Utilisation`: `18.3%`
+    - `CPU Requests Committed`: `50.4%`
+    - `CPU Limits Committed`: `69.5%`
+    - `Memory Requests Committed`: `10.9%`
+    - `Memory Limits Committed`: `17.5%`
+  - consommation nodes observée (`kubectl top nodes`):
+    - `ip-10-40-103-251`: `64m CPU` (`3%`), `1314Mi MEM` (`18%`)
+    - `ip-10-40-64-253`: `58m CPU` (`3%`), `982Mi MEM` (`13%`)
+    - `ip-10-40-88-52`: `124m CPU` (`6%`), `1341Mi MEM` (`18%`)
+  - comportement loadgenerator (Locust):
+    - run initial observé en `OOMKilled` (générateur instable).
+    - run de reprise collecté (logs complets fournis) avec trafic réel mais dégradé.
+    - warning Locust: ramp-up agressif (`spawn rate > 100`, `RATE=500`).
+    - erreurs applicatives observées dans les logs (`LocustBadStatusCode`, réponses `HTTP 500`).
+    - sorties `Aggregated` du run de reprise:
+      - volume: `17781` -> `32564` requêtes selon les snapshots.
+      - débit: jusqu'à ~`580.30 req/s`.
+      - taux d'échec global: ~`22.05%` à `33.73%` (très au-dessus d'un seuil acceptable).
+      - latence agrégée élevée: médiane ~`7500` à `9600 ms`, maximum jusqu'à `67244 ms`.
+      - endpoint critique `POST /setCurrency` régulièrement >`55%` d'échecs.
 - Preuves:
-- Décision:
+  - capture Grafana: `sc.png` (fournie par l'équipe projet).
+  - capture Grafana dashboard cluster (Kubernetes / Compute Resources / Cluster) fournie.
+  - capture Grafana Explore `current_replicas` fournie.
+  - capture Grafana Explore `desired_replicas` fournie.
+  - capture Grafana Explore `count(kube_node_info)` fournie.
+  - sortie `kubectl -n onlineboutique get hpa -w` fournie (événements de scaling visibles).
+  - sortie `kubectl top nodes` fournie.
+  - sortie `kubectl logs ... | grep -A25 "Aggregated"` fournie (plusieurs snapshots Locust, incluant run de reprise).
+- Décision: `OK` (palier 20K validé pour l'objectif d'autoscaling: montée et descente automatiques observées en fonction de la charge).
 
 ---
 
 ### Étape 2.8 - Test de charge 50K
 
-- Date:
+- Date: `2026-04-01` (nuit du `2026-03-31` au `2026-04-01`)
 - Paramètres:
+  - profil: `week2-50k`
+  - `USERS=50000`
+  - ramp-up contrôlé: `RATE=100`
+  - `FRONTEND_ADDR=frontend:80`
+  - tuning appliqué via `components/blackfriday-capacity-tuning` (frontend, loadgenerator, currencyservice, recommendationservice)
 - Commandes:
 ```bash
-# à compléter
+cd /home/naxxer/Videos/microservices-demo
+
+# appliquer le tuning de capacité (frontend + loadgenerator)
+kubectl apply -k ./kustomize -n onlineboutique
+kubectl -n onlineboutique rollout status deployment/frontend --timeout=180s
+kubectl -n onlineboutique rollout status deployment/loadgenerator --timeout=180s
+
+# lancer le profil 50K (autoscaling laissé en mode automatique)
+NAMESPACE=onlineboutique DEPLOYMENT=loadgenerator ./scripts/blackfriday/set-load-profile.sh week2-50k
+kubectl -n onlineboutique set env deployment/loadgenerator RATE=100
+kubectl -n onlineboutique scale deployment/loadgenerator --replicas=1
+
+# observation
+kubectl -n onlineboutique get hpa -w
+kubectl get nodes -w
+kubectl top nodes
+kubectl -n onlineboutique logs deploy/loadgenerator --tail=300 | grep -A25 "Aggregated"
+
+# arrêt de la charge
+kubectl -n onlineboutique scale deployment/loadgenerator --replicas=0
 ```
 - Résultat (latence/erreurs/stabilité):
+  - autoscaling HPA observé clairement sur la fenêtre de charge.
+  - montée des replicas (capture Grafana `kube_horizontalpodautoscaler_status_current_replicas`):
+    - `currencyservice` jusqu'à `10` replicas
+    - `frontend` jusqu'à `8` replicas
+    - `productcatalogservice` jusqu'à `4` replicas
+    - `recommendationservice` jusqu'à `3` replicas
+    - `cartservice`, `checkoutservice`, `paymentservice` stables à `2` replicas
+  - pression cluster visible sur dashboard:
+    - `CPU Utilisation`: `76.1%`
+    - `CPU Requests Committed`: `137%`
+    - `CPU Limits Committed`: `342%`
+    - `Memory Utilisation`: `23.1%`
+    - `Memory Requests Committed`: `29.6%`
+    - `Memory Limits Committed`: `94.6%`
+  - état post-arrêt `loadgenerator`: cluster fonctionnel mais non totalement stabilisé immédiatement, avec plusieurs pods `currencyservice` en `CrashLoopBackOff` pendant la phase de retour.
 - Preuves:
-- Décision:
+  - capture Grafana Explore `kube_horizontalpodautoscaler_status_current_replicas{namespace="onlineboutique"}` fournie (montée HPA jusqu'à `currencyservice=10`, `frontend=8`).
+  - capture Grafana dashboard cluster fournie (CPU/mémoire/réseau pendant la charge 50K).
+  - sortie `kubectl -n onlineboutique get pods` fournie après arrêt de charge (état des pods en phase de stabilisation).
+  - logs d'exécution fournis: `loadgenerator` arrêté, application des manifests/tuning, rollout `frontend` OK, difficultés intermittentes de rollout `loadgenerator` sur certaines tentatives.
+- Décision: `OK (objectif autoscaling atteint) avec réserves de stabilité applicative sur le palier 50K`.
 
 ---
 

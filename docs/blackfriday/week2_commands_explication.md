@@ -199,7 +199,21 @@ URL:
 
 ## 9) Activer les tests de charge
 
-### 9.1 Profil 5K users (users)
+Profils disponibles dans le script:
+- `week1-1k`
+- `week2-5k`
+- `week2-20k`
+- `week2-50k`
+
+### 9.1 Profil 1K users (users)
+
+```bash
+cd "$REPO_DIR"
+NAMESPACE=onlineboutique DEPLOYMENT=loadgenerator ./scripts/blackfriday/set-load-profile.sh week1-1k
+kubectl -n onlineboutique scale deployment/loadgenerator --replicas=1
+```
+
+### 9.2 Profil 5K users (users)
 
 ```bash
 cd "$REPO_DIR"
@@ -207,7 +221,7 @@ NAMESPACE=onlineboutique DEPLOYMENT=loadgenerator ./scripts/blackfriday/set-load
 kubectl -n onlineboutique scale deployment/loadgenerator --replicas=1
 ```
 
-### 9.2 Profil 20K users (users)
+### 9.3 Profil 20K users (users)
 
 ```bash
 cd "$REPO_DIR"
@@ -215,13 +229,22 @@ NAMESPACE=onlineboutique DEPLOYMENT=loadgenerator ./scripts/blackfriday/set-load
 kubectl -n onlineboutique scale deployment/loadgenerator --replicas=1
 ```
 
-### 9.3 Profil 50K users (users)
+### 9.4 Profil 50K users (users)
 
 ```bash
 cd "$REPO_DIR"
+kubectl apply -k "$REPO_DIR/kustomize" -n onlineboutique
+kubectl -n onlineboutique rollout status deployment/frontend --timeout=180s
+kubectl -n onlineboutique rollout status deployment/loadgenerator --timeout=180s
 NAMESPACE=onlineboutique DEPLOYMENT=loadgenerator ./scripts/blackfriday/set-load-profile.sh week2-50k
+kubectl -n onlineboutique set env deployment/loadgenerator RATE=100
 kubectl -n onlineboutique scale deployment/loadgenerator --replicas=1
 ```
+
+Notes:
+- Le tuning de capacité est porté par `components/blackfriday-capacity-tuning` (frontend + loadgenerator).
+- Le profil 50K garde `USERS=50000`, avec `RATE=100` pour une montée progressive plus stable.
+- On ne scale pas manuellement les replicas applicatifs pendant le test; HPA et Cluster Autoscaler restent responsables du scaling.
 
 Observer pendant le test:
 
@@ -289,4 +312,3 @@ kubectl apply -k "$REPO_DIR/kustomize" -n onlineboutique
 kubectl -n onlineboutique get ingress frontend-alb
 kubectl -n onlineboutique get pods
 ```
-

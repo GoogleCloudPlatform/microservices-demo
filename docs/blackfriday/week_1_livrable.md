@@ -1,10 +1,10 @@
-# Week 1 Livrable - Setup, Monitoring Basique CloudWatch et Test 1K
+# Week 1 Livrable - Infrastructure fonctionnelle avec documentation
 
 Source de référence: `BlackFriday_CahierDesCharges MT5.pdf`.
 
 ## 1. Contexte
 
-Cette semaine 1 couvre la mise en place des fondations techniques:
+Cette semaine 1 couvre la mise en place d'une infrastructure fonctionnelle documentée:
 - infrastructure AWS/EKS
 - déploiement de l'application
 - monitoring basique CloudWatch
@@ -126,7 +126,90 @@ Cycle exécuté:
 - arrêt loadgenerator
 - vérifications post-test
 
-## 6. Observations techniques (preuves)
+## 6. Commandes de reproduction (runbook court)
+
+Ces commandes permettent de rejouer le périmètre Week 1 de bout en bout.
+
+### 6.1 Provisionner l'infrastructure
+
+```bash
+# Backend Terraform (S3 + DynamoDB)
+cd /home/naxxer/Videos/microservices-demo/terraform/aws-module1/bootstrap-state
+terraform init
+terraform apply -auto-approve
+
+# Infra principale (VPC + EKS)
+cd /home/naxxer/Videos/microservices-demo/terraform/aws-module1
+terraform init -backend-config=backend.hcl -reconfigure
+terraform apply -var-file=terraform.tfvars -auto-approve
+```
+
+### 6.2 Connecter kubectl au cluster
+
+```bash
+cd /home/naxxer/Videos/microservices-demo/terraform/aws-module1
+export AWS_REGION=eu-south-1
+CLUSTER_NAME=$(terraform output -raw cluster_name)
+aws eks update-kubeconfig --name "$CLUSTER_NAME" --region "$AWS_REGION" --alias blackfriday-dev
+kubectl config use-context blackfriday-dev
+kubectl get nodes
+```
+
+### 6.3 Déployer l'application
+
+```bash
+cd /home/naxxer/Videos/microservices-demo
+kubectl create namespace onlineboutique --dry-run=client -o yaml | kubectl apply -f -
+kubectl apply -k ./kustomize -n onlineboutique
+kubectl -n onlineboutique get pods
+kubectl -n onlineboutique get svc frontend-external
+```
+
+### 6.4 Activer l'observabilité CloudWatch
+
+```bash
+cd /home/naxxer/Videos/microservices-demo/terraform/aws-module1
+export AWS_REGION=eu-south-1
+CLUSTER_NAME=$(terraform output -raw cluster_name)
+
+aws eks create-addon \
+  --cluster-name "$CLUSTER_NAME" \
+  --region "$AWS_REGION" \
+  --addon-name amazon-cloudwatch-observability \
+  --resolve-conflicts OVERWRITE || true
+
+aws eks update-addon \
+  --cluster-name "$CLUSTER_NAME" \
+  --region "$AWS_REGION" \
+  --addon-name amazon-cloudwatch-observability \
+  --resolve-conflicts OVERWRITE || true
+
+kubectl -n amazon-cloudwatch get pods
+```
+
+### 6.5 Lancer le test de charge 1K
+
+```bash
+cd /home/naxxer/Videos/microservices-demo
+NAMESPACE=onlineboutique DEPLOYMENT=loadgenerator ./scripts/blackfriday/set-load-profile.sh week1-1k
+kubectl -n onlineboutique scale deployment/loadgenerator --replicas=1
+
+# Observation pendant test
+kubectl -n onlineboutique logs deploy/loadgenerator -f --tail=120
+kubectl get nodes
+kubectl -n onlineboutique get pods
+```
+
+### 6.6 Arrêter le test et vérifier
+
+```bash
+kubectl -n onlineboutique scale deployment/loadgenerator --replicas=0
+kubectl -n onlineboutique get deploy loadgenerator
+kubectl -n onlineboutique get pods
+kubectl -n onlineboutique get events --sort-by=.lastTimestamp | tail -n 40
+```
+
+## 7. Observations techniques (preuves)
 
 État cluster/app observé:
 - nodes Ready
@@ -143,13 +226,13 @@ CloudWatch dashboard (captures):
 - mémoire node modérée
 - pics réseau/cpu corrélés à la fenêtre de charge
 
-## 7. Écarts et points de vigilance
+## 8. Écarts et points de vigilance
 
 1. `metrics-server`/`kubectl top` pas immédiatement prêt pendant la fenêtre de test.
 2. Probes frontend/recommendation à stabiliser pour les paliers de charge suivants.
 3. Qualité de service sous charge à qualifier avec des seuils explicites (SLO/SLA) en semaine 2.
 
-## 8. Conclusion Week 1
+## 9. Conclusion Week 1
 
 Statut global:
 - **PASS (avec réserves techniques mineures)**
@@ -164,14 +247,14 @@ Réserves:
 - stabilisation des probes
 - finalisation métriques K8s locales (`metrics-server`) selon besoin outillage local
 
-## 9. Actions prévues pour Week 2
+## 10. Actions prévues pour Week 2
 
 1. Stabiliser les services sensibles sous charge (probes/timeouts).
 2. Activer et valider autoscaling applicatif (HPA).
 3. Renforcer sécurité (network policies, scans).
 4. Exécuter les paliers de charge 5K, 20K, 50K avec collecte métriques standardisée.
 
-## 10. Checklist de preuves à archiver
+## 11. Checklist de preuves à archiver
 
 - capture `kubectl get nodes`
 - capture `kubectl -n onlineboutique get pods`
@@ -179,4 +262,3 @@ Réserves:
 - capture dashboard CloudWatch pendant charge
 - extrait logs loadgenerator pendant test
 - extrait events kube en fin de test
-
