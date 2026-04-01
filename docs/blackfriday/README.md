@@ -20,6 +20,7 @@ Maintain platform availability while scaling up to **90K concurrent users** duri
    - [week3-pre-blackfriday.md](week3-pre-blackfriday.md)
 4. Demo days - War Room execution:
    - [demo-war-room-runbook.md](demo-war-room-runbook.md)
+   - [demo-days-blackfriday.md](demo-days-blackfriday.md)
 
 ## Traceability
 
@@ -52,6 +53,12 @@ cd ..
 ./scripts/blackfriday/set-load-profile.sh week2-50k
 ./scripts/blackfriday/set-load-profile.sh week3-70k
 ./scripts/blackfriday/set-load-profile.sh demo-90k
+
+# Optional: dedicated Day 1 control helper (start/set-rate/status/stop)
+./scripts/blackfriday/demo-day-control.sh start
+./scripts/blackfriday/demo-day-control.sh set-rate 500
+./scripts/blackfriday/demo-day-control.sh status
+./scripts/blackfriday/demo-day-control.sh stop
 ```
 
 ## Related Repo Assets
