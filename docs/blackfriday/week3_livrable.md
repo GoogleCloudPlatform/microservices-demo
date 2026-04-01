@@ -170,7 +170,11 @@ terraform apply -var-file=terraform.tfvars
   - Approche: ajustement progressif base metriques (`kubectl top`, Grafana, HPA).
 
 #### Resultat
-- [A renseigner] reduction de cout observee, comportement de scheduling Spot, impact perf.
+- Node Spot actif confirme: `ip-10-40-99-249` avec labels `capacity-type=spot` et `workload-tier=best-effort`.
+- Configuration workloads non critiques validee: `loadgenerator` et `recommendationservice` exposent bien `tolerations` Spot + `nodeAffinity preferred`.
+- Validation de placement Spot executee: `loadgenerator` force temporairement via `nodeSelector` puis pods observes sur le node Spot.
+- Rollback operationnel valide: suppression du `nodeSelector` + redemarrage, puis retour au mode normal (preference Spot non stricte).
+- Etat final stable de test: `loadgenerator` remis a `replicas=0` apres verification.
 
 #### Conclusion partielle
 - Le design cout est en place: stable pour le critique, optimise pour le non critique.
