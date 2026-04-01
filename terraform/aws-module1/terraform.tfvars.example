@@ -1,6 +1,6 @@
 project_name             = "blackfriday-survival-MAH-groupe1"
 name_suffix              = "MAH-groupe1"
-aws_region               = "eu-west-3"
+aws_region               = "eu-south-1"
 cluster_version          = "1.31"
 node_instance_types      = ["m6i.large"]
 node_group_min_size      = 3

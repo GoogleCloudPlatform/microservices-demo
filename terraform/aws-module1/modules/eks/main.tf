@@ -11,6 +11,10 @@ module "eks" {
   cluster_endpoint_public_access = true
   enable_irsa                    = true
 
+  iam_role_use_name_prefix = false
+  iam_role_name            = "${var.cluster_name}-cluster"
+
+
   cluster_addons = {
     coredns    = {}
     kube-proxy = {}
