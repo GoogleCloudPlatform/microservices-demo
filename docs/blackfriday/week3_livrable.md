@@ -283,10 +283,14 @@ NAMESPACE=onlineboutique DEPLOYMENT=loadgenerator RATE_OVERRIDE=100 \
     - `autoscaling:SetDesiredCapacity`
     - `autoscaling:TerminateInstanceInAutoScalingGroup`
   - Impact: pas de scale-up on-demand effectif pendant certaines phases, d'ou pods `Pending`.
+- Remediation appliquee apres drill:
+  - policy inline `ClusterAutoscalerHotfixWeek3` appliquee au role `EKSClusterAutoscalerRoleMAH1`.
+  - restart du deployment `kube-system/cluster-autoscaler-aws-cluster-autoscaler` effectue.
+  - controle post-fix (`--since=10m`) sans occurrence des motifs `AccessDenied` / `SetDesiredCapacity` / `TerminateInstanceInAutoScalingGroup` / `No expansion options` dans la commande de verification.
 
 #### Conclusion partielle
 - Le runbook est valide fonctionnellement (detection, mitigation, mesure MTTR, journalisation).
-- Le passage "pret production" est conditionne a la correction IAM du Cluster Autoscaler.
+- Le blocage IAM principal est corrige operationnellement; validation finale a confirmer sous charge.
 
 ---
 
@@ -316,9 +320,11 @@ NAMESPACE=onlineboutique DEPLOYMENT=loadgenerator RATE_OVERRIDE=100 \
   - cadence de suivi tenue pendant drill (collecte continue dans le fichier de preuve).
 - Blocage principal identifie:
   - autoscaler en backoff suite a `AccessDenied` IAM, entrainant `No expansion options` et `NotTriggerScaleUp`.
+- Correctif immediat applique:
+  - droits IAM autoscaler completes + redemarrage du composant autoscaler.
 - Decision operationnelle:
   - War Room prete sur l'axe organisation/procedure.
-  - War Room a valider a nouveau apres correction IAM pour confirmer la reponse infra complete.
+  - War Room a valider a nouveau sous charge pour confirmer la reponse infra complete apres correctif IAM.
 
 #### Conclusion partielle
 - L'organisation et les procedures sont operationnelles.
@@ -357,7 +363,7 @@ NAMESPACE=onlineboutique DEPLOYMENT=loadgenerator RATE_OVERRIDE=100 \
 - Les scripts rendent l'execution reproductible.
 
 ### Reserves a lever
-1. Corriger IAM Cluster Autoscaler (`SetDesiredCapacity`, `TerminateInstanceInAutoScalingGroup`) puis valider scale-up/scale-down sans `AccessDenied`.
+1. Confirmer en test de charge court (post-hotfix IAM) le scale-up/scale-down sans retour d'erreurs autoscaler.
 2. Stabilite post-charge sur certains services critiques (pods `Pending`, probes transitoires).
 3. Mesure chifree definitive du cout sous repetition.
 4. Validation finale des KPI SLO/SLA pendant le 70K.
