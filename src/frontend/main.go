@@ -22,6 +22,7 @@ import (
 	"time"
 
 	"cloud.google.com/go/profiler"
+	"github.com/GoogleCloudPlatform/microservices-demo/src/frontend/healthcheck"
 	"github.com/gorilla/mux"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
@@ -159,6 +160,18 @@ func main() {
 	r.PathPrefix(baseUrl + "/static/").Handler(http.StripPrefix(baseUrl+"/static/", http.FileServer(http.Dir("./static/"))))
 	r.HandleFunc(baseUrl+"/robots.txt", func(w http.ResponseWriter, _ *http.Request) { fmt.Fprint(w, "User-agent: *\nDisallow: /") })
 	r.HandleFunc(baseUrl+"/_healthz", func(w http.ResponseWriter, _ *http.Request) { fmt.Fprint(w, "ok") })
+
+	// Structured health check with dependency status
+	hc := healthcheck.NewChecker("frontend", "1.0.0")
+	hc.AddGRPCDependency("product-catalog", svc.productCatalogSvcConn, true)
+	hc.AddGRPCDependency("currency", svc.currencySvcConn, true)
+	hc.AddGRPCDependency("cart", svc.cartSvcConn, true)
+	hc.AddGRPCDependency("recommendation", svc.recommendationSvcConn, false)
+	hc.AddGRPCDependency("checkout", svc.checkoutSvcConn, true)
+	hc.AddGRPCDependency("shipping", svc.shippingSvcConn, false)
+	hc.AddGRPCDependency("ad", svc.adSvcConn, false)
+	r.HandleFunc(baseUrl+"/health", hc.Handler()).Methods(http.MethodGet)
+	r.HandleFunc(baseUrl+"/livez", healthcheck.LivenessHandler("frontend")).Methods(http.MethodGet)
 	r.HandleFunc(baseUrl+"/product-meta/{ids}", svc.getProductByID).Methods(http.MethodGet)
 	r.HandleFunc(baseUrl+"/bot", svc.chatBotHandler).Methods(http.MethodPost)
 
