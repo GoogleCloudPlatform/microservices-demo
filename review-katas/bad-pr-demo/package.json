@@ -1,0 +1,9 @@
+{
+  "name": "bad-pr-demo",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Intentionally bad code review kata",
+  "scripts": {
+    "test": "node --test"
+  }
+}
