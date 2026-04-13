@@ -161,7 +161,7 @@ packaging==25.0
     #   langsmith
 pgvector==0.3.6
     # via langchain-postgres
-pillow==12.1.1
+pillow==12.2.0
     # via -r requirements.in
 proto-plus==1.26.1
     # via
