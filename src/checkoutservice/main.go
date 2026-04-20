@@ -25,6 +25,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
+	gobreaker "github.com/sony/gobreaker/v2"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/credentials/insecure"
@@ -37,9 +38,11 @@ import (
 
 	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
 	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc"
 	"go.opentelemetry.io/otel/propagation"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
+	"go.opentelemetry.io/otel/trace"
 )
 
 const (
@@ -68,21 +71,27 @@ type checkoutService struct {
 
 	productCatalogSvcAddr string
 	productCatalogSvcConn *grpc.ClientConn
+	productCatalogCB      *gobreaker.CircuitBreaker[any]
 
 	cartSvcAddr string
 	cartSvcConn *grpc.ClientConn
+	cartCB      *gobreaker.CircuitBreaker[any]
 
 	currencySvcAddr string
 	currencySvcConn *grpc.ClientConn
+	currencyCB      *gobreaker.CircuitBreaker[any]
 
 	shippingSvcAddr string
 	shippingSvcConn *grpc.ClientConn
+	shippingCB      *gobreaker.CircuitBreaker[any]
 
 	emailSvcAddr string
 	emailSvcConn *grpc.ClientConn
+	emailCB      *gobreaker.CircuitBreaker[any]
 
 	paymentSvcAddr string
 	paymentSvcConn *grpc.ClientConn
+	paymentCB      *gobreaker.CircuitBreaker[any]
 }
 
 func main() {
@@ -121,6 +130,13 @@ func main() {
 	mustConnGRPC(ctx, &svc.currencySvcConn, svc.currencySvcAddr)
 	mustConnGRPC(ctx, &svc.emailSvcConn, svc.emailSvcAddr)
 	mustConnGRPC(ctx, &svc.paymentSvcConn, svc.paymentSvcAddr)
+
+	svc.paymentCB = newCircuitBreaker("payment-service", 3, 10*time.Second, 30*time.Second, 0.6, 5)
+	svc.shippingCB = newCircuitBreaker("shipping-service", 3, 10*time.Second, 30*time.Second, 0.6, 5)
+	svc.cartCB = newCircuitBreaker("cart-service", 5, 10*time.Second, 15*time.Second, 0.7, 5)
+	svc.productCatalogCB = newCircuitBreaker("product-catalog-service", 5, 10*time.Second, 20*time.Second, 0.7, 5)
+	svc.currencyCB = newCircuitBreaker("currency-service", 5, 10*time.Second, 20*time.Second, 0.7, 5)
+	svc.emailCB = newCircuitBreaker("email-service", 2, 10*time.Second, 60*time.Second, 0.5, 3)
 
 	log.Infof("service config: %+v", svc)
 
@@ -219,6 +235,63 @@ func mustConnGRPC(ctx context.Context, conn **grpc.ClientConn, addr string) {
 	}
 }
 
+func newCircuitBreaker(name string, maxRequests uint32, interval, timeout time.Duration, failureRatio float64, minRequests uint32) *gobreaker.CircuitBreaker[any] {
+	return gobreaker.NewCircuitBreaker[any](gobreaker.Settings{
+		Name:        name,
+		MaxRequests: maxRequests,
+		Interval:    interval,
+		Timeout:     timeout,
+		ReadyToTrip: func(counts gobreaker.Counts) bool {
+			return counts.Requests >= minRequests &&
+				float64(counts.TotalFailures)/float64(counts.Requests) >= failureRatio
+		},
+		IsSuccessful: func(err error) bool {
+			return !isTransientGRPCError(err)
+		},
+		OnStateChange: func(name string, from, to gobreaker.State) {
+			log.WithFields(logrus.Fields{
+				"circuit": name,
+				"from":    from.String(),
+				"to":      to.String(),
+			}).Warn("circuit breaker state changed")
+		},
+	})
+}
+
+// isTransientGRPCError returns true for gRPC errors that indicate a transient
+// service issue and should count toward the circuit breaker failure threshold.
+// Client errors (InvalidArgument, Unauthenticated, etc.) return false so they
+// don't trip the circuit.
+func isTransientGRPCError(err error) bool {
+	if err == nil {
+		return false
+	}
+	st, ok := status.FromError(err)
+	if !ok {
+		return true
+	}
+	switch st.Code() {
+	case codes.Unavailable, codes.DeadlineExceeded, codes.ResourceExhausted, codes.Aborted, codes.Canceled:
+		return true
+	default:
+		return false
+	}
+}
+
+// cbExecute wraps a circuit breaker call with OTel span attributes for observability.
+func cbExecute(ctx context.Context, cb *gobreaker.CircuitBreaker[any], fn func() (any, error)) (any, error) {
+	span := trace.SpanFromContext(ctx)
+	span.SetAttributes(
+		attribute.String("circuit.name", cb.Name()),
+		attribute.String("circuit.state", cb.State().String()),
+	)
+	result, err := cb.Execute(fn)
+	if errors.Is(err, gobreaker.ErrOpenState) || errors.Is(err, gobreaker.ErrTooManyRequests) {
+		span.SetAttributes(attribute.Bool("circuit.rejected", true))
+	}
+	return result, err
+}
+
 func (cs *checkoutService) Check(ctx context.Context, req *healthpb.HealthCheckRequest) (*healthpb.HealthCheckResponse, error) {
 	return &healthpb.HealthCheckResponse{Status: healthpb.HealthCheckResponse_SERVING}, nil
 }
@@ -237,7 +310,7 @@ func (cs *checkoutService) PlaceOrder(ctx context.Context, req *pb.PlaceOrderReq
 
 	prep, err := cs.prepareOrderItemsAndShippingQuoteFromCart(ctx, req.UserId, req.UserCurrency, req.Address)
 	if err != nil {
-		return nil, status.Errorf(codes.Internal, err.Error())
+		return nil, status.Errorf(codes.Internal, "%s", err.Error())
 	}
 
 	total := pb.Money{CurrencyCode: req.UserCurrency,
@@ -311,26 +384,43 @@ func (cs *checkoutService) prepareOrderItemsAndShippingQuoteFromCart(ctx context
 }
 
 func (cs *checkoutService) quoteShipping(ctx context.Context, address *pb.Address, items []*pb.CartItem) (*pb.Money, error) {
-	shippingQuote, err := pb.NewShippingServiceClient(cs.shippingSvcConn).
-		GetQuote(ctx, &pb.GetQuoteRequest{
-			Address: address,
-			Items:   items})
+	result, err := cbExecute(ctx, cs.shippingCB, func() (any, error) {
+		return pb.NewShippingServiceClient(cs.shippingSvcConn).
+			GetQuote(ctx, &pb.GetQuoteRequest{
+				Address: address,
+				Items:   items})
+	})
 	if err != nil {
+		if errors.Is(err, gobreaker.ErrOpenState) || errors.Is(err, gobreaker.ErrTooManyRequests) {
+			return nil, status.Errorf(codes.Unavailable, "shipping quote service circuit breaker open")
+		}
 		return nil, fmt.Errorf("failed to get shipping quote: %+v", err)
 	}
-	return shippingQuote.GetCostUsd(), nil
+	return result.(*pb.GetQuoteResponse).GetCostUsd(), nil
 }
 
 func (cs *checkoutService) getUserCart(ctx context.Context, userID string) ([]*pb.CartItem, error) {
-	cart, err := pb.NewCartServiceClient(cs.cartSvcConn).GetCart(ctx, &pb.GetCartRequest{UserId: userID})
+	result, err := cbExecute(ctx, cs.cartCB, func() (any, error) {
+		return pb.NewCartServiceClient(cs.cartSvcConn).GetCart(ctx, &pb.GetCartRequest{UserId: userID})
+	})
 	if err != nil {
+		if errors.Is(err, gobreaker.ErrOpenState) || errors.Is(err, gobreaker.ErrTooManyRequests) {
+			return nil, status.Errorf(codes.Unavailable, "cart service circuit breaker open")
+		}
 		return nil, fmt.Errorf("failed to get user cart during checkout: %+v", err)
 	}
-	return cart.GetItems(), nil
+	return result.(*pb.Cart).GetItems(), nil
 }
 
 func (cs *checkoutService) emptyUserCart(ctx context.Context, userID string) error {
-	if _, err := pb.NewCartServiceClient(cs.cartSvcConn).EmptyCart(ctx, &pb.EmptyCartRequest{UserId: userID}); err != nil {
+	_, err := cbExecute(ctx, cs.cartCB, func() (any, error) {
+		return pb.NewCartServiceClient(cs.cartSvcConn).EmptyCart(ctx, &pb.EmptyCartRequest{UserId: userID})
+	})
+	if err != nil {
+		if errors.Is(err, gobreaker.ErrOpenState) || errors.Is(err, gobreaker.ErrTooManyRequests) {
+			log.WithField("service", "cart").Warn("failed to empty cart - circuit breaker open (non-critical)")
+			return nil
+		}
 		return fmt.Errorf("failed to empty user cart during checkout: %+v", err)
 	}
 	return nil
@@ -341,10 +431,16 @@ func (cs *checkoutService) prepOrderItems(ctx context.Context, items []*pb.CartI
 	cl := pb.NewProductCatalogServiceClient(cs.productCatalogSvcConn)
 
 	for i, item := range items {
-		product, err := cl.GetProduct(ctx, &pb.GetProductRequest{Id: item.GetProductId()})
+		result, err := cbExecute(ctx, cs.productCatalogCB, func() (any, error) {
+			return cl.GetProduct(ctx, &pb.GetProductRequest{Id: item.GetProductId()})
+		})
 		if err != nil {
+			if errors.Is(err, gobreaker.ErrOpenState) || errors.Is(err, gobreaker.ErrTooManyRequests) {
+				return nil, status.Errorf(codes.Unavailable, "product catalog circuit breaker open")
+			}
 			return nil, fmt.Errorf("failed to get product #%q", item.GetProductId())
 		}
+		product := result.(*pb.Product)
 		price, err := cs.convertCurrency(ctx, product.GetPriceUsd(), userCurrency)
 		if err != nil {
 			return nil, fmt.Errorf("failed to convert price of %q to %s", item.GetProductId(), userCurrency)
@@ -357,38 +453,59 @@ func (cs *checkoutService) prepOrderItems(ctx context.Context, items []*pb.CartI
 }
 
 func (cs *checkoutService) convertCurrency(ctx context.Context, from *pb.Money, toCurrency string) (*pb.Money, error) {
-	result, err := pb.NewCurrencyServiceClient(cs.currencySvcConn).Convert(context.TODO(), &pb.CurrencyConversionRequest{
-		From:   from,
-		ToCode: toCurrency})
+	result, err := cbExecute(ctx, cs.currencyCB, func() (any, error) {
+		return pb.NewCurrencyServiceClient(cs.currencySvcConn).Convert(ctx, &pb.CurrencyConversionRequest{
+			From:   from,
+			ToCode: toCurrency})
+	})
 	if err != nil {
+		if errors.Is(err, gobreaker.ErrOpenState) || errors.Is(err, gobreaker.ErrTooManyRequests) {
+			return nil, status.Errorf(codes.Unavailable, "currency conversion circuit breaker open")
+		}
 		return nil, fmt.Errorf("failed to convert currency: %+v", err)
 	}
-	return result, err
+	return result.(*pb.Money), nil
 }
 
 func (cs *checkoutService) chargeCard(ctx context.Context, amount *pb.Money, paymentInfo *pb.CreditCardInfo) (string, error) {
-	paymentResp, err := pb.NewPaymentServiceClient(cs.paymentSvcConn).Charge(ctx, &pb.ChargeRequest{
-		Amount:     amount,
-		CreditCard: paymentInfo})
+	result, err := cbExecute(ctx, cs.paymentCB, func() (any, error) {
+		return pb.NewPaymentServiceClient(cs.paymentSvcConn).Charge(ctx, &pb.ChargeRequest{
+			Amount:     amount,
+			CreditCard: paymentInfo})
+	})
 	if err != nil {
+		if errors.Is(err, gobreaker.ErrOpenState) || errors.Is(err, gobreaker.ErrTooManyRequests) {
+			return "", status.Errorf(codes.Unavailable, "payment service circuit breaker open, please try again later")
+		}
 		return "", fmt.Errorf("could not charge the card: %+v", err)
 	}
-	return paymentResp.GetTransactionId(), nil
+	return result.(*pb.ChargeResponse).GetTransactionId(), nil
 }
 
 func (cs *checkoutService) sendOrderConfirmation(ctx context.Context, email string, order *pb.OrderResult) error {
-	_, err := pb.NewEmailServiceClient(cs.emailSvcConn).SendOrderConfirmation(ctx, &pb.SendOrderConfirmationRequest{
-		Email: email,
-		Order: order})
+	_, err := cbExecute(ctx, cs.emailCB, func() (any, error) {
+		return pb.NewEmailServiceClient(cs.emailSvcConn).SendOrderConfirmation(ctx, &pb.SendOrderConfirmationRequest{
+			Email: email,
+			Order: order})
+	})
+	if errors.Is(err, gobreaker.ErrOpenState) || errors.Is(err, gobreaker.ErrTooManyRequests) {
+		log.WithField("service", "email").Warn("email circuit breaker open - order succeeded but confirmation not sent")
+		return fmt.Errorf("email service temporarily unavailable (circuit open)")
+	}
 	return err
 }
 
 func (cs *checkoutService) shipOrder(ctx context.Context, address *pb.Address, items []*pb.CartItem) (string, error) {
-	resp, err := pb.NewShippingServiceClient(cs.shippingSvcConn).ShipOrder(ctx, &pb.ShipOrderRequest{
-		Address: address,
-		Items:   items})
+	result, err := cbExecute(ctx, cs.shippingCB, func() (any, error) {
+		return pb.NewShippingServiceClient(cs.shippingSvcConn).ShipOrder(ctx, &pb.ShipOrderRequest{
+			Address: address,
+			Items:   items})
+	})
 	if err != nil {
+		if errors.Is(err, gobreaker.ErrOpenState) || errors.Is(err, gobreaker.ErrTooManyRequests) {
+			return "", status.Errorf(codes.Unavailable, "shipping service circuit breaker open")
+		}
 		return "", fmt.Errorf("shipment failed: %+v", err)
 	}
-	return resp.GetTrackingId(), nil
+	return result.(*pb.ShipOrderResponse).GetTrackingId(), nil
 }
