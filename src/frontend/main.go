@@ -19,6 +19,8 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"os/signal"
+	"syscall"
 	"time"
 
 	"cloud.google.com/go/profiler"
@@ -167,8 +169,63 @@ func main() {
 	handler = ensureSessionID(handler)                 // add session ID
 	handler = otelhttp.NewHandler(handler, "frontend") // add OTel tracing
 
+	srv := &http.Server{
+		Addr:    addr + ":" + srvPort,
+		Handler: handler,
+	}
+
+	// Run HTTP server in background
 	log.Infof("starting server on %s:%s", addr, srvPort)
-	log.Fatal(http.ListenAndServe(addr+":"+srvPort, handler))
+	errCh := make(chan error, 1)
+	go func() {
+		if err := srv.ListenAndServe(); err != http.ErrServerClosed {
+			errCh <- err
+		}
+	}()
+
+	// Wait for shutdown signal or server error
+	stop := make(chan os.Signal, 1)
+	signal.Notify(stop, os.Interrupt, syscall.SIGTERM)
+
+	select {
+	case sig := <-stop:
+		log.Infof("received signal %v, starting graceful shutdown", sig)
+	case err := <-errCh:
+		log.Fatalf("HTTP server failed: %v", err)
+	}
+
+	// Graceful shutdown: 25s fits within K8s default 30s terminationGracePeriodSeconds
+	shutdownCtx, cancel := context.WithTimeout(context.Background(), 25*time.Second)
+	defer cancel()
+
+	// 1. Drain HTTP server (stop accepting new connections, finish in-flight requests)
+	if err := srv.Shutdown(shutdownCtx); err != nil {
+		log.Warnf("HTTP server shutdown error: %v", err)
+	} else {
+		log.Info("HTTP server drained successfully")
+	}
+
+	// 2. Close gRPC client connections
+	for name, conn := range map[string]*grpc.ClientConn{
+		"currency":        svc.currencySvcConn,
+		"product-catalog": svc.productCatalogSvcConn,
+		"cart":            svc.cartSvcConn,
+		"recommendation":  svc.recommendationSvcConn,
+		"shipping":        svc.shippingSvcConn,
+		"checkout":        svc.checkoutSvcConn,
+		"ad":              svc.adSvcConn,
+	} {
+		if err := conn.Close(); err != nil {
+			log.Warnf("error closing %s client connection: %v", name, err)
+		}
+	}
+	if svc.collectorConn != nil {
+		if err := svc.collectorConn.Close(); err != nil {
+			log.Warnf("error closing collector client connection: %v", err)
+		}
+	}
+
+	log.Info("frontend shutdown complete")
 }
 func initStats(log logrus.FieldLogger) {
 	// TODO(arbrown) Implement OpenTelemtry stats

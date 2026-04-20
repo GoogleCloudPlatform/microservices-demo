@@ -19,6 +19,8 @@ import (
 	"fmt"
 	"net"
 	"os"
+	"os/signal"
+	"syscall"
 	"time"
 
 	"cloud.google.com/go/profiler"
@@ -159,8 +161,61 @@ func main() {
 	healthcheck := health.NewServer()
 	healthpb.RegisterHealthServer(srv, healthcheck)
 	log.Infof("starting to listen on tcp: %q", lis.Addr().String())
-	err = srv.Serve(lis)
-	log.Fatal(err)
+
+	// Run gRPC server in background
+	errCh := make(chan error, 1)
+	go func() {
+		errCh <- srv.Serve(lis)
+	}()
+
+	// Wait for shutdown signal or server error
+	stop := make(chan os.Signal, 1)
+	signal.Notify(stop, os.Interrupt, syscall.SIGTERM)
+
+	select {
+	case sig := <-stop:
+		log.Infof("received signal %v, starting graceful shutdown", sig)
+	case err := <-errCh:
+		log.Fatalf("gRPC server failed: %v", err)
+	}
+
+	// Mark health check as NOT_SERVING so readiness probe fails fast
+	healthcheck.SetServingStatus("", healthpb.HealthCheckResponse_NOT_SERVING)
+
+	// Graceful shutdown: 25s fits within K8s default 30s terminationGracePeriodSeconds
+	shutdownCtx, cancel := context.WithTimeout(context.Background(), 25*time.Second)
+	defer cancel()
+
+	// 1. Drain gRPC server (stop accepting new RPCs, finish in-flight)
+	stopped := make(chan struct{})
+	go func() {
+		srv.GracefulStop()
+		close(stopped)
+	}()
+
+	select {
+	case <-stopped:
+		log.Info("gRPC server drained successfully")
+	case <-shutdownCtx.Done():
+		log.Warn("graceful stop timed out, forcing shutdown")
+		srv.Stop()
+	}
+
+	// 2. Close gRPC client connections
+	for name, conn := range map[string]*grpc.ClientConn{
+		"shipping":        svc.shippingSvcConn,
+		"product-catalog": svc.productCatalogSvcConn,
+		"cart":            svc.cartSvcConn,
+		"currency":        svc.currencySvcConn,
+		"email":           svc.emailSvcConn,
+		"payment":         svc.paymentSvcConn,
+	} {
+		if err := conn.Close(); err != nil {
+			log.Warnf("error closing %s client connection: %v", name, err)
+		}
+	}
+
+	log.Info("checkoutservice shutdown complete")
 }
 
 func initStats() {
