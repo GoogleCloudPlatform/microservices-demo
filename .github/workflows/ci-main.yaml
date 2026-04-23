@@ -67,8 +67,8 @@ jobs:
       run: |
         PR_NUMBER=$(echo $GITHUB_REF | awk 'BEGIN { FS = "/" } ; { print $3 }')
         NAMESPACE="pr${PR_NUMBER}"
-        echo "::set-env name=NAMESPACE::$NAMESPACE"
-        echo "::set-env name=PR_NUMBER::$PR_NUMBER"
+        echo "NAMESPACE=$NAMESPACE" >> $GITHUB_ENV
+        echo "PR_NUMBER=$PR_NUMBER" >> $GITHUB_ENV
 
         yes | gcloud auth configure-docker us-docker.pkg.dev
         gcloud container clusters get-credentials $PR_CLUSTER --region $REGION --project $PROJECT_ID
@@ -82,7 +82,6 @@ jobs:
         skaffold config set --global local-cluster false
         skaffold run --default-repo=us-docker.pkg.dev/$PROJECT_ID/$GITHUB_REF --tag=$GITHUB_SHA --namespace=$NAMESPACE -p network-policies
       env:
-        ACTIONS_ALLOW_UNSECURE_COMMANDS: true
         PROJECT_ID: "online-boutique-ci"
         PR_CLUSTER: "prs-gke-cluster"
         REGION: "us-central1"
