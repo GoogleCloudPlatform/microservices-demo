@@ -62,7 +62,7 @@ psutil==7.1.0
     # via locust
 pygments==2.19.2
     # via pytest
-pytest==8.4.2
+pytest==9.0.3
     # via locust
 python-engineio==4.12.2
     # via
