@@ -19,6 +19,11 @@ metadata:
   labels:
     app: shoppingassistantservice
 spec:
+  # Stay at replicas: 1 because the Gemini API has per-key rate limits and
+  # additional replicas amplify token spend without horizontal benefit.
+  # The PDB below uses maxUnavailable: 1, allowing voluntary disruptions
+  # (node drain) while still bounding involuntary churn.
+  replicas: 1
   selector:
     matchLabels:
       app: shoppingassistantservice
@@ -93,3 +98,15 @@ metadata:
   name: shoppingassistantservice
   annotations:
     iam.gke.io/gcp-service-account: ALLOYDB_USER_GSA_ID
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: shoppingassistantservice
+  labels:
+    app: shoppingassistantservice
+spec:
+  maxUnavailable: 1
+  selector:
+    matchLabels:
+      app: shoppingassistantservice

@@ -19,6 +19,7 @@ metadata:
   labels:
     app: checkoutservice
 spec:
+  replicas: 2
   selector:
     matchLabels:
       app: checkoutservice
@@ -93,3 +94,15 @@ apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: checkoutservice
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: checkoutservice
+  labels:
+    app: checkoutservice
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: checkoutservice

@@ -35,6 +35,7 @@ metadata:
   labels:
     app: {{ .Values.paymentService.name }}
 spec:
+  replicas: {{ .Values.paymentService.replicas | default 2 }}
   selector:
     matchLabels:
       app: {{ .Values.paymentService.name }}
@@ -113,6 +114,21 @@ spec:
   - name: grpc
     port: 50051
     targetPort: 50051
+{{- if .Values.podDisruptionBudget.enable }}
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ .Values.paymentService.name }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: {{ .Values.paymentService.name }}
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: {{ .Values.paymentService.name }}
+{{- end }}
 {{- if .Values.networkPolicies.create }}
 ---
 apiVersion: networking.k8s.io/v1

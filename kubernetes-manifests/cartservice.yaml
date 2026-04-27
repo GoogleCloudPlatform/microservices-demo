@@ -19,6 +19,7 @@ metadata:
   labels:
     app: cartservice
 spec:
+  replicas: 2
   selector:
     matchLabels:
       app: cartservice
@@ -85,6 +86,10 @@ apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: cartservice
+# redis-cart intentionally has no PodDisruptionBudget and stays at replicas: 1.
+# emptyDir storage means replicas > 1 cause split-brain cart state, and a PDB
+# with minAvailable: 1 at replicas: 1 blocks all voluntary disruptions.
+# For production resilience use the kustomize/components/memorystore overlay.
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -154,3 +159,15 @@ spec:
   - name: tcp-redis
     port: 6379
     targetPort: 6379
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: cartservice
+  labels:
+    app: cartservice
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: cartservice

@@ -35,6 +35,7 @@ metadata:
   labels:
     app: {{ .Values.emailService.name }}
 spec:
+  replicas: {{ .Values.emailService.replicas | default 2 }}
   selector:
     matchLabels:
       app: {{ .Values.emailService.name }}
@@ -115,6 +116,21 @@ spec:
   - name: grpc
     port: 5000
     targetPort: 8080
+{{- if .Values.podDisruptionBudget.enable }}
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ .Values.emailService.name }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: {{ .Values.emailService.name }}
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: {{ .Values.emailService.name }}
+{{- end }}
 {{- if .Values.networkPolicies.create }}
 ---
 apiVersion: networking.k8s.io/v1

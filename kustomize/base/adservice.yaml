@@ -19,6 +19,7 @@ metadata:
   labels:
     app: adservice
 spec:
+  replicas: 2
   selector:
     matchLabels:
       app: adservice
@@ -86,3 +87,15 @@ apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: adservice
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: adservice
+  labels:
+    app: adservice
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: adservice

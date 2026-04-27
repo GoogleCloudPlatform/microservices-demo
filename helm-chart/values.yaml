@@ -33,6 +33,12 @@ networkPolicies:
   # Specifies if the NetworkPolicies are created or not. If true, one fine granular NetworkPolicy per app is created.
   create: false
 
+podDisruptionBudget:
+  # Specifies if PodDisruptionBudgets are created. When true, each service with replicas >= 2 gets
+  # a PDB with minAvailable: 1, and shoppingassistantservice (replicas: 1) gets maxUnavailable: 1.
+  # Requires replicas >= 2 on stateless services or the PDB will block all voluntary disruptions.
+  enable: true
+
 sidecars:
   # Specifies if the Sidecars are created or not. If true, one fine granular Sidecar per app is created.
   create: false
@@ -62,6 +68,7 @@ securityContext:
 adService:
   create: true
   name: adservice
+  replicas: 2
   resources:
     requests:
       cpu: 200m
@@ -73,6 +80,7 @@ adService:
 cartService:
   create: true
   name: cartservice
+  replicas: 2
   resources:
     requests:
       cpu: 200m
@@ -84,6 +92,7 @@ cartService:
 checkoutService:
   create: true
   name: checkoutservice
+  replicas: 2
   resources:
     requests:
       cpu: 100m
@@ -95,6 +104,7 @@ checkoutService:
 currencyService:
   create: true
   name: currencyservice
+  replicas: 2
   resources:
     requests:
       cpu: 100m
@@ -106,6 +116,7 @@ currencyService:
 emailService:
   create: true
   name: emailservice
+  replicas: 2
   resources:
     requests:
       cpu: 100m
@@ -117,6 +128,7 @@ emailService:
 frontend:
   create: true
   name: frontend
+  replicas: 2
   externalService: true
   cymbalBranding: false
   # One of: local, gcp, aws, azure, onprem, alibaba. When not set, defaults to "local" unless running in GKE, otherwise auto-sets to gcp.
@@ -142,6 +154,9 @@ frontend:
 loadGenerator:
   create: true
   name: loadgenerator
+  # loadGenerator stays at replicas: 1 and gets no PDB; it is a test tool whose
+  # disruption is acceptable.
+  replicas: 1
   checkFrontendInitContainer: true
   resources:
     requests:
@@ -154,6 +169,7 @@ loadGenerator:
 paymentService:
   create: true
   name: paymentservice
+  replicas: 2
   resources:
     requests:
       cpu: 100m
@@ -165,6 +181,7 @@ paymentService:
 productCatalogService:
   create: true
   name: productcatalogservice
+  replicas: 2
   # Specifies an extra latency to any request on productcatalogservice, by default no extra latency.
   extraLatency: ""
   resources:
@@ -178,6 +195,7 @@ productCatalogService:
 recommendationService:
   create: true
   name: recommendationservice
+  replicas: 2
   resources:
     requests:
       cpu: 100m
@@ -189,6 +207,7 @@ recommendationService:
 shippingService:
   create: true
   name: shippingservice
+  replicas: 2
   resources:
     requests:
       cpu: 100m
@@ -218,3 +237,8 @@ cartDatabase:
 shoppingAssistantService:
   create: false
   name: shoppingassistantservice
+  # shoppingAssistantService stays at replicas: 1 because the Gemini API has per-key
+  # rate limits; additional replicas amplify token spend without throughput benefit.
+  # When podDisruptionBudget.enable is true, the PDB uses maxUnavailable: 1 to allow
+  # voluntary disruptions while bounding involuntary churn.
+  replicas: 1

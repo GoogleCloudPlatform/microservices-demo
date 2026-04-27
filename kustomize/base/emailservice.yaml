@@ -19,6 +19,7 @@ metadata:
   labels:
     app: emailservice
 spec:
+  replicas: 2
   selector:
     matchLabels:
       app: emailservice
@@ -86,3 +87,15 @@ apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: emailservice
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: emailservice
+  labels:
+    app: emailservice
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: emailservice

@@ -19,6 +19,7 @@ metadata:
   labels:
     app: recommendationservice
 spec:
+  replicas: 2
   selector:
     matchLabels:
       app: recommendationservice
@@ -88,3 +89,15 @@ apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: recommendationservice
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: recommendationservice
+  labels:
+    app: recommendationservice
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: recommendationservice

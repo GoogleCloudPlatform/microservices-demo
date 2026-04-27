@@ -19,6 +19,7 @@ metadata:
   labels:
     app: paymentservice
 spec:
+  replicas: 2
   selector:
     matchLabels:
       app: paymentservice
@@ -84,3 +85,15 @@ apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: paymentservice
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: paymentservice
+  labels:
+    app: paymentservice
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: paymentservice

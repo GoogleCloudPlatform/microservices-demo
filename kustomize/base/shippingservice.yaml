@@ -19,6 +19,7 @@ metadata:
   labels:
     app: shippingservice
 spec:
+  replicas: 2
   selector:
     matchLabels:
       app: shippingservice
@@ -84,3 +85,15 @@ apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: shippingservice
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: shippingservice
+  labels:
+    app: shippingservice
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: shippingservice

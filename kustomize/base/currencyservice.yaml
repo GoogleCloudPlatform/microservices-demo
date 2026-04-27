@@ -19,6 +19,7 @@ metadata:
   labels:
     app: currencyservice
 spec:
+  replicas: 2
   selector:
     matchLabels:
       app: currencyservice
@@ -85,3 +86,15 @@ apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: currencyservice
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: currencyservice
+  labels:
+    app: currencyservice
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: currencyservice

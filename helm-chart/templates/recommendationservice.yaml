@@ -35,6 +35,7 @@ metadata:
   labels:
     app: {{ .Values.recommendationService.name }}
 spec:
+  replicas: {{ .Values.recommendationService.replicas | default 2 }}
   selector:
     matchLabels:
       app: {{ .Values.recommendationService.name }}
@@ -117,6 +118,21 @@ spec:
   - name: grpc
     port: 8080
     targetPort: 8080
+{{- if .Values.podDisruptionBudget.enable }}
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ .Values.recommendationService.name }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: {{ .Values.recommendationService.name }}
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: {{ .Values.recommendationService.name }}
+{{- end }}
 {{- if .Values.networkPolicies.create }}
 ---
 apiVersion: networking.k8s.io/v1

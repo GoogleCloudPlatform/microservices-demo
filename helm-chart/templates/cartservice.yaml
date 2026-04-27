@@ -33,6 +33,7 @@ metadata:
   labels:
     app: {{ .Values.cartService.name }}
 spec:
+  replicas: {{ .Values.cartService.replicas | default 2 }}
   selector:
     matchLabels:
       app: {{ .Values.cartService.name }}
@@ -110,6 +111,21 @@ spec:
   - name: grpc
     port: 7070
     targetPort: 7070
+{{- if .Values.podDisruptionBudget.enable }}
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ .Values.cartService.name }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: {{ .Values.cartService.name }}
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: {{ .Values.cartService.name }}
+{{- end }}
 {{- if .Values.networkPolicies.create }}
 ---
 apiVersion: networking.k8s.io/v1
@@ -212,6 +228,10 @@ metadata:
   {{- end }}
 ---
 {{- end }}
+# redis-cart intentionally has no PodDisruptionBudget and stays at replicas: 1.
+# emptyDir storage means replicas > 1 cause split-brain cart state, and a PDB
+# with minAvailable: 1 at replicas: 1 blocks all voluntary disruptions.
+# For production resilience, use cartDatabase.type: spanner or an external Redis.
 apiVersion: apps/v1
 kind: Deployment
 metadata:

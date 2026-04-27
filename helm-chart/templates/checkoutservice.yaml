@@ -35,6 +35,7 @@ metadata:
   labels:
     app: {{ .Values.checkoutService.name }}
 spec:
+  replicas: {{ .Values.checkoutService.replicas | default 2 }}
   selector:
     matchLabels:
       app: {{ .Values.checkoutService.name }}
@@ -124,6 +125,21 @@ spec:
   - name: grpc
     port: 5050
     targetPort: 5050
+{{- if .Values.podDisruptionBudget.enable }}
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ .Values.checkoutService.name }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: {{ .Values.checkoutService.name }}
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: {{ .Values.checkoutService.name }}
+{{- end }}
 {{- if .Values.networkPolicies.create }}
 ---
 apiVersion: networking.k8s.io/v1

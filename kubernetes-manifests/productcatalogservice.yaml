@@ -19,6 +19,7 @@ metadata:
   labels:
     app: productcatalogservice
 spec:
+  replicas: 2
   selector:
     matchLabels:
       app: productcatalogservice
@@ -84,3 +85,15 @@ apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: productcatalogservice
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: productcatalogservice
+  labels:
+    app: productcatalogservice
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: productcatalogservice
