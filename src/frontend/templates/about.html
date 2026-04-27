@@ -1,0 +1,30 @@
+<!--
+ Copyright 2026
+-->
+
+{{ define "about" }}
+
+{{ template "header" . }}
+<main role="main" class="home">
+  <div class="container py-5">
+    <div class="row justify-content-center">
+      <div class="col-12 col-lg-8">
+        <h1 class="mb-4">About This Demo Store</h1>
+        <p>
+          This storefront is part of the microservices demo application. It showcases a
+          production-style architecture where independent services collaborate to provide
+          product browsing, cart management, checkout, recommendations, and supporting
+          functionality.
+        </p>
+        <p>
+          The site is intended for demonstration and learning purposes only. No real
+          purchases are processed.
+        </p>
+        <a href="{{ $.baseUrl }}/" class="btn btn-dark mt-3">Back to shopping</a>
+      </div>
+    </div>
+  </div>
+</main>
+{{ template "footer" . }}
+
+{{ end }}
