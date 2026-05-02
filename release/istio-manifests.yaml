@@ -93,4 +93,13 @@ spec:
         host: frontend
         port:
           number: 80
+---
+apiVersion: security.istio.io/v1beta1
+kind: PeerAuthentication
+metadata:
+  name: default
+  namespace: default # namespace-wide policy
+spec:
+  mtls:
+    mode: STRICT # configures all workloads in the mesh to only accept requests encrypted with TLS
 # [END servicemesh_release_istio_manifests_microservices_demo]
