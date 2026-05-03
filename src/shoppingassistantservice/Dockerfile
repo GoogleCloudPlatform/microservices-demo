@@ -41,7 +41,7 @@ COPY --from=builder /usr/local/lib/python3.14/ /usr/local/lib/python3.14/
 COPY . .
 
 # set listen port
-ENV PORT "8080"
+ENV PORT="8080"
 EXPOSE 8080
 
 ENTRYPOINT ["python", "shoppingassistantservice.py"]
