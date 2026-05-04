@@ -91,10 +91,12 @@ spec:
         {{- end }}
         readinessProbe:
           periodSeconds: 5
+          timeoutSeconds: 5
           grpc:
             port: 8080
         livenessProbe:
-          periodSeconds: 5
+          periodSeconds: 10
+          timeoutSeconds: 5
           grpc:
             port: 8080
         resources:

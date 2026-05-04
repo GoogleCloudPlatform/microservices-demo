@@ -20,7 +20,7 @@ TRAINING_DIR="$REPO_ROOT/training"
 DOMAIN="training.gcp.re-cinq.com"
 TLS_SECRET="wildcard-training-tls"
 CLUSTER_ISSUER="letsencrypt-prod"
-INGRESS_CLASS="nginx"
+INGRESS_CLASS="nginx-ingress"
 BASE_BRANCH="main"
 
 if [[ $# -ne 1 ]]; then

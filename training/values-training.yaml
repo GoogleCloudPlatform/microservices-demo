@@ -66,11 +66,11 @@ currencyService:
 emailService:
   resources:
     requests:
-      cpu: 50m
-      memory: 48Mi
+      cpu: 100m
+      memory: 64Mi
     limits:
-      cpu: 150m
-      memory: 100Mi
+      cpu: 200m
+      memory: 128Mi
 
 frontend:
   externalService: false  # we expose via Ingress, not LoadBalancer
@@ -103,11 +103,11 @@ productCatalogService:
 recommendationService:
   resources:
     requests:
-      cpu: 50m
-      memory: 150Mi
+      cpu: 100m
+      memory: 220Mi
     limits:
-      cpu: 150m
-      memory: 350Mi
+      cpu: 200m
+      memory: 450Mi
 
 shippingService:
   resources:

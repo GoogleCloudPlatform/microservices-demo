@@ -100,6 +100,15 @@ resource "google_artifact_registry_repository_iam_member" "github_push" {
   member     = "serviceAccount:${google_service_account.github_pusher.email}"
 }
 
+# Lets the workflow run get-gke-credentials and helm-upgrade against the
+# training cluster. Project-wide scope is broader than necessary; refine
+# with RBAC later if upstreaming.
+resource "google_project_iam_member" "github_gke_developer" {
+  project = var.project_id
+  role    = "roles/container.developer"
+  member  = "serviceAccount:${google_service_account.github_pusher.email}"
+}
+
 # Allow the GitHub repo's tokens (any branch) to impersonate the SA.
 resource "google_service_account_iam_member" "github_wif_binding" {
   service_account_id = google_service_account.github_pusher.name
