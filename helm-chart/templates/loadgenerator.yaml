@@ -106,7 +106,7 @@ spec:
               - ALL
           privileged: false
           readOnlyRootFilesystem: true
-        image: {{ .Values.images.repository }}/{{ .Values.loadGenerator.name }}:{{ .Values.images.tag | default .Chart.AppVersion }}
+        image: {{ include "onlineboutique.image" (list . .Values.loadGenerator) }}
         env:
         - name: FRONTEND_ADDR
           value: "{{ .Values.frontend.name }}:80"

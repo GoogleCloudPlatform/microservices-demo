@@ -1,0 +1,43 @@
+# One-time setup applied to the cluster before the training.
+#
+#   kubectl apply -f training/k8s/training-system.yaml
+#
+# Creates:
+#   - the training-system namespace (control plane for training infra)
+#   - a wildcard Certificate for *.training.gcp.re-cinq.com that
+#     cert-manager issues via DNS-01 against the existing letsencrypt-prod
+#     ClusterIssuer; the resulting Secret is annotated for reflector so
+#     each attendee namespace gets a copy automatically.
+
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: training-system
+  labels:
+    purpose: training-control-plane
+
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: wildcard-training
+  namespace: training-system
+spec:
+  secretName: wildcard-training-tls
+  # Annotations on the secret produced by cert-manager. reflector picks
+  # these up and replicates the secret into any namespace matching the
+  # auto-namespaces regex.
+  secretTemplate:
+    annotations:
+      reflector.v1.k8s.emberstack.com/reflection-allowed: "true"
+      reflector.v1.k8s.emberstack.com/reflection-allowed-namespaces: "attendee-.*"
+      reflector.v1.k8s.emberstack.com/reflection-auto-enabled: "true"
+      reflector.v1.k8s.emberstack.com/reflection-auto-namespaces: "attendee-.*"
+  dnsNames:
+    - "*.training.gcp.re-cinq.com"
+    - "training.gcp.re-cinq.com"
+  issuerRef:
+    name: letsencrypt-prod
+    kind: ClusterIssuer
+  privateKey:
+    rotationPolicy: Never

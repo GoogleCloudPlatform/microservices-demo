@@ -1,4 +1,7 @@
 {
+  // Renovate disabled in this training fork to avoid auto-PR noise during
+  // training days. Re-enable by removing `enabled: false` if upstreaming.
+  enabled: false,
   extends: [
     'github>GoogleCloudPlatform/kubernetes-engine-samples//.github/renovate-configs/dee-platform-ops.json5',
     'schedule:earlyMondays',

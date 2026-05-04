@@ -1,0 +1,124 @@
+# Training overlay for Online Boutique.
+#
+# Applied per-attendee via:
+#   helm upgrade --install boutique ./helm-chart \
+#     -n attendee-<name> \
+#     -f training/values-training.yaml
+#
+# Goals:
+#   - Cut Autopilot pod-request cost (we pay for requests on Autopilot)
+#   - Drop loadgenerator entirely (a noisy neighbour to prod on a shared cluster)
+#   - Default all images to the training :base tag in our GAR
+#   - Leave per-service image.tag overridable so CI can flip a single service
+#     to attendee-<name>-<sha> on PR merge
+
+images:
+  # Bulk-copied at training setup from us-central1-docker.pkg.dev/google-samples/microservices-demo/*
+  repository: europe-west1-docker.pkg.dev/re5-n8n-platform/microservices-demo-training
+  tag: base
+
+# Disable load generation across all attendee namespaces.
+loadGenerator:
+  create: false
+
+# Disable shopping assistant (not used in training).
+shoppingAssistantService:
+  create: false
+
+# Trimmed resource requests/limits. Numbers chosen to be enough for a
+# 1-2 user browsing session, not for benchmarks.
+adService:
+  resources:
+    requests:
+      cpu: 50m
+      memory: 120Mi
+    limits:
+      cpu: 200m
+      memory: 220Mi
+
+cartService:
+  resources:
+    requests:
+      cpu: 50m
+      memory: 80Mi
+    limits:
+      cpu: 200m
+      memory: 200Mi
+
+checkoutService:
+  resources:
+    requests:
+      cpu: 50m
+      memory: 48Mi
+    limits:
+      cpu: 150m
+      memory: 100Mi
+
+currencyService:
+  resources:
+    requests:
+      cpu: 50m
+      memory: 80Mi
+    limits:
+      cpu: 150m
+      memory: 200Mi
+
+emailService:
+  resources:
+    requests:
+      cpu: 50m
+      memory: 48Mi
+    limits:
+      cpu: 150m
+      memory: 100Mi
+
+frontend:
+  externalService: false  # we expose via Ingress, not LoadBalancer
+  resources:
+    requests:
+      cpu: 50m
+      memory: 48Mi
+    limits:
+      cpu: 150m
+      memory: 100Mi
+
+paymentService:
+  resources:
+    requests:
+      cpu: 50m
+      memory: 80Mi
+    limits:
+      cpu: 150m
+      memory: 200Mi
+
+productCatalogService:
+  resources:
+    requests:
+      cpu: 50m
+      memory: 48Mi
+    limits:
+      cpu: 150m
+      memory: 100Mi
+
+recommendationService:
+  resources:
+    requests:
+      cpu: 50m
+      memory: 150Mi
+    limits:
+      cpu: 150m
+      memory: 350Mi
+
+shippingService:
+  resources:
+    requests:
+      cpu: 50m
+      memory: 48Mi
+    limits:
+      cpu: 150m
+      memory: 100Mi
+
+# In-cluster Redis for cart. Same trim.
+cartDatabase:
+  inClusterRedis:
+    create: true
