@@ -62,7 +62,8 @@ func (p *productCatalog) SearchProducts(ctx context.Context, req *pb.SearchProdu
 
 	var ps []*pb.Product
 	for _, product := range p.parseCatalog() {
-		if strings.Contains(strings.ToLower(product.Name), strings.ToLower(req.Query)) {
+		if strings.Contains(strings.ToLower(product.Name), strings.ToLower(req.Query)) ||
+			strings.Contains(strings.ToLower(product.Description), strings.ToLower(req.Query)) {
 			ps = append(ps, product)
 		}
 	}
