@@ -12,7 +12,8 @@
 ## What we want from you
 
 A customer just opened a ticket about your URL. The ticket is in
-`BUG_REPORT.md` on your branch. Your job today:
+[`BUG_REPORT.md`](https://github.com/re-cinq/microservices-demo/blob/attendee/josefin-gelin/BUG_REPORT.md)
+on your branch. Your job today:
 
 1. Reproduce the issue at josefin-gelin.training.gcp.re-cinq.com
 2. Use Claude Code to triage it: find the suspected file, understand
