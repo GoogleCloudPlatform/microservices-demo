@@ -34,6 +34,10 @@ mkdir -p "$TRAINING_DIR/handouts"
 
 log() { printf '\033[1;34m[bootstrap]\033[0m %s\n' "$*"; }
 
+# Make sure the main repo isn't holding any attendee/* branch checkout left
+# over from a previous cohort - it would otherwise prevent worktree creation.
+git -C "$REPO_ROOT" checkout main --quiet 2>/dev/null || true
+
 # Validate every row first - fail before we mutate anything
 log "validating $CSV"
 while IFS=, read -r name bug; do
@@ -177,10 +181,15 @@ EOF
     log "branch $branch already exists on origin, skipping"
   else
     log "creating branch $branch from origin/$BASE_BRANCH"
-    git worktree add --quiet --detach /tmp/training-$name "origin/$BASE_BRANCH"
+    # Clean up any leftover state from prior runs.
+    rm -rf "/tmp/training-$name"
+    git worktree prune
+    git worktree add --quiet --detach "/tmp/training-$name" "origin/$BASE_BRANCH"
     (
-      cd /tmp/training-$name
-      git checkout -b "$branch"
+      cd "/tmp/training-$name"
+      # -B overwrites a local branch of the same name (left over from a previous
+      # cohort even after the remote branch was teardown'd).
+      git checkout -B "$branch"
       git apply "$TRAINING_DIR/bugs/$bug/PATCH.diff"
       cp "$TRAINING_DIR/bugs/$bug/BUG_REPORT.md" ./BUG_REPORT.md
       git add -A
