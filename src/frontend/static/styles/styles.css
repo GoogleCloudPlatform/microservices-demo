@@ -235,6 +235,72 @@ header .navbar.sub-navbar .controls a img {
   margin-bottom: 3px;
 }
 
+header .header-search {
+  flex: 1 1 auto;
+  max-width: 420px;
+  margin: 0 24px;
+  height: 38px;
+  border: 1px solid #d6d4dc;
+  border-radius: 999px;
+  background: #fff;
+  overflow: hidden;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+header .header-search:focus-within {
+  border-color: #6f6890;
+  box-shadow: 0 0 0 3px rgba(111, 104, 144, 0.15);
+}
+
+header .header-search-input {
+  flex: 1 1 auto;
+  border: 0;
+  outline: none;
+  padding: 0 16px;
+  height: 100%;
+  font-size: 14px;
+  color: #2c2c2c;
+  background: transparent;
+}
+
+header .header-search-input::placeholder {
+  color: #9a98a4;
+}
+
+header .header-search-btn {
+  border: 0;
+  background: transparent;
+  padding: 0 14px;
+  height: 100%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+header .header-search-btn img {
+  width: 18px;
+  height: 18px;
+  opacity: 0.7;
+  transition: opacity 0.15s ease;
+}
+
+header .header-search-btn:hover img,
+header .header-search-btn:focus img {
+  opacity: 1;
+}
+
+.search-result-count {
+  color: #6c6c6c;
+  margin-bottom: 24px;
+}
+
+@media (max-width: 767px) {
+  header .header-search {
+    display: none !important;
+  }
+}
+
 /* Footer */
 
 footer.py-5 {

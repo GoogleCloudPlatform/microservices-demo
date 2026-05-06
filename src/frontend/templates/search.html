@@ -1,0 +1,66 @@
+<!--
+ Copyright 2024 Google LLC
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+-->
+
+{{ define "search" }}
+
+{{ template "header" . }}
+
+<main role="main" class="home">
+  <div class="container-fluid">
+    <div class="row">
+      <div class="col-12 col-lg-12 px-10-percent">
+
+        <div class="row hot-products-row px-xl-6">
+          <div class="col-12">
+            {{ if $.query }}
+              <h3>Search results for &ldquo;{{ $.query }}&rdquo;</h3>
+              <p class="search-result-count">{{ len $.products }} {{ if eq (len $.products) 1 }}product{{ else }}products{{ end }} found</p>
+            {{ else }}
+              <h3>Search</h3>
+              <p class="search-result-count">Enter a term in the search bar above to find products.</p>
+            {{ end }}
+          </div>
+
+          {{ range $.products }}
+          <div class="col-md-4 hot-product-card">
+            <a href="{{ $.baseUrl }}/product/{{.Item.Id}}">
+              <img loading="lazy" src="{{ $.baseUrl }}{{.Item.Picture}}">
+              <div class="hot-product-card-img-overlay"></div>
+            </a>
+            <div>
+              <div class="hot-product-card-name">{{ .Item.Name }}</div>
+              <div class="hot-product-card-price">{{ renderMoney .Price }}</div>
+            </div>
+          </div>
+          {{ end }}
+        </div>
+
+        <div class="row d-none d-lg-block home-desktop-footer-row">
+          <div class="col-12 p-0">
+            {{ template "footer" . }}
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</main>
+
+<div class="d-lg-none">
+  {{ template "footer" . }}
+</div>
+
+{{ end }}
