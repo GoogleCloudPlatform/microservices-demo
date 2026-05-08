@@ -1,10 +1,14 @@
 #!/usr/bin/env bash
 # Provision a training cohort.
 #
-#   ./provision.sh attendees.csv
+#   ./provision.sh attendees.csv              # Module 3 Ex 3 (seed bug per attendee)
+#   ./provision.sh --no-bug attendees.csv     # Module 5 (cohort branches w/o bug seed)
 #
 # Idempotent. Re-runs are safe; existing namespaces, releases, and
-# branches are upgraded in place. CSV format: name,bug_id
+# branches are upgraded in place.
+#
+# CSV format with bug:    name,bug_id
+# CSV format --no-bug:    name              (the bug column, if present, is ignored)
 #
 # Prerequisites:
 #   - kubectl pointing at the training cluster
@@ -23,8 +27,14 @@ CLUSTER_ISSUER="letsencrypt-prod"
 INGRESS_CLASS="nginx-ingress"
 BASE_BRANCH="main"
 
+NO_BUG=0
+if [[ "${1:-}" == "--no-bug" ]]; then
+  NO_BUG=1
+  shift
+fi
+
 if [[ $# -ne 1 ]]; then
-  echo "usage: $0 <attendees.csv>" >&2
+  echo "usage: $0 [--no-bug] <attendees.csv>" >&2
   exit 2
 fi
 CSV="$1"
@@ -39,12 +49,15 @@ log() { printf '\033[1;34m[bootstrap]\033[0m %s\n' "$*"; }
 git -C "$REPO_ROOT" checkout main --quiet 2>/dev/null || true
 
 # Validate every row first - fail before we mutate anything
-log "validating $CSV"
+log "validating $CSV (no-bug mode: $NO_BUG)"
 while IFS=, read -r name bug; do
   [[ "$name" == "name" ]] && continue
-  [[ -z "$name" || -z "$bug" ]] && { echo "empty name or bug in row: $name,$bug" >&2; exit 1; }
-  [[ -d "$TRAINING_DIR/bugs/$bug" ]] || { echo "unknown bug id: $bug (no such dir under training/bugs/)" >&2; exit 1; }
+  [[ -z "$name" ]] && { echo "empty name in row: $name,$bug" >&2; exit 1; }
   [[ "$name" =~ ^[a-z][a-z0-9-]{1,30}$ ]] || { echo "invalid attendee name (must be lowercase, alphanumeric+dash, <=31 chars): $name" >&2; exit 1; }
+  if [[ "$NO_BUG" -eq 0 ]]; then
+    [[ -z "$bug" ]] && { echo "empty bug in row: $name,$bug (use --no-bug for spec-only cohorts)" >&2; exit 1; }
+    [[ -d "$TRAINING_DIR/bugs/$bug" ]] || { echo "unknown bug id: $bug (no such dir under training/bugs/)" >&2; exit 1; }
+  fi
 done < "$CSV"
 
 # Process each attendee
@@ -175,12 +188,12 @@ spec:
                   number: 80
 EOF
 
-  # 4. Branch + bug injection
+  # 4. Branch + (optional) bug injection
   git fetch origin "$BASE_BRANCH" >/dev/null
   if git ls-remote --exit-code --heads origin "$branch" >/dev/null 2>&1; then
     log "branch $branch already exists on origin, skipping"
   else
-    log "creating branch $branch from origin/$BASE_BRANCH"
+    log "creating branch $branch from origin/$BASE_BRANCH (no-bug=$NO_BUG)"
     # Clean up any leftover state from prior runs.
     rm -rf "/tmp/training-$name"
     git worktree prune
@@ -190,19 +203,29 @@ EOF
       # -B overwrites a local branch of the same name (left over from a previous
       # cohort even after the remote branch was teardown'd).
       git checkout -B "$branch"
-      git apply "$TRAINING_DIR/bugs/$bug/PATCH.diff"
-      cp "$TRAINING_DIR/bugs/$bug/BUG_REPORT.md" ./BUG_REPORT.md
-      git add -A
-      GIT_AUTHOR_NAME="training-bot" GIT_AUTHOR_EMAIL="bot@training.local" \
-      GIT_COMMITTER_NAME="training-bot" GIT_COMMITTER_EMAIL="bot@training.local" \
-        git commit --quiet -m "training: seed bug ($bug)" -m "Customer ticket in BUG_REPORT.md."
+      if [[ "$NO_BUG" -eq 0 ]]; then
+        git apply "$TRAINING_DIR/bugs/$bug/PATCH.diff"
+        cp "$TRAINING_DIR/bugs/$bug/BUG_REPORT.md" ./BUG_REPORT.md
+        git add -A
+        GIT_AUTHOR_NAME="training-bot" GIT_AUTHOR_EMAIL="bot@training.local" \
+        GIT_COMMITTER_NAME="training-bot" GIT_COMMITTER_EMAIL="bot@training.local" \
+          git commit --quiet -m "training: seed bug ($bug)" -m "Customer ticket in BUG_REPORT.md."
+      else
+        # No-bug mode: empty commit so the branch has at least one entry on top of
+        # main (otherwise the GitHub Actions detect-changed-services step has no
+        # diff to inspect on first push, which is fine but slightly cleaner this way).
+        GIT_AUTHOR_NAME="training-bot" GIT_AUTHOR_EMAIL="bot@training.local" \
+        GIT_COMMITTER_NAME="training-bot" GIT_COMMITTER_EMAIL="bot@training.local" \
+          git commit --quiet --allow-empty -m "training: cohort branch for $name"
+      fi
       git push --quiet -u origin "$branch"
     )
     git worktree remove --force /tmp/training-$name
   fi
 
   # 5. Handout
-  cat > "$TRAINING_DIR/handouts/$name.md" <<EOF
+  if [[ "$NO_BUG" -eq 0 ]]; then
+    cat > "$TRAINING_DIR/handouts/$name.md" <<EOF
 # Training handout — $name
 
 ## Your environment
@@ -246,6 +269,38 @@ gh pr create --base $branch --title "fix: <one line>" --body "Closes ticket. See
 The PR auto-merges on green CI. Watch the GitHub Actions run for the
 deploy. Re-test at https://$host once it's green.
 EOF
+  else
+    cat > "$TRAINING_DIR/handouts/$name.md" <<EOF
+# Training handout — $name
+
+## Your environment
+
+| field        | value                                           |
+|--------------|-------------------------------------------------|
+| URL          | https://$host                                   |
+| Repo         | https://github.com/re-cinq/microservices-demo   |
+| Your branch  | \`$branch\`                                     |
+
+## What we want from you
+
+Follow the lab instructions in **Module 5 — Spec-driven development** to
+plan and ship a search feature on Online Boutique. Your branch is empty
+(no bug seeded); SpecKit's \`/speckit.implement\` will write the code.
+
+Local workflow:
+
+\`\`\`bash
+git clone https://github.com/re-cinq/microservices-demo
+cd microservices-demo
+git checkout $branch
+# follow the Module 5 Ex 2 + Ex 3 lab steps from there
+\`\`\`
+
+When SpecKit pushes a fix-branch and you open a PR back into
+\`$branch\`, the GitHub Actions \`deploy-attendee\` workflow rebuilds
+the changed services and rolls them out at https://$host.
+EOF
+  fi
 
   log "done with $name"
 done < "$CSV"

@@ -120,11 +120,18 @@ bob,visa-rejected
 Run:
 
 ```bash
+# Module 3 Ex 3 (bug-triage): seeds a bug from training/bugs/ on each branch
 training/bootstrap/provision.sh training/bootstrap/attendees.csv
+
+# Module 5 (spec-driven dev): no bug seeded, branches start empty for SpecKit
+training/bootstrap/provision.sh --no-bug training/bootstrap/attendees.csv
 ```
 
 This creates each namespace + Helm release + Ingress + git branch
 + handout under `training/handouts/<name>.md`. Idempotent.
+
+In `--no-bug` mode the CSV may have either `name` or `name,bug`; the bug
+column is ignored. Handout content is tailored to the mode.
 
 Print the handouts and hand them out. Attendees follow the instructions.
 
