@@ -73,7 +73,7 @@ jobs:
       timeout-minutes: 20
       run: |
         NAMESPACE="pr${PR_NUMBER}"
-        echo "::set-env name=NAMESPACE::$NAMESPACE"
+        echo "NAMESPACE=$NAMESPACE" >> $GITHUB_ENV
 
         yes | gcloud auth configure-docker us-docker.pkg.dev
         gcloud container clusters get-credentials $PR_CLUSTER --region $REGION --project $PROJECT_ID
@@ -87,7 +87,6 @@ jobs:
         skaffold config set --global local-cluster false
         skaffold run --default-repo=us-docker.pkg.dev/$PROJECT_ID/refs/pull/$PR_NUMBER --tag=$PR_NUMBER --namespace=$NAMESPACE -p network-policies
       env:
-        ACTIONS_ALLOW_UNSECURE_COMMANDS: true
         PR_NUMBER: ${{ github.event.pull_request.number }}
         PROJECT_ID: "online-boutique-ci"
         PR_CLUSTER: "prs-gke-cluster"
@@ -122,9 +121,8 @@ jobs:
         sleep 3
         done
         EXTERNAL_IP=$(get_externalIP)
-        echo "::set-env name=EXTERNAL_IP::$EXTERNAL_IP"
+        echo "EXTERNAL_IP=$EXTERNAL_IP" >> $GITHUB_ENV
       env:
-        ACTIONS_ALLOW_UNSECURE_COMMANDS: true
         PR_NUMBER: ${{ github.event.pull_request.number }}
     - name: Smoke Test
       timeout-minutes: 5
