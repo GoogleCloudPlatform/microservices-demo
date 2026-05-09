@@ -113,7 +113,7 @@ jsonpointer==3.0.0
     # via jsonpatch
 langchain==1.2.0
     # via -r requirements.in
-langchain-core==1.2.11
+langchain-core==1.3.3
     # via
     #   langchain
     #   langchain-google-genai
@@ -127,6 +127,8 @@ langchain-google-genai==4.1.2
     # via -r requirements.in
 langchain-postgres==0.0.16
     # via langchain-google-alloydb-pg
+langchain-protocol==0.0.15
+    # via langchain-core
 langgraph==1.0.10rc1
     # via langchain
 langgraph-checkpoint==3.0.1
@@ -232,6 +234,7 @@ typing-extensions==4.15.0
     #   google-genai
     #   grpcio
     #   langchain-core
+    #   langchain-protocol
     #   psycopg-pool
     #   pydantic
     #   pydantic-core
