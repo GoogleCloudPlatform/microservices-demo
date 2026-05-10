@@ -92,6 +92,16 @@ profiles:
   - op: add
     path: /manifests/kustomize/paths/1
     value: kustomize/components/network-policies
+# The "metrics-server" profile deploys metrics-server to kube-system.
+# Required for local clusters (Kind, Minikube) where metrics-server is not pre-installed.
+# Use in isolation or combined with other profiles:
+#     skaffold run -p metrics-server
+#     skaffold run -p metrics-server,network-policies
+- name: metrics-server
+  patches:
+  - op: add
+    path: /manifests/kustomize/paths/-
+    value: kustomize/components/metrics-server
 ---
 apiVersion: skaffold/v3
 kind: Config
