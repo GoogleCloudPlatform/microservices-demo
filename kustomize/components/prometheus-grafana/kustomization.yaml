@@ -1,0 +1,135 @@
+apiVersion: kustomize.config.k8s.io/v1alpha1
+kind: Component
+
+resources:
+  - otel-collector-prom.yaml
+  # prometheus.yaml   # Phase 2
+  # grafana.yaml      # Phase 3
+
+patches:
+# checkoutservice
+- patch: |-
+    apiVersion: apps/v1
+    kind: Deployment
+    metadata:
+      name: checkoutservice
+    spec:
+      template:
+        spec:
+          containers:
+            - name: server
+              env:
+              - name: COLLECTOR_SERVICE_ADDR
+                value: "otel-collector-prom:4317"
+              - name: OTEL_SERVICE_NAME
+                value: "checkoutservice"
+              - name: ENABLE_TRACING
+                value: "1"
+# currencyservice
+- patch: |-
+    apiVersion: apps/v1
+    kind: Deployment
+    metadata:
+      name: currencyservice
+    spec:
+      template:
+        spec:
+          containers:
+            - name: server
+              env:
+              - name: COLLECTOR_SERVICE_ADDR
+                value: "otel-collector-prom:4317"
+              - name: OTEL_SERVICE_NAME
+                value: "currencyservice"
+              - name: ENABLE_TRACING
+                value: "1"
+# emailservice
+- patch: |-
+    apiVersion: apps/v1
+    kind: Deployment
+    metadata:
+      name: emailservice
+    spec:
+      template:
+        spec:
+          containers:
+            - name: server
+              env:
+              - name: COLLECTOR_SERVICE_ADDR
+                value: "otel-collector-prom:4317"
+              - name: OTEL_SERVICE_NAME
+                value: "emailservice"
+              - name: ENABLE_TRACING
+                value: "1"
+# frontend
+- patch: |-
+    apiVersion: apps/v1
+    kind: Deployment
+    metadata:
+      name: frontend
+    spec:
+      template:
+        spec:
+          containers:
+            - name: server
+              env:
+              - name: COLLECTOR_SERVICE_ADDR
+                value: "otel-collector-prom:4317"
+              - name: OTEL_SERVICE_NAME
+                value: "frontend"
+              - name: ENABLE_TRACING
+                value: "1"
+# paymentservice
+- patch: |-
+    apiVersion: apps/v1
+    kind: Deployment
+    metadata:
+      name: paymentservice
+    spec:
+      template:
+        spec:
+          containers:
+            - name: server
+              env:
+              - name: COLLECTOR_SERVICE_ADDR
+                value: "otel-collector-prom:4317"
+              - name: OTEL_SERVICE_NAME
+                value: "paymentservice"
+              - name: ENABLE_TRACING
+                value: "1"
+# productcatalogservice
+- patch: |-
+    apiVersion: apps/v1
+    kind: Deployment
+    metadata:
+      name: productcatalogservice
+    spec:
+      template:
+        spec:
+          containers:
+            - name: server
+              env:
+              - name: COLLECTOR_SERVICE_ADDR
+                value: "otel-collector-prom:4317"
+              - name: OTEL_SERVICE_NAME
+                value: "productcatalogservice"
+              - name: ENABLE_TRACING
+                value: "1"
+# recommendationservice
+- patch: |-
+    apiVersion: apps/v1
+    kind: Deployment
+    metadata:
+      name: recommendationservice
+    spec:
+      template:
+        spec:
+          containers:
+            - name: server
+              env:
+              - name: COLLECTOR_SERVICE_ADDR
+                value: "otel-collector-prom:4317"
+              - name: OTEL_SERVICE_NAME
+                value: "recommendationservice"
+              - name: ENABLE_TRACING
+                value: "1"

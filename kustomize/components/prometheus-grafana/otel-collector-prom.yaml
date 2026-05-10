@@ -1,0 +1,105 @@
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: otel-collector-prom
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: otel-collector-prom-config
+data:
+  collector-config.yaml: |
+    receivers:
+      otlp:
+        protocols:
+          grpc:
+            endpoint: 0.0.0.0:4317
+
+    connectors:
+      spanmetrics:
+        histogram:
+          explicit:
+            buckets: [5ms, 10ms, 25ms, 50ms, 100ms, 250ms, 500ms, 1000ms, 2500ms, 5000ms]
+        dimensions:
+          - name: http.method
+          - name: http.status_code
+        metrics_expiration: 5m
+
+    exporters:
+      prometheus:
+        endpoint: "0.0.0.0:8889"
+        namespace: boutique
+
+    service:
+      pipelines:
+        traces:
+          receivers: [otlp]
+          exporters: [spanmetrics]
+        metrics:
+          receivers: [spanmetrics]
+          exporters: [prometheus]
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: otel-collector-prom
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: otel-collector-prom
+  template:
+    metadata:
+      labels:
+        app: otel-collector-prom
+    spec:
+      serviceAccountName: otel-collector-prom
+      securityContext:
+        fsGroup: 1000
+        runAsGroup: 1000
+        runAsNonRoot: true
+        runAsUser: 1000
+      containers:
+      - name: otel-collector-prom
+        image: otel/opentelemetry-collector-contrib:0.150.1@sha256:a516c26968aa1feb5e5fc0562e3338ea13755cb4f373603226bcc4e276374ad0
+        args:
+        - --config=/conf/collector-config.yaml
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+              - ALL
+          privileged: false
+          readOnlyRootFilesystem: true
+        ports:
+        - containerPort: 4317  # OTLP gRPC
+        - containerPort: 8889  # Prometheus scrape
+        volumeMounts:
+        - name: config
+          mountPath: /conf
+      volumes:
+      - name: config
+        configMap:
+          name: otel-collector-prom-config
+          items:
+          - key: collector-config.yaml
+            path: collector-config.yaml
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: otel-collector-prom
+spec:
+  type: ClusterIP
+  selector:
+    app: otel-collector-prom
+  ports:
+  - name: grpc-otlp
+    port: 4317
+    targetPort: 4317
+    protocol: TCP
+  - name: http-metrics
+    port: 8889
+    targetPort: 8889
+    protocol: TCP
