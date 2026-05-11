@@ -36,8 +36,9 @@ data:
           explicit:
             buckets: [5ms, 10ms, 25ms, 50ms, 100ms, 250ms, 500ms, 1000ms, 2500ms, 5000ms]
         dimensions:
-          - name: http.method
-          - name: http.status_code
+          - name: rpc.service
+          - name: rpc.method
+          - name: rpc.grpc.status_code
         metrics_expiration: 5m
 
     exporters:
