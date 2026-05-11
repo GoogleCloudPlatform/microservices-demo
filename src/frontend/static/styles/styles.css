@@ -675,3 +675,69 @@ the rules below could be extracted.
   width: 10px;
   height: 5px;
 }
+
+/* Product Search */
+
+.search-bar-row {
+  padding: 16px 0 8px 0;
+}
+
+.search-bar-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  max-width: 480px;
+  border: 1px solid #9AA0A6;
+  border-radius: 24px;
+  padding: 8px 16px;
+  background: #fff;
+}
+
+.search-icon {
+  font-size: 20px;
+  color: #5F6368;
+  margin-right: 8px;
+  pointer-events: none;
+  user-select: none;
+}
+
+.search-input {
+  flex: 1;
+  border: none;
+  outline: none;
+  font-size: 16px;
+  font-family: inherit;
+  background: transparent;
+  color: #1E2021;
+}
+
+.search-clear-btn {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #5F6368;
+  font-size: 14px;
+  padding: 0 0 0 8px;
+  line-height: 1;
+}
+
+.search-clear-btn:hover {
+  color: #111;
+}
+
+.search-result-count {
+  margin-top: 8px;
+  font-size: 13px;
+  color: #5F6368;
+}
+
+.search-no-results {
+  margin-top: 24px;
+  font-size: 15px;
+  color: #5F6368;
+  text-align: center;
+  width: 100%;
+}

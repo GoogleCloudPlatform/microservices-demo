@@ -37,6 +37,22 @@
 
       <div class="col-12 col-lg-12 px-10-percent">
 
+        <div class="search-bar-row">
+          <div class="search-bar-wrapper">
+            <span class="search-icon material-symbols-outlined">search</span>
+            <input
+              type="text"
+              id="product-search-input"
+              class="search-input"
+              placeholder="Search products…"
+              autocomplete="off"
+            />
+            <button id="search-clear-btn" class="search-clear-btn" aria-label="Clear search" style="display:none">&#10005;</button>
+          </div>
+          <div id="search-result-count" class="search-result-count" style="display:none"></div>
+          <div id="search-no-results" class="search-no-results" style="display:none"></div>
+        </div>
+
         <div class="row hot-products-row px-xl-6">
 
           <div class="col-12">
@@ -71,6 +87,8 @@
   </div>
 
 </main>
+
+<script src="{{ $.baseUrl }}/static/js/search.js"></script>
 
 <!-- Footer for smaller screens. -->
 <div class="d-lg-none">
