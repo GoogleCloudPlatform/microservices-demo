@@ -17,7 +17,7 @@ This document describes the design and implementation plan for adding Prometheus
 
 ## Services in scope
 
-These 8 services already emit OTLP traces and will feed the pipeline:
+These 7 services already emit OTLP traces and will feed the pipeline:
 
 | Service | Language |
 |---|---|
@@ -28,7 +28,8 @@ These 8 services already emit OTLP traces and will feed the pipeline:
 | currencyservice | Node.js |
 | emailservice | Python |
 | recommendationservice | Python |
-| shippingservice | Go (instrumentation is a stub — see issue #422; add once fixed) |
+
+`shippingservice` is currently out of scope because tracing is still a stub (see issue #422).
 
 ## Architecture
 
