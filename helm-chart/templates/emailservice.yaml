@@ -69,7 +69,7 @@ spec:
               - ALL
           privileged: false
           readOnlyRootFilesystem: true
-        image: {{ .Values.images.repository }}/{{ .Values.emailService.name }}:{{ .Values.images.tag | default .Chart.AppVersion }}
+        image: {{ include "onlineboutique.image" (list . .Values.emailService) }}
         ports:
         - containerPort: 8080
         env:
@@ -91,10 +91,12 @@ spec:
         {{- end }}
         readinessProbe:
           periodSeconds: 5
+          timeoutSeconds: 5
           grpc:
             port: 8080
         livenessProbe:
-          periodSeconds: 5
+          periodSeconds: 10
+          timeoutSeconds: 5
           grpc:
             port: 8080
         resources:

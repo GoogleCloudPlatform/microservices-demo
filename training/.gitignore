@@ -1,0 +1,6 @@
+handouts/
+bootstrap/attendees.csv
+bootstrap/emails.txt
+terraform/.terraform/
+terraform/terraform.tfstate*
+terraform/terraform.tfvars

@@ -1,0 +1,138 @@
+# Auto-deploy attendee branches.
+#
+# Triggers on push to attendee/<name> (i.e. after a PR is auto-merged into
+# the attendee's base branch). Detects which service was changed,
+# builds + pushes only that service's image to GAR, then helm-upgrades
+# the attendee's namespace to point that one service at the new tag.
+#
+# Repository variables this expects (Settings -> Secrets and variables -> Actions -> Variables):
+#   WIF_PROVIDER     full WIF provider resource name (terraform output workload_identity_provider)
+#   GAR_PUSHER_SA    email of the SA the workflow impersonates (terraform output github_pusher_sa_email)
+#   GCP_PROJECT_ID   re5-n8n-platform
+#   GAR_REGION       europe-west1
+#   GAR_REPO         microservices-demo-training
+#   GKE_CLUSTER      n8n-cluster
+#   GKE_REGION       europe-west1
+
+name: deploy-attendee
+
+on:
+  push:
+    branches:
+      - 'attendee/*'
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: deploy-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  detect:
+    runs-on: ubuntu-latest
+    outputs:
+      attendee: ${{ steps.parse.outputs.attendee }}
+      services: ${{ steps.changed.outputs.services }}
+      any_changed: ${{ steps.changed.outputs.any_changed }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Parse attendee name from branch
+        id: parse
+        run: |
+          name="${GITHUB_REF_NAME#attendee/}"
+          if [[ ! "$name" =~ ^[a-z][a-z0-9-]{1,30}$ ]]; then
+            echo "branch name doesn't match attendee/<name> pattern: $GITHUB_REF_NAME"
+            exit 1
+          fi
+          echo "attendee=$name" >> "$GITHUB_OUTPUT"
+
+      - name: Detect changed services
+        id: changed
+        run: |
+          services=()
+          for svc in adservice cartservice checkoutservice currencyservice emailservice frontend loadgenerator paymentservice productcatalogservice recommendationservice shippingservice; do
+            if git diff --name-only HEAD^ HEAD | grep -q "^src/$svc/"; then
+              services+=("$svc")
+            fi
+          done
+          if [[ ${#services[@]} -eq 0 ]]; then
+            echo "no service changed - nothing to deploy"
+            echo "any_changed=false" >> "$GITHUB_OUTPUT"
+            echo "services=[]" >> "$GITHUB_OUTPUT"
+          else
+            echo "any_changed=true" >> "$GITHUB_OUTPUT"
+            json=$(printf '%s\n' "${services[@]}" | jq -R . | jq -sc .)
+            echo "services=$json" >> "$GITHUB_OUTPUT"
+            echo "changed: ${services[*]}"
+          fi
+
+  build-and-deploy:
+    needs: detect
+    if: needs.detect.outputs.any_changed == 'true'
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        service: ${{ fromJSON(needs.detect.outputs.services) }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Authenticate to GCP via WIF
+        id: auth
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ vars.WIF_PROVIDER }}
+          service_account: ${{ vars.GAR_PUSHER_SA }}
+
+      - name: Configure Docker for Artifact Registry
+        run: gcloud auth configure-docker ${{ vars.GAR_REGION }}-docker.pkg.dev --quiet
+
+      - name: Build and push image
+        env:
+          IMAGE: ${{ vars.GAR_REGION }}-docker.pkg.dev/${{ vars.GCP_PROJECT_ID }}/${{ vars.GAR_REPO }}/${{ matrix.service }}:attendee-${{ needs.detect.outputs.attendee }}-${{ github.sha }}
+        run: |
+          docker build -t "$IMAGE" "src/${{ matrix.service }}"
+          docker push "$IMAGE"
+          echo "image=$IMAGE" >> "$GITHUB_ENV"
+
+      - uses: google-github-actions/get-gke-credentials@v2
+        with:
+          cluster_name: ${{ vars.GKE_CLUSTER }}
+          location: ${{ vars.GKE_REGION }}
+
+      - name: Map service dir to Helm values key
+        id: valuekey
+        run: |
+          case "${{ matrix.service }}" in
+            adservice)              echo "key=adService" >> "$GITHUB_OUTPUT" ;;
+            cartservice)            echo "key=cartService" >> "$GITHUB_OUTPUT" ;;
+            checkoutservice)        echo "key=checkoutService" >> "$GITHUB_OUTPUT" ;;
+            currencyservice)        echo "key=currencyService" >> "$GITHUB_OUTPUT" ;;
+            emailservice)           echo "key=emailService" >> "$GITHUB_OUTPUT" ;;
+            frontend)               echo "key=frontend" >> "$GITHUB_OUTPUT" ;;
+            loadgenerator)          echo "key=loadGenerator" >> "$GITHUB_OUTPUT" ;;
+            paymentservice)         echo "key=paymentService" >> "$GITHUB_OUTPUT" ;;
+            productcatalogservice)  echo "key=productCatalogService" >> "$GITHUB_OUTPUT" ;;
+            recommendationservice)  echo "key=recommendationService" >> "$GITHUB_OUTPUT" ;;
+            shippingservice)        echo "key=shippingService" >> "$GITHUB_OUTPUT" ;;
+          esac
+
+      - name: Helm upgrade attendee namespace
+        env:
+          NS: attendee-${{ needs.detect.outputs.attendee }}
+          KEY: ${{ steps.valuekey.outputs.key }}
+          REPO: ${{ vars.GAR_REGION }}-docker.pkg.dev/${{ vars.GCP_PROJECT_ID }}/${{ vars.GAR_REPO }}
+          TAG: attendee-${{ needs.detect.outputs.attendee }}-${{ github.sha }}
+        run: |
+          helm upgrade boutique ./helm-chart \
+            --namespace "$NS" \
+            -f training/values-training.yaml \
+            --reuse-values \
+            --set "${KEY}.image.repository=${REPO}" \
+            --set "${KEY}.image.tag=${TAG}" \
+            --wait --timeout 5m

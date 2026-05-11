@@ -1,0 +1,13 @@
+diff --git a/src/paymentservice/charge.js b/src/paymentservice/charge.js
+--- a/src/paymentservice/charge.js
++++ b/src/paymentservice/charge.js
+@@ -71,7 +71,7 @@ module.exports = function charge (request) {
+   if (!valid) { throw new InvalidCreditCard(); }
+
+   // Only VISA and mastercard is accepted, other card types (AMEX, dinersclub) will
+   // throw UnacceptedCreditCard error.
+-  if (!(cardType === 'visa' || cardType === 'mastercard')) { throw new UnacceptedCreditCard(cardType); }
++  if (!(cardType === 'Visa' || cardType === 'mastercard')) { throw new UnacceptedCreditCard(cardType); }
+
+   // Also validate expiration is > today.
+   const currentMonth = new Date().getMonth() + 1;

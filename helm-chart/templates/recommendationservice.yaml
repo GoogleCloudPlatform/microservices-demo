@@ -69,15 +69,17 @@ spec:
               - ALL
           privileged: false
           readOnlyRootFilesystem: true
-        image: {{ .Values.images.repository }}/{{ .Values.recommendationService.name }}:{{ .Values.images.tag | default .Chart.AppVersion }}
+        image: {{ include "onlineboutique.image" (list . .Values.recommendationService) }}
         ports:
         - containerPort: 8080
         readinessProbe:
           periodSeconds: 5
+          timeoutSeconds: 5
           grpc:
             port: 8080
         livenessProbe:
-          periodSeconds: 5
+          periodSeconds: 10
+          timeoutSeconds: 5
           grpc:
             port: 8080
         env:

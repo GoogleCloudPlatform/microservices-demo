@@ -54,6 +54,17 @@ func (fe *frontendServer) getProduct(ctx context.Context, id string) (*pb.Produc
 	return resp, err
 }
 
+// searchProducts is the 002-product-search client wrapper. Callers are
+// expected to have already trimmed the query (the storefront searchHandler
+// does this and short-circuits empty queries before calling). The
+// productcatalogservice trims defensively as well — see
+// specs/002-product-search/contracts/search-products.proto.md.
+func (fe *frontendServer) searchProducts(ctx context.Context, query string) ([]*pb.Product, error) {
+	resp, err := pb.NewProductCatalogServiceClient(fe.productCatalogSvcConn).
+		SearchProducts(ctx, &pb.SearchProductsRequest{Query: query})
+	return resp.GetResults(), err
+}
+
 func (fe *frontendServer) getCart(ctx context.Context, userID string) ([]*pb.CartItem, error) {
 	resp, err := pb.NewCartServiceClient(fe.cartSvcConn).GetCart(ctx, &pb.GetCartRequest{UserId: userID})
 	return resp.GetItems(), err

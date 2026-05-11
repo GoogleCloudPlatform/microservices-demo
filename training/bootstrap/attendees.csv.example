@@ -1,0 +1,7 @@
+name,bug
+alice,currency-converter-mismatch
+bob,visa-rejected
+charlie,duplicate-recommendations
+dana,search-misses-descriptions
+eve,currency-converter-mismatch
+frank,visa-rejected

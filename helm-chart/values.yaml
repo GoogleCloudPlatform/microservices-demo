@@ -20,6 +20,13 @@ images:
   repository: us-central1-docker.pkg.dev/google-samples/microservices-demo
   # Overrides the image tag whose default is the chart appVersion.
   tag: ""
+  # Per-service image overrides are also supported. Any service block below
+  # can set:
+  #   image:
+  #     repository: <registry>/<path>   # overrides .Values.images.repository
+  #     tag: <tag>                      # overrides .Values.images.tag
+  # Used by the training pipeline to flip the tag on a single fixed service
+  # while leaving the other ten on the shared :base tag.
 
 serviceAccounts:
   # Specifies whether service accounts should be created.

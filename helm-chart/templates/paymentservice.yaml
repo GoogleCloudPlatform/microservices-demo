@@ -69,7 +69,7 @@ spec:
               - ALL
           privileged: false
           readOnlyRootFilesystem: true
-        image: {{ .Values.images.repository }}/{{ .Values.paymentService.name }}:{{ .Values.images.tag | default .Chart.AppVersion }}
+        image: {{ include "onlineboutique.image" (list . .Values.paymentService) }}
         ports:
         - containerPort: 50051
         env:
