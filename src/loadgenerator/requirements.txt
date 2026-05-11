@@ -80,7 +80,7 @@ simple-websocket==1.1.0
     # via python-engineio
 tzdata==2025.2
     # via faker
-urllib3==2.6.3
+urllib3==2.7.0
     # via
     #   geventhttpclient
     #   requests
