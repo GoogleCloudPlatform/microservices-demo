@@ -80,6 +80,10 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
+      # Serial so concurrent helm-upgrades against the same release don't
+      # collide ("another operation in progress"). Each job is ~2 min, so
+      # a 2-service Module-5 deploy is ~4 min instead of ~2.
+      max-parallel: 1
       matrix:
         service: ${{ fromJSON(needs.detect.outputs.services) }}
     steps:
