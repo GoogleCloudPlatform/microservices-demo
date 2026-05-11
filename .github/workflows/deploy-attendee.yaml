@@ -44,8 +44,11 @@ jobs:
       - name: Parse attendee name from branch
         id: parse
         run: |
+          # SpecKit / fix branches can be long: attendee/<handle>-<feature-id>-<slug>
+          # We accept up to 80 chars, then walk back to the base namespace in the
+          # deploy step.
           name="${GITHUB_REF_NAME#attendee/}"
-          if [[ ! "$name" =~ ^[a-z][a-z0-9-]{1,30}$ ]]; then
+          if [[ ! "$name" =~ ^[a-z][a-z0-9-]{1,80}$ ]]; then
             echo "branch name doesn't match attendee/<name> pattern: $GITHUB_REF_NAME"
             exit 1
           fi
@@ -122,9 +125,36 @@ jobs:
             shippingservice)        echo "key=shippingService" >> "$GITHUB_OUTPUT" ;;
           esac
 
-      - name: Helm upgrade attendee namespace
+      - name: Resolve target namespace (walk back to base attendee)
+        id: ns
         env:
-          NS: attendee-${{ needs.detect.outputs.attendee }}
+          NAME: ${{ needs.detect.outputs.attendee }}
+        run: |
+          # If we were pushed to a feature branch like
+          # attendee/daniel-tufvander-001-browser-product-search the namespace
+          # attendee-daniel-tufvander-001-... does not exist. Walk back the
+          # hyphen-separated name until we find an existing namespace.
+          name="$NAME"
+          while true; do
+            if kubectl get ns "attendee-$name" >/dev/null 2>&1; then
+              echo "Found namespace attendee-$name"
+              echo "ns=attendee-$name" >> "$GITHUB_OUTPUT"
+              echo "attendee=$name" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+            if [[ "$name" != *-* ]]; then
+              echo "::warning::No matching attendee-* namespace for '$NAME'. Skipping deploy."
+              echo "skip=true" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+            name="${name%-*}"
+          done
+
+      - name: Helm upgrade attendee namespace
+        if: steps.ns.outputs.skip != 'true'
+        env:
+          NS: ${{ steps.ns.outputs.ns }}
+          ATTENDEE: ${{ steps.ns.outputs.attendee }}
           KEY: ${{ steps.valuekey.outputs.key }}
           REPO: ${{ vars.GAR_REGION }}-docker.pkg.dev/${{ vars.GCP_PROJECT_ID }}/${{ vars.GAR_REPO }}
           TAG: attendee-${{ needs.detect.outputs.attendee }}-${{ github.sha }}
