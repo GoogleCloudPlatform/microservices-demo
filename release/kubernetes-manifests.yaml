@@ -23,7 +23,7 @@ kind: Deployment
 metadata:
   name: currencyservice
   labels:
-    app: currencyservice
+    app: currencyserviceh
 spec:
   selector:
     matchLabels:
@@ -168,8 +168,8 @@ spec:
           value: "1"
         resources:
           requests:
-            cpu: 300m
-            memory: 256Mi
+            cpu: 50m
+            memory: 64Mi
           limits:
             cpu: 500m
             memory: 512Mi
@@ -785,7 +785,7 @@ spec:
           #   value: "" # This value would look like "http://123.123.123"
           resources:
             requests:
-              cpu: 100m
+              cpu: 50m
               memory: 64Mi
             limits:
               cpu: 200m
@@ -878,7 +878,7 @@ spec:
         resources:
           requests:
             cpu: 100m
-            memory: 220Mi
+            memory: 100Mi
           limits:
             cpu: 200m
             memory: 450Mi
