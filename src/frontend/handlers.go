@@ -141,6 +141,70 @@ func (plat *platformDetails) setPlatformDetails(env string) {
 	}
 }
 
+// searchHandler implements the 002-product-search feature
+// (GET /search?q=...). See specs/002-product-search/contracts/http-search.md
+// for the contract.
+//
+//   - Trims whitespace from q.
+//   - If q is empty after trimming, redirects to the catalog (HTTP 302)
+//     so we never render an empty-results page for an empty query.
+//   - Otherwise calls SearchProducts and renders the "search" template,
+//     converting prices to the user's currency so the existing product-card
+//     markup (shared with home.html) renders consistently.
+func (fe *frontendServer) searchHandler(w http.ResponseWriter, r *http.Request) {
+	log := r.Context().Value(ctxKeyLog{}).(logrus.FieldLogger)
+
+	q := strings.TrimSpace(r.URL.Query().Get("q"))
+	if q == "" {
+		http.Redirect(w, r, baseUrl+"/", http.StatusFound)
+		return
+	}
+
+	log.WithField("query", q).WithField("currency", currentCurrency(r)).Info("search")
+
+	currencies, err := fe.getCurrencies(r.Context())
+	if err != nil {
+		renderHTTPError(log, r, w, errors.Wrap(err, "could not retrieve currencies"), http.StatusInternalServerError)
+		return
+	}
+	results, err := fe.searchProducts(r.Context(), q)
+	if err != nil {
+		renderHTTPError(log, r, w, errors.Wrap(err, "could not search products"), http.StatusInternalServerError)
+		return
+	}
+	cart, err := fe.getCart(r.Context(), sessionID(r))
+	if err != nil {
+		renderHTTPError(log, r, w, errors.Wrap(err, "could not retrieve cart"), http.StatusInternalServerError)
+		return
+	}
+
+	type productView struct {
+		Item  *pb.Product
+		Price *pb.Money
+	}
+	ps := make([]productView, len(results))
+	for i, p := range results {
+		price, err := fe.convertCurrency(r.Context(), p.GetPriceUsd(), currentCurrency(r))
+		if err != nil {
+			renderHTTPError(log, r, w, errors.Wrapf(err, "failed to do currency conversion for product %s", p.GetId()), http.StatusInternalServerError)
+			return
+		}
+		ps[i] = productView{p, price}
+	}
+
+	if err := templates.ExecuteTemplate(w, "search", injectCommonTemplateData(r, map[string]interface{}{
+		"show_currency": true,
+		"currencies":    currencies,
+		"query":         q,
+		"searchQuery":   q,
+		"results":       ps,
+		"cart_size":     cartSize(cart),
+		"banner_color":  os.Getenv("BANNER_COLOR"),
+	})); err != nil {
+		log.Error(err)
+	}
+}
+
 func (fe *frontendServer) productHandler(w http.ResponseWriter, r *http.Request) {
 	log := r.Context().Value(ctxKeyLog{}).(logrus.FieldLogger)
 	id := mux.Vars(r)["id"]
