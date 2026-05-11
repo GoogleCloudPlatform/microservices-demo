@@ -90,11 +90,13 @@ All resources live in a new kustomize component:
 kustomize/components/prometheus-grafana/
 ├── kustomization.yaml          # component definition + service env patches
 ├── otel-collector-prom.yaml    # OTel Collector (prom-focused config)
-├── prometheus.yaml             # Prometheus Deployment + Service + ConfigMap
-├── grafana.yaml                # Grafana Deployment + Service + ConfigMaps
-└── dashboards/
-    └── services-overview.json  # Grafana dashboard (RED metrics per service)
 ```
+
+Planned for future phases (not in this PR):
+
+- `prometheus.yaml` (Phase 2)
+- `grafana.yaml` (Phase 3)
+- `dashboards/services-overview.json` (Phase 3)
 
 To enable it, add to `kubernetes-manifests/kustomization.yaml`:
 
