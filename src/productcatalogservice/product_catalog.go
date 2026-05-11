@@ -60,10 +60,19 @@ func (p *productCatalog) GetProduct(ctx context.Context, req *pb.GetProductReque
 func (p *productCatalog) SearchProducts(ctx context.Context, req *pb.SearchProductsRequest) (*pb.SearchProductsResponse, error) {
 	time.Sleep(extraLatency)
 
+	// Per the 002-product-search feature spec (FR-002, FR-004, FR-005, FR-006):
+	//   - trim leading/trailing whitespace
+	//   - case-insensitive substring match against Product.Name ONLY
+	//     (Description is intentionally NOT matched here)
+	//   - empty/whitespace-only query short-circuits to an empty result set
+	query := strings.ToLower(strings.TrimSpace(req.GetQuery()))
+	if query == "" {
+		return &pb.SearchProductsResponse{}, nil
+	}
+
 	var ps []*pb.Product
 	for _, product := range p.parseCatalog() {
-		if strings.Contains(strings.ToLower(product.Name), strings.ToLower(req.Query)) ||
-			strings.Contains(strings.ToLower(product.Description), strings.ToLower(req.Query)) {
+		if strings.Contains(strings.ToLower(product.Name), query) {
 			ps = append(ps, product)
 		}
 	}

@@ -64,6 +64,10 @@
                     <img src="{{ $.baseUrl }}/static/icons/Hipster_NavLogo.svg" alt="" class="top-left-logo" />
                     {{ end }}
                 </a>
+                <form action="{{ $.baseUrl }}/search" method="GET" role="search" class="search-form d-flex align-items-center">
+                    <input type="text" name="q" value="{{ $.searchQuery }}" placeholder="Search products" aria-label="Search products" class="search-input" />
+                    <button type="submit" class="search-submit" aria-label="Submit search">Search</button>
+                </form>
                 <div class="controls">
 
                     {{ if $.show_currency }}
