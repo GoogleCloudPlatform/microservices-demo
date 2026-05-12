@@ -45,16 +45,12 @@ data:
       prometheus:
         endpoint: "0.0.0.0:8889"
         namespace: boutique
-      otlp/traces:
-        endpoint: "opentelemetrycollector:4317"
-        tls:
-          insecure: true
 
     service:
       pipelines:
         traces:
           receivers: [otlp]
-          exporters: [spanmetrics, otlp/traces]
+          exporters: [spanmetrics]
         metrics:
           receivers: [spanmetrics]
           exporters: [prometheus]
