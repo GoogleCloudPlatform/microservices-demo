@@ -145,7 +145,7 @@ spec:
               - ALL
           privileged: false
           readOnlyRootFilesystem: true
-        image: busybox:latest
+        image: busybox:1.36.1
         env:
         - name: FRONTEND_ADDR
           value: "frontend:80"
