@@ -21,7 +21,7 @@ file — `main` is the canonical workshop starting point.
 
 | Branch | What it is |
 |--------|------------|
-| `main` | Clean workshop foundation. `docker compose up -d` and the FBT panel does not yet exist. Lab 1 starts here. |
+| `main` | Clean workshop foundation. `docker compose up -d --build` (first run builds all images, ~5-10 min) and the FBT panel does not yet exist. Lab 1 starts here. |
 | `lab2/start` | `lab1/complete` plus a few realistic-looking evolution commits. One introduces a cache race in FBT recommendations. Lab 2 starts here. |
 
 ### Lab 1 — bailout checkpoints

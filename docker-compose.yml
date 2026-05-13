@@ -5,18 +5,24 @@ services:
 
   emailservice:
     image: emailservice:5096a85
+    build:
+      context: ./src/emailservice
     environment:
       PORT: "8080"
       DISABLE_PROFILER: "1"
 
   productcatalogservice:
     image: productcatalogservice:5096a85
+    build:
+      context: ./src/productcatalogservice
     environment:
       PORT: "3550"
       DISABLE_PROFILER: "1"
 
   recommendationservice:
     image: recommendationservice:5096a85
+    build:
+      context: ./src/recommendationservice
     environment:
       PORT: "8080"
       PRODUCT_CATALOG_SERVICE_ADDR: productcatalogservice:3550
@@ -25,29 +31,39 @@ services:
 
   paymentservice:
     image: paymentservice:5096a85
+    build:
+      context: ./src/paymentservice
     environment:
       PORT: "50051"
       DISABLE_PROFILER: "1"
 
   shippingservice:
     image: shippingservice:5096a85
+    build:
+      context: ./src/shippingservice
     environment:
       PORT: "50051"
       DISABLE_PROFILER: "1"
 
   currencyservice:
     image: currencyservice:5096a85
+    build:
+      context: ./src/currencyservice
     environment:
       PORT: "7000"
       DISABLE_PROFILER: "1"
 
   adservice:
     image: adservice:5096a85
+    build:
+      context: ./src/adservice
     environment:
       PORT: "9555"
 
   cartservice:
     image: cartservice:5096a85
+    build:
+      context: ./src/cartservice/src
     environment:
       PORT: "7070"
       REDIS_ADDR: redis-cart:6379
@@ -55,6 +71,8 @@ services:
 
   checkoutservice:
     image: checkoutservice:5096a85
+    build:
+      context: ./src/checkoutservice
     environment:
       PORT: "5050"
       PRODUCT_CATALOG_SERVICE_ADDR: productcatalogservice:3550
@@ -69,6 +87,8 @@ services:
 
   frontend:
     image: frontend:5096a85
+    build:
+      context: ./src/frontend
     environment:
       PORT: "8080"
       PRODUCT_CATALOG_SERVICE_ADDR: productcatalogservice:3550
