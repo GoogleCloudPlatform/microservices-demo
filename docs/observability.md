@@ -71,7 +71,7 @@ These 7 services already emit OTLP traces and will feed the pipeline:
 
 ### Why a dedicated collector?
 
-The existing `google-cloud-operations` component runs an OTel Collector that exports to Cloud Trace and Cloud Monitoring. Rather than patching that collector (which would couple these two concerns), this component deploys a separate collector named `otel-collector-prom`. Services can be configured to export OTLP to either collector endpoint. If the intent is to send the same telemetry to both stacks simultaneously, that requires additional collector fan-out/forwarding configuration; pointing a service at `otel-collector-prom:4317` alone only sends data to that collector.
+The existing `google-cloud-operations` component runs an OTel Collector that exports to Cloud Trace and Cloud Monitoring. Rather than patching that collector (which would couple these two concerns), this component deploys a separate collector named `otel-collector-prom` for the Prometheus/Grafana pipeline. Services can be configured to export OTLP to either collector endpoint. In the currently shipped configuration, `otel-collector-prom` also forwards traces to `opentelemetrycollector:4317`, so pointing a service at `otel-collector-prom:4317` sends telemetry into the Prometheus/Grafana pipeline while also continuing to feed the existing Google Cloud operations collector.
 
 ### spanmetricsconnector
 
