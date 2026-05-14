@@ -116,7 +116,7 @@ When enabled, `kustomization.yaml` patches each OTel-instrumented service to set
   value: "1"
 ```
 
-> If `google-cloud-operations` is also enabled, services will have duplicate `COLLECTOR_SERVICE_ADDR` entries — the last patch wins. To fan out to both collectors simultaneously, the OTel Collector can be configured to forward to the GCP collector as an additional exporter (see Phase 3).
+> If `google-cloud-operations` is also enabled, services will have duplicate `COLLECTOR_SERVICE_ADDR` entries — the last patch wins. To fan out to both collectors simultaneously, the OTel Collector can be configured to forward to the GCP collector as an additional exporter (see Phase 5 (optional)).
 
 ## Implementation plan
 
