@@ -102,6 +102,11 @@ profiles:
   - op: add
     path: /manifests/kustomize/paths/-
     value: kustomize/components/metrics-server
+- name: prometheus-grafana
+  patches:
+  - op: replace
+    path: /manifests/kustomize/paths/0
+    value: kustomize/overlays/prometheus-grafana
 ---
 apiVersion: skaffold/v3
 kind: Config

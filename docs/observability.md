@@ -164,7 +164,7 @@ When enabled, `kustomization.yaml` patches each OTel-instrumented service to set
          exporters: [prometheus]
    ```
 
-2. Verify: `kubectl port-forward svc/otel-collector-prom 8889` → `curl localhost:8889/metrics` returns `boutique_calls_total` etc.
+2. Verify: `kubectl port-forward svc/otel-collector-prom 8889` → `curl localhost:8889/metrics` returns `boutique_traces_span_metrics_calls_total` etc.
 
 ### Phase 2: Prometheus
 
@@ -185,7 +185,7 @@ When enabled, `kustomization.yaml` patches each OTel-instrumented service to set
    - Service on port 9090 (ClusterIP)
    - Args: `--storage.tsdb.retention.time=7d` (no PVC needed for dev)
 
-2. Verify: `kubectl port-forward svc/prometheus 9090` → query `boutique_calls_total` returns results.
+2. Verify: `kubectl port-forward svc/prometheus 9090` → query `boutique_traces_span_metrics_calls_total` returns results.
 
 ### Phase 3: Grafana
 
@@ -202,11 +202,11 @@ When enabled, `kustomization.yaml` patches each OTel-instrumented service to set
 2. Create `kustomize/components/prometheus-grafana/dashboards/services-overview.json`
 
    Dashboard panels:
-   - **Request rate** — `sum(rate(boutique_calls_total[1m])) by (service_name)` — line chart
-   - **Error rate** — `sum(rate(boutique_calls_total{status_code="STATUS_CODE_ERROR"}[1m])) by (service_name)` — line chart
-   - **p99 latency** — `histogram_quantile(0.99, sum(rate(boutique_duration_milliseconds_bucket[5m])) by (le, service_name))` — line chart
+   - **Request rate** — `sum(rate(boutique_traces_span_metrics_calls_total[1m])) by (service_name)` — line chart
+   - **Error rate** — `sum(rate(boutique_traces_span_metrics_calls_total{status_code="STATUS_CODE_ERROR"}[1m])) by (service_name)` — line chart
+   - **p99 latency** — `histogram_quantile(0.99, sum(rate(boutique_traces_span_metrics_duration_milliseconds_bucket[5m])) by (le, service_name))` — line chart
    - **p50 latency** — same with 0.50
-   - **Calls heatmap** — `boutique_duration_milliseconds_bucket` — heatmap by service
+   - **Calls heatmap** — `boutique_traces_span_metrics_duration_milliseconds_bucket` — heatmap by service
    - Template variable: `$service` filter (multi-select from `service_name` label)
 
 3. Verify: `kubectl port-forward svc/grafana 3000` → open browser → dashboard loads with live data after load generator runs.
@@ -274,10 +274,10 @@ This makes the prometheus collector a transparent proxy for the GCP collector.
 
 ## Validation checklist
 
-- [ ] `otel-collector-prom` pod is Running
-- [ ] `curl otel-collector-prom:8889/metrics` returns `boutique_calls_total`
-- [ ] Prometheus target `otel-collector-prom:8889` shows State=UP
-- [ ] `boutique_calls_total` has data points in Prometheus after load generator runs
+- [x] `otel-collector-prom` pod is Running
+- [x] `curl otel-collector-prom:8889/metrics` returns `boutique_traces_span_metrics_calls_total`
+- [x] Prometheus target `otel-collector-prom:8889` shows State=UP
+- [x] `boutique_traces_span_metrics_calls_total` has data points in Prometheus after load generator runs
 - [ ] Grafana datasource test passes
 - [ ] "Services Overview" dashboard renders all panels
 - [ ] p99 latency panel shows per-service breakdown

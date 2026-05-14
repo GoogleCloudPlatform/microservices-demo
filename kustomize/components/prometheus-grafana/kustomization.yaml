@@ -17,7 +17,7 @@ kind: Component
 
 resources:
   - otel-collector-prom.yaml
-  # prometheus.yaml   # Phase 2
+  - prometheus.yaml
   # grafana.yaml      # Phase 3
 
 patches:
