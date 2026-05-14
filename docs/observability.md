@@ -51,8 +51,8 @@ These 7 services already emit OTLP traces and will feed the pipeline:
           │    otlp (grpc :4317)   │
           │                        │
           │  connectors:           │
-          │    spanmetricscon-     │◄─── derives RED metrics from spans
-          │    nector              │
+          │    spanmetrics         │◄─── derives RED metrics from spans
+          │    connector           │
           │                        │
           │  exporters:            │
           │    prometheus (:8889)  │──► scraped by Prometheus
