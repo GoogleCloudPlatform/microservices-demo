@@ -1,0 +1,66 @@
+# docker-compose override to use ECR mirrored base images
+# Usage: docker-compose -f docker-compose.yml -f docker-compose.ecr.yml up -d --build
+
+# This requires authentication to public ECR (no auth needed for public repos, but you may need to configure)
+# If you get rate-limited from Docker Hub, use this instead of docker-compose.yml
+
+services:
+  emailservice:
+    build:
+      context: ./src/emailservice
+      cache_from:
+        - public.ecr.aws/z8z1z1j0/workshop-base-images:golang_1-26-2-alpine
+
+  productcatalogservice:
+    build:
+      context: ./src/productcatalogservice
+      cache_from:
+        - public.ecr.aws/z8z1z1j0/workshop-base-images:golang_1-26-2-alpine
+
+  recommendationservice:
+    build:
+      context: ./src/recommendationservice
+      cache_from:
+        - public.ecr.aws/z8z1z1j0/workshop-base-images:golang_1-26-2-alpine
+
+  paymentservice:
+    build:
+      context: ./src/paymentservice
+      cache_from:
+        - public.ecr.aws/z8z1z1j0/workshop-base-images:golang_1-26-2-alpine
+
+  shippingservice:
+    build:
+      context: ./src/shippingservice
+      cache_from:
+        - public.ecr.aws/z8z1z1j0/workshop-base-images:golang_1-26-2-alpine
+
+  currencyservice:
+    build:
+      context: ./src/currencyservice
+      cache_from:
+        - public.ecr.aws/z8z1z1j0/workshop-base-images:golang_1-26-2-alpine
+
+  adservice:
+    build:
+      context: ./src/adservice
+      cache_from:
+        - public.ecr.aws/z8z1z1j0/workshop-base-images:python_3-14-4-alpine
+
+  cartservice:
+    build:
+      context: ./src/cartservice/src
+      cache_from:
+        - public.ecr.aws/z8z1z1j0/workshop-base-images:mcr-microsoft-com_dotnet_sdk_10-0-100-noble
+
+  checkoutservice:
+    build:
+      context: ./src/checkoutservice
+      cache_from:
+        - public.ecr.aws/z8z1z1j0/workshop-base-images:golang_1-26-2-alpine
+
+  frontend:
+    build:
+      context: ./src/frontend
+      cache_from:
+        - public.ecr.aws/z8z1z1j0/workshop-base-images:node_20-20-2-alpine
