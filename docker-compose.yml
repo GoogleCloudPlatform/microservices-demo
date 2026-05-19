@@ -61,9 +61,12 @@ services:
       PORT: "9555"
 
   cartservice:
+    # cartservice (.NET 10) is not built locally: the SDK Docker build
+    # fails under Docker Desktop on Apple Silicon (MSB4184 in restore
+    # under BuildKit; protoc SIGSEGV in publish under the classic
+    # builder). Pull and tag the upstream v0.10.5 image before
+    # `docker compose up -d` -- see WORKSHOP.md "First-time setup".
     image: cartservice:5096a85
-    build:
-      context: ./src/cartservice/src
     environment:
       PORT: "7070"
       REDIS_ADDR: redis-cart:6379
@@ -83,7 +86,14 @@ services:
       CART_SERVICE_ADDR: cartservice:7070
       DISABLE_PROFILER: "1"
     depends_on:
-      [productcatalogservice, shippingservice, paymentservice, emailservice, currencyservice, cartservice]
+      [
+        productcatalogservice,
+        shippingservice,
+        paymentservice,
+        emailservice,
+        currencyservice,
+        cartservice,
+      ]
 
   frontend:
     image: frontend:5096a85
@@ -103,4 +113,12 @@ services:
     ports:
       - "8080:8080"
     depends_on:
-      [productcatalogservice, currencyservice, cartservice, recommendationservice, shippingservice, checkoutservice, adservice]
+      [
+        productcatalogservice,
+        currencyservice,
+        cartservice,
+        recommendationservice,
+        shippingservice,
+        checkoutservice,
+        adservice,
+      ]

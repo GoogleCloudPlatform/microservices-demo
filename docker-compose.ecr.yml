@@ -47,11 +47,9 @@ services:
       cache_from:
         - public.ecr.aws/z8z1z1j0/workshop-base-images:python_3.14.4-alpine
 
-  cartservice:
-    build:
-      context: ./src/cartservice/src
-      cache_from:
-        - public.ecr.aws/z8z1z1j0/workshop-base-images:mcr.microsoft.com-dotnet-sdk_10.0.100-noble
+  # cartservice intentionally omitted: not built locally. See
+  # docker-compose.yml and WORKSHOP.md "First-time setup" for the
+  # upstream pull/tag step.
 
   checkoutservice:
     build:
