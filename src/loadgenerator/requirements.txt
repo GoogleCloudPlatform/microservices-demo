@@ -37,7 +37,7 @@ greenlet==3.2.4
     # via gevent
 h11==0.16.0
     # via wsproto
-idna==3.10
+idna==3.15
     # via requests
 iniconfig==2.1.0
     # via pytest
