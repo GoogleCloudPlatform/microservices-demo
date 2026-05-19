@@ -98,7 +98,7 @@ httpx==0.28.1
     #   google-genai
     #   langgraph-sdk
     #   langsmith
-idna==3.10
+idna==3.15
     # via
     #   anyio
     #   httpx
