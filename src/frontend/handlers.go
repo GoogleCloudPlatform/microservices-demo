@@ -180,6 +180,19 @@ func (fe *frontendServer) productHandler(w http.ResponseWriter, r *http.Request)
 		log.WithField("error", err).Warn("failed to get product recommendations")
 	}
 
+	// Update recently-viewed cookie: prepend current product, dedup, cap at 5.
+	updatedIDs := updateRecentlyViewed(recentlyViewedFromCookie(r), id)
+	http.SetCookie(w, &http.Cookie{
+		Name:   cookieRecentlyViewed,
+		Value:  strings.Join(updatedIDs, "|"),
+		MaxAge: cookieMaxAge,
+	})
+	// Fetch product details for the strip, excluding the current product (index 0).
+	recentlyViewed, err := fe.getRecentlyViewedProducts(r.Context(), updatedIDs[1:])
+	if err != nil {
+		log.WithField("error", err).Warn("failed to get recently viewed products")
+	}
+
 	product := struct {
 		Item  *pb.Product
 		Price *pb.Money
@@ -201,6 +214,7 @@ func (fe *frontendServer) productHandler(w http.ResponseWriter, r *http.Request)
 		"currencies":      currencies,
 		"product":         product,
 		"recommendations": recommendations,
+		"recently_viewed": recentlyViewed,
 		"cart_size":       cartSize(cart),
 		"packagingInfo":   packagingInfo,
 	})); err != nil {
@@ -632,4 +646,46 @@ func stringinSlice(slice []string, val string) bool {
 		}
 	}
 	return false
+}
+
+// recentlyViewedFromCookie parses the shop_recently-viewed cookie into an
+// ordered slice of product IDs (most recently viewed first).
+func recentlyViewedFromCookie(r *http.Request) []string {
+	c, err := r.Cookie(cookieRecentlyViewed)
+	if err != nil || c.Value == "" {
+		return nil
+	}
+	return strings.Split(c.Value, "|")
+}
+
+// updateRecentlyViewed prepends id to existing, deduplicates (keeping the
+// first/most-recent occurrence of each ID), and truncates to 5 entries.
+func updateRecentlyViewed(existing []string, id string) []string {
+	seen := map[string]bool{id: true}
+	result := []string{id}
+	for _, v := range existing {
+		if !seen[v] {
+			result = append(result, v)
+			seen[v] = true
+		}
+	}
+	if len(result) > 5 {
+		result = result[:5]
+	}
+	return result
+}
+
+// getRecentlyViewedProducts fetches full product details for each id.
+// On a single failure it returns whatever was fetched so far and logs a warning
+// via the caller — matching the graceful-degradation pattern used for recommendations.
+func (fe *frontendServer) getRecentlyViewedProducts(ctx context.Context, ids []string) ([]*pb.Product, error) {
+	var products []*pb.Product
+	for _, id := range ids {
+		p, err := fe.getProduct(ctx, id)
+		if err != nil {
+			return products, err
+		}
+		products = append(products, p)
+	}
+	return products, nil
 }

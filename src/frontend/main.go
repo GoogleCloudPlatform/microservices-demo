@@ -40,9 +40,10 @@ const (
 	defaultCurrency = "USD"
 	cookieMaxAge    = 60 * 60 * 48
 
-	cookiePrefix    = "shop_"
-	cookieSessionID = cookiePrefix + "session-id"
-	cookieCurrency  = cookiePrefix + "currency"
+	cookiePrefix          = "shop_"
+	cookieSessionID       = cookiePrefix + "session-id"
+	cookieCurrency        = cookiePrefix + "currency"
+	cookieRecentlyViewed  = cookiePrefix + "recently-viewed"
 )
 
 var (

@@ -581,6 +581,42 @@ similar to that of the hot-products-row.
   border-radius: 20% 0 20% 20%;
 }
 
+/* Recently Viewed */
+
+.recently-viewed {
+  background: #F9F9F9;
+  padding-bottom: 55px;
+}
+
+.recently-viewed .container {
+  max-width: 1174px;
+}
+
+@media (max-width: 992px) {
+  .recently-viewed .container {
+    max-width: none;
+  }
+}
+
+.recently-viewed h2 {
+  border-top: solid 1px;
+  padding: 40px 0;
+  font-weight: normal;
+  text-align: center;
+}
+
+.recently-viewed h5 {
+  margin-top: 8px;
+  font-weight: normal;
+  font-size: 18px;
+}
+
+.recently-viewed img {
+  height: 100%;
+  width: 100%;
+  border-radius: 20% 0 20% 20%;
+}
+
 select {
   -webkit-appearance: none;
   -webkit-border-radius: 0px;
