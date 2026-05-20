@@ -208,6 +208,15 @@ func (fe *frontendServer) productHandler(w http.ResponseWriter, r *http.Request)
 		}
 	}
 
+	wishlist := wishlistFromCookie(r)
+	inWishlist := false
+	for _, id := range wishlist {
+		if id == p.GetId() {
+			inWishlist = true
+			break
+		}
+	}
+
 	if err := templates.ExecuteTemplate(w, "product", injectCommonTemplateData(r, map[string]interface{}{
 		"ad":              fe.chooseAd(r.Context(), p.Categories, log),
 		"show_currency":   true,
@@ -217,6 +226,8 @@ func (fe *frontendServer) productHandler(w http.ResponseWriter, r *http.Request)
 		"recently_viewed": recentlyViewed,
 		"cart_size":       cartSize(cart),
 		"packagingInfo":   packagingInfo,
+		"in_wishlist":     inWishlist,
+		"just_saved":      r.URL.Query().Get("saved") == "1",
 	})); err != nil {
 		log.Println(err)
 	}
@@ -510,6 +521,66 @@ func (fe *frontendServer) chatBotHandler(w http.ResponseWriter, r *http.Request)
 	w.WriteHeader(http.StatusOK)
 }
 
+func (fe *frontendServer) viewWishlistHandler(w http.ResponseWriter, r *http.Request) {
+	log := r.Context().Value(ctxKeyLog{}).(logrus.FieldLogger)
+	currencies, err := fe.getCurrencies(r.Context())
+	if err != nil {
+		renderHTTPError(log, r, w, errors.Wrap(err, "could not retrieve currencies"), http.StatusInternalServerError)
+		return
+	}
+	cart, err := fe.getCart(r.Context(), sessionID(r))
+	if err != nil {
+		renderHTTPError(log, r, w, errors.Wrap(err, "could not retrieve cart"), http.StatusInternalServerError)
+		return
+	}
+
+	type wishlistItemView struct {
+		Item  *pb.Product
+		Price *pb.Money
+	}
+	ids := wishlistFromCookie(r)
+	items := make([]wishlistItemView, 0, len(ids))
+	for _, id := range ids {
+		p, err := fe.getProduct(r.Context(), id)
+		if err != nil {
+			log.WithField("error", err).Warnf("failed to get wishlist product %s", id)
+			continue
+		}
+		price, err := fe.convertCurrency(r.Context(), p.GetPriceUsd(), currentCurrency(r))
+		if err != nil {
+			log.WithField("error", err).Warnf("failed to convert currency for wishlist product %s", id)
+			continue
+		}
+		items = append(items, wishlistItemView{p, price})
+	}
+
+	if err := templates.ExecuteTemplate(w, "wishlist", injectCommonTemplateData(r, map[string]interface{}{
+		"show_currency": true,
+		"currencies":    currencies,
+		"items":         items,
+		"cart_size":     cartSize(cart),
+	})); err != nil {
+		log.Println(err)
+	}
+}
+
+func (fe *frontendServer) saveToWishlistHandler(w http.ResponseWriter, r *http.Request) {
+	log := r.Context().Value(ctxKeyLog{}).(logrus.FieldLogger)
+	productID := r.FormValue("product_id")
+	if productID == "" {
+		renderHTTPError(log, r, w, errors.New("product_id is required"), http.StatusBadRequest)
+		return
+	}
+	updated := updateWishlist(wishlistFromCookie(r), productID)
+	http.SetCookie(w, &http.Cookie{
+		Name:   cookieWishlist,
+		Value:  strings.Join(updated, "|"),
+		MaxAge: cookieMaxAge, // 48-hour lifetime matches shop_recently-viewed; session-only per spec assumptions
+	})
+	w.Header().Set("Location", baseUrl+"/product/"+productID+"?saved=1")
+	w.WriteHeader(http.StatusFound)
+}
+
 func (fe *frontendServer) setCurrencyHandler(w http.ResponseWriter, r *http.Request) {
 	log := r.Context().Value(ctxKeyLog{}).(logrus.FieldLogger)
 	cur := r.FormValue("currency_code")
@@ -575,6 +646,7 @@ func injectCommonTemplateData(r *http.Request, payload map[string]interface{}) m
 		"frontendMessage":   frontendMessage,
 		"currentYear":       time.Now().Year(),
 		"baseUrl":           baseUrl,
+		"wishlist_size":     len(wishlistFromCookie(r)),
 	}
 
 	for k, v := range payload {
@@ -646,6 +718,31 @@ func stringinSlice(slice []string, val string) bool {
 		}
 	}
 	return false
+}
+
+// wishlistFromCookie parses the shop_wishlist cookie into an ordered slice of
+// product IDs (most-recently-saved first).
+func wishlistFromCookie(r *http.Request) []string {
+	c, err := r.Cookie(cookieWishlist)
+	if err != nil || c.Value == "" {
+		return nil
+	}
+	return strings.Split(c.Value, "|")
+}
+
+// updateWishlist prepends id to existing, deduplicates (keeping the
+// first/most-recent occurrence of each ID), and returns the result.
+// Unlike updateRecentlyViewed, there is no size cap.
+func updateWishlist(existing []string, id string) []string {
+	seen := map[string]bool{id: true}
+	result := []string{id}
+	for _, v := range existing {
+		if !seen[v] {
+			result = append(result, v)
+			seen[v] = true
+		}
+	}
+	return result
 }
 
 // recentlyViewedFromCookie parses the shop_recently-viewed cookie into an

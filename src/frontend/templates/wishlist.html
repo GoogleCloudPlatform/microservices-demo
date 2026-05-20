@@ -1,0 +1,82 @@
+<!--
+ Copyright 2020 Google LLC
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+-->
+
+{{ define "wishlist" }}
+    {{ template "header" . }}
+
+    <div {{ with $.platform_css }} class="{{.}}" {{ end }}>
+        <span class="platform-flag">
+            {{$.platform_name}}
+        </span>
+    </div>
+
+    <main role="main" class="cart-sections">
+
+        {{ if eq (len $.items) 0 }}
+        <section class="empty-cart-section">
+            <h3>Your wishlist is empty.</h3>
+            <p>Save products you like while browsing — they'll appear here for the rest of your visit.</p>
+            <a class="cymbal-button-primary" href="{{ $.baseUrl }}/" role="button">Continue Shopping</a>
+        </section>
+        {{ else }}
+        <section class="container">
+            <div class="row">
+                <div class="col-lg-8 offset-lg-2 cart-summary-section">
+
+                    <div class="row mb-3 py-2">
+                        <div class="col">
+                            <h3>Wishlist ({{ $.wishlist_size }})</h3>
+                        </div>
+                        <div class="col text-right">
+                            <a class="cymbal-button-primary" href="{{ $.baseUrl }}/" role="button">
+                                Continue Shopping
+                            </a>
+                        </div>
+                    </div>
+
+                    {{ range $.items }}
+                    <div class="row cart-summary-item-row">
+                        <div class="col-md-3 pl-md-0">
+                            <a href="{{ $.baseUrl }}/product/{{.Item.Id}}">
+                                <img class="img-fluid" alt="" src="{{ $.baseUrl }}{{.Item.Picture}}" />
+                            </a>
+                        </div>
+                        <div class="col-md-9 pr-md-0">
+                            <div class="row">
+                                <div class="col">
+                                    <h4>
+                                        <a href="{{ $.baseUrl }}/product/{{.Item.Id}}">{{ .Item.Name }}</a>
+                                    </h4>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col">
+                                    <strong>{{ renderMoney .Price }}</strong>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {{ end }}
+
+                </div>
+            </div>
+        </section>
+        {{ end }}
+
+    </main>
+
+    {{ template "footer" . }}
+{{ end }}

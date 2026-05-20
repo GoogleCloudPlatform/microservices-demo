@@ -26,3 +26,8 @@ obj/
 pkg/
 release/wi-kubernetes-manifests.yaml
 vendor/
+
+# Go build artifacts
+*.exe
+*.test
+*.out

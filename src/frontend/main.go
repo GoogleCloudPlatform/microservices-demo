@@ -44,6 +44,7 @@ const (
 	cookieSessionID       = cookiePrefix + "session-id"
 	cookieCurrency        = cookiePrefix + "currency"
 	cookieRecentlyViewed  = cookiePrefix + "recently-viewed"
+	cookieWishlist        = cookiePrefix + "wishlist"
 )
 
 var (
@@ -150,6 +151,8 @@ func main() {
 	r := mux.NewRouter()
 	r.HandleFunc(baseUrl+"/", svc.homeHandler).Methods(http.MethodGet, http.MethodHead)
 	r.HandleFunc(baseUrl+"/product/{id}", svc.productHandler).Methods(http.MethodGet, http.MethodHead)
+	r.HandleFunc(baseUrl+"/wishlist", svc.viewWishlistHandler).Methods(http.MethodGet, http.MethodHead)
+	r.HandleFunc(baseUrl+"/wishlist", svc.saveToWishlistHandler).Methods(http.MethodPost)
 	r.HandleFunc(baseUrl+"/cart", svc.viewCartHandler).Methods(http.MethodGet, http.MethodHead)
 	r.HandleFunc(baseUrl+"/cart", svc.addToCartHandler).Methods(http.MethodPost)
 	r.HandleFunc(baseUrl+"/cart/empty", svc.emptyCartHandler).Methods(http.MethodPost)

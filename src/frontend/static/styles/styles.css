@@ -576,7 +576,7 @@ similar to that of the hot-products-row.
 }
 
 .recommendations img {
-  height: 100%;
+  height: auto;
   width: 100%;
   border-radius: 20% 0 20% 20%;
 }
@@ -612,7 +612,7 @@ similar to that of the hot-products-row.
 }
 
 .recently-viewed img {
-  height: 100%;
+  height: auto;
   width: 100%;
   border-radius: 20% 0 20% 20%;
 }
@@ -674,6 +674,21 @@ the rules below could be extracted.
 
 .cymbal-button-secondary:active {
   background-color: #f5ccd5;
+}
+
+.cymbal-button-secondary:disabled {
+  opacity: 0.6;
+  cursor: default;
+  pointer-events: none;
+}
+
+.cymbal-banner {
+  margin-top: 12px;
+  padding: 8px 16px;
+  background-color: #2e7d32;
+  color: white;
+  border-radius: 4px;
+  font-size: 14px;
 }
 
 .cymbal-form-field {
