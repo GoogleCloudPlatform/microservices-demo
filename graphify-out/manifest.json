@@ -1,0 +1,1462 @@
+{
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/.deploystack/test": {
+    "mtime": 1779683135.4769344,
+    "ast_hash": "e05cb16803695f3cdf575a6f6506dce9",
+    "semantic_hash": "e05cb16803695f3cdf575a6f6506dce9"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/.deploystack/scripts/preinit.sh": {
+    "mtime": 1779683135.4768631,
+    "ast_hash": "a569ed799fc9f7408dbffd40132c031f",
+    "semantic_hash": "a569ed799fc9f7408dbffd40132c031f"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/.claude/settings.local.json": {
+    "mtime": 1779685020.6211548,
+    "ast_hash": "48943a2420f9a1b382fa978c2690c27a",
+    "semantic_hash": "48943a2420f9a1b382fa978c2690c27a"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/docs/releasing/make-release.sh": {
+    "mtime": 1779683135.4909081,
+    "ast_hash": "0a2bb9ec611364f1b3f5d5585369b7b2",
+    "semantic_hash": "0a2bb9ec611364f1b3f5d5585369b7b2"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/docs/releasing/make-release-artifacts.sh": {
+    "mtime": 1779683135.4908426,
+    "ast_hash": "3c8c5ee00c7ac07311c9d97be86c9d63",
+    "semantic_hash": "3c8c5ee00c7ac07311c9d97be86c9d63"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/docs/releasing/make-docker-images.sh": {
+    "mtime": 1779683135.4907072,
+    "ast_hash": "fda28a4c666eef9a51ce6e9aed2c2525",
+    "semantic_hash": "fda28a4c666eef9a51ce6e9aed2c2525"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/docs/releasing/make-helm-chart.sh": {
+    "mtime": 1779683135.4907703,
+    "ast_hash": "31d6e33d44ad8d01aefd36dacbea50c3",
+    "semantic_hash": "31d6e33d44ad8d01aefd36dacbea50c3"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/.github/workflows/install-dependencies.sh": {
+    "mtime": 1779683135.4789596,
+    "ast_hash": "d3fb6bb82ccb91072e7d5d6694779ead",
+    "semantic_hash": "d3fb6bb82ccb91072e7d5d6694779ead"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/kustomize/components/shopping-assistant/scripts/generate_sql_from_products.py": {
+    "mtime": 1779683135.4980311,
+    "ast_hash": "2c7efebb76b9553c3188dbb9af9d18d6",
+    "semantic_hash": "2c7efebb76b9553c3188dbb9af9d18d6"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/kustomize/components/shopping-assistant/scripts/1_deploy_alloydb_infra.sh": {
+    "mtime": 1779683135.4978802,
+    "ast_hash": "f0e9f5822e877b85523c2a903016fac4",
+    "semantic_hash": "f0e9f5822e877b85523c2a903016fac4"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/kustomize/components/shopping-assistant/scripts/2_create_populate_alloydb_tables.sh": {
+    "mtime": 1779683135.4979608,
+    "ast_hash": "e6e9fdde7167b54ac943b33246e17573",
+    "semantic_hash": "e6e9fdde7167b54ac943b33246e17573"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/src/adservice/gradlew": {
+    "mtime": 1779683135.5005457,
+    "ast_hash": "794669d78aef1dd5c7d889ef618b311a",
+    "semantic_hash": "794669d78aef1dd5c7d889ef618b311a"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/src/adservice/genproto.sh": {
+    "mtime": 1779683135.5001585,
+    "ast_hash": "f148b34cc1b6ef4f4d4b9ac7cbf1c557",
+    "semantic_hash": "f148b34cc1b6ef4f4d4b9ac7cbf1c557"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/src/adservice/build.gradle": {
+    "mtime": 1779683135.5001001,
+    "ast_hash": "0a3a30d1a1fc439efdd0f9bc4f67d76b",
+    "semantic_hash": "0a3a30d1a1fc439efdd0f9bc4f67d76b"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/src/adservice/settings.gradle": {
+    "mtime": 1779683135.5006723,
+    "ast_hash": "3f0fb42128141b95caf826f6e60a5d64",
+    "semantic_hash": "3f0fb42128141b95caf826f6e60a5d64"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/src/adservice/src/main/java/hipstershop/AdServiceClient.java": {
+    "mtime": 1779683135.5009794,
+    "ast_hash": "f667d75c8274204f553ab893ae3e99b3",
+    "semantic_hash": "f667d75c8274204f553ab893ae3e99b3"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/src/adservice/src/main/java/hipstershop/AdService.java": {
+    "mtime": 1779683135.5008965,
+    "ast_hash": "5bda6ac8691a4be130d27f923d5b6037",
+    "semantic_hash": "5bda6ac8691a4be130d27f923d5b6037"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/src/shoppingassistantservice/shoppingassistantservice.py": {
+    "mtime": 1779683135.520998,
+    "ast_hash": "6f28ddf924ae2ceb31319c226f14fa39",
+    "semantic_hash": "6f28ddf924ae2ceb31319c226f14fa39"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/src/frontend/deployment_details.go": {
+    "mtime": 1779683135.5062213,
+    "ast_hash": "a6f83a2676af3a33c3eadcd2ab0030b4",
+    "semantic_hash": "a6f83a2676af3a33c3eadcd2ab0030b4"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/src/frontend/packaging_info.go": {
+    "mtime": 1779683135.5070698,
+    "ast_hash": "63e8a5e2b366c82d3954a76b937468da",
+    "semantic_hash": "63e8a5e2b366c82d3954a76b937468da"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/src/frontend/handlers.go": {
+    "mtime": 1779683135.5067317,
+    "ast_hash": "92ae192badf7c11000426ec9b3670994",
+    "semantic_hash": "92ae192badf7c11000426ec9b3670994"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/src/frontend/genproto.sh": {
+    "mtime": 1779683135.5063055,
+    "ast_hash": "cdf90826027e5936f5011f59c8cad94a",
+    "semantic_hash": "cdf90826027e5936f5011f59c8cad94a"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/src/frontend/rpc.go": {
+    "mtime": 1779683135.5071294,
+    "ast_hash": "7d12897ec4dfefb9d6b35997a78e9c98",
+    "semantic_hash": "7d12897ec4dfefb9d6b35997a78e9c98"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/src/frontend/middleware.go": {
+    "mtime": 1779683135.5068562,
+    "ast_hash": "bcab7df651c31b336105e4bbcc03545c",
+    "semantic_hash": "bcab7df651c31b336105e4bbcc03545c"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/src/frontend/main.go": {
+    "mtime": 1779683135.5068011,
+    "ast_hash": "71edca5108831c1bb724c268a0f4cbc3",
+    "semantic_hash": "71edca5108831c1bb724c268a0f4cbc3"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/src/frontend/validator/validator.go": {
+    "mtime": 1779683135.5166678,
+    "ast_hash": "850a96c098caa8f3b013735b6f0159fc",
+    "semantic_hash": "850a96c098caa8f3b013735b6f0159fc"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/src/frontend/validator/validator_test.go": {
+    "mtime": 1779683135.516733,
+    "ast_hash": "99d6257046675e8e69ebc685fc52796d",
+    "semantic_hash": "99d6257046675e8e69ebc685fc52796d"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/src/frontend/genproto/demo.pb.go": {
+    "mtime": 1779683135.50644,
+    "ast_hash": "a79a036ac1aff93551f1eb9eb69d3f3a",
+    "semantic_hash": "a79a036ac1aff93551f1eb9eb69d3f3a"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/src/frontend/genproto/demo_grpc.pb.go": {
+    "mtime": 1779683135.5065136,
+    "ast_hash": "47ec0a4b95606e91d54e41d31b5f3424",
+    "semantic_hash": "47ec0a4b95606e91d54e41d31b5f3424"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/src/frontend/money/money.go": {
+    "mtime": 1779683135.5069513,
+    "ast_hash": "bef3ed9026afe809494677e49f3407db",
+    "semantic_hash": "bef3ed9026afe809494677e49f3407db"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/src/frontend/money/money_test.go": {
+    "mtime": 1779683135.507017,
+    "ast_hash": "09f1c77e395585657857bdce08c19ec9",
+    "semantic_hash": "09f1c77e395585657857bdce08c19ec9"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/src/cartservice/tests/CartServiceTests.cs": {
+    "mtime": 1779683135.5024204,
+    "ast_hash": "d2441ad4b58c3330b992b08098f42875",
+    "semantic_hash": "d2441ad4b58c3330b992b08098f42875"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/src/cartservice/src/Startup.cs": {
+    "mtime": 1779683135.5016341,
+    "ast_hash": "453a9881f8107495fc3050f35cc9b923",
+    "semantic_hash": "453a9881f8107495fc3050f35cc9b923"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/src/cartservice/src/appsettings.json": {
+    "mtime": 1779683135.5016878,
+    "ast_hash": "f54ad7a9725d435bd0da6c6aa07862ad",
+    "semantic_hash": "f54ad7a9725d435bd0da6c6aa07862ad"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/src/cartservice/src/Program.cs": {
+    "mtime": 1779683135.5015597,
+    "ast_hash": "63f44061091d1f2e3f97c21c256e9a90",
+    "semantic_hash": "63f44061091d1f2e3f97c21c256e9a90"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/src/cartservice/src/cartstore/ICartStore.cs": {
+    "mtime": 1779683135.5019312,
+    "ast_hash": "e772199b88007b2414971c4283c9b4de",
+    "semantic_hash": "e772199b88007b2414971c4283c9b4de"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/src/cartservice/src/cartstore/SpannerCartStore.cs": {
+    "mtime": 1779683135.5020504,
+    "ast_hash": "8d462622a041a9fed265cf7823dea817",
+    "semantic_hash": "8d462622a041a9fed265cf7823dea817"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/src/cartservice/src/cartstore/AlloyDBCartStore.cs": {
+    "mtime": 1779683135.5018554,
+    "ast_hash": "65be6d0d67385aa8fd0c374ba659c580",
+    "semantic_hash": "65be6d0d67385aa8fd0c374ba659c580"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/src/cartservice/src/cartstore/RedisCartStore.cs": {
+    "mtime": 1779683135.5019884,
+    "ast_hash": "f617edc4fbbd54c88e95e020fe236d2e",
+    "semantic_hash": "f617edc4fbbd54c88e95e020fe236d2e"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/src/cartservice/src/services/HealthCheckService.cs": {
+    "mtime": 1779683135.50231,
+    "ast_hash": "c60e3272db009cb97ae732719eb32c6f",
+    "semantic_hash": "c60e3272db009cb97ae732719eb32c6f"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/src/cartservice/src/services/CartService.cs": {
+    "mtime": 1779683135.5022466,
+    "ast_hash": "febb6119e8ecfa2c416fa3022ced26bb",
+    "semantic_hash": "febb6119e8ecfa2c416fa3022ced26bb"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/src/loadgenerator/locustfile.py": {
+    "mtime": 1779683135.5168762,
+    "ast_hash": "14d5a4cf29513e17146682268e868e2e",
+    "semantic_hash": "14d5a4cf29513e17146682268e868e2e"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/src/productcatalogservice/server.go": {
+    "mtime": 1779683135.518964,
+    "ast_hash": "dc663e147e0df5f042d234181ccdcc8c",
+    "semantic_hash": "dc663e147e0df5f042d234181ccdcc8c"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/src/productcatalogservice/product_catalog_test.go": {
+    "mtime": 1779683135.518808,
+    "ast_hash": "0b6fd8577d8ef89c50702f3067d5c259",
+    "semantic_hash": "0b6fd8577d8ef89c50702f3067d5c259"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/src/productcatalogservice/genproto.sh": {
+    "mtime": 1779683135.518293,
+    "ast_hash": "94ff73f4a3291971a125aa5b242239b0",
+    "semantic_hash": "94ff73f4a3291971a125aa5b242239b0"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/src/productcatalogservice/products.json": {
+    "mtime": 1779683135.5188658,
+    "ast_hash": "202a5942432a95d8bd97f387ad0e9d4e",
+    "semantic_hash": "202a5942432a95d8bd97f387ad0e9d4e"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/src/productcatalogservice/catalog_loader.go": {
+    "mtime": 1779683135.5182385,
+    "ast_hash": "8d78ade2ae29aff6988c7d665b7ebb17",
+    "semantic_hash": "8d78ade2ae29aff6988c7d665b7ebb17"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/src/productcatalogservice/product_catalog.go": {
+    "mtime": 1779683135.518745,
+    "ast_hash": "395d228f7f124d7f69848bec71d4991e",
+    "semantic_hash": "395d228f7f124d7f69848bec71d4991e"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/src/productcatalogservice/genproto/demo.pb.go": {
+    "mtime": 1779683135.5184336,
+    "ast_hash": "a79a036ac1aff93551f1eb9eb69d3f3a",
+    "semantic_hash": "a79a036ac1aff93551f1eb9eb69d3f3a"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/src/productcatalogservice/genproto/demo_grpc.pb.go": {
+    "mtime": 1779683135.5185256,
+    "ast_hash": "47ec0a4b95606e91d54e41d31b5f3424",
+    "semantic_hash": "47ec0a4b95606e91d54e41d31b5f3424"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/src/paymentservice/charge.js": {
+    "mtime": 1779683135.5171757,
+    "ast_hash": "95741b0020de575cb532a51ae1ac150d",
+    "semantic_hash": "95741b0020de575cb532a51ae1ac150d"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/src/paymentservice/logger.js": {
+    "mtime": 1779683135.5174444,
+    "ast_hash": "a10be791a94ee49d890434a0f19a73e7",
+    "semantic_hash": "a10be791a94ee49d890434a0f19a73e7"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/src/paymentservice/server.js": {
+    "mtime": 1779683135.5179656,
+    "ast_hash": "ecafc9bc33d4242742280ca3842ce2d6",
+    "semantic_hash": "ecafc9bc33d4242742280ca3842ce2d6"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/src/paymentservice/index.js": {
+    "mtime": 1779683135.5173693,
+    "ast_hash": "d13126c00ab62db3de46bb23fd8aeb11",
+    "semantic_hash": "d13126c00ab62db3de46bb23fd8aeb11"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/src/paymentservice/package.json": {
+    "mtime": 1779683135.5176384,
+    "ast_hash": "796a4170ccda947bcee2002199cd00d8",
+    "semantic_hash": "796a4170ccda947bcee2002199cd00d8"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/src/paymentservice/genproto.sh": {
+    "mtime": 1779683135.5172312,
+    "ast_hash": "f0c70864ee2f605490b32af0324f618d",
+    "semantic_hash": "f0c70864ee2f605490b32af0324f618d"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/src/checkoutservice/genproto.sh": {
+    "mtime": 1779683135.5028017,
+    "ast_hash": "de5cff2480ac288506e2a8940e01090d",
+    "semantic_hash": "de5cff2480ac288506e2a8940e01090d"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/src/checkoutservice/main.go": {
+    "mtime": 1779683135.5034082,
+    "ast_hash": "3e714b0d27abf9fc4379ec91fe455860",
+    "semantic_hash": "3e714b0d27abf9fc4379ec91fe455860"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/src/checkoutservice/genproto/demo.pb.go": {
+    "mtime": 1779683135.5029764,
+    "ast_hash": "a79a036ac1aff93551f1eb9eb69d3f3a",
+    "semantic_hash": "a79a036ac1aff93551f1eb9eb69d3f3a"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/src/checkoutservice/genproto/demo_grpc.pb.go": {
+    "mtime": 1779683135.5030735,
+    "ast_hash": "47ec0a4b95606e91d54e41d31b5f3424",
+    "semantic_hash": "47ec0a4b95606e91d54e41d31b5f3424"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/src/checkoutservice/money/money.go": {
+    "mtime": 1779683135.5035381,
+    "ast_hash": "2e8cc643ee7e9790645ed8ff46c0df19",
+    "semantic_hash": "2e8cc643ee7e9790645ed8ff46c0df19"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/src/checkoutservice/money/money_test.go": {
+    "mtime": 1779683135.5036142,
+    "ast_hash": "85eafeffb8fd25847ab1b2cdecc0f0cf",
+    "semantic_hash": "85eafeffb8fd25847ab1b2cdecc0f0cf"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/src/emailservice/demo_pb2_grpc.py": {
+    "mtime": 1779683135.5054264,
+    "ast_hash": "9011e937c09616f02f7a9fb8d2056070",
+    "semantic_hash": "9011e937c09616f02f7a9fb8d2056070"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/src/emailservice/logger.py": {
+    "mtime": 1779683135.5056834,
+    "ast_hash": "48dcefce17a578b6253295b951c3e413",
+    "semantic_hash": "48dcefce17a578b6253295b951c3e413"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/src/emailservice/email_client.py": {
+    "mtime": 1779683135.5055,
+    "ast_hash": "2b2a1bd9a5e6cdcb27725165a9d3e8f7",
+    "semantic_hash": "2b2a1bd9a5e6cdcb27725165a9d3e8f7"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/src/emailservice/genproto.sh": {
+    "mtime": 1779683135.5056274,
+    "ast_hash": "95adf68aa05a866c7257fce8b1f51900",
+    "semantic_hash": "95adf68aa05a866c7257fce8b1f51900"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/src/emailservice/email_server.py": {
+    "mtime": 1779683135.5055764,
+    "ast_hash": "9b2076f360d6c60b4e2cb86f4aebefbf",
+    "semantic_hash": "9b2076f360d6c60b4e2cb86f4aebefbf"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/src/emailservice/demo_pb2.py": {
+    "mtime": 1779683135.5053687,
+    "ast_hash": "bccc69a91ab5ce9689c04c708d963345",
+    "semantic_hash": "bccc69a91ab5ce9689c04c708d963345"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/src/currencyservice/client.js": {
+    "mtime": 1779683135.5040257,
+    "ast_hash": "0680758c90ad01f8933cd2c3ca8dbaa4",
+    "semantic_hash": "0680758c90ad01f8933cd2c3ca8dbaa4"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/src/currencyservice/server.js": {
+    "mtime": 1779683135.5051882,
+    "ast_hash": "283d2e69bd4fd4afacd68a8a9821a6f5",
+    "semantic_hash": "283d2e69bd4fd4afacd68a8a9821a6f5"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/src/currencyservice/package.json": {
+    "mtime": 1779683135.5047863,
+    "ast_hash": "f1976bc3baca999368560ad2a840681d",
+    "semantic_hash": "f1976bc3baca999368560ad2a840681d"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/src/currencyservice/genproto.sh": {
+    "mtime": 1779683135.5041914,
+    "ast_hash": "52391d3ed55f1c4109a0441a68290b8f",
+    "semantic_hash": "52391d3ed55f1c4109a0441a68290b8f"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/src/currencyservice/data/currency_conversion.json": {
+    "mtime": 1779683135.5041294,
+    "ast_hash": "b9611080098197ba22b82740934431a9",
+    "semantic_hash": "b9611080098197ba22b82740934431a9"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/src/shippingservice/shippingservice_test.go": {
+    "mtime": 1779683135.5206752,
+    "ast_hash": "dbcf668dbb98cd34975e2555a0650a37",
+    "semantic_hash": "dbcf668dbb98cd34975e2555a0650a37"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/src/shippingservice/quote.go": {
+    "mtime": 1779683135.5206103,
+    "ast_hash": "637ef5a74f137c4502593c0014232290",
+    "semantic_hash": "637ef5a74f137c4502593c0014232290"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/src/shippingservice/tracker.go": {
+    "mtime": 1779683135.5207295,
+    "ast_hash": "e46a2310de66806507bb5401d894c56c",
+    "semantic_hash": "e46a2310de66806507bb5401d894c56c"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/src/shippingservice/genproto.sh": {
+    "mtime": 1779683135.519824,
+    "ast_hash": "0819aecf8ac9994250e479ba2babfa89",
+    "semantic_hash": "0819aecf8ac9994250e479ba2babfa89"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/src/shippingservice/main.go": {
+    "mtime": 1779683135.520542,
+    "ast_hash": "6c57161c593203956edd123d1e2c1816",
+    "semantic_hash": "6c57161c593203956edd123d1e2c1816"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/src/shippingservice/genproto/demo.pb.go": {
+    "mtime": 1779683135.519959,
+    "ast_hash": "a79a036ac1aff93551f1eb9eb69d3f3a",
+    "semantic_hash": "a79a036ac1aff93551f1eb9eb69d3f3a"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/src/shippingservice/genproto/demo_grpc.pb.go": {
+    "mtime": 1779683135.520276,
+    "ast_hash": "47ec0a4b95606e91d54e41d31b5f3424",
+    "semantic_hash": "47ec0a4b95606e91d54e41d31b5f3424"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/src/recommendationservice/client.py": {
+    "mtime": 1779683135.5191085,
+    "ast_hash": "f94cddafda7112c9b0f35e05c7b772c0",
+    "semantic_hash": "f94cddafda7112c9b0f35e05c7b772c0"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/src/recommendationservice/demo_pb2_grpc.py": {
+    "mtime": 1779683135.5192664,
+    "ast_hash": "9011e937c09616f02f7a9fb8d2056070",
+    "semantic_hash": "9011e937c09616f02f7a9fb8d2056070"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/src/recommendationservice/logger.py": {
+    "mtime": 1779683135.519379,
+    "ast_hash": "48dcefce17a578b6253295b951c3e413",
+    "semantic_hash": "48dcefce17a578b6253295b951c3e413"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/src/recommendationservice/genproto.sh": {
+    "mtime": 1779683135.5193248,
+    "ast_hash": "686e3767a442bdb17ab95e693c90992a",
+    "semantic_hash": "686e3767a442bdb17ab95e693c90992a"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/src/recommendationservice/demo_pb2.py": {
+    "mtime": 1779683135.5191896,
+    "ast_hash": "bccc69a91ab5ce9689c04c708d963345",
+    "semantic_hash": "bccc69a91ab5ce9689c04c708d963345"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/src/recommendationservice/recommendation_server.py": {
+    "mtime": 1779683135.519435,
+    "ast_hash": "59c1f19bbc83a8f6f6c4b8ac59c08d47",
+    "semantic_hash": "59c1f19bbc83a8f6f6c4b8ac59c08d47"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/cloudbuild.yaml": {
+    "mtime": 1779683135.4794047,
+    "ast_hash": "84e45227728dcececccbaf1dcf8e5ef3",
+    "semantic_hash": "84e45227728dcececccbaf1dcf8e5ef3"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/README.md": {
+    "mtime": 1779683135.4793277,
+    "ast_hash": "2f22f2d2782d2dfe0e7373234d5a490b",
+    "semantic_hash": "2f22f2d2782d2dfe0e7373234d5a490b"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/skaffold.yaml": {
+    "mtime": 1779683135.4998088,
+    "ast_hash": "d9f52e7821a1f7bfa6f4f8a3474444a4",
+    "semantic_hash": "d9f52e7821a1f7bfa6f4f8a3474444a4"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/terraform/README.md": {
+    "mtime": 1779683135.52108,
+    "ast_hash": "8eb5b6427c79e6252b7e4c376d3d7b32",
+    "semantic_hash": "8eb5b6427c79e6252b7e4c376d3d7b32"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/istio-manifests/frontend-gateway.yaml": {
+    "mtime": 1779683135.4923697,
+    "ast_hash": "fae8f4b217827f723d74ea13548d5b94",
+    "semantic_hash": "fae8f4b217827f723d74ea13548d5b94"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/istio-manifests/allow-egress-googleapis.yaml": {
+    "mtime": 1779683135.4923027,
+    "ast_hash": "345cf1ab83aeb1f03aa9601b7cce5619",
+    "semantic_hash": "345cf1ab83aeb1f03aa9601b7cce5619"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/istio-manifests/frontend.yaml": {
+    "mtime": 1779683135.4924235,
+    "ast_hash": "42a88714ee05a391b4021012f6796ae0",
+    "semantic_hash": "42a88714ee05a391b4021012f6796ae0"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/.deploystack/test.yaml": {
+    "mtime": 1779683135.4769835,
+    "ast_hash": "367b0fbca44c2304f74a572027a79add",
+    "semantic_hash": "367b0fbca44c2304f74a572027a79add"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/.deploystack/deploystack.yaml": {
+    "mtime": 1779683135.4765978,
+    "ast_hash": "e1113aa0c062e5ffb4a1f9f4e498b0f3",
+    "semantic_hash": "e1113aa0c062e5ffb4a1f9f4e498b0f3"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/.deploystack/messages/description.txt": {
+    "mtime": 1779683135.4767044,
+    "ast_hash": "6f75e56ab2fce40a1a226c904e080389",
+    "semantic_hash": "6f75e56ab2fce40a1a226c904e080389"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/.deploystack/messages/success.txt": {
+    "mtime": 1779683135.4767668,
+    "ast_hash": "6a35fa355414d100a64eaed19454560a",
+    "semantic_hash": "6a35fa355414d100a64eaed19454560a"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/kubernetes-manifests/emailservice.yaml": {
+    "mtime": 1779683135.4927986,
+    "ast_hash": "77603e802bdb0422574689486fe9d397",
+    "semantic_hash": "77603e802bdb0422574689486fe9d397"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/kubernetes-manifests/checkoutservice.yaml": {
+    "mtime": 1779683135.4926848,
+    "ast_hash": "b1814ba59f03f9cea61c77a4f92c9bc6",
+    "semantic_hash": "b1814ba59f03f9cea61c77a4f92c9bc6"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/kubernetes-manifests/recommendationservice.yaml": {
+    "mtime": 1779683135.4931555,
+    "ast_hash": "ed05f62f728b2e87719481a2b4a7f607",
+    "semantic_hash": "ed05f62f728b2e87719481a2b4a7f607"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/kubernetes-manifests/kustomization.yaml": {
+    "mtime": 1779683135.492919,
+    "ast_hash": "f1e63d6998d8115eb1d54cd3d4810649",
+    "semantic_hash": "f1e63d6998d8115eb1d54cd3d4810649"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/kubernetes-manifests/frontend.yaml": {
+    "mtime": 1779683135.492859,
+    "ast_hash": "a5334c9246cc59d896c1980b9ca524a8",
+    "semantic_hash": "a5334c9246cc59d896c1980b9ca524a8"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/kubernetes-manifests/paymentservice.yaml": {
+    "mtime": 1779683135.4930477,
+    "ast_hash": "578805d800c732f4aa67d2ba44fd014b",
+    "semantic_hash": "578805d800c732f4aa67d2ba44fd014b"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/kubernetes-manifests/README.md": {
+    "mtime": 1779683135.4925103,
+    "ast_hash": "6f3d963a12c684d03642294ffdc1aab3",
+    "semantic_hash": "6f3d963a12c684d03642294ffdc1aab3"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/kubernetes-manifests/productcatalogservice.yaml": {
+    "mtime": 1779683135.493105,
+    "ast_hash": "c802f7821f0e03459cf75652f730fa59",
+    "semantic_hash": "c802f7821f0e03459cf75652f730fa59"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/kubernetes-manifests/cartservice.yaml": {
+    "mtime": 1779683135.4926317,
+    "ast_hash": "e6c088580186250bac38a3b49c0abcfc",
+    "semantic_hash": "e6c088580186250bac38a3b49c0abcfc"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/kubernetes-manifests/loadgenerator.yaml": {
+    "mtime": 1779683135.4929764,
+    "ast_hash": "5eaf6e63a0b8c3b14cd5f903489fbc83",
+    "semantic_hash": "5eaf6e63a0b8c3b14cd5f903489fbc83"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/kubernetes-manifests/currencyservice.yaml": {
+    "mtime": 1779683135.4927402,
+    "ast_hash": "0d265b93cd7132b33ea6365848c122ff",
+    "semantic_hash": "0d265b93cd7132b33ea6365848c122ff"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/kubernetes-manifests/shippingservice.yaml": {
+    "mtime": 1779683135.4932096,
+    "ast_hash": "0c8019b99ba5e767739ae24b3de198ef",
+    "semantic_hash": "0c8019b99ba5e767739ae24b3de198ef"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/kubernetes-manifests/adservice.yaml": {
+    "mtime": 1779683135.4925792,
+    "ast_hash": "1a6badaa0b724f655d5c3134e7c69ab5",
+    "semantic_hash": "1a6badaa0b724f655d5c3134e7c69ab5"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/release/istio-manifests.yaml": {
+    "mtime": 1779683135.49965,
+    "ast_hash": "4603ce33bac5789b28182ac1fda0214d",
+    "semantic_hash": "4603ce33bac5789b28182ac1fda0214d"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/release/kubernetes-manifests.yaml": {
+    "mtime": 1779683135.4997325,
+    "ast_hash": "85548b25fb6800d2fa1bb5dd87cce042",
+    "semantic_hash": "85548b25fb6800d2fa1bb5dd87cce042"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/docs/development-guide.md": {
+    "mtime": 1779683135.4797046,
+    "ast_hash": "f44fe4cf2f1acff0610a839d221cbb5e",
+    "semantic_hash": "f44fe4cf2f1acff0610a839d221cbb5e"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/docs/deploystack.md": {
+    "mtime": 1779683135.479631,
+    "ast_hash": "8ecb33e219b3f1abc828fe89466551fd",
+    "semantic_hash": "8ecb33e219b3f1abc828fe89466551fd"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/docs/purpose.md": {
+    "mtime": 1779683135.4904337,
+    "ast_hash": "5cb09fb9133085bf7f16206c87fd5c59",
+    "semantic_hash": "5cb09fb9133085bf7f16206c87fd5c59"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/docs/product-requirements.md": {
+    "mtime": 1779683135.4903738,
+    "ast_hash": "32d223e9f489d0298dd480dddaa16154",
+    "semantic_hash": "32d223e9f489d0298dd480dddaa16154"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/docs/adding-new-microservice.md": {
+    "mtime": 1779683135.4795017,
+    "ast_hash": "a649f254425be5f2d13b0b5ef9353bd4",
+    "semantic_hash": "a649f254425be5f2d13b0b5ef9353bd4"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/docs/cloudshell-tutorial.md": {
+    "mtime": 1779683135.4795716,
+    "ast_hash": "3e55ca3cbb2866e04f3b1f4d0e730b4c",
+    "semantic_hash": "3e55ca3cbb2866e04f3b1f4d0e730b4c"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/docs/releasing/README.md": {
+    "mtime": 1779683135.4905722,
+    "ast_hash": "b0b1fce45534638df7a305f8738f6097",
+    "semantic_hash": "b0b1fce45534638df7a305f8738f6097"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/docs/releasing/license_header.txt": {
+    "mtime": 1779683135.4906383,
+    "ast_hash": "38a798935670867e3d1bef02c7698b7c",
+    "semantic_hash": "38a798935670867e3d1bef02c7698b7c"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/helm-chart/Chart.yaml": {
+    "mtime": 1779683135.4910047,
+    "ast_hash": "7de547335c4ae4cc06fbf71ed17493ff",
+    "semantic_hash": "7de547335c4ae4cc06fbf71ed17493ff"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/helm-chart/README.md": {
+    "mtime": 1779683135.4910686,
+    "ast_hash": "dffd04eb75e2f6a62b7e5f716b467671",
+    "semantic_hash": "dffd04eb75e2f6a62b7e5f716b467671"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/helm-chart/values.yaml": {
+    "mtime": 1779683135.4922104,
+    "ast_hash": "0b861509c61f4ec8477001d462999798",
+    "semantic_hash": "0b861509c61f4ec8477001d462999798"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/helm-chart/templates/opentelemetry-collector.yaml": {
+    "mtime": 1779683135.4918504,
+    "ast_hash": "5579a06be3c4dbea9d75119016f469eb",
+    "semantic_hash": "5579a06be3c4dbea9d75119016f469eb"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/helm-chart/templates/emailservice.yaml": {
+    "mtime": 1779683135.4916053,
+    "ast_hash": "9d196ae8f3af7e029d68d516346be31f",
+    "semantic_hash": "9d196ae8f3af7e029d68d516346be31f"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/helm-chart/templates/checkoutservice.yaml": {
+    "mtime": 1779683135.491405,
+    "ast_hash": "b2ff348a923d666e9c768e244e5ecf8a",
+    "semantic_hash": "b2ff348a923d666e9c768e244e5ecf8a"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/helm-chart/templates/recommendationservice.yaml": {
+    "mtime": 1779683135.4920735,
+    "ast_hash": "75e0d2ef6e6af98c841353201cacb5d2",
+    "semantic_hash": "75e0d2ef6e6af98c841353201cacb5d2"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/helm-chart/templates/NOTES.txt": {
+    "mtime": 1779683135.4911559,
+    "ast_hash": "38ec8cf24a41aa87b066b48c311a2719",
+    "semantic_hash": "38ec8cf24a41aa87b066b48c311a2719"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/helm-chart/templates/common.yaml": {
+    "mtime": 1779683135.4914713,
+    "ast_hash": "a93e2a8aa48a86e746b1896b13a6e86a",
+    "semantic_hash": "a93e2a8aa48a86e746b1896b13a6e86a"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/helm-chart/templates/frontend.yaml": {
+    "mtime": 1779683135.4916825,
+    "ast_hash": "5aa1c2ca917b60a95de649113e1b79cb",
+    "semantic_hash": "5aa1c2ca917b60a95de649113e1b79cb"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/helm-chart/templates/paymentservice.yaml": {
+    "mtime": 1779683135.491932,
+    "ast_hash": "db901d8131ae2f4d65141f94c8505de9",
+    "semantic_hash": "db901d8131ae2f4d65141f94c8505de9"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/helm-chart/templates/productcatalogservice.yaml": {
+    "mtime": 1779683135.4920044,
+    "ast_hash": "3a58553ade5327836337d9b38f84eedf",
+    "semantic_hash": "3a58553ade5327836337d9b38f84eedf"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/helm-chart/templates/cartservice.yaml": {
+    "mtime": 1779683135.491317,
+    "ast_hash": "2458d389054e1cf7c9dce33bed9edc68",
+    "semantic_hash": "2458d389054e1cf7c9dce33bed9edc68"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/helm-chart/templates/loadgenerator.yaml": {
+    "mtime": 1779683135.4917557,
+    "ast_hash": "c08b5c237f36d4a812bb611528191429",
+    "semantic_hash": "c08b5c237f36d4a812bb611528191429"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/helm-chart/templates/currencyservice.yaml": {
+    "mtime": 1779683135.4915454,
+    "ast_hash": "cf3174232570a39653f9e588eb89c569",
+    "semantic_hash": "cf3174232570a39653f9e588eb89c569"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/helm-chart/templates/shippingservice.yaml": {
+    "mtime": 1779683135.4921393,
+    "ast_hash": "83e7b4b82580c3cc5085c93b8ab763c6",
+    "semantic_hash": "83e7b4b82580c3cc5085c93b8ab763c6"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/helm-chart/templates/adservice.yaml": {
+    "mtime": 1779683135.4912293,
+    "ast_hash": "82963c1298677ab4de45a571cc83638f",
+    "semantic_hash": "82963c1298677ab4de45a571cc83638f"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/.github/CODE_OF_CONDUCT.md": {
+    "mtime": 1779683135.4772243,
+    "ast_hash": "01ff2efbd039ccc2ffc501a0efbeef68",
+    "semantic_hash": "01ff2efbd039ccc2ffc501a0efbeef68"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/.github/header-checker-lint.yml": {
+    "mtime": 1779683135.4776695,
+    "ast_hash": "7eb567dd3019dcaa593df1ea3c16c0dd",
+    "semantic_hash": "7eb567dd3019dcaa593df1ea3c16c0dd"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/.github/snippet-bot.yml": {
+    "mtime": 1779683135.478242,
+    "ast_hash": "e388c083df1ee814912d08a154f138ac",
+    "semantic_hash": "e388c083df1ee814912d08a154f138ac"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/.github/pull_request_template.md": {
+    "mtime": 1779683135.4777272,
+    "ast_hash": "7b6e6dbaaceff78ad08f1a68e73c6cd1",
+    "semantic_hash": "7b6e6dbaaceff78ad08f1a68e73c6cd1"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/.github/CONTRIBUTING.md": {
+    "mtime": 1779683135.4772754,
+    "ast_hash": "491ffa6686216bba0bf789f300d4f1a6",
+    "semantic_hash": "491ffa6686216bba0bf789f300d4f1a6"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/.github/SECURITY.md": {
+    "mtime": 1779683135.4775574,
+    "ast_hash": "6050a703a3c98f52788dfb04892b9b22",
+    "semantic_hash": "6050a703a3c98f52788dfb04892b9b22"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/.github/auto-approve.yml": {
+    "mtime": 1779683135.477609,
+    "ast_hash": "60d98e54ed781e29a7a477ae674a4a3c",
+    "semantic_hash": "60d98e54ed781e29a7a477ae674a4a3c"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/.github/terraform/README.md": {
+    "mtime": 1779683135.4783328,
+    "ast_hash": "8ff4018fab71942ff369e60fab3c7e32",
+    "semantic_hash": "8ff4018fab71942ff369e60fab3c7e32"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/.github/release-cluster/backend-config.yaml": {
+    "mtime": 1779683135.4778883,
+    "ast_hash": "6b0c04198647cdbdfc485bc6e44d69eb",
+    "semantic_hash": "6b0c04198647cdbdfc485bc6e44d69eb"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/.github/release-cluster/frontend-config.yaml": {
+    "mtime": 1779683135.4779425,
+    "ast_hash": "1c11f08fb5a00b42f278d4d5ed6b7f8d",
+    "semantic_hash": "1c11f08fb5a00b42f278d4d5ed6b7f8d"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/.github/release-cluster/README.md": {
+    "mtime": 1779683135.4778168,
+    "ast_hash": "880c5ee5b44ada7568ca3de83866c2cf",
+    "semantic_hash": "880c5ee5b44ada7568ca3de83866c2cf"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/.github/release-cluster/managed-cert.yaml": {
+    "mtime": 1779683135.4781146,
+    "ast_hash": "439c257e7849d78eb8f49affb9120d9c",
+    "semantic_hash": "439c257e7849d78eb8f49affb9120d9c"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/.github/release-cluster/frontend-ingress.yaml": {
+    "mtime": 1779683135.4779947,
+    "ast_hash": "3138b47f32fc2d001d908d6b38e43354",
+    "semantic_hash": "3138b47f32fc2d001d908d6b38e43354"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/.github/release-cluster/frontend-service.yaml": {
+    "mtime": 1779683135.478056,
+    "ast_hash": "c5656049621c385eda8cb16d842cc915",
+    "semantic_hash": "c5656049621c385eda8cb16d842cc915"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/.github/workflows/terraform-validate-ci.yaml": {
+    "mtime": 1779683135.4791307,
+    "ast_hash": "3b0536d34858ee54373d92bfc2d7071d",
+    "semantic_hash": "3b0536d34858ee54373d92bfc2d7071d"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/.github/workflows/helm-chart-ci.yaml": {
+    "mtime": 1779683135.478894,
+    "ast_hash": "403961dfc5d4c752ac8eee4be3ec2135",
+    "semantic_hash": "403961dfc5d4c752ac8eee4be3ec2135"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/.github/workflows/ci-pr.yaml": {
+    "mtime": 1779683135.4787471,
+    "ast_hash": "6a09444d032e0ef02ccbcb84d6b35823",
+    "semantic_hash": "6a09444d032e0ef02ccbcb84d6b35823"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/.github/workflows/kustomize-build-ci.yaml": {
+    "mtime": 1779683135.4790773,
+    "ast_hash": "7e2a0536c07e264e7dbbc34f8c410628",
+    "semantic_hash": "7e2a0536c07e264e7dbbc34f8c410628"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/.github/workflows/README.md": {
+    "mtime": 1779683135.4786096,
+    "ast_hash": "f14983db32733904875458e9f2ec389c",
+    "semantic_hash": "f14983db32733904875458e9f2ec389c"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/.github/workflows/ci-main.yaml": {
+    "mtime": 1779683135.4786847,
+    "ast_hash": "ef79273577c89a85f8de53f5bf916040",
+    "semantic_hash": "ef79273577c89a85f8de53f5bf916040"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/.github/workflows/cleanup.yaml": {
+    "mtime": 1779683135.4788039,
+    "ast_hash": "65e07ee61ba51ef8798cee31751d5f08",
+    "semantic_hash": "65e07ee61ba51ef8798cee31751d5f08"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/.github/workflows/kubevious-manifests-ci.yaml": {
+    "mtime": 1779683135.4790177,
+    "ast_hash": "01c56419df34af82577b905ef0c7262c",
+    "semantic_hash": "01c56419df34af82577b905ef0c7262c"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/.github/ISSUE_TEMPLATE/feature-request.md": {
+    "mtime": 1779683135.4774387,
+    "ast_hash": "796b2bfb9af334ce65d91d97fc5cab9a",
+    "semantic_hash": "796b2bfb9af334ce65d91d97fc5cab9a"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/.github/ISSUE_TEMPLATE/bug-report.md": {
+    "mtime": 1779683135.4773808,
+    "ast_hash": "b61d6ba7cccdb1f6e02d80193fed3eba",
+    "semantic_hash": "b61d6ba7cccdb1f6e02d80193fed3eba"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/.github/ISSUE_TEMPLATE/other.md": {
+    "mtime": 1779683135.477499,
+    "ast_hash": "88827a6c0a6461d1405f308e98c60b33",
+    "semantic_hash": "88827a6c0a6461d1405f308e98c60b33"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/kustomize/kustomization.yaml": {
+    "mtime": 1779683135.4987757,
+    "ast_hash": "65529b8d0ca60b2ac36390bb2f80c8d7",
+    "semantic_hash": "65529b8d0ca60b2ac36390bb2f80c8d7"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/kustomize/README.md": {
+    "mtime": 1779683135.493307,
+    "ast_hash": "aeb2614c227af21373e7152ba54692cb",
+    "semantic_hash": "aeb2614c227af21373e7152ba54692cb"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/kustomize/tests/README.md": {
+    "mtime": 1779683135.4988751,
+    "ast_hash": "afb089a8a86f98c3ef1c1f2c24aa2176",
+    "semantic_hash": "afb089a8a86f98c3ef1c1f2c24aa2176"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/kustomize/tests/memorystore-with-all-components/kustomization.yaml": {
+    "mtime": 1779683135.4989772,
+    "ast_hash": "cf2ae27fcb74b6acc52face931d758fa",
+    "semantic_hash": "cf2ae27fcb74b6acc52face931d758fa"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/kustomize/tests/spanner-with-all-components/kustomization.yaml": {
+    "mtime": 1779683135.4992468,
+    "ast_hash": "bd7422e9ceac569d4d1a4ca191fe1802",
+    "semantic_hash": "bd7422e9ceac569d4d1a4ca191fe1802"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/kustomize/tests/service-mesh-istio-with-all-components/kustomization.yaml": {
+    "mtime": 1779683135.4990976,
+    "ast_hash": "d238240ebdf397dd135eb1373eff222b",
+    "semantic_hash": "d238240ebdf397dd135eb1373eff222b"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/kustomize/components/custom-base-url/kustomization.yaml": {
+    "mtime": 1779683135.4950333,
+    "ast_hash": "a1463de3dea51db7b81bf141693bd5e6",
+    "semantic_hash": "a1463de3dea51db7b81bf141693bd5e6"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/kustomize/components/custom-base-url/README.md": {
+    "mtime": 1779683135.4949508,
+    "ast_hash": "fcfa481c35e2550b34462382c116abc3",
+    "semantic_hash": "fcfa481c35e2550b34462382c116abc3"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/kustomize/components/container-images-registry/kustomization.yaml": {
+    "mtime": 1779683135.494395,
+    "ast_hash": "a146fdd57a9ac8b39084a02783f91267",
+    "semantic_hash": "a146fdd57a9ac8b39084a02783f91267"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/kustomize/components/container-images-registry/README.md": {
+    "mtime": 1779683135.494318,
+    "ast_hash": "751e12cb82a1e39bd25f31664a5479b2",
+    "semantic_hash": "751e12cb82a1e39bd25f31664a5479b2"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/kustomize/components/without-loadgenerator/delete-loadgenerator.patch.yaml": {
+    "mtime": 1779683135.4986556,
+    "ast_hash": "e5dfc8f9fa7dd1e630fad20ede654213",
+    "semantic_hash": "e5dfc8f9fa7dd1e630fad20ede654213"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/kustomize/components/without-loadgenerator/kustomization.yaml": {
+    "mtime": 1779683135.4987142,
+    "ast_hash": "ecc257e7a2be8b0f8f32cfbdba220e74",
+    "semantic_hash": "ecc257e7a2be8b0f8f32cfbdba220e74"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/kustomize/components/without-loadgenerator/README.md": {
+    "mtime": 1779683135.4985926,
+    "ast_hash": "49066af7f8ad98fad27f3999f9479829",
+    "semantic_hash": "49066af7f8ad98fad27f3999f9479829"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/kustomize/components/cymbal-branding/kustomization.yaml": {
+    "mtime": 1779683135.49524,
+    "ast_hash": "3d6ff725772494479763be24398ce258",
+    "semantic_hash": "3d6ff725772494479763be24398ce258"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/kustomize/components/cymbal-branding/README.md": {
+    "mtime": 1779683135.4951575,
+    "ast_hash": "e094850e9f76b02e355d53819c38dfd1",
+    "semantic_hash": "e094850e9f76b02e355d53819c38dfd1"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/kustomize/components/memorystore/kustomization.yaml": {
+    "mtime": 1779683135.4957323,
+    "ast_hash": "012cb08a41c734b4969b93a6728f9cb0",
+    "semantic_hash": "012cb08a41c734b4969b93a6728f9cb0"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/kustomize/components/memorystore/README.md": {
+    "mtime": 1779683135.4956656,
+    "ast_hash": "64fe244d59c850cd3496a96c7ad6e71b",
+    "semantic_hash": "64fe244d59c850cd3496a96c7ad6e71b"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/kustomize/components/single-shared-session/kustomization.yaml": {
+    "mtime": 1779683135.4983153,
+    "ast_hash": "14a5b2f9dc5b8d8510c858dc259abbcb",
+    "semantic_hash": "14a5b2f9dc5b8d8510c858dc259abbcb"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/kustomize/components/single-shared-session/README.md": {
+    "mtime": 1779683135.498249,
+    "ast_hash": "9fb3b2749794aa3590689b176a6f1b26",
+    "semantic_hash": "9fb3b2749794aa3590689b176a6f1b26"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/kustomize/components/network-policies/network-policy-paymentservice.yaml": {
+    "mtime": 1779683135.4965644,
+    "ast_hash": "f8e01709953acec7d964dcdb485ead14",
+    "semantic_hash": "f8e01709953acec7d964dcdb485ead14"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/kustomize/components/network-policies/network-policy-currencyservice.yaml": {
+    "mtime": 1779683135.496206,
+    "ast_hash": "b200cee1f23de7b401533c6230dcec80",
+    "semantic_hash": "b200cee1f23de7b401533c6230dcec80"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/kustomize/components/network-policies/network-policy-adservice.yaml": {
+    "mtime": 1779683135.4960113,
+    "ast_hash": "d0fed5a0d85d0749ab97c9730eb0dc66",
+    "semantic_hash": "d0fed5a0d85d0749ab97c9730eb0dc66"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/kustomize/components/network-policies/network-policy-redis.yaml": {
+    "mtime": 1779683135.4968028,
+    "ast_hash": "778214fecb9a89ce255a1f150d458c4f",
+    "semantic_hash": "778214fecb9a89ce255a1f150d458c4f"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/kustomize/components/network-policies/network-policy-deny-all.yaml": {
+    "mtime": 1779683135.4962745,
+    "ast_hash": "470fee861b4fc603ac0d63cd88335bfb",
+    "semantic_hash": "470fee861b4fc603ac0d63cd88335bfb"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/kustomize/components/network-policies/network-policy-shippingservice.yaml": {
+    "mtime": 1779683135.4968805,
+    "ast_hash": "786eb96f862279434c70ec861d0376a4",
+    "semantic_hash": "786eb96f862279434c70ec861d0376a4"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/kustomize/components/network-policies/network-policy-frontend.yaml": {
+    "mtime": 1779683135.496422,
+    "ast_hash": "eebe5a65865788674cd862990771121c",
+    "semantic_hash": "eebe5a65865788674cd862990771121c"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/kustomize/components/network-policies/kustomization.yaml": {
+    "mtime": 1779683135.4959335,
+    "ast_hash": "a144745b1be66289c79f739351fb78ce",
+    "semantic_hash": "a144745b1be66289c79f739351fb78ce"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/kustomize/components/network-policies/network-policy-recommendationservice.yaml": {
+    "mtime": 1779683135.4967124,
+    "ast_hash": "e1b73b32be57ead5371f019f477383fb",
+    "semantic_hash": "e1b73b32be57ead5371f019f477383fb"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/kustomize/components/network-policies/network-policy-emailservice.yaml": {
+    "mtime": 1779683135.4963434,
+    "ast_hash": "0fc51f20b261c1ab1640e5bd0b020113",
+    "semantic_hash": "0fc51f20b261c1ab1640e5bd0b020113"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/kustomize/components/network-policies/README.md": {
+    "mtime": 1779683135.4958544,
+    "ast_hash": "17de13f3c0153af7a8b6ee94a5987e71",
+    "semantic_hash": "17de13f3c0153af7a8b6ee94a5987e71"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/kustomize/components/network-policies/network-policy-cartservice.yaml": {
+    "mtime": 1779683135.4960716,
+    "ast_hash": "8965e38f467502501a4f96c56d395bfd",
+    "semantic_hash": "8965e38f467502501a4f96c56d395bfd"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/kustomize/components/network-policies/network-policy-checkoutservice.yaml": {
+    "mtime": 1779683135.4961324,
+    "ast_hash": "0bc2e236d2e7acde4568f2b7efba0302",
+    "semantic_hash": "0bc2e236d2e7acde4568f2b7efba0302"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/kustomize/components/network-policies/network-policy-productcatalogservice.yaml": {
+    "mtime": 1779683135.4966323,
+    "ast_hash": "0bfee2a6fc1394301320869630f49168",
+    "semantic_hash": "0bfee2a6fc1394301320869630f49168"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/kustomize/components/network-policies/network-policy-loadgenerator.yaml": {
+    "mtime": 1779683135.4964914,
+    "ast_hash": "e30e29d240fb38f3889d40f18fced269",
+    "semantic_hash": "e30e29d240fb38f3889d40f18fced269"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/kustomize/components/container-images-tag/kustomization.yaml": {
+    "mtime": 1779683135.4948199,
+    "ast_hash": "e8d8a8bc882616453521c3bd7a45f28e",
+    "semantic_hash": "e8d8a8bc882616453521c3bd7a45f28e"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/kustomize/components/container-images-tag/README.md": {
+    "mtime": 1779683135.4947498,
+    "ast_hash": "145f18b2ef46cf8cd6bec845b6f4d014",
+    "semantic_hash": "145f18b2ef46cf8cd6bec845b6f4d014"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/kustomize/components/google-cloud-operations/otel-collector.yaml": {
+    "mtime": 1779683135.4955711,
+    "ast_hash": "556a10f87361288fc1dfda4ad4d2427f",
+    "semantic_hash": "556a10f87361288fc1dfda4ad4d2427f"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/kustomize/components/google-cloud-operations/kustomization.yaml": {
+    "mtime": 1779683135.4955182,
+    "ast_hash": "6ba47447fcf76740114d8b4d400eb9ba",
+    "semantic_hash": "6ba47447fcf76740114d8b4d400eb9ba"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/kustomize/components/google-cloud-operations/README.md": {
+    "mtime": 1779683135.4953644,
+    "ast_hash": "3dcade7b5ab38641925632294d7aba23",
+    "semantic_hash": "3dcade7b5ab38641925632294d7aba23"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/kustomize/components/spanner/kustomization.yaml": {
+    "mtime": 1779683135.4984906,
+    "ast_hash": "c608ddc7dfba9630789db1dc4fa19727",
+    "semantic_hash": "c608ddc7dfba9630789db1dc4fa19727"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/kustomize/components/spanner/README.md": {
+    "mtime": 1779683135.4984305,
+    "ast_hash": "a7b365141bbfef6a892a991f854eb03d",
+    "semantic_hash": "a7b365141bbfef6a892a991f854eb03d"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/kustomize/components/alloydb/kustomization.yaml": {
+    "mtime": 1779683135.4942265,
+    "ast_hash": "6540bc4d59e980ccd502fd874958bf7a",
+    "semantic_hash": "6540bc4d59e980ccd502fd874958bf7a"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/kustomize/components/alloydb/README.md": {
+    "mtime": 1779683135.4941704,
+    "ast_hash": "205a64e2a860c2caaf8ae044f4813023",
+    "semantic_hash": "205a64e2a860c2caaf8ae044f4813023"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/kustomize/components/service-mesh-istio/frontend-gateway.yaml": {
+    "mtime": 1779683135.497388,
+    "ast_hash": "cda3c05b8943b511502d1831f19ea40b",
+    "semantic_hash": "cda3c05b8943b511502d1831f19ea40b"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/kustomize/components/service-mesh-istio/allow-egress-googleapis.yaml": {
+    "mtime": 1779683135.4973056,
+    "ast_hash": "345cf1ab83aeb1f03aa9601b7cce5619",
+    "semantic_hash": "345cf1ab83aeb1f03aa9601b7cce5619"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/kustomize/components/service-mesh-istio/kustomization.yaml": {
+    "mtime": 1779683135.4975402,
+    "ast_hash": "a5a35856c8fd7ce9a364e823f6325baf",
+    "semantic_hash": "a5a35856c8fd7ce9a364e823f6325baf"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/kustomize/components/service-mesh-istio/frontend.yaml": {
+    "mtime": 1779683135.4974673,
+    "ast_hash": "42a88714ee05a391b4021012f6796ae0",
+    "semantic_hash": "42a88714ee05a391b4021012f6796ae0"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/kustomize/components/service-mesh-istio/README.md": {
+    "mtime": 1779683135.4972327,
+    "ast_hash": "bdb60a43651d88a999d6f2f0997fd4b2",
+    "semantic_hash": "bdb60a43651d88a999d6f2f0997fd4b2"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/kustomize/components/container-images-tag-suffix/kustomization.yaml": {
+    "mtime": 1779683135.4945507,
+    "ast_hash": "95c706251da38b74041c347ac99529da",
+    "semantic_hash": "95c706251da38b74041c347ac99529da"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/kustomize/components/container-images-tag-suffix/README.md": {
+    "mtime": 1779683135.494491,
+    "ast_hash": "d02ebcfb301ced096a96d2f2fbdd8547",
+    "semantic_hash": "d02ebcfb301ced096a96d2f2fbdd8547"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/kustomize/components/non-public-frontend/kustomization.yaml": {
+    "mtime": 1779683135.4970765,
+    "ast_hash": "b37dbf74ea82457cb7956419a981423f",
+    "semantic_hash": "b37dbf74ea82457cb7956419a981423f"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/kustomize/components/non-public-frontend/README.md": {
+    "mtime": 1779683135.4970057,
+    "ast_hash": "7ff99867cf08456b66b461a9c017f4c7",
+    "semantic_hash": "7ff99867cf08456b66b461a9c017f4c7"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/kustomize/components/shopping-assistant/kustomization.yaml": {
+    "mtime": 1779683135.497744,
+    "ast_hash": "42b79ab3c658ff6f9a0bb615dd7a96d7",
+    "semantic_hash": "42b79ab3c658ff6f9a0bb615dd7a96d7"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/kustomize/components/shopping-assistant/README.md": {
+    "mtime": 1779683135.4976745,
+    "ast_hash": "cc506519b0acc2d931ed2de31ad065a1",
+    "semantic_hash": "cc506519b0acc2d931ed2de31ad065a1"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/kustomize/components/shopping-assistant/shoppingassistantservice.yaml": {
+    "mtime": 1779683135.4981217,
+    "ast_hash": "4987bd97bdce3d29731a9ff9400885e8",
+    "semantic_hash": "4987bd97bdce3d29731a9ff9400885e8"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/kustomize/base/emailservice.yaml": {
+    "mtime": 1779683135.4936438,
+    "ast_hash": "eb57c1dcce07f2e97b51263a6e24fc00",
+    "semantic_hash": "eb57c1dcce07f2e97b51263a6e24fc00"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/kustomize/base/checkoutservice.yaml": {
+    "mtime": 1779683135.493542,
+    "ast_hash": "2dd21a97bdf427d20235b8b3b2aa2567",
+    "semantic_hash": "2dd21a97bdf427d20235b8b3b2aa2567"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/kustomize/base/recommendationservice.yaml": {
+    "mtime": 1779683135.4939764,
+    "ast_hash": "f20523ba026546bc46d93fbf17549ea7",
+    "semantic_hash": "f20523ba026546bc46d93fbf17549ea7"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/kustomize/base/kustomization.yaml": {
+    "mtime": 1779683135.493762,
+    "ast_hash": "13f6fc6494ecad4b25c7339609a851c5",
+    "semantic_hash": "13f6fc6494ecad4b25c7339609a851c5"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/kustomize/base/frontend.yaml": {
+    "mtime": 1779683135.4937022,
+    "ast_hash": "348aa0a8f85dbfc70f14fdf169ef1733",
+    "semantic_hash": "348aa0a8f85dbfc70f14fdf169ef1733"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/kustomize/base/paymentservice.yaml": {
+    "mtime": 1779683135.4938722,
+    "ast_hash": "81cb48e7417af6ff7021ef2e9599e0e0",
+    "semantic_hash": "81cb48e7417af6ff7021ef2e9599e0e0"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/kustomize/base/productcatalogservice.yaml": {
+    "mtime": 1779683135.4939208,
+    "ast_hash": "0b77600e99dbf6f27f169cc07599a8bc",
+    "semantic_hash": "0b77600e99dbf6f27f169cc07599a8bc"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/kustomize/base/cartservice.yaml": {
+    "mtime": 1779683135.4934883,
+    "ast_hash": "62b4a919b3ab14461830944ae23e4430",
+    "semantic_hash": "62b4a919b3ab14461830944ae23e4430"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/kustomize/base/loadgenerator.yaml": {
+    "mtime": 1779683135.4938233,
+    "ast_hash": "da24ddabad526fd7fa8a92fe26c05075",
+    "semantic_hash": "da24ddabad526fd7fa8a92fe26c05075"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/kustomize/base/currencyservice.yaml": {
+    "mtime": 1779683135.4935942,
+    "ast_hash": "39c9003a1e5dd8bd3b5c5f3c2f99e4a2",
+    "semantic_hash": "39c9003a1e5dd8bd3b5c5f3c2f99e4a2"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/kustomize/base/shippingservice.yaml": {
+    "mtime": 1779683135.4940267,
+    "ast_hash": "134cbb841df45f06b31a123081db419c",
+    "semantic_hash": "134cbb841df45f06b31a123081db419c"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/kustomize/base/adservice.yaml": {
+    "mtime": 1779683135.4934285,
+    "ast_hash": "b14ce5e2b845a63d4dc08d4cb03c69d9",
+    "semantic_hash": "b14ce5e2b845a63d4dc08d4cb03c69d9"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/src/adservice/README.md": {
+    "mtime": 1779683135.5000184,
+    "ast_hash": "8713c8e1142f80de544eb2f95d0cc093",
+    "semantic_hash": "8713c8e1142f80de544eb2f95d0cc093"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/src/shoppingassistantservice/requirements.txt": {
+    "mtime": 1779683135.520938,
+    "ast_hash": "6955ec29aaa799aadd9b4e8bcb00fe6f",
+    "semantic_hash": "6955ec29aaa799aadd9b4e8bcb00fe6f"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/src/frontend/README.md": {
+    "mtime": 1779683135.5061674,
+    "ast_hash": "b2372d1dc0ed418f90e0b56a6c6c2861",
+    "semantic_hash": "b2372d1dc0ed418f90e0b56a6c6c2861"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/src/frontend/static/images/credits.txt": {
+    "mtime": 1779683135.5106552,
+    "ast_hash": "8282b1371a7706b51882d12f5fcfd01d",
+    "semantic_hash": "8282b1371a7706b51882d12f5fcfd01d"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/src/frontend/templates/order.html": {
+    "mtime": 1779683135.516397,
+    "ast_hash": "42ef0f303545c2f7b8af4f7f5d35e782",
+    "semantic_hash": "42ef0f303545c2f7b8af4f7f5d35e782"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/src/frontend/templates/home.html": {
+    "mtime": 1779683135.5163448,
+    "ast_hash": "ae7b2552e0652c82609212d86b103341",
+    "semantic_hash": "ae7b2552e0652c82609212d86b103341"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/src/frontend/templates/recommendations.html": {
+    "mtime": 1779683135.5165849,
+    "ast_hash": "adf09c03c342f7b2c49e17a738d6db33",
+    "semantic_hash": "adf09c03c342f7b2c49e17a738d6db33"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/src/frontend/templates/product.html": {
+    "mtime": 1779683135.516519,
+    "ast_hash": "431601497775a6e1dacca2cc33121749",
+    "semantic_hash": "431601497775a6e1dacca2cc33121749"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/src/frontend/templates/footer.html": {
+    "mtime": 1779683135.5162134,
+    "ast_hash": "5b24720108deefb4d787abd85985d76f",
+    "semantic_hash": "5b24720108deefb4d787abd85985d76f"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/src/frontend/templates/cart.html": {
+    "mtime": 1779683135.5161083,
+    "ast_hash": "13282e8e55e117b393e15e1f7ddf44a6",
+    "semantic_hash": "13282e8e55e117b393e15e1f7ddf44a6"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/src/frontend/templates/header.html": {
+    "mtime": 1779683135.5162916,
+    "ast_hash": "d2f97837bafb349c5416961faa4b7fd1",
+    "semantic_hash": "d2f97837bafb349c5416961faa4b7fd1"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/src/frontend/templates/error.html": {
+    "mtime": 1779683135.51616,
+    "ast_hash": "fd650053e2a2559181c57bd8bd18734d",
+    "semantic_hash": "fd650053e2a2559181c57bd8bd18734d"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/src/frontend/templates/ad.html": {
+    "mtime": 1779683135.5158799,
+    "ast_hash": "7802ce299f27ae95e2626216191100f6",
+    "semantic_hash": "7802ce299f27ae95e2626216191100f6"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/src/frontend/templates/assistant.html": {
+    "mtime": 1779683135.516008,
+    "ast_hash": "45f5aea0baa7ec6ce4bfd0e97e48c0af",
+    "semantic_hash": "45f5aea0baa7ec6ce4bfd0e97e48c0af"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/src/loadgenerator/requirements.txt": {
+    "mtime": 1779683135.5169783,
+    "ast_hash": "addc89b168e7002d59ef790a2d3c1758",
+    "semantic_hash": "addc89b168e7002d59ef790a2d3c1758"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/src/productcatalogservice/README.md": {
+    "mtime": 1779683135.5181737,
+    "ast_hash": "ac21eb1d795931e8df96db401d25e551",
+    "semantic_hash": "ac21eb1d795931e8df96db401d25e551"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/src/checkoutservice/README.md": {
+    "mtime": 1779683135.5027406,
+    "ast_hash": "81e936f428f9b3335941504b5dbdca42",
+    "semantic_hash": "81e936f428f9b3335941504b5dbdca42"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/src/emailservice/requirements.txt": {
+    "mtime": 1779683135.5058236,
+    "ast_hash": "309036c521fd2d6b016a03417b9da21a",
+    "semantic_hash": "309036c521fd2d6b016a03417b9da21a"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/src/emailservice/templates/confirmation.html": {
+    "mtime": 1779683135.5059128,
+    "ast_hash": "38cda12c05a858e9081b0bd0afd3d468",
+    "semantic_hash": "38cda12c05a858e9081b0bd0afd3d468"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/src/shippingservice/README.md": {
+    "mtime": 1779683135.5197716,
+    "ast_hash": "0eb42dc8412c269e1c11593035df5524",
+    "semantic_hash": "0eb42dc8412c269e1c11593035df5524"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/src/recommendationservice/requirements.txt": {
+    "mtime": 1779683135.5195625,
+    "ast_hash": "87e919f93dcf766cfdc8c0952a6c2bd1",
+    "semantic_hash": "87e919f93dcf766cfdc8c0952a6c2bd1"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/docs/img/memorystore.png": {
+    "mtime": 1779683135.480933,
+    "ast_hash": "045e90d0cb6eb2bd5167de79b32e9bcf",
+    "semantic_hash": "045e90d0cb6eb2bd5167de79b32e9bcf"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/docs/img/architecture-diagram.png": {
+    "mtime": 1779683135.480479,
+    "ast_hash": "00a01cbd592996d932ed4f44ae1d3380",
+    "semantic_hash": "00a01cbd592996d932ed4f44ae1d3380"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/docs/img/online-boutique-frontend-1.png": {
+    "mtime": 1779683135.4850006,
+    "ast_hash": "c4be0d7f803fea2304a65a40609b1322",
+    "semantic_hash": "c4be0d7f803fea2304a65a40609b1322"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/docs/img/online-boutique-frontend-2.png": {
+    "mtime": 1779683135.4865234,
+    "ast_hash": "0d2271639dfcf190d3b17f751675c0a8",
+    "semantic_hash": "0d2271639dfcf190d3b17f751675c0a8"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/kustomize/components/google-cloud-operations/collector-model.png": {
+    "mtime": 1779683135.4954622,
+    "ast_hash": "f5507c5e3844c13732cf62091d39e99a",
+    "semantic_hash": "f5507c5e3844c13732cf62091d39e99a"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/src/frontend/static/images/folded-clothes-on-white-chair.jpg": {
+    "mtime": 1779683135.5120473,
+    "ast_hash": "8fa4aa57fb5c245b89c95785459826c3",
+    "semantic_hash": "8fa4aa57fb5c245b89c95785459826c3"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/src/frontend/static/images/VRHeadsets.png": {
+    "mtime": 1779683135.5105817,
+    "ast_hash": "aeb14046d51af98b419a7ab0138046f5",
+    "semantic_hash": "aeb14046d51af98b419a7ab0138046f5"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/src/frontend/static/images/folded-clothes-on-white-chair-wide.jpg": {
+    "mtime": 1779683135.5110312,
+    "ast_hash": "312b26e6804d58b4bc918183e1c65297",
+    "semantic_hash": "312b26e6804d58b4bc918183e1c65297"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/src/frontend/static/images/AdvertBannerImage.png": {
+    "mtime": 1779683135.5095377,
+    "ast_hash": "f9cbbf1ca87916c4ab07257ea926ec97",
+    "semantic_hash": "f9cbbf1ca87916c4ab07257ea926ec97"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/src/frontend/static/images/Advert2BannerImage.png": {
+    "mtime": 1779683135.5092258,
+    "ast_hash": "05e4acd26d5c30d4a12194944c1f588e",
+    "semantic_hash": "05e4acd26d5c30d4a12194944c1f588e"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/src/frontend/static/images/HeroBannerImage.png": {
+    "mtime": 1779683135.5099728,
+    "ast_hash": "3508e5c938578ab60b39f96d37304455",
+    "semantic_hash": "3508e5c938578ab60b39f96d37304455"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/src/frontend/static/images/HeroBannerImage2.png": {
+    "mtime": 1779683135.510265,
+    "ast_hash": "68a6eac05ebf5f4f1cbccd7b354157a3",
+    "semantic_hash": "68a6eac05ebf5f4f1cbccd7b354157a3"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/src/frontend/static/img/products/watch.jpg": {
+    "mtime": 1779683135.514138,
+    "ast_hash": "990c95a60d0cec659209da8ab342a72f",
+    "semantic_hash": "990c95a60d0cec659209da8ab342a72f"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/src/frontend/static/img/products/candle-holder.jpg": {
+    "mtime": 1779683135.512427,
+    "ast_hash": "3d0848c371ded07b0e0789801eda7c61",
+    "semantic_hash": "3d0848c371ded07b0e0789801eda7c61"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/src/frontend/static/img/products/mug.jpg": {
+    "mtime": 1779683135.5129128,
+    "ast_hash": "8f0f10d82149e23df2b13f4cbd364ece",
+    "semantic_hash": "8f0f10d82149e23df2b13f4cbd364ece"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/src/frontend/static/img/products/loafers.jpg": {
+    "mtime": 1779683135.512765,
+    "ast_hash": "d547ee8bd36a30100af0c2d8422b80a3",
+    "semantic_hash": "d547ee8bd36a30100af0c2d8422b80a3"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/src/frontend/static/img/products/salt-and-pepper-shakers.jpg": {
+    "mtime": 1779683135.513171,
+    "ast_hash": "883af80a3bedc31ed69b41888a4277bc",
+    "semantic_hash": "883af80a3bedc31ed69b41888a4277bc"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/src/frontend/static/img/products/hairdryer.jpg": {
+    "mtime": 1779683135.5126145,
+    "ast_hash": "429fb147af1e75b6329fcf2a234b2fcc",
+    "semantic_hash": "429fb147af1e75b6329fcf2a234b2fcc"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/src/frontend/static/img/products/tank-top.jpg": {
+    "mtime": 1779683135.513701,
+    "ast_hash": "56a2eb4e4ab08fd938a925ed25231c84",
+    "semantic_hash": "56a2eb4e4ab08fd938a925ed25231c84"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/src/frontend/static/img/products/sunglasses.jpg": {
+    "mtime": 1779683135.5133579,
+    "ast_hash": "eed2f028a66a8378e88b10505fe35827",
+    "semantic_hash": "eed2f028a66a8378e88b10505fe35827"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/src/frontend/static/img/products/bamboo-glass-jar.jpg": {
+    "mtime": 1779683135.5122638,
+    "ast_hash": "7f3a0bc0ed69f87e97cd5f1913e5fd87",
+    "semantic_hash": "7f3a0bc0ed69f87e97cd5f1913e5fd87"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/src/frontend/static/icons/Hipster_UpDownControl.svg": {
+    "mtime": 1779683135.5086162,
+    "ast_hash": "73254e0fe6bf380cfedc5510e6ca14c3",
+    "semantic_hash": "73254e0fe6bf380cfedc5510e6ca14c3"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/src/frontend/static/icons/Cymbal_NavLogo.svg": {
+    "mtime": 1779683135.5074203,
+    "ast_hash": "a168b83d738efee2daff019902746ae2",
+    "semantic_hash": "a168b83d738efee2daff019902746ae2"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/src/frontend/static/icons/Hipster_HelpIcon.svg": {
+    "mtime": 1779683135.5079474,
+    "ast_hash": "6f20e8204cbd8b3bb84e827f72ef2739",
+    "semantic_hash": "6f20e8204cbd8b3bb84e827f72ef2739"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/src/frontend/static/icons/Hipster_PinterestIcon.svg": {
+    "mtime": 1779683135.5083766,
+    "ast_hash": "2f500f332c5d26df20b1cbee7f08a113",
+    "semantic_hash": "2f500f332c5d26df20b1cbee7f08a113"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/src/frontend/static/icons/Hipster_GooglePlayIcon.svg": {
+    "mtime": 1779683135.507892,
+    "ast_hash": "ab0114b051df2fb6ab6f9852c9ae40ba",
+    "semantic_hash": "ab0114b051df2fb6ab6f9852c9ae40ba"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/src/frontend/static/icons/Hipster_InstagramIcon.svg": {
+    "mtime": 1779683135.5081775,
+    "ast_hash": "8cfa973556c382ea2280093e9ec9c40f",
+    "semantic_hash": "8cfa973556c382ea2280093e9ec9c40f"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/src/frontend/static/icons/Hipster_HeroLogoMaroon.svg": {
+    "mtime": 1779683135.508118,
+    "ast_hash": "a208cad1f9c8c90a90685afd54cabbfc",
+    "semantic_hash": "a208cad1f9c8c90a90685afd54cabbfc"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/src/frontend/static/icons/Hipster_CheckOutIcon.svg": {
+    "mtime": 1779683135.5076125,
+    "ast_hash": "f68400c08079f7070342ecf9229f0c3f",
+    "semantic_hash": "f68400c08079f7070342ecf9229f0c3f"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/src/frontend/static/icons/Hipster_DownArrow.svg": {
+    "mtime": 1779683135.5077162,
+    "ast_hash": "55ca5684c63ea7c6117a71f3d92c2df1",
+    "semantic_hash": "55ca5684c63ea7c6117a71f3d92c2df1"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/src/frontend/static/icons/Hipster_CartIcon.svg": {
+    "mtime": 1779683135.50756,
+    "ast_hash": "f99d8f3a43ff40d8e0f4fe54613e83a1",
+    "semantic_hash": "f99d8f3a43ff40d8e0f4fe54613e83a1"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/src/frontend/static/icons/Hipster_CurrencyIcon.svg": {
+    "mtime": 1779683135.5076575,
+    "ast_hash": "2faa8774799ab4c335988decfd402728",
+    "semantic_hash": "2faa8774799ab4c335988decfd402728"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/src/frontend/static/icons/Hipster_YoutubeIcon.svg": {
+    "mtime": 1779683135.5087242,
+    "ast_hash": "af717a9676e74fd786a32b41ec0492c5",
+    "semantic_hash": "af717a9676e74fd786a32b41ec0492c5"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/src/frontend/static/icons/Hipster_WandIcon.svg": {
+    "mtime": 1779683135.508671,
+    "ast_hash": "4918c32d0dbe8ec2a1cd5c263abbe5c0",
+    "semantic_hash": "4918c32d0dbe8ec2a1cd5c263abbe5c0"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/src/frontend/static/icons/Hipster_HeroLogo.svg": {
+    "mtime": 1779683135.5080278,
+    "ast_hash": "9a6fbf972ff0516bd514aaedbee62620",
+    "semantic_hash": "9a6fbf972ff0516bd514aaedbee62620"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/src/frontend/static/icons/Hipster_SearchIcon.svg": {
+    "mtime": 1779683135.5084934,
+    "ast_hash": "6a35995f9002ddbe9b1efaf964886fa0",
+    "semantic_hash": "6a35995f9002ddbe9b1efaf964886fa0"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/src/frontend/static/icons/Hipster_NavLogo.svg": {
+    "mtime": 1779683135.5083082,
+    "ast_hash": "a44349c582d5b2d3b40dd0e76ad8ce38",
+    "semantic_hash": "a44349c582d5b2d3b40dd0e76ad8ce38"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/src/frontend/static/icons/Hipster_Advert2.svg": {
+    "mtime": 1779683135.5074885,
+    "ast_hash": "e645e0cb4a498fe26b12f2d5f0a62f6a",
+    "semantic_hash": "e645e0cb4a498fe26b12f2d5f0a62f6a"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/src/frontend/static/icons/Hipster_TwitterIcon.svg": {
+    "mtime": 1779683135.50855,
+    "ast_hash": "411d3ba2c3c3e568076ed28061c448b6",
+    "semantic_hash": "411d3ba2c3c3e568076ed28061c448b6"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/src/frontend/static/icons/Hipster_FacebookIcon.svg": {
+    "mtime": 1779683135.5077915,
+    "ast_hash": "059e3941fe1689893ba655e2c0207c99",
+    "semantic_hash": "059e3941fe1689893ba655e2c0207c99"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/src/frontend/static/icons/Hipster_KitchenwareOffer.svg": {
+    "mtime": 1779683135.5082436,
+    "ast_hash": "9b8a92260d66bd557e7fe76842ecb7d4",
+    "semantic_hash": "9b8a92260d66bd557e7fe76842ecb7d4"
+  },
+  "/Users/mahashivamshu/Documents/capstone/ai_change_analyzer/microservices-demo/src/frontend/static/icons/Hipster_ProfileIcon.svg": {
+    "mtime": 1779683135.5084324,
+    "ast_hash": "5c8b3fe5e2ac398027ba3064477d1fa8",
+    "semantic_hash": "5c8b3fe5e2ac398027ba3064477d1fa8"
+  }
+}

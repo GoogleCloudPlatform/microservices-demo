@@ -1,0 +1,1 @@
+{"nodes": [{"id": "helmchart_common_template", "label": "Common Helm Template (deny-all NetworkPolicy)", "file_type": "code", "source_file": "helm-chart/templates/common.yaml", "source_location": null, "source_url": null, "captured_at": null, "author": "Google LLC", "contributor": null}], "edges": [], "hyperedges": []}
