@@ -5,7 +5,8 @@
   "repository": "https://github.com/GoogleCloudPlatform/microservices-demo",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "lint": "eslint ."
   },
   "author": "Jonathan Lui",
   "license": "ISC",
@@ -16,12 +17,18 @@
     "@opentelemetry/api": "1.9.1",
     "@opentelemetry/exporter-otlp-grpc": "0.26.0",
     "@opentelemetry/instrumentation-grpc": "0.214.0",
-    "@opentelemetry/sdk-trace-base": "2.6.1",
-    "@opentelemetry/sdk-node": "0.214.0",
     "@opentelemetry/resources": "2.6.1",
+    "@opentelemetry/sdk-node": "0.214.0",
+    "@opentelemetry/sdk-trace-base": "2.6.1",
     "@opentelemetry/semantic-conventions": "1.40.0",
     "pino": "10.3.1",
     "simple-card-validator": "^1.1.0",
     "uuid": "^14.0.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "eslint": "^10.4.0",
+    "eslint-config-google": "^0.14.0",
+    "globals": "^17.6.0"
   }
 }
