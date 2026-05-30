@@ -1,0 +1,6 @@
+# macOS extended-attribute sidecar files created on mounted volumes
+._*
+**/._*
+
+# Build artifacts — not needed in image
+currencyservice-cpp/build/

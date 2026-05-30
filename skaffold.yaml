@@ -38,7 +38,9 @@ build:
   - image: paymentservice
     context: src/paymentservice
   - image: currencyservice
-    context: src/currencyservice
+    context: src
+    docker:
+      dockerfile: currencyservice-cpp/Dockerfile
   - image: cartservice
     context: src/cartservice/src
     docker:
