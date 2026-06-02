@@ -26,8 +26,13 @@
         <div class="row hot-products-row px-xl-6">
           <div class="col-12">
             {{ if $.query }}
-              <h3>Search results for &ldquo;{{ $.query }}&rdquo;</h3>
-              <p class="search-result-count">{{ len $.products }} {{ if eq (len $.products) 1 }}product{{ else }}products{{ end }} found</p>
+              {{ if eq (len $.products) 0 }}
+                <h3>No products found for &ldquo;{{ $.query }}&rdquo;</h3>
+                <p class="search-result-count">Try a different word, or check the spelling.</p>
+              {{ else }}
+                <h3>Search results for &ldquo;{{ $.query }}&rdquo;</h3>
+                <p class="search-result-count">{{ len $.products }} {{ if eq (len $.products) 1 }}product{{ else }}products{{ end }} found</p>
+              {{ end }}
             {{ else }}
               <h3>Search</h3>
               <p class="search-result-count">Enter a term in the search bar above to find products.</p>
