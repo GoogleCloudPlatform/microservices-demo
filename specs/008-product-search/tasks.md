@@ -94,7 +94,7 @@ This repo is a polyglot microservices monorepo. Paths used below:
 
 **Purpose**: Get the slice onto the deploy path defined by TC-008 (CI deploys whatever lands on `attendee/matthew-buckland`).
 
-- [ ] T013 Commit the slice on `008-product-search` with a single commit. Stage exactly: `src/productcatalogservice/product_catalog_test.go`, `src/frontend/templates/search.html`, the entire `specs/008-product-search/` directory, and `CLAUDE.md`. Do NOT stage `src/productcatalogservice/product_catalog.go` (it is unchanged in this slice — that is the verification from T002). Commit message: `feat(search): empty-state UI + test coverage for name-or-description search (slice 008)`. Push with `--set-upstream origin 008-product-search`.
+- [X] T013 Commit the slice on `008-product-search` with a single commit. Stage exactly: `src/productcatalogservice/product_catalog_test.go`, `src/frontend/templates/search.html`, the entire `specs/008-product-search/` directory, and `CLAUDE.md`. Do NOT stage `src/productcatalogservice/product_catalog.go` (it is unchanged in this slice — that is the verification from T002). Commit message: `feat(search): empty-state UI + test coverage for name-or-description search (slice 008)`. Push with `--set-upstream origin 008-product-search`.
 
 - [ ] T014 Merge `008-product-search` into `attendee/matthew-buckland` (TC-008 deploy path). Use `git checkout attendee/matthew-buckland; git merge --no-ff 008-product-search; git push`. After the push, CI will deploy. Do NOT touch `cloudbuild.yaml`, `skaffold.yaml`, GitHub Actions, Helm, Kustomize, or any infra config (TC-006 / TC-007).
 
