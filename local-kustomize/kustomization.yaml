@@ -1,11 +1,11 @@
 resources:
-  - ../../release/kubernetes-manifests.yaml
+  - release/kubernetes-manifests.yaml
   - httproute.yaml
 
 images:
   - name: us-central1-docker.pkg.dev/google-samples/microservices-demo/frontend
-    newName: host.docker.internal:5000/microservices-demo/frontend
-    newTag: bootstrap
+    newName: zot.test:80/microservices-demo/frontend
+    newTag: v0.10.5
 
 patches:
   - path: delete-frontend-external.yaml
