@@ -4,6 +4,6 @@ resources:
 images:
   - name: us-central1-docker.pkg.dev/google-samples/microservices-demo/frontend
     newName: host.docker.internal:5000/microservices-demo/frontend
-    newTag: ec12b41
+    newTag: dea36a9
 patches:
   - path: delete-frontend-external.yaml
