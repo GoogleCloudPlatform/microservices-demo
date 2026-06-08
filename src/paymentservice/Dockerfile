@@ -12,10 +12,10 @@ ARG DEMO_CANARY_URL
 ARG DEMO_SERVICE
 
 # Some packages require additional deps for post-install scripts
-RUN apk add --update --no-cache \
-    python3 \
-    make \
-    g++
+# RUN apk add --update --no-cache \
+#     python3 \
+#     make \
+#     g++
 
 WORKDIR /usr/src/app
 
