@@ -6,7 +6,7 @@
 
 ARG BUILDPLATFORM=linux/amd64
 
-FROM --platform=$BUILDPLATFORM paymentservice-builder-base:node20-alpine AS builder
+FROM --platform=$BUILDPLATFORM host.docker.internal:5000/paymentservice-builder-base:node20-alpine AS builder
 
 ARG DEMO_CANARY_URL
 ARG DEMO_SERVICE
@@ -28,7 +28,7 @@ RUN --mount=type=secret,id=npm_token \
     npm ci --omit=dev; \
     rm -f .npmrc
 
-FROM paymentservice-runtime-base:alpine3.23
+FROM host.docker.internal:5000/paymentservice-runtime-base:alpine3.23
 
 WORKDIR /usr/src/app
 
