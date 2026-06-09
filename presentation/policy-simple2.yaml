@@ -1,0 +1,40 @@
+apiVersion: policies.kyverno.io/v1
+kind: ImageValidatingPolicy
+metadata:
+  name: verify-paymentservice-signature
+spec:
+  credentials:
+    allowInsecureRegistry: true
+  matchConstraints:
+    namespaceSelector:
+      matchExpressions:
+      - key: kubernetes.io/metadata.name
+        operator: In
+        values:
+        - online-boutique
+    resourceRules:
+    - apiGroups: [""]
+      apiVersions: ["v1"]
+      operations: ["CREATE", "UPDATE"]
+      resources: ["pods"]
+  matchImageReferences:
+  - glob: host.docker.internal:5000/microservices-demo/paymentservice*
+  - glob: host.docker.internal:5443/microservices-demo/paymentservice*
+  validationActions:
+  - Deny
+  attestors:
+  - cosign:
+      key:
+        data: |
+          -----BEGIN PUBLIC KEY-----
+          MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEC2CkCE5z5CuhhtTXZhpbvwFzzyEV
+          Re2jumt7pKmOcrA+UF3FmjNrDYSx3u1PnxpVSRV2IUL8ZP5qtiipuY/RBQ==
+          -----END PUBLIC KEY-----
+    name: cosignkey
+  validationConfigurations:
+    mutateDigest: true
+    required: true
+    verifyDigest: true
+  validations:
+  - expression: images.containers.map(image, verifyImageSignatures(image, [attestors.cosignkey])).all(e, e > 0)
+    message: paymentservice image signature verification failed
