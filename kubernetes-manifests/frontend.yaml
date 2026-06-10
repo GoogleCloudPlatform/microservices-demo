@@ -44,7 +44,7 @@ spec:
                 - ALL
             privileged: false
             readOnlyRootFilesystem: true
-          image: gcr.io/google-samples/microservices-demo/frontend:v0.8.0
+          image: image: 643537035878.dkr.ecr.ap-south-1.amazonaws.com/custom-frontend:v1
           ports:
           - containerPort: 8080
           readinessProbe:
