@@ -4,7 +4,7 @@
             "id": "AWOS",
             "name": "Acid Wash Oversize Tee",
             "description": "Trending right now! Grab yours!.",
-            "picture": "/static/img/products/sunglasses.jpg",
+            "picture": "https://clothingecom007.s3.ap-south-1.amazonaws.com/awos.jpg",
             "priceUsd": {
                 "currencyCode": "INR",
                 "units": 120,
@@ -16,7 +16,7 @@
             "id": "AWTO",
             "name": "Acid wash Top",
             "description": "Perfectly cropped cotton tank, with a scooped neckline.",
-            "picture": "/static/img/products/tank-top.jpg",
+            "picture": "https://clothingecom007.s3.ap-south-1.amazonaws.com/awto.jpg",
             "priceUsd": {
                 "currencyCode": "INR",
                 "units": 18,
@@ -28,7 +28,7 @@
             "id": "RFTEE",
             "name": "Regular Fit Tshirt",
             "description": "Available with 180 & 210 GSM. Premium breathable fabric.",
-            "picture": "/static/img/products/watch.jpg",
+            "picture": "https://clothingecom007.s3.ap-south-1.amazonaws.com/rf.png",
             "priceUsd": {
                 "currencyCode": "INR",
                 "units": 109,
@@ -40,7 +40,7 @@
             "id": "COPO",
             "name": "Collar Polo Tshirt",
             "description": "A neat addition to your summer wardrobe.",
-            "picture": "/static/img/products/loafers.jpg",
+            "picture": "https://clothingecom007.s3.ap-south-1.amazonaws.com/co.png",
             "priceUsd": {
                 "currencyCode": "INR",
                 "units": 89,
@@ -52,7 +52,7 @@
             "id": "RFFS",
             "name": "Regular Fit Full Sleeve Tshirt",
             "description": "Available with 180 & 210 GSM. Premium breathable fabric.",
-            "picture": "/static/img/products/hairdryer.jpg",
+            "picture": "https://clothingecom007.s3.ap-south-1.amazonaws.com/fs.png",
             "priceUsd": {
                 "currencyCode": "INR",
                 "units": 24,
@@ -64,7 +64,7 @@
             "id": "OSFS",
             "name": "Oversize Full Sleeve Tshirt",
             "description": "Trendiest wear among GenZ. Best statement for Style+Comfort!",
-            "picture": "/static/img/products/candle-holder.jpg",
+            "picture": "https://clothingecom007.s3.ap-south-1.amazonaws.com/osfs.png",
             "priceUsd": {
                 "currencyCode": "INR",
                 "units": 18,
@@ -76,7 +76,7 @@
             "id": "BOLOR",
             "name": "Bottom",
             "description": "To style your topwear with perfect match",
-            "picture": "/static/img/products/salt-and-pepper-shakers.jpg",
+            "picture": "https://clothingecom007.s3.ap-south-1.amazonaws.com/bo.png",
             "priceUsd": {
                 "currencyCode": "INR",
                 "units": 387,
@@ -88,7 +88,7 @@
             "id": "RFSH",
             "name": "Regular Fit Shirts",
             "description": "Pure cotton regular fit shirts with vibrant colors & perfect fit",
-            "picture": "/static/img/products/bamboo-glass-jar.jpg",
+            "picture": "https://clothingecom007.s3.ap-south-1.amazonaws.com/sh.png",
             "priceUsd": {
                 "currencyCode": "INR",
                 "units": 598,
@@ -100,7 +100,7 @@
             "id": "CORST",
             "name": "Cord Sets",
             "description": "A simple & classy cord sets to style you with comfort",
-            "picture": "/static/img/products/mug.jpg",
+            "picture": "https://clothingecom007.s3.ap-south-1.amazonaws.com/cord.png",
             "priceUsd": {
                 "currencyCode": "INR",
                 "units": 25,
