@@ -87,7 +87,8 @@
         {
             "id": "RFSH",
             "name": "Regular Fit Shirts",
-            "description": "Pure cotton regular fit shirts with vibrant colors & perfect fit",: "/static/img/products/bamboo-glass-jar.jpg",
+            "description": "Pure cotton regular fit shirts with vibrant colors & perfect fit",
+            "picture": "/static/img/products/bamboo-glass-jar.jpg",
             "priceUsd": {
                 "currencyCode": "INR",
                 "units": 598,
