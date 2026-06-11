@@ -74,7 +74,7 @@ jobs:
     - name: Build and Push Custom Images
       env:
         # ⚠️ REPLACE WITH YOUR ACTUAL 12-DIGIT AWS ACCOUNT ID
-        ECR_REGISTRY: 123456789012.dkr.ecr.ap-south-1.amazonaws.com
+        ECR_REGISTRY: 643537035878.dkr.ecr.ap-south-1.amazonaws.com
         IMAGE_TAG: ${{ github.sha }}
       run: |
         # 1. Build and Push Product Catalog Service
@@ -90,7 +90,7 @@ jobs:
     - name: Update Kubernetes GitOps Manifests
       env:
         # ⚠️ REPLACE WITH YOUR ACTUAL 12-DIGIT AWS ACCOUNT ID
-        ECR_REGISTRY: 123456789012.dkr.ecr.ap-south-1.amazonaws.com
+        ECR_REGISTRY: 643537035878.dkr.ecr.ap-south-1.amazonaws.com
         IMAGE_TAG: ${{ github.sha }}
       run: |
         # Update the image tags inside your deployment YAML files dynamically
