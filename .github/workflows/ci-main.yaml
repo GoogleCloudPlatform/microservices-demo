@@ -32,11 +32,6 @@ permissions:
 jobs:
   code-tests:
     runs-on: ubuntu-latest
-
-jobs:
-  # Job 1: Run code verification tests
-  code-tests:
-    runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
 
