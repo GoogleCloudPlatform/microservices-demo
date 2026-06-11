@@ -14,6 +14,10 @@
 
 name: "Continuous Integration - Main/Release"
 
+# Make sure env is pushed all the way to the left margin
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 on:
   push:
     branches:
@@ -25,7 +29,7 @@ on:
       - '.github/workflows/terraform-validate-ci.yaml'
       - 'helm-chart/**'
       - '.github/workflows/helm-chart-ci.yaml'
-
+  
 permissions:
   contents: write
 
