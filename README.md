@@ -15,8 +15,12 @@ Originally based on the [Google Microservices Demo](https://github.com/GoogleClo
 ---
 
 ## Architecture
-
-**[INSERT YOUR CUSTOM DRAW.IO DIAGRAM IMAGE HERE - USE THE ROUGH DIAGRAM DESCRIPTION BELOW AS YOUR BASE]**
+<p align="center">
+  <img src="/docs/img/architecture-diagram.png" width="95%" alt="architecture_diagram" />
+</p>
+<p align="center">
+  <img src="/docs/img/ci_cd_flow.png" width="35%" alt="ci_cd_flow" />
+</p>
 
 The architecture consists of standard components:
 
