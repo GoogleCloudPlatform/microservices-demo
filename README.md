@@ -39,7 +39,9 @@ This project features a sophisticated CI/CD bridge using a nested monorepo struc
 
 ### Continuous Integration (GitHub Actions)
 
-**(/docs/img/github_actions_green_pipeline.png)[SCREENSHOT OF GREEN PIPELINE IN GITHUB ACTIONS]**
+<h3>SCREENSHOT OF GREEN PIPELINE IN GITHUB ACTIONS</h3>
+<p align="center">
+  <img src="/docs/img/github_actions_green_pipeline.png" width="65%" alt="github_actions" />
 
 On push to `main` (specifically targeting `src/frontend/**` or `src/productcatalogservice/**` changes):
 1.  **Code verification & Unit Tests (Go/C#):** Pipeline validates changes.
@@ -49,8 +51,14 @@ On push to `main` (specifically targeting `src/frontend/**` or `src/productcatal
 
 ### Continuous Deployment (GitOps with ArgoCD)
 
-**(docs\img\argocd_dashboard.png)|(docs\img\argocd_dashboard1.png)|(docs\img\argocd_dashboard2.png)[ARGOCD DASHBOARD]**
-
+<h3>ARGOCD DASHBOARD</h3>
+<p align="center">
+  <img src="/docs/img/argocd_dashboard.png" width="45%" alt="argocd_dashboard" />
+  <img src="/docs/img/argocd_dashboard1.png" width="45%" alt="argocd_dashboard" />
+</p>
+<p align="center">
+  <img src="/docs/img/argocd_dashboard2.png" width="45%" alt="argocd_dashboard" />
+</p>
 * **Polling:** ArgoCD is configured to poll the specified Git repository for changes to Kubernetes manifests.
 * **Synchronization:** Upon detecting the manifest commit from the CI pipeline, ArgoCD automatically and gracefully rolls out the updated pods to the EKS cluster, pulling the correct new image from ECR.
 
@@ -76,9 +84,12 @@ A major focus of this project was engineering through real-world infrastructure 
 ---
 ## Screenshots
 
-| Home Page                                                                                                         | Checkout Screen                                                                                                    |
-| ----------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
-| [![Screenshot of store homepage](/docs/img/essentia_webpage.png)](/docs/img/essentia_productpage.png) | [![Screenshot of checkout screen](/docs/img/essentia_cart_page.png)](/docs/img/essentia_cart_page1.png) |
+| Home Page | Product Page |
+| :---: | :---: |
+| ![Screenshot of store homepage](/docs/img/essentia_webpage.png) | ![Screenshot of Product page](/docs/img/essentia_product_page.png) |
+| **Checkout Screen 1** | **Checkout Screen 2** |
+| ![Screenshot of checkout screen](/docs/img/essentia_cart_page.png) | ![Screenshot of checkout screen](/docs/img/essentia_cart_page1.png) |
+
 
 
 ## How to Deploy & Use
