@@ -26,6 +26,13 @@ on:
       - 'helm-chart/**'
       - '.github/workflows/helm-chart-ci.yaml'
 
+permissions:
+  contents: write
+
+jobs:
+  code-tests:
+    runs-on: ubuntu-latest
+
 jobs:
   # Job 1: Run code verification tests
   code-tests:
