@@ -28,7 +28,7 @@ The architecture consists of standard components:
 
 * **AWS EKS Cluster:** Master nodes + managed worker nodes (`t3.small` initially).
 * **AWS ECR:** Private repositories for custom Frontend and Product Catalog images.
-* **AWS S3:** Public bucket (`your-bucket-name`) hosting all product images and the brand logo.
+* **AWS S3:** Public bucket (`clothingecom007`) hosting all product images and the brand logo.
 * **AWS ELB (Classic LoadBalancer):** Physical entry point for public internet traffic, routing to the frontend service.
 
 ---
@@ -77,7 +77,7 @@ A major focus of this project was engineering through real-world infrastructure 
 
 ## Customizations & Bespoke Branding
 
-* **S3 Asset Integration:** Offloaded original Google assets. Integrated public object access and robust bucket policies for secure, scalable asset delivery (interlocking EA brand logo and all custom product imagery). **customize with specific examples if relevant**
+* **S3 Asset Integration:** Offloaded original Google assets. Integrated public object access and robust bucket policies for secure, scalable asset delivery. **customize with specific examples if relevant**
 * **Bespoke Frontend:** Customized the original Google design to inject the EA brand identity via header HTML modifications, ensuring seamless integration with the S3-hosted logo. **customize with specific examples**
 * **Dynamic Product Catalog:** Overhauled the product catalog schema with custom product details (e.g., specific apparel descriptions, updated prices) and full integration with bespoke S3 URLs for each item. **customize with specific examples**
 
@@ -108,7 +108,7 @@ A major focus of this project was engineering through real-world infrastructure 
 
 ### Step 2: Build & Push Initial Images (Manual or via Pipeline)
 
-* You can manually build and push initial images to ECR, or trigger the automatic pipeline by pushing changes to the `src/` folders. **[INSERT A LINK TO YOUR CI/CD LOGS OR A BASIC DOCKER BUILD EXAMPLE IF MANUAL BUILD IS AN OPTION]**
+* You can manually build and push initial images to ECR, or trigger the automatic pipeline by pushing changes to the `src/` folders.
 
 ### Step 3: Deploy ArgoCD
 
