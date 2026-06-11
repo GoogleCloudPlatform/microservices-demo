@@ -6,8 +6,8 @@
             "description": "Trending right now! Grab yours!.",
             "picture": "https://clothingecom007.s3.ap-south-1.amazonaws.com/awos.jpg",
             "priceUsd": {
-                "currencyCode": "INR",
-                "units": 120,
+                "currencyCode": "USD",
+                "units": 18,
                 "nanos": 990000000
             },
             "categories": ["clothing", "tops"]
@@ -18,7 +18,7 @@
             "description": "Perfectly cropped cotton tank, with a scooped neckline.",
             "picture": "https://clothingecom007.s3.ap-south-1.amazonaws.com/awto.jpg",
             "priceUsd": {
-                "currencyCode": "INR",
+                "currencyCode": "USD",
                 "units": 18,
                 "nanos": 990000000
             },
@@ -30,8 +30,8 @@
             "description": "Available with 180 & 210 GSM. Premium breathable fabric.",
             "picture": "https://clothingecom007.s3.ap-south-1.amazonaws.com/rf.png",
             "priceUsd": {
-                "currencyCode": "INR",
-                "units": 109,
+                "currencyCode": "USD",
+                "units": 18,
                 "nanos": 990000000
             },
             "categories": ["clothing", "tops"]
@@ -42,8 +42,8 @@
             "description": "A neat addition to your summer wardrobe.",
             "picture": "https://clothingecom007.s3.ap-south-1.amazonaws.com/co.png",
             "priceUsd": {
-                "currencyCode": "INR",
-                "units": 89,
+                "currencyCode": "USD",
+                "units": 18,
                 "nanos": 990000000
             },
             "categories": ["clothing", "tops"]
@@ -54,8 +54,8 @@
             "description": "Available with 180 & 210 GSM. Premium breathable fabric.",
             "picture": "https://clothingecom007.s3.ap-south-1.amazonaws.com/fs.png",
             "priceUsd": {
-                "currencyCode": "INR",
-                "units": 24,
+                "currencyCode": "USD",
+                "units": 18,
                 "nanos": 990000000
             },
             "categories": ["clothing", "tops"]
@@ -66,7 +66,7 @@
             "description": "Trendiest wear among GenZ. Best statement for Style+Comfort!",
             "picture": "https://clothingecom007.s3.ap-south-1.amazonaws.com/osfs.png",
             "priceUsd": {
-                "currencyCode": "INR",
+                "currencyCode": "USD",
                 "units": 18,
                 "nanos": 990000000
             },
@@ -78,9 +78,9 @@
             "description": "To style your topwear with perfect match",
             "picture": "https://clothingecom007.s3.ap-south-1.amazonaws.com/bo.png",
             "priceUsd": {
-                "currencyCode": "INR",
-                "units": 387,
-                "nanos": 490000000
+                "currencyCode": "USD",
+                "units": 18,
+                "nanos": 990000000
             },
             "categories": ["clothing", "tops"]
         },
@@ -90,9 +90,9 @@
             "description": "Pure cotton regular fit shirts with vibrant colors & perfect fit",
             "picture": "https://clothingecom007.s3.ap-south-1.amazonaws.com/sh.png",
             "priceUsd": {
-                "currencyCode": "INR",
-                "units": 598,
-                "nanos": 490000000
+                "currencyCode": "USD",
+                "units": 18,
+                "nanos": 990000000
             },
             "categories": ["clothing", "tops"]
         },
@@ -102,8 +102,8 @@
             "description": "A simple & classy cord sets to style you with comfort",
             "picture": "https://clothingecom007.s3.ap-south-1.amazonaws.com/cord.png",
             "priceUsd": {
-                "currencyCode": "INR",
-                "units": 25,
+                "currencyCode": "USD",
+                "units": 18,
                 "nanos": 990000000
             },
             "categories": ["clothing", "tops"]
