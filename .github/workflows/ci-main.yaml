@@ -25,6 +25,7 @@ on:
       - release/*
     paths-ignore:
       - '**/README.md'
+      - 'docs/**'
       - 'terraform/**'
       - '.github/workflows/terraform-validate-ci.yaml'
       - 'helm-chart/**'
