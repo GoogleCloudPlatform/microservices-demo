@@ -44,7 +44,7 @@ spec:
                 - ALL
             privileged: false
             readOnlyRootFilesystem: true
-          image: 643537035878.dkr.ecr.ap-south-1.amazonaws.com/custom-frontend:87bde9ed66d54fd8c029e48335b738ac1063848a
+          image: 643537035878.dkr.ecr.ap-south-1.amazonaws.com/custom-frontend:60825dd853ef65a3027d60ac80ec5d14614fc60d
           ports:
           - containerPort: 8080
           readinessProbe:
