@@ -60,53 +60,53 @@ jobs:
         done
 
   # Job 2: Automatically build, push to AWS ECR, and update GitOps manifests
-  build-and-ship:
-    runs-on: ubuntu-latest
-    needs: code-tests # Only runs if code tests pass successfully
-    steps:
-    - name: Checkout Code
-      uses: actions/checkout@v4
+  # build-and-ship:
+  #   runs-on: ubuntu-latest
+  #   needs: code-tests # Only runs if code tests pass successfully
+  #   steps:
+  #   - name: Checkout Code
+  #     uses: actions/checkout@v4
 
-    - name: Configure AWS Credentials
-      uses: aws-actions/configure-aws-credentials@v4
-      with:
-        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        aws-region: ap-south-1
+  #   - name: Configure AWS Credentials
+  #     uses: aws-actions/configure-aws-credentials@v4
+  #     with:
+  #       aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  #       aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  #       aws-region: ap-south-1
 
-    - name: Login to Amazon ECR
-      id: login-ecr
-      uses: aws-actions/amazon-ecr-login@v2
+  #   - name: Login to Amazon ECR
+  #     id: login-ecr
+  #     uses: aws-actions/amazon-ecr-login@v2
 
-    - name: Build and Push Custom Images
-      env:
-        # ⚠️ REPLACE WITH YOUR ACTUAL 12-DIGIT AWS ACCOUNT ID
-        ECR_REGISTRY: 643537035878.dkr.ecr.ap-south-1.amazonaws.com
-        IMAGE_TAG: ${{ github.sha }}
-      run: |
-        # 1. Build and Push Product Catalog Service
-        cd src/productcatalogservice
-        docker build -t $ECR_REGISTRY/custom-productcatalog:$IMAGE_TAG .
-        docker push $ECR_REGISTRY/custom-productcatalog:$IMAGE_TAG
+  #   - name: Build and Push Custom Images
+  #     env:
+  #       # ⚠️ REPLACE WITH YOUR ACTUAL 12-DIGIT AWS ACCOUNT ID
+  #       ECR_REGISTRY: 643537035878.dkr.ecr.ap-south-1.amazonaws.com
+  #       IMAGE_TAG: ${{ github.sha }}
+  #     run: |
+  #       # 1. Build and Push Product Catalog Service
+  #       cd src/productcatalogservice
+  #       docker build -t $ECR_REGISTRY/custom-productcatalog:$IMAGE_TAG .
+  #       docker push $ECR_REGISTRY/custom-productcatalog:$IMAGE_TAG
         
-        # 2. Build and Push Frontend Service
-        cd ../frontend
-        docker build -t $ECR_REGISTRY/custom-frontend:$IMAGE_TAG .
-        docker push $ECR_REGISTRY/custom-frontend:$IMAGE_TAG
+  #       # 2. Build and Push Frontend Service
+  #       cd ../frontend
+  #       docker build -t $ECR_REGISTRY/custom-frontend:$IMAGE_TAG .
+  #       docker push $ECR_REGISTRY/custom-frontend:$IMAGE_TAG
 
-    - name: Update Kubernetes GitOps Manifests
-      env:
-        # ⚠️ REPLACE WITH YOUR ACTUAL 12-DIGIT AWS ACCOUNT ID
-        ECR_REGISTRY: 643537035878.dkr.ecr.ap-south-1.amazonaws.com
-        IMAGE_TAG: ${{ github.sha }}
-      run: |
-        # Update the image tags inside your deployment YAML files dynamically
-        sed -i "s|image: .*custom-productcatalog:.*|image: $ECR_REGISTRY/custom-productcatalog:$IMAGE_TAG|g" kubernetes-manifests/productcatalogservice.yaml
-        sed -i "s|image: .*custom-frontend:.*|image: $ECR_REGISTRY/custom-frontend:$IMAGE_TAG|g" kubernetes-manifests/frontend.yaml
+  #   - name: Update Kubernetes GitOps Manifests
+  #     env:
+  #       # ⚠️ REPLACE WITH YOUR ACTUAL 12-DIGIT AWS ACCOUNT ID
+  #       ECR_REGISTRY: 643537035878.dkr.ecr.ap-south-1.amazonaws.com
+  #       IMAGE_TAG: ${{ github.sha }}
+  #     run: |
+  #       # Update the image tags inside your deployment YAML files dynamically
+  #       sed -i "s|image: .*custom-productcatalog:.*|image: $ECR_REGISTRY/custom-productcatalog:$IMAGE_TAG|g" kubernetes-manifests/productcatalogservice.yaml
+  #       sed -i "s|image: .*custom-frontend:.*|image: $ECR_REGISTRY/custom-frontend:$IMAGE_TAG|g" kubernetes-manifests/frontend.yaml
         
-        # Commit the modifications back to the repo so ArgoCD syncs them
-        git config --global user.name "GitHub Actions Bot"
-        git config --global user.email "actions@github.com"
-        git add kubernetes-manifests/productcatalogservice.yaml kubernetes-manifests/frontend.yaml
-        git commit -m "chore: automated image tag update to $IMAGE_TAG [skip ci]"
-        git push
+  #       # Commit the modifications back to the repo so ArgoCD syncs them
+  #       git config --global user.name "GitHub Actions Bot"
+  #       git config --global user.email "actions@github.com"
+  #       git add kubernetes-manifests/productcatalogservice.yaml kubernetes-manifests/frontend.yaml
+  #       git commit -m "chore: automated image tag update to $IMAGE_TAG [skip ci]"
+  #       git push
