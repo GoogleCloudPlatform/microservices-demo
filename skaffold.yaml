@@ -92,6 +92,19 @@ profiles:
   - op: add
     path: /manifests/kustomize/paths/1
     value: kustomize/components/network-policies
+# "aks" profile targets Azure AKS. Use with --default-repo pointing at your ACR login server:
+#     skaffold run -p aks --default-repo=<acr-name>.azurecr.io
+- name: aks
+  manifests:
+    kustomize:
+      paths:
+      - kustomize/overlays/aks
+  patches:
+  - op: remove
+    path: /build/artifacts/3
+  - op: replace
+    path: /build/platforms
+    value: ["linux/amd64"]
 ---
 apiVersion: skaffold/v3
 kind: Config

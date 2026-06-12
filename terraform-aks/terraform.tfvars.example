@@ -1,0 +1,8 @@
+subscription_id     = "your-subscription-id"
+tenant_id           = "your-tenant-id"
+location            = "eastus"
+resource_group_name = "online-boutique"
+acr_name            = "onlineboutiqueacr"  # globally unique, alphanumeric only
+cluster_name        = "online-boutique"
+node_count          = 3
+node_vm_size        = "Standard_D2s_v3"
