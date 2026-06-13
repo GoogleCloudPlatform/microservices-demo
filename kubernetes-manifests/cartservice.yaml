@@ -45,7 +45,7 @@ spec:
           readOnlyRootFilesystem: true
         image: cartservice
         ports:
-        - containerPort: 7070
+        - containerPort: 7071
         env:
         - name: REDIS_ADDR
           value: "redis-cart:6379"
@@ -59,12 +59,12 @@ spec:
         readinessProbe:
           initialDelaySeconds: 15
           grpc:
-            port: 7070
+            port: 7071
         livenessProbe:
           initialDelaySeconds: 15
           periodSeconds: 10
           grpc:
-            port: 7070
+            port: 7071
 ---
 apiVersion: v1
 kind: Service
@@ -78,8 +78,8 @@ spec:
     app: cartservice
   ports:
   - name: grpc
-    port: 7070
-    targetPort: 7070
+    port: 7071
+    targetPort: 7071
 ---
 apiVersion: v1
 kind: ServiceAccount
