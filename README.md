@@ -1,5 +1,7 @@
 # Essentia Attire: E-Commerce Microservices Architecture on AWS EKS
-
+<p align="center">
+  <img src="/docs/img/P202.png" width="75%" alt="architecture_diagram" />
+</p>
 ## Project Overview
 
 Essentia Attire is a dynamic, fully functional, and visually bespoke e-commerce platform built upon a polyglot microservices architecture. This project showcases the engineering of a modern, scalable, and automated cloud infrastructure using best practices in AWS, Kubernetes, and GitOps.
