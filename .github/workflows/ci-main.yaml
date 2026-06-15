@@ -60,6 +60,7 @@ jobs:
         done
 
   # Job 2: Automatically build, push to AWS ECR, and update GitOps manifests
+  
   # build-and-ship:
   #   runs-on: ubuntu-latest
   #   needs: code-tests # Only runs if code tests pass successfully
