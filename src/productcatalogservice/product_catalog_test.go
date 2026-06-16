@@ -99,3 +99,21 @@ func TestSearchProducts(t *testing.T) {
 		t.Errorf("got %d, want %d", got, want)
 	}
 }
+
+func TestGetProductRatingKnownIDs(t *testing.T) {
+	for id, want := range productRatings {
+		got := GetProductRating(id)
+		if got < 1.0 || got > 5.0 {
+			t.Errorf("product %s: rating %v out of range [1,5]", id, got)
+		}
+		if got != want {
+			t.Errorf("product %s: got %v, want %v", id, got, want)
+		}
+	}
+}
+
+func TestGetProductRatingUnknownID(t *testing.T) {
+	if got := GetProductRating("DOESNOTEXIST"); got != 0 {
+		t.Errorf("expected 0 for unknown product, got %v", got)
+	}
+}

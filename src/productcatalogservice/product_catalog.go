@@ -25,6 +25,25 @@ import (
 	"google.golang.org/grpc/status"
 )
 
+var productRatings = map[string]float32{
+	"OLJCESPC7Z": 4.0, // Sunglasses
+	"66VCHSJNUP": 3.5, // Tank Top
+	"1YMWWN1N4O": 4.5, // Watch
+	"L9ECAV7KIM": 3.0, // Loafers
+	"2ZYFJ3GM2N": 2.5, // Hairdryer
+	"0PUK6V6EV0": 4.0, // Candle Holder
+	"LS4PSXUNUM": 4.5, // Salt & Pepper Shakers
+	"9SIQT8TOJO": 3.5, // Bamboo Glass Jar
+	"6E92ZMYYFZ": 5.0, // Mug
+}
+
+func GetProductRating(id string) float32 {
+	if r, ok := productRatings[id]; ok {
+		return r
+	}
+	return 0
+}
+
 type productCatalog struct {
 	pb.UnimplementedProductCatalogServiceServer
 	catalog pb.ListProductsResponse
