@@ -248,6 +248,40 @@ func (fe *frontendServer) emptyCartHandler(w http.ResponseWriter, r *http.Reques
 	w.WriteHeader(http.StatusFound)
 }
 
+// appliedPromoCode returns the normalised promo code currently applied for this
+// shopper (stored in a cookie), or an empty string if none.
+func appliedPromoCode(r *http.Request) string {
+	c, _ := r.Cookie(cookiePromoCode)
+	if c == nil {
+		return ""
+	}
+	return normalizePromoCode(c.Value)
+}
+
+func (fe *frontendServer) applyPromoHandler(w http.ResponseWriter, r *http.Request) {
+	log := r.Context().Value(ctxKeyLog{}).(logrus.FieldLogger)
+	code := normalizePromoCode(r.FormValue("promo_code"))
+
+	switch {
+	case code == "":
+		// Empty submission clears any applied code.
+		http.SetCookie(w, &http.Cookie{Name: cookiePromoCode, Value: "", MaxAge: -1})
+		log.Debug("cleared promo code")
+	default:
+		if _, ok := promoDiscountRate(code); ok {
+			http.SetCookie(w, &http.Cookie{Name: cookiePromoCode, Value: code, MaxAge: cookieMaxAge})
+			log.WithField("promo", code).Debug("applied promo code")
+		} else {
+			// Unrecognised, non-empty code: leave any applied code unchanged and
+			// show no error. Invalid-code feedback is a separate story (AIP-179).
+			log.WithField("promo", code).Debug("unrecognised promo code; ignoring")
+		}
+	}
+
+	w.Header().Set("location", baseUrl+"/cart")
+	w.WriteHeader(http.StatusFound)
+}
+
 func (fe *frontendServer) viewCartHandler(w http.ResponseWriter, r *http.Request) {
 	log := r.Context().Value(ctxKeyLog{}).(logrus.FieldLogger)
 	log.Debug("view user cart")
@@ -280,7 +314,7 @@ func (fe *frontendServer) viewCartHandler(w http.ResponseWriter, r *http.Request
 		Price    *pb.Money
 	}
 	items := make([]cartItemView, len(cart))
-	totalPrice := pb.Money{CurrencyCode: currentCurrency(r)}
+	itemsTotal := pb.Money{CurrencyCode: currentCurrency(r)}
 	for i, item := range cart {
 		p, err := fe.getProduct(r.Context(), item.GetProductId())
 		if err != nil {
@@ -298,7 +332,23 @@ func (fe *frontendServer) viewCartHandler(w http.ResponseWriter, r *http.Request
 			Item:     p,
 			Quantity: item.GetQuantity(),
 			Price:    &multPrice}
-		totalPrice = money.Must(money.Sum(totalPrice, multPrice))
+		itemsTotal = money.Must(money.Sum(itemsTotal, multPrice))
+	}
+
+	// Apply a promo-code discount (if any) to the items total only; shipping is
+	// never discounted.
+	promoCode := appliedPromoCode(r)
+	promoApplied := false
+	var promoDiscount *pb.Money
+	if rate, ok := promoDiscountRate(promoCode); ok {
+		d := discountAmount(itemsTotal, rate)
+		promoDiscount = &d
+		promoApplied = true
+	}
+
+	totalPrice := itemsTotal
+	if promoApplied {
+		totalPrice = money.Must(money.Sum(totalPrice, money.Negate(*promoDiscount)))
 	}
 	totalPrice = money.Must(money.Sum(totalPrice, *shippingCost))
 	year := time.Now().Year()
@@ -312,6 +362,9 @@ func (fe *frontendServer) viewCartHandler(w http.ResponseWriter, r *http.Request
 		"total_cost":       totalPrice,
 		"items":            items,
 		"expiration_years": []int{year, year + 1, year + 2, year + 3, year + 4},
+		"promo_applied":    promoApplied,
+		"promo_code":       promoCode,
+		"promo_discount":   promoDiscount,
 	})); err != nil {
 		log.Println(err)
 	}
@@ -377,10 +430,33 @@ func (fe *frontendServer) placeOrderHandler(w http.ResponseWriter, r *http.Reque
 	order.GetOrder().GetItems()
 	recommendations, _ := fe.getRecommendations(r.Context(), sessionID(r), nil)
 
-	totalPaid := *order.GetOrder().GetShippingCost()
+	// Sum the items total (excluding shipping) so a promo discount can be applied
+	// to the basket value only.
+	itemsTotal := pb.Money{CurrencyCode: order.GetOrder().GetShippingCost().GetCurrencyCode()}
 	for _, v := range order.GetOrder().GetItems() {
 		multPrice := money.MultiplySlow(*v.GetCost(), uint32(v.GetItem().GetQuantity()))
-		totalPaid = money.Must(money.Sum(totalPaid, multPrice))
+		itemsTotal = money.Must(money.Sum(itemsTotal, multPrice))
+	}
+
+	promoCode := appliedPromoCode(r)
+	promoApplied := false
+	var promoDiscount *pb.Money
+	if rate, ok := promoDiscountRate(promoCode); ok {
+		d := discountAmount(itemsTotal, rate)
+		promoDiscount = &d
+		promoApplied = true
+	}
+
+	totalPaid := itemsTotal
+	if promoApplied {
+		totalPaid = money.Must(money.Sum(totalPaid, money.Negate(*promoDiscount)))
+	}
+	totalPaid = money.Must(money.Sum(totalPaid, *order.GetOrder().GetShippingCost()))
+
+	// The order is placed; clear any applied promo code so it does not carry over
+	// to the next order.
+	if promoApplied {
+		http.SetCookie(w, &http.Cookie{Name: cookiePromoCode, Value: "", MaxAge: -1})
 	}
 
 	currencies, err := fe.getCurrencies(r.Context())
@@ -395,6 +471,9 @@ func (fe *frontendServer) placeOrderHandler(w http.ResponseWriter, r *http.Reque
 		"order":           order.GetOrder(),
 		"total_paid":      &totalPaid,
 		"recommendations": recommendations,
+		"promo_applied":   promoApplied,
+		"promo_code":      promoCode,
+		"promo_discount":  promoDiscount,
 	})); err != nil {
 		log.Println(err)
 	}

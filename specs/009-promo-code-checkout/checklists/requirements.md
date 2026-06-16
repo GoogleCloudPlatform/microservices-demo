@@ -13,7 +13,7 @@
 
 ## Requirement Completeness
 
-- [ ] No [NEEDS CLARIFICATION] markers remain
+- [x] No [NEEDS CLARIFICATION] markers remain
 - [x] Requirements are testable and unambiguous
 - [x] Success criteria are measurable
 - [x] Success criteria are technology-agnostic (no implementation details)
@@ -32,5 +32,5 @@
 ## Notes
 
 - **Content Quality / "No implementation details"** and **Feature Readiness / "No implementation details leak"** are intentionally left unchecked. The spec includes a **Constraints** section (C-001 to C-004) naming the repo's existing services, the in-memory `products.json` data source, and the Go language. This is a deliberate deviation: the user directed that the epic's technical-constraints section be carried in as **hard constraints**, which overrides the usual technology-agnostic rule for this spec.
-- **One [NEEDS CLARIFICATION] marker remains** (FR-002 / Edge Cases): the base the 50% discount applies to (item subtotal only vs. subtotal plus shipping/taxes). This materially affects the amount charged, so it is surfaced as a question rather than silently assumed.
+- **Clarification resolved** (FR-002 / Edge Cases): the 50% discount applies to the total value of the basket (sum of cart item prices); shipping is not discounted. No [NEEDS CLARIFICATION] markers remain.
 - All other items pass.

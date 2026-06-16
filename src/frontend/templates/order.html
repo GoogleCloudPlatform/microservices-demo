@@ -53,6 +53,16 @@
                     {{.order.ShippingTrackingId}}
                 </div>
             </div>
+            {{ if $.promo_applied }}
+            <div class="row border-bottom-solid padding-y-24">
+                <div class="col-6 pl-md-0">
+                    Discount ({{ $.promo_code }})
+                </div>
+                <div class="col-6 pr-md-0 text-right">
+                    -{{ renderMoney .promo_discount }}
+                </div>
+            </div>
+            {{ end }}
             <div class="row padding-y-24">
                 <div class="col-6 pl-md-0">
                     Total Paid
