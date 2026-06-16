@@ -90,10 +90,35 @@
                         <div class="col pr-md-0 text-right">{{ renderMoney .shipping_cost }}</div>
                     </div>
 
+                    {{ if $.promo_applied }}
+                    <div class="row cart-summary-shipping-row">
+                        <div class="col pl-md-0">Discount ({{ $.promo_code }})</div>
+                        <div class="col pr-md-0 text-right">-{{ renderMoney .promo_discount }}</div>
+                    </div>
+                    {{ end }}
+
                     <div class="row cart-summary-total-row">
                         <div class="col pl-md-0">Total</div>
                         <div class="col pr-md-0 text-right">{{ renderMoney .total_cost }}</div>
                     </div>
+
+                    <form class="cart-summary-promo-form" method="POST" action="{{ $.baseUrl }}/cart/promo">
+                        <div class="row py-2">
+                            <div class="col-7 pl-md-0">
+                                <input type="text" name="promo_code" id="promo_code" value="{{ $.promo_code }}" placeholder="Promo code">
+                            </div>
+                            <div class="col-5 pr-md-0 text-right">
+                                <button class="cymbal-button-secondary" type="submit">Apply</button>
+                            </div>
+                        </div>
+                        {{ if $.promo_applied }}
+                        <div class="row">
+                            <div class="col pl-md-0">
+                                <small>Promo code {{ $.promo_code }} applied &mdash; 50% off your basket.</small>
+                            </div>
+                        </div>
+                        {{ end }}
+                    </form>
 
                 </div>
 

@@ -30,7 +30,7 @@ A shopper who has a discount code can enter it on the checkout page and see the 
 
 ### Edge Cases
 
-- **Order value base**: The discount is "50% off the order value". What the order value comprises (subtotal only vs. including shipping and/or taxes) is [NEEDS CLARIFICATION: does the 50% apply to the item subtotal only, or to the subtotal plus shipping/taxes?].
+- **Order value base**: The 50% discount applies to the **total value of the basket** — the sum of all cart item prices (unit price × quantity) across the cart. Shipping is not discounted.
 - **Unrecognised / mistyped codes**: Out of scope for this story — covered by sibling story [AIP-179](https://odevo.atlassian.net/browse/AIP-179) "See a clear error for an unrecognised promo code".
 - **Entering a second code / replacing an applied code**: Out of scope for this story — covered by sibling story [AIP-180](https://odevo.atlassian.net/browse/AIP-180) "Replace an applied code by entering another".
 
@@ -39,7 +39,7 @@ A shopper who has a discount code can enter it on the checkout page and see the 
 ### Functional Requirements
 
 - **FR-001**: The checkout page MUST provide a field where a shopper can enter a promo code and apply it.
-- **FR-002**: When the shopper applies the code `50OFF`, the system MUST reduce the order total by 50% [NEEDS CLARIFICATION: of which base — item subtotal only, or subtotal plus shipping/taxes?].
+- **FR-002**: When the shopper applies the code `50OFF`, the system MUST reduce the order by 50% of the total value of the basket (the sum of all cart item prices, unit price × quantity). Shipping is not discounted.
 - **FR-003**: When a valid code is applied, the system MUST show an inline confirmation that the code was accepted.
 - **FR-004**: The order summary MUST display the discounted total, and that displayed discounted total MUST be the amount the shopper is charged.
 - **FR-005**: When no code is entered, checkout MUST behave exactly as it does today — no discount applied and no error shown.
@@ -63,7 +63,7 @@ These are stated by the epic as hard constraints and bound any implementation of
 
 ### Measurable Outcomes
 
-- **SC-001**: Applying `50OFF` reduces the displayed order total by exactly 50%.
+- **SC-001**: Applying `50OFF` reduces the basket (items) total by exactly 50%, with shipping unchanged.
 - **SC-002**: In 100% of orders where a code is applied, the discounted total shown in the order summary equals the amount charged.
 - **SC-003**: A shopper who enters no code completes checkout with the same steps and outcome as today — no added friction and no error shown.
 
