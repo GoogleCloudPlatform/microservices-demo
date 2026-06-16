@@ -32,6 +32,7 @@
         <div class="product-wrapper">
 
           <h2>{{ $.product.Item.Name }}</h2>
+          {{ if $.rating }}<p class="product-rating">{{ $.rating }} ★</p>{{ end }}
           <p class="product-price">{{ renderMoney $.product.Price }}</p>
           <p>{{ $.product.Item.Description }}</p>
 

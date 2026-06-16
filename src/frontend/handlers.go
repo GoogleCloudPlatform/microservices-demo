@@ -56,6 +56,18 @@ var (
 
 var validEnvs = []string{"local", "gcp", "azure", "aws", "onprem", "alibaba"}
 
+var productRatings = map[string]float32{
+	"OLJCESPC7Z": 4.0, // Sunglasses
+	"66VCHSJNUP": 3.5, // Tank Top
+	"1YMWWN1N4O": 4.5, // Watch
+	"L9ECAV7KIM": 3.0, // Loafers
+	"2ZYFJ3GM2N": 2.5, // Hairdryer
+	"0PUK6V6EV0": 4.0, // Candle Holder
+	"LS4PSXUNUM": 4.5, // Salt & Pepper Shakers
+	"9SIQT8TOJO": 3.5, // Bamboo Glass Jar
+	"6E92ZMYYFZ": 5.0, // Mug
+}
+
 func (fe *frontendServer) homeHandler(w http.ResponseWriter, r *http.Request) {
 	log := r.Context().Value(ctxKeyLog{}).(logrus.FieldLogger)
 	log.WithField("currency", currentCurrency(r)).Info("home")
@@ -203,6 +215,7 @@ func (fe *frontendServer) productHandler(w http.ResponseWriter, r *http.Request)
 		"recommendations": recommendations,
 		"cart_size":       cartSize(cart),
 		"packagingInfo":   packagingInfo,
+		"rating":          productRatings[p.GetId()],
 	})); err != nil {
 		log.Println(err)
 	}
