@@ -1,0 +1,93 @@
+name: CI Pipeline
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+env:
+  AWS_REGION: us-east-1
+  ECR_REGISTRY: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com
+
+jobs:
+  build-and-push:
+    name: Build and Push Docker Images
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build and push frontend
+        run: |
+          docker build -t $ECR_REGISTRY/frontend:${{ github.sha }} ./src/frontend
+          docker push $ECR_REGISTRY/frontend:${{ github.sha }}
+
+      - name: Build and push productcatalogservice
+        run: |
+          docker build -t $ECR_REGISTRY/productcatalogservice:${{ github.sha }} ./src/productcatalogservice
+          docker push $ECR_REGISTRY/productcatalogservice:${{ github.sha }}
+
+      - name: Build and push cartservice
+        run: |
+          docker build -t $ECR_REGISTRY/cartservice:${{ github.sha }} ./src/cartservice/src
+          docker push $ECR_REGISTRY/cartservice:${{ github.sha }}
+
+      - name: Build and push currencyservice
+        run: |
+          docker build -t $ECR_REGISTRY/currencyservice:${{ github.sha }} ./src/currencyservice
+          docker push $ECR_REGISTRY/currencyservice:${{ github.sha }}
+
+      - name: Build and push paymentservice
+        run: |
+          docker build -t $ECR_REGISTRY/paymentservice:${{ github.sha }} ./src/paymentservice
+          docker push $ECR_REGISTRY/paymentservice:${{ github.sha }}
+
+      - name: Build and push shippingservice
+        run: |
+          docker build -t $ECR_REGISTRY/shippingservice:${{ github.sha }} ./src/shippingservice
+          docker push $ECR_REGISTRY/shippingservice:${{ github.sha }}
+
+      - name: Build and push emailservice
+        run: |
+          docker build -t $ECR_REGISTRY/emailservice:${{ github.sha }} ./src/emailservice
+          docker push $ECR_REGISTRY/emailservice:${{ github.sha }}
+
+      - name: Build and push checkoutservice
+        run: |
+          docker build -t $ECR_REGISTRY/checkoutservice:${{ github.sha }} ./src/checkoutservice
+          docker push $ECR_REGISTRY/checkoutservice:${{ github.sha }}
+
+      - name: Build and push recommendationservice
+        run: |
+          docker build -t $ECR_REGISTRY/recommendationservice:${{ github.sha }} ./src/recommendationservice
+          docker push $ECR_REGISTRY/recommendationservice:${{ github.sha }}
+
+      - name: Build and push adservice
+        run: |
+          docker build -t $ECR_REGISTRY/adservice:${{ github.sha }} ./src/adservice
+          docker push $ECR_REGISTRY/adservice:${{ github.sha }}
+
+      - name: Build and push loadgenerator
+        run: |
+          docker build -t $ECR_REGISTRY/loadgenerator:${{ github.sha }} ./src/loadgenerator
+          docker push $ECR_REGISTRY/loadgenerator:${{ github.sha }}
+
+      - name: Build and push shoppingassistantservice
+        run: |
+          docker build -t $ECR_REGISTRY/shoppingassistantservice:${{ github.sha }} ./src/shoppingassistantservice
+          docker push $ECR_REGISTRY/shoppingassistantservice:${{ github.sha }}
