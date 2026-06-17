@@ -1,0 +1,141 @@
+version: '3.9'
+
+services:
+
+  frontend:
+    build:
+      context: ./src/frontend
+      dockerfile: Dockerfile
+    image: frontend:v1
+    ports:
+      - "8080:8080"
+    environment:
+      - PRODUCT_CATALOG_SERVICE_ADDR=productcatalogservice:3550
+      - CURRENCY_SERVICE_ADDR=currencyservice:7000
+      - CART_SERVICE_ADDR=cartservice:8080
+      - RECOMMENDATION_SERVICE_ADDR=recommendationservice:8080
+      - CHECKOUT_SERVICE_ADDR=checkoutservice:5050
+      - AD_SERVICE_ADDR=adservice:9555
+      - SHIPPING_SERVICE_ADDR=shippingservice:50051
+      - SHOPPING_ASSISTANT_SERVICE_ADDR=shoppingassistantservice:8080
+    depends_on:
+      - productcatalogservice
+      - currencyservice
+      - cartservice
+      - recommendationservice
+      - checkoutservice
+      - adservice
+      - shippingservice
+
+  productcatalogservice:
+    build:
+      context: ./src/productcatalogservice
+      dockerfile: Dockerfile
+    image: productcatalogservice:v1
+    ports:
+      - "3550:3550"
+  cartservice:
+    build:
+      context: ./src/cartservice/src
+      dockerfile: Dockerfile
+    image: cartservice:v1
+    expose:
+      - "8080"
+    environment:
+      - REDIS_ADDR=redis:6379
+      - ASPNETCORE_HTTP_PORTS=8080
+
+  currencyservice:
+    build:
+      context: ./src/currencyservice
+      dockerfile: Dockerfile
+    image: currencyservice:v1
+    ports:
+      - "7000:7000"
+    environment:
+      - DISABLE_PROFILER=1
+      - PORT=7000
+  paymentservice:
+    build:
+      context: ./src/paymentservice
+      dockerfile: Dockerfile
+    image: paymentservice:v1
+    ports:
+      - "50052:50051"
+    environment:
+      - DISABLE_PROFILER=1
+      - PORT=50051
+
+  shippingservice:
+    build:
+      context: ./src/shippingservice
+      dockerfile: Dockerfile
+    image: shippingservice:v1
+    ports:
+      - "50053:50051"
+
+  emailservice:
+    build:
+      context: ./src/emailservice
+      dockerfile: Dockerfile
+    image: emailservice:v1
+    expose:
+      - "8080"
+
+  checkoutservice:
+    build:
+      context: ./src/checkoutservice
+      dockerfile: Dockerfile
+    image: checkoutservice:v1
+    ports:
+      - "5050:5050"
+    environment:
+      - PRODUCT_CATALOG_SERVICE_ADDR=productcatalogservice:3550
+      - SHIPPING_SERVICE_ADDR=shippingservice:50051
+      - PAYMENT_SERVICE_ADDR=paymentservice:50051
+      - EMAIL_SERVICE_ADDR=emailservice:8080
+      - CURRENCY_SERVICE_ADDR=currencyservice:7000
+      - CART_SERVICE_ADDR=cartservice:8080
+
+  recommendationservice:
+    build:
+      context: ./src/recommendationservice
+      dockerfile: Dockerfile
+    image: recommendationservice:v1
+    expose:
+      - "8082"
+    environment:
+      - PRODUCT_CATALOG_SERVICE_ADDR=productcatalogservice:3550
+
+  adservice:
+    build:
+      context: ./src/adservice
+      dockerfile: Dockerfile
+    image: adservice:v1
+    ports:
+      - "9555:9555"
+
+  shoppingassistantservice:
+    build:
+      context: ./src/shoppingassistantservice
+      dockerfile: Dockerfile
+    image: shoppingassistantservice:v1
+    expose:
+      - "8080"
+    environment:
+      - DISABLE_PROFILER=1
+
+  loadgenerator:
+    build:
+      context: ./src/loadgenerator
+      dockerfile: Dockerfile
+    image: loadgenerator:v1
+    environment:
+      - FRONTEND_ADDR=frontend:8080
+    depends_on:
+      - frontend
+
+  redis:
+    image: redis:alpine
+    ports:
+      - "6379:6379"
