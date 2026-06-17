@@ -33,6 +33,13 @@ concurrency:
 
 jobs:
   code-tests:
+    # Only run on the privileged self-hosted runner for same-repo pull requests.
+    # Fork PRs must not execute untrusted code here: these runners are persistent
+    # GCE VMs whose attached service account (GKE/GCR/GCS) is reachable through the
+    # metadata server regardless of whether GitHub secrets are forwarded. This
+    # matches the documented requirement to branch directly off the repository
+    # rather than from a fork.
+    if: github.event.pull_request.head.repo.full_name == github.repository
     runs-on: [self-hosted, is-enabled]
     steps:
     - uses: actions/checkout@v6
@@ -59,6 +66,10 @@ jobs:
         dotnet test src/cartservice/
 
   deployment-tests:
+    # Same-repo pull requests only (see code-tests). Never build/deploy
+    # attacker-controlled fork code to the shared GKE cluster from the
+    # service-account-bearing self-hosted runner.
+    if: github.event.pull_request.head.repo.full_name == github.repository
     runs-on: [self-hosted, is-enabled]
     needs: code-tests
     strategy:
