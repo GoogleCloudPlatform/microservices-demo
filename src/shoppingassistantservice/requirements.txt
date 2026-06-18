@@ -253,3 +253,4 @@ xxhash==3.6.0
     # via langgraph
 zstandard==0.25.0
     # via langsmith
+aiohttp
