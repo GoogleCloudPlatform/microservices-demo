@@ -1,0 +1,54 @@
+name: Docker Build and Push
+
+on:
+push:
+branches:
+- main
+workflow_dispatch:
+
+env:
+IMAGE_NAME: ${{ secrets.DOCKER_USERNAME }}/my-app
+
+jobs:
+docker:
+name: Build & Push Docker Image
+runs-on: ubuntu-latest
+
+
+permissions:
+  contents: read
+
+steps:
+  - name: Checkout Repository
+    uses: actions/checkout@v4
+
+  - name: Set up Docker Buildx
+    uses: docker/setup-buildx-action@v3
+
+  - name: Login to Docker Hub
+    uses: docker/login-action@v3
+    with:
+      username: ${{ secrets.DOCKER_USERNAME }}
+      password: ${{ secrets.DOCKER_PASSWORD }}
+
+  - name: Extract Docker Metadata
+    id: meta
+    uses: docker/metadata-action@v5
+    with:
+      images: ${{ env.IMAGE_NAME }}
+      tags: |
+        type=sha
+        type=raw,value=latest
+
+  - name: Build and Push Docker Image
+    uses: docker/build-push-action@v6
+    with:
+      context: .
+      push: true
+      tags: ${{ steps.meta.outputs.tags }}
+      labels: ${{ steps.meta.outputs.labels }}
+
+  - name: Verify Image Push
+    run: |
+      echo "Docker image pushed successfully"
+      echo "${{ steps.meta.outputs.tags }}"
