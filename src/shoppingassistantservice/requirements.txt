@@ -137,7 +137,7 @@ langgraph-prebuilt==1.0.8
     # via langgraph
 langgraph-sdk==0.3.1
     # via langgraph
-langsmith==0.6.3
+langsmith==0.8.18
     # via langchain-core
 markupsafe==3.0.2
     # via
@@ -246,10 +246,14 @@ uuid-utils==0.12.0
     #   langchain-core
     #   langsmith
 websockets==15.0.1
-    # via google-genai
+    # via
+    #   google-genai
+    #   langsmith
 werkzeug==3.1.6
     # via flask
 xxhash==3.6.0
-    # via langgraph
+    # via
+    #   langgraph
+    #   langsmith
 zstandard==0.25.0
     # via langsmith
