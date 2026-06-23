@@ -13,8 +13,8 @@
 # limitations under the License.
 
 apiVersion: v2
-name: onlineboutique
-description: A Helm chart for Kubernetes for Online Boutique
+name: onlineshopping
+description: A Helm chart for Kubernetes for Online Shopping
 
 # A chart can be either an 'application' or a 'library' chart.
 #
