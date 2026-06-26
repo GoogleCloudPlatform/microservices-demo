@@ -27,8 +27,8 @@
   <div class="container">
     <div class="row">
       <div class="col-md-12">
-        <div id="chat-modal" class="chat-modal">
-          <div id="bot-messages" class="bot-messages">
+        <div id="chat-modal" class="chat-modal" role="region" aria-label="Shopping assistant chat">
+          <div id="bot-messages" class="bot-messages" aria-live="polite" aria-label="Chat messages" aria-relevant="additions">
             <p class="bot-message">
               <span class="bot-message-text">Hi, I'm the Cymbal Shops assistant. I can help you with your shopping experience.</span>
             </p>
@@ -36,10 +36,10 @@
               <span class="bot-message-text">What can I help you with?</span>
             </p>
           </div>
-          <div class="bot-input">
-            <input id="bot-input-text" type="text" style="margin-right: 30px;" class="bot-input-text" placeholder="Recommend me items...">
-            <input type="file" class="bot-input-file-button"  onchange="getBase64()">
-            <button id="bot-input-button" class="bot-input-button">Send</button>
+          <div class="bot-input" role="group" aria-label="Send a message">
+            <input id="bot-input-text" type="text" style="margin-right: 30px;" class="bot-input-text" placeholder="Recommend me items..." aria-label="Type your message to the assistant">
+            <input type="file" class="bot-input-file-button" aria-label="Upload an image" onchange="getBase64()">
+            <button id="bot-input-button" class="bot-input-button" aria-label="Send message">Send</button>
           </div>
         </div>
       </div>

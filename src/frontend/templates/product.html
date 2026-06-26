@@ -26,7 +26,7 @@
   <div class="h-product container">
     <div class="row">
       <div class="col-md-6">
-        <img class="product-image" alt="" src="{{ $.baseUrl }}{{$.product.Item.Picture}}" />
+        <img class="product-image" alt="{{ $.product.Item.Name }}" src="{{ $.baseUrl }}{{$.product.Item.Picture}}" />
       </div>
       <div class="product-info col-md-5">
         <div class="product-wrapper">
@@ -53,10 +53,10 @@
           </div>
           {{ end }}
 
-          <form method="POST" action="{{ $.baseUrl }}/cart">
+          <form method="POST" action="{{ $.baseUrl }}/cart" aria-label="Add {{ $.product.Item.Name }} to cart">
             <input type="hidden" name="product_id" value="{{$.product.Item.Id}}" />
             <div class="product-quantity-dropdown">
-              <select name="quantity" id="quantity">
+              <select name="quantity" id="quantity" aria-label="Select quantity">
                 <option>1</option>
                 <option>2</option>
                 <option>3</option>
@@ -64,9 +64,9 @@
                 <option>5</option>
                 <option>10</option>
               </select>
-              <img src="{{ $.baseUrl }}/static/icons/Hipster_DownArrow.svg" alt="">
+              <img src="{{ $.baseUrl }}/static/icons/Hipster_DownArrow.svg" alt="" aria-hidden="true">
             </div>
-            <button type="submit" class="cymbal-button-primary">Add To Cart</button>
+            <button type="submit" class="cymbal-button-primary" aria-label="Add {{ $.product.Item.Name }} to cart">Add To Cart</button>
           </form>
         </div>
       </div>

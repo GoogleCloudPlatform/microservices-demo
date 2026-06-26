@@ -23,12 +23,12 @@
       </div>
     <main role="main">
         <div class="py-5">
-            <div class="container bg-light py-3 px-lg-5 py-lg-5">
+            <div class="container bg-light py-3 px-lg-5 py-lg-5" role="alert" aria-label="Error details">
                 <h1>Uh, oh!</h1>
                 <p>Something has failed. Below are some details for debugging.</p>
 
                 <p><strong>HTTP Status:</strong> {{.status_code}} {{.status}}</p>
-                <pre class="border border-danger p-3"
+                <pre class="border border-danger p-3" aria-label="Error message"
                     style="white-space: pre-wrap; word-break: keep-all;">
                     {{- .error -}}
                 </pre>

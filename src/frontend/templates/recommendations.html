@@ -15,7 +15,7 @@
 -->
 
 {{ define "recommendations" }}
-<section class="recommendations">
+<section class="recommendations" aria-label="Product recommendations">
     <div class="container">
       <div class="row">
         <div class="col-xl-10 offset-xl-1">
@@ -24,10 +24,10 @@
             {{ range .recommendations }}
             <div class="col-md-3">
               <div>
-                <a href="{{ $.baseUrl }}/product/{{.Id}}">
-                  <img alt="" src="{{ $.baseUrl }}{{.Picture}}">
+                <a href="{{ $.baseUrl }}/product/{{.Id}}" aria-label="View {{ .Name }}">
+                  <img alt="{{ .Name }}" src="{{ $.baseUrl }}{{.Picture}}">
                 </a>
-                <div>
+                <div aria-hidden="true">
                   <h5>
                     {{ .Name }}
                   </h5>

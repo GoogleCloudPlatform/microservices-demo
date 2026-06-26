@@ -45,11 +45,11 @@
 
           {{ range $.products }}
           <div class="col-md-4 hot-product-card">
-            <a href="{{ $.baseUrl }}/product/{{.Item.Id}}">
-              <img loading="lazy" src="{{ $.baseUrl }}{{.Item.Picture}}">
-              <div class="hot-product-card-img-overlay"></div>
+            <a href="{{ $.baseUrl }}/product/{{.Item.Id}}" aria-label="View {{ .Item.Name }}, {{ renderMoney .Price }}">
+              <img loading="lazy" src="{{ $.baseUrl }}{{.Item.Picture}}" alt="{{ .Item.Name }}">
+              <div class="hot-product-card-img-overlay" aria-hidden="true"></div>
             </a>
-            <div>
+            <div aria-hidden="true">
               <div class="hot-product-card-name">{{ .Item.Name }}</div>
               <div class="hot-product-card-price">{{ renderMoney .Price }}</div>
             </div>

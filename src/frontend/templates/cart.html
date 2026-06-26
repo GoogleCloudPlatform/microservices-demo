@@ -26,13 +26,13 @@
     <main role="main" class="cart-sections">
 
         {{ if eq (len $.items) 0 }}
-        <section class="empty-cart-section">
+        <section class="empty-cart-section" aria-label="Empty shopping cart">
             <h3>Your shopping cart is empty!</h3>
             <p>Items you add to your shopping cart will appear here.</p>
-            <a class="cymbal-button-primary" href="{{ $.baseUrl }}/" role="button">Continue Shopping</a>
+            <a class="cymbal-button-primary" href="{{ $.baseUrl }}/" role="button" aria-label="Continue shopping">Continue Shopping</a>
         </section>
         {{ else }}
-        <section class="container">
+        <section class="container" aria-label="Shopping cart">
             <div class="row">
 
                 <div class="col-lg-6 col-xl-5 offset-xl-1 cart-summary-section">
@@ -42,11 +42,11 @@
                             <h3>Cart ({{ $.cart_size }})</h3>
                         </div>
                         <div class="col-8 pr-md-0 text-right">
-                            <form method="POST" action="{{ $.baseUrl }}/cart/empty">
-                                <button class="cymbal-button-secondary cart-summary-empty-cart-button" type="submit">
+                            <form method="POST" action="{{ $.baseUrl }}/cart/empty" aria-label="Empty cart">
+                                <button class="cymbal-button-secondary cart-summary-empty-cart-button" type="submit" aria-label="Empty shopping cart">
                                     Empty Cart
                                 </button>
-                                <a class="cymbal-button-primary" href="{{ $.baseUrl }}/" role="button">
+                                <a class="cymbal-button-primary" href="{{ $.baseUrl }}/" role="button" aria-label="Continue shopping">
                                     Continue Shopping
                                 </a>
                             </form>
@@ -56,8 +56,8 @@
                     {{ range $.items }}
                     <div class="row cart-summary-item-row">
                         <div class="col-md-4 pl-md-0">
-                            <a href="{{ $.baseUrl }}/product/{{.Item.Id}}">
-                                <img class="img-fluid" alt="" src="{{ $.baseUrl }}{{.Item.Picture}}" />
+                            <a href="{{ $.baseUrl }}/product/{{.Item.Id}}" aria-label="View {{ .Item.Name }}">
+                                <img class="img-fluid" alt="{{ .Item.Name }}" src="{{ $.baseUrl }}{{.Item.Picture}}" />
                             </a>
                         </div>
                         <div class="col-md-8 pr-md-0">
@@ -99,7 +99,7 @@
 
                 <div class="col-lg-5 offset-lg-1 col-xl-4">
 
-                    <form class="cart-checkout-form" action="{{ $.baseUrl }}/cart/checkout" method="POST">
+                    <form class="cart-checkout-form" action="{{ $.baseUrl }}/cart/checkout" method="POST" aria-label="Checkout: shipping and payment information">
 
                         <div class="row">
                             <div class="col">
@@ -173,7 +173,7 @@
                         <div class="form-row">
                             <div class="col-md-5 cymbal-form-field">
                                 <label for="credit_card_expiration_month">Month</label>
-                                <select name="credit_card_expiration_month" id="credit_card_expiration_month">
+                                <select name="credit_card_expiration_month" id="credit_card_expiration_month" aria-label="Credit card expiration month">
                                     <option value="1">January</option>
                                     <option value="2">February</option>
                                     <option value="3">March</option>
@@ -191,7 +191,7 @@
                             </div>
                             <div class="col-md-4 cymbal-form-field">
                                     <label for="credit_card_expiration_year">Year</label>
-                                    <select name="credit_card_expiration_year" id="credit_card_expiration_year">
+                                    <select name="credit_card_expiration_year" id="credit_card_expiration_year" aria-label="Credit card expiration year">
                                     {{ range $i, $y := $.expiration_years}}<option value="{{$y}}"
                                         {{if eq $i 1 -}}
                                             selected="selected"
@@ -209,7 +209,7 @@
 
                         <div class="form-row justify-content-center">
                             <div class="col text-center">
-                                <button class="cymbal-button-primary" type="submit">
+                                <button class="cymbal-button-primary" type="submit" aria-label="Place order">
                                     Place Order
                                 </button>
                             </div>

@@ -15,10 +15,11 @@
 -->
 
 {{ define "text_ad" }}
-<div class="container py-3 px-lg-5 py-lg-5">
-    <div role="alert">
-        <strong>Ad</strong>
-        <a href="{{$.baseUrl}}{{.ad.RedirectUrl}}" rel="nofollow noopener noreferrer" target="_blank">
+<div class="container py-3 px-lg-5 py-lg-5" aria-label="Advertisement">
+    <div role="complementary" aria-label="Sponsored content">
+        <strong aria-hidden="true">Ad</strong>
+        <a href="{{$.baseUrl}}{{.ad.RedirectUrl}}" rel="nofollow noopener noreferrer" target="_blank"
+           aria-label="Advertisement: {{.ad.Text}} (opens in new tab)">
             {{.ad.Text}}
         </a>
     </div>
