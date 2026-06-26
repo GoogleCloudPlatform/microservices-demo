@@ -211,6 +211,8 @@ message OrderResult {
     Money shipping_cost = 3;
     Address  shipping_address = 4;
     repeated OrderItem items = 5;
+    Money  discount_amount = 6;
+    string coupon_code_used = 7;
 }
 
 message SendOrderConfirmationRequest {
@@ -232,6 +234,7 @@ message PlaceOrderRequest {
     Address address = 3;
     string email = 5;
     CreditCardInfo credit_card = 6;
+    string coupon_code = 7;
 }
 
 message PlaceOrderResponse {

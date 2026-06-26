@@ -63,6 +63,13 @@ func init() {
 	log.Out = os.Stdout
 }
 
+
+var coupons = map[string]int64{
+	"SAVE10":  10,  // intended as $10 off
+	"SAVE50":  50,  // intended as $50 off
+	"SAVE100": 100, // intended as $100 off
+}
+
 type checkoutService struct {
 	pb.UnimplementedCheckoutServiceServer
 
@@ -249,6 +256,61 @@ func (cs *checkoutService) PlaceOrder(ctx context.Context, req *pb.PlaceOrderReq
 		total = money.Must(money.Sum(total, multPrice))
 	}
 
+	// -------------------------------------------------------
+	// NEW — coupon validation and discount application
+	//
+	// discountAmount and couponCodeUsed are zero/empty by
+	// default — if no coupon is submitted or the code is
+	// invalid, the order proceeds with the original total.
+	// -------------------------------------------------------
+	var discountAmount pb.Money
+	var couponCodeUsed string
+
+	if req.CouponCode != "" {
+		if couponValue, ok := coupons[req.CouponCode]; ok {
+
+			
+			couponInUSD := pb.Money{
+				CurrencyCode: "USD",  
+				Units:        couponValue,
+				Nanos:        0,
+			}
+
+			
+			convertedDiscount, err := cs.convertCurrency(ctx, &couponInUSD, req.UserCurrency)
+			if err != nil {
+				
+				log.Infof("failed to convert coupon currency: %v", err)
+			} else {
+				discountAmount = *convertedDiscount
+				couponCodeUsed = req.CouponCode
+
+				
+				negativeDiscount := pb.Money{
+					CurrencyCode: discountAmount.CurrencyCode,
+					Units:        -discountAmount.Units,
+					Nanos:        -discountAmount.Nanos,
+				}
+
+				// apply discount only if total covers it
+				// prevents a negative total being sent to paymentservice
+				newTotal, err := money.Sum(total, negativeDiscount)
+				if err == nil && newTotal.Units >= 0 {
+					total = newTotal
+				} else {
+					// discount exceeds total — make the order free
+					total = pb.Money{
+						CurrencyCode: req.UserCurrency,
+						Units:        0,
+						Nanos:        0,
+					}
+				}
+			}
+		} else {
+			log.Infof("coupon code %q not found, skipping discount", req.CouponCode)
+		}
+	}
+
 	txID, err := cs.chargeCard(ctx, &total, req.CreditCard)
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "failed to charge card: %+v", err)
@@ -268,6 +330,8 @@ func (cs *checkoutService) PlaceOrder(ctx context.Context, req *pb.PlaceOrderReq
 		ShippingCost:       prep.shippingCostLocalized,
 		ShippingAddress:    req.Address,
 		Items:              prep.orderItems,
+		DiscountAmount:     &discountAmount,
+		CouponCodeUsed:     couponCodeUsed,
 	}
 
 	if err := cs.sendOrderConfirmation(ctx, req.Email, orderResult); err != nil {

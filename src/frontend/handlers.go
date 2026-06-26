@@ -54,6 +54,18 @@ var (
 	plat platformDetails
 )
 
+// validCoupons mirrors the coupon store in checkoutservice/main.go
+// Used here ONLY for frontend validation before calling PlaceOrder.
+// Keys are coupon codes, values are the display description shown to the user.
+//
+// NOTE: The description intentionally says "X off" without specifying currency.
+
+var validCoupons = map[string]string{
+	"SAVE10":  "Save 10 off your order",
+	"SAVE50":  "Save 50 off your order",
+	"SAVE100": "Save 100 off your order",
+}
+
 var validEnvs = []string{"local", "gcp", "azure", "aws", "onprem", "alibaba"}
 
 func (fe *frontendServer) homeHandler(w http.ResponseWriter, r *http.Request) {
@@ -89,14 +101,11 @@ func (fe *frontendServer) homeHandler(w http.ResponseWriter, r *http.Request) {
 		ps[i] = productView{p, price}
 	}
 
-	// Set ENV_PLATFORM (default to local if not set; use env var if set; otherwise detect GCP, which overrides env)_
 	var env = os.Getenv("ENV_PLATFORM")
-	// Only override from env variable if set + valid env
 	if env == "" || stringinSlice(validEnvs, env) == false {
 		fmt.Println("env platform is either empty or invalid")
 		env = "local"
 	}
-	// Autodetect GCP
 	addrs, err := net.LookupHost("metadata.google.internal.")
 	if err == nil && len(addrs) >= 0 {
 		log.Debugf("Detected Google metadata server: %v, setting ENV_PLATFORM to GCP.", addrs)
@@ -112,7 +121,7 @@ func (fe *frontendServer) homeHandler(w http.ResponseWriter, r *http.Request) {
 		"currencies":    currencies,
 		"products":      ps,
 		"cart_size":     cartSize(cart),
-		"banner_color":  os.Getenv("BANNER_COLOR"), // illustrates canary deployments
+		"banner_color":  os.Getenv("BANNER_COLOR"),
 		"ad":            fe.chooseAd(r.Context(), []string{}, log),
 	})); err != nil {
 		log.Error(err)
@@ -174,7 +183,6 @@ func (fe *frontendServer) productHandler(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	// ignores the error retrieving recommendations since it is not critical
 	recommendations, err := fe.getRecommendations(r.Context(), sessionID(r), []string{id})
 	if err != nil {
 		log.WithField("error", err).Warn("failed to get product recommendations")
@@ -185,8 +193,6 @@ func (fe *frontendServer) productHandler(w http.ResponseWriter, r *http.Request)
 		Price *pb.Money
 	}{p, price}
 
-	// Fetch packaging info (weight/dimensions) of the product
-	// The packaging service is an optional microservice you can run as part of a Google Cloud demo.
 	var packagingInfo *PackagingInfo = nil
 	if isPackagingServiceConfigured() {
 		packagingInfo, err = httpGetPackagingInfo(id)
@@ -232,7 +238,7 @@ func (fe *frontendServer) addToCartHandler(w http.ResponseWriter, r *http.Reques
 		renderHTTPError(log, r, w, errors.Wrap(err, "failed to add to cart"), http.StatusInternalServerError)
 		return
 	}
-	w.Header().Set("location", baseUrl + "/cart")
+	w.Header().Set("location", baseUrl+"/cart")
 	w.WriteHeader(http.StatusFound)
 }
 
@@ -244,7 +250,7 @@ func (fe *frontendServer) emptyCartHandler(w http.ResponseWriter, r *http.Reques
 		renderHTTPError(log, r, w, errors.Wrap(err, "failed to empty cart"), http.StatusInternalServerError)
 		return
 	}
-	w.Header().Set("location", baseUrl + "/")
+	w.Header().Set("location", baseUrl+"/")
 	w.WriteHeader(http.StatusFound)
 }
 
@@ -262,7 +268,6 @@ func (fe *frontendServer) viewCartHandler(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	// ignores the error retrieving recommendations since it is not critical
 	recommendations, err := fe.getRecommendations(r.Context(), sessionID(r), cartIDs(cart))
 	if err != nil {
 		log.WithField("error", err).Warn("failed to get product recommendations")
@@ -303,6 +308,17 @@ func (fe *frontendServer) viewCartHandler(w http.ResponseWriter, r *http.Request
 	totalPrice = money.Must(money.Sum(totalPrice, *shippingCost))
 	year := time.Now().Year()
 
+	// -------------------------------------------------------
+	// NEW — read coupon_error from query string
+	// This is set when placeOrderHandler rejects an invalid
+	// coupon and redirects back to /cart with ?coupon_error=...
+	// so the cart page can display the validation message.
+	// -------------------------------------------------------
+	couponError := r.URL.Query().Get("coupon_error")
+	// also carry back the coupon code the user typed so the
+	// field stays filled in after the redirect
+	lastCoupon := r.URL.Query().Get("coupon_code")
+
 	if err := templates.ExecuteTemplate(w, "cart", injectCommonTemplateData(r, map[string]interface{}{
 		"currencies":       currencies,
 		"recommendations":  recommendations,
@@ -312,6 +328,9 @@ func (fe *frontendServer) viewCartHandler(w http.ResponseWriter, r *http.Request
 		"total_cost":       totalPrice,
 		"items":            items,
 		"expiration_years": []int{year, year + 1, year + 2, year + 3, year + 4},
+		// NEW — coupon state passed to template
+		"coupon_error": couponError,
+		"last_coupon":  lastCoupon,
 	})); err != nil {
 		log.Println(err)
 	}
@@ -332,7 +351,28 @@ func (fe *frontendServer) placeOrderHandler(w http.ResponseWriter, r *http.Reque
 		ccMonth, _    = strconv.ParseInt(r.FormValue("credit_card_expiration_month"), 10, 32)
 		ccYear, _     = strconv.ParseInt(r.FormValue("credit_card_expiration_year"), 10, 32)
 		ccCVV, _      = strconv.ParseInt(r.FormValue("credit_card_cvv"), 10, 32)
+		couponCode    = strings.TrimSpace(strings.ToUpper(r.FormValue("coupon_code")))
 	)
+
+	// -------------------------------------------------------
+	// NEW — validate coupon code BEFORE placing order
+	// If the user typed something and it is not in our map,
+	// redirect back to cart with an error message.
+	// We never reach PlaceOrder with an invalid coupon — the
+	// cart is NOT emptied and the user can try a different code.
+	// This solves the state problem: invalid coupon = stay on
+	// cart page, cart untouched, user can re-enter a code.
+	// -------------------------------------------------------
+	if couponCode != "" {
+		if _, ok := validCoupons[couponCode]; !ok {
+			// redirect back to cart with error and preserve the
+			// coupon code the user typed so the field is pre-filled
+			http.Redirect(w, r,
+				baseUrl+"/cart?coupon_error=Invalid+coupon+code+%22"+couponCode+"%22.+Please+try+again.&coupon_code="+couponCode,
+				http.StatusFound)
+			return
+		}
+	}
 
 	payload := validator.PlaceOrderPayload{
 		Email:         email,
@@ -366,8 +406,10 @@ func (fe *frontendServer) placeOrderHandler(w http.ResponseWriter, r *http.Reque
 				City:          payload.City,
 				State:         payload.State,
 				ZipCode:       int32(payload.ZipCode),
-				Country:       payload.Country},
-		})
+				Country:       payload.Country,
+			},
+			CouponCode: couponCode,
+ 		})
 	if err != nil {
 		renderHTTPError(log, r, w, errors.Wrap(err, "failed to complete the order"), http.StatusInternalServerError)
 		return
@@ -377,10 +419,46 @@ func (fe *frontendServer) placeOrderHandler(w http.ResponseWriter, r *http.Reque
 	order.GetOrder().GetItems()
 	recommendations, _ := fe.getRecommendations(r.Context(), sessionID(r), nil)
 
+	// -------------------------------------------------------
+	// FIX — totalPaid calculation
+	//
+	// WRONG (previous version):
+	//   totalPaid = shipping + items — then subtract discount again
+	//   This caused double subtraction and showed negative numbers
+	//   like -₹200 or -$10 on the confirmation page.
+	//
+	// CORRECT (this version):
+	//   checkoutservice already applied the discount to the total
+	//   before charging the card. The OrderResult items still carry
+	//   their ORIGINAL prices (before discount) so we can show the
+	//   breakdown. We just need: shipping + items = pre-discount total,
+	//   then subtract discount ONCE to get what was actually charged.
+	//
+	//   totalPaid here is what we DISPLAY as "Total Paid" — it should
+	//   match what checkoutservice charged to the card.
+	// -------------------------------------------------------
 	totalPaid := *order.GetOrder().GetShippingCost()
 	for _, v := range order.GetOrder().GetItems() {
 		multPrice := money.MultiplySlow(*v.GetCost(), uint32(v.GetItem().GetQuantity()))
 		totalPaid = money.Must(money.Sum(totalPaid, multPrice))
+	}
+
+	// subtract discount ONCE — only if a coupon was actually applied
+	// discount_amount is always a positive number (e.g. 830 for INR)
+	// we subtract it here to show the correct final amount paid
+	discount := order.GetOrder().GetDiscountAmount()
+	if discount != nil && discount.GetUnits() > 0 {
+		negativeDiscount := pb.Money{
+			CurrencyCode: discount.GetCurrencyCode(),
+			Units:        -discount.GetUnits(),
+			Nanos:        -discount.GetNanos(),
+		}
+		if newTotal, err := money.Sum(totalPaid, negativeDiscount); err == nil && newTotal.Units >= 0 {
+			totalPaid = newTotal
+		} else {
+			// discount was larger than total — order was free
+			totalPaid = pb.Money{CurrencyCode: discount.GetCurrencyCode(), Units: 0, Nanos: 0}
+		}
 	}
 
 	currencies, err := fe.getCurrencies(r.Context())
@@ -390,11 +468,14 @@ func (fe *frontendServer) placeOrderHandler(w http.ResponseWriter, r *http.Reque
 	}
 
 	if err := templates.ExecuteTemplate(w, "order", injectCommonTemplateData(r, map[string]interface{}{
-		"show_currency":   false,
-		"currencies":      currencies,
-		"order":           order.GetOrder(),
-		"total_paid":      &totalPaid,
-		"recommendations": recommendations,
+		"show_currency":    false,
+		"currencies":       currencies,
+		"order":            order.GetOrder(),
+		"total_paid":       &totalPaid,
+		"recommendations":  recommendations,
+		
+		"discount_amount":  order.GetOrder().GetDiscountAmount(),
+		"coupon_code_used": order.GetOrder().GetCouponCodeUsed(),
 	})); err != nil {
 		log.Println(err)
 	}
@@ -423,7 +504,7 @@ func (fe *frontendServer) logoutHandler(w http.ResponseWriter, r *http.Request) 
 		c.MaxAge = -1
 		http.SetCookie(w, c)
 	}
-	w.Header().Set("Location", baseUrl + "/")
+	w.Header().Set("Location", baseUrl+"/")
 	w.WriteHeader(http.StatusFound)
 }
 
@@ -490,9 +571,7 @@ func (fe *frontendServer) chatBotHandler(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	// respond with the same message
 	json.NewEncoder(w).Encode(Response{Message: response.Content})
-
 	w.WriteHeader(http.StatusOK)
 }
 
@@ -522,8 +601,6 @@ func (fe *frontendServer) setCurrencyHandler(w http.ResponseWriter, r *http.Requ
 	w.WriteHeader(http.StatusFound)
 }
 
-// chooseAd queries for advertisements available and randomly chooses one, if
-// available. It ignores the error retrieving the ad since it is not critical.
 func (fe *frontendServer) chooseAd(ctx context.Context, ctxKeys []string, log logrus.FieldLogger) *pb.Ad {
 	ads, err := fe.getAd(ctx, ctxKeys)
 	if err != nil {
@@ -594,7 +671,6 @@ func cartIDs(c []*pb.CartItem) []string {
 	return out
 }
 
-// get total # of items in cart
 func cartSize(c []*pb.CartItem) int {
 	cartSize := 0
 	for _, item := range c {
@@ -618,7 +694,7 @@ func renderCurrencyLogo(currencyCode string) string {
 		"GBP": "£",
 	}
 
-	logo := "$" //default
+	logo := "$"
 	if val, ok := logos[currencyCode]; ok {
 		logo = val
 	}

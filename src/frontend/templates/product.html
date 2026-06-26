@@ -1,86 +1,100 @@
 <!--
  Copyright 2020 Google LLC
-
- Licensed under the Apache License, Version 2.0 (the "License");
- you may not use this file except in compliance with the License.
- You may obtain a copy of the License at
-
-      http://www.apache.org/licenses/LICENSE-2.0
-
- Unless required by applicable law or agreed to in writing, software
- distributed under the License is distributed on an "AS IS" BASIS,
- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- See the License for the specific language governing permissions and
- limitations under the License.
+ Licensed under the Apache License, Version 2.0
 -->
 
 {{ define "product" }}
 {{ template "header" . }}
+
 <div {{ with $.platform_css }} class="{{.}}" {{ end }}>
-  <span class="platform-flag">
-    {{$.platform_name}}
-  </span>
+    <span class="platform-flag" aria-hidden="true">{{$.platform_name}}</span>
 </div>
 
-<main role="main">
-  <div class="h-product container">
-    <div class="row">
-      <div class="col-md-6">
-        <img class="product-image" alt="" src="{{ $.baseUrl }}{{$.product.Item.Picture}}" />
-      </div>
-      <div class="product-info col-md-5">
-        <div class="product-wrapper">
+<main role="main" aria-label="Product detail page for {{ $.product.Item.Name }}">
+    <div class="h-product container">
+        <div class="row">
 
-          <h2>{{ $.product.Item.Name }}</h2>
-          <p class="product-price">{{ renderMoney $.product.Price }}</p>
-          <p>{{ $.product.Item.Description }}</p>
-
-          {{ if $.packagingInfo }}
-          <div class="product-packaging">
-            <h3>Packaging</h3>
-            <span>
-              Weight: {{ if $.packagingInfo.Weight }}{{ $.packagingInfo.Weight }}lb{{ else }}n/a{{ end }}
-            </span>
-            <span>
-              Width: {{ if $.packagingInfo.Width }}{{ $.packagingInfo.Width }}cm{{ else }}n/a{{ end }}
-            </span>
-            <span>
-              Height: {{ if $.packagingInfo.Height }}{{ $.packagingInfo.Height }}cm{{ else }}n/a{{ end }}
-            </span>
-            <span>
-              Depth: {{ if $.packagingInfo.Depth }}{{ $.packagingInfo.Depth }}cm{{ else }}n/a{{ end }}
-            </span>
-          </div>
-          {{ end }}
-
-          <form method="POST" action="{{ $.baseUrl }}/cart">
-            <input type="hidden" name="product_id" value="{{$.product.Item.Id}}" />
-            <div class="product-quantity-dropdown">
-              <select name="quantity" id="quantity">
-                <option>1</option>
-                <option>2</option>
-                <option>3</option>
-                <option>4</option>
-                <option>5</option>
-                <option>10</option>
-              </select>
-              <img src="{{ $.baseUrl }}/static/icons/Hipster_DownArrow.svg" alt="">
+            <div class="col-md-6">
+                <img class="product-image"
+                     src="{{ $.baseUrl }}{{$.product.Item.Picture}}"
+                     alt="Product image of {{ $.product.Item.Name }}" />
             </div>
-            <button type="submit" class="cymbal-button-primary">Add To Cart</button>
-          </form>
+
+            <div class="product-info col-md-5" aria-label="Product information">
+                <div class="product-wrapper">
+
+                    <h2>{{ $.product.Item.Name }}</h2>
+
+                    <p class="product-price" aria-label="Price: {{ renderMoney $.product.Price }}">
+                        {{ renderMoney $.product.Price }}
+                    </p>
+
+                    <p aria-label="Product description">{{ $.product.Item.Description }}</p>
+
+                    {{ if $.packagingInfo }}
+                    <section class="product-packaging" aria-label="Packaging information">
+                        <h3>Packaging</h3>
+                        <span aria-label="Weight: {{ if $.packagingInfo.Weight }}{{ $.packagingInfo.Weight }} pounds{{ else }}not available{{ end }}">
+                            Weight: {{ if $.packagingInfo.Weight }}{{ $.packagingInfo.Weight }}lb{{ else }}n/a{{ end }}
+                        </span>
+                        <span aria-label="Width: {{ if $.packagingInfo.Width }}{{ $.packagingInfo.Width }} centimetres{{ else }}not available{{ end }}">
+                            Width: {{ if $.packagingInfo.Width }}{{ $.packagingInfo.Width }}cm{{ else }}n/a{{ end }}
+                        </span>
+                        <span aria-label="Height: {{ if $.packagingInfo.Height }}{{ $.packagingInfo.Height }} centimetres{{ else }}not available{{ end }}">
+                            Height: {{ if $.packagingInfo.Height }}{{ $.packagingInfo.Height }}cm{{ else }}n/a{{ end }}
+                        </span>
+                        <span aria-label="Depth: {{ if $.packagingInfo.Depth }}{{ $.packagingInfo.Depth }} centimetres{{ else }}not available{{ end }}">
+                            Depth: {{ if $.packagingInfo.Depth }}{{ $.packagingInfo.Depth }}cm{{ else }}n/a{{ end }}
+                        </span>
+                    </section>
+                    {{ end }}
+
+                    <form method="POST"
+                          action="{{ $.baseUrl }}/cart"
+                          aria-label="Add {{ $.product.Item.Name }} to cart">
+                        <input type="hidden" name="product_id" value="{{$.product.Item.Id}}" />
+
+                        <div class="product-quantity-dropdown">
+                            <label for="quantity" class="sr-only">Select quantity</label>
+                            <select name="quantity"
+                                    id="quantity"
+                                    aria-label="Select quantity to add to cart">
+                                <option value="1">1</option>
+                                <option value="2">2</option>
+                                <option value="3">3</option>
+                                <option value="4">4</option>
+                                <option value="5">5</option>
+                                <option value="10">10</option>
+                            </select>
+                            <img src="{{ $.baseUrl }}/static/icons/Hipster_DownArrow.svg"
+                                 alt=""
+                                 aria-hidden="true" />
+                        </div>
+
+                        <button type="submit"
+                                class="cymbal-button-primary"
+                                aria-label="Add {{ $.product.Item.Name }} to shopping cart">
+                            Add To Cart
+                        </button>
+                    </form>
+
+                </div>
+            </div>
+
         </div>
-      </div>
     </div>
-  </div>
-  <div>
-    {{ if $.recommendations}}
-      {{ template "recommendations" $ }}
-    {{ end }}
-  </div>
-  <div class="ad">
-   {{ if $.ad }}{{ template "text_ad" $ }}{{ end }}
-  </div>
+
+    <div>
+        {{ if $.recommendations }}
+            {{ template "recommendations" $ }}
+        {{ end }}
+    </div>
+
+    <div class="ad" aria-label="Advertisement">
+        {{ if $.ad }}{{ template "text_ad" $ }}{{ end }}
+    </div>
 
 </main>
+
 {{ template "footer" . }}
 {{ end }}
