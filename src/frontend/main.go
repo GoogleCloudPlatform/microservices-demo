@@ -55,7 +55,8 @@ var (
 		"TRY": true,
 	}
 
-	baseUrl = ""
+	baseUrl        = ""
+	lockedCurrency = "" // set from DEFAULT_CURRENCY env var; empty means user can switch freely
 )
 
 type ctxKeySessionID struct{}
@@ -109,6 +110,11 @@ func main() {
 			propagation.TraceContext{}, propagation.Baggage{}))
 
 	baseUrl = os.Getenv("BASE_URL")
+
+	if dc := os.Getenv("DEFAULT_CURRENCY"); dc != "" {
+		lockedCurrency = dc
+		whitelistedCurrencies[dc] = true
+	}
 
 	if os.Getenv("ENABLE_TRACING") == "1" {
 		log.Info("Tracing enabled.")

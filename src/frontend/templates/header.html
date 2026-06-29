@@ -64,6 +64,12 @@
                     {{ if $.show_currency }}
                     <div class="h-controls">
                         <div class="h-control">
+                            {{ if $.currency_locked }}
+                            <div class="currency-locked-wrap" aria-label="Currency (fixed by configuration)">
+                                <span class="currency-locked-sym" aria-hidden="true">{{ renderCurrencyLogo $.user_currency }}</span>
+                                <span class="currency-locked-code">{{ $.user_currency }}</span>
+                            </div>
+                            {{ else }}
                             <span class="icon currency-icon" aria-hidden="true">
                                 {{ renderCurrencyLogo $.user_currency }}
                             </span>
@@ -86,6 +92,7 @@
                                  alt=""
                                  aria-hidden="true"
                                  class="icon arrow" />
+                            {{ end }}
                         </div>
                     </div>
                     {{ end }}

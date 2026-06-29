@@ -354,6 +354,11 @@ func (fe *frontendServer) placeOrderHandler(w http.ResponseWriter, r *http.Reque
 		couponCode    = strings.TrimSpace(strings.ToUpper(r.FormValue("coupon_code")))
 	)
 
+	// SAVE10 is the default coupon for every order; user can override with SAVE50 or SAVE100.
+	if couponCode == "" {
+		couponCode = "SAVE10"
+	}
+
 	// -------------------------------------------------------
 	// NEW — validate coupon code BEFORE placing order
 	// If the user typed something and it is not in our map,
@@ -473,7 +478,7 @@ func (fe *frontendServer) placeOrderHandler(w http.ResponseWriter, r *http.Reque
 		"order":            order.GetOrder(),
 		"total_paid":       &totalPaid,
 		"recommendations":  recommendations,
-		
+		// Discount is shown in the user's chosen currency (the actual amount deducted).
 		"discount_amount":  order.GetOrder().GetDiscountAmount(),
 		"coupon_code_used": order.GetOrder().GetCouponCodeUsed(),
 	})); err != nil {
@@ -577,6 +582,19 @@ func (fe *frontendServer) chatBotHandler(w http.ResponseWriter, r *http.Request)
 
 func (fe *frontendServer) setCurrencyHandler(w http.ResponseWriter, r *http.Request) {
 	log := r.Context().Value(ctxKeyLog{}).(logrus.FieldLogger)
+
+	// When currency is locked via DEFAULT_CURRENCY env var, ignore the request.
+	if lockedCurrency != "" {
+		log.Debug("currency is locked via DEFAULT_CURRENCY env var; ignoring setCurrency request")
+		referer := r.Header.Get("referer")
+		if referer == "" {
+			referer = baseUrl + "/"
+		}
+		w.Header().Set("Location", referer)
+		w.WriteHeader(http.StatusFound)
+		return
+	}
+
 	cur := r.FormValue("currency_code")
 	payload := validator.SetCurrencyPayload{Currency: cur}
 	if err := payload.Validate(); err != nil {
@@ -630,6 +648,7 @@ func injectCommonTemplateData(r *http.Request, payload map[string]interface{}) m
 		"session_id":        sessionID(r),
 		"request_id":        r.Context().Value(ctxKeyRequestID{}),
 		"user_currency":     currentCurrency(r),
+		"currency_locked":   lockedCurrency != "",
 		"platform_css":      plat.css,
 		"platform_name":     plat.provider,
 		"is_cymbal_brand":   isCymbalBrand,
@@ -648,6 +667,9 @@ func injectCommonTemplateData(r *http.Request, payload map[string]interface{}) m
 }
 
 func currentCurrency(r *http.Request) string {
+	if lockedCurrency != "" {
+		return lockedCurrency
+	}
 	c, _ := r.Cookie(cookieCurrency)
 	if c != nil {
 		return c.Value
