@@ -129,7 +129,7 @@ langchain-postgres==0.0.16
     # via langchain-google-alloydb-pg
 langgraph==1.0.10rc1
     # via langchain
-langgraph-checkpoint==3.0.1
+langgraph-checkpoint==4.1.1
     # via
     #   langgraph
     #   langgraph-prebuilt
