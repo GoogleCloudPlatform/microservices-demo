@@ -64,7 +64,7 @@ pygments==2.19.2
     # via pytest
 pytest==8.4.2
     # via locust
-python-engineio==4.12.2
+python-engineio==4.13.2
     # via
     #   locust
     #   python-socketio
