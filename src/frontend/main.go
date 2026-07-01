@@ -69,7 +69,7 @@ type frontendServer struct {
 	currencySvcConn *grpc.ClientConn
 
 	cartSvcAddr string
-	cartSvcConn *grpc.ClientConn
+	cartSvcConn *grpc.ClientConn 
 
 	recommendationSvcAddr string
 	recommendationSvcConn *grpc.ClientConn

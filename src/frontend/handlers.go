@@ -354,11 +354,6 @@ func (fe *frontendServer) placeOrderHandler(w http.ResponseWriter, r *http.Reque
 		couponCode    = strings.TrimSpace(strings.ToUpper(r.FormValue("coupon_code")))
 	)
 
-	// SAVE10 is the default coupon for every order; user can override with SAVE50 or SAVE100.
-	if couponCode == "" {
-		couponCode = "SAVE10"
-	}
-
 	// -------------------------------------------------------
 	// NEW — validate coupon code BEFORE placing order
 	// If the user typed something and it is not in our map,

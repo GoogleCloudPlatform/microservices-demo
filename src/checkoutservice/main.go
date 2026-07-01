@@ -266,8 +266,14 @@ func (cs *checkoutService) PlaceOrder(ctx context.Context, req *pb.PlaceOrderReq
 	var discountAmount pb.Money
 	var couponCodeUsed string
 
-	if req.CouponCode != "" {
-		if couponValue, ok := coupons[req.CouponCode]; ok {
+	// Default to SAVE10 if no coupon was submitted.
+	couponCode := req.CouponCode
+	if couponCode == "" {
+		couponCode = "SAVE10"
+	}
+
+	if couponCode != "" {
+		if couponValue, ok := coupons[couponCode]; ok {
 
 			
 			couponInUSD := pb.Money{
@@ -283,7 +289,7 @@ func (cs *checkoutService) PlaceOrder(ctx context.Context, req *pb.PlaceOrderReq
 				log.Infof("failed to convert coupon currency: %v", err)
 			} else {
 				discountAmount = *convertedDiscount
-				couponCodeUsed = req.CouponCode
+				couponCodeUsed = couponCode
 
 				
 				negativeDiscount := pb.Money{

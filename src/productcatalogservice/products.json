@@ -10,7 +10,9 @@
                 "units": 19,
                 "nanos": 990000000
             },
-            "categories": ["accessories"]
+            "categories": [
+                "accessories"
+            ]
         },
         {
             "id": "66VCHSJNUP",
@@ -22,7 +24,10 @@
                 "units": 18,
                 "nanos": 990000000
             },
-            "categories": ["clothing", "tops"]
+            "categories": [
+                "clothing",
+                "tops"
+            ]
         },
         {
             "id": "1YMWWN1N4O",
@@ -34,7 +39,9 @@
                 "units": 109,
                 "nanos": 990000000
             },
-            "categories": ["accessories"]
+            "categories": [
+                "accessories"
+            ]
         },
         {
             "id": "L9ECAV7KIM",
@@ -46,7 +53,9 @@
                 "units": 89,
                 "nanos": 990000000
             },
-            "categories": ["footwear"]
+            "categories": [
+                "footwear"
+            ]
         },
         {
             "id": "2ZYFJ3GM2N",
@@ -58,7 +67,10 @@
                 "units": 24,
                 "nanos": 990000000
             },
-            "categories": ["hair", "beauty"]
+            "categories": [
+                "hair",
+                "beauty"
+            ]
         },
         {
             "id": "0PUK6V6EV0",
@@ -70,7 +82,10 @@
                 "units": 18,
                 "nanos": 990000000
             },
-            "categories": ["decor", "home"]
+            "categories": [
+                "decor",
+                "home"
+            ]
         },
         {
             "id": "LS4PSXUNUM",
@@ -82,7 +97,9 @@
                 "units": 18,
                 "nanos": 490000000
             },
-            "categories": ["kitchen"]
+            "categories": [
+                "kitchen"
+            ]
         },
         {
             "id": "9SIQT8TOJO",
@@ -91,10 +108,12 @@
             "picture": "/static/img/products/bamboo-glass-jar.jpg",
             "priceUsd": {
                 "currencyCode": "USD",
-                "units": 5,
-                "nanos": 490000000
+                "units": 2,
+                "nanos": 10000000
             },
-            "categories": ["kitchen"]
+            "categories": [
+                "kitchen"
+            ]
         },
         {
             "id": "6E92ZMYYFZ",
@@ -106,7 +125,9 @@
                 "units": 8,
                 "nanos": 990000000
             },
-            "categories": ["kitchen"]
+            "categories": [
+                "kitchen"
+            ]
         }
     ]
 }
