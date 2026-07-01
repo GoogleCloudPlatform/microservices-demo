@@ -1,0 +1,53 @@
+version: "3.9"
+
+services:
+
+  adservice:
+    image: docker.io/anmol069/adservice:${IMAGE_TAG}
+    restart: unless-stopped
+
+  cartservice:
+    image: docker.io/anmol069/cartservice:${IMAGE_TAG}
+    restart: unless-stopped
+
+  checkoutservice:
+    image: docker.io/anmol069/checkoutservice:${IMAGE_TAG}
+    restart: unless-stopped
+
+  currencyservice:
+    image: docker.io/anmol069/currencyservice:${IMAGE_TAG}
+    restart: unless-stopped
+
+  emailservice:
+    image: docker.io/anmol069/emailservice:${IMAGE_TAG}
+    restart: unless-stopped
+
+  frontend:
+    image: docker.io/anmol069/frontend:${IMAGE_TAG}
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+
+  loadgenerator:
+    image: docker.io/anmol069/loadgenerator:${IMAGE_TAG}
+    restart: unless-stopped
+
+  paymentservice:
+    image: docker.io/anmol069/paymentservice:${IMAGE_TAG}
+    restart: unless-stopped
+
+  productcatalogservice:
+    image: docker.io/anmol069/productcatalogservice:${IMAGE_TAG}
+    restart: unless-stopped
+
+  recommendationservice:
+    image: docker.io/anmol069/recommendationservice:${IMAGE_TAG}
+    restart: unless-stopped
+
+  shippingservice:
+    image: docker.io/anmol069/shippingservice:${IMAGE_TAG}
+    restart: unless-stopped
+
+  shoppingassistantservice:
+    image: docker.io/anmol069/shoppingassistantservice:${IMAGE_TAG}
+    restart: unless-stopped
