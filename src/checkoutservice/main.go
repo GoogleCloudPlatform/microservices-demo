@@ -70,6 +70,14 @@ var coupons = map[string]int64{
 	"SAVE100": 100, // intended as $100 off
 }
 
+// couponMinOrder is the minimum pre-discount order subtotal (USD, shipping
+// included) required to redeem the matching coupon in the `coupons` map.
+var couponMinOrder = map[string]int64{
+	"SAVE10":  50,
+	"SAVE50":  200,
+	"SAVE100": 400,
+}
+
 type checkoutService struct {
 	pb.UnimplementedCheckoutServiceServer
 
@@ -266,32 +274,47 @@ func (cs *checkoutService) PlaceOrder(ctx context.Context, req *pb.PlaceOrderReq
 	var discountAmount pb.Money
 	var couponCodeUsed string
 
-	// Default to SAVE10 if no coupon was submitted.
+	// Default to SAVE10 if no coupon was submitted. userSuppliedCoupon
+	// distinguishes "user typed a code" from "we silently defaulted" —
+	// an unmet minimum or unknown code is a hard error for the former,
+	// but just falls back to no discount for the latter.
+	userSuppliedCoupon := req.CouponCode != ""
 	couponCode := req.CouponCode
 	if couponCode == "" {
 		couponCode = "SAVE10"
 	}
 
 	if couponCode != "" {
-		if couponValue, ok := coupons[couponCode]; ok {
-
-			
-			couponInUSD := pb.Money{
-				CurrencyCode: "USD",  
-				Units:        couponValue,
-				Nanos:        0,
+		couponValue, ok := coupons[couponCode]
+		if !ok {
+			if userSuppliedCoupon {
+				return nil, status.Errorf(codes.InvalidArgument, "coupon %q is not a valid coupon code", req.CouponCode)
+			}
+			log.Infof("coupon code %q not found, skipping discount", req.CouponCode)
+		} else {
+			// Minimum-order validation only applies to a coupon the user
+			// explicitly typed in. The default coupon (SAVE10, applied
+			// automatically when none is submitted) always applies,
+			// regardless of order value.
+			if userSuppliedCoupon {
+				minOrderLocal, err := cs.convertUSDAmount(ctx, couponMinOrder[couponCode], req.UserCurrency)
+				if err != nil {
+					return nil, status.Errorf(codes.Internal, "failed to validate coupon minimum order: %v", err)
+				}
+				if money.IsNegative(money.Must(money.Sum(total, money.Negate(*minOrderLocal)))) {
+					return nil, status.Errorf(codes.FailedPrecondition,
+						"coupon %q requires an order of at least %s %d.%02d",
+						couponCode, minOrderLocal.CurrencyCode, minOrderLocal.Units, minOrderLocal.Nanos/10000000)
+				}
 			}
 
-			
-			convertedDiscount, err := cs.convertCurrency(ctx, &couponInUSD, req.UserCurrency)
+			convertedDiscount, err := cs.convertUSDAmount(ctx, couponValue, req.UserCurrency)
 			if err != nil {
-				
 				log.Infof("failed to convert coupon currency: %v", err)
 			} else {
 				discountAmount = *convertedDiscount
 				couponCodeUsed = couponCode
 
-				
 				negativeDiscount := pb.Money{
 					CurrencyCode: discountAmount.CurrencyCode,
 					Units:        -discountAmount.Units,
@@ -312,8 +335,6 @@ func (cs *checkoutService) PlaceOrder(ctx context.Context, req *pb.PlaceOrderReq
 					}
 				}
 			}
-		} else {
-			log.Infof("coupon code %q not found, skipping discount", req.CouponCode)
 		}
 	}
 
@@ -434,6 +455,17 @@ func (cs *checkoutService) convertCurrency(ctx context.Context, from *pb.Money, 
 		return nil, fmt.Errorf("failed to convert currency: %+v", err)
 	}
 	return result, err
+}
+
+// convertUSDAmount converts a whole-dollar USD amount into toCurrency.
+// Skips the currencyservice round-trip when toCurrency is already USD,
+// since its cross-rate math (USD -> EUR -> USD) introduces floating-point
+// rounding noise even on a same-currency no-op conversion (e.g. 200 -> 199.99).
+func (cs *checkoutService) convertUSDAmount(ctx context.Context, usdUnits int64, toCurrency string) (*pb.Money, error) {
+	if toCurrency == usdCurrency {
+		return &pb.Money{CurrencyCode: usdCurrency, Units: usdUnits}, nil
+	}
+	return cs.convertCurrency(ctx, &pb.Money{CurrencyCode: usdCurrency, Units: usdUnits}, toCurrency)
 }
 
 func (cs *checkoutService) chargeCard(ctx context.Context, amount *pb.Money, paymentInfo *pb.CreditCardInfo) (string, error) {

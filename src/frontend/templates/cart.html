@@ -247,16 +247,16 @@
                                            placeholder="Enter coupon code"
                                            maxlength="20"
                                            value="{{ $.last_coupon }}"
-                                           aria-label="Optional coupon code. Available codes: SAVE10, SAVE50, SAVE100"
+                                           aria-label="Optional coupon code"
                                            aria-describedby="coupon-hint"
                                            autocomplete="off"
                                            style="text-transform:uppercase;">
                                     <small id="coupon-hint"
                                            style="color:#6c757d;font-size:0.82em;line-height:1.6;display:block;margin-top:4px;">
                                         Available coupons:<br>
-                                        <strong>SAVE10</strong> — Save {{ renderCurrencyLogo $.user_currency }}10 off your order<br>
-                                        <strong>SAVE50</strong> — Save {{ renderCurrencyLogo $.user_currency }}50 off your order<br>
-                                        <strong>SAVE100</strong> — Save {{ renderCurrencyLogo $.user_currency }}100 off your order
+                                        {{ range $.coupon_options }}
+                                        <strong>{{ .Code }}</strong> — Save {{ renderCurrencyLogo $.user_currency }}{{ .DiscountUSD }} off orders above {{ renderCurrencyLogo $.user_currency }}{{ .MinOrderUSD }}<br>
+                                        {{ end }}
                                     </small>
                                 </div>
                             </div>

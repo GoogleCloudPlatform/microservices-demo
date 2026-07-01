@@ -23,6 +23,7 @@ import (
 	"math/rand"
 	"net"
 	"net/http"
+	"net/url"
 	"os"
 	"strconv"
 	"strings"
@@ -31,6 +32,8 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 
 	pb "github.com/GoogleCloudPlatform/microservices-demo/src/frontend/genproto"
 	"github.com/GoogleCloudPlatform/microservices-demo/src/frontend/money"
@@ -54,17 +57,25 @@ var (
 	plat platformDetails
 )
 
-// validCoupons mirrors the coupon store in checkoutservice/main.go
-// Used here ONLY for frontend validation before calling PlaceOrder.
-// Keys are coupon codes, values are the display description shown to the user.
-//
-// NOTE: The description intentionally says "X off" without specifying currency.
-
-var validCoupons = map[string]string{
-	"SAVE10":  "Save 10 off your order",
-	"SAVE50":  "Save 50 off your order",
-	"SAVE100": "Save 100 off your order",
+// couponDefs mirrors the coupon store (coupons + couponMinOrder) in
+// checkoutservice/main.go. Used here for (1) existence validation before
+// calling PlaceOrder, and (2) rendering coupon amounts/minimums on the
+// cart page converted into the user's current currency. DiscountUSD and
+// MinOrderUSD are both in USD, same as checkoutservice's source of truth.
+type couponDef struct {
+	DiscountUSD int64
+	MinOrderUSD int64
 }
+
+var couponDefs = map[string]couponDef{
+	"SAVE10":  {DiscountUSD: 10, MinOrderUSD: 50},
+	"SAVE50":  {DiscountUSD: 50, MinOrderUSD: 200},
+	"SAVE100": {DiscountUSD: 100, MinOrderUSD: 400},
+}
+
+// couponOrder fixes the display order of couponDefs on the cart page,
+// since Go map iteration order is randomized.
+var couponOrder = []string{"SAVE10", "SAVE50", "SAVE100"}
 
 var validEnvs = []string{"local", "gcp", "azure", "aws", "onprem", "alibaba"}
 
@@ -319,6 +330,21 @@ func (fe *frontendServer) viewCartHandler(w http.ResponseWriter, r *http.Request
 	// field stays filled in after the redirect
 	lastCoupon := r.URL.Query().Get("coupon_code")
 
+	// Coupon amounts are just the raw USD number with the current
+	// currency's symbol swapped in for display (e.g. "10" -> "¥10" or
+	// "€10") — not an actual currency conversion. The real conversion
+	// happens server-side in checkoutservice when the coupon is applied.
+	type couponOptionView struct {
+		Code        string
+		DiscountUSD int64
+		MinOrderUSD int64
+	}
+	couponOptions := make([]couponOptionView, 0, len(couponOrder))
+	for _, code := range couponOrder {
+		def := couponDefs[code]
+		couponOptions = append(couponOptions, couponOptionView{Code: code, DiscountUSD: def.DiscountUSD, MinOrderUSD: def.MinOrderUSD})
+	}
+
 	if err := templates.ExecuteTemplate(w, "cart", injectCommonTemplateData(r, map[string]interface{}{
 		"currencies":       currencies,
 		"recommendations":  recommendations,
@@ -329,8 +355,9 @@ func (fe *frontendServer) viewCartHandler(w http.ResponseWriter, r *http.Request
 		"items":            items,
 		"expiration_years": []int{year, year + 1, year + 2, year + 3, year + 4},
 		// NEW — coupon state passed to template
-		"coupon_error": couponError,
-		"last_coupon":  lastCoupon,
+		"coupon_error":   couponError,
+		"last_coupon":    lastCoupon,
+		"coupon_options": couponOptions,
 	})); err != nil {
 		log.Println(err)
 	}
@@ -364,7 +391,7 @@ func (fe *frontendServer) placeOrderHandler(w http.ResponseWriter, r *http.Reque
 	// cart page, cart untouched, user can re-enter a code.
 	// -------------------------------------------------------
 	if couponCode != "" {
-		if _, ok := validCoupons[couponCode]; !ok {
+		if _, ok := couponDefs[couponCode]; !ok {
 			// redirect back to cart with error and preserve the
 			// coupon code the user typed so the field is pre-filled
 			http.Redirect(w, r,
@@ -411,6 +438,19 @@ func (fe *frontendServer) placeOrderHandler(w http.ResponseWriter, r *http.Reque
 			CouponCode: couponCode,
  		})
 	if err != nil {
+		// A coupon the user explicitly typed can be rejected by
+		// checkoutservice (below its minimum spend, or invalid) —
+		// send them back to the cart with the reason instead of a
+		// generic error page. Any other failure still hard-errors.
+		if couponCode != "" {
+			if st, ok := status.FromError(err); ok &&
+				(st.Code() == codes.FailedPrecondition || st.Code() == codes.InvalidArgument) {
+				http.Redirect(w, r,
+					baseUrl+"/cart?coupon_error="+url.QueryEscape(st.Message())+"&coupon_code="+url.QueryEscape(couponCode),
+					http.StatusFound)
+				return
+			}
+		}
 		renderHTTPError(log, r, w, errors.Wrap(err, "failed to complete the order"), http.StatusInternalServerError)
 		return
 	}
@@ -437,10 +477,24 @@ func (fe *frontendServer) placeOrderHandler(w http.ResponseWriter, r *http.Reque
 	//   totalPaid here is what we DISPLAY as "Total Paid" — it should
 	//   match what checkoutservice charged to the card.
 	// -------------------------------------------------------
+	type orderItemView struct {
+		Item     *pb.Product
+		Quantity int32
+		Price    *pb.Money
+	}
+
 	totalPaid := *order.GetOrder().GetShippingCost()
-	for _, v := range order.GetOrder().GetItems() {
+	orderItems := make([]orderItemView, len(order.GetOrder().GetItems()))
+	for i, v := range order.GetOrder().GetItems() {
 		multPrice := money.MultiplySlow(*v.GetCost(), uint32(v.GetItem().GetQuantity()))
 		totalPaid = money.Must(money.Sum(totalPaid, multPrice))
+
+		p, err := fe.getProduct(r.Context(), v.GetItem().GetProductId())
+		if err != nil {
+			renderHTTPError(log, r, w, errors.Wrapf(err, "could not retrieve product #%s", v.GetItem().GetProductId()), http.StatusInternalServerError)
+			return
+		}
+		orderItems[i] = orderItemView{Item: p, Quantity: v.GetItem().GetQuantity(), Price: &multPrice}
 	}
 
 	// subtract discount ONCE — only if a coupon was actually applied
@@ -467,15 +521,29 @@ func (fe *frontendServer) placeOrderHandler(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
+	// Only surface the coupon badge/discount line when the user typed a
+	// coupon code themselves. checkoutservice silently falls back to a
+	// default coupon when none is submitted (see checkoutservice's
+	// PlaceOrder) — that default discount still reduces totalPaid above,
+	// but it stays invisible on the confirmation page since the user
+	// never applied it.
+	var discountAmount *pb.Money
+	var couponCodeUsed string
+	if couponCode != "" {
+		discountAmount = order.GetOrder().GetDiscountAmount()
+		couponCodeUsed = order.GetOrder().GetCouponCodeUsed()
+	}
+
 	if err := templates.ExecuteTemplate(w, "order", injectCommonTemplateData(r, map[string]interface{}{
 		"show_currency":    false,
 		"currencies":       currencies,
 		"order":            order.GetOrder(),
+		"order_items":      orderItems,
 		"total_paid":       &totalPaid,
 		"recommendations":  recommendations,
 		// Discount is shown in the user's chosen currency (the actual amount deducted).
-		"discount_amount":  order.GetOrder().GetDiscountAmount(),
-		"coupon_code_used": order.GetOrder().GetCouponCodeUsed(),
+		"discount_amount":  discountAmount,
+		"coupon_code_used": couponCodeUsed,
 	})); err != nil {
 		log.Println(err)
 	}
