@@ -264,21 +264,11 @@ func (cs *checkoutService) PlaceOrder(ctx context.Context, req *pb.PlaceOrderReq
 		total = money.Must(money.Sum(total, multPrice))
 	}
 
-	// -------------------------------------------------------
-	// NEW — coupon validation and discount application
-	//
-	// discountAmount and couponCodeUsed are zero/empty by
-	// default — if no coupon is submitted or the code is
-	// invalid, the order proceeds with the original total.
-	// -------------------------------------------------------
 	var discountAmount pb.Money
 	var couponCodeUsed string
 
-	// Default to SAVE10 if no coupon was submitted. userSuppliedCoupon
-	// distinguishes "user typed a code" from "we silently defaulted" —
-	// an unmet minimum or unknown code is a hard error for the former,
-	// but just falls back to no discount for the latter.
-	userSuppliedCoupon := req.CouponCode != ""
+
+	ans := req.CouponCode != ""
 	couponCode := req.CouponCode
 	if couponCode == "" {
 		couponCode = "SAVE10"
@@ -287,16 +277,13 @@ func (cs *checkoutService) PlaceOrder(ctx context.Context, req *pb.PlaceOrderReq
 	if couponCode != "" {
 		couponValue, ok := coupons[couponCode]
 		if !ok {
-			if userSuppliedCoupon {
+			if ans {
 				return nil, status.Errorf(codes.InvalidArgument, "coupon %q is not a valid coupon code", req.CouponCode)
 			}
 			log.Infof("coupon code %q not found, skipping discount", req.CouponCode)
 		} else {
-			// Minimum-order validation only applies to a coupon the user
-			// explicitly typed in. The default coupon (SAVE10, applied
-			// automatically when none is submitted) always applies,
-			// regardless of order value.
-			if userSuppliedCoupon {
+
+			if ans {
 				minOrderLocal, err := cs.convertUSDAmount(ctx, couponMinOrder[couponCode], req.UserCurrency)
 				if err != nil {
 					return nil, status.Errorf(codes.Internal, "failed to validate coupon minimum order: %v", err)

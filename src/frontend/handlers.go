@@ -57,11 +57,7 @@ var (
 	plat platformDetails
 )
 
-// couponDefs mirrors the coupon store (coupons + couponMinOrder) in
-// checkoutservice/main.go. Used here for (1) existence validation before
-// calling PlaceOrder, and (2) rendering coupon amounts/minimums on the
-// cart page converted into the user's current currency. DiscountUSD and
-// MinOrderUSD are both in USD, same as checkoutservice's source of truth.
+
 type couponDef struct {
 	DiscountUSD int64
 	MinOrderUSD int64
@@ -73,12 +69,22 @@ var couponDefs = map[string]couponDef{
 	"SAVE100": {DiscountUSD: 100, MinOrderUSD: 400},
 }
 
-// couponOrder fixes the display order of couponDefs on the cart page,
-// since Go map iteration order is randomized.
+
 var couponOrder = []string{"SAVE10", "SAVE50", "SAVE100"}
 
 var validEnvs = []string{"local", "gcp", "azure", "aws", "onprem", "alibaba"}
-
+// Home godoc
+//
+// @Summary      Home page
+// @Description  Displays the Hipster Shop home page with the list of available products.
+// @Tags         Home
+// @Accept       json
+// @Produce      text/html
+//
+// @Success      200 {string} string "Home page rendered successfully"
+// @Failure      500 {string} string "Internal Server Error"
+//
+// @Router       / [get]
 func (fe *frontendServer) homeHandler(w http.ResponseWriter, r *http.Request) {
 	log := r.Context().Value(ctxKeyLog{}).(logrus.FieldLogger)
 	log.WithField("currency", currentCurrency(r)).Info("home")
@@ -160,7 +166,21 @@ func (plat *platformDetails) setPlatformDetails(env string) {
 		plat.css = "local"
 	}
 }
-
+// ProductDetails godoc
+//
+// @Summary      View product details
+// @Description  Displays detailed information for a specific product.
+// @Tags         Product
+// @Accept       json
+// @Produce      text/html
+//
+// @Param        id path string true "Product ID"
+//
+// @Success      200 {string} string "Product page rendered successfully"
+// @Failure      404 {string} string "Product not found"
+// @Failure      500 {string} string "Internal Server Error"
+//
+// @Router       /product/{id} [get]
 func (fe *frontendServer) productHandler(w http.ResponseWriter, r *http.Request) {
 	log := r.Context().Value(ctxKeyLog{}).(logrus.FieldLogger)
 	id := mux.Vars(r)["id"]
@@ -224,7 +244,22 @@ func (fe *frontendServer) productHandler(w http.ResponseWriter, r *http.Request)
 		log.Println(err)
 	}
 }
-
+// AddToCart godoc
+//
+// @Summary Add product to cart
+// @Description Adds a product to the current shopping cart.
+// @Tags Cart
+// @Accept application/x-www-form-urlencoded
+// @Produce text/html
+//
+// @Param product_id formData string true "Product ID"
+// @Param quantity formData integer true "Quantity"
+//
+// @Success 302 "Redirect to cart"
+// @Failure 422 "Validation Error"
+// @Failure 500 "Internal Server Error"
+//
+// @Router /cart [post]
 func (fe *frontendServer) addToCartHandler(w http.ResponseWriter, r *http.Request) {
 	log := r.Context().Value(ctxKeyLog{}).(logrus.FieldLogger)
 	quantity, _ := strconv.ParseUint(r.FormValue("quantity"), 10, 32)
@@ -253,6 +288,18 @@ func (fe *frontendServer) addToCartHandler(w http.ResponseWriter, r *http.Reques
 	w.WriteHeader(http.StatusFound)
 }
 
+// EmptyCart godoc
+//
+// @Summary      Empty shopping cart
+// @Description  Removes all items from the current user's shopping cart.
+// @Tags         Cart
+// @Accept       json
+// @Produce      text/html
+//
+// @Success      200 {string} string "Cart emptied successfully"
+// @Failure      500 {string} string "Internal Server Error"
+//
+// @Router       /cart/empty [post]
 func (fe *frontendServer) emptyCartHandler(w http.ResponseWriter, r *http.Request) {
 	log := r.Context().Value(ctxKeyLog{}).(logrus.FieldLogger)
 	log.Debug("emptying cart")
@@ -264,7 +311,21 @@ func (fe *frontendServer) emptyCartHandler(w http.ResponseWriter, r *http.Reques
 	w.Header().Set("location", baseUrl+"/")
 	w.WriteHeader(http.StatusFound)
 }
-
+// ViewCart godoc
+//
+//	@Summary		View shopping cart
+//	@Description	Retrieves and displays the current user's shopping cart, including cart items, quantities, prices, and total amount.
+//	@Tags			Cart
+//	@Accept			json
+//	@Produce		text/html
+//
+//	@Param			coupon_error	query	string	false	"Coupon validation error message, set when redirected here from /cart/checkout"
+//	@Param			coupon_code		query	string	false	"Coupon code to pre-fill in the form, set when redirected here from /cart/checkout"
+//
+//	@Success		200	{string}	string	"Cart page rendered successfully"
+//	@Failure		500	{string}	string	"Internal Server Error"
+//
+//	@Router			/cart [get]
 func (fe *frontendServer) viewCartHandler(w http.ResponseWriter, r *http.Request) {
 	log := r.Context().Value(ctxKeyLog{}).(logrus.FieldLogger)
 	log.Debug("view user cart")
@@ -319,21 +380,12 @@ func (fe *frontendServer) viewCartHandler(w http.ResponseWriter, r *http.Request
 	totalPrice = money.Must(money.Sum(totalPrice, *shippingCost))
 	year := time.Now().Year()
 
-	// -------------------------------------------------------
-	// NEW — read coupon_error from query string
-	// This is set when placeOrderHandler rejects an invalid
-	// coupon and redirects back to /cart with ?coupon_error=...
-	// so the cart page can display the validation message.
-	// -------------------------------------------------------
+	
 	couponError := r.URL.Query().Get("coupon_error")
-	// also carry back the coupon code the user typed so the
-	// field stays filled in after the redirect
+	
 	lastCoupon := r.URL.Query().Get("coupon_code")
 
-	// Coupon amounts are just the raw USD number with the current
-	// currency's symbol swapped in for display (e.g. "10" -> "¥10" or
-	// "€10") — not an actual currency conversion. The real conversion
-	// happens server-side in checkoutservice when the coupon is applied.
+	
 	type couponOptionView struct {
 		Code        string
 		DiscountUSD int64
@@ -363,6 +415,33 @@ func (fe *frontendServer) viewCartHandler(w http.ResponseWriter, r *http.Request
 	}
 }
 
+
+// PlaceOrder godoc
+//
+// @Summary      Place an order
+// @Description  Processes the checkout form, validates the input, places the order using the Checkout gRPC service, and renders the order confirmation page.
+// @Tags         Checkout
+// @Accept       application/x-www-form-urlencoded
+// @Produce      text/html
+//
+// @Param email formData string true "Customer email"
+// @Param street_address formData string true "Street address"
+// @Param zip_code formData string true "ZIP/Postal code"
+// @Param city formData string true "City"
+// @Param state formData string true "State"
+// @Param country formData string true "Country"
+// @Param credit_card_number formData string true "Credit card number"
+// @Param credit_card_expiration_month formData integer true "Credit card expiration month"
+// @Param credit_card_expiration_year formData integer true "Credit card expiration year"
+// @Param credit_card_cvv formData integer true "Credit card CVV"
+// @Param coupon_code formData string false "Coupon code"
+//
+// @Success 200 {string} string "Order placed successfully"
+// @Success 302 {string} string "Redirect to /cart with a coupon_error when the submitted coupon is unknown or below its minimum order amount"
+// @Failure 422 {string} string "Validation Error"
+// @Failure 500 {string} string "Internal server error"
+//
+// @Router /cart/checkout [post]
 func (fe *frontendServer) placeOrderHandler(w http.ResponseWriter, r *http.Request) {
 	log := r.Context().Value(ctxKeyLog{}).(logrus.FieldLogger)
 	log.Debug("placing order")
@@ -381,15 +460,7 @@ func (fe *frontendServer) placeOrderHandler(w http.ResponseWriter, r *http.Reque
 		couponCode    = strings.TrimSpace(strings.ToUpper(r.FormValue("coupon_code")))
 	)
 
-	// -------------------------------------------------------
-	// NEW — validate coupon code BEFORE placing order
-	// If the user typed something and it is not in our map,
-	// redirect back to cart with an error message.
-	// We never reach PlaceOrder with an invalid coupon — the
-	// cart is NOT emptied and the user can try a different code.
-	// This solves the state problem: invalid coupon = stay on
-	// cart page, cart untouched, user can re-enter a code.
-	// -------------------------------------------------------
+	
 	if couponCode != "" {
 		if _, ok := couponDefs[couponCode]; !ok {
 			// redirect back to cart with error and preserve the
@@ -438,10 +509,7 @@ func (fe *frontendServer) placeOrderHandler(w http.ResponseWriter, r *http.Reque
 			CouponCode: couponCode,
  		})
 	if err != nil {
-		// A coupon the user explicitly typed can be rejected by
-		// checkoutservice (below its minimum spend, or invalid) —
-		// send them back to the cart with the reason instead of a
-		// generic error page. Any other failure still hard-errors.
+	
 		if couponCode != "" {
 			if st, ok := status.FromError(err); ok &&
 				(st.Code() == codes.FailedPrecondition || st.Code() == codes.InvalidArgument) {
@@ -459,24 +527,6 @@ func (fe *frontendServer) placeOrderHandler(w http.ResponseWriter, r *http.Reque
 	order.GetOrder().GetItems()
 	recommendations, _ := fe.getRecommendations(r.Context(), sessionID(r), nil)
 
-	// -------------------------------------------------------
-	// FIX — totalPaid calculation
-	//
-	// WRONG (previous version):
-	//   totalPaid = shipping + items — then subtract discount again
-	//   This caused double subtraction and showed negative numbers
-	//   like -₹200 or -$10 on the confirmation page.
-	//
-	// CORRECT (this version):
-	//   checkoutservice already applied the discount to the total
-	//   before charging the card. The OrderResult items still carry
-	//   their ORIGINAL prices (before discount) so we can show the
-	//   breakdown. We just need: shipping + items = pre-discount total,
-	//   then subtract discount ONCE to get what was actually charged.
-	//
-	//   totalPaid here is what we DISPLAY as "Total Paid" — it should
-	//   match what checkoutservice charged to the card.
-	// -------------------------------------------------------
 	type orderItemView struct {
 		Item     *pb.Product
 		Quantity int32
@@ -497,9 +547,6 @@ func (fe *frontendServer) placeOrderHandler(w http.ResponseWriter, r *http.Reque
 		orderItems[i] = orderItemView{Item: p, Quantity: v.GetItem().GetQuantity(), Price: &multPrice}
 	}
 
-	// subtract discount ONCE — only if a coupon was actually applied
-	// discount_amount is always a positive number (e.g. 830 for INR)
-	// we subtract it here to show the correct final amount paid
 	discount := order.GetOrder().GetDiscountAmount()
 	if discount != nil && discount.GetUnits() > 0 {
 		negativeDiscount := pb.Money{
@@ -521,12 +568,7 @@ func (fe *frontendServer) placeOrderHandler(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
-	// Only surface the coupon badge/discount line when the user typed a
-	// coupon code themselves. checkoutservice silently falls back to a
-	// default coupon when none is submitted (see checkoutservice's
-	// PlaceOrder) — that default discount still reduces totalPaid above,
-	// but it stays invisible on the confirmation page since the user
-	// never applied it.
+	
 	var discountAmount *pb.Money
 	var couponCodeUsed string
 	if couponCode != "" {
@@ -549,6 +591,18 @@ func (fe *frontendServer) placeOrderHandler(w http.ResponseWriter, r *http.Reque
 	}
 }
 
+// AssistantPage godoc
+//
+// @Summary      Display shopping assistant page
+// @Description  Renders the shopping assistant interface for interacting with the AI assistant.
+// @Tags         Assistant
+// @Accept       json
+// @Produce      text/html
+//
+// @Success      200 {string} string "Assistant page rendered successfully"
+// @Failure      500 {string} string "Internal Server Error"
+//
+// @Router       /assistant [get]
 func (fe *frontendServer) assistantHandler(w http.ResponseWriter, r *http.Request) {
 	currencies, err := fe.getCurrencies(r.Context())
 	if err != nil {
@@ -563,7 +617,18 @@ func (fe *frontendServer) assistantHandler(w http.ResponseWriter, r *http.Reques
 		log.Println(err)
 	}
 }
-
+// Logout godoc
+//
+// @Summary      Logout user
+// @Description  Logs out the current user by clearing the session and redirects to the home page.
+// @Tags         Authentication
+// @Accept       json
+// @Produce      text/html
+//
+// @Success      302 {string} string "Redirect to home page after logout"
+// @Failure      500 {string} string "Internal Server Error"
+//
+// @Router       /logout [get]
 func (fe *frontendServer) logoutHandler(w http.ResponseWriter, r *http.Request) {
 	log := r.Context().Value(ctxKeyLog{}).(logrus.FieldLogger)
 	log.Debug("logging out")
@@ -575,7 +640,21 @@ func (fe *frontendServer) logoutHandler(w http.ResponseWriter, r *http.Request) 
 	w.Header().Set("Location", baseUrl+"/")
 	w.WriteHeader(http.StatusFound)
 }
-
+// GetProductMetadata godoc
+//
+// @Summary      Get product metadata
+// @Description  Returns product metadata for one or more product IDs.
+// @Tags         Product
+// @Accept       json
+// @Produce      application/json
+//
+// @Param        ids path string true "Comma-separated product IDs"
+//
+// @Success      200 {object} map[string]interface{}
+// @Failure      400 {string} string "Invalid product ID"
+// @Failure      404 {string} string "Product not found"
+//
+// @Router       /product-meta/{ids} [get]
 func (fe *frontendServer) getProductByID(w http.ResponseWriter, r *http.Request) {
 	id := mux.Vars(r)["ids"]
 	if id == "" {
@@ -596,7 +675,21 @@ func (fe *frontendServer) getProductByID(w http.ResponseWriter, r *http.Request)
 	w.Write(jsonData)
 	w.WriteHeader(http.StatusOK)
 }
-
+// ChatBot godoc
+//
+// @Summary      Chat with shopping assistant
+// @Description  Sends a user query to the shopping assistant and returns the generated response.
+// @Tags         Assistant
+// @Accept       application/json
+// @Produce      application/json
+//
+// @Param        request body map[string]interface{} true "Chat request"
+//
+// @Success      200 {object} map[string]interface{}
+// @Failure      400 {string} string "Invalid request"
+// @Failure      500 {string} string "Internal Server Error"
+//
+// @Router       /bot [post]
 func (fe *frontendServer) chatBotHandler(w http.ResponseWriter, r *http.Request) {
 	log := r.Context().Value(ctxKeyLog{}).(logrus.FieldLogger)
 	type Response struct {
@@ -642,7 +735,21 @@ func (fe *frontendServer) chatBotHandler(w http.ResponseWriter, r *http.Request)
 	json.NewEncoder(w).Encode(Response{Message: response.Content})
 	w.WriteHeader(http.StatusOK)
 }
-
+// SetCurrency godoc
+//
+// @Summary      Set preferred currency
+// @Description  Updates the user's preferred currency and refreshes the current session.
+// @Tags         Currency
+// @Accept       application/x-www-form-urlencoded
+// @Produce      text/html
+//
+// @Param        currency_code formData string true "Currency code (e.g. USD, EUR, INR)"
+//
+// @Success      302 {string} string "Redirect after updating currency"
+// @Failure      400 {string} string "Invalid currency code"
+// @Failure      500 {string} string "Internal Server Error"
+//
+// @Router       /setCurrency [post]
 func (fe *frontendServer) setCurrencyHandler(w http.ResponseWriter, r *http.Request) {
 	log := r.Context().Value(ctxKeyLog{}).(logrus.FieldLogger)
 
