@@ -423,43 +423,176 @@ spec:
         app: cartservice
     spec:
       serviceAccountName: cartservice
-      terminationGracePeriodSeconds: 5
+      terminationGracePeriodSeconds: 30
       securityContext:
         fsGroup: 1000
         runAsGroup: 1000
         runAsNonRoot: true
         runAsUser: 1000
+      volumes:
+      - name: coverage-tmp
+        emptyDir: {}
+      - name: coverage-tools
+        emptyDir: {}
+      - name: coverage-real-tools
+        emptyDir: {}
+      initContainers:
+      - name: install-dotnet-coverage
+        image: mcr.microsoft.com/dotnet/sdk:8.0
+        imagePullPolicy: IfNotPresent
+        command:
+        - sh
+        - -c
+        - |
+          set -eux
+
+          mkdir -p /tools /real-tools
+          mkdir -p /tmp/coverage/logs /tmp/coverage/html
+          mkdir -p /tmp/.coverage_tools /tmp/.dotnet /tmp/.nuget
+
+          export DOTNET_CLI_HOME=/tmp
+          export HOME=/tmp
+
+          dotnet tool install dotnet-coverage --tool-path /real-tools
+
+          cat > /tools/dotnet-coverage <<'EOS'
+          #!/bin/sh
+          mkdir -p /tmp/coverage/logs 2>/dev/null || true
+          { echo "wrapper args: $@" >> /tmp/coverage/logs/dotnet-coverage-wrapper.log; } 2>/dev/null || true
+
+          unset CORECLR_ENABLE_PROFILING CORECLR_PROFILER CORECLR_PROFILER_PATH CORECLR_PROFILER_PATH_32 CORECLR_PROFILER_PATH_64 DOTNET_STARTUP_HOOKS
+
+          NEWARGS=""
+          while [ $# -gt 0 ]; do
+            case "$1" in
+              --settings|-s)
+                shift
+                [ $# -gt 0 ] && shift
+                continue
+                ;;
+              --settings=*)
+                shift
+                continue
+                ;;
+              collect)
+                NEWARGS="$NEWARGS 'collect' '--include-files' '/tmp/app/cartservice.dll'"
+                shift
+                ;;
+              *)
+                q=$(printf "%s" "$1" | sed "s/'/'\\\\''/g")
+                NEWARGS="$NEWARGS '$q'"
+                shift
+                ;;
+            esac
+          done
+
+          { echo "wrapper final args: $NEWARGS" >> /tmp/coverage/logs/dotnet-coverage-wrapper.log; } 2>/dev/null || true
+          eval "exec /real-tools/dotnet-coverage $NEWARGS"
+          EOS
+
+          chmod +x /tools/dotnet-coverage
+          chmod -R 0755 /real-tools /tools
+
+          # /tmp should be sticky, but /tmp/coverage should be normal writable.
+          chmod 1777 /tmp
+          chmod -R 0777 /tmp/coverage /tmp/.coverage_tools /tmp/.dotnet /tmp/.nuget
+
+          rm -f /tmp/coverage/logs/dotnet-coverage-wrapper.log
+          touch /tmp/coverage/logs/dotnet-coverage-wrapper.log
+          chown 1000:1000 /tmp/coverage/logs/dotnet-coverage-wrapper.log || true
+          chmod 0666 /tmp/coverage/logs/dotnet-coverage-wrapper.log
+
+          /real-tools/dotnet-coverage --version
+        securityContext:
+          runAsUser: 0
+          runAsGroup: 0
+          runAsNonRoot: false
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+        volumeMounts:
+        - name: coverage-tools
+          mountPath: /tools
+        - name: coverage-real-tools
+          mountPath: /real-tools
+        - name: coverage-tmp
+          mountPath: /tmp
       containers:
       - name: server
         securityContext:
           allowPrivilegeEscalation: false
           capabilities:
             drop:
-              - ALL
+            - ALL
           privileged: false
           readOnlyRootFilesystem: true
-        image: us-central1-docker.pkg.dev/google-samples/microservices-demo/cartservice:v0.10.5
+        image: localhost/cartservice-debug:v1
+        imagePullPolicy: IfNotPresent
+        command:
+        - /bin/sh
+        - -lc
+        args:
+        - |
+          rm -rf /tmp/app
+          mkdir -p /tmp/app
+          cp -a /app/. /tmp/app/
+          chmod -R u+rwX,g+rwX,o+rX /tmp/app
+          cd /tmp/app
+          dotnet cartservice.dll &
+          APP_PID=$!
+          echo "Started cartservice from /tmp/app child pid=$APP_PID"
+          wait "$APP_PID" || true
+          echo "cartservice child stopped; keeping container alive for coverage runner"
+          tail -f /dev/null
         ports:
         - containerPort: 7070
         env:
         - name: REDIS_ADDR
           value: "redis-cart:6379"
+        - name: APP_DLL
+          value: "cartservice.dll"
+        - name: TMPDIR
+          value: "/tmp"
+        - name: HOME
+          value: "/tmp"
+        - name: COVERAGE_BASE_PATH
+          value: "/tmp"
+        - name: DOTNET_CLI_HOME
+          value: "/tmp"
+        - name: NUGET_PACKAGES
+          value: "/tmp/.nuget/packages"
+        - name: COMPlus_ReadyToRun
+          value: "0"
+        - name: DOTNET_ReadyToRun
+          value: "0"
+        - name: PATH
+          value: "/tools:/tmp/.dotnet/tools:/tmp/.coverage_tools:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
         resources:
           requests:
-            cpu: 200m
-            memory: 64Mi
-          limits:
             cpu: 300m
-            memory: 128Mi
+            memory: 256Mi
+          limits:
+            cpu: 1000m
+            memory: 1Gi
         readinessProbe:
-          initialDelaySeconds: 15
+          initialDelaySeconds: 20
+          failureThreshold: 3
           grpc:
             port: 7070
         livenessProbe:
-          initialDelaySeconds: 15
+          initialDelaySeconds: 20
           periodSeconds: 10
+          failureThreshold: 30
           grpc:
             port: 7070
+        volumeMounts:
+        - name: coverage-tmp
+          mountPath: /tmp
+        - name: coverage-tools
+          mountPath: /tools
+        - name: coverage-real-tools
+          mountPath: /real-tools
 ---
 apiVersion: v1
 kind: Service
