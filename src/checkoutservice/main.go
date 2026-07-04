@@ -314,7 +314,7 @@ func (cs *checkoutService) PlaceOrder(ctx context.Context, req *pb.PlaceOrderReq
 				if err == nil && newTotal.Units >= 0 {
 					total = newTotal
 				} else {
-					// discount exceeds total — make the order free
+					
 					total = pb.Money{
 						CurrencyCode: req.UserCurrency,
 						Units:        0,

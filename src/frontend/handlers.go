@@ -406,7 +406,6 @@ func (fe *frontendServer) viewCartHandler(w http.ResponseWriter, r *http.Request
 		"total_cost":       totalPrice,
 		"items":            items,
 		"expiration_years": []int{year, year + 1, year + 2, year + 3, year + 4},
-		// NEW — coupon state passed to template
 		"coupon_error":   couponError,
 		"last_coupon":    lastCoupon,
 		"coupon_options": couponOptions,
@@ -463,8 +462,6 @@ func (fe *frontendServer) placeOrderHandler(w http.ResponseWriter, r *http.Reque
 	
 	if couponCode != "" {
 		if _, ok := couponDefs[couponCode]; !ok {
-			// redirect back to cart with error and preserve the
-			// coupon code the user typed so the field is pre-filled
 			http.Redirect(w, r,
 				baseUrl+"/cart?coupon_error=Invalid+coupon+code+%22"+couponCode+"%22.+Please+try+again.&coupon_code="+couponCode,
 				http.StatusFound)
@@ -583,7 +580,6 @@ func (fe *frontendServer) placeOrderHandler(w http.ResponseWriter, r *http.Reque
 		"order_items":      orderItems,
 		"total_paid":       &totalPaid,
 		"recommendations":  recommendations,
-		// Discount is shown in the user's chosen currency (the actual amount deducted).
 		"discount_amount":  discountAmount,
 		"coupon_code_used": couponCodeUsed,
 	})); err != nil {
