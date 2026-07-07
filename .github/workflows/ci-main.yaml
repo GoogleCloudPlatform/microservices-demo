@@ -20,7 +20,9 @@ on:
       - main
       - release/*
     paths-ignore:
-      - '**/README.md'
+      - '**/*.md'
+      - 'docs/**'
+      - 'LICENSE'
       - 'kustomize/**'
       - '.github/workflows/kustomize-build-ci.yaml'
       - 'terraform/**'
