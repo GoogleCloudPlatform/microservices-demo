@@ -33,7 +33,7 @@ concurrency:
 
 jobs:
   code-tests:
-    runs-on: [self-hosted, is-enabled]
+    runs-on: ubuntu-24.04
     steps:
     - uses: actions/checkout@v6
     - uses: actions/setup-dotnet@v5
@@ -59,8 +59,12 @@ jobs:
         dotnet test src/cartservice/
 
   deployment-tests:
-    runs-on: [self-hosted, is-enabled]
+    runs-on: ubuntu-24.04
     needs: code-tests
+    permissions:
+      contents: read
+      id-token: write
+      pull-requests: write
     strategy:
       matrix:
         profile: ["local-code"]
@@ -69,6 +73,19 @@ jobs:
     - uses: actions/checkout@v6
       with:
         ref: ${{github.event.pull_request.head.sha}}
+    - id: auth
+      uses: google-github-actions/auth@v2
+      with:
+        workload_identity_provider: ${{ vars.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+        service_account: ${{ vars.GCP_SERVICE_ACCOUNT }}
+    - uses: google-github-actions/setup-gcloud@v2
+      with:
+        install_components: 'gke-gcloud-auth-plugin'
+    - name: Install Skaffold
+      run: |
+        curl -Lo skaffold https://storage.googleapis.com/skaffold/releases/latest/skaffold-linux-amd64
+        chmod +x skaffold
+        sudo mv skaffold /usr/local/bin
     - name: Build + Deploy PR images to GKE
       timeout-minutes: 20
       run: |

@@ -29,7 +29,7 @@ on:
       - '.github/workflows/helm-chart-ci.yaml'
 jobs:
   code-tests:
-    runs-on: [self-hosted, is-enabled]
+    runs-on: ubuntu-24.04
     steps:
     - uses: actions/checkout@v6
     - uses: actions/setup-dotnet@v5
@@ -54,14 +54,30 @@ jobs:
       run: |
         dotnet test src/cartservice/
   deployment-tests:
-    runs-on: [self-hosted, is-enabled]
+    runs-on: ubuntu-24.04
     needs: code-tests
+    permissions:
+      contents: read
+      id-token: write
     strategy:
       matrix:
         profile: ["local-code"]
       fail-fast: true
     steps:
     - uses: actions/checkout@v6
+    - id: auth
+      uses: google-github-actions/auth@v2
+      with:
+        workload_identity_provider: ${{ vars.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+        service_account: ${{ vars.GCP_SERVICE_ACCOUNT }}
+    - uses: google-github-actions/setup-gcloud@v2
+      with:
+        install_components: 'gke-gcloud-auth-plugin'
+    - name: Install Skaffold
+      run: |
+        curl -Lo skaffold https://storage.googleapis.com/skaffold/releases/latest/skaffold-linux-amd64
+        chmod +x skaffold
+        sudo mv skaffold /usr/local/bin
     - name: Build + Deploy PR images to GKE
       timeout-minutes: 20
       run: |

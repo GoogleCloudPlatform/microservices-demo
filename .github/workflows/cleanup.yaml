@@ -27,8 +27,19 @@ on:
       - '.github/workflows/terraform-validate-ci.yaml'
 jobs:
   cleanup-namespace:
-    runs-on: [self-hosted, is-enabled]
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      id-token: write
     steps:
+      - id: auth
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ vars.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ vars.GCP_SERVICE_ACCOUNT }}
+      - uses: google-github-actions/setup-gcloud@v2
+        with:
+          install_components: 'gke-gcloud-auth-plugin'
       - name: Delete PR namespace in staging cluster
         if: ${{ always() }}
         timeout-minutes: 20
