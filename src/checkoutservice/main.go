@@ -75,7 +75,7 @@ var coupons = map[string]int64{
 var couponMinOrder = map[string]int64{
 	"SAVE10":  50,
 	"SAVE50":  200,
-	"SAVE100": 400,
+	"SAVE100": 350,
 }
 
 type checkoutService struct {

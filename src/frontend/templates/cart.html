@@ -255,7 +255,7 @@
                                            style="color:#6c757d;font-size:0.82em;line-height:1.6;display:block;margin-top:4px;">
                                         Available coupons:<br>
                                         {{ range $.coupon_options }}
-                                        <strong>{{ .Code }}</strong> — Save {{ renderCurrencyLogo $.user_currency }}{{ .DiscountUSD }} off orders above {{ renderCurrencyLogo $.user_currency }}{{ .MinOrderUSD }}<br>
+                                        <strong>{{ .Code }}</strong> — Save {{ renderCurrencyLogo $.user_currency }}{{ .DiscountUSD }} off orders above {{ renderCurrencyLogo $.user_currency }}{{ .MinOrderUSD }} or more<br>
                                         {{ end }}
                                     </small>
                                 </div>

@@ -66,7 +66,7 @@ type couponDef struct {
 var couponDefs = map[string]couponDef{
 	"SAVE10":  {DiscountUSD: 10, MinOrderUSD: 50},
 	"SAVE50":  {DiscountUSD: 50, MinOrderUSD: 200},
-	"SAVE100": {DiscountUSD: 100, MinOrderUSD: 400},
+	"SAVE100": {DiscountUSD: 100, MinOrderUSD: 350},
 }
 
 
