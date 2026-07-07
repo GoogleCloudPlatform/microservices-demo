@@ -49,7 +49,7 @@ jobs:
           gcloud container clusters get-credentials $PR_CLUSTER \
               --region $REGION --project $PROJECT_ID
           NAMESPACE="pr${PR_NUMBER}"
-          kubectl delete namespace $NAMESPACE
+          kubectl delete namespace $NAMESPACE --ignore-not-found
         env:
           PROJECT_ID: "online-boutique-ci"
           PR_CLUSTER: "prs-gke-cluster"
