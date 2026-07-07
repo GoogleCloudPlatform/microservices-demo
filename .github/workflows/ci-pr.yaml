@@ -81,6 +81,10 @@ jobs:
     - uses: google-github-actions/setup-gcloud@v2
       with:
         install_components: 'gke-gcloud-auth-plugin'
+    - name: Set up QEMU
+      uses: docker/setup-qemu-action@v3
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
     - name: Install Skaffold
       run: |
         curl -Lo skaffold https://storage.googleapis.com/skaffold/releases/latest/skaffold-linux-amd64
