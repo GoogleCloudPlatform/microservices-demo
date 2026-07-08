@@ -63,6 +63,7 @@ jobs:
   deployment-tests:
     runs-on: ubuntu-24.04
     needs: code-tests
+    environment: gke-staging
     permissions:
       contents: read
       id-token: write
