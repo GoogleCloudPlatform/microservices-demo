@@ -127,7 +127,7 @@ langchain-core==1.2.11
     #   langgraph
     #   langgraph-checkpoint
     #   langgraph-prebuilt
-langchain-google-alloydb-pg==0.13.0
+langchain-google-alloydb-pg>=0.14.0
     # via -r requirements.in
 langchain-google-genai==4.1.2
     # via -r requirements.in
