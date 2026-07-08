@@ -20,15 +20,28 @@ on:
       - main
     types: closed
     paths-ignore:
-      - '**/README.md'
+      - '**/*.md'
+      - 'docs/**'
+      - 'LICENSE'
       - 'kustomize/**'
       - '.github/workflows/kustomize-build-ci.yaml'
       - 'terraform/**'
       - '.github/workflows/terraform-validate-ci.yaml'
 jobs:
   cleanup-namespace:
-    runs-on: [self-hosted, is-enabled]
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      id-token: write
     steps:
+      - id: auth
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ vars.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ vars.GCP_SERVICE_ACCOUNT }}
+      - uses: google-github-actions/setup-gcloud@v2
+        with:
+          install_components: 'gke-gcloud-auth-plugin'
       - name: Delete PR namespace in staging cluster
         if: ${{ always() }}
         timeout-minutes: 20
@@ -36,7 +49,7 @@ jobs:
           gcloud container clusters get-credentials $PR_CLUSTER \
               --region $REGION --project $PROJECT_ID
           NAMESPACE="pr${PR_NUMBER}"
-          kubectl delete namespace $NAMESPACE
+          kubectl delete namespace $NAMESPACE --ignore-not-found
         env:
           PROJECT_ID: "online-boutique-ci"
           PR_CLUSTER: "prs-gke-cluster"
