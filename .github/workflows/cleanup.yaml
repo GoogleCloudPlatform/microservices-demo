@@ -30,6 +30,7 @@ on:
 jobs:
   cleanup-namespace:
     runs-on: ubuntu-24.04
+    environment: gke-staging
     permissions:
       contents: read
       id-token: write
