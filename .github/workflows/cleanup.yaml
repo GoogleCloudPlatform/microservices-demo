@@ -14,7 +14,7 @@
 
 name: "Clean up deployment"
 on:
-  pull_request:
+  pull_request_target:
     # run on pull requests targeting main
     branches:
       - main
