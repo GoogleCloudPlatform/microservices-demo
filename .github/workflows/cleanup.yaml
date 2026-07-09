@@ -14,7 +14,7 @@
 
 name: "Clean up deployment"
 on:
-  pull_request:
+  pull_request_target:
     # run on pull requests targeting main
     branches:
       - main
@@ -30,6 +30,7 @@ on:
 jobs:
   cleanup-namespace:
     runs-on: ubuntu-24.04
+    environment: gke-staging
     permissions:
       contents: read
       id-token: write
@@ -37,8 +38,8 @@ jobs:
       - id: auth
         uses: google-github-actions/auth@v2
         with:
-          workload_identity_provider: ${{ vars.GCP_WORKLOAD_IDENTITY_PROVIDER }}
-          service_account: ${{ vars.GCP_SERVICE_ACCOUNT }}
+          workload_identity_provider: 'projects/816257685787/locations/global/workloadIdentityPools/github-actions-pool/providers/github-provider'
+          service_account: 'github-action-runner@online-boutique-ci.iam.gserviceaccount.com'
       - uses: google-github-actions/setup-gcloud@v2
         with:
           install_components: 'gke-gcloud-auth-plugin'
