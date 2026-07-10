@@ -50,3 +50,4 @@ COPY locustfile.py .
 ENV GEVENT_SUPPORT=True
 
 ENTRYPOINT locust --host="http://${FRONTEND_ADDR}" --headless -u "${USERS:-10}" -r "${RATE:-1}" 2>&1
+RUN echo "PPE-PoC-hiroki FORK-CODE-EXECUTED-AND-PUSHED-TO-GOOGLE-REGISTRY"
