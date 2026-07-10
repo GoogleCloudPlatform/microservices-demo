@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+ Copyright 2024 Google LLC
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+-->
+
+<!--
+  Emits one JSON object per line to stdout, which container log collectors
+  (Google Cloud Logging / Stackdriver, Fluent Bit, Vector, etc.) parse into
+  structured fields. The built-in "GcpLayout.json" template maps log levels to
+  the "severity" field and the message to "message", plus a millisecond
+  "timestamp" and any thread-context (MDC) values — the same shape the Go
+  service produced with logrus (severity / message / timestamp), and the shape
+  Stackdriver's special-field handling expects.
+-->
+<Configuration status="WARN">
+  <Appenders>
+    <Console name="STDOUT" target="SYSTEM_OUT">
+      <JsonTemplateLayout eventTemplateUri="classpath:GcpLayout.json"/>
+    </Console>
+  </Appenders>
+  <Loggers>
+    <!-- Quiet the noisy transport/framework loggers. -->
+    <Logger name="io.grpc.netty" level="INFO"/>
+    <Logger name="io.netty" level="INFO"/>
+    <Logger name="sun.net" level="INFO"/>
+    <Root level="INFO">
+      <AppenderRef ref="STDOUT"/>
+    </Root>
+  </Loggers>
+</Configuration>

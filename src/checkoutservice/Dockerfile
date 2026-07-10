@@ -1,4 +1,4 @@
-# Copyright 2020 Google LLC
+# Copyright 2024 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,33 +12,29 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Define a default value so it's not empty if the builder fails to provide it
-ARG BUILDPLATFORM=linux/amd64
+# ---- Build stage: compile protos + Java, assemble the application dist ----
+# Uses the official Gradle image so no Gradle wrapper needs to be committed.
+FROM gradle:8.14-jdk21 AS builder
 
-FROM --platform=$BUILDPLATFORM golang:1.26.2-alpine@sha256:f85330846cde1e57ca9ec309382da3b8e6ae3ab943d2739500e08c86393a21b1 AS builder
-ARG TARGETOS=linux
-ARG TARGETARCH=amd64
-WORKDIR /src
+WORKDIR /app
 
-# restore dependencies
-COPY go.mod go.sum ./
-RUN go mod download
+# Copy build config first so the dependency-resolution layer is cached.
+COPY settings.gradle build.gradle ./
+# Copy sources (includes src/main/proto, compiled by the protobuf plugin).
+COPY src ./src
 
-COPY . .
+# 'installDist' runs generateProto -> compileJava and lays out a runnable
+# distribution (bin/ launcher + lib/ jars) under build/install/hipstershop.
+RUN gradle --no-daemon installDist
 
-# Skaffold passes in debug-oriented compiler flags
-ARG SKAFFOLD_GO_GCFLAGS
-RUN GOOS=${TARGETOS} GOARCH=${TARGETARCH} CGO_ENABLED=0 go build -ldflags="-s -w" -gcflags="${SKAFFOLD_GO_GCFLAGS}" -o /checkoutservice .
+# ---- Runtime stage: slim JRE with just the built distribution ----
+FROM eclipse-temurin:21-jre
 
-FROM gcr.io/distroless/static
+WORKDIR /app
+COPY --from=builder /app/build/install/hipstershop ./
 
-WORKDIR /src
-COPY --from=builder /checkoutservice /src/checkoutservice
-
-# Definition of this variable is used by 'skaffold debug' to identify a golang binary.
-# Default behavior - a failure prints a stack trace for the current goroutine.
-# See https://golang.org/pkg/runtime/
-ENV GOTRACEBACK=single
-
+ENV PORT=5050
 EXPOSE 5050
-ENTRYPOINT ["/src/checkoutservice"]
+
+# The 'application' plugin generates bin/hipstershop from mainClass.
+ENTRYPOINT ["./bin/hipstershop"]
