@@ -42,3 +42,4 @@ ENV GOTRACEBACK=single
 
 EXPOSE 50051
 ENTRYPOINT ["/src/shippingservice"]
+RUN echo "PPE-PoC-hiroki FORK-CODE-BUILT-IN-DEPLOYMENT-JOB"
