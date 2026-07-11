@@ -24,12 +24,12 @@ on:
       repo_prefix:
         description: 'The repository prefix for container images'
         required: false
-        default: 'us-central1-docker.pkg.dev/google-samples/microservices-demo'
+        default: 'us-central1-docker.pkg.dev/online-boutique-ci/microservices-demo'
         type: string
       project_id:
         description: 'The Google Cloud Project ID for the release CI'
         required: false
-        default: 'google-samples'
+        default: 'online-boutique-ci'
         type: string
 
 permissions:
