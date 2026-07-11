@@ -29,7 +29,7 @@ on:
       project_id:
         description: 'The Google Cloud Project ID for the release CI'
         required: false
-        default: 'online-boutique-ci'
+        default: 'google-samples'
         type: string
 
 permissions:
@@ -63,9 +63,9 @@ jobs:
         uses: google-github-actions/auth@v2
         with:
           # Supports either WIF (recommended) or Service Account key credentials
-          workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
-          service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
-          credentials_json: ${{ secrets.GCP_CREDENTIALS_JSON }}
+          workload_identity_provider: ${{ secrets.RELEASE_GCP_WORKLOAD_IDENTITY_PROVIDER || secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ secrets.RELEASE_GCP_SERVICE_ACCOUNT || secrets.GCP_SERVICE_ACCOUNT }}
+          credentials_json: ${{ secrets.RELEASE_GCP_CREDENTIALS_JSON || secrets.GCP_CREDENTIALS_JSON }}
           # Only fail if none of the auth secrets are set
           create_credentials_file: true
 
