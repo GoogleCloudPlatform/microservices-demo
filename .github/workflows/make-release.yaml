@@ -1,0 +1,110 @@
+# Copyright 2026 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+name: Manual Release Builder
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'The release version (e.g., v0.3.5)'
+        required: true
+        type: string
+      repo_prefix:
+        description: 'The repository prefix for container images'
+        required: false
+        default: 'us-central1-docker.pkg.dev/google-samples/microservices-demo'
+        type: string
+      project_id:
+        description: 'The Google Cloud Project ID for the release CI'
+        required: false
+        default: 'google-samples'
+        type: string
+
+permissions:
+  contents: write
+  pull-requests: write
+  id-token: write # required for Google Workload Identity Federation OIDC
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          # Fetch all history for all tags and branches
+          fetch-depth: 0
+          token: ${{ secrets.RELEASE_PAT || secrets.GITHUB_TOKEN }}
+
+      - name: Validate Version Format
+        run: |
+          if [[ ! "${{ inputs.version }}" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "Error: Version must match format vX.Y.Z (e.g., v1.2.3)"
+            exit 1
+          fi
+
+      - name: Symlink gsed to sed
+        run: |
+          sudo ln -s $(which sed) /usr/local/bin/gsed
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          # Supports either WIF (recommended) or Service Account key credentials
+          workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+          credentials_json: ${{ secrets.GCP_CREDENTIALS_JSON }}
+          # Only fail if none of the auth secrets are set
+          create_credentials_file: true
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: Configure Docker authentication
+        run: |
+          REGISTRY=$(echo "${{ inputs.repo_prefix }}" | cut -d'/' -f1)
+          gcloud auth configure-docker "$REGISTRY"
+
+      - name: Run Release Script
+        env:
+          TAG: ${{ inputs.version }}
+          REPO_PREFIX: ${{ inputs.repo_prefix }}
+          PROJECT_ID: ${{ inputs.project_id }}
+        run: |
+          # Configure Git user identity for committing release changes
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          
+          bash ./docs/releasing/make-release.sh
+
+      - name: Create Pull Request
+        env:
+          GH_TOKEN: ${{ secrets.RELEASE_PAT || secrets.GITHUB_TOKEN }}
+          NEW_VERSION: ${{ inputs.version }}
+          PR_BODY: |
+            This PR releases Online Boutique `${{ inputs.version }}`.
+
+            ## Tasks
+            - [ ] Checks are all passing
+            - [ ] Deploy production environment (https://cymbal-shops.retail.cymbal.dev)
+            - [ ] Merge PR
+            - [ ] Publish release notes
+            - [ ] Announce the release
+        run: |
+          gh pr create \
+            --title "release/${NEW_VERSION}" \
+            --body "$PR_BODY" \
+            --head "release/${NEW_VERSION}" \
+            --base "main"
