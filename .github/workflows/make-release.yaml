@@ -74,8 +74,9 @@ jobs:
 
       - name: Configure Docker authentication
         run: |
-          REGISTRY=$(echo "${{ inputs.repo_prefix }}" | cut -d'/' -f1)
-          gcloud auth configure-docker "$REGISTRY"
+          REGISTRY_IMAGES=$(echo "${{ inputs.repo_prefix }}" | cut -d'/' -f1)
+          gcloud auth configure-docker "$REGISTRY_IMAGES"
+          gcloud auth configure-docker "us-docker.pkg.dev"
 
       - name: Run Release Script
         env:
