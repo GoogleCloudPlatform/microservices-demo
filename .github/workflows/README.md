@@ -39,3 +39,13 @@ Note that this workflow does not update the image tags used in `release/kubernet
 ### Cleanup - [cleanup.yaml](cleanup.yaml)
 
 This workflow runs when a PR closes, regardless of whether it was merged into main. This workflow deletes the PR-specific GKE namespace in the test cluster.
+
+### Manual Release Builder - [make-release.yaml](make-release.yaml)
+
+This workflow is manually triggered via the `workflow_dispatch` event to automate the release process. When run, it:
+1. Validates the release version format.
+2. Automates the build and push of container images to Google Cloud Build.
+3. Automatically regenerates Kubernetes manifests and Kustomize bases.
+4. Packages and pushes the Helm chart.
+5. Branches and tags the repository.
+6. Opens a new Pull Request targeting `main` with the release checklist.
