@@ -40,7 +40,19 @@ while IFS= read -d $'\0' -r dir; do
     (
         cd "${builddir}"
         log "Building (and pushing) image on Google Cloud Build: ${image}"
-        gcloud builds submit --project=${PROJECT_ID} --tag=${image}
+        log "Submitting Cloud Build job..."
+        build_id=$(gcloud builds submit --project=${PROJECT_ID} --tag=${image} --async --format="value(id)")
+        log "Build submitted with ID: ${build_id}. Waiting for completion..."
+        while true; do
+            status=$(gcloud builds describe ${build_id} --project=${PROJECT_ID} --format="value(status)")
+            log "Current build status: ${status}"
+            if [[ "$status" == "SUCCESS" ]]; then
+                break
+            elif [[ "$status" == "FAILURE" || "$status" == "INTERNAL_ERROR" || "$status" == "TIMEOUT" || "$status" == "CANCELLED" ]]; then
+                fail "Cloud Build ${build_id} failed with status: ${status}"
+            fi
+            sleep 10
+        done
         gcloud artifacts docker tags add ${image} ${image_with_sample_public_image_tag}
     )
 done < <(find "${REPO_ROOT}/src" -mindepth 1 -maxdepth 1 -type d -print0)
