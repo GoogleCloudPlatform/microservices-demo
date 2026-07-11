@@ -31,8 +31,8 @@ The preferred way to start a new release is to run the **Manual Release Builder*
 3. Click the **Run workflow** dropdown button.
 4. Fill in the parameters:
    - **The release version (e.g., v0.3.5)**: Set the version string `vX.Y.Z`.
-   - **The repository prefix for container images**: Defaults to `us-central1-docker.pkg.dev/google-samples/microservices-demo`.
-   - **The Google Cloud Project ID for the release CI**: Defaults to `google-samples`.
+   - **The repository prefix for container images**: Defaults to `us-central1-docker.pkg.dev/online-boutique-ci/microservices-demo`.
+   - **The Google Cloud Project ID for the release CI**: Defaults to `online-boutique-ci`.
 5. Click **Run workflow**.
 
 This workflow will:
@@ -49,8 +49,8 @@ If you need to run the release process manually from your local machine, ensure 
 ```sh
 # assuming you are inside the root path of the microservices-demo repository
 export TAG=vX.Y.Z # This is the new version (e.g. `v0.3.5`)
-export REPO_PREFIX=us-central1-docker.pkg.dev/google-samples/microservices-demo # This is the Docker repository for tagged images
-export PROJECT_ID=google-samples # This is the Google Cloud project for the release CI
+export REPO_PREFIX=us-central1-docker.pkg.dev/online-boutique-ci/microservices-demo # This is the Docker repository for tagged images
+export PROJECT_ID=online-boutique-ci # This is the Google Cloud project for the release CI
 ./docs/releasing/make-release.sh
 ```
 
