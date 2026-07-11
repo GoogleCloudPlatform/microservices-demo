@@ -4,7 +4,7 @@ This document walks through the process of creating a new release of Online Bout
 
 ## Prerequisites for tagging a release
 
-1. Choose the logical [next release tag](https://github.com/GoogleCloudPlatform/bank-of-anthos/releases), using [semantic versioning](https://semver.org/): `vX.Y.Z`.
+1. Choose the logical [next release tag](https://github.com/GoogleCloudPlatform/microservices-demo/releases), using [semantic versioning](https://semver.org/): `vX.Y.Z`.
 
    If this release includes significant feature changes, update the minor version (`Y`). Otherwise, for bug-fix releases or standard quarterly release, update the patch version `Z`).
 

@@ -29,7 +29,7 @@ on:
       project_id:
         description: 'The Google Cloud Project ID for the release CI'
         required: false
-        default: 'google-samples'
+        default: 'online-boutique-ci'
         type: string
 
 permissions:
