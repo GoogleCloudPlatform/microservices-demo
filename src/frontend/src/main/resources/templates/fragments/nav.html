@@ -1,0 +1,88 @@
+<!--
+ Copyright 2020 Google LLC
+ Licensed under the Apache License, Version 2.0
+-->
+<header th:fragment="nav" role="banner" aria-label="Site header" xmlns:th="http://www.thymeleaf.org">
+
+    <div class="navbar" role="note" aria-label="Site announcement" th:if="${not #strings.isEmpty(frontendMessage)}">
+        <div class="container d-flex justify-content-center">
+            <div class="h-free-shipping" th:text="${frontendMessage}">Free shipping</div>
+        </div>
+    </div>
+
+    <nav class="navbar sub-navbar" role="navigation" aria-label="Main navigation">
+        <div class="container d-flex justify-content-between">
+
+            <a th:href="@{/}"
+               class="navbar-brand d-flex align-items-center"
+               th:aria-label="${is_cymbal_brand} ? 'Cymbal Shops - go to home page' : 'Online Boutique - go to home page'">
+                <img th:if="${is_cymbal_brand}"
+                     th:src="@{/static/icons/Cymbal_NavLogo.svg}"
+                     alt="Cymbal Shops logo"
+                     class="top-left-logo-cymbal" />
+                <img th:unless="${is_cymbal_brand}"
+                     th:src="@{/static/icons/Hipster_NavLogo.svg}"
+                     alt="Online Boutique logo"
+                     class="top-left-logo" />
+            </a>
+
+            <div class="controls" role="group" aria-label="Site controls">
+
+                <div class="h-controls" th:if="${show_currency}">
+                    <div class="h-control">
+                        <div class="currency-locked-wrap" aria-label="Currency (fixed by configuration)" th:if="${currency_locked}">
+                            <span class="currency-locked-sym" aria-hidden="true" th:text="${moneyFormatter.renderCurrencyLogo(user_currency)}">$</span>
+                            <span class="currency-locked-code" th:text="${user_currency}">USD</span>
+                        </div>
+                        <th:block th:unless="${currency_locked}">
+                            <span class="icon currency-icon" aria-hidden="true" th:text="${moneyFormatter.renderCurrencyLogo(user_currency)}">$</span>
+                            <form method="POST"
+                                  class="controls-form"
+                                  th:action="@{/setCurrency}"
+                                  id="currency_form"
+                                  aria-label="Currency selection form">
+                                <label for="currency_code" class="sr-only">Select currency</label>
+                                <select name="currency_code"
+                                        id="currency_code"
+                                        th:aria-label="'Select display currency, currently ' + ${user_currency}"
+                                        onchange="document.getElementById('currency_form').submit();">
+                                    <option th:each="c : ${currencies}"
+                                            th:value="${c}"
+                                            th:selected="${c == user_currency}"
+                                            th:text="${c}">USD</option>
+                                </select>
+                            </form>
+                            <img th:src="@{/static/icons/Hipster_DownArrow.svg}"
+                                 alt=""
+                                 aria-hidden="true"
+                                 class="icon arrow" />
+                        </th:block>
+                    </div>
+                </div>
+
+                <a th:if="${assistant_enabled}"
+                   th:href="@{/assistant}"
+                   class="cart-link"
+                   aria-label="Open shopping assistant">
+                    <img th:src="@{/static/icons/Hipster_WandIcon.svg}"
+                         style="width: 22px; height: 22px;"
+                         alt="Shopping assistant"
+                         class="logo"
+                         title="Assistant" />
+                </a>
+
+                <a th:href="@{/cart}"
+                   class="cart-link"
+                   th:aria-label="${cart_size} ? ('View shopping cart, ' + ${cart_size} + ' item' + (${cart_size} > 1 ? 's' : '') + ' in cart') : 'View shopping cart, cart is empty'">
+                    <img th:src="@{/static/icons/Hipster_CartIcon.svg}"
+                         alt="Shopping cart icon"
+                         class="logo"
+                         title="Cart" />
+                    <span class="cart-size-circle" aria-hidden="true" th:if="${cart_size}" th:text="${cart_size}">0</span>
+                </a>
+
+            </div>
+        </div>
+    </nav>
+
+</header>

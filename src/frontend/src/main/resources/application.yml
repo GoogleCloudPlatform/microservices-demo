@@ -1,0 +1,18 @@
+spring:
+  application:
+    name: frontend
+  thymeleaf:
+    cache: true
+    encoding: UTF-8
+
+server:
+  port: ${PORT:8080}
+  address: ${LISTEN_ADDR:0.0.0.0}
+  servlet:
+    context-path: ${BASE_URL:}
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+  api-docs:
+    path: /v3/api-docs

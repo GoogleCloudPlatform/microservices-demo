@@ -1,0 +1,286 @@
+<!--
+ Copyright 2020 Google LLC
+ Licensed under the Apache License, Version 2.0
+-->
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: head}"></head>
+<body>
+<div th:replace="~{fragments/nav :: nav}"></div>
+
+<div th:class="${platform_css}">
+    <span class="platform-flag" aria-hidden="true" th:text="${platform_name}"></span>
+</div>
+
+<main role="main" class="cart-sections" aria-label="Shopping cart page">
+
+    <section class="empty-cart-section" aria-label="Empty cart message" th:if="${#lists.isEmpty(items)}">
+        <h3>Your shopping cart is empty!</h3>
+        <p>Items you add to your shopping cart will appear here.</p>
+        <a class="cymbal-button-primary"
+           th:href="@{/}"
+           role="button"
+           aria-label="Continue shopping, return to home page">Continue Shopping</a>
+    </section>
+
+    <section class="container" aria-label="Cart summary and checkout" th:unless="${#lists.isEmpty(items)}">
+        <div class="row">
+
+            <div class="col-lg-6 col-xl-5 offset-xl-1 cart-summary-section" aria-label="Cart item summary">
+
+                <div class="row mb-3 py-2">
+                    <div class="col-4 pl-md-0">
+                        <h3 id="cart-heading">Cart (<span th:text="${cart_size}">0</span>)</h3>
+                    </div>
+                    <div class="col-8 pr-md-0 text-right">
+                        <form method="POST" th:action="@{/cart/empty}" aria-label="Empty your entire cart">
+                            <button class="cymbal-button-secondary cart-summary-empty-cart-button"
+                                    type="submit"
+                                    aria-label="Remove all items from cart">
+                                Empty Cart
+                            </button>
+                            <a class="cymbal-button-primary"
+                               th:href="@{/}"
+                               role="button"
+                               aria-label="Continue shopping, return to home page">
+                                Continue Shopping
+                            </a>
+                        </form>
+                    </div>
+                </div>
+
+                <ul aria-labelledby="cart-heading" style="list-style:none;padding:0;margin:0;">
+                <li class="row cart-summary-item-row" th:each="item : ${items}" th:aria-label="'Cart item: ' + ${item.item.name}">
+                    <div class="col-md-4 pl-md-0">
+                        <a th:href="@{'/product/' + ${item.item.id}}"
+                           th:aria-label="'View product details for ' + ${item.item.name}">
+                            <img class="img-fluid"
+                                 th:alt="'Product image of ' + ${item.item.name}"
+                                 th:src="@{${item.item.picture}}" />
+                        </a>
+                    </div>
+                    <div class="col-md-8 pr-md-0">
+                        <div class="row">
+                            <div class="col"><h4 th:text="${item.item.name}">Name</h4></div>
+                        </div>
+                        <div class="row cart-summary-item-row-item-id-row">
+                            <div class="col" th:aria-label="'Product SKU: ' + ${item.item.id}">SKU #<span th:text="${item.item.id}"></span></div>
+                        </div>
+                        <div class="row">
+                            <div class="col" th:aria-label="'Quantity: ' + ${item.quantity}">Quantity: <span th:text="${item.quantity}"></span></div>
+                            <div class="col pr-md-0 text-right" th:aria-label="'Item subtotal: ' + ${moneyFormatter.renderMoney(item.price)}">
+                                <strong th:text="${moneyFormatter.renderMoney(item.price)}">$0.00</strong>
+                            </div>
+                        </div>
+                    </div>
+                </li>
+                </ul>
+
+                <div class="row cart-summary-shipping-row" aria-label="Shipping cost">
+                    <div class="col pl-md-0">Shipping</div>
+                    <div class="col pr-md-0 text-right" aria-live="polite" th:text="${moneyFormatter.renderMoney(shipping_cost)}">$0.00</div>
+                </div>
+
+                <div class="row cart-summary-total-row" aria-label="Order total before discount">
+                    <div class="col pl-md-0">Total</div>
+                    <div class="col pr-md-0 text-right" aria-live="polite" th:text="${moneyFormatter.renderMoney(total_cost)}">$0.00</div>
+                </div>
+
+            </div>
+
+            <div class="col-lg-5 offset-lg-1 col-xl-4">
+
+                <form class="cart-checkout-form"
+                      th:action="@{/cart/checkout}"
+                      method="POST"
+                      aria-label="Checkout form">
+
+                    <fieldset>
+                        <legend><h3>Shipping Address</h3></legend>
+
+                        <div class="form-row">
+                            <div class="col cymbal-form-field">
+                                <label for="email">E-mail Address</label>
+                                <input type="email" id="email" name="email"
+                                       value="someone@example.com" required
+                                       aria-label="Email address for order confirmation"
+                                       aria-required="true"
+                                       autocomplete="email">
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="col cymbal-form-field">
+                                <label for="street_address">Street Address</label>
+                                <input type="text" name="street_address" id="street_address"
+                                       value="1600 Amphitheatre Parkway" required
+                                       aria-label="Street address for shipping"
+                                       aria-required="true"
+                                       autocomplete="street-address">
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="col cymbal-form-field">
+                                <label for="zip_code">Zip Code</label>
+                                <input type="text" name="zip_code" id="zip_code"
+                                       value="94043" required pattern="\d{4,5}"
+                                       aria-label="Zip or postal code, 4 to 5 digits"
+                                       aria-required="true"
+                                       autocomplete="postal-code">
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="col cymbal-form-field">
+                                <label for="city">City</label>
+                                <input type="text" name="city" id="city"
+                                       value="Mountain View" required
+                                       aria-label="City for shipping address"
+                                       aria-required="true"
+                                       autocomplete="address-level2">
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="col-md-5 cymbal-form-field">
+                                <label for="state">State</label>
+                                <input type="text" name="state" id="state"
+                                       value="CA" required
+                                       aria-label="State or province"
+                                       aria-required="true"
+                                       autocomplete="address-level1">
+                            </div>
+                            <div class="col-md-7 cymbal-form-field">
+                                <label for="country">Country</label>
+                                <input type="text" id="country" placeholder="Country Name"
+                                       name="country" value="United States" required
+                                       aria-label="Country name"
+                                       aria-required="true"
+                                       autocomplete="country-name">
+                            </div>
+                        </div>
+                    </fieldset>
+
+                    <fieldset>
+                        <legend><h3 class="payment-method-heading">Payment Method</h3></legend>
+
+                        <div class="form-row">
+                            <div class="col cymbal-form-field">
+                                <label for="credit_card_number">Credit Card Number</label>
+                                <input type="text" id="credit_card_number"
+                                       name="credit_card_number"
+                                       placeholder="0000000000000000"
+                                       value="4432801561520454"
+                                       required pattern="\d{16}"
+                                       aria-label="16-digit credit card number"
+                                       aria-required="true"
+                                       autocomplete="cc-number">
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="col-md-5 cymbal-form-field">
+                                <label for="credit_card_expiration_month">Month</label>
+                                <select name="credit_card_expiration_month"
+                                        id="credit_card_expiration_month"
+                                        aria-label="Credit card expiration month"
+                                        autocomplete="cc-exp-month">
+                                    <option value="1">January</option>
+                                    <option value="2">February</option>
+                                    <option value="3">March</option>
+                                    <option value="4">April</option>
+                                    <option value="5">May</option>
+                                    <option value="6">June</option>
+                                    <option value="7">July</option>
+                                    <option value="8">August</option>
+                                    <option value="9">September</option>
+                                    <option value="10">October</option>
+                                    <option value="11">November</option>
+                                    <option value="12">December</option>
+                                </select>
+                                <img th:src="@{/static/icons/Hipster_DownArrow.svg}"
+                                     alt="" aria-hidden="true" class="cymbal-dropdown-chevron">
+                            </div>
+                            <div class="col-md-4 cymbal-form-field">
+                                <label for="credit_card_expiration_year">Year</label>
+                                <select name="credit_card_expiration_year"
+                                        id="credit_card_expiration_year"
+                                        aria-label="Credit card expiration year"
+                                        autocomplete="cc-exp-year">
+                                    <option th:each="y, iter : ${expiration_years}"
+                                            th:value="${y}"
+                                            th:selected="${iter.index == 1}"
+                                            th:text="${y}">2026</option>
+                                </select>
+                                <img th:src="@{/static/icons/Hipster_DownArrow.svg}"
+                                     alt="" aria-hidden="true" class="cymbal-dropdown-chevron">
+                            </div>
+                            <div class="col-md-3 cymbal-form-field">
+                                <label for="credit_card_cvv">CVV</label>
+                                <input type="password" id="credit_card_cvv"
+                                       name="credit_card_cvv" value="672"
+                                       required pattern="\d{3}"
+                                       aria-label="3-digit CVV security code from back of card"
+                                       aria-required="true"
+                                       autocomplete="cc-csc">
+                            </div>
+                        </div>
+                    </fieldset>
+
+                    <fieldset>
+                        <legend><h3 class="payment-method-heading">Coupon Code</h3></legend>
+
+                        <div role="alert" aria-live="assertive" aria-atomic="true"
+                             th:if="${not #strings.isEmpty(coupon_error)}"
+                             style="background-color:#f8d7da;border:1px solid #f5c6cb;color:#721c24;padding:10px 14px;border-radius:4px;margin-bottom:10px;font-size:0.9em;">
+                            <span aria-hidden="true">&#10007;</span> <span th:text="${coupon_error}"></span>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="col cymbal-form-field">
+                                <label for="coupon_code">Have a coupon? (optional)</label>
+                                <input type="text"
+                                       id="coupon_code"
+                                       name="coupon_code"
+                                       placeholder="Enter coupon code"
+                                       maxlength="20"
+                                       th:value="${last_coupon}"
+                                       aria-label="Optional coupon code"
+                                       aria-describedby="coupon-hint"
+                                       autocomplete="off"
+                                       style="text-transform:uppercase;">
+                                <small id="coupon-hint"
+                                       style="color:#6c757d;font-size:0.82em;line-height:1.6;display:block;margin-top:4px;">
+                                    Available coupons:<br>
+                                    <th:block th:each="opt : ${coupon_options}">
+                                    <strong th:text="${opt.code}">SAVE10</strong> &mdash; Save <span th:text="${moneyFormatter.renderCurrencyLogo(user_currency)}">$</span><span th:text="${opt.discountUsd}">10</span> off orders above <span th:text="${moneyFormatter.renderCurrencyLogo(user_currency)}">$</span><span th:text="${opt.minOrderUsd}">50</span> or more<br>
+                                    </th:block>
+                                </small>
+                            </div>
+                        </div>
+                    </fieldset>
+
+                    <div class="form-row justify-content-center">
+                        <div class="col text-center">
+                            <button class="cymbal-button-primary"
+                                    type="submit"
+                                    aria-label="Place your order and proceed to payment">
+                                Place Order
+                            </button>
+                        </div>
+                    </div>
+
+                </form>
+            </div>
+
+        </div>
+    </section>
+
+</main>
+
+<div th:if="${recommendations}" th:replace="~{fragments/recommendations :: recommendations}"></div>
+
+<div th:replace="~{fragments/footer :: footer}"></div>
+</body>
+</html>

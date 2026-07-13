@@ -1,0 +1,31 @@
+<!--
+ Copyright 2020 Google LLC
+ Licensed under the Apache License, Version 2.0
+-->
+<section th:fragment="recommendations" class="recommendations" aria-label="Recommended products section" xmlns:th="http://www.thymeleaf.org">
+    <div class="container">
+        <div class="row">
+            <div class="col-xl-10 offset-xl-1">
+
+                <h2 id="recommendations-heading">You May Also Like</h2>
+
+                <ul class="row" aria-labelledby="recommendations-heading"
+                    style="list-style:none;padding:0;margin:0;">
+                    <li class="col-md-3" th:each="p : ${recommendations}" th:aria-label="'Recommended product: ' + ${p.name}">
+                        <div>
+                            <a th:href="@{'/product/' + ${p.id}}"
+                               th:aria-label="'View recommended product: ' + ${p.name}">
+                                <img th:src="@{${p.picture}}"
+                                     th:alt="'Product image of ' + ${p.name}" />
+                            </a>
+                            <div>
+                                <h5 th:text="${p.name}">Product</h5>
+                            </div>
+                        </div>
+                    </li>
+                </ul>
+
+            </div>
+        </div>
+    </div>
+</section>

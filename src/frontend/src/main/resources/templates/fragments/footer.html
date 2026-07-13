@@ -1,0 +1,51 @@
+<!--
+ Copyright 2020 Google LLC
+ Licensed under the Apache License, Version 2.0
+-->
+<th:block th:fragment="footer" xmlns:th="http://www.thymeleaf.org">
+
+<footer class="py-5" role="contentinfo" aria-label="Site footer">
+    <div class="footer-top">
+        <div class="container footer-social">
+            <p class="footer-text" aria-label="Disclaimer: demo website only">
+                This website is hosted for demo purposes only. It is not an actual shop. This is not a Google product.
+            </p>
+            <p class="footer-text">
+                &copy; 2020-<span th:text="${currentYear}">2026</span> Google LLC
+                (<a href="https://github.com/GoogleCloudPlatform/microservices-demo"
+                    aria-label="View source code on GitHub"
+                    target="_blank"
+                    rel="noopener noreferrer">Source Code</a>)
+            </p>
+            <p class="footer-text">
+                <small aria-label="Session and request debug information">
+                    <th:block th:if="${not #strings.isEmpty(session_id)}">session-id: <span th:text="${session_id}">-</span> &mdash; </th:block>
+                    <th:block th:if="${not #strings.isEmpty(request_id)}">request-id: <span th:text="${request_id}">-</span></th:block>
+                </small>
+                <br/>
+                <small aria-label="Deployment details">
+                    <th:block th:if="${deploymentDetails}">
+                        <th:block th:if="${deploymentDetails['CLUSTERNAME']}">
+                        <b>Cluster: </b><span th:text="${deploymentDetails['CLUSTERNAME']}"></span><br/>
+                        </th:block>
+                        <th:block th:if="${deploymentDetails['ZONE']}">
+                        <b>Zone: </b><span th:text="${deploymentDetails['ZONE']}"></span><br/>
+                        </th:block>
+                        <th:block th:if="${deploymentDetails['HOSTNAME']}">
+                        <b>Pod: </b><span th:text="${deploymentDetails['HOSTNAME']}"></span>
+                        </th:block>
+                    </th:block>
+                    <th:block th:unless="${deploymentDetails}">
+                    Deployment details are still loading. Try refreshing this page.
+                    </th:block>
+                </small>
+            </p>
+        </div>
+    </div>
+</footer>
+
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js"
+    integrity="sha384-smHYKdLADwkXOn1EmN1qk/HfnUcbVRZyYmZ4qpPea6sjB/pTJ0euyQp0Mk8ck+5T"
+    crossorigin="anonymous">
+</script>
+</th:block>

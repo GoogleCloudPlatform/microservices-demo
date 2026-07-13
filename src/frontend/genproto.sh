@@ -15,11 +15,9 @@
 # limitations under the License.
 
 # [START gke_frontend_genproto]
+# protos are needed in frontend folder for compiling during Docker build.
 
-PATH=$PATH:$(go env GOPATH)/bin
-protodir=../../protos
-outdir=./genproto
-
-protoc --proto_path=$protodir --go_out=./$outdir --go_opt=paths=source_relative --go-grpc_out=./$outdir --go-grpc_opt=paths=source_relative $protodir/demo.proto
+mkdir -p src/main/proto && \
+cp ../../protos/demo.proto src/main/proto
 
 # [END gke_frontend_genproto]

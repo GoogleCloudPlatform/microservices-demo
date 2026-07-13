@@ -1,0 +1,242 @@
+<!--
+ Copyright 2020 Google LLC
+ Licensed under the Apache License, Version 2.0
+-->
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: head}"></head>
+<body>
+<div th:replace="~{fragments/nav :: nav}"></div>
+
+<div th:class="${platform_css}">
+    <span class="platform-flag" aria-hidden="true" th:text="${platform_name}"></span>
+</div>
+
+<main role="main" aria-label="Shopping assistant chat page">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+
+                <section id="chat-modal"
+                         class="chat-modal"
+                         aria-label="Shopping assistant chat window"
+                         aria-live="polite"
+                         aria-relevant="additions">
+
+                    <!-- Chat message history -->
+                    <div id="bot-messages"
+                         class="bot-messages"
+                         role="log"
+                         aria-label="Chat message history"
+                         aria-live="polite"
+                         aria-relevant="additions text">
+                        <p class="bot-message" role="article" aria-label="Assistant message">
+                            <span class="bot-message-text">
+                                Hi, I'm the Cymbal Shops assistant. I can help you with your shopping experience.
+                            </span>
+                        </p>
+                        <p class="bot-message" role="article" aria-label="Assistant message">
+                            <span class="bot-message-text">What can I help you with?</span>
+                        </p>
+                    </div>
+
+                    <!-- Chat input area -->
+                    <div class="bot-input" role="group" aria-label="Chat input controls">
+
+                        <label for="bot-input-text" class="sr-only">
+                            Type your message to the shopping assistant
+                        </label>
+                        <input id="bot-input-text"
+                               type="text"
+                               style="margin-right:30px;"
+                               class="bot-input-text"
+                               placeholder="Recommend me items..."
+                               aria-label="Type your message to the shopping assistant"
+                               aria-describedby="bot-input-hint"
+                               autocomplete="off" />
+
+                        <label for="bot-input-file" class="sr-only">
+                            Upload an image to help the assistant recommend products
+                        </label>
+                        <input id="bot-input-file"
+                               type="file"
+                               class="bot-input-file-button"
+                               accept="image/*"
+                               aria-label="Upload an image to get product recommendations based on it"
+                               onchange="getBase64()" />
+
+                        <button id="bot-input-button"
+                                class="bot-input-button"
+                                aria-label="Send message to assistant"
+                                aria-describedby="bot-input-hint">
+                            Send
+                        </button>
+
+                        <span id="bot-input-hint" class="sr-only">
+                            Type a message or upload an image then click Send or press Enter
+                        </span>
+
+                    </div>
+                </section>
+
+            </div>
+        </div>
+    </div>
+</main>
+
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    var image;
+    var botUrl = /*[[@{/bot}]]*/ '/bot';
+    var productMetaUrlBase = /*[[@{/product-meta/}]]*/ '/product-meta/';
+    var productUrlBase = /*[[@{/product/}]]*/ '/product/';
+
+    function getBase64() {
+        var file = document.querySelector('input[type=file]')['files'][0];
+        var reader = new FileReader();
+        reader.onloadend = function () {
+            image = reader.result;
+        };
+        reader.readAsDataURL(file);
+    }
+
+    function extractIdsFromString(message) {
+        const idPattern = /\[([a-zA-Z0-9-]+)\]/g;
+        const matches = message.matchAll(idPattern);
+        const ids = [];
+        for (const match of matches) {
+            ids.push(match[1]);
+        }
+        return ids;
+    }
+
+    const chatModal   = document.getElementById("chat-modal");
+    const botMessages = document.getElementById("bot-messages");
+    const botbutton   = document.getElementById("bot-input-button");
+    const botinput    = document.getElementById("bot-input-text");
+
+    async function main() {
+        botbutton.addEventListener("click", handleButtonClick);
+        botinput.addEventListener("keypress", (event) => {
+            if (event.key === "Enter") { botbutton.click(); }
+        });
+    }
+
+    async function handleButtonClick() {
+        if (!botinput.value || !botinput.value.trim) { return; }
+
+        const message = botinput.value;
+
+        // Render user message
+        const usermessage    = document.createElement("p");
+        usermessage.classList.add("user-message");
+        usermessage.setAttribute("role", "article");
+        usermessage.setAttribute("aria-label", "Your message: " + message);
+
+        const userMessageSpan = document.createElement("span");
+        userMessageSpan.innerText = message;
+        userMessageSpan.classList.add("user-message-text");
+        usermessage.appendChild(userMessageSpan);
+
+        // Render uploaded image if present
+        const imageDivElement = document.createElement("div");
+        imageDivElement.classList.add("user-image-div");
+        const imageElement = document.createElement("img");
+        imageElement.src   = image;
+        imageElement.classList.add("user-image");
+        imageElement.alt   = "Uploaded image for product recommendation";
+        imageElement.onerror = function () { this.style.display = 'none'; };
+        imageDivElement.appendChild(imageElement);
+
+        botMessages.appendChild(usermessage);
+        botMessages.appendChild(imageDivElement);
+        botMessages.scrollTo(0, botMessages.scrollHeight);
+        botinput.value = "";
+
+        // Disable controls while waiting
+        botbutton.disabled = true;
+        botbutton.setAttribute("aria-busy", "true");
+        botinput.disabled  = true;
+
+        // Render loading placeholder
+        const botMessage = document.createElement("p");
+        botMessage.classList.add("bot-message-loading", "bot-message");
+        botMessage.setAttribute("role", "article");
+        botMessage.setAttribute("aria-label", "Assistant is typing");
+        const botMessageSpan = document.createElement("span");
+        botMessageSpan.classList.add("bot-message-text");
+        botMessage.appendChild(botMessageSpan);
+        botMessages.appendChild(botMessage);
+        botMessages.scrollTo(0, botMessages.scrollHeight);
+
+        // Fetch response
+        const response = await fetch(botUrl, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ message: message, image: image }),
+        });
+        const responseJson = await response.json();
+
+        const extractedIds = extractIdsFromString(responseJson.message);
+
+        // Replace placeholder with real response
+        botMessageSpan.innerText = responseJson.message.replace(/\n+[-*\d][\S\s]*/g, "");
+        botMessage.classList.remove("bot-message-loading");
+        botMessage.setAttribute("aria-label", "Assistant reply: " + botMessageSpan.innerText);
+
+        // Render recommended products if any
+        if (extractedIds.length > 0) {
+            const botProductsDiv = document.createElement("div");
+            botProductsDiv.classList.add("bot-products");
+            botProductsDiv.setAttribute("role", "list");
+            botProductsDiv.setAttribute("aria-label", "Recommended products");
+
+            for (const id of extractedIds) {
+                const productResponse = await fetch(productMetaUrlBase + id, {
+                    method: "GET",
+                    headers: { "Content-Type": "application/json" },
+                });
+                const product = await productResponse.json();
+
+                const botProductDiv = document.createElement("a");
+                botProductDiv.classList.add("bot-product");
+                botProductDiv.href = productUrlBase + id;
+                botProductDiv.setAttribute("role", "listitem");
+                botProductDiv.setAttribute("aria-label", "Recommended product: " + product["name"]);
+
+                const botProductImg = document.createElement("img");
+                botProductImg.src   = product["picture"];
+                botProductImg.alt   = "Product image of " + product["name"];
+                botProductImg.classList.add("bot-product-img");
+                botProductImg.onerror = function () { this.style.display = 'none'; };
+                botProductDiv.appendChild(botProductImg);
+
+                const botProductDescription = document.createElement("div");
+                botProductDescription.classList.add("bot-product-description");
+                let productDescription = product["description"];
+                if (productDescription.length > 350) {
+                    productDescription = productDescription.substring(0, 330) + '...';
+                }
+                botProductDescription.innerHTML = "<b>" + product["name"] + "</b><br>" + productDescription;
+                botProductDiv.appendChild(botProductDescription);
+
+                botProductsDiv.appendChild(botProductDiv);
+            }
+            botMessages.appendChild(botProductsDiv);
+        }
+
+        botMessages.scrollTo(0, botMessages.scrollHeight);
+
+        // Re-enable controls
+        botbutton.disabled = false;
+        botbutton.setAttribute("aria-busy", "false");
+        botinput.disabled  = false;
+        botinput.focus();
+    }
+
+    main();
+    /*]]>*/
+</script>
+
+</body>
+</html>

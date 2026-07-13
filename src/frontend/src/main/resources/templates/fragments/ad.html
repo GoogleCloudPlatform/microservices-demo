@@ -1,0 +1,14 @@
+<!--
+ Copyright 2020 Google LLC
+ Licensed under the Apache License, Version 2.0
+-->
+<div th:fragment="textAd" class="container py-3 px-lg-5 py-lg-5" xmlns:th="http://www.thymeleaf.org">
+    <aside role="complementary" aria-label="Advertisement">
+        <strong aria-hidden="true">Ad</strong>
+        <a th:href="@{${ad.redirectUrl}}"
+           rel="nofollow noopener noreferrer"
+           target="_blank"
+           th:aria-label="'Advertisement: ' + ${ad.text} + ', opens in new tab'"
+           th:text="${ad.text}">Ad text</a>
+    </aside>
+</div>

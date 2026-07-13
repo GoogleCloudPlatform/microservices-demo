@@ -1,0 +1,88 @@
+plugins {
+    id 'java'
+    id 'org.springframework.boot' version '3.3.5'
+    id 'io.spring.dependency-management' version '1.1.6'
+    id 'com.google.protobuf' version '0.9.6'
+    id 'idea'
+}
+
+description = 'Frontend Service'
+group = "hipstershop"
+version = "0.1.0-SNAPSHOT"
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
+}
+
+repositories {
+    mavenCentral()
+    mavenLocal()
+}
+
+def grpcVersion = "1.80.0"
+def protocVersion = "4.34.1"
+def otelVersion = "1.43.0"
+
+dependencies {
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+
+    implementation "io.grpc:grpc-netty-shaded:${grpcVersion}"
+    implementation "io.grpc:grpc-protobuf:${grpcVersion}"
+    implementation "io.grpc:grpc-stub:${grpcVersion}"
+    implementation "com.google.protobuf:protobuf-java:${protocVersion}"
+    compileOnly 'org.apache.tomcat:annotations-api:6.0.53'
+
+    implementation "io.opentelemetry:opentelemetry-api:${otelVersion}"
+    implementation "io.opentelemetry:opentelemetry-sdk:${otelVersion}"
+    implementation "io.opentelemetry:opentelemetry-exporter-otlp:${otelVersion}"
+
+    implementation 'net.logstash.logback:logstash-logback-encoder:7.4'
+
+    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.6.0'
+
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+}
+
+protobuf {
+    protoc {
+        artifact = "com.google.protobuf:protoc:${protocVersion}"
+    }
+    plugins {
+        grpc {
+            artifact = "io.grpc:protoc-gen-grpc-java:${grpcVersion}"
+        }
+    }
+    generateProtoTasks {
+        all()*.plugins {
+            grpc {}
+        }
+    }
+}
+
+sourceSets {
+    main {
+        java {
+            srcDirs 'build/generated/source/proto/main/java'
+            srcDirs 'build/generated/source/proto/main/grpc'
+        }
+    }
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
+}
+
+// This to cache dependencies during Docker image building. First build will take time.
+// Subsequent build will be incremental.
+ext {
+    speed = project.hasProperty('speed') ? project.getProperty('speed') : false
+    offlineCompile = new File("$buildDir/output/lib")
+}
+
+task downloadRepos(type: Copy) {
+    from configurations.compileClasspath
+    into offlineCompile
+}

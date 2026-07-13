@@ -19,6 +19,11 @@ metadata:
   labels:
     app: frontend
 spec:
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 0
+      maxUnavailable: 1
   selector:
     matchLabels:
       app: frontend
@@ -47,8 +52,16 @@ spec:
           image: frontend
           ports:
           - containerPort: 8080
+          volumeMounts:
+          - name: tmp
+            mountPath: /tmp
+          startupProbe:
+            httpGet:
+              path: "/_healthz"
+              port: 8080
+            periodSeconds: 5
+            failureThreshold: 24 # allow up to 2 minutes for the JVM to boot
           readinessProbe:
-            initialDelaySeconds: 10
             httpGet:
               path: "/_healthz"
               port: 8080
@@ -56,7 +69,6 @@ spec:
               - name: "Cookie"
                 value: "shop_session-id=x-readiness-probe"
           livenessProbe:
-            initialDelaySeconds: 10
             httpGet:
               path: "/_healthz"
               port: 8080
@@ -99,11 +111,14 @@ spec:
           #   value: "" # This value would look like "http://123.123.123"
           resources:
             requests:
-              cpu: 100m
-              memory: 64Mi
+              cpu: 500m
+              memory: 320Mi
             limits:
-              cpu: 200m
-              memory: 128Mi
+              cpu: "1"
+              memory: 512Mi
+      volumes:
+      - name: tmp
+        emptyDir: {}
 ---
 apiVersion: v1
 kind: Service

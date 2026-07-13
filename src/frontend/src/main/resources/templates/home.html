@@ -1,0 +1,73 @@
+<!--
+ Copyright 2020 Google LLC
+ Licensed under the Apache License, Version 2.0
+-->
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: head}"></head>
+<body>
+<div th:replace="~{fragments/nav :: nav}"></div>
+
+<div th:class="${platform_css}">
+    <span class="platform-flag" aria-hidden="true" th:text="${platform_name}"></span>
+</div>
+
+<main role="main" class="home" aria-label="Home page, product listing">
+
+    <!-- Hero banner image for mobile -->
+    <div class="home-mobile-hero-banner d-lg-none"
+         role="img"
+         aria-label="Online Boutique hero banner image"></div>
+
+    <div class="container-fluid">
+        <div class="row">
+
+            <div class="col-12 col-lg-12 px-10-percent">
+
+                <section class="row hot-products-row px-xl-6" aria-label="Hot products section">
+
+                    <div class="col-12">
+                        <h3 id="hot-products-heading">Hot Products</h3>
+                    </div>
+
+                    <ul class="row w-100" aria-labelledby="hot-products-heading"
+                        style="list-style:none; padding:0; margin:0;">
+                        <li class="col-md-4 hot-product-card" th:each="pv : ${products}"
+                            th:aria-label="'Product: ' + ${pv.item.name} + ', price ' + ${moneyFormatter.renderMoney(pv.price)}">
+                            <a th:href="@{'/product/' + ${pv.item.id}}"
+                               th:aria-label="'View details for ' + ${pv.item.name} + ', priced at ' + ${moneyFormatter.renderMoney(pv.price)}">
+                                <img loading="lazy"
+                                     th:src="@{${pv.item.picture}}"
+                                     th:alt="'Product image of ' + ${pv.item.name}" />
+                                <div class="hot-product-card-img-overlay" aria-hidden="true"></div>
+                            </a>
+                            <div>
+                                <div class="hot-product-card-name" th:text="${pv.item.name}">Name</div>
+                                <div class="hot-product-card-price" th:aria-label="'Price: ' + ${moneyFormatter.renderMoney(pv.price)}"
+                                     th:text="${moneyFormatter.renderMoney(pv.price)}">$0.00</div>
+                            </div>
+                        </li>
+                    </ul>
+
+                </section>
+
+                <!-- Footer for larger screens -->
+                <div class="row d-none d-lg-block home-desktop-footer-row">
+                    <div class="col-12 p-0">
+                        <div th:replace="~{fragments/footer :: footer}"></div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+</main>
+
+<!-- Footer for smaller screens -->
+<div class="d-lg-none">
+    <div th:replace="~{fragments/footer :: footer}"></div>
+</div>
+
+</body>
+</html>

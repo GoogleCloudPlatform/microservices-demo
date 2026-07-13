@@ -1,5 +1,9 @@
 # frontend
 
-Run the following command to restore dependencies to `vendor/` directory:
+Java 17 / Spring Boot service. Build and run locally:
 
-    dep ensure --vendor-only
+    ./gradlew bootRun
+
+Build the container image:
+
+    docker build -t frontend .

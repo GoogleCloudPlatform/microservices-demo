@@ -1,0 +1,98 @@
+<!--
+ Copyright 2020 Google LLC
+ Licensed under the Apache License, Version 2.0
+-->
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: head}"></head>
+<body>
+<div th:replace="~{fragments/nav :: nav}"></div>
+
+<div th:class="${platform_css}">
+    <span class="platform-flag" aria-hidden="true" th:text="${platform_name}"></span>
+</div>
+
+<main role="main" th:aria-label="'Product detail page for ' + ${product.item.name}">
+    <div class="h-product container">
+        <div class="row">
+
+            <div class="col-md-6">
+                <img class="product-image"
+                     th:src="@{${product.item.picture}}"
+                     th:alt="'Product image of ' + ${product.item.name}" />
+            </div>
+
+            <div class="product-info col-md-5" aria-label="Product information">
+                <div class="product-wrapper">
+
+                    <h2 th:text="${product.item.name}">Name</h2>
+
+                    <p class="product-price" th:aria-label="'Price: ' + ${moneyFormatter.renderMoney(product.price)}"
+                       th:text="${moneyFormatter.renderMoney(product.price)}">$0.00</p>
+
+                    <p aria-label="Product description" th:text="${product.item.description}">Description</p>
+
+                    <section class="product-packaging" aria-label="Packaging information" th:if="${packagingInfo}">
+                        <h3>Packaging</h3>
+                        <span th:aria-label="${packagingInfo.weight} ? ('Weight: ' + ${packagingInfo.weight} + ' pounds') : 'Weight: not available'">
+                            Weight: <span th:text="${packagingInfo.weight} ? (${packagingInfo.weight} + 'lb') : 'n/a'">n/a</span>
+                        </span>
+                        <span th:aria-label="${packagingInfo.width} ? ('Width: ' + ${packagingInfo.width} + ' centimetres') : 'Width: not available'">
+                            Width: <span th:text="${packagingInfo.width} ? (${packagingInfo.width} + 'cm') : 'n/a'">n/a</span>
+                        </span>
+                        <span th:aria-label="${packagingInfo.height} ? ('Height: ' + ${packagingInfo.height} + ' centimetres') : 'Height: not available'">
+                            Height: <span th:text="${packagingInfo.height} ? (${packagingInfo.height} + 'cm') : 'n/a'">n/a</span>
+                        </span>
+                        <span th:aria-label="${packagingInfo.depth} ? ('Depth: ' + ${packagingInfo.depth} + ' centimetres') : 'Depth: not available'">
+                            Depth: <span th:text="${packagingInfo.depth} ? (${packagingInfo.depth} + 'cm') : 'n/a'">n/a</span>
+                        </span>
+                    </section>
+
+                    <form method="POST"
+                          th:action="@{/cart}"
+                          th:aria-label="'Add ' + ${product.item.name} + ' to cart'">
+                        <input type="hidden" name="product_id" th:value="${product.item.id}" />
+
+                        <div class="product-quantity-dropdown">
+                            <label for="quantity" class="sr-only">Select quantity</label>
+                            <select name="quantity"
+                                    id="quantity"
+                                    aria-label="Select quantity to add to cart">
+                                <option value="1">1</option>
+                                <option value="2">2</option>
+                                <option value="3">3</option>
+                                <option value="4">4</option>
+                                <option value="5">5</option>
+                                <option value="10">10</option>
+                            </select>
+                            <img th:src="@{/static/icons/Hipster_DownArrow.svg}"
+                                 alt=""
+                                 aria-hidden="true" />
+                        </div>
+
+                        <button type="submit"
+                                class="cymbal-button-primary"
+                                th:aria-label="'Add ' + ${product.item.name} + ' to shopping cart'">
+                            Add To Cart
+                        </button>
+                    </form>
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <div>
+        <div th:if="${recommendations}" th:replace="~{fragments/recommendations :: recommendations}"></div>
+    </div>
+
+    <div class="ad" aria-label="Advertisement">
+        <div th:if="${ad}" th:replace="~{fragments/ad :: textAd}"></div>
+    </div>
+
+</main>
+
+<div th:replace="~{fragments/footer :: footer}"></div>
+</body>
+</html>

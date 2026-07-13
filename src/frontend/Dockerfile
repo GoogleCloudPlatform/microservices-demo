@@ -15,31 +15,25 @@
 # Define a default value so it's not empty if the builder fails to provide it
 ARG BUILDPLATFORM=linux/amd64
 
-FROM --platform=$BUILDPLATFORM golang:1.26.2-alpine@sha256:f85330846cde1e57ca9ec309382da3b8e6ae3ab943d2739500e08c86393a21b1 AS builder
-ARG TARGETOS=linux
-ARG TARGETARCH=amd64
-WORKDIR /src
+FROM --platform=$BUILDPLATFORM eclipse-temurin:17-jdk AS builder
+WORKDIR /app
 
-# restore dependencies
-COPY go.mod go.sum ./
-RUN go mod download
+# restore dependencies (cached layer, speeds up subsequent builds)
+COPY build.gradle settings.gradle gradlew ./
+COPY gradle gradle
+RUN chmod +x gradlew
+RUN ./gradlew downloadRepos --no-daemon
+
 COPY . .
+RUN chmod +x gradlew
+RUN ./gradlew bootJar --no-daemon -x test
 
-# Skaffold passes in debug-oriented compiler flags
-ARG SKAFFOLD_GO_GCFLAGS
-RUN GOOS=${TARGETOS} GOARCH=${TARGETARCH} CGO_ENABLED=0 go build -ldflags="-s -w" -gcflags="${SKAFFOLD_GO_GCFLAGS}" -o /go/bin/frontend .
-
-FROM gcr.io/distroless/static
-WORKDIR /src
-COPY --from=builder /go/bin/frontend /src/server
-COPY ./templates ./templates
-COPY ./static ./static
-COPY ./docs ./docs
-
-# Definition of this variable is used by 'skaffold debug' to identify a golang binary.
-# Default behavior - a failure prints a stack trace for the current goroutine.
-# See https://golang.org/pkg/runtime/
-ENV GOTRACEBACK=single
+FROM eclipse-temurin:17-jre-alpine
+WORKDIR /app
+COPY --from=builder /app/build/libs/*.jar /app/app.jar
 
 EXPOSE 8080
-ENTRYPOINT ["/src/server"]
+# -XX:MaxRAMPercentage scales the heap to the container's memory limit (cgroup-aware) instead
+# of a hardcoded -Xmx; -XX:+UseSerialGC and -Xss512k trade peak throughput for a smaller
+# footprint and faster startup, which matters under the frontend's modest CPU/memory limits.
+ENTRYPOINT ["java", "-XX:+UseSerialGC", "-XX:MaxRAMPercentage=75.0", "-Xss512k", "-jar", "/app/app.jar"]

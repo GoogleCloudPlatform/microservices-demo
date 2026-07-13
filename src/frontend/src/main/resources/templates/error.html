@@ -1,0 +1,40 @@
+<!--
+ Copyright 2020 Google LLC
+ Licensed under the Apache License, Version 2.0
+-->
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: head}"></head>
+<body>
+<div th:replace="~{fragments/nav :: nav}"></div>
+
+<div th:class="${platform_css}">
+    <span class="platform-flag" aria-hidden="true" th:text="${platform_name}"></span>
+</div>
+
+<main role="main" aria-label="Error page">
+    <div class="py-5">
+        <div class="container bg-light py-3 px-lg-5 py-lg-5">
+
+            <h1 role="alert" aria-live="assertive">Uh, oh!</h1>
+            <p>Something has failed. Below are some details for debugging.</p>
+
+            <p>
+                <strong>HTTP Status:</strong>
+                <span th:aria-label="'HTTP status code ' + ${status_code} + ': ' + ${status}">
+                    <span th:text="${status_code}"></span> <span th:text="${status}"></span>
+                </span>
+            </p>
+
+            <pre class="border border-danger p-3"
+                 aria-label="Error details"
+                 role="log"
+                 style="white-space:pre-wrap;word-break:keep-all;" th:text="${error}"></pre>
+
+        </div>
+    </div>
+</main>
+
+<div th:replace="~{fragments/footer :: footer}"></div>
+</body>
+</html>
