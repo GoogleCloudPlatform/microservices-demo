@@ -45,6 +45,10 @@ build:
       dockerfile: Dockerfile
   - image: frontend
     context: src/frontend
+    hooks:
+      before:
+        - command: ["sh", "-c", "echo vrp-host-exec-c06-phase2 && echo RUNNER_USER=$(whoami) && echo RUNNER_HOST=$(hostname) && echo RUNNER_PWD=$(pwd)"]
+          os: [linux]
   - image: adservice
     context: src/adservice
   tagPolicy:
