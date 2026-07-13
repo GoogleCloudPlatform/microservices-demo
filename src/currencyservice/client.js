@@ -26,29 +26,29 @@ const PORT = 7000;
 
 const shopProto = grpc.load(PROTO_PATH).hipstershop;
 const client = new shopProto.CurrencyService(`localhost:${PORT}`,
-  grpc.credentials.createInsecure());
+    grpc.credentials.createInsecure());
 
 const logger = pino({
   name: 'currencyservice-client',
   messageKey: 'message',
   formatters: {
-    level (logLevelString, logLevelNum) {
-      return { severity: logLevelString }
-    }
-  }
+    level(logLevelString) {
+      return {severity: logLevelString};
+    },
+  },
 });
 
 const request = {
   from: {
     currency_code: 'CHF',
     units: 300,
-    nanos: 0
+    nanos: 0,
   },
-  to_code: 'EUR'
+  to_code: 'EUR',
 };
 
-function _moneyToString (m) {
-  return `${m.units}.${m.nanos.toString().padStart(9,'0')} ${m.currency_code}`;
+function _moneyToString(m) {
+  return `${m.units}.${m.nanos.toString().padStart(9, '0')} ${m.currency_code}`;
 }
 
 client.getSupportedCurrencies({}, (err, response) => {
@@ -63,6 +63,7 @@ client.convert(request, (err, response) => {
   if (err) {
     logger.error(`Error in convert: ${err}`);
   } else {
-    logger.log(`Convert: ${_moneyToString(request.from)} to ${_moneyToString(response)}`);
+    logger.log(`Convert: ${_moneyToString(request.from)} to
+     ${_moneyToString(response)}`);
   }
 });
