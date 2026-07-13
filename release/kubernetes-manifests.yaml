@@ -18,9 +18,15 @@
 
 # [START gke_release_kubernetes_manifests_microservices_demo]
 ---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: boutique
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
+  namespace: boutique
   name: currencyservice
   labels:
     app: currencyservice
@@ -75,6 +81,7 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
+  namespace: boutique
   name: currencyservice
   labels:
     app: currencyservice
@@ -90,11 +97,13 @@ spec:
 apiVersion: v1
 kind: ServiceAccount
 metadata:
+  namespace: boutique
   name: currencyservice
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
+  namespace: boutique
   name: loadgenerator
   labels:
     app: loadgenerator
@@ -177,11 +186,13 @@ spec:
 apiVersion: v1
 kind: ServiceAccount
 metadata:
+  namespace: boutique
   name: loadgenerator
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
+  namespace: boutique
   name: productcatalogservice
   labels:
     app: productcatalogservice
@@ -235,6 +246,7 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
+  namespace: boutique
   name: productcatalogservice
   labels:
     app: productcatalogservice
@@ -250,11 +262,13 @@ spec:
 apiVersion: v1
 kind: ServiceAccount
 metadata:
+  namespace: boutique
   name: productcatalogservice
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
+  namespace: boutique
   name: checkoutservice
   labels:
     app: checkoutservice
@@ -282,7 +296,7 @@ spec:
                 - ALL
             privileged: false
             readOnlyRootFilesystem: true
-          image: us-central1-docker.pkg.dev/google-samples/microservices-demo/checkoutservice:v0.10.5
+          image: cavissonsystem/checkoutservice:javaV5
           ports:
           - containerPort: 5050
           readinessProbe:
@@ -317,6 +331,7 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
+  namespace: boutique
   name: checkoutservice
   labels:
     app: checkoutservice
@@ -332,11 +347,13 @@ spec:
 apiVersion: v1
 kind: ServiceAccount
 metadata:
+  namespace: boutique
   name: checkoutservice
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
+  namespace: boutique
   name: shippingservice
   labels:
     app: shippingservice
@@ -390,6 +407,7 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
+  namespace: boutique
   name: shippingservice
   labels:
     app: shippingservice
@@ -405,11 +423,13 @@ spec:
 apiVersion: v1
 kind: ServiceAccount
 metadata:
+  namespace: boutique
   name: shippingservice
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
+  namespace: boutique
   name: cartservice
   labels:
     app: cartservice
@@ -527,7 +547,7 @@ spec:
             - ALL
           privileged: false
           readOnlyRootFilesystem: true
-        image: localhost/cartservice-debug:v1
+        image: cavissonsystem/cartservice:v1
         imagePullPolicy: IfNotPresent
         command:
         - /bin/sh
@@ -597,6 +617,7 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
+  namespace: boutique
   name: cartservice
   labels:
     app: cartservice
@@ -612,11 +633,13 @@ spec:
 apiVersion: v1
 kind: ServiceAccount
 metadata:
+  namespace: boutique
   name: cartservice
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
+  namespace: boutique
   name: redis-cart
   labels:
     app: redis-cart
@@ -671,6 +694,7 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
+  namespace: boutique
   name: redis-cart
   labels:
     app: redis-cart
@@ -686,6 +710,7 @@ spec:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
+  namespace: boutique
   name: emailservice
   labels:
     app: emailservice
@@ -741,6 +766,7 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
+  namespace: boutique
   name: emailservice
   labels:
     app: emailservice
@@ -756,11 +782,13 @@ spec:
 apiVersion: v1
 kind: ServiceAccount
 metadata:
+  namespace: boutique
   name: emailservice
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
+  namespace: boutique
   name: paymentservice
   labels:
     app: paymentservice
@@ -814,6 +842,7 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
+  namespace: boutique
   name: paymentservice
   labels:
     app: paymentservice
@@ -829,11 +858,13 @@ spec:
 apiVersion: v1
 kind: ServiceAccount
 metadata:
+  namespace: boutique
   name: paymentservice
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
+  namespace: boutique
   name: frontend
   labels:
     app: frontend
@@ -863,7 +894,7 @@ spec:
                 - ALL
             privileged: false
             readOnlyRootFilesystem: true
-          image: us-central1-docker.pkg.dev/google-samples/microservices-demo/frontend:v0.10.5
+          image: cavissonsystem/frontend:javav4
           ports:
           - containerPort: 8080
           readinessProbe:
@@ -927,6 +958,7 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
+  namespace: boutique
   name: frontend
   labels:
     app: frontend
@@ -942,6 +974,7 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
+  namespace: boutique
   name: frontend-external
   labels:
     app: frontend
@@ -957,11 +990,13 @@ spec:
 apiVersion: v1
 kind: ServiceAccount
 metadata:
+  namespace: boutique
   name: frontend
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
+  namespace: boutique
   name: recommendationservice
   labels:
     app: recommendationservice
@@ -1019,6 +1054,7 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
+  namespace: boutique
   name: recommendationservice
   labels:
     app: recommendationservice
@@ -1034,11 +1070,13 @@ spec:
 apiVersion: v1
 kind: ServiceAccount
 metadata:
+  namespace: boutique
   name: recommendationservice
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
+  namespace: boutique
   name: adservice
   labels:
     app: adservice
@@ -1094,6 +1132,7 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
+  namespace: boutique
   name: adservice
   labels:
     app: adservice
@@ -1109,5 +1148,6 @@ spec:
 apiVersion: v1
 kind: ServiceAccount
 metadata:
+  namespace: boutique
   name: adservice
 # [END gke_release_kubernetes_manifests_microservices_demo]

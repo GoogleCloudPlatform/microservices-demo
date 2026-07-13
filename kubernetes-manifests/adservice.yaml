@@ -15,6 +15,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
+  namespace: boutique
   name: adservice
   labels:
     app: adservice
@@ -70,6 +71,7 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
+  namespace: boutique
   name: adservice
   labels:
     app: adservice
@@ -85,4 +87,5 @@ spec:
 apiVersion: v1
 kind: ServiceAccount
 metadata:
+  namespace: boutique
   name: adservice

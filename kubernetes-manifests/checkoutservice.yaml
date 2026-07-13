@@ -15,6 +15,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
+  namespace: boutique
   name: checkoutservice
   labels:
     app: checkoutservice
@@ -77,6 +78,7 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
+  namespace: boutique
   name: checkoutservice
   labels:
     app: checkoutservice
@@ -92,4 +94,5 @@ spec:
 apiVersion: v1
 kind: ServiceAccount
 metadata:
+  namespace: boutique
   name: checkoutservice

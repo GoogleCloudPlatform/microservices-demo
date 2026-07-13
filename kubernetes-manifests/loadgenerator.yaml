@@ -14,6 +14,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
+  namespace: boutique
   name: loadgenerator
   labels:
     app: loadgenerator
@@ -96,4 +97,5 @@ spec:
 apiVersion: v1
 kind: ServiceAccount
 metadata:
+  namespace: boutique
   name: loadgenerator
