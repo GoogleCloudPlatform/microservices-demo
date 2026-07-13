@@ -71,14 +71,14 @@
         <div class="row border-bottom-solid padding-y-24"
              role="status"
              th:if="${not #strings.isEmpty(coupon_code_used)}"
-             th:aria-label="'Coupon discount applied: ' + ${coupon_code_used} + ', saving ' + ${moneyFormatter.renderMoney(discount_amount)}">
+             th:aria-label="'Coupon discount applied: ' + ${coupon_code_used} + ', saving ' + ${moneyFormatter.renderCurrencyLogo(user_currency)} + ${coupon_discount_display}">
             <div class="col-6 pl-md-0" style="color:#28a745;">
                 Coupon Discount
                 <span aria-hidden="true" style="background-color:#d4edda;color:#155724;padding:2px 8px;border-radius:4px;font-size:0.82em;font-weight:bold;margin-left:6px;"
                       th:text="${coupon_code_used}"></span>
             </div>
             <div class="col-6 pr-md-0 text-right" style="color:#28a745;">
-                - <span th:text="${moneyFormatter.renderMoney(discount_amount)}"></span>
+                - <span th:text="${moneyFormatter.renderCurrencyLogo(user_currency)} + ${coupon_discount_display}"></span>
             </div>
         </div>
 
