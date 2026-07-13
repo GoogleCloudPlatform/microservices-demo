@@ -24,7 +24,7 @@ log() { echo "$1" >&2; }
 
 TAG="${TAG:?TAG env variable must be specified}"
 REPO_PREFIX="${REPO_PREFIX:?REPO_PREFIX env variable must be specified}"
-PROJECT_ID="${PROJECT_ID:?PROJECT_ID env variable must be specified e.g. google-samples}"
+PROJECT_ID="${PROJECT_ID:?PROJECT_ID env variable must be specified e.g. online-boutique-ci}"
 
 while IFS= read -d $'\0' -r dir; do
     # build image
