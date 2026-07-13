@@ -30,6 +30,9 @@ RUN gradle --no-daemon installDist
 # ---- Runtime stage: slim JRE with just the built distribution ----
 FROM eclipse-temurin:21-jre
 
+# Ensure an interactive shell is available for debugging (kubectl exec -- sh/bash).
+RUN apt-get update && apt-get install -y --no-install-recommends bash && rm -rf /var/lib/apt/lists/*
+
 WORKDIR /app
 COPY --from=builder /app/build/install/hipstershop ./
 
