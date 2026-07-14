@@ -10,7 +10,7 @@ product-catalog, currency, shipping, payment, and email services.
 build.gradle                 # protobuf plugin compiles src/main/proto -> Java + gRPC stubs
 settings.gradle
 Dockerfile                   # multi-stage: gradle build -> slim JRE
-src/main/proto/demo.proto    # the official Online Boutique service contract
+src/main/proto/hipstershop.proto # the official Online Boutique service contract
 src/main/resources/log4j2.xml# structured (Stackdriver-shaped) JSON logging to stdout
 src/main/java/hipstershop/
   CheckoutService.java        # main(): gRPC server, downstream channels, health service
@@ -19,8 +19,8 @@ src/main/java/hipstershop/
 ```
 
 The generated classes match the repo convention (proto `package hipstershop`, no `java_package`):
-messages land in the outer class `hipstershop.Demo` (e.g. `hipstershop.Demo.PlaceOrderRequest`) and
-service stubs in `hipstershop.CheckoutServiceGrpc`, `hipstershop.CartServiceGrpc`, etc.
+messages land in the outer class `hipstershop.Hipstershop` (e.g. `hipstershop.Hipstershop.PlaceOrderRequest`)
+and service stubs in `hipstershop.CheckoutServiceGrpc`, `hipstershop.CartServiceGrpc`, etc.
 
 ## Build & run
 

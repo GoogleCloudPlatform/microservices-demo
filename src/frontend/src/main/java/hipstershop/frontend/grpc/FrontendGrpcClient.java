@@ -4,7 +4,7 @@ import hipstershop.AdServiceGrpc;
 import hipstershop.CartServiceGrpc;
 import hipstershop.CheckoutServiceGrpc;
 import hipstershop.CurrencyServiceGrpc;
-import hipstershop.Demo;
+import hipstershop.Hipstershop;
 import hipstershop.ProductCatalogServiceGrpc;
 import hipstershop.RecommendationServiceGrpc;
 import hipstershop.ShippingServiceGrpc;
@@ -52,8 +52,8 @@ public class FrontendGrpcClient {
     }
 
     public List<String> getCurrencies() {
-        Demo.GetSupportedCurrenciesResponse resp =
-                currencyStub.getSupportedCurrencies(Demo.Empty.getDefaultInstance());
+        Hipstershop.GetSupportedCurrenciesResponse resp =
+                currencyStub.getSupportedCurrencies(Hipstershop.Empty.getDefaultInstance());
         List<String> out = new ArrayList<>();
         for (String c : resp.getCurrencyCodesList()) {
             if (shopProperties.getWhitelistedCurrencies().contains(c)) {
@@ -63,50 +63,50 @@ public class FrontendGrpcClient {
         return out;
     }
 
-    public List<Demo.Product> getProducts() {
-        return productCatalogStub.listProducts(Demo.Empty.getDefaultInstance()).getProductsList();
+    public List<Hipstershop.Product> getProducts() {
+        return productCatalogStub.listProducts(Hipstershop.Empty.getDefaultInstance()).getProductsList();
     }
 
-    public Demo.Product getProduct(String id) {
-        return productCatalogStub.getProduct(Demo.GetProductRequest.newBuilder().setId(id).build());
+    public Hipstershop.Product getProduct(String id) {
+        return productCatalogStub.getProduct(Hipstershop.GetProductRequest.newBuilder().setId(id).build());
     }
 
-    public List<Demo.CartItem> getCart(String userId) {
-        return cartStub.getCart(Demo.GetCartRequest.newBuilder().setUserId(userId).build()).getItemsList();
+    public List<Hipstershop.CartItem> getCart(String userId) {
+        return cartStub.getCart(Hipstershop.GetCartRequest.newBuilder().setUserId(userId).build()).getItemsList();
     }
 
     public void emptyCart(String userId) {
-        cartStub.emptyCart(Demo.EmptyCartRequest.newBuilder().setUserId(userId).build());
+        cartStub.emptyCart(Hipstershop.EmptyCartRequest.newBuilder().setUserId(userId).build());
     }
 
     public void insertCart(String userId, String productId, int quantity) {
-        cartStub.addItem(Demo.AddItemRequest.newBuilder()
+        cartStub.addItem(Hipstershop.AddItemRequest.newBuilder()
                 .setUserId(userId)
-                .setItem(Demo.CartItem.newBuilder().setProductId(productId).setQuantity(quantity).build())
+                .setItem(Hipstershop.CartItem.newBuilder().setProductId(productId).setQuantity(quantity).build())
                 .build());
     }
 
-    public Demo.Money convertCurrency(Demo.Money money, String currency) {
-        return currencyStub.convert(Demo.CurrencyConversionRequest.newBuilder()
+    public Hipstershop.Money convertCurrency(Hipstershop.Money money, String currency) {
+        return currencyStub.convert(Hipstershop.CurrencyConversionRequest.newBuilder()
                 .setFrom(money)
                 .setToCode(currency)
                 .build());
     }
 
-    public Demo.Money getShippingQuote(List<Demo.CartItem> items, String currency) {
-        Demo.GetQuoteResponse quote = shippingStub.getQuote(
-                Demo.GetQuoteRequest.newBuilder().addAllItems(items).build());
+    public Hipstershop.Money getShippingQuote(List<Hipstershop.CartItem> items, String currency) {
+        Hipstershop.GetQuoteResponse quote = shippingStub.getQuote(
+                Hipstershop.GetQuoteRequest.newBuilder().addAllItems(items).build());
         return convertCurrency(quote.getCostUsd(), currency);
     }
 
-    public List<Demo.Product> getRecommendations(String userId, List<String> productIds) {
-        Demo.ListRecommendationsRequest.Builder reqBuilder =
-                Demo.ListRecommendationsRequest.newBuilder().setUserId(userId);
+    public List<Hipstershop.Product> getRecommendations(String userId, List<String> productIds) {
+        Hipstershop.ListRecommendationsRequest.Builder reqBuilder =
+                Hipstershop.ListRecommendationsRequest.newBuilder().setUserId(userId);
         if (productIds != null) {
             reqBuilder.addAllProductIds(productIds);
         }
-        Demo.ListRecommendationsResponse resp = recommendationStub.listRecommendations(reqBuilder.build());
-        List<Demo.Product> out = new ArrayList<>();
+        Hipstershop.ListRecommendationsResponse resp = recommendationStub.listRecommendations(reqBuilder.build());
+        List<Hipstershop.Product> out = new ArrayList<>();
         for (String id : resp.getProductIdsList()) {
             out.add(getProduct(id));
         }
@@ -116,14 +116,14 @@ public class FrontendGrpcClient {
         return out;
     }
 
-    public Demo.PlaceOrderResponse placeOrder(Demo.PlaceOrderRequest request) {
+    public Hipstershop.PlaceOrderResponse placeOrder(Hipstershop.PlaceOrderRequest request) {
         return checkoutStub.placeOrder(request);
     }
 
-    public List<Demo.Ad> getAd(List<String> contextKeys) {
+    public List<Hipstershop.Ad> getAd(List<String> contextKeys) {
         AdServiceGrpc.AdServiceBlockingStub stubWithDeadline =
                 adStub.withDeadline(Deadline.after(100, TimeUnit.MILLISECONDS));
-        Demo.AdRequest.Builder reqBuilder = Demo.AdRequest.newBuilder();
+        Hipstershop.AdRequest.Builder reqBuilder = Hipstershop.AdRequest.newBuilder();
         if (contextKeys != null) {
             reqBuilder.addAllContextKeys(contextKeys);
         }

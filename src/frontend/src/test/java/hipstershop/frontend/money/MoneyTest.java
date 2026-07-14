@@ -5,17 +5,17 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import hipstershop.Demo;
+import hipstershop.Hipstershop;
 import org.junit.jupiter.api.Test;
 
 /** Ports the key cases from the Go frontend's money/money_test.go. */
 class MoneyTest {
 
-    private static Demo.Money mmc(long units, int nanos, String currency) {
-        return Demo.Money.newBuilder().setUnits(units).setNanos(nanos).setCurrencyCode(currency).build();
+    private static Hipstershop.Money mmc(long units, int nanos, String currency) {
+        return Hipstershop.Money.newBuilder().setUnits(units).setNanos(nanos).setCurrencyCode(currency).build();
     }
 
-    private static Demo.Money mm(long units, int nanos) {
+    private static Hipstershop.Money mm(long units, int nanos) {
         return mmc(units, nanos, "");
     }
 

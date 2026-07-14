@@ -9,6 +9,6 @@ import org.springframework.context.annotation.Configuration;
 @OpenAPIDefinition(info = @Info(
         title = "Hipster Shop Frontend API",
         version = "1.0",
-        description = "Frontend service for Google Microservices Demo."))
+        description = "Frontend service for the Hipstershop microservices project."))
 public class OpenApiConfig {
 }

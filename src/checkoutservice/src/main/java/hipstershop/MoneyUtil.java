@@ -16,7 +16,7 @@
 
 package hipstershop;
 
-import hipstershop.Demo.Money;
+import hipstershop.Hipstershop.Money;
 
 /**
  * Fixed-point money arithmetic, ported from the Go {@code money} package used by the original

@@ -1,6 +1,6 @@
 package hipstershop.frontend.web;
 
-import hipstershop.Demo;
+import hipstershop.Hipstershop;
 import java.util.Map;
 import org.springframework.stereotype.Component;
 
@@ -16,7 +16,7 @@ public class MoneyFormatter {
             "TRY", "₺",
             "GBP", "£");
 
-    public String renderMoney(Demo.Money money) {
+    public String renderMoney(Hipstershop.Money money) {
         String logo = renderCurrencyLogo(money.getCurrencyCode());
         // Matches the Go implementation exactly: integer division of nanos by 1e7 (not rounded).
         return String.format("%s%d.%02d", logo, money.getUnits(), money.getNanos() / 10000000);

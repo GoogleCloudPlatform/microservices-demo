@@ -1,6 +1,6 @@
 package hipstershop.frontend.web;
 
-import hipstershop.Demo;
+import hipstershop.Hipstershop;
 import hipstershop.frontend.config.ShopProperties;
 import hipstershop.frontend.deployment.DeploymentDetailsService;
 import hipstershop.frontend.grpc.FrontendGrpcClient;
@@ -62,14 +62,14 @@ public class HomeController {
             return errorRenderer.render(response, model, "could not retrieve currencies", e, 500);
         }
 
-        List<Demo.Product> products;
+        List<Hipstershop.Product> products;
         try {
             products = grpcClient.getProducts();
         } catch (Exception e) {
             return errorRenderer.render(response, model, "could not retrieve products", e, 500);
         }
 
-        List<Demo.CartItem> cart;
+        List<Hipstershop.CartItem> cart;
         try {
             cart = grpcClient.getCart(SessionContext.sessionId(request));
         } catch (Exception e) {
@@ -77,8 +77,8 @@ public class HomeController {
         }
 
         List<ProductView> productViews = new ArrayList<>(products.size());
-        for (Demo.Product p : products) {
-            Demo.Money price;
+        for (Hipstershop.Product p : products) {
+            Hipstershop.Money price;
             try {
                 price = grpcClient.convertCurrency(p.getPriceUsd(), currentCurrency);
             } catch (Exception e) {

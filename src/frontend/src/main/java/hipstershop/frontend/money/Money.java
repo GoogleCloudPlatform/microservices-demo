@@ -1,10 +1,10 @@
 package hipstershop.frontend.money;
 
-import hipstershop.Demo;
+import hipstershop.Hipstershop;
 
 /**
  * Money arithmetic helpers, a straight port of the Go frontend's {@code money.go}.
- * Values are represented as {@link Demo.Money} (units + nanos + currency code),
+ * Values are represented as {@link Hipstershop.Money} (units + nanos + currency code),
  * matching the wire type shared across all services.
  */
 public final class Money {
@@ -28,11 +28,11 @@ public final class Money {
         }
     }
 
-    public static boolean isValid(Demo.Money m) {
+    public static boolean isValid(Hipstershop.Money m) {
         return signMatches(m) && validNanos(m.getNanos());
     }
 
-    private static boolean signMatches(Demo.Money m) {
+    private static boolean signMatches(Hipstershop.Money m) {
         return m.getNanos() == 0 || m.getUnits() == 0 || ((m.getNanos() < 0) == (m.getUnits() < 0));
     }
 
@@ -40,22 +40,22 @@ public final class Money {
         return NANOS_MIN <= nanos && nanos <= NANOS_MAX;
     }
 
-    public static boolean isZero(Demo.Money m) {
+    public static boolean isZero(Hipstershop.Money m) {
         return m.getUnits() == 0 && m.getNanos() == 0;
     }
 
-    public static boolean areSameCurrency(Demo.Money l, Demo.Money r) {
+    public static boolean areSameCurrency(Hipstershop.Money l, Hipstershop.Money r) {
         return l.getCurrencyCode().equals(r.getCurrencyCode()) && !l.getCurrencyCode().isEmpty();
     }
 
-    public static boolean areEquals(Demo.Money l, Demo.Money r) {
+    public static boolean areEquals(Hipstershop.Money l, Hipstershop.Money r) {
         return l.getCurrencyCode().equals(r.getCurrencyCode())
                 && l.getUnits() == r.getUnits()
                 && l.getNanos() == r.getNanos();
     }
 
-    public static Demo.Money negate(Demo.Money m) {
-        return Demo.Money.newBuilder()
+    public static Hipstershop.Money negate(Hipstershop.Money m) {
+        return Hipstershop.Money.newBuilder()
                 .setUnits(-m.getUnits())
                 .setNanos(-m.getNanos())
                 .setCurrencyCode(m.getCurrencyCode())
@@ -63,7 +63,7 @@ public final class Money {
     }
 
     /** Adds two values. Throws if either value is invalid or currency codes mismatch. */
-    public static Demo.Money sum(Demo.Money l, Demo.Money r) {
+    public static Hipstershop.Money sum(Hipstershop.Money l, Hipstershop.Money r) {
         if (!isValid(l) || !isValid(r)) {
             throw new InvalidValueException();
         }
@@ -89,7 +89,7 @@ public final class Money {
             }
         }
 
-        return Demo.Money.newBuilder()
+        return Hipstershop.Money.newBuilder()
                 .setUnits(units)
                 .setNanos(nanos)
                 .setCurrencyCode(l.getCurrencyCode())
@@ -97,8 +97,8 @@ public final class Money {
     }
 
     /** Slow multiplication done through repeated addition, matching the Go implementation exactly. */
-    public static Demo.Money multiplySlow(Demo.Money m, long n) {
-        Demo.Money out = m;
+    public static Hipstershop.Money multiplySlow(Hipstershop.Money m, long n) {
+        Hipstershop.Money out = m;
         while (n > 1) {
             out = sum(out, m);
             n--;

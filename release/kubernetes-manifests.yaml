@@ -280,6 +280,7 @@ spec:
     metadata:
       labels:
         app: checkoutservice
+        com.cavisson/inject-java: "true"
     spec:
       serviceAccountName: checkoutservice
       securityContext:
@@ -441,6 +442,7 @@ spec:
     metadata:
       labels:
         app: cartservice
+        com.cavisson/inject-dotnetc-Debian: "true"
     spec:
       serviceAccountName: cartservice
       terminationGracePeriodSeconds: 30
@@ -876,6 +878,7 @@ spec:
     metadata:
       labels:
         app: frontend
+        com.cavisson/inject-java: "true"
       annotations:
         sidecar.istio.io/rewriteAppHTTPProbers: "true"
     spec:

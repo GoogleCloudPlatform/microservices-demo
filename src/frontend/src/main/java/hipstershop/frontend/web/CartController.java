@@ -1,6 +1,6 @@
 package hipstershop.frontend.web;
 
-import hipstershop.Demo;
+import hipstershop.Hipstershop;
 import hipstershop.frontend.config.ShopProperties;
 import hipstershop.frontend.grpc.FrontendGrpcClient;
 import hipstershop.frontend.money.Money;
@@ -58,14 +58,14 @@ public class CartController {
             return errorRenderer.render(response, model, "could not retrieve currencies", e, 500);
         }
 
-        List<Demo.CartItem> cart;
+        List<Hipstershop.CartItem> cart;
         try {
             cart = grpcClient.getCart(SessionContext.sessionId(request));
         } catch (Exception e) {
             return errorRenderer.render(response, model, "could not retrieve cart", e, 500);
         }
 
-        List<Demo.Product> recommendations;
+        List<Hipstershop.Product> recommendations;
         try {
             recommendations = grpcClient.getRecommendations(SessionContext.sessionId(request), CartUtil.cartIds(cart));
         } catch (Exception e) {
@@ -73,7 +73,7 @@ public class CartController {
             recommendations = List.of();
         }
 
-        Demo.Money shippingCost;
+        Hipstershop.Money shippingCost;
         try {
             shippingCost = grpcClient.getShippingQuote(cart, currentCurrency);
         } catch (Exception e) {
@@ -81,23 +81,23 @@ public class CartController {
         }
 
         List<LineItemView> items = new ArrayList<>(cart.size());
-        Demo.Money totalPrice = Demo.Money.newBuilder().setCurrencyCode(currentCurrency).build();
-        for (Demo.CartItem item : cart) {
-            Demo.Product p;
+        Hipstershop.Money totalPrice = Hipstershop.Money.newBuilder().setCurrencyCode(currentCurrency).build();
+        for (Hipstershop.CartItem item : cart) {
+            Hipstershop.Product p;
             try {
                 p = grpcClient.getProduct(item.getProductId());
             } catch (Exception e) {
                 return errorRenderer.render(
                         response, model, "could not retrieve product #" + item.getProductId(), e, 500);
             }
-            Demo.Money price;
+            Hipstershop.Money price;
             try {
                 price = grpcClient.convertCurrency(p.getPriceUsd(), currentCurrency);
             } catch (Exception e) {
                 return errorRenderer.render(
                         response, model, "could not convert currency for product #" + item.getProductId(), e, 500);
             }
-            Demo.Money multPrice = Money.multiplySlow(price, item.getQuantity());
+            Hipstershop.Money multPrice = Money.multiplySlow(price, item.getQuantity());
             items.add(new LineItemView(p, item.getQuantity(), multPrice));
             totalPrice = Money.sum(totalPrice, multPrice);
         }
@@ -140,7 +140,7 @@ public class CartController {
         }
         log.debug("adding to cart (product={}, quantity={})", payload.getProductId(), payload.getQuantity());
 
-        Demo.Product p;
+        Hipstershop.Product p;
         try {
             p = grpcClient.getProduct(payload.getProductId());
         } catch (Exception e) {

@@ -18,6 +18,6 @@
 # protos are needed in frontend folder for compiling during Docker build.
 
 mkdir -p src/main/proto && \
-cp ../../protos/demo.proto src/main/proto
+cp ../../protos/hipstershop.proto src/main/proto
 
 # [END gke_frontend_genproto]

@@ -1,22 +1,22 @@
 package hipstershop.frontend.web;
 
-import hipstershop.Demo;
+import hipstershop.Hipstershop;
 
 /** Product + localized price, used by the home and product pages. */
 public class ProductView {
-    private final Demo.Product item;
-    private final Demo.Money price;
+    private final Hipstershop.Product item;
+    private final Hipstershop.Money price;
 
-    public ProductView(Demo.Product item, Demo.Money price) {
+    public ProductView(Hipstershop.Product item, Hipstershop.Money price) {
         this.item = item;
         this.price = price;
     }
 
-    public Demo.Product getItem() {
+    public Hipstershop.Product getItem() {
         return item;
     }
 
-    public Demo.Money getPrice() {
+    public Hipstershop.Money getPrice() {
         return price;
     }
 }

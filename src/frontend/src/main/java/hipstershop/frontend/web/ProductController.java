@@ -1,7 +1,7 @@
 package hipstershop.frontend.web;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import hipstershop.Demo;
+import hipstershop.Hipstershop;
 import hipstershop.frontend.config.ShopProperties;
 import hipstershop.frontend.grpc.FrontendGrpcClient;
 import hipstershop.frontend.packaging.PackagingClient;
@@ -57,7 +57,7 @@ public class ProductController {
         String currentCurrency = CurrencyUtil.currentCurrency(request, shopProperties);
         log.debug("serving product page (id={}, currency={})", id, currentCurrency);
 
-        Demo.Product p;
+        Hipstershop.Product p;
         try {
             p = grpcClient.getProduct(id);
         } catch (Exception e) {
@@ -71,21 +71,21 @@ public class ProductController {
             return errorRenderer.render(response, model, "could not retrieve currencies", e, 500);
         }
 
-        List<Demo.CartItem> cart;
+        List<Hipstershop.CartItem> cart;
         try {
             cart = grpcClient.getCart(SessionContext.sessionId(request));
         } catch (Exception e) {
             return errorRenderer.render(response, model, "could not retrieve cart", e, 500);
         }
 
-        Demo.Money price;
+        Hipstershop.Money price;
         try {
             price = grpcClient.convertCurrency(p.getPriceUsd(), currentCurrency);
         } catch (Exception e) {
             return errorRenderer.render(response, model, "failed to convert currency", e, 500);
         }
 
-        List<Demo.Product> recommendations;
+        List<Hipstershop.Product> recommendations;
         try {
             recommendations = grpcClient.getRecommendations(SessionContext.sessionId(request), List.of(id));
         } catch (Exception e) {
@@ -114,7 +114,7 @@ public class ProductController {
         if (id == null || id.isEmpty()) {
             return ResponseEntity.ok().build();
         }
-        Demo.Product p;
+        Hipstershop.Product p;
         try {
             p = grpcClient.getProduct(id);
         } catch (Exception e) {
@@ -128,7 +128,7 @@ public class ProductController {
         }
     }
 
-    private Map<String, Object> toJsonMap(Demo.Product p) {
+    private Map<String, Object> toJsonMap(Hipstershop.Product p) {
         Map<String, Object> json = new LinkedHashMap<>();
         if (!p.getId().isEmpty()) {
             json.put("id", p.getId());
@@ -144,7 +144,7 @@ public class ProductController {
         }
         if (p.hasPriceUsd()) {
             Map<String, Object> price = new LinkedHashMap<>();
-            Demo.Money m = p.getPriceUsd();
+            Hipstershop.Money m = p.getPriceUsd();
             if (!m.getCurrencyCode().isEmpty()) {
                 price.put("currency_code", m.getCurrencyCode());
             }

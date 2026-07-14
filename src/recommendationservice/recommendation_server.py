@@ -26,8 +26,8 @@ from concurrent import futures
 from google.auth.exceptions import DefaultCredentialsError
 import grpc
 
-import demo_pb2
-import demo_pb2_grpc
+import hipstershop_pb2
+import hipstershop_pb2_grpc
 from grpc_health.v1 import health_pb2
 from grpc_health.v1 import health_pb2_grpc
 
@@ -66,11 +66,11 @@ def initStackdriverProfiling():
   #       logger.warning("Could not initialize Stackdriver Profiler after retrying, giving up")
   return
 
-class RecommendationService(demo_pb2_grpc.RecommendationServiceServicer):
+class RecommendationService(hipstershop_pb2_grpc.RecommendationServiceServicer):
     def ListRecommendations(self, request, context):
         max_responses = 5
         # fetch list of products from product catalog stub
-        cat_response = product_catalog_stub.ListProducts(demo_pb2.Empty())
+        cat_response = product_catalog_stub.ListProducts(hipstershop_pb2.Empty())
         product_ids = [x.id for x in cat_response.products]
         filtered_products = list(set(product_ids)-set(request.product_ids))
         num_products = len(filtered_products)
@@ -81,7 +81,7 @@ class RecommendationService(demo_pb2_grpc.RecommendationServiceServicer):
         prod_list = [filtered_products[i] for i in indices]
         logger.info("[Recv ListRecommendations] product_ids={}".format(prod_list))
         # build and return response
-        response = demo_pb2.ListRecommendationsResponse()
+        response = hipstershop_pb2.ListRecommendationsResponse()
         response.product_ids.extend(prod_list)
         return response
 
@@ -133,14 +133,14 @@ if __name__ == "__main__":
         raise Exception('PRODUCT_CATALOG_SERVICE_ADDR environment variable not set')
     logger.info("product catalog address: " + catalog_addr)
     channel = grpc.insecure_channel(catalog_addr)
-    product_catalog_stub = demo_pb2_grpc.ProductCatalogServiceStub(channel)
+    product_catalog_stub = hipstershop_pb2_grpc.ProductCatalogServiceStub(channel)
 
     # create gRPC server
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
 
     # add class to gRPC server
     service = RecommendationService()
-    demo_pb2_grpc.add_RecommendationServiceServicer_to_server(service, server)
+    hipstershop_pb2_grpc.add_RecommendationServiceServicer_to_server(service, server)
     health_pb2_grpc.add_HealthServicer_to_server(service, server)
 
     # start server

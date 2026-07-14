@@ -1,20 +1,20 @@
 package hipstershop.frontend.web;
 
-import hipstershop.Demo;
+import hipstershop.Hipstershop;
 
 /** Product + quantity + localized line price, used by the cart and order pages. */
 public class LineItemView {
-    private final Demo.Product item;
+    private final Hipstershop.Product item;
     private final int quantity;
-    private final Demo.Money price;
+    private final Hipstershop.Money price;
 
-    public LineItemView(Demo.Product item, int quantity, Demo.Money price) {
+    public LineItemView(Hipstershop.Product item, int quantity, Hipstershop.Money price) {
         this.item = item;
         this.quantity = quantity;
         this.price = price;
     }
 
-    public Demo.Product getItem() {
+    public Hipstershop.Product getItem() {
         return item;
     }
 
@@ -22,7 +22,7 @@ public class LineItemView {
         return quantity;
     }
 
-    public Demo.Money getPrice() {
+    public Hipstershop.Money getPrice() {
         return price;
     }
 }

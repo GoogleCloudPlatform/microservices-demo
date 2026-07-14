@@ -1,6 +1,6 @@
 package hipstershop.frontend.web;
 
-import hipstershop.Demo;
+import hipstershop.Hipstershop;
 import hipstershop.frontend.grpc.FrontendGrpcClient;
 import java.util.List;
 import java.util.Random;
@@ -21,9 +21,9 @@ public class AdChooser {
         this.grpcClient = grpcClient;
     }
 
-    public Demo.Ad choose(List<String> contextKeys) {
+    public Hipstershop.Ad choose(List<String> contextKeys) {
         try {
-            List<Demo.Ad> ads = grpcClient.getAd(contextKeys);
+            List<Hipstershop.Ad> ads = grpcClient.getAd(contextKeys);
             if (ads.isEmpty()) {
                 return null;
             }

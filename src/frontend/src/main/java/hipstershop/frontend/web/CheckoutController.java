@@ -1,6 +1,6 @@
 package hipstershop.frontend.web;
 
-import hipstershop.Demo;
+import hipstershop.Hipstershop;
 import hipstershop.frontend.config.ShopProperties;
 import hipstershop.frontend.grpc.FrontendGrpcClient;
 import hipstershop.frontend.money.Money;
@@ -99,9 +99,9 @@ public class CheckoutController {
             return errorRenderer.render(response, model, e.getMessage(), null, 422);
         }
 
-        Demo.PlaceOrderRequest orderRequest = Demo.PlaceOrderRequest.newBuilder()
+        Hipstershop.PlaceOrderRequest orderRequest = Hipstershop.PlaceOrderRequest.newBuilder()
                 .setEmail(payload.getEmail())
-                .setCreditCard(Demo.CreditCardInfo.newBuilder()
+                .setCreditCard(Hipstershop.CreditCardInfo.newBuilder()
                         .setCreditCardNumber(payload.getCcNumber())
                         .setCreditCardExpirationMonth((int) (long) payload.getCcMonth())
                         .setCreditCardExpirationYear((int) (long) payload.getCcYear())
@@ -109,7 +109,7 @@ public class CheckoutController {
                         .build())
                 .setUserId(SessionContext.sessionId(request))
                 .setUserCurrency(CurrencyUtil.currentCurrency(request, shopProperties))
-                .setAddress(Demo.Address.newBuilder()
+                .setAddress(Hipstershop.Address.newBuilder()
                         .setStreetAddress(payload.getStreetAddress())
                         .setCity(payload.getCity())
                         .setState(payload.getState())
@@ -119,7 +119,7 @@ public class CheckoutController {
                 .setCouponCode(couponCode)
                 .build();
 
-        Demo.PlaceOrderResponse order;
+        Hipstershop.PlaceOrderResponse order;
         try {
             order = grpcClient.placeOrder(orderRequest);
         } catch (StatusRuntimeException e) {
@@ -136,20 +136,20 @@ public class CheckoutController {
         }
         log.info("order placed (order_id={})", order.getOrder().getOrderId());
 
-        List<Demo.Product> recommendations;
+        List<Hipstershop.Product> recommendations;
         try {
             recommendations = grpcClient.getRecommendations(SessionContext.sessionId(request), null);
         } catch (Exception e) {
             recommendations = List.of();
         }
 
-        Demo.Money totalPaid = order.getOrder().getShippingCost();
+        Hipstershop.Money totalPaid = order.getOrder().getShippingCost();
         List<LineItemView> orderItems = new ArrayList<>(order.getOrder().getItemsCount());
-        for (Demo.OrderItem v : order.getOrder().getItemsList()) {
-            Demo.Money multPrice = Money.multiplySlow(v.getCost(), v.getItem().getQuantity());
+        for (Hipstershop.OrderItem v : order.getOrder().getItemsList()) {
+            Hipstershop.Money multPrice = Money.multiplySlow(v.getCost(), v.getItem().getQuantity());
             totalPaid = Money.sum(totalPaid, multPrice);
 
-            Demo.Product p;
+            Hipstershop.Product p;
             try {
                 p = grpcClient.getProduct(v.getItem().getProductId());
             } catch (Exception e) {
@@ -159,22 +159,22 @@ public class CheckoutController {
             orderItems.add(new LineItemView(p, v.getItem().getQuantity(), multPrice));
         }
 
-        Demo.Money discount = order.getOrder().hasDiscountAmount() ? order.getOrder().getDiscountAmount() : null;
+        Hipstershop.Money discount = order.getOrder().hasDiscountAmount() ? order.getOrder().getDiscountAmount() : null;
         if (discount != null && discount.getUnits() > 0) {
-            Demo.Money negativeDiscount = Demo.Money.newBuilder()
+            Hipstershop.Money negativeDiscount = Hipstershop.Money.newBuilder()
                     .setCurrencyCode(discount.getCurrencyCode())
                     .setUnits(-discount.getUnits())
                     .setNanos(-discount.getNanos())
                     .build();
             try {
-                Demo.Money newTotal = Money.sum(totalPaid, negativeDiscount);
+                Hipstershop.Money newTotal = Money.sum(totalPaid, negativeDiscount);
                 if (newTotal.getUnits() >= 0) {
                     totalPaid = newTotal;
                 } else {
-                    totalPaid = Demo.Money.newBuilder().setCurrencyCode(discount.getCurrencyCode()).build();
+                    totalPaid = Hipstershop.Money.newBuilder().setCurrencyCode(discount.getCurrencyCode()).build();
                 }
             } catch (Exception e) {
-                totalPaid = Demo.Money.newBuilder().setCurrencyCode(discount.getCurrencyCode()).build();
+                totalPaid = Hipstershop.Money.newBuilder().setCurrencyCode(discount.getCurrencyCode()).build();
             }
         }
 
@@ -185,7 +185,7 @@ public class CheckoutController {
             return errorRenderer.render(response, model, "could not retrieve currencies", e, 500);
         }
 
-        Demo.Money discountAmount = null;
+        Hipstershop.Money discountAmount = null;
         String couponCodeUsed = "";
         long couponDiscountDisplay = 0;
         if (!couponCode.isEmpty()) {
@@ -214,10 +214,10 @@ public class CheckoutController {
 
     /** Cart items' price_usd plus shipping cost in USD, ignoring the shopper's display currency. */
     private long getOrderSubtotalUsd(HttpServletRequest request) {
-        List<Demo.CartItem> cart = grpcClient.getCart(SessionContext.sessionId(request));
-        Demo.Money subtotal = Demo.Money.newBuilder().setCurrencyCode("USD").build();
-        for (Demo.CartItem item : cart) {
-            Demo.Product p = grpcClient.getProduct(item.getProductId());
+        List<Hipstershop.CartItem> cart = grpcClient.getCart(SessionContext.sessionId(request));
+        Hipstershop.Money subtotal = Hipstershop.Money.newBuilder().setCurrencyCode("USD").build();
+        for (Hipstershop.CartItem item : cart) {
+            Hipstershop.Product p = grpcClient.getProduct(item.getProductId());
             subtotal = Money.sum(subtotal, Money.multiplySlow(p.getPriceUsd(), item.getQuantity()));
         }
         subtotal = Money.sum(subtotal, grpcClient.getShippingQuote(cart, "USD"));
