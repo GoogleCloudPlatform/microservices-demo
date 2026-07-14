@@ -1,0 +1,79 @@
+# quality-gate.routes — per-service routing for the quality gate (MONOREPO mode)
+# ---------------------------------------------------------------------------
+# Copy this file to ".claude/quality-gate.routes" (drop the .example) to turn
+# the gate from one global build/test pair into a per-service router: the gate
+# looks at WHICH files changed and runs ONLY the commands of the services that
+# actually changed. Change one service -> only that service's commands run.
+# Fast (no building the whole repo for a one-service change) and honest (green
+# covers the code that changed).
+#
+# init-dev-kit writes this file for you on a multi-service repo, one route per
+# service it found, with each command cited to the repo's own build/CI files.
+# Single-service repos don't need it — they use QG_BUILD_CMD/QG_TEST_CMD instead.
+#
+# FORMAT — one route per line, three `::`-separated fields (space-trimmed):
+#
+#     <path-prefix> :: <build_cmd> :: <test_cmd>
+#
+#   - <path-prefix> matches a changed file when the file path STARTS WITH it.
+#     Works for a directory ("billing/"), a nested dir ("apps/web/"), or a file
+#     ("go.mod"). End dir prefixes with "/" so "cart/" doesn't also match
+#     "cart-utils/". The prefix is just a string match — it makes NO assumption
+#     about your repo's layout (services under src/, under apps/, at the repo
+#     root, multi-module — all work; write the prefixes your repo actually uses).
+#   - Leave <build_cmd> OR <test_cmd> empty to skip that phase for that service.
+#   - Lines that are blank or start with "#" are ignored.
+#   - Prefer per-service commands (e.g. `dotnet test src/cart`) over repo-wide
+#     ones, so the gate stays fast and scoped to the touched service.
+#   - The COMMAND is arbitrary shell, so ANY stack works (no built-in stack list)
+#     — write whatever that service's CI/build uses, however unusual.
+#   - The one limit: routing is prefix-only — no globs/regex, no "any *.proto
+#     anywhere". A unit must be identifiable by a LEADING path string (a dir,
+#     a nested dir, or a filename prefix like "src/cart_"). A SHARED dir like
+#     "protos/" or "openapi/" IS a subtree and routes fine (see Shape E); only
+#     a build unit that is NOT a path subtree (files scattered across the tree)
+#     can't be a route — let the fallback pair (below) or the task's own
+#     acceptance check cover it.
+#
+# Changed files that match NO route are NOT verified by the gate; it prints a
+# NOTE so the gap is visible. QG_BUILD_CMD/QG_TEST_CMD (in settings.json) act as
+# the fallback pair for those unrouted changes — set them for a repo-wide lint,
+# or leave empty and rely on the task's own acceptance check.
+#
+# TOOLCHAINS: route EVERY real service (commands from the repo's CI), not just
+# the ones whose tool happens to be installed on the machine you set this up on —
+# this file ships to the whole team. If a route's tool is missing when the gate
+# runs, it blocks with an actionable "install '<tool>'" message (the premise is
+# you have the toolchains for the services you touch). If you genuinely don't
+# work on a service, comment its route out rather than shipping a half-set gate.
+#
+# The shapes below are ILLUSTRATIONS, not an exhaustive menu — the gate matches
+# whatever prefixes you write, not these. A layout or stack not shown here needs
+# no new "shape": just write its prefix + command. Uncomment & adapt, or mix.
+#
+# --- Shape A: services under a common parent (e.g. src/<service>/) ----------
+# src/cart/      :: dotnet build src/cart        :: dotnet test src/cart
+# src/checkout/  :: go build ./src/checkout/...  :: go test ./src/checkout/...
+# src/reco/      ::                              :: pytest src/reco
+#
+# --- Shape B: JS/TS workspace monorepo (apps/ + packages/) ------------------
+# apps/web/      :: npm --prefix apps/web run build :: npm --prefix apps/web test
+# packages/core/ :: npm --prefix packages/core run build :: npm --prefix packages/core test
+#
+# --- Shape C: services at the repo root -------------------------------------
+# billing/       :: cargo build --manifest-path billing/Cargo.toml :: cargo test --manifest-path billing/Cargo.toml
+# auth/          :: go build ./auth/...          :: go test ./auth/...
+#
+# --- Shape D: Maven/Gradle multi-module (modules are top-level dirs) ---------
+# payments/      :: mvn -q -pl payments -am compile :: mvn -q -pl payments test
+# ledger/        :: ./gradlew :ledger:assemble   :: ./gradlew :ledger:test
+#
+# --- Shape E: SHARED contract/library dir consumed by many services ----------
+# A change under a shared dir — proto/IDL contracts, OpenAPI/JSON-schema specs,
+# a shared internal library — is verified by building its CONSUMERS, not the dir
+# itself. Route the shared dir's prefix to a COMPOSITE command chaining the
+# consumers' commands with `&&` (the services that import it / codegen from it).
+# Without such a route, the repo's highest-blast-radius changes are exactly the
+# ones the gate never checks.
+# protos/  :: go build ./services/checkout/... && dotnet build src/cart :: go test ./services/checkout/... && dotnet test src/cart
+# openapi/ :: npm --prefix clients/web run build ::
