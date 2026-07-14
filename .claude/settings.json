@@ -5,7 +5,8 @@
     "routes_file": ".claude/quality-gate.routes",
     "routed_services": "Go (frontend, shippingservice, productcatalogservice build+test; checkoutservice build-only), C# cartservice (build+test), Java adservice (compile-only)",
     "unrouted": "Node.js (currencyservice, paymentservice) and Python (emailservice, recommendationservice, loadgenerator, shoppingassistantservice) have no CI unit tests / compile step — covered by task acceptance checks",
-    "rationale": "CI (ci-pr.yaml/ci-main.yaml) unit-tests only Go shipping+productcatalog+frontend/validator and C# cartservice; the deployment-tests job (skaffold->GKE) is too heavy for a per-Stop gate. User chose to gate all compilable services."
+    "rationale": "CI (ci-pr.yaml/ci-main.yaml) unit-tests only Go shipping+productcatalog+frontend/validator and C# cartservice; the deployment-tests job (skaffold->GKE) is too heavy for a per-Stop gate. User chose to gate all compilable services.",
+    "hook_timeout": "900s (dev-kit 0.5.2 template default is 600s; raised because the slowest route, the protos/ composite, chains every compilable service and a cold first run downloads the Gradle distribution + dotnet restore + Go modules). Claude Code's default is 60s and a timed-out hook does NOT block — without this the gate silently skips on cold runs."
   },
   "env": {
     "QG_BUILD_CMD": "",
@@ -17,7 +18,8 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/quality-gate.sh\""
+            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/quality-gate.sh\"",
+            "timeout": 900
           }
         ]
       }
@@ -27,7 +29,8 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/quality-gate.sh\""
+            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/quality-gate.sh\"",
+            "timeout": 900
           }
         ]
       }
