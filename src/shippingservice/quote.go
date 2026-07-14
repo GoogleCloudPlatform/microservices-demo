@@ -27,7 +27,7 @@ type Quote struct {
 
 // String representation of the Quote.
 func (q Quote) String() string {
-	return fmt.Sprintf("$%d.%d", q.Dollars, q.Cents)
+	return fmt.Sprintf("$%d.%02d", q.Dollars, q.Cents)
 }
 
 // CreateQuoteFromCount takes a number of items and returns a shipping quote.

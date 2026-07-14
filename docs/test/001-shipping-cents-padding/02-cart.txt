@@ -1,0 +1,18 @@
+$ curl -s -b 'shop_session-id=<session>' http://localhost:8080/product/0PUK6V6EV0
+HTTP_STATUS:200
+Product: Candle Holder  $18.99
+
+$ curl -s -b 'shop_session-id=<session>' -X POST http://localhost:8080/cart --data-urlencode 'product_id=0PUK6V6EV0' --data-urlencode 'quantity=1'
+HTTP/1.1 302 Found
+Location: /cart
+Date: Tue, 14 Jul 2026 10:34:04 GMT
+Content-Length: 0
+
+
+$ curl -s -b 'shop_session-id=<session>' http://localhost:8080/cart
+HTTP/1.1 200 OK
+
+--- cart contents excerpt ---
+Item: Candle Holder
+Quantity: 1
+Line items shown: $18.99 (item), $8.99 (shipping), $1.43 (tax), $29.41 (total)
