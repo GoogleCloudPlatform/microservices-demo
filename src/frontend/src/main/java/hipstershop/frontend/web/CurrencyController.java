@@ -50,6 +50,13 @@ public class CurrencyController {
         } catch (ValidationUtil.ValidationException e) {
             return errorRenderer.render(response, model, e.getMessage(), null, 422);
         }
+        // @Iso4217 only checks the code is a real-world currency; also enforce that it's
+        // one of the currencies this shop actually offers (so it can't be set by a direct
+        // POST even though it's been removed from the dropdown, e.g. CAD).
+        if (!shopProperties.getWhitelistedCurrencies().contains(payload.getCurrency())) {
+            return errorRenderer.render(
+                    response, model, "Field 'currency' is invalid: not offered by this shop", null, 422);
+        }
         log.debug("setting currency (new={})", payload.getCurrency());
 
         if (!payload.getCurrency().isEmpty()) {

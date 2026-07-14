@@ -33,8 +33,10 @@ public class ShopProperties {
             "SAVE50", new CouponDef(50, 200),
             "SAVE100", new CouponDef(100, 350));
 
+    // CAD is deliberately excluded: it shares the "$" symbol with USD, which caused
+    // confusing coupon/total displays that looked like they were in USD but weren't.
     private final Set<String> whitelistedCurrencies = new LinkedHashSet<>(
-            Set.of("USD", "EUR", "CAD", "JPY", "GBP", "TRY"));
+            Set.of("USD", "EUR", "JPY", "GBP", "TRY"));
 
     private String baseUrl;
     private String lockedCurrency;
