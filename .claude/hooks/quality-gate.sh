@@ -39,10 +39,14 @@
 #   src/cart/           :: dotnet build src/cart       :: dotnet test src/cart
 #   src/checkout/       :: go build ./src/checkout/... :: go test ./src/checkout/...
 #   src/recommendation/ ::                             :: pytest src/recommendation
+#   protos/             :: <build the consumers, `&&`-chained> ::
 #
 # A path-prefix matches a changed file when the file path STARTS WITH it (so it
 # works for a directory `src/cart/` or a file `go.mod`). Leave a command field
-# empty to skip that phase for that service. Lines that are blank or start with
+# empty to skip that phase for that service. A SHARED dir (proto/IDL contracts,
+# OpenAPI specs, a shared lib) is routed the same way — point its prefix at a
+# COMPOSITE command that builds/tests its consumers (see
+# quality-gate.routes.example, Shape E). Lines that are blank or start with
 # `#` are ignored. When this file has at least one active route it takes over;
 # QG_BUILD_CMD/QG_TEST_CMD are then the fallback for changed files that match
 # NO route (so a repo-wide lint can still run) — leave them empty for none.

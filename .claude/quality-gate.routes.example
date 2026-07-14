@@ -28,10 +28,12 @@
 #   - The COMMAND is arbitrary shell, so ANY stack works (no built-in stack list)
 #     — write whatever that service's CI/build uses, however unusual.
 #   - The one limit: routing is prefix-only — no globs/regex, no "any *.proto
-#     anywhere". A service must be identifiable by a LEADING path string (a dir,
-#     a nested dir, or a filename prefix like "src/cart_"). A build unit that is
-#     NOT a path subtree can't be a route; let the fallback pair (below) or the
-#     task's own acceptance check cover it.
+#     anywhere". A unit must be identifiable by a LEADING path string (a dir,
+#     a nested dir, or a filename prefix like "src/cart_"). A SHARED dir like
+#     "protos/" or "openapi/" IS a subtree and routes fine (see Shape E); only
+#     a build unit that is NOT a path subtree (files scattered across the tree)
+#     can't be a route — let the fallback pair (below) or the task's own
+#     acceptance check cover it.
 #
 # Changed files that match NO route are NOT verified by the gate; it prints a
 # NOTE so the gap is visible. QG_BUILD_CMD/QG_TEST_CMD (in settings.json) act as
@@ -65,3 +67,13 @@
 # --- Shape D: Maven/Gradle multi-module (modules are top-level dirs) ---------
 # payments/      :: mvn -q -pl payments -am compile :: mvn -q -pl payments test
 # ledger/        :: ./gradlew :ledger:assemble   :: ./gradlew :ledger:test
+#
+# --- Shape E: SHARED contract/library dir consumed by many services ----------
+# A change under a shared dir — proto/IDL contracts, OpenAPI/JSON-schema specs,
+# a shared internal library — is verified by building its CONSUMERS, not the dir
+# itself. Route the shared dir's prefix to a COMPOSITE command chaining the
+# consumers' commands with `&&` (the services that import it / codegen from it).
+# Without such a route, the repo's highest-blast-radius changes are exactly the
+# ones the gate never checks.
+# protos/  :: go build ./services/checkout/... && dotnet build src/cart :: go test ./services/checkout/... && dotnet test src/cart
+# openapi/ :: npm --prefix clients/web run build ::
