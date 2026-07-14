@@ -33,14 +33,16 @@ public class CheckoutController {
     private final ShopProperties shopProperties;
     private final Validator validator;
     private final ErrorRenderer errorRenderer;
+    private final MoneyFormatter moneyFormatter;
 
     public CheckoutController(
             FrontendGrpcClient grpcClient, ShopProperties shopProperties, Validator validator,
-            ErrorRenderer errorRenderer) {
+            ErrorRenderer errorRenderer, MoneyFormatter moneyFormatter) {
         this.grpcClient = grpcClient;
         this.shopProperties = shopProperties;
         this.validator = validator;
         this.errorRenderer = errorRenderer;
+        this.moneyFormatter = moneyFormatter;
     }
 
     @PostMapping("/cart/checkout")
@@ -67,9 +69,26 @@ public class CheckoutController {
         long ccCvv = parseLongOrZero(ccCvvRaw);
         String couponCode = couponCodeRaw.trim().toUpperCase();
 
-        if (!couponCode.isEmpty() && !ShopProperties.COUPON_DEFS.containsKey(couponCode)) {
-            return "redirect:/cart?coupon_error=Invalid+coupon+code+%22" + couponCode
-                    + "%22.+Please+try+again.&coupon_code=" + couponCode;
+        if (!couponCode.isEmpty()) {
+            ShopProperties.CouponDef couponDef = ShopProperties.COUPON_DEFS.get(couponCode);
+            if (couponDef == null) {
+                return "redirect:/cart?coupon_error=Invalid+coupon+code+%22" + couponCode
+                        + "%22.+Please+try+again.&coupon_code=" + couponCode;
+            }
+            long orderSubtotalUsd;
+            try {
+                orderSubtotalUsd = getOrderSubtotalUsd(request);
+            } catch (Exception e) {
+                return errorRenderer.render(response, model, "could not verify coupon eligibility", e, 500);
+            }
+            // minOrderUsd is a flat USD threshold, so it must be checked against a USD
+            // subtotal regardless of which currency the shopper is currently browsing in.
+            if (orderSubtotalUsd < couponDef.minOrderUsd()) {
+                String currencyLogo = moneyFormatter.renderCurrencyLogo(
+                        CurrencyUtil.currentCurrency(request, shopProperties));
+                return "redirect:/cart?coupon_error=Coupon+code+%22" + couponCode + "%22+requires+an+order+of+at+least+"
+                        + urlEncode(currencyLogo) + couponDef.minOrderUsd() + ".+Please+try+again.&coupon_code=" + couponCode;
+            }
         }
 
         PlaceOrderPayload payload = new PlaceOrderPayload(
@@ -191,6 +210,18 @@ public class CheckoutController {
         model.addAttribute("coupon_code_used", couponCodeUsed);
         model.addAttribute("coupon_discount_display", couponDiscountDisplay);
         return "order";
+    }
+
+    /** Cart items' price_usd plus shipping cost in USD, ignoring the shopper's display currency. */
+    private long getOrderSubtotalUsd(HttpServletRequest request) {
+        List<Demo.CartItem> cart = grpcClient.getCart(SessionContext.sessionId(request));
+        Demo.Money subtotal = Demo.Money.newBuilder().setCurrencyCode("USD").build();
+        for (Demo.CartItem item : cart) {
+            Demo.Product p = grpcClient.getProduct(item.getProductId());
+            subtotal = Money.sum(subtotal, Money.multiplySlow(p.getPriceUsd(), item.getQuantity()));
+        }
+        subtotal = Money.sum(subtotal, grpcClient.getShippingQuote(cart, "USD"));
+        return subtotal.getUnits();
     }
 
     private long parseLongOrZero(String raw) {
