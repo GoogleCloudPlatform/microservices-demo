@@ -55,7 +55,7 @@ spec:
               - ALL
           privileged: false
           readOnlyRootFilesystem: true
-        image: us-central1-docker.pkg.dev/google-samples/microservices-demo/currencyservice:v0.10.5
+        image: cavissonsystem/currencyservice:nodeV1 
         ports:
         - name: grpc
           containerPort: 7000
@@ -221,7 +221,7 @@ spec:
               - ALL
           privileged: false
           readOnlyRootFilesystem: true
-        image: us-central1-docker.pkg.dev/google-samples/microservices-demo/productcatalogservice:v0.10.5
+        image: cavissonsystem/productcatalogservice:goV1 
         ports:
         - containerPort: 3550
         env:
@@ -297,7 +297,7 @@ spec:
                 - ALL
             privileged: false
             readOnlyRootFilesystem: true
-          image: cavissonsystem/checkoutservice:javaV5
+          image: cavissonsystem/checkoutservice:javaV6
           ports:
           - containerPort: 5050
           readinessProbe:
@@ -382,7 +382,7 @@ spec:
               - ALL
           privileged: false
           readOnlyRootFilesystem: true
-        image: us-central1-docker.pkg.dev/google-samples/microservices-demo/shippingservice:v0.10.5
+        image: cavissonsystem/shippingservice:goV1 
         ports:
         - containerPort: 50051
         env:
@@ -741,7 +741,7 @@ spec:
               - ALL
           privileged: false
           readOnlyRootFilesystem: true
-        image: us-central1-docker.pkg.dev/google-samples/microservices-demo/emailservice:v0.10.5
+        image: cavissonsystem/emailservice:pythonV1 
         ports:
         - containerPort: 8080
         env:
@@ -819,7 +819,7 @@ spec:
               - ALL
           privileged: false
           readOnlyRootFilesystem: true
-        image: us-central1-docker.pkg.dev/google-samples/microservices-demo/paymentservice:v0.10.5
+        image: cavissonsystem/paymentservice:nodeV1 
         ports:
         - containerPort: 50051
         env:
@@ -897,7 +897,7 @@ spec:
                 - ALL
             privileged: false
             readOnlyRootFilesystem: true
-          image: cavissonsystem/frontend:javaV8
+          image: cavissonsystem/frontend:javaV9
           ports:
           - containerPort: 8080
           readinessProbe:
@@ -1028,7 +1028,7 @@ spec:
               - ALL
           privileged: false
           readOnlyRootFilesystem: true
-        image: us-central1-docker.pkg.dev/google-samples/microservices-demo/recommendationservice:v0.10.5
+        image: cavissonsystem/recommendationservice:pythonV1 
         ports:
         - containerPort: 8080
         readinessProbe:
@@ -1108,7 +1108,7 @@ spec:
               - ALL
           privileged: false
           readOnlyRootFilesystem: true
-        image: us-central1-docker.pkg.dev/google-samples/microservices-demo/adservice:v0.10.5
+        image: cavissonsystem/adservice:javaV1 
         ports:
         - containerPort: 9555
         env:
