@@ -1,5 +1,5 @@
 # quality-gate.routes — per-service routing for the Online Boutique monorepo.
-# Written by init-dev-kit (dev-kit 0.5.1). One route per service:
+# Written by init-dev-kit (dev-kit 0.5.2). One route per service:
 #     <path-prefix> :: <build_cmd> :: <test_cmd>
 # The gate runs ONLY the service(s) whose files changed. Commands are cited to
 # .github/workflows/ci-pr.yaml / ci-main.yaml where the service is verified.
@@ -23,6 +23,12 @@ src/cartservice/           :: dotnet build src/cartservice/               :: dot
 # compileJava only (no unit tests in this service); gradlew ships mode 644 so
 # invoke it via `sh`. First run downloads the Gradle distribution + deps.
 src/adservice/             :: sh src/adservice/gradlew -p src/adservice compileJava ::
+
+# --- Shared gRPC contracts (Shape E: composite of consumers) ------------------
+# A change under protos/ affects every service that vendors generated code from
+# it, so it is verified by building/testing the compiled consumers (`&&`-chained
+# — same commands as their own routes above; checkout/adservice build-only).
+protos/                    :: go -C src/frontend build ./... && go -C src/shippingservice build ./... && go -C src/productcatalogservice build ./... && go -C src/checkoutservice build ./... && dotnet build src/cartservice/ && sh src/adservice/gradlew -p src/adservice compileJava :: go -C src/frontend test ./... && go -C src/shippingservice test ./... && go -C src/productcatalogservice test ./... && dotnet test src/cartservice/
 
 # Node.js (currency, payment) and Python (email, recommendation, loadgenerator,
 # shoppingassistant) have NO unit tests in CI and no compile step — they are not
