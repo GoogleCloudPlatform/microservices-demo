@@ -1,0 +1,36 @@
+{
+  "$comment": "dev-kit quality gate. This is a MULTI-SERVICE (polyglot) repo with no single build/test command, so the gate is ROUTED via .claude/quality-gate.routes — it runs only the service(s) that changed. QG_BUILD_CMD/QG_TEST_CMD are the fallback pair for changed files that match NO route; left EMPTY here on purpose, so unrouted changes (Node/Python services) are verified by each task's own acceptance check. No repo-wide 'model' pin on purpose: run the dev-kit orchestrator on Opus per-session (/model opus). _dev_kit_setup below records the routing decision.",
+  "_dev_kit_setup": {
+    "mode": "routed",
+    "routes_file": ".claude/quality-gate.routes",
+    "routed_services": "Go (frontend, shippingservice, productcatalogservice build+test; checkoutservice build-only), C# cartservice (build+test), Java adservice (compile-only)",
+    "unrouted": "Node.js (currencyservice, paymentservice) and Python (emailservice, recommendationservice, loadgenerator, shoppingassistantservice) have no CI unit tests / compile step — covered by task acceptance checks",
+    "rationale": "CI (ci-pr.yaml/ci-main.yaml) unit-tests only Go shipping+productcatalog+frontend/validator and C# cartservice; the deployment-tests job (skaffold->GKE) is too heavy for a per-Stop gate. User chose to gate all compilable services."
+  },
+  "env": {
+    "QG_BUILD_CMD": "",
+    "QG_TEST_CMD": ""
+  },
+  "hooks": {
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/quality-gate.sh\""
+          }
+        ]
+      }
+    ],
+    "SubagentStop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/quality-gate.sh\""
+          }
+        ]
+      }
+    ]
+  }
+}
