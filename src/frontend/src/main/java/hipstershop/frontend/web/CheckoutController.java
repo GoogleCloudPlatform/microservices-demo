@@ -75,17 +75,19 @@ public class CheckoutController {
                 return "redirect:/cart?coupon_error=Invalid+coupon+code+%22" + couponCode
                         + "%22.+Please+try+again.&coupon_code=" + couponCode;
             }
-            long orderSubtotalUsd;
+            String currentCurrency = CurrencyUtil.currentCurrency(request, shopProperties);
+            long orderSubtotal;
             try {
-                orderSubtotalUsd = getOrderSubtotalUsd(request);
+                orderSubtotal = getOrderSubtotal(request, currentCurrency);
             } catch (Exception e) {
                 return errorRenderer.render(response, model, "could not verify coupon eligibility", e, 500);
             }
-            // minOrderUsd is a flat USD threshold, so it must be checked against a USD
-            // subtotal regardless of which currency the shopper is currently browsing in.
-            if (orderSubtotalUsd < couponDef.minOrderUsd()) {
-                String currencyLogo = moneyFormatter.renderCurrencyLogo(
-                        CurrencyUtil.currentCurrency(request, shopProperties));
+            // minOrderUsd is compared as a flat number directly against the shopper's real,
+            // currency-converted cart total (what's actually displayed on the page) — no
+            // conversion of the threshold itself, matching the cart page's
+            // "Save X off orders above Y" hint text.
+            if (orderSubtotal < couponDef.minOrderUsd()) {
+                String currencyLogo = moneyFormatter.renderCurrencyLogo(currentCurrency);
                 return "redirect:/cart?coupon_error=Coupon+code+%22" + couponCode + "%22+requires+an+order+of+at+least+"
                         + urlEncode(currencyLogo) + couponDef.minOrderUsd() + ".+Please+try+again.&coupon_code=" + couponCode;
             }
@@ -185,19 +187,14 @@ public class CheckoutController {
             return errorRenderer.render(response, model, "could not retrieve currencies", e, 500);
         }
 
+        // Only surface the "Coupon Discount" row when the shopper actually typed a code —
+        // a silently-defaulted coupon still reduces total_paid above, but stays invisible
+        // in the UI since the shopper never asked for it.
         Hipstershop.Money discountAmount = null;
         String couponCodeUsed = "";
-        long couponDiscountDisplay = 0;
         if (!couponCode.isEmpty()) {
             discountAmount = order.getOrder().getDiscountAmount();
             couponCodeUsed = order.getOrder().getCouponCodeUsed();
-            // Show the coupon's flat face value (e.g. "10") rather than the real
-            // currency-converted amount actually deducted, matching the cart page's
-            // coupon hint text and keeping the exact discount amount private.
-            ShopProperties.CouponDef def = ShopProperties.COUPON_DEFS.get(couponCodeUsed);
-            if (def != null) {
-                couponDiscountDisplay = def.discountUsd();
-            }
         }
 
         model.addAttribute("show_currency", false);
@@ -208,19 +205,19 @@ public class CheckoutController {
         model.addAttribute("recommendations", recommendations);
         model.addAttribute("discount_amount", discountAmount);
         model.addAttribute("coupon_code_used", couponCodeUsed);
-        model.addAttribute("coupon_discount_display", couponDiscountDisplay);
         return "order";
     }
 
-    /** Cart items' price_usd plus shipping cost in USD, ignoring the shopper's display currency. */
-    private long getOrderSubtotalUsd(HttpServletRequest request) {
+    /** Cart items' price plus shipping cost, converted into the shopper's current currency. */
+    private long getOrderSubtotal(HttpServletRequest request, String currency) {
         List<Hipstershop.CartItem> cart = grpcClient.getCart(SessionContext.sessionId(request));
-        Hipstershop.Money subtotal = Hipstershop.Money.newBuilder().setCurrencyCode("USD").build();
+        Hipstershop.Money subtotal = Hipstershop.Money.newBuilder().setCurrencyCode(currency).build();
         for (Hipstershop.CartItem item : cart) {
             Hipstershop.Product p = grpcClient.getProduct(item.getProductId());
-            subtotal = Money.sum(subtotal, Money.multiplySlow(p.getPriceUsd(), item.getQuantity()));
+            Hipstershop.Money price = grpcClient.convertCurrency(p.getPriceUsd(), currency);
+            subtotal = Money.sum(subtotal, Money.multiplySlow(price, item.getQuantity()));
         }
-        subtotal = Money.sum(subtotal, grpcClient.getShippingQuote(cart, "USD"));
+        subtotal = Money.sum(subtotal, grpcClient.getShippingQuote(cart, currency));
         return subtotal.getUnits();
     }
 
