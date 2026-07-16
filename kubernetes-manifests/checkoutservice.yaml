@@ -49,9 +49,19 @@ spec:
           readinessProbe:
             grpc:
               port: 5050
+            initialDelaySeconds: 90
+            periodSeconds: 20
+            successThreshold: 1
+            timeoutSeconds: 5
+            failureThreshold: 3
           livenessProbe:
             grpc:
               port: 5050
+            initialDelaySeconds: 90
+            periodSeconds: 20
+            successThreshold: 1
+            timeoutSeconds: 5
+            failureThreshold: 3
           env:
           - name: PORT
             value: "5050"
@@ -70,10 +80,10 @@ spec:
           resources:
             requests:
               cpu: 100m
-              memory: 64Mi
+              memory: 256Mi
             limits:
               cpu: 200m
-              memory: 128Mi
+              memory: 512Mi
 ---
 apiVersion: v1
 kind: Service
