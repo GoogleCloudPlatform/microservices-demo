@@ -29,6 +29,7 @@ RUN chmod +x gradlew
 RUN ./gradlew bootJar --no-daemon -x test
 
 FROM eclipse-temurin:17-jre-alpine
+RUN apk add --no-cache bash
 WORKDIR /app
 COPY --from=builder /app/build/libs/*.jar /app/app.jar
 
