@@ -5,7 +5,6 @@ WORKDIR /app
 
 COPY go.mod go.sum ./
 RUN go mod download
-RUN go get google.golang.org/grpc@v1.79.3 && go mod tidy
 
 COPY . .
 
