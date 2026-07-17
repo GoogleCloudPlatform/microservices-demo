@@ -98,3 +98,51 @@ resource "aws_eks_node_group" "main" {
     aws_iam_role_policy_attachment.ec2_container_registry_readonly
   ]
 }
+
+# ── OIDC Provider for IRSA ───────────────────────────
+data "tls_certificate" "eks" {
+  url = aws_eks_cluster.main.identity[0].oidc[0].issuer
+}
+
+resource "aws_iam_openid_connect_provider" "eks" {
+  client_id_list  = ["sts.amazonaws.com"]
+  thumbprint_list = [data.tls_certificate.eks.certificates[0].sha1_fingerprint]
+  url             = aws_eks_cluster.main.identity[0].oidc[0].issuer
+}
+
+# ── IAM Role for AWS Load Balancer Controller ────────
+data "aws_iam_policy_document" "aws_lbc" {
+  statement {
+    effect = "Allow"
+    principals {
+      type        = "Federated"
+      identifiers = [aws_iam_openid_connect_provider.eks.arn]
+    }
+    actions = ["sts:AssumeRoleWithWebIdentity"]
+    condition {
+      test     = "StringEquals"
+      variable = "${aws_iam_openid_connect_provider.eks.url}:aud"
+      values   = ["sts.amazonaws.com"]
+    }
+    condition {
+      test     = "StringEquals"
+      variable = "${aws_iam_openid_connect_provider.eks.url}:sub"
+      values   = ["system:serviceaccount:kube-system:aws-load-balancer-controller"]
+    }
+  }
+}
+
+resource "aws_iam_role" "aws_lbc" {
+  name               = "online-boutique-aws-lbc"
+  assume_role_policy = data.aws_iam_policy_document.aws_lbc.json
+}
+
+resource "aws_iam_role_policy_attachment" "aws_lbc" {
+  policy_arn = "arn:aws:iam::865749917919:policy/AWSLoadBalancerControllerIAMPolicy"
+  role       = aws_iam_role.aws_lbc.name
+}
+
+# ── Output the role ARN (needed for Helm install) ────
+output "aws_lbc_role_arn" {
+  value = aws_iam_role.aws_lbc.arn
+}

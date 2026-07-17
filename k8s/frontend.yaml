@@ -17,6 +17,13 @@ spec:
           image: 865749917919.dkr.ecr.us-east-1.amazonaws.com/frontend:b03773cf983cbd5b115020ccc59bdb9352362673
           ports:
             - containerPort: 8080
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "64Mi"
+            limits:
+              cpu: "200m"
+              memory: "128Mi"
           env:
             - name: PRODUCT_CATALOG_SERVICE_ADDR
               value: "productcatalogservice:3550"
@@ -40,7 +47,7 @@ kind: Service
 metadata:
   name: frontend
 spec:
-  type: LoadBalancer
+  type: ClusterIP
   selector:
     app: frontend
   ports:
