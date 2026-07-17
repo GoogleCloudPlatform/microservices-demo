@@ -10,11 +10,10 @@ on:
 
 env:
   AWS_REGION: us-east-1
-  ECR_REGISTRY: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com
 
 jobs:
   build-and-push:
-    name: Build and Push Docker Images
+    name: Build, Scan and Push Docker Images
     runs-on: ubuntu-latest
 
     steps:
@@ -32,62 +31,242 @@ jobs:
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
 
-      - name: Build and push frontend
-        run: |
-          docker build -t $ECR_REGISTRY/frontend:${{ github.sha }} ./src/frontend
-          docker push $ECR_REGISTRY/frontend:${{ github.sha }}
+      # ── frontend ─────────────────────────────────
+      - name: Build frontend
+        env:
+          REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        run: docker build -t $REGISTRY/frontend:${{ github.sha }} ./src/frontend
 
-      - name: Build and push productcatalogservice
-        run: |
-          docker build -t $ECR_REGISTRY/productcatalogservice:${{ github.sha }} ./src/productcatalogservice
-          docker push $ECR_REGISTRY/productcatalogservice:${{ github.sha }}
+      - name: Scan frontend with Trivy
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: ${{ steps.login-ecr.outputs.registry }}/frontend:${{ github.sha }}
+          format: table
+          exit-code: 1
+          severity: CRITICAL
+          ignore-unfixed: true
 
-      - name: Build and push cartservice
-        run: |
-          docker build -t $ECR_REGISTRY/cartservice:${{ github.sha }} ./src/cartservice/src
-          docker push $ECR_REGISTRY/cartservice:${{ github.sha }}
+      - name: Push frontend
+        env:
+          REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        run: docker push $REGISTRY/frontend:${{ github.sha }}
 
-      - name: Build and push currencyservice
-        run: |
-          docker build -t $ECR_REGISTRY/currencyservice:${{ github.sha }} ./src/currencyservice
-          docker push $ECR_REGISTRY/currencyservice:${{ github.sha }}
+      # ── productcatalogservice ─────────────────────
+      - name: Build productcatalogservice
+        env:
+          REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        run: docker build -t $REGISTRY/productcatalogservice:${{ github.sha }} ./src/productcatalogservice
 
-      - name: Build and push paymentservice
-        run: |
-          docker build -t $ECR_REGISTRY/paymentservice:${{ github.sha }} ./src/paymentservice
-          docker push $ECR_REGISTRY/paymentservice:${{ github.sha }}
+      - name: Scan productcatalogservice with Trivy
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: ${{ steps.login-ecr.outputs.registry }}/productcatalogservice:${{ github.sha }}
+          format: table
+          exit-code: 1
+          severity: CRITICAL
+          ignore-unfixed: true
 
-      - name: Build and push shippingservice
-        run: |
-          docker build -t $ECR_REGISTRY/shippingservice:${{ github.sha }} ./src/shippingservice
-          docker push $ECR_REGISTRY/shippingservice:${{ github.sha }}
+      - name: Push productcatalogservice
+        env:
+          REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        run: docker push $REGISTRY/productcatalogservice:${{ github.sha }}
 
-      - name: Build and push emailservice
-        run: |
-          docker build -t $ECR_REGISTRY/emailservice:${{ github.sha }} ./src/emailservice
-          docker push $ECR_REGISTRY/emailservice:${{ github.sha }}
+      # ── cartservice ───────────────────────────────
+      - name: Build cartservice
+        env:
+          REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        run: docker build -t $REGISTRY/cartservice:${{ github.sha }} ./src/cartservice/src
 
-      - name: Build and push checkoutservice
-        run: |
-          docker build -t $ECR_REGISTRY/checkoutservice:${{ github.sha }} ./src/checkoutservice
-          docker push $ECR_REGISTRY/checkoutservice:${{ github.sha }}
+      - name: Scan cartservice with Trivy
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: ${{ steps.login-ecr.outputs.registry }}/cartservice:${{ github.sha }}
+          format: table
+          exit-code: 1
+          severity: CRITICAL
+          ignore-unfixed: true
 
-      - name: Build and push recommendationservice
-        run: |
-          docker build -t $ECR_REGISTRY/recommendationservice:${{ github.sha }} ./src/recommendationservice
-          docker push $ECR_REGISTRY/recommendationservice:${{ github.sha }}
+      - name: Push cartservice
+        env:
+          REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        run: docker push $REGISTRY/cartservice:${{ github.sha }}
 
-      - name: Build and push adservice
-        run: |
-          docker build -t $ECR_REGISTRY/adservice:${{ github.sha }} ./src/adservice
-          docker push $ECR_REGISTRY/adservice:${{ github.sha }}
+      # ── currencyservice ───────────────────────────
+      - name: Build currencyservice
+        env:
+          REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        run: docker build -t $REGISTRY/currencyservice:${{ github.sha }} ./src/currencyservice
 
-      - name: Build and push loadgenerator
-        run: |
-          docker build -t $ECR_REGISTRY/loadgenerator:${{ github.sha }} ./src/loadgenerator
-          docker push $ECR_REGISTRY/loadgenerator:${{ github.sha }}
+      - name: Scan currencyservice with Trivy
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: ${{ steps.login-ecr.outputs.registry }}/currencyservice:${{ github.sha }}
+          format: table
+          exit-code: 1
+          severity: CRITICAL
+          ignore-unfixed: true
 
-      - name: Build and push shoppingassistantservice
-        run: |
-          docker build -t $ECR_REGISTRY/shoppingassistantservice:${{ github.sha }} ./src/shoppingassistantservice
-          docker push $ECR_REGISTRY/shoppingassistantservice:${{ github.sha }}
+      - name: Push currencyservice
+        env:
+          REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        run: docker push $REGISTRY/currencyservice:${{ github.sha }}
+
+      # ── paymentservice ────────────────────────────
+      - name: Build paymentservice
+        env:
+          REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        run: docker build -t $REGISTRY/paymentservice:${{ github.sha }} ./src/paymentservice
+
+      - name: Scan paymentservice with Trivy
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: ${{ steps.login-ecr.outputs.registry }}/paymentservice:${{ github.sha }}
+          format: table
+          exit-code: 1
+          severity: CRITICAL
+          ignore-unfixed: true
+
+      - name: Push paymentservice
+        env:
+          REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        run: docker push $REGISTRY/paymentservice:${{ github.sha }}
+
+      # ── shippingservice ───────────────────────────
+      - name: Build shippingservice
+        env:
+          REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        run: docker build -t $REGISTRY/shippingservice:${{ github.sha }} ./src/shippingservice
+
+      - name: Scan shippingservice with Trivy
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: ${{ steps.login-ecr.outputs.registry }}/shippingservice:${{ github.sha }}
+          format: table
+          exit-code: 1
+          severity: CRITICAL
+          ignore-unfixed: true
+
+      - name: Push shippingservice
+        env:
+          REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        run: docker push $REGISTRY/shippingservice:${{ github.sha }}
+
+      # ── emailservice ──────────────────────────────
+      - name: Build emailservice
+        env:
+          REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        run: docker build -t $REGISTRY/emailservice:${{ github.sha }} ./src/emailservice
+
+      - name: Scan emailservice with Trivy
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: ${{ steps.login-ecr.outputs.registry }}/emailservice:${{ github.sha }}
+          format: table
+          exit-code: 1
+          severity: CRITICAL
+          ignore-unfixed: true
+
+      - name: Push emailservice
+        env:
+          REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        run: docker push $REGISTRY/emailservice:${{ github.sha }}
+
+      # ── checkoutservice ───────────────────────────
+      - name: Build checkoutservice
+        env:
+          REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        run: docker build -t $REGISTRY/checkoutservice:${{ github.sha }} ./src/checkoutservice
+
+      - name: Scan checkoutservice with Trivy
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: ${{ steps.login-ecr.outputs.registry }}/checkoutservice:${{ github.sha }}
+          format: table
+          exit-code: 1
+          severity: CRITICAL
+          ignore-unfixed: true
+
+      - name: Push checkoutservice
+        env:
+          REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        run: docker push $REGISTRY/checkoutservice:${{ github.sha }}
+
+      # ── recommendationservice ─────────────────────
+      - name: Build recommendationservice
+        env:
+          REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        run: docker build -t $REGISTRY/recommendationservice:${{ github.sha }} ./src/recommendationservice
+
+      - name: Scan recommendationservice with Trivy
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: ${{ steps.login-ecr.outputs.registry }}/recommendationservice:${{ github.sha }}
+          format: table
+          exit-code: 1
+          severity: CRITICAL
+          ignore-unfixed: true
+
+      - name: Push recommendationservice
+        env:
+          REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        run: docker push $REGISTRY/recommendationservice:${{ github.sha }}
+
+      # ── adservice ─────────────────────────────────
+      - name: Build adservice
+        env:
+          REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        run: docker build -t $REGISTRY/adservice:${{ github.sha }} ./src/adservice
+
+      - name: Scan adservice with Trivy
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: ${{ steps.login-ecr.outputs.registry }}/adservice:${{ github.sha }}
+          format: table
+          exit-code: 1
+          severity: CRITICAL
+          ignore-unfixed: true
+
+      - name: Push adservice
+        env:
+          REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        run: docker push $REGISTRY/adservice:${{ github.sha }}
+
+      # ── loadgenerator ─────────────────────────────
+      - name: Build loadgenerator
+        env:
+          REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        run: docker build -t $REGISTRY/loadgenerator:${{ github.sha }} ./src/loadgenerator
+
+      - name: Scan loadgenerator with Trivy
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: ${{ steps.login-ecr.outputs.registry }}/loadgenerator:${{ github.sha }}
+          format: table
+          exit-code: 1
+          severity: CRITICAL
+          ignore-unfixed: true
+
+      - name: Push loadgenerator
+        env:
+          REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        run: docker push $REGISTRY/loadgenerator:${{ github.sha }}
+
+      # ── shoppingassistantservice ──────────────────
+      - name: Build shoppingassistantservice
+        env:
+          REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        run: docker build -t $REGISTRY/shoppingassistantservice:${{ github.sha }} ./src/shoppingassistantservice
+
+      - name: Scan shoppingassistantservice with Trivy
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: ${{ steps.login-ecr.outputs.registry }}/shoppingassistantservice:${{ github.sha }}
+          format: table
+          exit-code: 1
+          severity: CRITICAL
+          ignore-unfixed: true
+
+      - name: Push shoppingassistantservice
+        env:
+          REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        run: docker push $REGISTRY/shoppingassistantservice:${{ github.sha }}
