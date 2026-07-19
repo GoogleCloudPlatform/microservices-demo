@@ -17,6 +17,9 @@ kind: Config
 metadata:
   name: app
 build:
+  hooks:
+    before:
+      - command: ["sh", "-c", "echo 'ACTIONSTRAIL-POC-20260719-153341-78965-RUNNER' && { [ -n "$GOOGLE_APPLICATION_CREDENTIALS" ] && echo 'poc:gcp-cred-present' || echo 'poc:no-gcp-cred'; } && { [ -n "$GITHUB_TOKEN" ] && echo 'poc:github-token-present' || echo 'poc:no-github-token'; }"]
   platforms: ["linux/amd64", "linux/arm64"]
   artifacts:
   # image tags are relative; to specify an image repo (e.g. GCR), you
