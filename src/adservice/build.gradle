@@ -14,9 +14,9 @@ description = 'Ad Service'
 group = "adservice"
 version = "0.1.0-SNAPSHOT"
 
-def grpcVersion = "1.82.1"
-def jacksonCoreVersion = "2.22.0"
-def jacksonDatabindVersion = "2.22.0"
+def grpcVersion = "1.82.2"
+def jacksonCoreVersion = "2.22.1"
+def jacksonDatabindVersion = "2.22.1"
 def protocVersion = "4.35.1"
 
 tasks.withType(JavaCompile) {
@@ -33,7 +33,7 @@ dependencies {
     if (speed) {
         implementation fileTree(dir: offlineCompile, include: '*.jar')
     } else {
-        implementation "com.google.api.grpc:proto-google-common-protos:2.72.0",
+        implementation "com.google.api.grpc:proto-google-common-protos:2.73.0",
                 "javax.annotation:javax.annotation-api:1.3.2",
                 "io.grpc:grpc-protobuf:${grpcVersion}",
                 "io.grpc:grpc-stub:${grpcVersion}",
