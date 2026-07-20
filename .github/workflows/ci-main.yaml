@@ -85,7 +85,7 @@ jobs:
         chmod +x skaffold
         sudo mv skaffold /usr/local/bin
     - name: Cache Skaffold cache
-      uses: actions/cache@v4
+      uses: actions/cache@v6
       with:
         path: ~/.skaffold/cache
         key: skaffold-${{ runner.os }}-${{ github.workflow }}-${{ github.run_id }}
