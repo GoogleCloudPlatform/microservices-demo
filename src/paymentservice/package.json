@@ -25,6 +25,7 @@
     "uuid": "^14.0.0"
   },
   "overrides": {
-    "protobufjs": "^7.5.5"
+    "protobufjs": "^7.5.5",
+    "tar": "^7.5.19"
   }
 }
