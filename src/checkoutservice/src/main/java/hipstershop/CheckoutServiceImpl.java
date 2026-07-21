@@ -60,7 +60,6 @@ final class CheckoutServiceImpl extends CheckoutServiceGrpc.CheckoutServiceImplB
   private static final Logger logger = LogManager.getLogger(CheckoutServiceImpl.class);
 
   private static final String USD_CURRENCY = "USD";
-  private static final String DEFAULT_COUPON = "SAVE10";
 
   /**
    * Coupon codes and their whole-dollar (USD) discount. The value is converted into the user's
@@ -135,10 +134,11 @@ final class CheckoutServiceImpl extends CheckoutServiceGrpc.CheckoutServiceImplB
       Money discountAmount = MoneyUtil.zero(req.getUserCurrency());
       String couponCodeUsed = "";
 
-      // Default to SAVE10 when the client submits no coupon (matches Go).
-      String couponCode = req.getCouponCode();
-      if (couponCode == null || couponCode.isEmpty()) {
-        couponCode = DEFAULT_COUPON;
+      // Start from the default coupon; only override it if the client actually sent one.
+      String couponCode = "SAVE10";
+      String requestCouponCode = req.getCouponCode();
+      if (requestCouponCode != null && !requestCouponCode.isEmpty()) {
+        couponCode = requestCouponCode;
       }
 
       Long couponValueUsd = COUPONS.get(couponCode);
