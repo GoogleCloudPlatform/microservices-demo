@@ -2,8 +2,8 @@ FROM node:20-alpine
 
 WORKDIR /app
 
-RUN apk add --no-cache python3 make g++
-
+RUN apk add --no-cache python3 make g++ && \
+    npm install -g npm@11.18.0 --ignore-scripts
 COPY package.json package-lock.json ./
 
 # Remove the problematic profiler package before installing

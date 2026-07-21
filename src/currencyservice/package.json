@@ -25,6 +25,7 @@
     "xml2js": "0.6.2"
   },
   "overrides": {
-    "protobufjs": "^7.5.5"
+    "protobufjs": "^7.5.5",
+    "tar": "^7.5.19"
   }
 }
