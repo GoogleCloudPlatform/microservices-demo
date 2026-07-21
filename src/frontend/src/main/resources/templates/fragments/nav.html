@@ -13,18 +13,20 @@
     <nav class="navbar sub-navbar" role="navigation" aria-label="Main navigation">
         <div class="container d-flex justify-content-between">
 
-            <a th:href="@{/}"
-               class="navbar-brand d-flex align-items-center"
-               th:aria-label="${is_cymbal_brand} ? 'Cymbal Shops - go to home page' : 'Online Boutique - go to home page'">
-                <img th:if="${is_cymbal_brand}"
-                     th:src="@{/static/icons/Cymbal_NavLogo.svg}"
-                     alt="Cymbal Shops logo"
-                     class="top-left-logo-cymbal" />
-                <img th:unless="${is_cymbal_brand}"
-                     th:src="@{/static/icons/Hipster_NavLogo.svg}"
-                     alt="Online Boutique logo"
-                     class="top-left-logo" />
-            </a>
+            <div class="d-flex align-items-center">
+                <a th:href="@{/}"
+                   class="navbar-brand d-flex align-items-center"
+                   th:aria-label="${is_cymbal_brand} ? 'Cymbal Shops - go to home page' : 'Online Boutique - go to home page'">
+                    <img th:if="${is_cymbal_brand}"
+                         th:src="@{/static/icons/Cymbal_NavLogo.svg}"
+                         alt="Cymbal Shops logo"
+                         class="top-left-logo-cymbal" />
+                    <img th:unless="${is_cymbal_brand}"
+                         th:src="@{/static/icons/Hipster_NavLogo.svg}"
+                         alt="Online Boutique logo"
+                         class="top-left-logo" />
+                </a>
+            </div>
 
             <div class="controls" role="group" aria-label="Site controls">
 
@@ -75,7 +77,7 @@
                    class="cart-link"
                    th:aria-label="${cart_size} ? ('View shopping cart, ' + ${cart_size} + ' item' + (${cart_size} > 1 ? 's' : '') + ' in cart') : 'View shopping cart, cart is empty'">
                     <img th:src="@{/static/icons/Hipster_CartIcon.svg}"
-                         alt="Shopping cart icon"
+                         alt="Cart icon"
                          class="logo"
                          title="Cart" />
                     <span class="cart-size-circle" aria-hidden="true" th:if="${cart_size}" th:text="${cart_size}">0</span>
