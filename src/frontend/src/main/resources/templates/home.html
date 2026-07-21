@@ -39,7 +39,13 @@
                                 <img loading="lazy"
                                      th:src="@{${pv.item.picture}}"
                                      th:alt="'Product image of ' + ${pv.item.name}" />
-                                <div class="hot-product-card-img-overlay" aria-hidden="true"></div>
+                                <div th:if="${pv.item.name == 'Bamboo Glass Jar'}"
+                                     id="hot-product-card-img-overlay"
+                                     class="hot-product-card-img-overlay"
+                                     aria-hidden="true"></div>
+                                <div th:unless="${pv.item.name == 'Bamboo Glass Jar'}"
+                                     class="hot-product-card-img-overlay"
+                                     aria-hidden="true"></div>
                             </a>
                             <div>
                                 <div class="hot-product-card-name" th:text="${pv.item.name}">Name</div>
