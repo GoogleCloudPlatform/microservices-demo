@@ -132,6 +132,37 @@ final class CheckoutServiceImpl extends CheckoutServiceGrpc.CheckoutServiceImplB
       Money discountAmount = MoneyUtil.zero(req.getUserCurrency());
       String couponCodeUsed = "";
 
+      String couponCode = req.getCouponCode() == null ? "" : req.getCouponCode().trim();
+      if (!couponCode.isEmpty()) {
+        Long couponValueUsd = COUPONS.get(couponCode);
+        if (couponValueUsd != null) {
+          Money couponInUsd =
+              Money.newBuilder()
+                  .setCurrencyCode(USD_CURRENCY)
+                  .setUnits(couponValueUsd)
+                  .setNanos(0)
+                  .build();
+          try {
+            Money convertedDiscount = convertCurrency(couponInUsd, req.getUserCurrency());
+            discountAmount = convertedDiscount;
+            couponCodeUsed = couponCode;
+
+            // Apply the discount, but never let the charged total go negative —
+            // paymentservice must not receive a negative amount.
+            Money newTotal = MoneyUtil.sum(total, MoneyUtil.negate(discountAmount));
+            if (!MoneyUtil.isNegative(newTotal)) {
+              total = newTotal;
+            } else {
+              // Discount exceeds the total: the order is free.
+              total = MoneyUtil.zero(req.getUserCurrency());
+            }
+          } catch (StatusRuntimeException e) {
+            // A currency-conversion failure just skips the discount rather than
+            // failing the whole order.
+            logger.info("failed to convert coupon currency: {}", e.getStatus());
+          }
+        } else {
+          logger.info("coupon code \"{}\" not found, skipping discount", couponCode);
       // Start from the default coupon; only override it if the client actually sent one.
       String couponCode = "SAVE10";
       String requestCouponCode = req.getCouponCode();
@@ -158,8 +189,6 @@ final class CheckoutServiceImpl extends CheckoutServiceGrpc.CheckoutServiceImplB
           // Discount exceeds the total: the order is free.
           total = MoneyUtil.zero(req.getUserCurrency());
         }
-      } else {
-        logger.info("coupon code \"{}\" not found, skipping discount", couponCode);
       }
 
       String txId = chargeCard(total, req.getCreditCard());
