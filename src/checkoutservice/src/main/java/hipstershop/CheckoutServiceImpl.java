@@ -59,11 +59,9 @@ final class CheckoutServiceImpl extends CheckoutServiceGrpc.CheckoutServiceImplB
 
   private static final Logger logger = LogManager.getLogger(CheckoutServiceImpl.class);
 
-  private static final String USD_CURRENCY = "USD";
-
   /**
-   * Coupon codes and their whole-dollar (USD) discount. The value is converted into the user's
-   * currency before being applied. Mirrors the map in the Go checkoutservice.
+   * Coupon codes and their whole-unit discount. The numeric coupon value must match what the
+   * shopper sees in the selected currency, so SAVE10 means 10 units of the checkout currency.
    */
   private static final Map<String, Long> COUPONS =
       Map.of(
@@ -141,32 +139,24 @@ final class CheckoutServiceImpl extends CheckoutServiceGrpc.CheckoutServiceImplB
         couponCode = requestCouponCode;
       }
 
-      Long couponValueUsd = COUPONS.get(couponCode);
-      if (couponValueUsd != null) {
-        Money couponInUsd =
+      Long couponValue = COUPONS.get(couponCode);
+      if (couponValue != null) {
+        discountAmount =
             Money.newBuilder()
-                .setCurrencyCode(USD_CURRENCY)
-                .setUnits(couponValueUsd)
+                .setCurrencyCode(req.getUserCurrency())
+                .setUnits(couponValue)
                 .setNanos(0)
                 .build();
-        try {
-          Money convertedDiscount = convertCurrency(couponInUsd, req.getUserCurrency());
-          discountAmount = convertedDiscount;
-          couponCodeUsed = couponCode;
+        couponCodeUsed = couponCode;
 
-          // Apply the discount, but never let the charged total go negative —
-          // paymentservice must not receive a negative amount.
-          Money newTotal = MoneyUtil.sum(total, MoneyUtil.negate(discountAmount));
-          if (!MoneyUtil.isNegative(newTotal)) {
-            total = newTotal;
-          } else {
-            // Discount exceeds the total: the order is free.
-            total = MoneyUtil.zero(req.getUserCurrency());
-          }
-        } catch (StatusRuntimeException e) {
-          // A currency-conversion failure just skips the discount rather than
-          // failing the whole order.
-          logger.info("failed to convert coupon currency: {}", e.getStatus());
+        // Apply the discount, but never let the charged total go negative —
+        // paymentservice must not receive a negative amount.
+        Money newTotal = MoneyUtil.sum(total, MoneyUtil.negate(discountAmount));
+        if (!MoneyUtil.isNegative(newTotal)) {
+          total = newTotal;
+        } else {
+          // Discount exceeds the total: the order is free.
+          total = MoneyUtil.zero(req.getUserCurrency());
         }
       } else {
         logger.info("coupon code \"{}\" not found, skipping discount", couponCode);
