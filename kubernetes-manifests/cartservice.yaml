@@ -52,17 +52,22 @@ spec:
         resources:
           requests:
             cpu: 200m
-            memory: 64Mi
+            memory: 256Mi
           limits:
-            cpu: 300m
-            memory: 128Mi
+            cpu: 500m
+            memory: 512Mi
         readinessProbe:
-          initialDelaySeconds: 15
+          initialDelaySeconds: 30
+          timeoutSeconds: 10
+          periodSeconds: 10
+          failureThreshold: 5
           grpc:
             port: 7070
         livenessProbe:
           initialDelaySeconds: 15
+          timeoutSeconds: 10
           periodSeconds: 10
+          failureThreshold: 5
           grpc:
             port: 7070
 ---
