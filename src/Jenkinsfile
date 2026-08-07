@@ -1,7 +1,7 @@
 // =============================================================================
 // Jenkinsfile — Online Boutique CI/CD Pipeline
 // =============================================================================
-// Thin orchestrator. All logic lives in jenkins-shared-library.
+// Thin orchestrator. All logic lives in jenkins-shared-library..
 // =============================================================================
 
 @Library('jenkins-shared-library') _
@@ -221,6 +221,6 @@ pipeline {
     //     }
     //     success { echo "Pipeline completed ✓" }
     //     failure { echo "Pipeline FAILED ✗" }
-    // }
+    }
 }
 }
