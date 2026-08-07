@@ -1,0 +1,207 @@
+// =============================================================================
+// Jenkinsfile — Online Boutique CI/CD Pipeline
+// =============================================================================
+// Thin orchestrator. All logic lives in jenkins-shared-library.
+// =============================================================================
+
+@Library('jenkins-shared-library') _
+
+pipeline {
+    agent {
+        docker {
+            alwaysPull true
+            image '730335384723.dkr.ecr.ap-south-1.amazonaws.com/devsecops:1.0.0'
+            args '-v /var/run/docker.sock:/var/run/docker.sock --user root --entrypoint=""'
+        }
+    }
+
+    parameters {
+        choice(name: 'ENVIRONMENT', choices: ['local', 'dev', 'prod'], description: 'Target environment')
+        string(name: 'SERVICES', defaultValue: '', description: 'Comma-separated services (empty = auto-detect)')
+        booleanParam(name: 'FORCE_FULL_BUILD', defaultValue: false, description: 'Build all services')
+        booleanParam(name: 'SKIP_DEPLOY', defaultValue: false, description: 'Skip GitOps update and ArgoCD sync')
+    }
+
+    options {
+        timestamps()
+        timeout(time: 45, unit: 'MINUTES')
+        disableConcurrentBuilds()
+        buildDiscarder(logRotator(numToKeepStr: '15'))
+        ansiColor('xterm')
+    }
+
+    environment {
+        PIPELINE_ENV = "${params.ENVIRONMENT ?: 'local'}"
+        DOCKER_BUILDKIT = '1'
+    }
+
+    stages {
+        // ─────────────────────────────────────────────────
+        // Stage 1: Checkout
+        // ─────────────────────────────────────────────────
+        stage('Checkout') {
+            steps {
+                script {
+                    env.CONFIG = utils.loadConfig(env.PIPELINE_ENV)
+                    utils.checkoutSource()
+                    env.BUILD_TAG = utils.buildVersion()
+                    utils.printSummary(env.CONFIG)
+                }
+            }
+        }
+
+        // ─────────────────────────────────────────────────
+        // Stage 2: Detect Changed Services
+        // ─────────────────────────────────────────────────
+        stage('Detect Changed Services') {
+            steps {
+                script {
+                    env.CHANGED_SERVICES = utils.detectChangedServices(
+                        env.CONFIG,
+                        params.FORCE_FULL_BUILD,
+                        params.SERVICES
+                    )
+                    if (!env.CHANGED_SERVICES?.trim()) {
+                        echo "No services changed. Pipeline will skip build stages."
+                    }
+                }
+            }
+        }
+
+        // ─────────────────────────────────────────────────
+        // Stage 3: Build
+        // ─────────────────────────────────────────────────
+        stage('Build') {
+            when { expression { env.CHANGED_SERVICES?.trim() } }
+            steps {
+                script {
+                    def services = env.CHANGED_SERVICES.split(',').toList()
+                    build.buildServices(services, env.CONFIG)
+                }
+            }
+        }
+
+        // ─────────────────────────────────────────────────
+        // Stage 4: Unit Test
+        // ─────────────────────────────────────────────────
+        stage('Unit Test') {
+            when { expression { env.CHANGED_SERVICES?.trim() } }
+            steps {
+                script {
+                    def services = env.CHANGED_SERVICES.split(',').toList()
+                    build.runTests(services, env.CONFIG)
+                }
+            }
+        }
+
+        // ─────────────────────────────────────────────────
+        // Stage 5: Security Scan (Placeholder — Member 4)
+        // ─────────────────────────────────────────────────
+        stage('Security Scan') {
+            when { expression { env.CHANGED_SERVICES?.trim() } }
+            steps {
+                echo '╔══════════════════════════════════════════════════╗'
+                echo '║  SECURITY STAGE — Owned by Member 4              ║'
+                echo '║  Invoke DevSecOps shared library here.           ║'
+                echo '║                                                  ║'
+                echo '║  Tools: SonarQube, Semgrep, Gitleaks, Checkov,  ║'
+                echo '║         Trivy, Syft, Cosign, Scorecard,         ║'
+                echo '║         Kube-linter, Kyverno                    ║'
+                echo '║                                                  ║'
+                echo '║  Integration point:                              ║'
+                echo '║  @Library("devsecops-library") _                 ║'
+                echo '║  security.scanAll(services, config)              ║'
+                echo '╚══════════════════════════════════════════════════╝'
+            }
+        }
+
+        // ─────────────────────────────────────────────────
+        // Stage 6: Docker Build
+        // ─────────────────────────────────────────────────
+        stage('Docker Build') {
+            when { expression { env.CHANGED_SERVICES?.trim() } }
+            steps {
+                script {
+                    def services = env.CHANGED_SERVICES.split(',').toList()
+                    docker.login(env.CONFIG)
+                    docker.buildImages(services, env.CONFIG, env.BUILD_TAG)
+                }
+            }
+        }
+
+        // ─────────────────────────────────────────────────
+        // Stage 7: Push Docker Image
+        // ─────────────────────────────────────────────────
+        stage('Push Docker Image') {
+            when { expression { env.CHANGED_SERVICES?.trim() } }
+            steps {
+                script {
+                    def services = env.CHANGED_SERVICES.split(',').toList()
+                    docker.pushImages(services, env.CONFIG, env.BUILD_TAG)
+                }
+            }
+        }
+
+        // ─────────────────────────────────────────────────
+        // Stage 8: Publish Artifacts
+        // ─────────────────────────────────────────────────
+        stage('Publish Artifacts') {
+            when { expression { env.CHANGED_SERVICES?.trim() } }
+            steps {
+                script {
+                    artifact.publish(env.CONFIG, env.BUILD_TAG)
+                }
+            }
+        }
+
+        // ─────────────────────────────────────────────────
+        // Stage 9: Update GitOps Repository
+        // ─────────────────────────────────────────────────
+        stage('Update GitOps Repository') {
+            when {
+                allOf {
+                    expression { env.CHANGED_SERVICES?.trim() }
+                    expression { !params.SKIP_DEPLOY }
+                }
+            }
+            steps {
+                script {
+                    def services = env.CHANGED_SERVICES.split(',').toList()
+                    gitops.updateRepo(services, env.CONFIG, env.BUILD_TAG)
+                }
+            }
+        }
+
+        // ─────────────────────────────────────────────────
+        // Stage 10: ArgoCD Sync
+        // ─────────────────────────────────────────────────
+        stage('ArgoCD Sync') {
+            when {
+                allOf {
+                    expression { env.CHANGED_SERVICES?.trim() }
+                    expression { !params.SKIP_DEPLOY }
+                    expression { env.CONFIG.argocd.enabled }
+                }
+            }
+            steps {
+                script {
+                    gitops.argoSync(env.CONFIG)
+                }
+            }
+        }
+    }
+
+    // ─────────────────────────────────────────────────
+    // Stage 11: Notifications (post block)
+    // ─────────────────────────────────────────────────
+    post {
+        always {
+            script {
+                notify.send(env.CONFIG, currentBuild.currentResult)
+            }
+            cleanWs()
+        }
+        success { echo "Pipeline completed ✓" }
+        failure { echo "Pipeline FAILED ✗" }
+    }
+}
