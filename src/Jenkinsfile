@@ -10,7 +10,40 @@
 pipeline {
     agent {
         kubernetes {
-            yaml readTrusted('jenkins/pod.yaml')
+            yaml '''
+                apiVersion: v1
+                kind: Pod
+                metadata:
+                  labels:
+                    jenkins-agent: online-boutique
+                spec:
+                  serviceAccountName: jenkins
+                  containers:
+                  - name: devsecops
+                    image: 730335384723.dkr.ecr.ap-south-1.amazonaws.com/devsecops:1.0.0
+                    command: ['cat']
+                    tty: true
+                    env:
+                    - name: AWS_REGION
+                      value: ap-south-1
+                    - name: AWS_DEFAULT_REGION
+                      value: ap-south-1
+                    - name: AWS_STS_REGIONAL_ENDPOINTS
+                      value: regional
+                  - name: docker
+                    image: docker:27-dind
+                    securityContext:
+                      privileged: true
+                    env:
+                    - name: DOCKER_TLS_CERTDIR
+                      value: ""
+                    volumeMounts:
+                    - name: docker-storage
+                      mountPath: /var/lib/docker
+                  volumes:
+                  - name: docker-storage
+                    emptyDir: {}
+            '''
             defaultContainer 'devsecops'
         }
     }
