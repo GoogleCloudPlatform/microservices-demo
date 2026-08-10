@@ -10,12 +10,29 @@
 
 pipeline {
     agent {
-        docker {
-            alwaysPull true
-            image '730335384723.dkr.ecr.ap-south-1.amazonaws.com/devsecops:1.0.0'
-            registryUrl 'https://730335384723.dkr.ecr.ap-south-1.amazonaws.com'
-            registryCredentialsId 'ecr:ap-south-1:AWSJenkinsRole'
-            args '-v /var/run/docker.sock:/var/run/docker.sock -u 0:0'
+        kubernetes {
+            yaml '''
+                apiVersion: v1
+                kind: Pod
+                metadata:
+                  labels:
+                    jenkins-agent: devsecops
+                spec:
+                  serviceAccountName: jenkins
+                  containers:
+                  - name: devsecops
+                    image: 730335384723.dkr.ecr.ap-south-1.amazonaws.com/devsecops:1.0.0
+                    command: ['cat']
+                    tty: true
+                    volumeMounts:
+                    - name: docker-sock
+                      mountPath: /var/run/docker.sock
+                  volumes:
+                  - name: docker-sock
+                    hostPath:
+                      path: /var/run/docker.sock
+            '''
+            defaultContainer 'devsecops'
         }
     }
 
