@@ -199,7 +199,7 @@ pipeline {
                                 --build-arg NODE_ENV=${NODE_ENV} \
                                 --build-arg ENV_FILE=.env \
                                 -t ${env.IMAGE_TAG} \
-                                -f ./Dockerfile .
+                                -f ./src/adservice/Dockerfile .
                         """
                     }
                 }
