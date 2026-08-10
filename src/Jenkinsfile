@@ -24,13 +24,26 @@ pipeline {
                     image: 730335384723.dkr.ecr.ap-south-1.amazonaws.com/devsecops:1.0.0
                     command: ['cat']
                     tty: true
+                    env:
+                    - name: AWS_REGION
+                      value: ap-south-1
+                    - name: AWS_DEFAULT_REGION
+                      value: ap-south-1
+                    - name: AWS_STS_REGIONAL_ENDPOINTS
+                      value: regional
+                  - name: docker
+                    image: docker:27-dind
+                    securityContext:
+                      privileged: true
+                    env:
+                    - name: DOCKER_TLS_CERTDIR
+                      value: ""
                     volumeMounts:
-                    - name: docker-sock
-                      mountPath: /var/run/docker.sock
+                    - name: docker-storage
+                      mountPath: /var/lib/docker
                   volumes:
-                  - name: docker-sock
-                    hostPath:
-                      path: /var/run/docker.sock
+                  - name: docker-storage
+                    emptyDir: {}
             '''
             defaultContainer 'devsecops'
         }
@@ -59,7 +72,7 @@ pipeline {
         DEPLOY_TARGET_BRANCH = "feature-1"
         REGISTRY             = "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com"
         ECR_REPOSITORY       = "devsecops"
-        SECRET_NAME          = "shared/ppd/finvuaaserver-secret"
+        // SECRET_NAME          = "shared/ppd/finvuaaserver-secret"
         NODE_ENV             = "local"
         PIPELINE_ENV         = "local"
         DOCKER_BUILDKIT      = '1'
@@ -78,20 +91,20 @@ pipeline {
         // ─────────────────────────────────────────────────
         // Stage 2: Fetch Secrets from AWS SecretsManager
         // ─────────────────────────────────────────────────
-        stage('Fetch env from AWS SecretsManager') {
-            steps {
-                script {
-                    sh '''
-                        unset AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY AWS_SESSION_TOKEN
-                        aws secretsmanager get-secret-value \
-                            --region ${AWS_REGION} \
-                            --secret-id ${SECRET_NAME} \
-                            --query SecretString \
-                            --output text > .env || { echo "Failed to fetch secret"; exit 1; }
-                    '''
-                }
-            }
-        }
+        // stage('Fetch env from AWS SecretsManager') {
+        //     steps {
+        //         script {
+        //             sh '''
+        //                 unset AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY AWS_SESSION_TOKEN
+        //                 aws secretsmanager get-secret-value \
+        //                     --region ${AWS_REGION} \
+        //                     --secret-id ${SECRET_NAME} \
+        //                     --query SecretString \
+        //                     --output text > .env || { echo "Failed to fetch secret"; exit 1; }
+        //             '''
+        //         }
+        //     }
+        // }
 
         // ─────────────────────────────────────────────────
         // Stage 3: Sensitive Information Check
@@ -177,16 +190,18 @@ pipeline {
         // ─────────────────────────────────────────────────
         stage('Build Docker Image') {
             steps {
-                script {
-                    echo 'Building Docker Image...'
-                    env.IMAGE_TAG = "${REGISTRY}/${ECR_REPOSITORY}:${env.BUILD_NUMBER}"
-                    sh """
-                        docker build \
-                            --build-arg NODE_ENV=${NODE_ENV} \
-                            --build-arg ENV_FILE=.env \
-                            -t ${env.IMAGE_TAG} \
-                            -f ./Dockerfile .
-                    """
+                container('docker') {
+                    script {
+                        echo 'Building Docker Image...'
+                        env.IMAGE_TAG = "${REGISTRY}/${ECR_REPOSITORY}:${env.BUILD_NUMBER}"
+                        sh """
+                            docker build \
+                                --build-arg NODE_ENV=${NODE_ENV} \
+                                --build-arg ENV_FILE=.env \
+                                -t ${env.IMAGE_TAG} \
+                                -f ./Dockerfile .
+                        """
+                    }
                 }
             }
         }
@@ -196,11 +211,13 @@ pipeline {
         // ─────────────────────────────────────────────────
         stage('Container Image Scan') {
             steps {
-                echo 'Scanning Docker image for vulnerabilities...'
-                sh """
-                    echo "Running Trivy scan on ${env.IMAGE_TAG}..."
-                    # trivy image --exit-code 0 --severity HIGH,CRITICAL ${env.IMAGE_TAG}
-                """
+                container('docker') {
+                    echo 'Scanning Docker image for vulnerabilities...'
+                    sh """
+                        echo "Running Trivy scan on ${env.IMAGE_TAG}..."
+                        # trivy image --exit-code 0 --severity HIGH,CRITICAL ${env.IMAGE_TAG}
+                    """
+                }
             }
         }
 
@@ -212,13 +229,16 @@ pipeline {
                 branch "${DEPLOY_TARGET_BRANCH}"
             }
             steps {
-                script {
-                    echo 'Pushing Docker image to ECR...'
-                    sh """
-                        aws ecr get-login-password --region ${AWS_REGION} | \
-                            docker login --username AWS --password-stdin ${REGISTRY}
-                        docker push ${env.IMAGE_TAG}
-                    """
+                container('docker') {
+                    script {
+                        echo 'Pushing Docker image to ECR...'
+                        sh """
+                            apk add --no-cache aws-cli || true
+                            aws ecr get-login-password --region ${AWS_REGION} | \
+                                docker login --username AWS --password-stdin ${REGISTRY}
+                            docker push ${env.IMAGE_TAG}
+                        """
+                    }
                 }
             }
         }
@@ -256,13 +276,7 @@ pipeline {
     post {
         always {
             echo 'Cleaning up resources...'
-            sh 'docker system prune -f || true'
             cleanWs()
-            snsPublish(
-                topicArn: "arn:aws:sns:${env.AWS_REGION}:${env.AWS_ACCOUNT_ID}:${env.SNS_TOPIC_NAME}",
-                subject: "Jenkins: ${env.JOB_NAME}-${env.BUILD_NUMBER}",
-                message: "Build status notification for ${env.JOB_NAME}: ${currentBuild.currentResult}"
-            )
         }
         success {
             echo 'Pipeline completed successfully!'
