@@ -1,60 +1,24 @@
 // =============================================================================
-// Jenkinsfile — Online Boutique CI/CD Pipeline
+// Jenkinsfile — Online Boutique Monorepo (Minimal Orchestrator)
 // =============================================================================
-// Project  : E-commerce Online Boutique (Microservices)
-// Repo     : https://github.com/DevOps-Experiments-ORG/E-commerce-Online-Boutique
-// Registry : 730335384723.dkr.ecr.ap-south-1.amazonaws.com/devsecops
-// Branch   : feature-1 (deploy gate)
-// Agent    : Docker-based Jenkins agent with DevSecOps tooling
+// All pipeline logic lives in: devsecops-tools/vars/onlineBoutiquePipeline.groovy
+// Each Jenkins job passes APP_NAME to identify which service to build.
 // =============================================================================
+
+@Library('devsecops-tools') _
 
 pipeline {
     agent {
         kubernetes {
-            yaml '''
-                apiVersion: v1
-                kind: Pod
-                metadata:
-                  labels:
-                    jenkins-agent: devsecops
-                spec:
-                  serviceAccountName: jenkins
-                  containers:
-                  - name: devsecops
-                    image: 730335384723.dkr.ecr.ap-south-1.amazonaws.com/devsecops:1.0.0
-                    command: ['cat']
-                    tty: true
-                    env:
-                    - name: AWS_REGION
-                      value: ap-south-1
-                    - name: AWS_DEFAULT_REGION
-                      value: ap-south-1
-                    - name: AWS_STS_REGIONAL_ENDPOINTS
-                      value: regional
-                  - name: docker
-                    image: docker:27-dind
-                    securityContext:
-                      privileged: true
-                    env:
-                    - name: DOCKER_TLS_CERTDIR
-                      value: ""
-                    volumeMounts:
-                    - name: docker-storage
-                      mountPath: /var/lib/docker
-                  volumes:
-                  - name: docker-storage
-                    emptyDir: {}
-            '''
+            yaml readTrusted('jenkins/pod.yaml')
             defaultContainer 'devsecops'
         }
     }
 
-    // parameters {
-    //     choice(name: 'ENVIRONMENT', choices: ['local', 'dev', 'prod'], description: 'Target environment')
-    //     string(name: 'SERVICES', defaultValue: '', description: 'Comma-separated services (empty = auto-detect)')
-    //     booleanParam(name: 'FORCE_FULL_BUILD', defaultValue: false, description: 'Build all services')
-    //     booleanParam(name: 'SKIP_DEPLOY', defaultValue: false, description: 'Skip GitOps update and ArgoCD sync')
-    // }
+    parameters {
+        string(name: 'APP_NAME', defaultValue: '', description: 'Service name under src/ (e.g., frontend, cartservice)')
+        booleanParam(name: 'FORCE_BUILD', defaultValue: false, description: 'Build even if no changes detected for this service')
+    }
 
     options {
         timeout(time: 45, unit: 'MINUTES')
@@ -63,226 +27,26 @@ pipeline {
         skipDefaultCheckout()
     }
 
-    environment {
-        AWS_REGION           = 'ap-south-1'
-        AWS_ACCOUNT_ID       = '730335384723'
-        SNS_TOPIC_NAME       = 'Ai-powered'
-        DEPLOY_GITOPS_REPO   = "E-commerce-Online-Boutique"
-        DEPLOY_TARGET_FILE   = "microservices/applications/pramaan-beta/dev-mock-aa-prod/values-pre-prod.yaml"
-        DEPLOY_TARGET_BRANCH = "feature-1"
-        REGISTRY             = "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com"
-        ECR_REPOSITORY       = "devsecops"
-        // SECRET_NAME          = "shared/ppd/finvuaaserver-secret"
-        NODE_ENV             = "local"
-        PIPELINE_ENV         = "local"
-        DOCKER_BUILDKIT      = '1'
-    }
-
     stages {
-        // ─────────────────────────────────────────────────
-        // Stage 1: Checkout
-        // ─────────────────────────────────────────────────
-        stage('Checkout Code') {
-            steps {
-                checkout scm
-            }
-        }
-
-        // ─────────────────────────────────────────────────
-        // Stage 2: Fetch Secrets from AWS SecretsManager
-        // ─────────────────────────────────────────────────
-        // stage('Fetch env from AWS SecretsManager') {
-        //     steps {
-        //         script {
-        //             sh '''
-        //                 unset AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY AWS_SESSION_TOKEN
-        //                 aws secretsmanager get-secret-value \
-        //                     --region ${AWS_REGION} \
-        //                     --secret-id ${SECRET_NAME} \
-        //                     --query SecretString \
-        //                     --output text > .env || { echo "Failed to fetch secret"; exit 1; }
-        //             '''
-        //         }
-        //     }
-        // }
-
-        // ─────────────────────────────────────────────────
-        // Stage 3: Sensitive Information Check
-        // ─────────────────────────────────────────────────
-        stage('Sensitive Information Check - Git Secret') {
-            steps {
-                echo 'Scanning for sensitive information...'
-                sh '''
-                    echo "Running git-secrets scan..."
-                    # git secrets --scan || true
-                '''
-            }
-        }
-
-        // ─────────────────────────────────────────────────
-        // Stage 4: Build Code
-        // ─────────────────────────────────────────────────
-        stage('Build Code') {
-            steps {
-                echo "Building packages..."
-            }
-        }
-
-        // ─────────────────────────────────────────────────
-        // Stage 5: Unit Tests
-        // ─────────────────────────────────────────────────
-        stage('Run Tests') {
-            steps {
-                echo 'Testing...'
-                sh '''
-                    echo 'Running unit tests...'
-                '''
-            }
-        }
-
-        // ─────────────────────────────────────────────────
-        // Stage 6: Integration Testing
-        // ─────────────────────────────────────────────────
-        stage('Integration Testing') {
-            steps {
-                echo 'Running Integration tests cases...'
-            }
-        }
-
-        // ─────────────────────────────────────────────────
-        // Stage 7: AI PR Review (only on Pull Requests)
-        // ─────────────────────────────────────────────────
-        stage('AI PR Review') {
-            when { expression { env.CHANGE_ID } }
+        stage('Run Pipeline') {
             steps {
                 script {
-                    def response = httpRequest(
-                        url: "http://obs-assistant.default.svc.cluster.local:5000/review-pr",
-                        httpMode: 'POST',
-                        contentType: 'APPLICATION_JSON',
-                        requestBody: """{"pr_number": ${env.CHANGE_ID}}""",
-                        timeout: 60
-                    )
-                    echo "PR Review posted: ${response.content}"
+                    def appName = params.APP_NAME?.trim() ?: env.APP_NAME?.trim()
+                    onlineBoutiquePipeline(appName: appName, forceBuild: params.FORCE_BUILD)
                 }
-            }
-        }
-
-        // ─────────────────────────────────────────────────
-        // Stage 8: SonarQube Scan (disabled — uncomment when ready)
-        // ─────────────────────────────────────────────────
-        // stage('SonarQube Scan') {
-        //     steps {
-        //         echo 'Running SonarQube Scan...'
-        //         // sonarQubeScan('online-boutique', 'nodejs')
-        //     }
-        // }
-
-        // stage('Quality Gate Check') {
-        //     steps {
-        //         echo 'Running SonarQube Quality Gate check...'
-        //         // qualityGateCheck()
-        //     }
-        // }
-
-        // ─────────────────────────────────────────────────
-        // Stage 9: Build Docker Image
-        // ─────────────────────────────────────────────────
-        stage('Build Docker Image') {
-            steps {
-                container('docker') {
-                    script {
-                        echo 'Building Docker Image...'
-                        env.IMAGE_TAG = "${REGISTRY}/${ECR_REPOSITORY}:${env.BUILD_NUMBER}"
-                        sh """
-                            docker build \
-                                --build-arg NODE_ENV=${NODE_ENV} \
-                                --build-arg ENV_FILE=.env \
-                                -t ${env.IMAGE_TAG} \
-                                -f ./src/adservice/Dockerfile .
-                        """
-                    }
-                }
-            }
-        }
-
-        // ─────────────────────────────────────────────────
-        // Stage 10: Container Image Security Scan
-        // ─────────────────────────────────────────────────
-        stage('Container Image Scan') {
-            steps {
-                container('docker') {
-                    echo 'Scanning Docker image for vulnerabilities...'
-                    sh """
-                        echo "Running Trivy scan on ${env.IMAGE_TAG}..."
-                        # trivy image --exit-code 0 --severity HIGH,CRITICAL ${env.IMAGE_TAG}
-                    """
-                }
-            }
-        }
-
-        // ─────────────────────────────────────────────────
-        // Stage 11: Push Docker Image to ECR
-        // ─────────────────────────────────────────────────
-        stage('Push Docker Image') {
-            when {
-                branch "${DEPLOY_TARGET_BRANCH}"
-            }
-            steps {
-                container('docker') {
-                    script {
-                        echo 'Pushing Docker image to ECR...'
-                        sh """
-                            apk add --no-cache aws-cli || true
-                            aws ecr get-login-password --region ${AWS_REGION} | \
-                                docker login --username AWS --password-stdin ${REGISTRY}
-                            docker push ${env.IMAGE_TAG}
-                        """
-                    }
-                }
-            }
-        }
-
-        // ─────────────────────────────────────────────────
-        // Stage 12: Update Image Tag in GitOps Repo
-        // ─────────────────────────────────────────────────
-        stage('Update Image Tag in GitOps') {
-            when {
-                branch "${DEPLOY_TARGET_BRANCH}"
-            }
-            steps {
-                echo "Pushing changes to ${env.DEPLOY_GITOPS_REPO}"
-                // TODO: Implement GitOps image tag update
-                // updateGitOps()
-            }
-        }
-
-        // ─────────────────────────────────────────────────
-        // Stage 13: Post-Deployment Tests
-        // ─────────────────────────────────────────────────
-        stage('Post-Deployment Tests') {
-            when {
-                branch "${DEPLOY_TARGET_BRANCH}"
-            }
-            steps {
-                echo 'Running post-deployment tests...'
             }
         }
     }
 
-    // ─────────────────────────────────────────────────────
-    // Post Actions: Cleanup & Notifications
-    // ─────────────────────────────────────────────────────
     post {
         always {
-            echo 'Cleaning up resources...'
             cleanWs()
         }
         success {
-            echo 'Pipeline completed successfully!'
+            echo "Pipeline completed for ${params.APP_NAME ?: env.APP_NAME ?: 'unknown'}"
         }
         failure {
-            echo 'Pipeline failed!'
+            echo "Pipeline FAILED for ${params.APP_NAME ?: env.APP_NAME ?: 'unknown'}"
         }
     }
 }
