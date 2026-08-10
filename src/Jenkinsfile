@@ -19,12 +19,12 @@ pipeline {
         }
     }
 
-    parameters {
-        choice(name: 'ENVIRONMENT', choices: ['local', 'dev', 'prod'], description: 'Target environment')
-        string(name: 'SERVICES', defaultValue: '', description: 'Comma-separated services (empty = auto-detect)')
-        booleanParam(name: 'FORCE_FULL_BUILD', defaultValue: false, description: 'Build all services')
-        booleanParam(name: 'SKIP_DEPLOY', defaultValue: false, description: 'Skip GitOps update and ArgoCD sync')
-    }
+    // parameters {
+    //     choice(name: 'ENVIRONMENT', choices: ['local', 'dev', 'prod'], description: 'Target environment')
+    //     string(name: 'SERVICES', defaultValue: '', description: 'Comma-separated services (empty = auto-detect)')
+    //     booleanParam(name: 'FORCE_FULL_BUILD', defaultValue: false, description: 'Build all services')
+    //     booleanParam(name: 'SKIP_DEPLOY', defaultValue: false, description: 'Skip GitOps update and ArgoCD sync')
+    // }
 
     options {
         timeout(time: 45, unit: 'MINUTES')
@@ -44,7 +44,7 @@ pipeline {
         ECR_REPOSITORY       = "devsecops"
         SECRET_NAME          = "shared/ppd/finvuaaserver-secret"
         NODE_ENV             = "local"
-        PIPELINE_ENV         = "${params.ENVIRONMENT ?: 'local'}"
+        PIPELINE_ENV         = "local"
         DOCKER_BUILDKIT      = '1'
     }
 
