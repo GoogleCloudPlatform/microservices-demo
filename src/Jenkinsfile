@@ -19,11 +19,6 @@ pipeline {
         }
     }
 
-    tools {
-        jdk 'jdk17'
-        maven 'maven3'
-    }
-
     parameters {
         choice(name: 'ENVIRONMENT', choices: ['local', 'dev', 'prod'], description: 'Target environment')
         string(name: 'SERVICES', defaultValue: '', description: 'Comma-separated services (empty = auto-detect)')
@@ -32,11 +27,9 @@ pipeline {
     }
 
     options {
-        timestamps()
         timeout(time: 45, unit: 'MINUTES')
         disableConcurrentBuilds()
         buildDiscarder(logRotator(numToKeepStr: '15'))
-        ansiColor('xterm')
         skipDefaultCheckout()
     }
 
