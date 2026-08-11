@@ -61,3 +61,12 @@ jobs:
       timeout-minutes: 10
       run: |
         dotnet test src/cartservice/
+    - name: Save PR Number
+      run: |
+        mkdir -p .pr
+        echo "${{ github.event.pull_request.number }}" > .pr/PR_NUMBER
+    - name: Upload PR Number Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: pr_number
+        path: .pr/PR_NUMBER
