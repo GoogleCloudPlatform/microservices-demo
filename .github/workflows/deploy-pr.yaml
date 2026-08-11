@@ -12,61 +12,67 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-name: "Continuous Integration - Main/Release"
+name: "Deploy Staging - Pull Request"
 on:
-  push:
-    # run on pushes to main or release/*
-    branches:
-      - main
-      - release/*
-    paths-ignore:
-      - '**/*.md'
-      - 'docs/**'
-      - 'LICENSE'
-      - 'kustomize/**'
-      - '.github/workflows/kustomize-build-ci.yaml'
-      - 'terraform/**'
-      - '.github/workflows/terraform-validate-ci.yaml'
-      - 'helm-chart/**'
-      - '.github/workflows/helm-chart-ci.yaml'
+  workflow_run:
+    workflows: ["Continuous Integration - Pull Request"]
+    types:
+      - completed
+
+# Prevent concurrent deployments for the same PR
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.workflow_run.pull_requests[0].number || github.event.workflow_run.id }}
+  cancel-in-progress: true
+
 jobs:
-  code-tests:
-    runs-on: ubuntu-24.04
-    steps:
-    - uses: actions/checkout@v6
-    - uses: actions/setup-dotnet@v5
-      env:
-        DOTNET_INSTALL_DIR: "./.dotnet"
-      with:
-        dotnet-version: '10.0'
-    - uses: actions/setup-go@v6
-      with:
-        go-version: '1.26'
-    - name: Go Unit Tests
-      timeout-minutes: 10
-      run: |
-        for SERVICE in "shippingservice" "productcatalogservice"; do
-          echo "testing $SERVICE..."
-          pushd src/$SERVICE
-          go test
-          popd
-        done
-    - name: C# Unit Tests
-      timeout-minutes: 10
-      run: |
-        dotnet test src/cartservice/
   deployment-tests:
     runs-on: ubuntu-24.04
-    needs: code-tests
+    if: ${{ github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'pull_request' }}
+    environment: gke-staging
     permissions:
       contents: read
       id-token: write
+      pull-requests: write
+      statuses: write
     strategy:
       matrix:
         profile: ["local-code"]
       fail-fast: true
     steps:
     - uses: actions/checkout@v6
+      with:
+        repository: ${{ github.event.workflow_run.head_repository.full_name }}
+        ref: ${{ github.event.workflow_run.head_sha }}
+        allow-unsafe-pr-checkout: true
+    - name: Download PR Number Artifact
+      uses: actions/download-artifact@v4
+      with:
+        name: pr_number
+        run-id: ${{ github.event.workflow_run.id }}
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        path: .pr
+    - name: Resolve PR Number
+      run: |
+        if [[ -f .pr/PR_NUMBER ]]; then
+          PR_NUMBER=$(cat .pr/PR_NUMBER)
+        else
+          PR_NUMBER="${{ github.event.workflow_run.pull_requests[0].number }}"
+        fi
+        if [[ -z "$PR_NUMBER" || "$PR_NUMBER" == "null" ]]; then
+          echo "Error: Unable to resolve PR_NUMBER"
+          exit 1
+        fi
+        echo "PR_NUMBER=$PR_NUMBER" >> $GITHUB_ENV
+        echo "Resolved PR_NUMBER=$PR_NUMBER"
+    - name: Report Status (Pending)
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        gh api "/repos/${{ github.repository }}/statuses/${{ github.event.workflow_run.head_sha }}" \
+          -f state="pending" \
+          -f target_url="https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}" \
+          -f description="Deploying to GKE staging..." \
+          -f context="Deploy Staging / GKE"
     - id: auth
       uses: google-github-actions/auth@v2
       with:
@@ -85,7 +91,7 @@ jobs:
         chmod +x skaffold
         sudo mv skaffold /usr/local/bin
     - name: Cache Skaffold cache
-      uses: actions/cache@v6
+      uses: actions/cache@v4
       with:
         path: ~/.skaffold/cache
         key: skaffold-${{ runner.os }}-${{ github.workflow }}-${{ github.run_id }}
@@ -94,10 +100,8 @@ jobs:
     - name: Build + Deploy PR images to GKE
       timeout-minutes: 20
       run: |
-        PR_NUMBER=$(echo $GITHUB_REF | awk 'BEGIN { FS = "/" } ; { print $3 }')
         NAMESPACE="pr${PR_NUMBER}"
         echo "NAMESPACE=$NAMESPACE" >> $GITHUB_ENV
-        echo "PR_NUMBER=$PR_NUMBER" >> $GITHUB_ENV
 
         yes | gcloud auth configure-docker us-docker.pkg.dev
         gcloud container clusters get-credentials $PR_CLUSTER --region $REGION --project $PROJECT_ID
@@ -109,7 +113,7 @@ jobs:
         EOF
         echo Deploying application
         skaffold config set --global local-cluster false
-        skaffold run --default-repo=us-docker.pkg.dev/$PROJECT_ID/$GITHUB_REF --tag=$GITHUB_SHA --namespace=$NAMESPACE -p network-policies
+        skaffold run --default-repo=us-docker.pkg.dev/$PROJECT_ID/refs/pull/$PR_NUMBER --tag=$PR_NUMBER --namespace=$NAMESPACE -p network-policies
       env:
         PROJECT_ID: "online-boutique-ci"
         PR_CLUSTER: "prs-gke-cluster"
@@ -131,6 +135,20 @@ jobs:
         kubectl wait --for=condition=available --timeout=1000s deployment/productcatalogservice
         kubectl wait --for=condition=available --timeout=1000s deployment/recommendationservice
         kubectl wait --for=condition=available --timeout=1000s deployment/shippingservice
+    - name: Query EXTERNAL_IP for staging
+      timeout-minutes: 5
+      run: |
+        set -x
+        NAMESPACE="pr${PR_NUMBER}"
+        get_externalIP() {
+          kubectl get service frontend-external --namespace $NAMESPACE -o jsonpath='{.status.loadBalancer.ingress[0].ip}'
+        }
+        until [[ -n "$(get_externalIP)" ]]; do
+          echo "Querying for external IP for frontend-external on namespace: $NAMESPACE{}"
+        sleep 3
+        done
+        EXTERNAL_IP=$(get_externalIP)
+        echo "EXTERNAL_IP=$EXTERNAL_IP" >> $GITHUB_ENV
     - name: Smoke Test
       timeout-minutes: 5
       run: |
@@ -148,3 +166,26 @@ jobs:
         if [[ "$ERROR_COUNT" -gt "0" ]]; then
           exit 1
         fi
+    - name: Comment EXTERNAL_IP
+      timeout-minutes: 5
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        if [[ -n "$PR_NUMBER" && -n "$EXTERNAL_IP" ]]; then
+          gh pr comment "$PR_NUMBER" --repo "${{ github.repository }}" --body "🚲 PR staged at http://${EXTERNAL_IP}"
+        fi
+        sleep 60
+    - name: Report Status (Final)
+      if: always()
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        STATE="success"
+        if [[ "${{ job.status }}" != "success" ]]; then
+          STATE="failure"
+        fi
+        gh api "/repos/${{ github.repository }}/statuses/${{ github.event.workflow_run.head_sha }}" \
+          -f state="$STATE" \
+          -f target_url="https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}" \
+          -f description="Staging deployment $STATE" \
+          -f context="Deploy Staging / GKE"
