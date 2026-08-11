@@ -14,7 +14,7 @@
 
 name: "Continuous Integration - Pull Request"
 on:
-  pull_request_target:
+  pull_request:
     branches:
       - main
     paths-ignore:
@@ -74,8 +74,6 @@ jobs:
       fail-fast: true
     steps:
     - uses: actions/checkout@v6
-      with:
-        ref: ${{github.event.pull_request.head.sha}}
     - id: auth
       uses: google-github-actions/auth@v2
       with:
