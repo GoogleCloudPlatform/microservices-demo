@@ -30,6 +30,8 @@ pipeline {
                       value: ap-south-1
                     - name: AWS_STS_REGIONAL_ENDPOINTS
                       value: regional
+                    - name: DOCKER_HOST
+                      value: tcp://localhost:2375
                   - name: docker
                     image: docker:27-dind
                     securityContext:
