@@ -4,7 +4,7 @@
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//      http://www.apache.org/licenses/LICENSE-2.0
+//      https://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,6 +17,7 @@ package main
 import (
 	"context"
 	"os"
+	"sync"
 	"testing"
 
 	pb "github.com/GoogleCloudPlatform/microservices-demo/src/productcatalogservice/genproto"
@@ -98,4 +99,62 @@ func TestSearchProducts(t *testing.T) {
 	if got, want := len(products.Results), 2; got != want {
 		t.Errorf("got %d, want %d", got, want)
 	}
+}
+
+// TestGetProductConcurrentSafe verifies that GetProduct does not panic or
+// return errors when called concurrently with catalog reloads. Before the fix,
+// parseCatalog() was called multiple times per loop iteration, and concurrent
+// reloads could swap the slice mid-iteration causing index panics or NOT_FOUND.
+func TestGetProductConcurrentSafe(t *testing.T) {
+	pc := &productCatalog{
+		catalog: pb.ListProductsResponse{
+			Products: []*pb.Product{},
+		},
+	}
+
+	// Enable catalog reloading so parseCatalog() calls loadCatalog() each time.
+	// Use a product ID that exists in products.json (loaded by loadCatalog).
+	reloadCatalog = true
+	productID := "OLJCESPC7Z" // Sunglasses — exists in products.json
+
+	var wg sync.WaitGroup
+	for i := 0; i < 50; i++ {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			for j := 0; j < 100; j++ {
+				_, err := pc.GetProduct(context.Background(), &pb.GetProductRequest{Id: productID})
+				if err != nil {
+					t.Errorf("GetProduct failed under concurrent reload: %v", err)
+				}
+			}
+		}()
+	}
+	wg.Wait()
+
+	reloadCatalog = false
+}
+
+// TestGetProductConsistentSnapshot verifies that GetProduct returns a product
+// that is actually in the catalog, even when reloads happen.
+func TestGetProductConsistentSnapshot(t *testing.T) {
+	pc := &productCatalog{
+		catalog: pb.ListProductsResponse{
+			Products: []*pb.Product{},
+		},
+	}
+
+	// Even with reload enabled, every lookup should find the product.
+	reloadCatalog = true
+	productID := "OLJCESPC7Z" // Sunglasses — exists in products.json
+	for i := 0; i < 200; i++ {
+		p, err := pc.GetProduct(context.Background(), &pb.GetProductRequest{Id: productID})
+		if err != nil {
+			t.Fatalf("iteration %d: unexpected error: %v", i, err)
+		}
+		if p.Id != productID {
+			t.Fatalf("iteration %d: got product %s, want %s", i, p.Id, productID)
+		}
+	}
+	reloadCatalog = false
 }

@@ -16,6 +16,7 @@ package main
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
 	"net"
 	"os"
@@ -23,12 +24,14 @@ import (
 
 	"cloud.google.com/go/profiler"
 	"github.com/google/uuid"
+	_ "github.com/lib/pq"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/health"
+	"google.golang.org/grpc/keepalive"
 	"google.golang.org/grpc/status"
 
 	pb "github.com/GoogleCloudPlatform/microservices-demo/src/checkoutservice/genproto"
@@ -37,9 +40,12 @@ import (
 
 	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
 	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/attribute"
+	otelcodes "go.opentelemetry.io/otel/codes"
 	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc"
 	"go.opentelemetry.io/otel/propagation"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
+	"go.opentelemetry.io/otel/trace"
 )
 
 const (
@@ -83,6 +89,8 @@ type checkoutService struct {
 
 	paymentSvcAddr string
 	paymentSvcConn *grpc.ClientConn
+
+	db *sql.DB
 }
 
 func main() {
@@ -121,6 +129,14 @@ func main() {
 	mustConnGRPC(ctx, &svc.currencySvcConn, svc.currencySvcAddr)
 	mustConnGRPC(ctx, &svc.emailSvcConn, svc.emailSvcAddr)
 	mustConnGRPC(ctx, &svc.paymentSvcConn, svc.paymentSvcAddr)
+
+	// Initialize PostgreSQL connection
+	if db, err := initPostgreSQL(); err != nil {
+		log.Warnf("Failed to connect to PostgreSQL: %v. Order persistence will be disabled.", err)
+	} else {
+		svc.db = db
+		log.Info("PostgreSQL connection established successfully")
+	}
 
 	log.Infof("service config: %+v", svc)
 
@@ -209,14 +225,55 @@ func mustMapEnv(target *string, envKey string) {
 
 func mustConnGRPC(ctx context.Context, conn **grpc.ClientConn, addr string) {
 	var err error
-	_, cancel := context.WithTimeout(ctx, time.Second*3)
+	dialCtx, cancel := context.WithTimeout(ctx, time.Second*3)
 	defer cancel()
 	*conn, err = grpc.NewClient(addr,
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
-		grpc.WithStatsHandler(otelgrpc.NewClientHandler()))
+		grpc.WithStatsHandler(otelgrpc.NewClientHandler()),
+		grpc.WithKeepaliveParams(keepalive.ClientParameters{
+			Time:                30 * time.Second,
+			Timeout:             10 * time.Second,
+			PermitWithoutStream: true,
+		}),
+	)
 	if err != nil {
 		panic(errors.Wrapf(err, "grpc: failed to connect %s", addr))
 	}
+	_ = dialCtx
+}
+
+func initPostgreSQL() (*sql.DB, error) {
+	host := os.Getenv("POSTGRES_HOST")
+	port := os.Getenv("POSTGRES_PORT")
+	dbname := os.Getenv("POSTGRES_DB")
+	user := os.Getenv("POSTGRES_USER")
+	password := os.Getenv("POSTGRES_PASSWORD")
+
+	if host == "" || port == "" || dbname == "" || user == "" || password == "" {
+		return nil, fmt.Errorf("PostgreSQL environment variables not set")
+	}
+
+	connStr := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
+		host, port, user, password, dbname)
+
+	db, err := sql.Open("postgres", connStr)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to open PostgreSQL connection")
+	}
+
+	// Test the connection
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	if err := db.PingContext(ctx); err != nil {
+		return nil, errors.Wrap(err, "failed to ping PostgreSQL")
+	}
+
+	// Set connection pool settings
+	db.SetMaxOpenConns(25)
+	db.SetMaxIdleConns(5)
+	db.SetConnMaxLifetime(5 * time.Minute)
+
+	return db, nil
 }
 
 func (cs *checkoutService) Check(ctx context.Context, req *healthpb.HealthCheckRequest) (*healthpb.HealthCheckResponse, error) {
@@ -225,6 +282,107 @@ func (cs *checkoutService) Check(ctx context.Context, req *healthpb.HealthCheckR
 
 func (cs *checkoutService) Watch(req *healthpb.HealthCheckRequest, ws healthpb.Health_WatchServer) error {
 	return status.Errorf(codes.Unimplemented, "health check via Watch not implemented")
+}
+
+func (cs *checkoutService) saveOrderToPostgreSQL(ctx context.Context, orderID, userID string, order *pb.OrderResult, currency string) error {
+	if cs.db == nil {
+		return fmt.Errorf("PostgreSQL connection not available")
+	}
+
+	// Get tracer for database spans
+	tracer := otel.Tracer("checkoutservice/postgresql")
+	
+	// Calculate total amount
+	totalAmount := float64(order.ShippingCost.Units) + float64(order.ShippingCost.Nanos)/1e9
+	for _, item := range order.Items {
+		itemTotal := float64(item.Cost.Units) + float64(item.Cost.Nanos)/1e9
+		totalAmount += itemTotal * float64(item.Item.Quantity)
+	}
+
+	// Insert order with OpenTelemetry span
+	orderQuery := `
+		INSERT INTO orders (id, session_id, order_date, total_amount, currency, status, shipping_address)
+		VALUES ($1, $2, CURRENT_TIMESTAMP, $3, $4, $5, $6)
+		ON CONFLICT (id) DO NOTHING
+	`
+	shippingAddr := fmt.Sprintf("%s, %s, %s %s", order.ShippingAddress.StreetAddress,
+		order.ShippingAddress.City, order.ShippingAddress.State, order.ShippingAddress.ZipCode)
+
+	spanCtx, span := tracer.Start(ctx, "db.insert.orders",
+		trace.WithSpanKind(trace.SpanKindClient),
+		trace.WithAttributes(
+			attribute.String("db.system", "postgresql"),
+			attribute.String("db.name", "boutique"),
+			attribute.String("db.operation", "INSERT"),
+			attribute.String("db.statement", orderQuery),
+			attribute.String("net.peer.name", "postgresql"),
+		))
+	defer span.End()
+
+	_, err := cs.db.ExecContext(spanCtx, orderQuery, orderID, userID, totalAmount, currency, "completed", shippingAddr)
+	if err != nil {
+		span.RecordError(err)
+		span.SetStatus(otelcodes.Error, err.Error())
+		return errors.Wrap(err, "failed to insert order")
+	}
+	span.SetStatus(otelcodes.Ok, "Order inserted successfully")
+
+	// Insert order items with OpenTelemetry spans
+	itemQuery := `
+		INSERT INTO order_items (order_id, product_id, quantity, price)
+		VALUES ($1, $2, $3, $4)
+	`
+	for _, item := range order.Items {
+		itemSpanCtx, itemSpan := tracer.Start(ctx, "db.insert.order_items",
+			trace.WithSpanKind(trace.SpanKindClient),
+			trace.WithAttributes(
+				attribute.String("db.system", "postgresql"),
+				attribute.String("db.name", "boutique"),
+				attribute.String("db.operation", "INSERT"),
+				attribute.String("db.statement", itemQuery),
+				attribute.String("net.peer.name", "postgresql"),
+				attribute.String("db.product_id", item.Item.ProductId),
+			))
+		
+		price := float64(item.Cost.Units) + float64(item.Cost.Nanos)/1e9
+		_, err := cs.db.ExecContext(itemSpanCtx, itemQuery, orderID, item.Item.ProductId, item.Item.Quantity, price)
+		if err != nil {
+			itemSpan.RecordError(err)
+			itemSpan.SetStatus(otelcodes.Error, err.Error())
+			log.Warnf("failed to insert order item: %+v", err)
+		} else {
+			itemSpan.SetStatus(otelcodes.Ok, "Order item inserted successfully")
+		}
+		itemSpan.End()
+	}
+
+	// Log order event with OpenTelemetry span
+	eventQuery := `
+		INSERT INTO application_events (event_type, session_id, event_data)
+		VALUES ($1, $2, $3)
+	`
+	eventData := fmt.Sprintf(`{"order_id": "%s", "total": %.2f, "currency": "%s"}`, orderID, totalAmount, currency)
+	
+	eventSpanCtx, eventSpan := tracer.Start(ctx, "db.insert.application_events",
+		trace.WithSpanKind(trace.SpanKindClient),
+		trace.WithAttributes(
+			attribute.String("db.system", "postgresql"),
+			attribute.String("db.name", "boutique"),
+			attribute.String("db.operation", "INSERT"),
+			attribute.String("db.statement", eventQuery),
+			attribute.String("net.peer.name", "postgresql"),
+		))
+	defer eventSpan.End()
+
+	_, err = cs.db.ExecContext(eventSpanCtx, eventQuery, "order_placed", userID, eventData)
+	if err != nil {
+		eventSpan.RecordError(err)
+		eventSpan.SetStatus(otelcodes.Error, err.Error())
+	} else {
+		eventSpan.SetStatus(otelcodes.Ok, "Event logged successfully")
+	}
+
+	return nil
 }
 
 func (cs *checkoutService) PlaceOrder(ctx context.Context, req *pb.PlaceOrderRequest) (*pb.PlaceOrderResponse, error) {
@@ -275,6 +433,16 @@ func (cs *checkoutService) PlaceOrder(ctx context.Context, req *pb.PlaceOrderReq
 	} else {
 		log.Infof("order confirmation email sent to %q", req.Email)
 	}
+
+	// Store order in PostgreSQL
+	if cs.db != nil {
+		if err := cs.saveOrderToPostgreSQL(ctx, orderID.String(), req.UserId, orderResult, req.UserCurrency); err != nil {
+			log.Warnf("failed to save order to PostgreSQL: %+v", err)
+		} else {
+			log.Infof("order saved to PostgreSQL: %s", orderID.String())
+		}
+	}
+
 	resp := &pb.PlaceOrderResponse{Order: orderResult}
 	return resp, nil
 }
@@ -343,11 +511,11 @@ func (cs *checkoutService) prepOrderItems(ctx context.Context, items []*pb.CartI
 	for i, item := range items {
 		product, err := cl.GetProduct(ctx, &pb.GetProductRequest{Id: item.GetProductId()})
 		if err != nil {
-			return nil, fmt.Errorf("failed to get product #%q", item.GetProductId())
+			return nil, fmt.Errorf("failed to get product #%q: %+v", item.GetProductId(), err)
 		}
 		price, err := cs.convertCurrency(ctx, product.GetPriceUsd(), userCurrency)
 		if err != nil {
-			return nil, fmt.Errorf("failed to convert price of %q to %s", item.GetProductId(), userCurrency)
+			return nil, fmt.Errorf("failed to convert price of %q to %s: %+v", item.GetProductId(), userCurrency, err)
 		}
 		out[i] = &pb.OrderItem{
 			Item: item,
@@ -357,7 +525,7 @@ func (cs *checkoutService) prepOrderItems(ctx context.Context, items []*pb.CartI
 }
 
 func (cs *checkoutService) convertCurrency(ctx context.Context, from *pb.Money, toCurrency string) (*pb.Money, error) {
-	result, err := pb.NewCurrencyServiceClient(cs.currencySvcConn).Convert(context.TODO(), &pb.CurrencyConversionRequest{
+	result, err := pb.NewCurrencyServiceClient(cs.currencySvcConn).Convert(ctx, &pb.CurrencyConversionRequest{
 		From:   from,
 		ToCode: toCurrency})
 	if err != nil {

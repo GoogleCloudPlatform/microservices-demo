@@ -60,6 +60,14 @@ class ExpiredCreditCard extends CreditCardError {
  */
 module.exports = function charge (request) {
   const { amount, credit_card: creditCard } = request;
+
+  // Validate amount fields to prevent NaN/bigint errors downstream.
+  if (!amount || typeof amount.units !== 'number' || typeof amount.nanos !== 'number' ||
+      !Number.isFinite(amount.units) || !Number.isFinite(amount.nanos) ||
+      amount.units < 0 || amount.nanos < 0) {
+    throw new CreditCardError('Invalid payment amount: units and nanos must be valid non-negative finite numbers');
+  }
+
   const cardNumber = creditCard.credit_card_number;
   const cardInfo = cardValidator(cardNumber);
   const {

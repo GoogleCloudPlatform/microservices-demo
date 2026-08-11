@@ -41,30 +41,36 @@ func (p *productCatalog) Watch(req *healthpb.HealthCheckRequest, ws healthpb.Hea
 func (p *productCatalog) ListProducts(context.Context, *pb.Empty) (*pb.ListProductsResponse, error) {
 	time.Sleep(extraLatency)
 
+	// Call parseCatalog() once for a consistent snapshot.
 	return &pb.ListProductsResponse{Products: p.parseCatalog()}, nil
 }
 
 func (p *productCatalog) GetProduct(ctx context.Context, req *pb.GetProductRequest) (*pb.Product, error) {
 	time.Sleep(extraLatency)
 
-	var found *pb.Product
-	for i := 0; i < len(p.parseCatalog()); i++ {
-		if req.Id == p.parseCatalog()[i].Id {
-			found = p.parseCatalog()[i]
+	// Call parseCatalog() once to avoid race conditions during catalog reloads.
+	// Previously, parseCatalog() was called 3 times per loop iteration, and
+	// concurrent reloads could swap the underlying slice mid-iteration, causing
+	// NOT_FOUND errors and index-out-of-bounds panics.
+	products := p.parseCatalog()
+
+	for _, product := range products {
+		if req.Id == product.Id {
+			return product, nil
 		}
 	}
 
-	if found == nil {
-		return nil, status.Errorf(codes.NotFound, "no product with ID %s", req.Id)
-	}
-	return found, nil
+	return nil, status.Errorf(codes.NotFound, "no product with ID %s", req.Id)
 }
 
 func (p *productCatalog) SearchProducts(ctx context.Context, req *pb.SearchProductsRequest) (*pb.SearchProductsResponse, error) {
 	time.Sleep(extraLatency)
 
+	// Call parseCatalog() once for consistent snapshot during search.
+	products := p.parseCatalog()
+
 	var ps []*pb.Product
-	for _, product := range p.parseCatalog() {
+	for _, product := range products {
 		if strings.Contains(strings.ToLower(product.Name), strings.ToLower(req.Query)) ||
 			strings.Contains(strings.ToLower(product.Description), strings.ToLower(req.Query)) {
 			ps = append(ps, product)
@@ -75,12 +81,21 @@ func (p *productCatalog) SearchProducts(ctx context.Context, req *pb.SearchProdu
 }
 
 func (p *productCatalog) parseCatalog() []*pb.Product {
-	if reloadCatalog || len(p.catalog.Products) == 0 {
-		err := loadCatalog(&p.catalog)
-		if err != nil {
+	// Acquire the mutex to ensure a consistent snapshot of the catalog.
+	// loadCatalog() also acquires this mutex, so we must release before calling it
+	// and re-acquire to read the result.
+	catalogMutex.Lock()
+	needsReload := reloadCatalog || len(p.catalog.Products) == 0
+	catalogMutex.Unlock()
+
+	if needsReload {
+		// loadCatalog acquires the mutex internally.
+		if err := loadCatalog(&p.catalog); err != nil {
 			return []*pb.Product{}
 		}
 	}
 
+	catalogMutex.Lock()
+	defer catalogMutex.Unlock()
 	return p.catalog.Products
 }
