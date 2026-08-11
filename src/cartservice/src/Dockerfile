@@ -32,6 +32,8 @@ RUN dotnet publish cartservice.csproj \
     -c release \
     -o /cartservice
 
+USER 1000
+
 # https://mcr.microsoft.com/product/dotnet/runtime-deps
 FROM mcr.microsoft.com/dotnet/runtime-deps:10.0.0-noble-chiseled@sha256:b857c8cb8d929183cfe4c6dd9994abba92a2639dd2dbaf06005379f815991604
 
@@ -40,5 +42,7 @@ COPY --from=builder /cartservice .
 EXPOSE 7070
 ENV DOTNET_EnableDiagnostics=0 \
     ASPNETCORE_HTTP_PORTS=7070
+HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
+    CMD ["/app/cartservice", "--help"] || exit 1
 USER 1000
 ENTRYPOINT ["/app/cartservice"]
