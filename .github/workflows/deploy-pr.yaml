@@ -19,10 +19,15 @@ on:
     types:
       - completed
 
+# Prevent concurrent deployments for the same PR
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.workflow_run.pull_requests[0].number || github.event.workflow_run.id }}
+  cancel-in-progress: true
+
 jobs:
   deployment-tests:
     runs-on: ubuntu-24.04
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    if: ${{ github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'pull_request' }}
     environment: gke-staging
     permissions:
       contents: read
@@ -37,6 +42,7 @@ jobs:
       with:
         repository: ${{ github.event.workflow_run.head_repository.full_name }}
         ref: ${{ github.event.workflow_run.head_sha }}
+        allow-unsafe-pr-checkout: true
     - id: auth
       uses: google-github-actions/auth@v2
       with:
@@ -139,10 +145,12 @@ jobs:
           COMMENTS_URL: ${{ github.event.workflow_run.pull_requests[0].comments_url }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
-          curl \
-            -X POST \
-            $COMMENTS_URL \
-            -H "Content-Type: application/json" \
-            -H "Authorization: token $GITHUB_TOKEN" \
-            --data '{ "body": "🚲 PR staged at '"http://${EXTERNAL_IP}"'"}'
+          if [[ -n "$COMMENTS_URL" && -n "$EXTERNAL_IP" ]]; then
+            curl \
+              -X POST \
+              $COMMENTS_URL \
+              -H "Content-Type: application/json" \
+              -H "Authorization: Bearer $GITHUB_TOKEN" \
+              --data '{ "body": "🚲 PR staged at '"http://${EXTERNAL_IP}"'"}'
+          fi
           sleep 60
