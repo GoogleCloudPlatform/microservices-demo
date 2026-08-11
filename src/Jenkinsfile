@@ -5,7 +5,7 @@
 // Each Jenkins job passes APP_NAME to identify which service to build.
 // =============================================================================
 
-@Library('devsecops-tools') _
+@Library('devsecops-tools@main') _
 
 pipeline {
     agent {
@@ -73,7 +73,7 @@ pipeline {
 
     post {
         always {
-            cleanWs()
+            deleteDir()
         }
         success {
             echo "Pipeline completed for ${params.APP_NAME ?: env.APP_NAME ?: 'unknown'}"

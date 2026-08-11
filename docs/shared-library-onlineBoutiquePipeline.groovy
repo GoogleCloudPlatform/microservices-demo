@@ -72,7 +72,7 @@ def call(Map config = [:]) {
     stage('Check Changes') {
         if (!forceBuild) {
             def changed = sh(
-                script: "git diff --name-only HEAD~1 HEAD || echo 'src/${appName}/'",
+                script: "git log --oneline -1 > /dev/null 2>&1 && git diff --name-only HEAD~1 HEAD 2>/dev/null || echo 'src/${appName}/'",
                 returnStdout: true
             ).trim().split('\n')
 
@@ -92,7 +92,7 @@ def call(Map config = [:]) {
         dir(appDir) {
             switch(svc.type) {
                 case 'java':
-                    sh 'mvn -B clean package -DskipTests'
+                    sh 'chmod +x ./gradlew && ./gradlew build -x test'
                     break
                 case 'go':
                     sh 'go build ./...'
@@ -117,7 +117,7 @@ def call(Map config = [:]) {
         dir(appDir) {
             switch(svc.type) {
                 case 'java':
-                    sh 'mvn -B test'
+                    sh 'chmod +x ./gradlew && ./gradlew test'
                     break
                 case 'go':
                     sh 'go test ./...'
