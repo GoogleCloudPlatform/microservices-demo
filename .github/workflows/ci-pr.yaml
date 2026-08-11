@@ -14,7 +14,7 @@
 
 name: "Continuous Integration - Pull Request"
 on:
-  pull_request_target:
+  pull_request:
     branches:
       - main
     paths-ignore:
@@ -36,6 +36,8 @@ concurrency:
 jobs:
   code-tests:
     runs-on: ubuntu-24.04
+    permissions:
+      contents: read
     steps:
     - uses: actions/checkout@v6
     - uses: actions/setup-dotnet@v5
@@ -59,129 +61,12 @@ jobs:
       timeout-minutes: 10
       run: |
         dotnet test src/cartservice/
-
-  deployment-tests:
-    runs-on: ubuntu-24.04
-    needs: code-tests
-    environment: gke-staging
-    permissions:
-      contents: read
-      id-token: write
-      pull-requests: write
-    strategy:
-      matrix:
-        profile: ["local-code"]
-      fail-fast: true
-    steps:
-    - uses: actions/checkout@v6
+    - name: Save PR Number
+      run: |
+        mkdir -p .pr
+        echo "${{ github.event.pull_request.number }}" > .pr/PR_NUMBER
+    - name: Upload PR Number Artifact
+      uses: actions/upload-artifact@v4
       with:
-        ref: ${{github.event.pull_request.head.sha}}
-    - id: auth
-      uses: google-github-actions/auth@v2
-      with:
-        workload_identity_provider: 'projects/816257685787/locations/global/workloadIdentityPools/github-actions-pool/providers/github-provider'
-        service_account: 'github-action-runner@online-boutique-ci.iam.gserviceaccount.com'
-    - uses: google-github-actions/setup-gcloud@v2
-      with:
-        install_components: 'gke-gcloud-auth-plugin'
-    - name: Set up QEMU
-      uses: docker/setup-qemu-action@v3
-    - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v3
-    - name: Install Skaffold
-      run: |
-        curl -Lo skaffold https://storage.googleapis.com/skaffold/releases/latest/skaffold-linux-amd64
-        chmod +x skaffold
-        sudo mv skaffold /usr/local/bin
-    - name: Cache Skaffold cache
-      uses: actions/cache@v4
-      with:
-        path: ~/.skaffold/cache
-        key: skaffold-${{ runner.os }}-${{ github.workflow }}-${{ github.run_id }}
-        restore-keys: |
-          skaffold-${{ runner.os }}-${{ github.workflow }}-
-    - name: Build + Deploy PR images to GKE
-      timeout-minutes: 20
-      run: |
-        NAMESPACE="pr${PR_NUMBER}"
-        echo "NAMESPACE=$NAMESPACE" >> $GITHUB_ENV
-
-        yes | gcloud auth configure-docker us-docker.pkg.dev
-        gcloud container clusters get-credentials $PR_CLUSTER --region $REGION --project $PROJECT_ID
-        cat <<EOF | kubectl apply -f -
-        apiVersion: v1
-        kind: Namespace
-        metadata:
-          name: $NAMESPACE
-        EOF
-        echo Deploying application
-        skaffold config set --global local-cluster false
-        skaffold run --default-repo=us-docker.pkg.dev/$PROJECT_ID/refs/pull/$PR_NUMBER --tag=$PR_NUMBER --namespace=$NAMESPACE -p network-policies
-      env:
-        PR_NUMBER: ${{ github.event.pull_request.number }}
-        PROJECT_ID: "online-boutique-ci"
-        PR_CLUSTER: "prs-gke-cluster"
-        REGION: "us-central1"
-    - name: Wait For Pods
-      timeout-minutes: 20
-      run: |
-        set -x
-        kubectl config set-context --current --namespace=$NAMESPACE
-        kubectl wait --for=condition=available --timeout=1000s deployment/redis-cart
-        kubectl wait --for=condition=available --timeout=1000s deployment/adservice
-        kubectl wait --for=condition=available --timeout=1000s deployment/cartservice
-        kubectl wait --for=condition=available --timeout=1000s deployment/checkoutservice
-        kubectl wait --for=condition=available --timeout=1000s deployment/currencyservice
-        kubectl wait --for=condition=available --timeout=1000s deployment/emailservice
-        kubectl wait --for=condition=available --timeout=1000s deployment/frontend
-        kubectl wait --for=condition=available --timeout=1000s deployment/loadgenerator
-        kubectl wait --for=condition=available --timeout=1000s deployment/paymentservice
-        kubectl wait --for=condition=available --timeout=1000s deployment/productcatalogservice
-        kubectl wait --for=condition=available --timeout=1000s deployment/recommendationservice
-        kubectl wait --for=condition=available --timeout=1000s deployment/shippingservice
-    - name: Query EXTERNAL_IP for staging
-      timeout-minutes: 5
-      run: |
-        set -x
-        NAMESPACE="pr${PR_NUMBER}"
-        get_externalIP() {
-          kubectl get service frontend-external --namespace $NAMESPACE -o jsonpath='{.status.loadBalancer.ingress[0].ip}'
-        }
-        until [[ -n "$(get_externalIP)" ]]; do
-          echo "Querying for external IP for frontend-external on namespace: $NAMESPACE{}"
-        sleep 3
-        done
-        EXTERNAL_IP=$(get_externalIP)
-        echo "EXTERNAL_IP=$EXTERNAL_IP" >> $GITHUB_ENV
-      env:
-        PR_NUMBER: ${{ github.event.pull_request.number }}
-    - name: Smoke Test
-      timeout-minutes: 5
-      run: |
-        set -x
-        # start fresh loadgenerator pod
-        kubectl delete pod -l app=loadgenerator
-        # wait for requests to come in
-        REQUEST_COUNT="0"
-        while [[ "$REQUEST_COUNT"  -lt "50"  ]]; do
-            sleep 5
-            REQUEST_COUNT=$(kubectl logs -l app=loadgenerator | grep Aggregated | awk '{print $2}')
-        done
-        # ensure there are no errors hitting endpoints
-        ERROR_COUNT=$(kubectl logs -l app=loadgenerator | grep Aggregated | awk '{print $3}' | sed "s/[(][^)]*[)]//g")
-        if [[ "$ERROR_COUNT" -gt "0" ]]; then
-          exit 1
-        fi
-    - name: Comment EXTERNAL_IP
-      timeout-minutes: 5
-      env:
-          COMMENTS_URL: ${{ github.event.pull_request.comments_url }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      run: |
-          curl \
-            -X POST \
-            $COMMENTS_URL \
-            -H "Content-Type: application/json" \
-            -H "Authorization: token $GITHUB_TOKEN" \
-            --data '{ "body": "🚲 PR staged at '"http://${EXTERNAL_IP}"'"}'
-          sleep 60
+        name: pr_number
+        path: .pr/PR_NUMBER
