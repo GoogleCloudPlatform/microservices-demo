@@ -79,7 +79,7 @@ pipeline {
 
     post {
         always {
-            deleteDir()
+            sh 'rm -rf ${WORKSPACE}/* ${WORKSPACE}/.* 2>/dev/null || true'
         }
         success {
             echo "Pipeline completed for ${params.APP_NAME ?: env.APP_NAME ?: 'unknown'}"
