@@ -16,7 +16,7 @@
 ARG BUILDPLATFORM=linux/amd64
 
 # https://mcr.microsoft.com/product/dotnet/sdk
-FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:10.0.100-noble@sha256:c7445f141c04f1a6b454181bd098dcfa606c61ba0bd213d0a702489e5bd4cd71 AS builder
+FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:10.0.100-noble AS builder
 ARG TARGETARCH=amd64
 WORKDIR /app
 COPY cartservice.csproj .
@@ -35,7 +35,7 @@ RUN dotnet publish cartservice.csproj \
 USER 1000
 
 # https://mcr.microsoft.com/product/dotnet/runtime-deps
-FROM mcr.microsoft.com/dotnet/runtime-deps:10.0.0-noble-chiseled@sha256:b857c8cb8d929183cfe4c6dd9994abba92a2639dd2dbaf06005379f815991604
+FROM mcr.microsoft.com/dotnet/runtime-deps:10.0.0-noble-chiseled
 
 WORKDIR /app
 COPY --from=builder /cartservice .
