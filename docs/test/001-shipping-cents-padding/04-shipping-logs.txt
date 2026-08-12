@@ -1,0 +1,11 @@
+{"message":"Tracing enabled, but temporarily unavailable","severity":"info","timestamp":"2026-07-14T10:32:45.661278667Z"}
+{"message":"See https://github.com/GoogleCloudPlatform/microservices-demo/issues/422 for more info.","severity":"info","timestamp":"2026-07-14T10:32:45.663064375Z"}
+{"message":"Profiling disabled.","severity":"info","timestamp":"2026-07-14T10:32:45.663096584Z"}
+{"message":"Stats enabled, but temporarily unavailable","severity":"info","timestamp":"2026-07-14T10:32:45.667758167Z"}
+{"message":"Shipping Service listening on port :50051","severity":"info","timestamp":"2026-07-14T10:32:45.668575959Z"}
+{"message":"[GetQuote] received request","severity":"info","timestamp":"2026-07-14T10:34:16.247118542Z"}
+{"message":"[GetQuote] completed request","severity":"info","timestamp":"2026-07-14T10:34:16.247299792Z"}
+{"message":"[GetQuote] received request","severity":"info","timestamp":"2026-07-14T10:34:49.53944421Z"}
+{"message":"[GetQuote] completed request","severity":"info","timestamp":"2026-07-14T10:34:49.539479585Z"}
+{"message":"[ShipOrder] received request","severity":"info","timestamp":"2026-07-14T10:34:49.984565711Z"}
+{"message":"[ShipOrder] completed request","severity":"info","timestamp":"2026-07-14T10:34:49.984902502Z"}
