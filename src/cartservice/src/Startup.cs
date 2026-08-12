@@ -27,16 +27,26 @@ namespace cartservice
         public void ConfigureServices(IServiceCollection services)
         {
             string redisAddress = Configuration["REDIS_ADDR"];
+                string redisPassword = Configuration["REDIS_PASSWORD"];
+           string redisUsername = Configuration["REDIS_USERNAME"];
             string spannerProjectId = Configuration["SPANNER_PROJECT"];
             string spannerConnectionString = Configuration["SPANNER_CONNECTION_STRING"];
             string alloyDBConnectionString = Configuration["ALLOYDB_PRIMARY_IP"];
 
             if (!string.IsNullOrEmpty(redisAddress))
             {
-                services.AddStackExchangeRedisCache(options =>
-                {
-                    options.Configuration = redisAddress;
-                });
+services.AddStackExchangeRedisCache(options =>
+{
+    if (!string.IsNullOrEmpty(redisPassword))
+    {
+        options.Configuration =
+            $"{redisAddress},password={redisPassword}";
+    }
+    else
+    {
+        options.Configuration = redisAddress;
+    }
+});
                 services.AddSingleton<ICartStore, RedisCartStore>();
             }
             else if (!string.IsNullOrEmpty(spannerProjectId) || !string.IsNullOrEmpty(spannerConnectionString))
