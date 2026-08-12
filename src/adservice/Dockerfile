@@ -42,6 +42,6 @@ COPY --from=builder /app .
 
 EXPOSE 9555
 HEALTHCHECK --interval=30s --timeout=5s --start-period=30s --retries=3 \
-    CMD ["/app/build/install/hipstershop/bin/AdService", "--health-check"] || exit 1
+    CMD /app/build/install/hipstershop/bin/AdService --health-check || exit 1
 USER 1000
 ENTRYPOINT ["/app/build/install/hipstershop/bin/AdService"]

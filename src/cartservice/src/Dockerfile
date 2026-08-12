@@ -43,6 +43,6 @@ EXPOSE 7070
 ENV DOTNET_EnableDiagnostics=0 \
     ASPNETCORE_HTTP_PORTS=7070
 HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
-    CMD ["/app/cartservice", "--help"] || exit 1
+    CMD /app/cartservice --help || exit 1
 USER 1000
 ENTRYPOINT ["/app/cartservice"]
