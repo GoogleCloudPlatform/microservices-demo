@@ -20,7 +20,7 @@ pipeline {
                   serviceAccountName: jenkins
                   containers:
                   - name: devsecops
-                    image: 730335384723.dkr.ecr.ap-south-1.amazonaws.com/devsecops:1.0.1
+                    image: 730335384723.dkr.ecr.ap-south-1.amazonaws.com/devsecops:1.1.0
                     command: ['cat']
                     tty: true
                     env:
