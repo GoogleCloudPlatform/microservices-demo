@@ -124,7 +124,7 @@ public final class AdService {
     return adsMap.get(category);
   }
 
-  private static final Random random = new Random(); // nosemgrep: java.lang.security.audit.crypto.weak-random
+  private static final Random random = new Random();
 
   private List<Ad> getRandomAds() {
     List<Ad> ads = new ArrayList<>(MAX_ADS_TO_SERVE);
