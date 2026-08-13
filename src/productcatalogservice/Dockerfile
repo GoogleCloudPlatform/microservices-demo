@@ -15,7 +15,7 @@
 # Define a default value so it's not empty if the builder fails to provide it
 ARG BUILDPLATFORM=linux/amd64
 
-FROM --platform=$BUILDPLATFORM golang:1.26.4-alpine@sha256:3ad57304ad93bbec8548a0437ad9e06a455660655d9af011d58b993f6f615648 AS builder
+FROM --platform=$BUILDPLATFORM golang:1.26.4-alpine AS builder
 ARG TARGETOS=linux
 ARG TARGETARCH=amd64
 
@@ -41,4 +41,7 @@ COPY products.json .
 ENV GOTRACEBACK=single
 
 EXPOSE 3550
+HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
+    CMD /src/server --help || exit 1
+USER 1000
 ENTRYPOINT ["/src/server"]
