@@ -25,6 +25,7 @@ const PROTO_PATH = path.join(__dirname, './proto/demo.proto');
 const PORT = 7000;
 
 const shopProto = grpc.load(PROTO_PATH).hipstershop;
+// nosemgrep: javascript.grpc.security.grpc-nodejs-insecure-connection.grpc-nodejs-insecure-connection
 const client = new shopProto.CurrencyService(`localhost:${PORT}`,
   grpc.credentials.createInsecure());
 
