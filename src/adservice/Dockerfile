@@ -30,6 +30,9 @@ RUN ./gradlew installDist
 
 FROM eclipse-temurin:25.0.3_9-jre-alpine
 
+# Patch Alpine OS packages (CVE-2026-56408, CVE-2026-2100)
+RUN apk upgrade --no-cache
+
 # @TODO: https://github.com/GoogleCloudPlatform/microservices-demo/issues/2517
 # Download Stackdriver Profiler Java agent
 # RUN mkdir -p /opt/cprof && \
