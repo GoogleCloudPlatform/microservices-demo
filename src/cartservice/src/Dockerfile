@@ -35,7 +35,10 @@ RUN dotnet publish cartservice.csproj \
 USER 1000
 
 # https://mcr.microsoft.com/product/dotnet/runtime-deps
-FROM mcr.microsoft.com/dotnet/runtime-deps:10.0.0-noble-chiseled
+FROM mcr.microsoft.com/dotnet/runtime-deps:10.0-noble
+
+# Patch OpenSSL CVE-2026-45447
+RUN apt-get update && apt-get upgrade -y openssl libssl3t64 && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 COPY --from=builder /cartservice .
