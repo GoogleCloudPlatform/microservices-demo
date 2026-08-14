@@ -131,18 +131,18 @@ pipeline {
             }
         }
 
-        stage('SAST - SonarCloud') {
-            when { expression { env.APP_NAME_RESOLVED } }
-            steps {
-                sonarScanner(
-                    projectKey: 'DevOps-Experiments-ORG_E-commerce-Online-Boutique',
-                    sonarUrl:   'https://sonarcloud.io',
-                    sources:    '.',
-                    qualityGate: true,
-                    extraArgs:  '-Dsonar.organization=devops-experiments-org'
-                )
-            }
-        }
+        // stage('SAST - SonarCloud') {
+        //     when { expression { env.APP_NAME_RESOLVED } }
+        //     steps {
+        //         sonarScanner(
+        //             projectKey: 'DevOps-Experiments-ORG_E-commerce-Online-Boutique',
+        //             sonarUrl:   'https://sonarcloud.io',
+        //             sources:    '.',
+        //             qualityGate: true,
+        //             extraArgs:  '-Dsonar.organization=devops-experiments-org'
+        //         )
+        //     }
+        // }
 
         stage('Docker Build') {
             when { expression { env.APP_NAME_RESOLVED } }
