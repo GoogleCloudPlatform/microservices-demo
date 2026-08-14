@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+
 const pino = require('pino');
 const logger = pino({
   name: 'currencyservice-server',
