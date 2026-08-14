@@ -1,8 +1,7 @@
 // =============================================================================
-// Jenkinsfile — Online Boutique Monorepo (Minimal Orchestrator)
+// Jenkinsfile — Online Boutique Monorepo CI/CD Pipeline
 // =============================================================================
-// All pipeline logic lives in: devsecops-tools/vars/onlineBoutiquePipeline.groovy
-// Each Jenkins job passes APP_NAME to identify which service to build.
+// Stages defined here. Tool implementations in devsecops-tools/vars/*.groovy
 // =============================================================================
 
 @Library('devsecops-tools@main') _
@@ -10,53 +9,14 @@
 pipeline {
     agent {
         kubernetes {
-            yaml '''
-                apiVersion: v1
-                kind: Pod
-                metadata:
-                  labels:
-                    jenkins-agent: online-boutique
-                spec:
-                  serviceAccountName: jenkins
-                  containers:
-                  - name: devsecops
-                    image: 730335384723.dkr.ecr.ap-south-1.amazonaws.com/devsecops:1.1.1
-                    command: ['cat']
-                    tty: true
-                    env:
-                    - name: AWS_REGION
-                      value: ap-south-1
-                    - name: AWS_DEFAULT_REGION
-                      value: ap-south-1
-                    - name: AWS_STS_REGIONAL_ENDPOINTS
-                      value: regional
-                    - name: DOCKER_HOST
-                      value: tcp://localhost:2375
-                  - name: docker
-                    image: docker:27-dind
-                    securityContext:
-                      privileged: true
-                    args:
-                    - --host=tcp://0.0.0.0:2375
-                    - --host=unix:///var/run/docker.sock
-                    - --tls=false
-                    env:
-                    - name: DOCKER_TLS_CERTDIR
-                      value: ""
-                    volumeMounts:
-                    - name: docker-storage
-                      mountPath: /var/lib/docker
-                  volumes:
-                  - name: docker-storage
-                    emptyDir: {}
-            '''
+            yaml libraryResource('pod.yaml')
             defaultContainer 'devsecops'
         }
     }
 
     parameters {
-        string(name: 'APP_NAME', defaultValue: '', description: 'Service name under src/ (e.g., frontend, cartservice)')
-        booleanParam(name: 'FORCE_BUILD', defaultValue: false, description: 'Build even if no changes detected for this service')
+        string(name: 'APP_NAME', defaultValue: '', description: 'Service name under src/')
+        booleanParam(name: 'FORCE_BUILD', defaultValue: false, description: 'Force build even if no changes')
     }
 
     options {
@@ -67,25 +27,221 @@ pipeline {
     }
 
     stages {
-        stage('Run Pipeline') {
+        stage('Resolve Service') {
             steps {
                 script {
                     def appName = params.APP_NAME?.trim() ?: env.APP_NAME?.trim()
-                    onlineBoutiquePipeline(appName: appName, forceBuild: params.FORCE_BUILD)
+                    env.SVC_CONFIG = ''
+
+                    def cfg = onlineBoutiquePipeline(appName: appName, forceBuild: params.FORCE_BUILD)
+                    if (cfg == null) {
+                        echo "Pipeline skipped — no relevant changes"
+                        return
+                    }
+
+                    // Store config in env for subsequent stages
+                    env.APP_NAME_RESOLVED = cfg.appName
+                    env.APP_DIR       = cfg.appDir
+                    env.SVC_TYPE      = cfg.svcType
+                    env.IMAGE_TAG     = cfg.imageTag
+                    env.DOCKERFILE    = cfg.dockerfile
+                    env.BUILD_CONTEXT = cfg.buildContext
+                    env.REGISTRY      = cfg.registry
+                    env.AWS_REGION_CFG = cfg.awsRegion
+                    env.FORCE_BUILD   = cfg.forceBuild.toString()
+                    env.S3_BUCKET     = cfg.s3Bucket
+
+                    echo """
+    ┌──────────────────────────────────────────────────────────┐
+    │  Service    : ${env.APP_NAME_RESOLVED}
+    │  Type       : ${env.SVC_TYPE}
+    │  Directory  : ${env.APP_DIR}
+    │  Image      : ${env.IMAGE_TAG}
+    │  Branch     : ${env.BRANCH_NAME ?: 'main'}
+    │  Dockerfile : ${env.DOCKERFILE}
+    │  Context    : ${env.BUILD_CONTEXT}
+    └──────────────────────────────────────────────────────────┘
+                    """
                 }
+            }
+        }
+
+        stage('Checkout') {
+            when { expression { env.APP_NAME_RESOLVED } }
+            steps {
+                checkout scm
+                sh "git config --global --add safe.directory '*'"
+            }
+        }
+
+        stage('Secret Detection') {
+            when { expression { env.APP_NAME_RESOLVED } }
+            steps {
+                gitleaksScanner(
+                    appName:     env.APP_NAME_RESOLVED,
+                    scanPath:    env.APP_DIR,
+                    scanMode:    'commit',
+                    failOnLeaks: true,
+                    storeInS3:   true,
+                    s3Bucket:    env.S3_BUCKET
+                )
+            }
+        }
+
+        stage('Build') {
+            when { expression { env.APP_NAME_RESOLVED } }
+            steps {
+                buildService(appDir: env.APP_DIR, svcType: env.SVC_TYPE, action: 'build')
+            }
+        }
+
+        stage('SAST Scan') {
+            when { expression { env.APP_NAME_RESOLVED } }
+            steps {
+                semgrepScanner(
+                    appName:        env.APP_NAME_RESOLVED,
+                    scanPath:       env.APP_DIR,
+                    rules:          'p/default',
+                    severity:       'ERROR',
+                    failOnFindings: true,
+                    storeInS3:      true,
+                    s3Bucket:       env.S3_BUCKET
+                )
+            }
+        }
+
+        stage('IaC Scan') {
+            when { expression { env.APP_NAME_RESOLVED } }
+            steps {
+                checkovScanner(
+                    appName:        env.APP_NAME_RESOLVED,
+                    scanPath:       env.APP_DIR,
+                    framework:      'dockerfile',
+                    failOnFindings: true,
+                    storeInS3:      true,
+                    s3Bucket:       env.S3_BUCKET
+                )
+            }
+        }
+
+        stage('Test') {
+            when { expression { env.APP_NAME_RESOLVED } }
+            steps {
+                buildService(appDir: env.APP_DIR, svcType: env.SVC_TYPE, action: 'test')
+            }
+        }
+
+        stage('Docker Build') {
+            when { expression { env.APP_NAME_RESOLVED } }
+            steps {
+                sh "docker build -t ${env.IMAGE_TAG} -f ${env.DOCKERFILE} ${env.BUILD_CONTEXT}"
+            }
+        }
+
+        stage('Image Vulnerability Scan') {
+            when { expression { env.APP_NAME_RESOLVED } }
+            steps {
+                script {
+                    sh "cp ${env.APP_DIR}/.trivyignore .trivyignore 2>/dev/null || true"
+                }
+                trivyScanner(
+                    appName:       env.APP_NAME_RESOLVED,
+                    imageName:     env.IMAGE_TAG,
+                    scanType:      'image',
+                    severity:      'CRITICAL,HIGH',
+                    failOnVuln:    true,
+                    ignoreUnfixed: false,
+                    storeInS3:     true,
+                    s3Bucket:      env.S3_BUCKET
+                )
+            }
+        }
+
+        stage('SBOM Generation') {
+            when { expression { env.APP_NAME_RESOLVED && env.BRANCH_NAME == 'main' } }
+            steps {
+                syftSbom(
+                    appName:   env.APP_NAME_RESOLVED,
+                    imageName: env.IMAGE_TAG,
+                    scanType:  'image',
+                    format:    'cyclonedx-json',
+                    storeInS3: true,
+                    s3Bucket:  env.S3_BUCKET
+                )
+            }
+        }
+
+        stage('Push to ECR') {
+            when { expression { env.APP_NAME_RESOLVED && env.BRANCH_NAME == 'main' } }
+            steps {
+                sh """
+                    aws ecr get-login-password --region ${env.AWS_REGION_CFG} | \
+                        docker login --username AWS --password-stdin ${env.REGISTRY}
+                    docker push ${env.IMAGE_TAG}
+                """
+            }
+        }
+
+        stage('Image Signing') {
+            when { expression { env.APP_NAME_RESOLVED && env.BRANCH_NAME == 'main' } }
+            steps {
+                cosignSign(
+                    appName:          env.APP_NAME_RESOLVED,
+                    imageName:        env.IMAGE_TAG,
+                    action:           'sign',
+                    keyless:          false,
+                    keyCredentialId:  'cosign-private-key',
+                    keyPassword:      'cosign-key-password'
+                )
+            }
+        }
+
+        stage('OpenSSF Scorecard') {
+            when { expression { env.APP_NAME_RESOLVED && env.BRANCH_NAME == 'main' } }
+            steps {
+                openssfScorecard(
+                    appName:        env.APP_NAME_RESOLVED,
+                    repoUrl:        'github.com/DevOps-Experiments-ORG/E-commerce-Online-Boutique',
+                    githubTokenId:  'github-token',
+                    failBelowScore: 0,
+                    storeInS3:      true,
+                    s3Bucket:       env.S3_BUCKET
+                )
+            }
+        }
+
+        stage('Update GitOps') {
+            when { expression { env.APP_NAME_RESOLVED && env.BRANCH_NAME == 'main' } }
+            steps {
+                gitopsUpdate(
+                    appName:  env.APP_NAME_RESOLVED,
+                    imageTag: env.IMAGE_TAG,
+                    registry: env.REGISTRY
+                )
             }
         }
     }
 
     post {
         always {
+            script {
+                if (env.APP_NAME_RESOLVED) {
+                    notifyPipeline(
+                        appName:     env.APP_NAME_RESOLVED,
+                        imageTag:    env.IMAGE_TAG,
+                        s3Bucket:    env.S3_BUCKET,
+                        failedStage: currentBuild.result == 'FAILURE' ? env.STAGE_NAME : '',
+                        failedError: currentBuild.currentResult == 'FAILURE' ? 'Check console output' : ''
+                    )
+                }
+            }
             sh 'rm -rf ${WORKSPACE}/* ${WORKSPACE}/.* 2>/dev/null || true'
         }
         success {
-            echo "Pipeline completed for ${params.APP_NAME ?: env.APP_NAME ?: 'unknown'}"
+            echo "Pipeline completed for ${env.APP_NAME_RESOLVED ?: 'unknown'}"
         }
         failure {
-            echo "Pipeline FAILED for ${params.APP_NAME ?: env.APP_NAME ?: 'unknown'}"
+            echo "Pipeline FAILED for ${env.APP_NAME_RESOLVED ?: 'unknown'}"
         }
     }
 }
