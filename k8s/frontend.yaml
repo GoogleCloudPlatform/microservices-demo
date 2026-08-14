@@ -1,9 +1,17 @@
-apiVersion: apps/v1
-kind: Deployment
+apiVersion: argoproj.io/v1alpha1
+kind: Rollout
 metadata:
   name: frontend
 spec:
-  replicas: 1
+  replicas: 2
+  strategy:
+    canary:
+      steps:
+        - setWeight: 25
+        - pause: {}
+        - setWeight: 50
+        - pause: {}
+        - setWeight: 100
   selector:
     matchLabels:
       app: frontend
