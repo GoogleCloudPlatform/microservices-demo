@@ -15,7 +15,6 @@
  * limitations under the License.
  *
  */
-
 require('@google-cloud/trace-agent').start();
 
 const path = require('path');
