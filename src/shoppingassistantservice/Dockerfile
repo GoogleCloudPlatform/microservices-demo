@@ -15,13 +15,13 @@
 # Define a default value so it's not empty if the builder fails to provide it
 ARG BUILDPLATFORM=linux/amd64
 
-FROM --platform=$BUILDPLATFORM python:3.14.6-alpine AS base
+FROM --platform=$BUILDPLATFORM python:3.14.6-slim@sha256:b877e50bd90de10af8d82c57a022fc2e0dc731c5320d762a27986facfc3355c1 AS base
 
 FROM base AS builder
 
-RUN apk update \
-    && apk add --no-cache g++ \
-    && rm -rf /var/cache/apk/*
+RUN apt-get -qq update \
+    && apt-get install -y --no-install-recommends g++ \
+    && rm -rf /var/lib/apt/lists/*
 
 # get packages
 COPY requirements.txt .
@@ -43,7 +43,5 @@ COPY . .
 # set listen port
 ENV PORT="8080"
 EXPOSE 8080
-HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
-    CMD python -c "import urllib.request; urllib.request.urlopen('http://localhost:8080')" || exit 1
-USER 1000
+
 ENTRYPOINT ["python", "shoppingassistantservice.py"]

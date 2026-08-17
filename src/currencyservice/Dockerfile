@@ -15,7 +15,7 @@
 # Define a default value so it's not empty if the builder fails to provide it
 ARG BUILDPLATFORM=linux/amd64
 
-FROM --platform=$BUILDPLATFORM node:20.20.2-alpine AS builder
+FROM --platform=$BUILDPLATFORM node:20.20.2-alpine@sha256:fb4cd12c85ee03686f6af5362a0b0d56d50c58a04632e6c0fb8363f609372293 AS builder
 
 # Some packages (e.g. @google-cloud/profiler) require additional
 # deps for post-install scripts
@@ -30,7 +30,7 @@ COPY package*.json ./
 
 RUN npm install --only=production
 
-FROM alpine:3.24.1
+FROM alpine:3.24.1@sha256:28bd5fe8b56d1bd048e5babf5b10710ebe0bae67db86916198a6eec434943f8b
 
 RUN apk add --no-cache nodejs
 
@@ -41,7 +41,5 @@ COPY --from=builder /usr/src/app/node_modules ./node_modules
 COPY . .
 
 EXPOSE 7000
-HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
-    CMD node -e "process.exit(0)" || exit 1
-USER 1000
+
 ENTRYPOINT [ "node", "server.js" ]

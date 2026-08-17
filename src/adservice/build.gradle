@@ -18,7 +18,6 @@ def grpcVersion = "1.82.1"
 def jacksonCoreVersion = "2.22.0"
 def jacksonDatabindVersion = "2.22.0"
 def protocVersion = "4.35.1"
-def nettyVersion = "4.1.136.Final"
 
 tasks.withType(JavaCompile) {
     sourceCompatibility = JavaVersion.VERSION_21
@@ -47,17 +46,6 @@ dependencies {
         runtimeOnly "com.fasterxml.jackson.core:jackson-core:${jacksonCoreVersion}",
                 "com.fasterxml.jackson.core:jackson-databind:${jacksonDatabindVersion}",
                 "io.netty:netty-tcnative-boringssl-static:2.0.80.Final"
-
-        // Force Netty upgrade to fix CVE-2026-59901, CVE-2026-55831, CVE-2026-55833, CVE-2026-56745, CVE-2026-56819, CVE-2026-44249, CVE-2026-45416, CVE-2026-50010
-        constraints {
-            implementation("io.netty:netty-codec:${nettyVersion}")
-            implementation("io.netty:netty-codec-http:${nettyVersion}")
-            implementation("io.netty:netty-codec-http2:${nettyVersion}")
-            implementation("io.netty:netty-handler:${nettyVersion}")
-            implementation("io.netty:netty-common:${nettyVersion}")
-            implementation("io.netty:netty-buffer:${nettyVersion}")
-            implementation("io.netty:netty-transport:${nettyVersion}")
-        }
     }
 }
 

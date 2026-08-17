@@ -68,7 +68,7 @@ def checkout(l):
         'credit_card_number': fake.credit_card_number(card_type="visa"),
         'credit_card_expiration_month': random.randint(1, 12),
         'credit_card_expiration_year': random.randint(current_year, current_year + 70),
-        'credit_card_cvv': f"{random.randint(100, 999)}",  # nosemgrep: python.lang.security.insecure-random-use
+        'credit_card_cvv': f"{random.randint(100, 999)}",
     })
     
 def logout(l):

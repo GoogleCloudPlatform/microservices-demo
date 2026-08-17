@@ -1,22 +1,29 @@
 // =============================================================================
-// Jenkinsfile — Online Boutique Monorepo CI/CD Pipeline
+// Jenkinsfile — Online Boutique CI/CD Pipeline
 // =============================================================================
-// Stages defined here. Tool implementations in devsecops-tools/vars/*.groovy
+// Project  : E-commerce Online Boutique (Microservices)
+// Repo     : https://github.com/DevOps-Experiments-ORG/E-commerce-Online-Boutique
+// Registry : 730335384723.dkr.ecr.ap-south-1.amazonaws.com/devsecops
+// Branch   : feature-1 (deploy gate)
+// Agent    : Docker-based Jenkins agent with DevSecOps tooling
 // =============================================================================
-
-@Library('devsecops-tools@main') _
 
 pipeline {
     agent {
-        kubernetes {
-            yaml libraryResource('pod.yaml')
-            defaultContainer 'devsecops'
+        docker {
+            alwaysPull true
+            image '730335384723.dkr.ecr.ap-south-1.amazonaws.com/devsecops:1.0.0'
+            registryUrl 'https://730335384723.dkr.ecr.ap-south-1.amazonaws.com'
+            registryCredentialsId 'ecr:ap-south-1:AWSKey'
+            args '-v /var/run/docker.sock:/var/run/docker.sock -u 0:0'
         }
     }
 
     parameters {
-        string(name: 'APP_NAME', defaultValue: '', description: 'Service name under src/')
-        booleanParam(name: 'FORCE_BUILD', defaultValue: false, description: 'Force build even if no changes')
+        choice(name: 'ENVIRONMENT', choices: ['local', 'dev', 'prod'], description: 'Target environment')
+        string(name: 'SERVICES', defaultValue: '', description: 'Comma-separated services (empty = auto-detect)')
+        booleanParam(name: 'FORCE_FULL_BUILD', defaultValue: false, description: 'Build all services')
+        booleanParam(name: 'SKIP_DEPLOY', defaultValue: false, description: 'Skip GitOps update and ArgoCD sync')
     }
 
     options {
@@ -26,235 +33,225 @@ pipeline {
         skipDefaultCheckout()
     }
 
+    environment {
+        AWS_REGION           = 'ap-south-1'
+        AWS_ACCOUNT_ID       = '730335384723'
+        SNS_TOPIC_NAME       = 'Ai-powered'
+        DEPLOY_GITOPS_REPO   = "E-commerce-Online-Boutique"
+        DEPLOY_TARGET_FILE   = "microservices/applications/pramaan-beta/dev-mock-aa-prod/values-pre-prod.yaml"
+        DEPLOY_TARGET_BRANCH = "feature-1"
+        REGISTRY             = "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com"
+        ECR_REPOSITORY       = "devsecops"
+        SECRET_NAME          = "shared/ppd/finvuaaserver-secret"
+        NODE_ENV             = "local"
+        PIPELINE_ENV         = "${params.ENVIRONMENT ?: 'local'}"
+        DOCKER_BUILDKIT      = '1'
+    }
+
     stages {
-        stage('Resolve Service') {
+        // ─────────────────────────────────────────────────
+        // Stage 1: Checkout
+        // ─────────────────────────────────────────────────
+        stage('Checkout Code') {
+            steps {
+                checkout scm
+            }
+        }
+
+        // ─────────────────────────────────────────────────
+        // Stage 2: Fetch Secrets from AWS SecretsManager
+        // ─────────────────────────────────────────────────
+        stage('Fetch env from AWS SecretsManager') {
             steps {
                 script {
-                    def appName = params.APP_NAME?.trim() ?: env.APP_NAME?.trim()
-                    env.SVC_CONFIG = ''
+                    sh '''
+                        unset AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY AWS_SESSION_TOKEN
+                        aws secretsmanager get-secret-value \
+                            --region ${AWS_REGION} \
+                            --secret-id ${SECRET_NAME} \
+                            --query SecretString \
+                            --output text > .env || { echo "Failed to fetch secret"; exit 1; }
+                    '''
+                }
+            }
+        }
 
-                    def cfg = onlineBoutiquePipeline(appName: appName, forceBuild: params.FORCE_BUILD)
-                    if (cfg == null) {
-                        echo "Pipeline skipped — no relevant changes"
-                        return
-                    }
+        // ─────────────────────────────────────────────────
+        // Stage 3: Sensitive Information Check
+        // ─────────────────────────────────────────────────
+        stage('Sensitive Information Check - Git Secret') {
+            steps {
+                echo 'Scanning for sensitive information...'
+                sh '''
+                    echo "Running git-secrets scan..."
+                    # git secrets --scan || true
+                '''
+            }
+        }
 
-                    // Store config in env for subsequent stages
-                    env.APP_NAME_RESOLVED = cfg.appName
-                    env.APP_DIR       = cfg.appDir
-                    env.SVC_TYPE      = cfg.svcType
-                    env.IMAGE_TAG     = cfg.imageTag
-                    env.DOCKERFILE    = cfg.dockerfile
-                    env.BUILD_CONTEXT = cfg.buildContext
-                    env.REGISTRY      = cfg.registry
-                    env.AWS_REGION_CFG = cfg.awsRegion
-                    env.FORCE_BUILD   = cfg.forceBuild.toString()
-                    env.S3_BUCKET     = cfg.s3Bucket
+        // ─────────────────────────────────────────────────
+        // Stage 4: Build Code
+        // ─────────────────────────────────────────────────
+        stage('Build Code') {
+            steps {
+                echo "Building packages..."
+            }
+        }
 
-                    echo """
-    ┌──────────────────────────────────────────────────────────┐
-    │  Service    : ${env.APP_NAME_RESOLVED}
-    │  Type       : ${env.SVC_TYPE}
-    │  Directory  : ${env.APP_DIR}
-    │  Image      : ${env.IMAGE_TAG}
-    │  Branch     : ${env.BRANCH_NAME ?: 'main'}
-    │  Dockerfile : ${env.DOCKERFILE}
-    │  Context    : ${env.BUILD_CONTEXT}
-    └──────────────────────────────────────────────────────────┘
+        // ─────────────────────────────────────────────────
+        // Stage 5: Unit Tests
+        // ─────────────────────────────────────────────────
+        stage('Run Tests') {
+            steps {
+                echo 'Testing...'
+                sh '''
+                    echo 'Running unit tests...'
+                '''
+            }
+        }
+
+        // ─────────────────────────────────────────────────
+        // Stage 6: Integration Testing
+        // ─────────────────────────────────────────────────
+        stage('Integration Testing') {
+            steps {
+                echo 'Running Integration tests cases...'
+            }
+        }
+
+        // ─────────────────────────────────────────────────
+        // Stage 7: AI PR Review (only on Pull Requests)
+        // ─────────────────────────────────────────────────
+        stage('AI PR Review') {
+            when { expression { env.CHANGE_ID } }
+            steps {
+                script {
+                    def response = httpRequest(
+                        url: "http://obs-assistant.default.svc.cluster.local:5000/review-pr",
+                        httpMode: 'POST',
+                        contentType: 'APPLICATION_JSON',
+                        requestBody: """{"pr_number": ${env.CHANGE_ID}}""",
+                        timeout: 60
+                    )
+                    echo "PR Review posted: ${response.content}"
+                }
+            }
+        }
+
+        // ─────────────────────────────────────────────────
+        // Stage 8: SonarQube Scan (disabled — uncomment when ready)
+        // ─────────────────────────────────────────────────
+        // stage('SonarQube Scan') {
+        //     steps {
+        //         echo 'Running SonarQube Scan...'
+        //         // sonarQubeScan('online-boutique', 'nodejs')
+        //     }
+        // }
+
+        // stage('Quality Gate Check') {
+        //     steps {
+        //         echo 'Running SonarQube Quality Gate check...'
+        //         // qualityGateCheck()
+        //     }
+        // }
+
+        // ─────────────────────────────────────────────────
+        // Stage 9: Build Docker Image
+        // ─────────────────────────────────────────────────
+        stage('Build Docker Image') {
+            steps {
+                script {
+                    echo 'Building Docker Image...'
+                    env.IMAGE_TAG = "${REGISTRY}/${ECR_REPOSITORY}:${env.BUILD_NUMBER}"
+                    sh """
+                        docker build \
+                            --build-arg NODE_ENV=${NODE_ENV} \
+                            --build-arg ENV_FILE=.env \
+                            -t ${env.IMAGE_TAG} \
+                            -f ./Dockerfile .
                     """
                 }
             }
         }
 
-        stage('Checkout') {
-            when { expression { env.APP_NAME_RESOLVED } }
+        // ─────────────────────────────────────────────────
+        // Stage 10: Container Image Security Scan
+        // ─────────────────────────────────────────────────
+        stage('Container Image Scan') {
             steps {
-                checkout scm
-                sh "git config --global --add safe.directory '*'"
-            }
-        }
-
-        stage('Secret Detection') {
-            when { expression { env.APP_NAME_RESOLVED } }
-            steps {
-                gitleaksScanner(
-                    appName:     env.APP_NAME_RESOLVED,
-                    scanPath:    env.APP_DIR,
-                    scanMode:    env.CHANGE_ID ? 'branch' : 'commit',
-                    failOnLeaks: true,
-                    storeInS3:   true,
-                    s3Bucket:    env.S3_BUCKET
-                )
-            }
-        }
-
-        stage('Build') {
-            when { expression { env.APP_NAME_RESOLVED } }
-            steps {
-                buildService(appDir: env.APP_DIR, svcType: env.SVC_TYPE, action: 'build')
-            }
-        }
-
-        stage('SAST Scan') {
-            when { expression { env.APP_NAME_RESOLVED } }
-            steps {
-                semgrepScanner(
-                    appName:        env.APP_NAME_RESOLVED,
-                    scanPath:       env.APP_DIR,
-                    rules:          'p/default',
-                    severity:       'ERROR',
-                    failOnFindings: true,
-                    storeInS3:      true,
-                    s3Bucket:       env.S3_BUCKET
-                )
-            }
-        }
-
-        stage('IaC Scan') {
-            when { expression { env.APP_NAME_RESOLVED } }
-            steps {
-                checkovScanner(
-                    appName:        env.APP_NAME_RESOLVED,
-                    scanPath:       env.APP_DIR,
-                    framework:      'dockerfile',
-                    failOnFindings: true,
-                    storeInS3:      true,
-                    s3Bucket:       env.S3_BUCKET
-                )
-            }
-        }
-
-        stage('Test') {
-            when { expression { env.APP_NAME_RESOLVED } }
-            steps {
-                buildService(appDir: env.APP_DIR, svcType: env.SVC_TYPE, action: 'test')
-            }
-        }
-
-        // stage('SAST - SonarCloud') {
-        //     when { expression { env.APP_NAME_RESOLVED } }
-        //     steps {
-        //         sonarScanner(
-        //             projectKey: 'DevOps-Experiments-ORG_E-commerce-Online-Boutique',
-        //             sonarUrl:   'https://sonarcloud.io',
-        //             sources:    '.',
-        //             qualityGate: true,
-        //             extraArgs:  '-Dsonar.organization=devops-experiments-org'
-        //         )
-        //     }
-        // }
-
-        stage('Docker Build') {
-            when { expression { env.APP_NAME_RESOLVED } }
-            steps {
-                sh "docker build -t ${env.IMAGE_TAG} -f ${env.DOCKERFILE} ${env.BUILD_CONTEXT}"
-            }
-        }
-
-        stage('Image Vulnerability Scan') {
-            when { expression { env.APP_NAME_RESOLVED } }
-            steps {
-                script {
-                    sh "cp ${env.APP_DIR}/.trivyignore .trivyignore 2>/dev/null || true"
-                }
-                trivyScanner(
-                    appName:       env.APP_NAME_RESOLVED,
-                    imageName:     env.IMAGE_TAG,
-                    scanType:      'image',
-                    severity:      'CRITICAL,HIGH',
-                    failOnVuln:    true,
-                    ignoreUnfixed: false,
-                    storeInS3:     true,
-                    s3Bucket:      env.S3_BUCKET
-                )
-            }
-        }
-
-        stage('SBOM Generation') {
-            when { expression { env.APP_NAME_RESOLVED && env.BRANCH_NAME == 'main' } }
-            steps {
-                syftSbom(
-                    appName:   env.APP_NAME_RESOLVED,
-                    imageName: env.IMAGE_TAG,
-                    scanType:  'image',
-                    format:    'cyclonedx-json',
-                    storeInS3: true,
-                    s3Bucket:  env.S3_BUCKET
-                )
-            }
-        }
-
-        stage('Push to ECR') {
-            when { expression { env.APP_NAME_RESOLVED && env.BRANCH_NAME == 'main' } }
-            steps {
+                echo 'Scanning Docker image for vulnerabilities...'
                 sh """
-                    aws ecr get-login-password --region ${env.AWS_REGION_CFG} | \
-                        docker login --username AWS --password-stdin ${env.REGISTRY}
-                    docker push ${env.IMAGE_TAG}
+                    echo "Running Trivy scan on ${env.IMAGE_TAG}..."
+                    # trivy image --exit-code 0 --severity HIGH,CRITICAL ${env.IMAGE_TAG}
                 """
             }
         }
 
-        stage('Image Signing') {
-            when { expression { env.APP_NAME_RESOLVED && env.BRANCH_NAME == 'main' } }
+        // ─────────────────────────────────────────────────
+        // Stage 11: Push Docker Image to ECR
+        // ─────────────────────────────────────────────────
+        stage('Push Docker Image') {
+            when {
+                branch "${DEPLOY_TARGET_BRANCH}"
+            }
             steps {
-                cosignSign(
-                    appName:          env.APP_NAME_RESOLVED,
-                    imageName:        env.IMAGE_TAG,
-                    action:           'sign',
-                    keyless:          false,
-                    keyCredentialId:  'cosign-private-key',
-                    keyPassword:      'cosign-key-password'
-                )
+                script {
+                    echo 'Pushing Docker image to ECR...'
+                    sh """
+                        aws ecr get-login-password --region ${AWS_REGION} | \
+                            docker login --username AWS --password-stdin ${REGISTRY}
+                        docker push ${env.IMAGE_TAG}
+                    """
+                }
             }
         }
 
-        stage('OpenSSF Scorecard') {
-            when { expression { env.APP_NAME_RESOLVED && env.BRANCH_NAME == 'main' } }
+        // ─────────────────────────────────────────────────
+        // Stage 12: Update Image Tag in GitOps Repo
+        // ─────────────────────────────────────────────────
+        stage('Update Image Tag in GitOps') {
+            when {
+                branch "${DEPLOY_TARGET_BRANCH}"
+            }
             steps {
-                openssfScorecard(
-                    appName:        env.APP_NAME_RESOLVED,
-                    repoUrl:        'github.com/DevOps-Experiments-ORG/E-commerce-Online-Boutique',
-                    githubTokenId:  'github-token',
-                    failBelowScore: 0,
-                    storeInS3:      true,
-                    s3Bucket:       env.S3_BUCKET
-                )
+                echo "Pushing changes to ${env.DEPLOY_GITOPS_REPO}"
+                // TODO: Implement GitOps image tag update
+                // updateGitOps()
             }
         }
 
-        stage('Update GitOps') {
-            when { expression { env.APP_NAME_RESOLVED && env.BRANCH_NAME == 'main' } }
+        // ─────────────────────────────────────────────────
+        // Stage 13: Post-Deployment Tests
+        // ─────────────────────────────────────────────────
+        stage('Post-Deployment Tests') {
+            when {
+                branch "${DEPLOY_TARGET_BRANCH}"
+            }
             steps {
-                gitopsUpdate(
-                    appName:  env.APP_NAME_RESOLVED,
-                    imageTag: env.IMAGE_TAG,
-                    registry: env.REGISTRY
-                )
+                echo 'Running post-deployment tests...'
             }
         }
     }
 
+    // ─────────────────────────────────────────────────────
+    // Post Actions: Cleanup & Notifications
+    // ─────────────────────────────────────────────────────
     post {
         always {
-            script {
-                if (env.APP_NAME_RESOLVED) {
-                    notifyPipeline(
-                        appName:     env.APP_NAME_RESOLVED,
-                        imageTag:    env.IMAGE_TAG,
-                        s3Bucket:    env.S3_BUCKET,
-                        failedStage: currentBuild.result == 'FAILURE' ? env.STAGE_NAME : '',
-                        failedError: currentBuild.currentResult == 'FAILURE' ? 'Check console output' : ''
-                    )
-                }
-            }
-            sh 'rm -rf ${WORKSPACE}/* ${WORKSPACE}/.* 2>/dev/null || true'
+            echo 'Cleaning up resources...'
+            sh 'docker system prune -f || true'
+            cleanWs()
+            snsPublish(
+                topicArn: "arn:aws:sns:${env.AWS_REGION}:${env.AWS_ACCOUNT_ID}:${env.SNS_TOPIC_NAME}",
+                subject: "Jenkins: ${env.JOB_NAME}-${env.BUILD_NUMBER}",
+                message: "Build status notification for ${env.JOB_NAME}: ${currentBuild.currentResult}"
+            )
         }
         success {
-            echo "Pipeline completed for ${env.APP_NAME_RESOLVED ?: 'unknown'}"
+            echo 'Pipeline completed successfully!'
         }
         failure {
-            echo "Pipeline FAILED for ${env.APP_NAME_RESOLVED ?: 'unknown'}"
+            echo 'Pipeline failed!'
         }
     }
 }

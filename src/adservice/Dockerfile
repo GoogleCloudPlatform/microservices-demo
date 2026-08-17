@@ -15,7 +15,7 @@
 # Define a default value so it's not empty if the builder fails to provide it
 ARG BUILDPLATFORM=linux/amd64
 
-FROM --platform=$BUILDPLATFORM eclipse-temurin:24.0.2_12-jdk-noble AS builder
+FROM --platform=$BUILDPLATFORM eclipse-temurin:24.0.2_12-jdk-noble@sha256:dacac8e9a0df0d2bd24e702b4431132875c249930b70555ebd7ca285b5bee684 AS builder
 
 WORKDIR /app
 
@@ -28,10 +28,7 @@ COPY . .
 RUN chmod +x gradlew
 RUN ./gradlew installDist
 
-FROM eclipse-temurin:25.0.3_9-jre-alpine
-
-# Patch Alpine OS packages (CVE-2026-56408, CVE-2026-2100)
-RUN apk upgrade --no-cache
+FROM eclipse-temurin:25.0.3_9-jre-alpine@sha256:28db6fdf60e38945e43d840c0333aeaec66c15943070104f7586fd3c9d1665b0
 
 # @TODO: https://github.com/GoogleCloudPlatform/microservices-demo/issues/2517
 # Download Stackdriver Profiler Java agent
@@ -44,7 +41,4 @@ WORKDIR /app
 COPY --from=builder /app .
 
 EXPOSE 9555
-HEALTHCHECK --interval=30s --timeout=5s --start-period=30s --retries=3 \
-    CMD /app/build/install/hipstershop/bin/AdService --health-check || exit 1
-USER 1000
 ENTRYPOINT ["/app/build/install/hipstershop/bin/AdService"]

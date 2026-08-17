@@ -6,7 +6,6 @@ Run the following command to restore dependencies to `vendor/` directory:
 
 ## Dynamic catalog reloading / artificial delay
 
-
 This service has a "dynamic catalog reloading" feature that is purposefully
 not well implemented. The goal of this feature is to allow you to modify the
 `products.json` file and have the changes be picked up without having to

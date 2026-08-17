@@ -2,7 +2,7 @@ module github.com/GoogleCloudPlatform/microservices-demo/src/shippingservice
 
 go 1.25.0
 
-toolchain go1.26.6
+toolchain go1.26.4
 
 require (
 	cloud.google.com/go/profiler v0.6.0
