@@ -80,7 +80,7 @@ pipeline {
                 gitleaksScanner(
                     appName:     env.APP_NAME_RESOLVED,
                     scanPath:    env.APP_DIR,
-                    scanMode:    'commit',
+                    scanMode:    env.CHANGE_ID ? 'branch' : 'commit',
                     failOnLeaks: true,
                     storeInS3:   true,
                     s3Bucket:    env.S3_BUCKET
