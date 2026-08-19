@@ -27,6 +27,11 @@ services:
 
   # ---------------------------------------------------------------------------
   # Microservicios gRPC (backend)
+  #
+  # Nota sobre healthchecks: las imágenes distroless (Go services) y chiseled
+  # (.NET cartservice) no tienen shell ni herramientas, por lo que no se puede
+  # usar CMD-SHELL. Los servicios sin healthcheck arrancan con depends_on
+  # (condition: service_started) y restart: unless-stopped para reintentar.
   # ---------------------------------------------------------------------------
 
   emailservice:
@@ -42,7 +47,7 @@ services:
     expose:
       - "8080"
     healthcheck:
-      test: ["CMD", "python", "-c", "import socket; s=socket.socket(); s.settimeout(2); s.connect(('localhost', 8080)); s.close()"]
+      test: ["CMD-SHELL", "python -c \"import socket; s=socket.socket(); s.settimeout(2); s.connect(('localhost', 8080)); s.close()\""]
       interval: 15s
       timeout: 5s
       retries: 10
@@ -60,12 +65,7 @@ services:
       - DISABLE_PROFILER=1
     expose:
       - "3550"
-    healthcheck:
-      test: ["CMD", "/bin/grpc_health_probe", "-addr=localhost:3550"]
-      interval: 15s
-      timeout: 5s
-      retries: 10
-      start_period: 10s
+    # Imagen distroless: sin shell, sin healthcheck posible
 
   currencyservice:
     build:
@@ -80,7 +80,7 @@ services:
     expose:
       - "7000"
     healthcheck:
-      test: ["CMD", "/bin/grpc_health_probe", "-addr=localhost:7000"]
+      test: ["CMD-SHELL", "nc -z localhost 7000 || exit 1"]
       interval: 15s
       timeout: 5s
       retries: 10
@@ -99,7 +99,7 @@ services:
     expose:
       - "50051"
     healthcheck:
-      test: ["CMD", "/bin/grpc_health_probe", "-addr=localhost:50051"]
+      test: ["CMD-SHELL", "nc -z localhost 50051 || exit 1"]
       interval: 15s
       timeout: 5s
       retries: 10
@@ -117,12 +117,7 @@ services:
       - DISABLE_PROFILER=1
     expose:
       - "50051"
-    healthcheck:
-      test: ["CMD", "/bin/grpc_health_probe", "-addr=localhost:50051"]
-      interval: 15s
-      timeout: 5s
-      retries: 10
-      start_period: 10s
+    # Imagen distroless: sin shell, sin healthcheck posible
 
   recommendationservice:
     build:
@@ -133,7 +128,7 @@ services:
     restart: unless-stopped
     depends_on:
       productcatalogservice:
-        condition: service_healthy
+        condition: service_started
     environment:
       - PORT=8080
       - PRODUCT_CATALOG_SERVICE_ADDR=productcatalogservice:3550
@@ -141,7 +136,7 @@ services:
     expose:
       - "8080"
     healthcheck:
-      test: ["CMD", "python", "-c", "import socket; s=socket.socket(); s.settimeout(2); s.connect(('localhost', 8080)); s.close()"]
+      test: ["CMD-SHELL", "python -c \"import socket; s=socket.socket(); s.settimeout(2); s.connect(('localhost', 8080)); s.close()\""]
       interval: 15s
       timeout: 5s
       retries: 10
@@ -163,12 +158,7 @@ services:
       - DOTNET_EnableDiagnostics=0
     expose:
       - "7070"
-    healthcheck:
-      test: ["CMD", "/bin/grpc_health_probe", "-addr=localhost:7070"]
-      interval: 15s
-      timeout: 5s
-      retries: 10
-      start_period: 20s
+    # Imagen chiseled: sin shell, sin healthcheck posible
 
   adservice:
     build:
@@ -182,7 +172,7 @@ services:
     expose:
       - "9555"
     healthcheck:
-      test: ["CMD", "/bin/grpc_health_probe", "-addr=localhost:9555"]
+      test: ["CMD-SHELL", "nc -z localhost 9555 || exit 1"]
       interval: 15s
       timeout: 5s
       retries: 10
@@ -197,9 +187,9 @@ services:
     restart: unless-stopped
     depends_on:
       productcatalogservice:
-        condition: service_healthy
+        condition: service_started
       shippingservice:
-        condition: service_healthy
+        condition: service_started
       paymentservice:
         condition: service_healthy
       emailservice:
@@ -207,7 +197,7 @@ services:
       currencyservice:
         condition: service_healthy
       cartservice:
-        condition: service_healthy
+        condition: service_started
     environment:
       - PORT=5050
       - PRODUCT_CATALOG_SERVICE_ADDR=productcatalogservice:3550
@@ -218,12 +208,7 @@ services:
       - CART_SERVICE_ADDR=cartservice:7070
     expose:
       - "5050"
-    healthcheck:
-      test: ["CMD", "/bin/grpc_health_probe", "-addr=localhost:5050"]
-      interval: 15s
-      timeout: 5s
-      retries: 10
-      start_period: 10s
+    # Imagen distroless: sin shell, sin healthcheck posible
 
   # ---------------------------------------------------------------------------
   # Frontend (Go) - expuesto al host
@@ -237,17 +222,17 @@ services:
     restart: unless-stopped
     depends_on:
       productcatalogservice:
-        condition: service_healthy
+        condition: service_started
       currencyservice:
         condition: service_healthy
       cartservice:
-        condition: service_healthy
+        condition: service_started
       recommendationservice:
         condition: service_healthy
       shippingservice:
-        condition: service_healthy
+        condition: service_started
       checkoutservice:
-        condition: service_healthy
+        condition: service_started
       adservice:
         condition: service_healthy
     environment:
@@ -263,12 +248,7 @@ services:
       - ENABLE_PROFILER=0
     ports:
       - "8080:8080"
-    healthcheck:
-      test: ["CMD", "wget", "--spider", "-q", "http://localhost:8080/_healthz"]
-      interval: 15s
-      timeout: 5s
-      retries: 10
-      start_period: 10s
+    # Imagen distroless: sin shell, sin healthcheck posible
 
   # ---------------------------------------------------------------------------
   # Perfil opcional: generador de carga (Locust)
@@ -284,7 +264,7 @@ services:
     restart: unless-stopped
     depends_on:
       frontend:
-        condition: service_healthy
+        condition: service_started
     environment:
       - FRONTEND_ADDR=frontend:8080
       - USERS=10
