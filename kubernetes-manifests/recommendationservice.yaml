@@ -47,11 +47,13 @@ spec:
         ports:
         - containerPort: 8080
         readinessProbe:
-          periodSeconds: 5
+          initialDelaySeconds: 20
+          periodSeconds: 15
           grpc:
             port: 8080
         livenessProbe:
-          periodSeconds: 5
+          initialDelaySeconds: 20
+          periodSeconds: 15
           grpc:
             port: 8080
         env:
@@ -66,7 +68,7 @@ spec:
             cpu: 100m
             memory: 220Mi
           limits:
-            cpu: 200m
+            cpu: 500m
             memory: 450Mi
 ---
 apiVersion: v1

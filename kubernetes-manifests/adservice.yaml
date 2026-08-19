@@ -59,11 +59,13 @@ spec:
         readinessProbe:
           initialDelaySeconds: 20
           periodSeconds: 15
+          timeoutSeconds: 5
           grpc:
             port: 9555
         livenessProbe:
           initialDelaySeconds: 20
           periodSeconds: 15
+          timeoutSeconds: 5
           grpc:
             port: 9555
 ---

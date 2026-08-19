@@ -52,11 +52,13 @@ spec:
         - name: DISABLE_PROFILER
           value: "1"
         readinessProbe:
-          periodSeconds: 5
+          initialDelaySeconds: 20
+          periodSeconds: 15
           grpc:
             port: 8080
         livenessProbe:
-          periodSeconds: 5
+          initialDelaySeconds: 20
+          periodSeconds: 15
           grpc:
             port: 8080
         resources:
@@ -64,8 +66,8 @@ spec:
             cpu: 100m
             memory: 64Mi
           limits:
-            cpu: 200m
-            memory: 128Mi
+            cpu: 500m
+            memory: 256Mi
 ---
 apiVersion: v1
 kind: Service

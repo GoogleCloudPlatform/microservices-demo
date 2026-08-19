@@ -1,0 +1,319 @@
+# Online Boutique - docker-compose
+# Levanta todos los microservicios del backend y el frontend en una sola red.
+#
+# Uso:
+#   docker-compose up -d --build              # levanta todo (sin shopping-assistant ni loadgenerator)
+#   docker-compose --profile loadgen up -d --build   # incluye el generador de carga
+#   docker-compose --profile assistant up -d --build # incluye shopping-assistant (requiere GCP)
+#
+# El frontend queda expuesto en http://localhost:8080
+
+services:
+
+  # ---------------------------------------------------------------------------
+  # Base de datos Redis para el carrito
+  # ---------------------------------------------------------------------------
+  redis-cart:
+    image: redis:alpine
+    container_name: redis-cart
+    restart: unless-stopped
+    expose:
+      - "6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ---------------------------------------------------------------------------
+  # Microservicios gRPC (backend)
+  # ---------------------------------------------------------------------------
+
+  emailservice:
+    build:
+      context: src/emailservice
+      platforms: ["linux/amd64"]
+    image: emailservice:local
+    container_name: emailservice
+    restart: unless-stopped
+    environment:
+      - PORT=8080
+      - DISABLE_PROFILER=1
+    expose:
+      - "8080"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import socket; s=socket.socket(); s.settimeout(2); s.connect(('localhost', 8080)); s.close()"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+
+  productcatalogservice:
+    build:
+      context: src/productcatalogservice
+      platforms: ["linux/amd64"]
+    image: productcatalogservice:local
+    container_name: productcatalogservice
+    restart: unless-stopped
+    environment:
+      - PORT=3550
+      - DISABLE_PROFILER=1
+    expose:
+      - "3550"
+    healthcheck:
+      test: ["CMD", "/bin/grpc_health_probe", "-addr=localhost:3550"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
+  currencyservice:
+    build:
+      context: src/currencyservice
+      platforms: ["linux/amd64"]
+    image: currencyservice:local
+    container_name: currencyservice
+    restart: unless-stopped
+    environment:
+      - PORT=7000
+      - DISABLE_PROFILER=1
+    expose:
+      - "7000"
+    healthcheck:
+      test: ["CMD", "/bin/grpc_health_probe", "-addr=localhost:7000"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
+  paymentservice:
+    build:
+      context: src/paymentservice
+      platforms: ["linux/amd64"]
+    image: paymentservice:local
+    container_name: paymentservice
+    restart: unless-stopped
+    environment:
+      - PORT=50051
+      - DISABLE_PROFILER=1
+    expose:
+      - "50051"
+    healthcheck:
+      test: ["CMD", "/bin/grpc_health_probe", "-addr=localhost:50051"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
+  shippingservice:
+    build:
+      context: src/shippingservice
+      platforms: ["linux/amd64"]
+    image: shippingservice:local
+    container_name: shippingservice
+    restart: unless-stopped
+    environment:
+      - PORT=50051
+      - DISABLE_PROFILER=1
+    expose:
+      - "50051"
+    healthcheck:
+      test: ["CMD", "/bin/grpc_health_probe", "-addr=localhost:50051"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
+  recommendationservice:
+    build:
+      context: src/recommendationservice
+      platforms: ["linux/amd64"]
+    image: recommendationservice:local
+    container_name: recommendationservice
+    restart: unless-stopped
+    depends_on:
+      productcatalogservice:
+        condition: service_healthy
+    environment:
+      - PORT=8080
+      - PRODUCT_CATALOG_SERVICE_ADDR=productcatalogservice:3550
+      - DISABLE_PROFILER=1
+    expose:
+      - "8080"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import socket; s=socket.socket(); s.settimeout(2); s.connect(('localhost', 8080)); s.close()"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+
+  cartservice:
+    build:
+      context: src/cartservice/src
+      platforms: ["linux/amd64"]
+    image: cartservice:local
+    container_name: cartservice
+    restart: unless-stopped
+    depends_on:
+      redis-cart:
+        condition: service_healthy
+    environment:
+      - REDIS_ADDR=redis-cart:6379
+      - ASPNETCORE_HTTP_PORTS=7070
+      - DOTNET_EnableDiagnostics=0
+    expose:
+      - "7070"
+    healthcheck:
+      test: ["CMD", "/bin/grpc_health_probe", "-addr=localhost:7070"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+
+  adservice:
+    build:
+      context: src/adservice
+      platforms: ["linux/amd64"]
+    image: adservice:local
+    container_name: adservice
+    restart: unless-stopped
+    environment:
+      - PORT=9555
+    expose:
+      - "9555"
+    healthcheck:
+      test: ["CMD", "/bin/grpc_health_probe", "-addr=localhost:9555"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+
+  checkoutservice:
+    build:
+      context: src/checkoutservice
+      platforms: ["linux/amd64"]
+    image: checkoutservice:local
+    container_name: checkoutservice
+    restart: unless-stopped
+    depends_on:
+      productcatalogservice:
+        condition: service_healthy
+      shippingservice:
+        condition: service_healthy
+      paymentservice:
+        condition: service_healthy
+      emailservice:
+        condition: service_healthy
+      currencyservice:
+        condition: service_healthy
+      cartservice:
+        condition: service_healthy
+    environment:
+      - PORT=5050
+      - PRODUCT_CATALOG_SERVICE_ADDR=productcatalogservice:3550
+      - SHIPPING_SERVICE_ADDR=shippingservice:50051
+      - PAYMENT_SERVICE_ADDR=paymentservice:50051
+      - EMAIL_SERVICE_ADDR=emailservice:8080
+      - CURRENCY_SERVICE_ADDR=currencyservice:7000
+      - CART_SERVICE_ADDR=cartservice:7070
+    expose:
+      - "5050"
+    healthcheck:
+      test: ["CMD", "/bin/grpc_health_probe", "-addr=localhost:5050"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
+  # ---------------------------------------------------------------------------
+  # Frontend (Go) - expuesto al host
+  # ---------------------------------------------------------------------------
+  frontend:
+    build:
+      context: src/frontend
+      platforms: ["linux/amd64"]
+    image: frontend:local
+    container_name: frontend
+    restart: unless-stopped
+    depends_on:
+      productcatalogservice:
+        condition: service_healthy
+      currencyservice:
+        condition: service_healthy
+      cartservice:
+        condition: service_healthy
+      recommendationservice:
+        condition: service_healthy
+      shippingservice:
+        condition: service_healthy
+      checkoutservice:
+        condition: service_healthy
+      adservice:
+        condition: service_healthy
+    environment:
+      - PORT=8080
+      - PRODUCT_CATALOG_SERVICE_ADDR=productcatalogservice:3550
+      - CURRENCY_SERVICE_ADDR=currencyservice:7000
+      - CART_SERVICE_ADDR=cartservice:7070
+      - RECOMMENDATION_SERVICE_ADDR=recommendationservice:8080
+      - SHIPPING_SERVICE_ADDR=shippingservice:50051
+      - CHECKOUT_SERVICE_ADDR=checkoutservice:5050
+      - AD_SERVICE_ADDR=adservice:9555
+      - SHOPPING_ASSISTANT_SERVICE_ADDR=shoppingassistantservice:8080
+      - ENABLE_PROFILER=0
+    ports:
+      - "8080:8080"
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:8080/_healthz"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
+  # ---------------------------------------------------------------------------
+  # Perfil opcional: generador de carga (Locust)
+  #   docker-compose --profile loadgen up -d --build
+  # ---------------------------------------------------------------------------
+  loadgenerator:
+    profiles: ["loadgen"]
+    build:
+      context: src/loadgenerator
+      platforms: ["linux/amd64"]
+    image: loadgenerator:local
+    container_name: loadgenerator
+    restart: unless-stopped
+    depends_on:
+      frontend:
+        condition: service_healthy
+    environment:
+      - FRONTEND_ADDR=frontend:8080
+      - USERS=10
+      - RATE=1
+
+  # ---------------------------------------------------------------------------
+  # Perfil opcional: shopping assistant (requiere credenciales de Google Cloud)
+  #   Necesita: PROJECT_ID, REGION, ALLOYDB_*, y GOOGLE_APPLICATION_CREDENTIALS
+  #   docker-compose --profile assistant up -d --build
+  # ---------------------------------------------------------------------------
+  shoppingassistantservice:
+    profiles: ["assistant"]
+    build:
+      context: src/shoppingassistantservice
+      platforms: ["linux/amd64"]
+    image: shoppingassistantservice:local
+    container_name: shoppingassistantservice
+    restart: unless-stopped
+    environment:
+      - PORT=8080
+      - PROJECT_ID=${PROJECT_ID:-}
+      - REGION=${REGION:-}
+      - ALLOYDB_DATABASE_NAME=${ALLOYDB_DATABASE_NAME:-}
+      - ALLOYDB_TABLE_NAME=${ALLOYDB_TABLE_NAME:-}
+      - ALLOYDB_CLUSTER_NAME=${ALLOYDB_CLUSTER_NAME:-}
+      - ALLOYDB_INSTANCE_NAME=${ALLOYDB_INSTANCE_NAME:-}
+      - ALLOYDB_SECRET_NAME=${ALLOYDB_SECRET_NAME:-}
+      - GOOGLE_APPLICATION_CREDENTIALS=/gcp/credentials.json
+    volumes:
+      - ${GOOGLE_APPLICATION_CREDENTIALS:-/dev/null}:/gcp/credentials.json:ro
+    expose:
+      - "8080"
