@@ -1,0 +1,31 @@
+{
+  "family": "boutique-shoppingassistantservice",
+  "executionRoleArn": "arn:aws:iam::AWS_ACCOUNT_ID:role/ecsTaskExecutionRole",
+  "networkMode": "bridge",
+  "requiresCompatibilities": ["EC2"],
+  "cpu": "256",
+  "memory": "512",
+  "containerDefinitions": [
+    {
+      "name": "shoppingassistantservice",
+      "image": "IMAGE_PLACEHOLDER",
+      "essential": true,
+      "portMappings": [
+        { "containerPort": 8080, "hostPort": 8080, "protocol": "tcp" }
+      ],
+      "environment": [
+        { "name": "PORT", "value": "8080" },
+        { "name": "PROJECT_ID", "value": "" },
+        { "name": "REGION", "value": "" },
+        { "name": "ALLOYDB_DATABASE_NAME", "value": "" },
+        { "name": "ALLOYDB_TABLE_NAME", "value": "" },
+        { "name": "ALLOYDB_CLUSTER_NAME", "value": "" },
+        { "name": "ALLOYDB_INSTANCE_NAME", "value": "" },
+        { "name": "ALLOYDB_SECRET_NAME", "value": "" }
+      ],
+      "secrets": [
+        { "name": "GOOGLE_APPLICATION_CREDENTIALS_JSON", "valueFrom": "GCP_CREDENTIALS_SECRET_ARN" }
+      ]
+    }
+  ]
+}

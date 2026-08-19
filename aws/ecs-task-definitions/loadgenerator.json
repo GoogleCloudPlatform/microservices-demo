@@ -1,0 +1,20 @@
+{
+  "family": "boutique-loadgenerator",
+  "executionRoleArn": "arn:aws:iam::AWS_ACCOUNT_ID:role/ecsTaskExecutionRole",
+  "networkMode": "bridge",
+  "requiresCompatibilities": ["EC2"],
+  "cpu": "256",
+  "memory": "512",
+  "containerDefinitions": [
+    {
+      "name": "loadgenerator",
+      "image": "IMAGE_PLACEHOLDER",
+      "essential": true,
+      "environment": [
+        { "name": "FRONTEND_ADDR", "value": "frontend:8080" },
+        { "name": "USERS", "value": "10" },
+        { "name": "RATE", "value": "1" }
+      ]
+    }
+  ]
+}

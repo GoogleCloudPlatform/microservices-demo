@@ -1,0 +1,22 @@
+{
+  "family": "boutique-paymentservice",
+  "executionRoleArn": "arn:aws:iam::AWS_ACCOUNT_ID:role/ecsTaskExecutionRole",
+  "networkMode": "bridge",
+  "requiresCompatibilities": ["EC2"],
+  "cpu": "256",
+  "memory": "512",
+  "containerDefinitions": [
+    {
+      "name": "paymentservice",
+      "image": "IMAGE_PLACEHOLDER",
+      "essential": true,
+      "portMappings": [
+        { "containerPort": 50051, "hostPort": 50051, "protocol": "tcp" }
+      ],
+      "environment": [
+        { "name": "PORT", "value": "50051" },
+        { "name": "DISABLE_PROFILER", "value": "1" }
+      ]
+    }
+  ]
+}

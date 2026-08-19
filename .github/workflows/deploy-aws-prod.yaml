@@ -1,0 +1,412 @@
+# Deploy Online Boutique to AWS ECS (EC2 launch type) when a PR from
+# development is merged into main.
+#
+# Trigger: a Pull Request from `development` into `main` is closed as merged.
+#
+# Pipeline:
+#   1. build-and-push (matrix): build each microservice image and push to ECR
+#   2. deploy-to-ecs: render task definitions with the new image URIs,
+#      register new revisions, update ECS services, wait for stability,
+#      and run a smoke test against the ALB.
+#
+# Prerequisites (see aws/README.md):
+#   - ECR repository per service (or a shared prefix)
+#   - ECS cluster with EC2 capacity (e.g. t3.medium ASG)
+#   - ECS services + ALB for frontend
+#   - GitHub secrets/vars configured (AWS_ROLE_ARN or AWS_ACCESS_KEY_ID, etc.)
+#
+# NOTE: Until the AWS secrets/vars are configured, this workflow will fail
+# cleanly at the `configure-aws-credentials` step. This is expected.
+
+name: "Deploy to AWS ECS (Production)"
+
+on:
+  pull_request:
+    branches:
+      - main
+    types:
+      - closed
+    paths-ignore:
+      - '**/*.md'
+      - 'docs/**'
+      - 'LICENSE'
+      - 'kustomize/**'
+      - '.github/workflows/kustomize-build-ci.yaml'
+      - 'terraform/**'
+      - '.github/workflows/terraform-validate-ci.yaml'
+      - 'helm-chart/**'
+      - '.github/workflows/helm-chart-ci.yaml'
+
+# Only run one production deploy at a time
+concurrency:
+  group: deploy-aws-prod-${{ github.event.pull_request.number }}
+  cancel-in-progress: false
+
+jobs:
+  # ---------------------------------------------------------------------------
+  # Job 1: Build and push images to ECR (parallel matrix)
+  # ---------------------------------------------------------------------------
+  build-and-push:
+    if: ${{ github.event.pull_request.merged == true && github.event.pull_request.head.ref == 'development' }}
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      id-token: write # required for OIDC-based AWS auth
+    strategy:
+      fail-fast: false
+      matrix:
+        service:
+          # 12 microservices + redis-cart (redis uses a public image, no build)
+          - { name: emailservice,             context: src/emailservice }
+          - { name: productcatalogservice,    context: src/productcatalogservice }
+          - { name: recommendationservice,    context: src/recommendationservice }
+          - { name: shippingservice,          context: src/shippingservice }
+          - { name: checkoutservice,          context: src/checkoutservice }
+          - { name: paymentservice,           context: src/paymentservice }
+          - { name: currencyservice,          context: src/currencyservice }
+          - { name: cartservice,              context: src/cartservice/src }
+          - { name: frontend,                 context: src/frontend }
+          - { name: adservice,                context: src/adservice }
+          - { name: loadgenerator,            context: src/loadgenerator }
+          - { name: shoppingassistantservice, context: src/shoppingassistantservice }
+    outputs:
+      image_uri: ${{ steps.build.outputs.image_uri }}
+    steps:
+      - name: Checkout merged main
+        uses: actions/checkout@v7
+
+      - name: Configure AWS credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ vars.AWS_REGION }}
+          # If using access keys instead of OIDC, replace the two lines above with:
+          #   aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          #   aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          #   aws-region: ${{ vars.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        id: ecr-login
+        uses: aws-actions/amazon-ecr-login@v2
+        with:
+          mask-password: 'true'
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
+
+      - name: Build, tag, and push image to ECR
+        id: build
+        env:
+          ECR_REGISTRY: ${{ steps.ecr-login.outputs.registry }}
+          ECR_REPO_PREFIX: ${{ vars.ECR_REPO_PREFIX }}
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          SERVICE="${{ matrix.service.name }}"
+          REPO="${ECR_REGISTRY}/${ECR_REPO_PREFIX}/${SERVICE}"
+          # Ensure the ECR repository exists (create if missing)
+          aws ecr describe-repositories --repository-names "${ECR_REPO_PREFIX}/${SERVICE}" 2>/dev/null \
+            || aws ecr create-repository --repository-name "${ECR_REPO_PREFIX}/${SERVICE}" >/dev/null
+          # Build and push both :sha and :latest
+          docker buildx build \
+            --platform linux/amd64 \
+            --tag "${REPO}:${IMAGE_TAG}" \
+            --tag "${REPO}:latest" \
+            --push \
+            "${{ matrix.service.context }}"
+          echo "image_uri=${REPO}:${IMAGE_TAG}" >> "$GITHUB_OUTPUT"
+          echo "Pushed ${REPO}:${IMAGE_TAG} and :latest"
+
+  # ---------------------------------------------------------------------------
+  # Job 2: Deploy to ECS
+  # ---------------------------------------------------------------------------
+  deploy-to-ecs:
+    needs: build-and-push
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      id-token: write
+      pull-requests: write
+    steps:
+      - name: Checkout merged main
+        uses: actions/checkout@v7
+
+      - name: Configure AWS credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ vars.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        id: ecr-login
+        uses: aws-actions/amazon-ecr-login@v2
+        with:
+          mask-password: 'true'
+
+      - name: Set environment variables
+        env:
+          ECR_REGISTRY: ${{ steps.ecr-login.outputs.registry }}
+          ECR_REPO_PREFIX: ${{ vars.ECR_REPO_PREFIX }}
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          echo "ECR_REGISTRY=${ECR_REGISTRY}" >> "$GITHUB_ENV"
+          echo "ECR_REPO_PREFIX=${ECR_REPO_PREFIX}" >> "$GITHUB_ENV"
+          echo "IMAGE_TAG=${IMAGE_TAG}" >> "$GITHUB_ENV"
+          echo "ECS_CLUSTER=${{ vars.ECS_CLUSTER_NAME }}" >> "$GITHUB_ENV"
+          echo "AWS_ACCOUNT_ID=${{ vars.AWS_ACCOUNT_ID }}" >> "$GITHUB_ENV"
+
+      # ---------------------------------------------------------------------
+      # Render + deploy each service task definition
+      # ---------------------------------------------------------------------
+      - name: Deploy redis-cart
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v2
+        with:
+          task-definition: aws/ecs-task-definitions/redis-cart.json
+          service: boutique-redis-cart
+          cluster: ${{ env.ECS_CLUSTER }}
+          wait-for-service-stability: true
+          wait-for-minutes: 10
+
+      - name: Deploy emailservice
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        id: render-emailservice
+        with:
+          task-definition: aws/ecs-task-definitions/emailservice.json
+          containers: |
+            emailservice=${{ env.ECR_REGISTRY }}/${{ env.ECR_REPO_PREFIX }}/emailservice:${{ env.IMAGE_TAG }}
+      - name: Deploy emailservice service
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v2
+        with:
+          task-definition: ${{ steps.render-emailservice.outputs.task-definition }}
+          service: boutique-emailservice
+          cluster: ${{ env.ECS_CLUSTER }}
+          wait-for-service-stability: true
+          wait-for-minutes: 10
+
+      - name: Deploy productcatalogservice
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        id: render-productcatalogservice
+        with:
+          task-definition: aws/ecs-task-definitions/productcatalogservice.json
+          containers: |
+            productcatalogservice=${{ env.ECR_REGISTRY }}/${{ env.ECR_REPO_PREFIX }}/productcatalogservice:${{ env.IMAGE_TAG }}
+      - name: Deploy productcatalogservice service
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v2
+        with:
+          task-definition: ${{ steps.render-productcatalogservice.outputs.task-definition }}
+          service: boutique-productcatalogservice
+          cluster: ${{ env.ECS_CLUSTER }}
+          wait-for-service-stability: true
+          wait-for-minutes: 10
+
+      - name: Deploy currencyservice
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        id: render-currencyservice
+        with:
+          task-definition: aws/ecs-task-definitions/currencyservice.json
+          containers: |
+            currencyservice=${{ env.ECR_REGISTRY }}/${{ env.ECR_REPO_PREFIX }}/currencyservice:${{ env.IMAGE_TAG }}
+      - name: Deploy currencyservice service
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v2
+        with:
+          task-definition: ${{ steps.render-currencyservice.outputs.task-definition }}
+          service: boutique-currencyservice
+          cluster: ${{ env.ECS_CLUSTER }}
+          wait-for-service-stability: true
+          wait-for-minutes: 10
+
+      - name: Deploy paymentservice
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        id: render-paymentservice
+        with:
+          task-definition: aws/ecs-task-definitions/paymentservice.json
+          containers: |
+            paymentservice=${{ env.ECR_REGISTRY }}/${{ env.ECR_REPO_PREFIX }}/paymentservice:${{ env.IMAGE_TAG }}
+      - name: Deploy paymentservice service
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v2
+        with:
+          task-definition: ${{ steps.render-paymentservice.outputs.task-definition }}
+          service: boutique-paymentservice
+          cluster: ${{ env.ECS_CLUSTER }}
+          wait-for-service-stability: true
+          wait-for-minutes: 10
+
+      - name: Deploy shippingservice
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        id: render-shippingservice
+        with:
+          task-definition: aws/ecs-task-definitions/shippingservice.json
+          containers: |
+            shippingservice=${{ env.ECR_REGISTRY }}/${{ env.ECR_REPO_PREFIX }}/shippingservice:${{ env.IMAGE_TAG }}
+      - name: Deploy shippingservice service
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v2
+        with:
+          task-definition: ${{ steps.render-shippingservice.outputs.task-definition }}
+          service: boutique-shippingservice
+          cluster: ${{ env.ECS_CLUSTER }}
+          wait-for-service-stability: true
+          wait-for-minutes: 10
+
+      - name: Deploy recommendationservice
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        id: render-recommendationservice
+        with:
+          task-definition: aws/ecs-task-definitions/recommendationservice.json
+          containers: |
+            recommendationservice=${{ env.ECR_REGISTRY }}/${{ env.ECR_REPO_PREFIX }}/recommendationservice:${{ env.IMAGE_TAG }}
+      - name: Deploy recommendationservice service
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v2
+        with:
+          task-definition: ${{ steps.render-recommendationservice.outputs.task-definition }}
+          service: boutique-recommendationservice
+          cluster: ${{ env.ECS_CLUSTER }}
+          wait-for-service-stability: true
+          wait-for-minutes: 10
+
+      - name: Deploy cartservice
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        id: render-cartservice
+        with:
+          task-definition: aws/ecs-task-definitions/cartservice.json
+          containers: |
+            cartservice=${{ env.ECR_REGISTRY }}/${{ env.ECR_REPO_PREFIX }}/cartservice:${{ env.IMAGE_TAG }}
+      - name: Deploy cartservice service
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v2
+        with:
+          task-definition: ${{ steps.render-cartservice.outputs.task-definition }}
+          service: boutique-cartservice
+          cluster: ${{ env.ECS_CLUSTER }}
+          wait-for-service-stability: true
+          wait-for-minutes: 10
+
+      - name: Deploy adservice
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        id: render-adservice
+        with:
+          task-definition: aws/ecs-task-definitions/adservice.json
+          containers: |
+            adservice=${{ env.ECR_REGISTRY }}/${{ env.ECR_REPO_PREFIX }}/adservice:${{ env.IMAGE_TAG }}
+      - name: Deploy adservice service
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v2
+        with:
+          task-definition: ${{ steps.render-adservice.outputs.task-definition }}
+          service: boutique-adservice
+          cluster: ${{ env.ECS_CLUSTER }}
+          wait-for-service-stability: true
+          wait-for-minutes: 10
+
+      - name: Deploy checkoutservice
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        id: render-checkoutservice
+        with:
+          task-definition: aws/ecs-task-definitions/checkoutservice.json
+          containers: |
+            checkoutservice=${{ env.ECR_REGISTRY }}/${{ env.ECR_REPO_PREFIX }}/checkoutservice:${{ env.IMAGE_TAG }}
+      - name: Deploy checkoutservice service
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v2
+        with:
+          task-definition: ${{ steps.render-checkoutservice.outputs.task-definition }}
+          service: boutique-checkoutservice
+          cluster: ${{ env.ECS_CLUSTER }}
+          wait-for-service-stability: true
+          wait-for-minutes: 10
+
+      - name: Deploy shoppingassistantservice
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        id: render-shoppingassistantservice
+        with:
+          task-definition: aws/ecs-task-definitions/shoppingassistantservice.json
+          containers: |
+            shoppingassistantservice=${{ env.ECR_REGISTRY }}/${{ env.ECR_REPO_PREFIX }}/shoppingassistantservice:${{ env.IMAGE_TAG }}
+      - name: Deploy shoppingassistantservice service
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v2
+        with:
+          task-definition: ${{ steps.render-shoppingassistantservice.outputs.task-definition }}
+          service: boutique-shoppingassistantservice
+          cluster: ${{ env.ECS_CLUSTER }}
+          wait-for-service-stability: true
+          wait-for-minutes: 10
+
+      - name: Deploy frontend
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        id: render-frontend
+        with:
+          task-definition: aws/ecs-task-definitions/frontend.json
+          containers: |
+            frontend=${{ env.ECR_REGISTRY }}/${{ env.ECR_REPO_PREFIX }}/frontend:${{ env.IMAGE_TAG }}
+      - name: Deploy frontend service
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v2
+        with:
+          task-definition: ${{ steps.render-frontend.outputs.task-definition }}
+          service: boutique-frontend
+          cluster: ${{ env.ECS_CLUSTER }}
+          wait-for-service-stability: true
+          wait-for-minutes: 15
+
+      - name: Deploy loadgenerator
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        id: render-loadgenerator
+        with:
+          task-definition: aws/ecs-task-definitions/loadgenerator.json
+          containers: |
+            loadgenerator=${{ env.ECR_REGISTRY }}/${{ env.ECR_REPO_PREFIX }}/loadgenerator:${{ env.IMAGE_TAG }}
+      - name: Deploy loadgenerator service
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v2
+        with:
+          task-definition: ${{ steps.render-loadgenerator.outputs.task-definition }}
+          service: boutique-loadgenerator
+          cluster: ${{ env.ECS_CLUSTER }}
+          wait-for-service-stability: true
+          wait-for-minutes: 10
+
+      # ---------------------------------------------------------------------
+      # Smoke test against the ALB
+      # ---------------------------------------------------------------------
+      - name: Smoke Test
+        timeout-minutes: 5
+        env:
+          FRONTEND_URL: ${{ vars.FRONTEND_URL }}
+        run: |
+          set -euo pipefail
+          if [ -z "${FRONTEND_URL}" ]; then
+            echo "::warning::FRONTEND_URL variable not set; skipping smoke test."
+            exit 0
+          fi
+          echo "Smoke testing ${FRONTEND_URL} ..."
+          # Retry up to 10 times with 5s backoff
+          for i in $(seq 1 10); do
+            HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" "${FRONTEND_URL}" || echo "000")
+            echo "Attempt $i: HTTP ${HTTP_CODE}"
+            if [ "${HTTP_CODE}" = "200" ]; then
+              echo "Smoke test PASSED."
+              exit 0
+            fi
+            sleep 5
+          done
+          echo "Smoke test FAILED: frontend did not return 200 after 10 attempts."
+          exit 1
+
+      # ---------------------------------------------------------------------
+      # Comment result on the merged PR
+      # ---------------------------------------------------------------------
+      - name: Comment on PR
+        if: always()
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          FRONTEND_URL: ${{ vars.FRONTEND_URL }}
+        run: |
+          STATUS="${{ job.status }}"
+          PR_NUMBER="${{ github.event.pull_request.number }}"
+          if [ -n "${FRONTEND_URL}" ]; then
+            URL_LINE="Frontend: ${FRONTEND_URL}"
+          else
+            URL_LINE="Frontend URL not configured (set FRONTEND_URL variable)."
+          fi
+          gh pr comment "${PR_NUMBER}" --body "🚀 **AWS ECS deploy: ${STATUS}**
+
+          Image tag: \`${{ github.sha }}\`
+          Cluster: \`${{ vars.ECS_CLUSTER_NAME }}\`
+          ${URL_LINE}" || true

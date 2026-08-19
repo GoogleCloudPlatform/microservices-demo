@@ -1,0 +1,18 @@
+{
+  "family": "boutique-redis-cart",
+  "executionRoleArn": "arn:aws:iam::AWS_ACCOUNT_ID:role/ecsTaskExecutionRole",
+  "networkMode": "bridge",
+  "requiresCompatibilities": ["EC2"],
+  "cpu": "256",
+  "memory": "512",
+  "containerDefinitions": [
+    {
+      "name": "redis-cart",
+      "image": "IMAGE_PLACEHOLDER",
+      "essential": true,
+      "portMappings": [
+        { "containerPort": 6379, "hostPort": 6379, "protocol": "tcp" }
+      ]
+    }
+  ]
+}

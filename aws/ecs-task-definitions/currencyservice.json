@@ -1,0 +1,22 @@
+{
+  "family": "boutique-currencyservice",
+  "executionRoleArn": "arn:aws:iam::AWS_ACCOUNT_ID:role/ecsTaskExecutionRole",
+  "networkMode": "bridge",
+  "requiresCompatibilities": ["EC2"],
+  "cpu": "256",
+  "memory": "512",
+  "containerDefinitions": [
+    {
+      "name": "currencyservice",
+      "image": "IMAGE_PLACEHOLDER",
+      "essential": true,
+      "portMappings": [
+        { "containerPort": 7000, "hostPort": 7000, "protocol": "tcp" }
+      ],
+      "environment": [
+        { "name": "PORT", "value": "7000" },
+        { "name": "DISABLE_PROFILER", "value": "1" }
+      ]
+    }
+  ]
+}

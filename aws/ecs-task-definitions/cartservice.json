@@ -1,0 +1,23 @@
+{
+  "family": "boutique-cartservice",
+  "executionRoleArn": "arn:aws:iam::AWS_ACCOUNT_ID:role/ecsTaskExecutionRole",
+  "networkMode": "bridge",
+  "requiresCompatibilities": ["EC2"],
+  "cpu": "512",
+  "memory": "1024",
+  "containerDefinitions": [
+    {
+      "name": "cartservice",
+      "image": "IMAGE_PLACEHOLDER",
+      "essential": true,
+      "portMappings": [
+        { "containerPort": 7070, "hostPort": 7070, "protocol": "tcp" }
+      ],
+      "environment": [
+        { "name": "REDIS_ADDR", "value": "redis-cart:6379" },
+        { "name": "ASPNETCORE_HTTP_PORTS", "value": "7070" },
+        { "name": "DOTNET_EnableDiagnostics", "value": "0" }
+      ]
+    }
+  ]
+}

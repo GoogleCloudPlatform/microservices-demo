@@ -1,0 +1,21 @@
+{
+  "family": "boutique-adservice",
+  "executionRoleArn": "arn:aws:iam::AWS_ACCOUNT_ID:role/ecsTaskExecutionRole",
+  "networkMode": "bridge",
+  "requiresCompatibilities": ["EC2"],
+  "cpu": "256",
+  "memory": "512",
+  "containerDefinitions": [
+    {
+      "name": "adservice",
+      "image": "IMAGE_PLACEHOLDER",
+      "essential": true,
+      "portMappings": [
+        { "containerPort": 9555, "hostPort": 9555, "protocol": "tcp" }
+      ],
+      "environment": [
+        { "name": "PORT", "value": "9555" }
+      ]
+    }
+  ]
+}

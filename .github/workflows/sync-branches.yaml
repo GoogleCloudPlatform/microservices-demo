@@ -1,0 +1,171 @@
+# Sync branches derived from development.
+#
+# Trigger: a Pull Request is merged INTO development.
+# For every branch B that derives from development (i.e. development is an
+# ancestor of B), open an automatic PR from a temp branch (merge of
+# development into B) back into B. Branches with merge conflicts are skipped
+# and reported in the job summary; they require manual resolution.
+
+name: "Sync development into derived branches"
+
+on:
+  pull_request:
+    # run when a PR targeting development is closed
+    branches:
+      - development
+    types:
+      - closed
+    paths-ignore:
+      - '**/*.md'
+      - 'docs/**'
+      - 'LICENSE'
+      - 'kustomize/**'
+      - '.github/workflows/kustomize-build-ci.yaml'
+      - 'terraform/**'
+      - '.github/workflows/terraform-validate-ci.yaml'
+      - 'helm-chart/**'
+      - '.github/workflows/helm-chart-ci.yaml'
+
+# Only one sync run at a time per PR target
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  sync-branches:
+    # only when the PR was actually merged (not just closed)
+    if: ${{ github.event.pull_request.merged == true }}
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - name: Checkout development (post-merge)
+        uses: actions/checkout@v7
+        with:
+          ref: development
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Configure git identity
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+      - name: Fetch all remote branches
+        run: |
+          git fetch --prune origin
+          # Print the list of origin branches for debugging
+          git for-each-ref --format='%(refname:short)' refs/remotes/origin/
+
+      - name: Sync development into derived branches
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+
+          # Branches we never want to sync into
+          SKIP_PATTERN='^(main|development|release/.*|gh-pages)$'
+
+          # Collect results for the job summary
+          SUMMARY_FILE="$GITHUB_STEP_SUMMARY"
+          {
+            echo "## Sync development into derived branches"
+            echo ""
+            echo "Source: \`development\` @ $(git rev-parse --short origin/development)"
+            echo ""
+            echo "| Branch | Status | PR |"
+            echo "| --- | --- | --- |"
+          } >> "$SUMMARY_FILE"
+
+          # Iterate over origin branches only (ignore upstream/* and local refs)
+          for ref in $(git for-each-ref --format='%(refname:short)' refs/remotes/origin/); do
+            # Strip the leading "origin/" prefix
+            BRANCH="${ref#origin/}"
+
+            # Skip HEAD symbolic ref and protected branches
+            if [[ "$BRANCH" == "HEAD" ]]; then continue; fi
+            if [[ "$BRANCH" =~ $SKIP_PATTERN ]]; then
+              continue
+            fi
+
+            # Skip sync/* temp branches created by this very workflow
+            if [[ "$BRANCH" == sync/* ]]; then continue; fi
+
+            echo "::group::Branch: $BRANCH"
+
+            # Verify the branch derives from development
+            if ! git merge-base --is-ancestor origin/development "origin/$BRANCH"; then
+              echo "  $BRANCH does NOT derive from development (development is not an ancestor). Skipping."
+              echo "| \`$BRANCH\` | Skipped (not derived from development) | — |" >> "$SUMMARY_FILE"
+              echo "::endgroup::"
+              continue
+            fi
+
+            # Check if branch is already up to date with development
+            if [ "$(git rev-parse origin/development)" = "$(git merge-base origin/development "origin/$BRANCH")" ]; then
+              # development HEAD is reachable from B => B already contains everything in development
+              echo "  $BRANCH is already up to date with development. Skipping."
+              echo "| \`$BRANCH\` | Already up to date | — |" >> "$SUMMARY_FILE"
+              echo "::endgroup::"
+              continue
+            fi
+
+            # Create a temp branch from B and merge development into it
+            TEMP_BRANCH="sync/development-to-${BRANCH//\//-}"
+            git branch -D "$TEMP_BRANCH" 2>/dev/null || true
+            git checkout -b "$TEMP_BRANCH" "origin/$BRANCH"
+
+            if git merge --no-edit --no-ff origin/development; then
+              # No conflicts: push temp branch and open/update PR
+              git push --force-with-lease origin "$TEMP_BRANCH"
+
+              # Check if a PR already exists for this head/base pair
+              EXISTING_PR=$(gh pr list \
+                --head "$TEMP_BRANCH" \
+                --base "$BRANCH" \
+                --state open \
+                --json number \
+                --jq '.[0].number // empty' \
+                || echo "")
+
+              PR_BODY=":robot: Automated sync PR from \`development\` into \`$BRANCH\`.
+
+          This PR was created by the \`sync-branches\` workflow after a PR was merged into \`development\`.
+
+          - Source: \`development\` @ $(git rev-parse --short origin/development)
+          - Target: \`$BRANCH\`
+          - Triggering PR: #${{ github.event.pull_request.number }}
+
+          Review the diff and merge to keep \`$BRANCH\` in sync with \`development\`."
+
+              if [ -n "$EXISTING_PR" ]; then
+                echo "  Updating existing PR #$EXISTING_PR ($TEMP_BRANCH -> $BRANCH)"
+                gh pr edit "$EXISTING_PR" --body "$PR_BODY"
+                echo "| \`$BRANCH\` | Updated existing PR | #$EXISTING_PR |" >> "$SUMMARY_FILE"
+              else
+                NEW_PR=$(gh pr create \
+                  --head "$TEMP_BRANCH" \
+                  --base "$BRANCH" \
+                  --title "chore: sync development into ${BRANCH}" \
+                  --body "$PR_BODY" \
+                  --json number \
+                  --jq '.number')
+                echo "  Opened PR #$NEW_PR ($TEMP_BRANCH -> $BRANCH)"
+                echo "| \`$BRANCH\` | Opened PR | #$NEW_PR |" >> "$SUMMARY_FILE"
+              fi
+            else
+              # Merge conflict: abort, skip, and report
+              git merge --abort
+              echo "  $BRANCH has merge conflicts with development. Skipping (manual merge required)."
+              echo "| \`$BRANCH\` | ⚠️ Conflict — manual merge required | — |" >> "$SUMMARY_FILE"
+            fi
+
+            # Back to development for the next iteration
+            git checkout development
+            git branch -D "$TEMP_BRANCH" 2>/dev/null || true
+            echo "::endgroup::"
+          done
+
+          echo "" >> "$SUMMARY_FILE"
+          echo "_Done. Branches marked with ⚠️ require manual conflict resolution._" >> "$SUMMARY_FILE"
