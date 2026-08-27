@@ -37,3 +37,17 @@ module "ecr" {
     ManagedBy   = "terraform"
   }
 }
+
+#IAM roles for the EKS cluster and its node groups. The cluster role is assumed by the EKS service, while the node role is assumed by EC2 instances in the node group. Each role has the necessary policies attached to allow proper operation of the EKS cluster and its nodes.
+
+module "iam" {
+  source = "./modules/iam"
+
+  cluster_name = "induwara-eks-platform"
+
+  tags = {
+    Project     = "eks-microservices-platform"
+    Environment = "portfolio"
+    ManagedBy   = "terraform"
+  }
+}
