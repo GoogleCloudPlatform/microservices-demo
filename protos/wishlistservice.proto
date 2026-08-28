@@ -1,30 +1,96 @@
 syntax = "proto3";
 
-package wishlist;
+package hipstershop;
+
+option go_package = "github.com/GoogleCloudPlatform/microservices-demo/hipstershop";
+
+// ---------------Wishlist service-----------------
 
 service WishlistService {
-  // Add a product to the user's wishlist
-  rpc AddToWishlist (AddToWishlistRequest) returns (AddToWishlistResponse);
-  
-  // Get the user's entire wishlist
-  rpc GetWishlist (GetWishlistRequest) returns (GetWishlistResponse);
-  
-  // Remove a product from the wishlist
-  rpc RemoveFromWishlist (RemoveFromWishlistRequest) returns (RemoveFromWishlistResponse);
-  
-  // Add items from wishlist to the cart
-  rpc AddWishlistToCart (AddWishlistToCartRequest) returns (AddWishlistToCartResponse);
-  
-  // (Internal) Check for sales on wishlist items and trigger emails
-  rpc CheckAndNotifySales (CheckAndNotifySalesRequest) returns (CheckAndNotifySalesResponse);
+    // Adds product to wishlist
+    rpc AddToWishlist (AddToWishlistRequest) returns (Empty) {}
+
+    // Retrieves full wishlist 
+    rpc GetWishlist (GetWishlistRequest) returns (GetWishlistResponse) {}
+
+    // Removes a product
+    rpc RemoveFromWishlist (RemoveFromWishlistRequest) returns (Empty) {}
+
+    // Empties wishlist
+    rpc ClearWishlist (ClearWishlistRequest) returns (Empty) {}
+
+    // Adds items to cart.
+    rpc AddWishlistToCart (AddWishlistToCartRequest) returns (AddWishlistToCartResponse) {}
+
+    // (Internal) Checks for price drops
+    //NEED TO ADD PRICE DROP FUNCTION
+    // This is meant to be called by a background scheduler
+    //rpc CheckAndNotifySales (CheckAndNotifySalesRequest) returns (CheckAndNotifySalesResponse) {}
 }
 
-// Define messages for each request/response here
-// PLACEHOLDER
+// --- Request and Response Messages ---
+
+// Request to add item
 message AddToWishlistRequest {
-  string user_id = 1;
-  string product_id = 2;
+    string user_id = 1;      // The ID of the user (from the frontend session).
+    string product_id = 2;   // The ID of the product to add (from productcatalogservice).
 }
-message AddToWishlistResponse {
-  bool success = 1;
+
+// Request to get wishlist.
+message GetWishlistRequest {
+    string user_id = 1;
 }
+
+// Response containing wishlist
+message GetWishlistResponse {
+    repeated WishlistItem items = 1; // A list of wishlist items with product details.
+}
+
+// Represents a single item in the wishlist
+message WishlistItem {
+    string product_id = 1;         // The product ID.
+    string name = 2;              // Product name (from productcatalogservice).
+    string description = 3;       // Product description.
+    string picture = 4;           // Product image URL.
+    Money price_usd = 5;          // Current product price in USD (reuses the Money type).
+    bool is_on_sale = 6;          // Indicates if the item is currently discounted.
+    string added_at = 7;          // Timestamp when the item was added to the wishlist (ISO 8601 format).
+}
+
+// Request to remove an item 
+message RemoveFromWishlistRequest {
+    string user_id = 1;
+    string product_id = 2;
+}
+
+// Request to clear wishlist.
+message ClearWishlistRequest {
+    string user_id = 1;
+}
+
+// Request to add all wishlist items to cart.
+message AddWishlistToCartRequest {
+    string user_id = 1;
+}
+
+// Response for adding wishlist items to cart.
+message AddWishlistToCartResponse {
+    bool success = 1;            // True if all items were added successfully.
+    string message = 2;          // A status message.
+    int32 items_added_count = 3; // Number of items successfully moved to cart.
+}
+
+//NEED TO ADD SALES FUNCTION
+
+// (Internal) Request to check for sales on wishlist items.
+//message CheckAndNotifySalesRequest {
+    // Optional: If provided, only check for this specific user. Otherwise, check all users.
+    //string user_id = 1;
+//}
+
+// (Internal) Response for the sale-check operation.
+//message CheckAndNotifySalesResponse {
+    //bool success = 1;
+    //int32 users_notified = 2;    // Number of users who were sent a notification.
+    //int32 items_found_on_sale = 3; // Total number of wishlist items that were on sale.
+//}
