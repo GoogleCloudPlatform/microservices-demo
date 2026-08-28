@@ -977,4 +977,57 @@ apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: productcatalogservice
+---
+#PostgreSQL Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: postgres-db
+spec:
+  selector:
+    matchLabels:
+      app: postgres-db
+  template:
+    metadata:
+      labels:
+        app: postgres-db
+    spec:
+      containers:
+      - name: postgres
+        image: postgres:15-alpine  # Use a stable version
+        ports:
+        - containerPort: 5432
+        env:
+        - name: POSTGRES_DB
+          value: "wishlist"
+        - name: POSTGRES_USER
+          value: "wishlist_user"
+        - name: POSTGRES_PASSWORD
+          value: "wishlist_pass"  # In production, use a Kubernetes Secret
+        volumeMounts:
+        - name: postgres-storage
+          mountPath: /var/lib/postgresql/data
+        - name: postgres-init
+          mountPath: /docker-entrypoint-initdb.d  # This directory is special
+      volumes:
+      - name: postgres-storage
+        persistentVolumeClaim:
+          claimName: postgres-pvc  # You would create this PVC
+      - name: postgres-init
+        configMap:
+          name: postgres-init-script  # A ConfigMap holding your SQL
+---
+# PostgreSQL Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres-db
+spec:
+  type: ClusterIP
+  selector:
+    app: postgres-db
+  ports:
+  - name: postgres
+    port: 5432
+    targetPort: 5432
 # [END gke_release_kubernetes_manifests_microservices_demo]
