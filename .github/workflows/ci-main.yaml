@@ -41,7 +41,7 @@ jobs:
         dotnet-version: '10.0'
     - uses: actions/setup-go@v7
       with:
-        go-version: '1.26'
+        go-version: '1.27'
     - name: Go Unit Tests
       timeout-minutes: 10
       run: |
