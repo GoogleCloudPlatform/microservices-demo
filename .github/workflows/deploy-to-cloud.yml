@@ -1,0 +1,201 @@
+name: Deploy to Cloud
+
+# Manually-triggered deployment of Online Boutique to a Kubernetes cluster
+# on Azure (AKS), AWS (EKS), or GCP (GKE).
+#
+# Required repository secrets (set in Settings > Secrets and variables > Actions):
+#   Azure: AZURE_CREDENTIALS      - JSON output of:
+#            az ad sp create-for-rbac --sdk-auth --role contributor \
+#              --scopes /subscriptions/<SUBSCRIPTION_ID>
+#   AWS:   AWS_ACCESS_KEY_ID
+#          AWS_SECRET_ACCESS_KEY
+#   GCP:   GCP_SA_KEY              - JSON key of a service account with
+#            roles/container.developer (or higher) on the target project
+#
+# Note: GitHub Actions only supports a fixed set of inputs per workflow -
+# fields not relevant to the chosen cloud provider can be left blank.
+
+on:
+  workflow_dispatch:
+    inputs:
+      cloud_provider:
+        description: "Cloud provider to deploy to"
+        required: true
+        type: choice
+        options:
+          - azure
+          - aws
+          - gcp
+      cluster_name:
+        description: "Name of the target Kubernetes cluster"
+        required: true
+        type: string
+      namespace:
+        description: "Kubernetes namespace to deploy into (created if missing)"
+        required: false
+        type: string
+        default: "default"
+      azure_resource_group:
+        description: "[Azure only] Resource group containing the AKS cluster"
+        required: false
+        type: string
+      azure_subscription_id:
+        description: "[Azure only] Subscription ID (optional, overrides the one in AZURE_CREDENTIALS)"
+        required: false
+        type: string
+      aws_region:
+        description: "[AWS only] AWS region containing the EKS cluster"
+        required: false
+        type: string
+      gcp_project_id:
+        description: "[GCP only] GCP project ID containing the GKE cluster"
+        required: false
+        type: string
+      gcp_location:
+        description: "[GCP only] GKE cluster zone (e.g. us-central1-a) or region (e.g. us-central1)"
+        required: false
+        type: string
+      gcp_location_type:
+        description: "[GCP only] Whether gcp_location above is a zone or a region"
+        required: false
+        type: choice
+        options:
+          - zone
+          - region
+        default: zone
+
+concurrency:
+  group: deploy-${{ inputs.cloud_provider }}-${{ inputs.cluster_name }}
+  cancel-in-progress: false
+
+jobs:
+  validate-inputs:
+    name: Validate inputs
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check required fields for the selected cloud
+        shell: bash
+        run: |
+          set -euo pipefail
+          missing=()
+
+          case "${{ inputs.cloud_provider }}" in
+            azure)
+              [ -z "${{ inputs.azure_resource_group }}" ] && missing+=("azure_resource_group")
+              ;;
+            aws)
+              [ -z "${{ inputs.aws_region }}" ] && missing+=("aws_region")
+              ;;
+            gcp)
+              [ -z "${{ inputs.gcp_project_id }}" ] && missing+=("gcp_project_id")
+              [ -z "${{ inputs.gcp_location }}" ] && missing+=("gcp_location")
+              ;;
+            *)
+              echo "Unknown cloud_provider: ${{ inputs.cloud_provider }}"
+              exit 1
+              ;;
+          esac
+
+          if [ "${#missing[@]}" -ne 0 ]; then
+            echo "::error::Missing required input(s) for cloud_provider=${{ inputs.cloud_provider }}: ${missing[*]}"
+            exit 1
+          fi
+
+          echo "Inputs OK for cloud_provider=${{ inputs.cloud_provider }}"
+
+  deploy:
+    name: Deploy Online Boutique
+    needs: validate-inputs
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # ---------------- Azure (AKS) ----------------
+      - name: Azure login
+        if: ${{ inputs.cloud_provider == 'azure' }}
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Set Azure subscription
+        if: ${{ inputs.cloud_provider == 'azure' && inputs.azure_subscription_id != '' }}
+        run: az account set --subscription "${{ inputs.azure_subscription_id }}"
+
+      - name: Get AKS credentials
+        if: ${{ inputs.cloud_provider == 'azure' }}
+        run: |
+          az aks get-credentials \
+            --resource-group "${{ inputs.azure_resource_group }}" \
+            --name "${{ inputs.cluster_name }}" \
+            --overwrite-existing
+
+      # ---------------- AWS (EKS) ----------------
+      - name: Configure AWS credentials
+        if: ${{ inputs.cloud_provider == 'aws' }}
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ inputs.aws_region }}
+
+      - name: Get EKS credentials
+        if: ${{ inputs.cloud_provider == 'aws' }}
+        run: |
+          aws eks update-kubeconfig \
+            --region "${{ inputs.aws_region }}" \
+            --name "${{ inputs.cluster_name }}"
+
+      # ---------------- GCP (GKE) ----------------
+      - name: Authenticate to GCP
+        if: ${{ inputs.cloud_provider == 'gcp' }}
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      - name: Set up gcloud CLI
+        if: ${{ inputs.cloud_provider == 'gcp' }}
+        uses: google-github-actions/setup-gcloud@v2
+        with:
+          project_id: ${{ inputs.gcp_project_id }}
+
+      - name: Install gke-gcloud-auth-plugin
+        if: ${{ inputs.cloud_provider == 'gcp' }}
+        run: gcloud components install gke-gcloud-auth-plugin --quiet
+
+      - name: Get GKE credentials (zone)
+        if: ${{ inputs.cloud_provider == 'gcp' && inputs.gcp_location_type == 'zone' }}
+        run: |
+          gcloud container clusters get-credentials "${{ inputs.cluster_name }}" \
+            --zone "${{ inputs.gcp_location }}" \
+            --project "${{ inputs.gcp_project_id }}"
+
+      - name: Get GKE credentials (region)
+        if: ${{ inputs.cloud_provider == 'gcp' && inputs.gcp_location_type == 'region' }}
+        run: |
+          gcloud container clusters get-credentials "${{ inputs.cluster_name }}" \
+            --region "${{ inputs.gcp_location }}" \
+            --project "${{ inputs.gcp_project_id }}"
+
+      # ---------------- Deploy ----------------
+      - name: Verify cluster access
+        run: kubectl cluster-info
+
+      - name: Create namespace if needed
+        run: kubectl create namespace "${{ inputs.namespace }}" --dry-run=client -o yaml | kubectl apply -f -
+
+      - name: Deploy Online Boutique manifests
+        run: kubectl apply -n "${{ inputs.namespace }}" -f kubernetes-manifests/
+
+      - name: Wait for rollout
+        run: |
+          for deploy in $(kubectl get deployments -n "${{ inputs.namespace }}" -o jsonpath='{.items[*].metadata.name}'); do
+            kubectl rollout status deployment/"$deploy" -n "${{ inputs.namespace }}" --timeout=300s
+          done
+
+      - name: Show deployed resources
+        run: |
+          kubectl get pods -n "${{ inputs.namespace }}"
+          echo ""
+          echo "Waiting for the frontend external IP (may take a minute on a fresh cluster)..."
+          kubectl get service frontend-external -n "${{ inputs.namespace }}" || true
