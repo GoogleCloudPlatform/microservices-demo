@@ -19,7 +19,7 @@ FROM --platform=$BUILDPLATFORM eclipse-temurin:24.0.2_12-jdk-noble@sha256:dacac8
 
 WORKDIR /app
 
-COPY ["build.gradle", "gradlew", "./"]
+COPY ["build.gradle", "settings.gradle", "gradlew", "./"]
 COPY gradle gradle
 RUN chmod +x gradlew
 RUN ./gradlew downloadRepos
