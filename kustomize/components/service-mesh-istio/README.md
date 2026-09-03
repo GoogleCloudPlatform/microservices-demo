@@ -26,7 +26,8 @@ The following CLI tools needs to be installed and in the PATH:
 
    ```sh
    gcloud container clusters create-auto $CLUSTER_NAME \
-     --location=$REGION
+     --location=$REGION \
+     --labels dev-tutorial=online-boutique
    ```
 
    To make the best use of our service mesh, we need to have [GKE Workload Identity](https://cloud.google.com/kubernetes-engine/docs/how-to/workload-identity), and the [Kubernetes Gateway API resource definitions](https://cloud.google.com/kubernetes-engine/docs/how-to/deploying-gateways) enabled. Autopilot takes care of this for us.
