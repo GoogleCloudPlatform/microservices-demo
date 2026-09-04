@@ -1,0 +1,123 @@
+// Copyright 2026 Google LLC
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+syntax = "proto3";
+
+package hipstershop;
+
+option go_package = "github.com/GoogleCloudPlatform/microservices-demo/hipstershop";
+
+// -----------------------------------------------------------------------------
+// UserService: accounts and sessions
+//
+// Minimalistic scope: registration, login and logout, basic profile. 
+// No additional functions.
+// -----------------------------------------------------------------------------
+service UserService {
+    // Create account and open session
+    rpc CreateUser(CreateUserRequest) returns (AuthResponse) {}
+
+    // Verify email and password 
+    rpc Authenticate(AuthenticateRequest) returns (AuthResponse) {}
+
+    //Translates session token to an identity.
+    rpc ValidateSession(ValidateSessionRequest) returns (Session) {}
+
+    // Terminates session
+    rpc Logout(LogoutRequest) returns (UserEmpty) {}
+
+    // Public data of account
+    rpc GetUser(GetUserRequest) returns (User) {}
+
+    // Updates name and address
+    rpc UpdateProfile(UpdateProfileRequest) returns (User) {}
+
+    // Password change
+    rpc ChangePassword(ChangePasswordRequest) returns (UserEmpty) {}
+}
+
+message UserEmpty {}
+
+// -----------------------------------------------------------------------------
+// Messages
+// -----------------------------------------------------------------------------
+
+message User {
+    string id = 1;              // UUID. user_id as seen by the rest of the system
+    string email = 2;
+    string first_name = 3;
+    string last_name = 4;
+    UserAddress address = 5;    // could be empty field
+    int64 created_at = 6;       // measured in seconds
+}
+
+// Mirrors Address in demo.proto. If checkoutservice changes contract,
+// this service isn't made aware.
+message UserAddress {
+    string street_address = 1;
+    string city = 2;
+    string state = 3;
+    string country = 4;
+    int32 zip_code = 5;
+}
+
+message Session {
+    string session_token = 1;   // obscured, stored as a cookie in frontend
+    string user_id = 2;
+    int64 expires_at = 3;       // measured in seconds
+}
+
+// Identity token returned by login
+message AuthResponse {
+    User user = 1;
+    Session session = 2;
+}
+
+message CreateUserRequest {
+    string email = 1;
+    string password = 2;        
+    string first_name = 3;
+    string last_name = 4;
+}
+
+message AuthenticateRequest {
+    string email = 1;
+    string password = 2;
+}
+
+message ValidateSessionRequest {
+    string session_token = 1;
+}
+
+message LogoutRequest {
+    string session_token = 1;
+}
+
+message GetUserRequest {
+    string user_id = 1;
+}
+
+message UpdateProfileRequest {
+    string user_id = 1;
+    string first_name = 2;
+    string last_name = 3;
+    UserAddress address = 4;
+}
+
+message ChangePasswordRequest {
+    string user_id = 1;
+    string current_password = 2;
+    string new_password = 3;
+    string keep_session_token = 4;  // this session persists
+}
