@@ -1,0 +1,73 @@
+syntax = "proto3";
+package hipstershop;
+option go_package = "github.com/GoogleCloudPlatform/microservices-demo/hipstershop";
+// -----------------Wishlist service-----------------
+//
+// Lets a shopper keep several wish lists ("Christmas", "For the apartment"),
+// each holding product ids. Product details are never stored here: the
+// frontend resolves them against the product catalog on every render.
+service WishlistService {
+rpc CreateWishlist(CreateWishlistRequest) returns (Wishlist) {}
+rpc ListWishlists(ListWishlistsRequest) returns (ListWishlistsResponse) {}
+rpc GetWishlist(GetWishlistRequest) returns (Wishlist) {}
+rpc RenameWishlist(RenameWishlistRequest) returns (Wishlist) {}
+rpc DeleteWishlist(DeleteWishlistRequest) returns (WishlistEmpty) {}
+rpc AddWishlistItem(AddWishlistItemRequest) returns (WishlistEmpty) {}
+rpc RemoveWishlistItem(RemoveWishlistItemRequest) returns (WishlistEmpty) {}
+rpc GetWishlistSummary(WishlistSummaryRequest) returns (WishlistSummaryResponse) {}
+}
+// demo.proto already defines an Empty message in this package, so the wishlist
+// service brings its own name to avoid a collision when both files are
+// generated into the same Go package (as they are in the frontend).
+message WishlistEmpty {}
+message WishlistItem {
+string product_id = 1;
+int64 added_at = 2; // unix seconds
+}
+message Wishlist {
+string id = 1;
+string name = 2;
+int64 created_at = 3; // unix seconds
+int32 item_count = 4;
+repeated WishlistItem items = 5; // only populated by GetWishlist
+}
+message CreateWishlistRequest {
+string user_id = 1;
+string name = 2;
+}
+message ListWishlistsRequest {
+string user_id = 1;
+}
+message ListWishlistsResponse {
+repeated Wishlist wishlists = 1;
+}
+message GetWishlistRequest {
+string user_id = 1;
+string id = 2;
+}
+message RenameWishlistRequest {
+string user_id = 1;
+string id = 2;
+string name = 3;
+}
+message DeleteWishlistRequest {
+string user_id = 1;
+string id = 2;
+}
+message AddWishlistItemRequest {
+string user_id = 1;
+string id = 2;
+string product_id = 3;
+}
+message RemoveWishlistItemRequest {
+string user_id = 1;
+string id = 2;
+string product_id = 3;
+}
+message WishlistSummaryRequest {
+string user_id = 1;
+}
+message WishlistSummaryResponse {
+int32 list_count = 1;
+int32 item_count = 2;
+}
