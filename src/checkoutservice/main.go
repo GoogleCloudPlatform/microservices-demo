@@ -43,8 +43,9 @@ import (
 )
 
 const (
-	listenPort  = "5050"
-	usdCurrency = "USD"
+	listenPort          = "5050"
+	usdCurrency         = "USD"
+	emailRequestTimeout = time.Second
 )
 
 var log *logrus.Logger
@@ -377,7 +378,10 @@ func (cs *checkoutService) chargeCard(ctx context.Context, amount *pb.Money, pay
 }
 
 func (cs *checkoutService) sendOrderConfirmation(ctx context.Context, email string, order *pb.OrderResult) error {
-	_, err := pb.NewEmailServiceClient(cs.emailSvcConn).SendOrderConfirmation(ctx, &pb.SendOrderConfirmationRequest{
+	emailCtx, cancel := context.WithTimeout(ctx, emailRequestTimeout)
+	defer cancel()
+
+	_, err := pb.NewEmailServiceClient(cs.emailSvcConn).SendOrderConfirmation(emailCtx, &pb.SendOrderConfirmationRequest{
 		Email: email,
 		Order: order})
 	return err
