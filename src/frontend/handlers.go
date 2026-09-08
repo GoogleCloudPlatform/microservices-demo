@@ -66,7 +66,7 @@ func (fe *frontendServer) homeHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	products, err := fe.getProducts(r.Context())
 	if err != nil {
-		renderHTTPError(log, r, w, errors.Wrap(err, "could not retrieve products"), http.StatusInternalServerError)
+		renderHTTPError(log, r, w, errors.Wrap(err, "could not retrieve products"), http.StatusServiceUnavailable)
 		return
 	}
 	cart, err := fe.getCart(r.Context(), sessionID(r))
