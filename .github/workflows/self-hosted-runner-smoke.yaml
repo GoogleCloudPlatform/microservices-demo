@@ -1,0 +1,49 @@
+name: Local Self-Hosted Runner Smoke Test
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: local-self-hosted-runner
+  cancel-in-progress: false
+
+jobs:
+  smoke:
+    name: Validate local runner
+    runs-on:
+      - self-hosted
+      - linux
+      - x64
+      - devsecops-local
+    timeout-minutes: 10
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Show runner environment
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          echo "Runner: ${RUNNER_NAME}"
+          echo "OS: ${RUNNER_OS}"
+          echo "Architecture: ${RUNNER_ARCH}"
+          uname -a
+          whoami
+          pwd
+      - name: Validate required tools
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          git --version
+          make --version
+          curl --version
+          docker --version
+          docker compose version
+      - name: Validate Docker Engine
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          docker version
+          docker info
+          docker ps
