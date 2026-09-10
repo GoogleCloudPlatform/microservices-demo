@@ -15,8 +15,9 @@ El razonamiento sale de la propuesta de proyecto del equipo, que se entrega por 
 | [0005](0005-estado-derivado-del-tiempo-no-almacenado.md) | El estado se deriva del tiempo, no se almacena | Aceptada | Propuesta §2.4 |
 | [0006](0006-registro-sincrono-sin-cola-ni-eventos.md) | Registro síncrono desde `checkoutservice`, sin cola | Aceptada | Propuesta §2.6 |
 | [0007](0007-componente-opcional-con-kill-switch.md) | Componente opcional con *kill switch* | Aceptada | Propuesta §2.8 |
-| [0008](0008-despliegue-continuo-en-dos-fases.md) | Despliegue continuo en dos fases | Aceptada | **pipeline-de-despliegue-continuo** |
+| [0008](0008-despliegue-continuo-en-dos-fases.md) | Despliegue continuo en dos fases | Aceptada · fase B reemplazada por 0010 | **pipeline-de-despliegue-continuo** |
 | [0009](0009-consulta-anonima-sin-autenticacion.md) | La consulta de seguimiento es anónima | Aceptada | Propuesta §1.3 |
+| [0010](0010-fase-b-en-aws-con-k3s-sobre-ec2.md) | La fase B se despliega en AWS, con k3s sobre EC2 | Aceptada | **opciones-de-despliegue-en-la-nube** |
 
 ## Las reglas
 
@@ -48,7 +49,7 @@ Qué se eligió, en voz activa.
 
 ## Fechas
 
-Reflejan **cuándo quedó registrada** la decisión, no necesariamente cuándo se discutió por primera vez. Los ADR 0001 a 0007 y el 0009 documentan decisiones que ya estaban tomadas en la **propuesta de proyecto**; el 0008 se registró junto con el diseño del pipeline.
+Reflejan **cuándo quedó registrada** la decisión, no necesariamente cuándo se discutió por primera vez. Los ADR 0001 a 0007 y el 0009 documentan decisiones que ya estaban tomadas en la **propuesta de proyecto**; el 0008 se registró junto con el diseño del pipeline, y el 0010 el día en que el proveedor de nube quedó fijado por la institución.
 
 ## Páginas relacionadas
 
