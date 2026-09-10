@@ -1,9 +1,6 @@
 name: Local Self-Hosted Runner Smoke Test
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - feat/ci-self-hosted-runner
 
 permissions:
   contents: read
