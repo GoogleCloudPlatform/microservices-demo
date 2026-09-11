@@ -70,6 +70,19 @@ jobs:
           test -x "${RUNNER_TEMP}/productcatalogservice"
           ls -lh "${RUNNER_TEMP}/productcatalogservice"
 
+      - name: Scan source dependencies with Trivy
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          version: v0.74.0
+          scan-type: fs
+          scan-ref: ${{ env.SERVICE_PATH }}
+          scanners: vuln
+          vuln-type: library
+          severity: HIGH,CRITICAL
+          ignore-unfixed: true
+          format: table
+          exit-code: '1'
+
       - name: Checkout infrastructure repository
         if: ${{ github.ref == 'refs/heads/main' }}
         uses: actions/checkout@v7
