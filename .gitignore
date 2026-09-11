@@ -5,8 +5,8 @@
 .kubernetes-manifests-*/
 .project
 .skaffold-*.yaml
-.terraform.lock.hcl
-.terraform/*
+**/.terraform.lock.hcl
+**/.terraform/*
 .venv/
 .vs/
 .vscode/

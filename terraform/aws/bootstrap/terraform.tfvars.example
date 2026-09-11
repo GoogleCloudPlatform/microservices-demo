@@ -1,0 +1,2 @@
+state_bucket_name = "boutique-eq4-tfstate-CAMBIA-ESTO"
+region            = "us-east-1"

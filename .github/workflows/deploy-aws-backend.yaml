@@ -1,0 +1,51 @@
+name: "Deploy AWS Backend (Terraform)"
+
+# Despliega la infraestructura serverless del Admin Panel (terraform/aws)
+# a la cuenta de AWS Academy Learner Lab del equipo.
+#
+# Requiere estos secrets en el repo (Settings > Secrets and variables >
+# Actions), refrescados cada vez que se reinicia la sesion del Learner Lab:
+#   AWS_ACCESS_KEY_ID
+#   AWS_SECRET_ACCESS_KEY
+#   AWS_SESSION_TOKEN
+# Y este secret, que solo se define una vez (lo crea terraform/aws/bootstrap):
+#   TF_STATE_BUCKET
+on:
+  push:
+    branches: [main]
+    paths:
+      - "terraform/aws/**"
+  workflow_dispatch: {}
+
+jobs:
+  terraform-apply:
+    runs-on: ubuntu-24.04
+    defaults:
+      run:
+        working-directory: terraform/aws
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "1.16.1"
+
+      - name: Configurar credenciales de AWS (Learner Lab)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
+          aws-region: us-east-1
+
+      - name: Terraform Init
+        run: terraform init -backend-config="bucket=${{ secrets.TF_STATE_BUCKET }}"
+
+      - name: Terraform Plan
+        run: terraform plan -out=tfplan
+
+      - name: Terraform Apply
+        run: terraform apply -auto-approve tfplan
+
+      - name: Mostrar URL del API
+        run: terraform output -raw api_url
