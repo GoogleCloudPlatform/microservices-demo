@@ -1,0 +1,70 @@
+name: "Security CI"
+
+on:
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  govulncheck:
+    name: "Vulnerabilidades en dependencias de Go"
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-go@v6
+        with:
+          go-version: '1.26'
+
+      - name: Instalar govulncheck
+        run: go install golang.org/x/vuln/cmd/govulncheck@latest
+
+      - name: Analizar los modulos en Go
+        timeout-minutes: 15
+        run: |
+          set -e
+          for MODULE in "frontend" "checkoutservice" "productcatalogservice" "shippingservice"; do
+            echo "::group::$MODULE"
+            pushd "src/$MODULE"
+            govulncheck ./...
+            popd
+            echo "::endgroup::"
+          done
+
+  gitleaks:
+    name: "Deteccion de secretos"
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          # El historial completo: gitleaks revisa todos los commits,
+          # no solo el diff del Pull Request.
+          fetch-depth: 0
+
+      - name: Escanear el historial
+        timeout-minutes: 15
+        run: |
+          docker run --rm -v "$PWD:/repo" zricethezav/gitleaks:v8.18.4 \
+            detect \
+            --source /repo \
+            --redact \
+            --exit-code 1 \
+            --report-format sarif \
+            --report-path /repo/gitleaks-report.sarif
+
+      - name: Guardar el reporte
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: gitleaks-report
+          path: gitleaks-report.sarif
+          if-no-files-found: ignore
