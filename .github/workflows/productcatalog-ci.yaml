@@ -13,6 +13,8 @@ env:
   APPLICATION_PATH: application
   INFRASTRUCTURE_PATH: infrastructure
   SERVICE_PATH: application/src/productcatalogservice
+  IMAGE_NAME: productcatalogservice
+  IMAGE_TAG: ci-${{ github.sha }}
 
 jobs:
   validate:
@@ -82,6 +84,49 @@ jobs:
           ignore-unfixed: true
           format: table
           exit-code: '1'
+
+      - name: Build productcatalogservice image
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+
+          image_ref="${IMAGE_NAME}:${IMAGE_TAG}"
+
+          echo "Building image: ${image_ref}"
+
+          docker build \
+            --file "${SERVICE_PATH}/Dockerfile" \
+            --tag "${image_ref}" \
+            "${SERVICE_PATH}"
+
+          docker image inspect "${image_ref}" >/dev/null
+
+          echo "Successfully built image: ${image_ref}"
+
+      - name: Scan container image with Trivy
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25
+        with:
+          version: v0.74.0
+          scan-type: image
+          image-ref: '${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}'
+          scanners: vuln
+          vuln-type: os,library
+          severity: HIGH,CRITICAL
+          ignore-unfixed: true
+          format: table
+          exit-code: '1'
+
+      - name: Remove local CI image
+        if: ${{ always() }}
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+
+          image_ref="${IMAGE_NAME}:${IMAGE_TAG}"
+
+          if docker image inspect "${image_ref}" >/dev/null 2>&1; then
+            docker image rm --force "${image_ref}"
+          fi
 
       - name: Checkout infrastructure repository
         if: ${{ github.ref == 'refs/heads/main' }}
