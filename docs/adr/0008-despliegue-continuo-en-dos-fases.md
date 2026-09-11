@@ -1,6 +1,8 @@
 # ADR 0008 — Despliegue continuo en dos fases sobre el mismo workflow
 
-**Estado:** Aceptada · 2026-08-27
+**Estado:** Aceptada · 2026-08-27 · su **fase B** quedó reemplazada por el [ADR 0010](0010-fase-b-en-aws-con-k3s-sobre-ec2.md) · 2026-09-10
+
+> El diseño en dos fases sobre un mismo workflow sigue vigente, y la fase A sigue en operación. Lo único que este ADR ya no describe es **el destino de la fase B**: donde dice GKE, Artifact Registry y nodo *spot*, hoy hay que leer AWS, `ghcr.io` y k3s sobre EC2. Ver el ADR 0010.
 
 ## Contexto
 
@@ -20,8 +22,8 @@ Restricciones: la ventana de la prueba gratuita de Google Cloud es limitada, y a
 | | Fase A — ya | Fase B — cerca de la demo |
 |---|---|---|
 | Runner | Self-hosted en la máquina del equipo | `ubuntu-24.04` |
-| Clúster | Docker Desktop local | GKE zonal, nodo spot |
-| Registro | Ninguno | Artifact Registry |
+| Clúster | Docker Desktop local | ~~GKE zonal, nodo spot~~ → k3s sobre EC2 (ADR 0010) |
+| Registro | Ninguno | ~~Artifact Registry~~ → `ghcr.io` (ADR 0010) |
 
 Entre una y otra cambian el *runner* y cinco valores. Los pasos de despliegue, espera, verificación y rollback son idénticos.
 
