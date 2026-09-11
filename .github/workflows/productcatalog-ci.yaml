@@ -9,46 +9,185 @@ concurrency:
   group: productcatalog-local-ci
   cancel-in-progress: false
 
+env:
+  APPLICATION_PATH: application
+  INFRASTRUCTURE_PATH: infrastructure
+  SERVICE_PATH: application/src/productcatalogservice
+
 jobs:
   validate:
-    name: Test and build productcatalogservice
+    name: Validate productcatalogservice
     runs-on:
       - self-hosted
       - linux
       - x64
       - devsecops-local
-    timeout-minutes: 15
+    timeout-minutes: 30
     steps:
-      - name: Checkout repository
+      - name: Checkout application repository
         uses: actions/checkout@v7
         with:
+          path: application
+          fetch-depth: 0
           persist-credentials: false
 
       - name: Set up Go
         uses: actions/setup-go@v7
         with:
-          go-version-file: src/productcatalogservice/go.mod
-          cache-dependency-path: src/productcatalogservice/go.sum
-
-      - name: Show Go version
-        run: go version
+          go-version-file: application/src/productcatalogservice/go.mod
+          cache-dependency-path: application/src/productcatalogservice/go.sum
 
       - name: Download dependencies
-        working-directory: src/productcatalogservice
+        working-directory: ${{ env.SERVICE_PATH }}
         run: go mod download
 
-      - name: Run unit tests
-        working-directory: src/productcatalogservice
-        run: go test ./...
+      - name: Run unit tests with coverage
+        working-directory: ${{ env.SERVICE_PATH }}
+        run: |
+          set -Eeuo pipefail
+
+          go test \
+            -coverprofile=coverage.out \
+            ./...
+
+      - name: Show coverage summary
+        working-directory: ${{ env.SERVICE_PATH }}
+        run: go tool cover -func=coverage.out
 
       - name: Build service
-        working-directory: src/productcatalogservice
+        working-directory: ${{ env.SERVICE_PATH }}
         run: |
+          set -Eeuo pipefail
+
           go build \
             -o "${RUNNER_TEMP}/productcatalogservice" \
             .
 
       - name: Validate binary
         run: |
+          set -Eeuo pipefail
+
           test -x "${RUNNER_TEMP}/productcatalogservice"
           ls -lh "${RUNNER_TEMP}/productcatalogservice"
+
+      - name: Checkout infrastructure repository
+        if: ${{ github.ref == 'refs/heads/main' }}
+        uses: actions/checkout@v7
+        with:
+          repository: ${{ vars.INFRASTRUCTURE_REPOSITORY }}
+          path: infrastructure
+          persist-credentials: false
+
+      - name: Prepare local tooling configuration
+        if: ${{ github.ref == 'refs/heads/main' }}
+        shell: bash
+        env:
+          SONAR_DB_PASSWORD: ${{ secrets.SONAR_DB_PASSWORD }}
+        run: |
+          set -Eeuo pipefail
+
+          if [[ -z "${SONAR_DB_PASSWORD}" ]]; then
+            echo "SONAR_DB_PASSWORD is not configured."
+            exit 1
+          fi
+
+          tooling_dir="${INFRASTRUCTURE_PATH}/local/tooling"
+
+          grep -v '^SONAR_DB_PASSWORD=' \
+            "${tooling_dir}/.env.example" \
+            > "${tooling_dir}/.env"
+
+          printf 'SONAR_DB_PASSWORD=%s\n' \
+            "${SONAR_DB_PASSWORD}" \
+            >> "${tooling_dir}/.env"
+
+          chmod 600 "${tooling_dir}/.env"
+
+      - name: Prepare SonarQube resource profile
+        if: ${{ github.ref == 'refs/heads/main' }}
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+
+          make -C "${INFRASTRUCTURE_PATH}" cluster-stop
+          make -C "${INFRASTRUCTURE_PATH}" tooling-jcr-down
+
+          make -C "${INFRASTRUCTURE_PATH}" tooling-sonar-up
+          make -C "${INFRASTRUCTURE_PATH}" tooling-sonar-wait
+
+      - name: Validate SonarQube readiness
+        if: ${{ github.ref == 'refs/heads/main' }}
+        shell: bash
+        env:
+          SONAR_HOST_URL: ${{ vars.SONAR_HOST_URL }}
+        run: |
+          set -Eeuo pipefail
+
+          curl -fsS \
+            "${SONAR_HOST_URL}/api/system/status" \
+            | jq -e '.status == "UP"'
+
+      - name: Run SonarQube analysis
+        if: ${{ github.ref == 'refs/heads/main' }}
+        uses: SonarSource/sonarqube-scan-action@v8.2.1
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: ${{ vars.SONAR_HOST_URL }}
+        with:
+          projectBaseDir: application/src/productcatalogservice
+
+      - name: Validate SonarQube Quality Gate
+        if: ${{ github.ref == 'refs/heads/main' }}
+        uses: SonarSource/sonarqube-quality-gate-action@v1.2.0
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: ${{ vars.SONAR_HOST_URL }}
+        with:
+          scanMetadataReportFile: application/src/productcatalogservice/.scannerwork/report-task.txt
+          pollingTimeoutSec: 300
+
+      - name: Capture SonarQube resource usage
+        if: ${{ always() && github.ref == 'refs/heads/main' }}
+        shell: bash
+        run: |
+          docker stats \
+            --no-stream \
+            --format 'table {{.Name}}\t{{.CPUPerc}}\t{{.MemUsage}}\t{{.MemPerc}}' \
+            | grep -E 'NAME|sonarqube' \
+            || true
+
+      - name: Stop SonarQube
+        if: ${{ always() && github.ref == 'refs/heads/main' }}
+        shell: bash
+        run: |
+          cleanup_status=0
+
+          if [[ -d "${INFRASTRUCTURE_PATH}" ]]; then
+            make \
+              -C "${INFRASTRUCTURE_PATH}" \
+              tooling-sonar-down \
+              || cleanup_status=$?
+
+            rm -f \
+              "${INFRASTRUCTURE_PATH}/local/tooling/.env"
+          fi
+
+          exit "${cleanup_status}"
+
+      - name: Clean generated CI files
+        if: ${{ always() }}
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+
+          rm -f \
+            "${SERVICE_PATH}/coverage.out" \
+            "${RUNNER_TEMP}/productcatalogservice"
+
+          rm -rf \
+            "${SERVICE_PATH}/.scannerwork"
+
+          if [[ -d "${INFRASTRUCTURE_PATH}" ]]; then
+            rm -f \
+              "${INFRASTRUCTURE_PATH}/local/tooling/.env"
+          fi

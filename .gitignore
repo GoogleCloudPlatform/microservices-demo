@@ -27,3 +27,5 @@ pkg/
 release/wi-kubernetes-manifests.yaml
 vendor/
 gha-creds-*.json
+# Go test coverage reports
+coverage.out
