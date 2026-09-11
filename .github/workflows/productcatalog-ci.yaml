@@ -1,0 +1,54 @@
+name: Product Catalog CI
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: productcatalog-local-ci
+  cancel-in-progress: false
+
+jobs:
+  validate:
+    name: Test and build productcatalogservice
+    runs-on:
+      - self-hosted
+      - linux
+      - x64
+      - devsecops-local
+    timeout-minutes: 15
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: Set up Go
+        uses: actions/setup-go@v7
+        with:
+          go-version-file: src/productcatalogservice/go.mod
+          cache-dependency-path: src/productcatalogservice/go.sum
+
+      - name: Show Go version
+        run: go version
+
+      - name: Download dependencies
+        working-directory: src/productcatalogservice
+        run: go mod download
+
+      - name: Run unit tests
+        working-directory: src/productcatalogservice
+        run: go test ./...
+
+      - name: Build service
+        working-directory: src/productcatalogservice
+        run: |
+          go build \
+            -o "${RUNNER_TEMP}/productcatalogservice" \
+            .
+
+      - name: Validate binary
+        run: |
+          test -x "${RUNNER_TEMP}/productcatalogservice"
+          ls -lh "${RUNNER_TEMP}/productcatalogservice"
