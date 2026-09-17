@@ -27,3 +27,9 @@ pkg/
 release/wi-kubernetes-manifests.yaml
 vendor/
 gha-creds-*.json
+# Generated gRPC code.
+src/wishlistservice/genproto/
+
+# Go build artifacts.
+src/wishlistservice/*.exe
+src/wishlistservice/*.test
