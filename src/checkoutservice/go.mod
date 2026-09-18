@@ -2,7 +2,7 @@ module github.com/GoogleCloudPlatform/microservices-demo/src/checkoutservice
 
 go 1.25.0
 
-toolchain go1.27.0
+toolchain go1.27.1
 
 require (
 	cloud.google.com/go/profiler v0.6.0

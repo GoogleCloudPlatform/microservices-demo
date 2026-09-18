@@ -11,6 +11,8 @@ cloud.google.com/go/alloydbconn v1.18.5 h1:DsUY/zZIARley3ZKGO6Sa7enGaSMh614uT0CB
 cloud.google.com/go/alloydbconn v1.18.5/go.mod h1:3TUfDxT+TUbfYk18UgiiUx+h783jcJNERcvsHvmGZ2s=
 cloud.google.com/go/alloydbconn v1.18.6 h1:vtRmNRk1kq0QjJ8lbrPLeooIVqCbKcDxKycRtmb6gsQ=
 cloud.google.com/go/alloydbconn v1.18.6/go.mod h1:P70koybK8sRT5E11jBlCQxthyWc3+Y0gKhA4hL1favE=
+cloud.google.com/go/alloydbconn v1.19.1 h1:trZK0OtIC4RlFNiaPaX+dTC1Zl4EMC9lOeOxzUsw98w=
+cloud.google.com/go/alloydbconn v1.19.1/go.mod h1:sUQ98EeCuAu1rXbiqVHgg+ypOzBqrt4rXYQO3ELLzIc=
 cloud.google.com/go/auth v0.20.0 h1:kXTssoVb4azsVDoUiF8KvxAqrsQcQtB53DcSgta74CA=
 cloud.google.com/go/auth v0.20.0/go.mod h1:942/yi/itH1SsmpyrbnTMDgGfdy2BUqIKyd0cyYLc5Q=
 cloud.google.com/go/auth/oauth2adapt v0.2.8 h1:keo8NaayQZ6wimpNSmW5OPc283g65QNIiLpZnkHRbnc=
@@ -132,6 +134,8 @@ github.com/jackc/pgservicefile v0.0.0-20240606120523-5a60cdf6a761 h1:iCEnooe7Ulw
 github.com/jackc/pgservicefile v0.0.0-20240606120523-5a60cdf6a761/go.mod h1:5TJZWKEWniPve33vlWYSoGYefn3gLQRzjfDlhSJ9ZKM=
 github.com/jackc/pgx/v5 v5.10.0 h1:VhSvgU2jSli8o3AqIEOTJr7rZwAEUVo4E4XhR94Zfr0=
 github.com/jackc/pgx/v5 v5.10.0/go.mod h1:mal1tBGAFfLHvZzaYh77YS/eC6IX9OWbRV1QIIM0Jn4=
+github.com/jackc/pgx/v5 v5.11.0 h1:IzBBtyK9AHqf98cctWFifYSci2hgQR/cd56wB4p+ogg=
+github.com/jackc/pgx/v5 v5.11.0/go.mod h1:mal1tBGAFfLHvZzaYh77YS/eC6IX9OWbRV1QIIM0Jn4=
 github.com/jackc/puddle/v2 v2.2.2 h1:PR8nw+E/1w0GLuRFSmiioY6UooMp6KJv0/61nB7icHo=
 github.com/jackc/puddle/v2 v2.2.2/go.mod h1:vriiEXHvEE654aYKXXjOvZM39qJ0q+azkZFrfEOc3H4=
 github.com/pkg/errors v0.9.1 h1:FEBLx1zS214owpjy7qsBeixbURkuhQAwrK5UwLGTwt4=
