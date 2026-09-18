@@ -1,0 +1,130 @@
+<!--
+ Copyright 2026 Google LLC
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+-->
+
+{{ define "wishlist" }}
+{{ template "header" . }}
+
+<div {{ with $.platform_css }} class="{{.}}" {{ end }}>
+    <span class="platform-flag">
+        {{$.platform_name}}
+    </span>
+</div>
+
+<main role="main" class="cart-sections">
+    <section class="container">
+        <div class="row">
+            <div class="col-lg-8 offset-lg-2 cart-summary-section">
+
+                <div class="row mb-3 py-2">
+                    <div class="col-6 pl-md-0">
+                        <h3>{{ $.list.Name }} ({{ len $.items }})</h3>
+                    </div>
+                    <div class="col-6 pr-md-0 text-right">
+                        <a class="cymbal-button-primary" href="{{ $.baseUrl }}/wishlists" role="button">All wishlists</a>
+                    </div>
+                </div>
+
+                <form method="POST" action="{{ $.baseUrl }}/wishlist/{{ $.list.Id }}/rename" class="row cart-summary-item-row">
+                    <div class="col-8 pl-md-0">
+                        <input type="text" name="name" class="form-control" maxlength="64"
+                               value="{{ $.list.Name }}" />
+                    </div>
+                    <div class="col-4 pr-md-0 text-right">
+                        <button type="submit" class="cymbal-button-secondary">Rename</button>
+                    </div>
+                </form>
+
+                {{ if eq (len $.items) 0 }}
+                <div class="row cart-summary-item-row">
+                    <div class="col pl-md-0">
+                        <h4>This wishlist is empty.</h4>
+                        <p>Open any product and use "Add to Wishlist" to save it here.</p>
+                        <a class="cymbal-button-primary" href="{{ $.baseUrl }}/" role="button">Browse products</a>
+                    </div>
+                </div>
+                {{ else }}
+                {{ range $.items }}
+                <div class="row cart-summary-item-row">
+                    <div class="col-md-4 pl-md-0">
+                        <a href="{{ $.baseUrl }}/product/{{ .Item.Id }}">
+                            <img class="img-fluid" alt="" src="{{ $.baseUrl }}{{ .Item.Picture }}" />
+                        </a>
+                    </div>
+                    <div class="col-md-8 pr-md-0">
+                        <div class="row">
+                            <div class="col">
+                                <h4>{{ .Item.Name }}</h4>
+                            </div>
+                            <div class="col pr-md-0 text-right">
+                                <strong>{{ renderMoney .Price }}</strong>
+                            </div>
+                        </div>
+                        <div class="row cart-summary-item-row-item-id-row">
+                            <div class="col">
+                                SKU #{{ .Item.Id }} &middot; saved {{ .AddedAt.Format "Jan 2, 2006" }}
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col pr-md-0 text-right">
+                                <form method="POST" action="{{ $.baseUrl }}/wishlist/{{ $.list.Id }}/move-to-cart" class="d-inline">
+                                    <input type="hidden" name="product_id" value="{{ .Item.Id }}" />
+                                    <button type="submit" class="cymbal-button-primary">Move to cart</button>
+                                </form>
+                                <form method="POST" action="{{ $.baseUrl }}/wishlist/{{ $.list.Id }}/remove" class="d-inline">
+                                    <input type="hidden" name="product_id" value="{{ .Item.Id }}" />
+                                    <button type="submit" class="cymbal-button-secondary">Remove</button>
+                                </form>
+                            </div>
+                        </div>
+                        <!-- Cambiar el producto de lista. Sólo aparece si hay
+                             más de una lista: con una sola no habría a dónde
+                             moverlo. -->
+                        {{ if gt (len $.wishlists) 1 }}
+                        <div class="row">
+                            <div class="col pr-md-0 text-right">
+                                <form method="POST" action="{{ $.baseUrl }}/wishlist/{{ $.list.Id }}/move" class="d-inline">
+                                    <input type="hidden" name="product_id" value="{{ .Item.Id }}" />
+                                    <label style="font-size:.85em;color:#666;margin:0 6px 0 0;">Mover a</label>
+                                    <select name="target_list_id" style="max-width:180px;">
+                                        {{ range $.wishlists }}{{ if ne .Id $.list.Id }}
+                                        <option value="{{ .Id }}">{{ .Name }}</option>
+                                        {{ end }}{{ end }}
+                                    </select>
+                                    <button type="submit" class="cymbal-button-secondary">Mover</button>
+                            </div>
+                        </div>
+                        {{ end }}
+                    </div>
+                </div>
+                {{ end }}
+                {{ end }}
+
+                <div class="row cart-summary-shipping-row">
+                    <div class="col pl-md-0">Delete this wishlist</div>
+                    <div class="col pr-md-0 text-right">
+                        <form method="POST" action="{{ $.baseUrl }}/wishlist/{{ $.list.Id }}/delete">
+                            <button type="submit" class="cymbal-button-secondary">Delete list</button>
+                        </form>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+</main>
+
+{{ template "footer" . }}
+{{ end }}

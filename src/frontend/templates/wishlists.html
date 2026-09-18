@@ -1,0 +1,84 @@
+<!--
+ Copyright 2026 Google LLC
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+-->
+
+{{ define "wishlists" }}
+{{ template "header" . }}
+
+<div {{ with $.platform_css }} class="{{.}}" {{ end }}>
+    <span class="platform-flag">
+        {{$.platform_name}}
+    </span>
+</div>
+
+<main role="main" class="cart-sections">
+    <section class="container">
+        <div class="row">
+            <div class="col-lg-8 offset-lg-2 cart-summary-section">
+
+                <div class="row mb-3 py-2">
+                    <div class="col-6 pl-md-0">
+                        <h3>Your Wishlists ({{ len $.lists }})</h3>
+                    </div>
+                    <div class="col-6 pr-md-0 text-right">
+                        <a class="cymbal-button-primary" href="{{ $.baseUrl }}/" role="button">Continue Shopping</a>
+                    </div>
+                </div>
+
+                <form method="POST" action="{{ $.baseUrl }}/wishlists" class="row cart-summary-item-row">
+                    <div class="col-8 pl-md-0">
+                        <input type="text" name="name" class="form-control" maxlength="64"
+                               placeholder="Name your new wishlist (e.g. Birthday)" />
+                    </div>
+                    <div class="col-4 pr-md-0 text-right">
+                        <button type="submit" class="cymbal-button-primary">Create list</button>
+                    </div>
+                </form>
+
+                {{ if eq (len $.lists) 0 }}
+                <div class="row cart-summary-item-row">
+                    <div class="col pl-md-0">
+                        <h4>You have no wishlists yet.</h4>
+                        <p>Create one above, or save a product from its page to start a list.</p>
+                    </div>
+                </div>
+                {{ else }}
+                {{ range $.lists }}
+                <div class="row cart-summary-item-row">
+                    <div class="col-8 pl-md-0">
+                        <h4>
+                            <a href="{{ $.baseUrl }}/wishlist/{{ .Id }}">{{ .Name }}</a>
+                        </h4>
+                        <div class="cart-summary-item-row-item-id-row">
+                            {{ .ItemCount }} item{{ if ne .ItemCount 1 }}s{{ end }}
+                        </div>
+                    </div>
+                    <div class="col-4 pr-md-0 text-right">
+                        <a class="cymbal-button-primary" href="{{ $.baseUrl }}/wishlist/{{ .Id }}" role="button">Open</a>
+                        <form method="POST" action="{{ $.baseUrl }}/wishlist/{{ .Id }}/delete" class="d-inline">
+                            <button type="submit" class="cymbal-button-secondary">Delete</button>
+                        </form>
+                    </div>
+                </div>
+                {{ end }}
+                {{ end }}
+
+            </div>
+        </div>
+    </section>
+</main>
+
+{{ template "footer" . }}
+{{ end }}
