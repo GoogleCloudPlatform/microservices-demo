@@ -68,6 +68,36 @@
             </div>
             <button type="submit" class="cymbal-button-primary">Add To Cart</button>
           </form>
+
+          <form method="POST" action="{{ $.baseUrl }}/wishlist/add" class="product-wishlist-form">
+            <input type="hidden" name="product_id" value="{{$.product.Item.Id}}" />
+            <!-- La etiqueta importa: sin ella el desplegable pasa
+                 desapercibido y todo acaba en la lista que salga primero. -->
+            <label for="wishlist_select" style="display:block;font-size:.9em;color:#666;margin-bottom:4px;">
+              Guardar en la lista
+            </label>
+            <div class="product-quantity-dropdown">
+              <select name="list_id" id="wishlist_select" onchange="toggleNewWishlistName()">
+                {{ range $.wishlists }}
+                <option value="{{ .Id }}">{{ .Name }}</option>
+                {{ end }}
+                <option value="__new__" {{ if eq (len $.wishlists) 0 }}selected{{ end }}>+ New wishlist</option>
+              </select>
+              <img src="{{ $.baseUrl }}/static/icons/Hipster_DownArrow.svg" alt="">
+            </div>
+            <input type="text" name="new_list_name" id="new_wishlist_name" maxlength="64"
+                   placeholder="Name the new wishlist"
+                   {{ if ne (len $.wishlists) 0 }}style="display: none;"{{ end }} />
+            <button type="submit" class="cymbal-button-secondary">Add to Wishlist</button>
+          </form>
+
+          <script>
+            function toggleNewWishlistName() {
+              var select = document.getElementById('wishlist_select');
+              var input = document.getElementById('new_wishlist_name');
+              input.style.display = select.value === '__new__' ? '' : 'none';
+            }
+          </script>
         </div>
       </div>
     </div>
