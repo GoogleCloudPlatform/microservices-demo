@@ -1,0 +1,173 @@
+# Copyright 2026 Equipo del proyecto  <-- pon aqui vuestros nombres
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# -----------------------------------------------------------------------------
+# wishlistservice + su Redis.
+#
+# Mismo patron que cartservice de Google: el servicio y su almacen viven en el
+# mismo archivo porque nadie mas los usa. El Redis NO lleva volumen a proposito:
+# las listas caducan a las 48 h de todos modos (WISHLIST_TTL_SECONDS), asi que
+# perderlas al reiniciar es aceptable.
+# -----------------------------------------------------------------------------
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: wishlistservice
+  labels:
+    app: wishlistservice
+spec:
+  selector:
+    matchLabels:
+      app: wishlistservice
+  template:
+    metadata:
+      labels:
+        app: wishlistservice
+    spec:
+      serviceAccountName: wishlistservice
+      terminationGracePeriodSeconds: 5
+      securityContext:
+        fsGroup: 1000
+        runAsGroup: 1000
+        runAsNonRoot: true
+        runAsUser: 1000
+      containers:
+      - name: server
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+              - ALL
+          privileged: false
+          readOnlyRootFilesystem: true
+        # Imagen construida en local con el mismo nombre que usa docker-compose.
+        # En un cluster remoto hay que publicarla y cambiar esta linea.
+        image: boutique/wishlistservice:local
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 8080
+        env:
+        - name: PORT
+          value: "8080"
+        - name: REDIS_ADDR
+          value: "redis-wishlist:6379"
+        - name: WISHLIST_TTL_SECONDS
+          value: "172800"
+        resources:
+          requests:
+            cpu: 50m
+            memory: 32Mi
+          limits:
+            cpu: 200m
+            memory: 128Mi
+        # El servicio registra grpc.health.v1, en dos niveles: readiness responde
+        # NOT_SERVING mientras Redis no conteste.
+        readinessProbe:
+          initialDelaySeconds: 5
+          grpc:
+            port: 8080
+        livenessProbe:
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          grpc:
+            port: 8080
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: wishlistservice
+  labels:
+    app: wishlistservice
+spec:
+  type: ClusterIP
+  selector:
+    app: wishlistservice
+  ports:
+  - name: grpc
+    port: 8080
+    targetPort: 8080
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: wishlistservice
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: redis-wishlist
+  labels:
+    app: redis-wishlist
+spec:
+  selector:
+    matchLabels:
+      app: redis-wishlist
+  template:
+    metadata:
+      labels:
+        app: redis-wishlist
+    spec:
+      securityContext:
+        fsGroup: 1000
+        runAsGroup: 1000
+        runAsNonRoot: true
+        runAsUser: 1000
+      containers:
+      - name: redis
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+              - ALL
+          privileged: false
+          readOnlyRootFilesystem: true
+        image: redis:alpine
+        ports:
+        - containerPort: 6379
+        readinessProbe:
+          periodSeconds: 5
+          tcpSocket:
+            port: 6379
+        livenessProbe:
+          periodSeconds: 5
+          tcpSocket:
+            port: 6379
+        volumeMounts:
+        - mountPath: /data
+          name: redis-data
+        resources:
+          requests:
+            cpu: 70m
+            memory: 100Mi
+          limits:
+            cpu: 125m
+            memory: 200Mi
+      volumes:
+      - name: redis-data
+        emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: redis-wishlist
+  labels:
+    app: redis-wishlist
+spec:
+  type: ClusterIP
+  selector:
+    app: redis-wishlist
+  ports:
+  - name: tcp-redis
+    port: 6379
+    targetPort: 6379
