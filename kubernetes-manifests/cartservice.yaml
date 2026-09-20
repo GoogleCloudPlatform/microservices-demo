@@ -52,10 +52,10 @@ spec:
         resources:
           requests:
             cpu: 200m
-            memory: 64Mi
+            memory: 70Mi
           limits:
-            cpu: 300m
-            memory: 128Mi
+            cpu: 220m
+            memory: 90Mi
         readinessProbe:
           initialDelaySeconds: 15
           grpc:
@@ -134,8 +134,8 @@ spec:
             memory: 256Mi
             cpu: 125m
           requests:
-            cpu: 70m
-            memory: 200Mi
+            cpu: 20m
+            memory: 70Mi
       volumes:
       - name: redis-data
         emptyDir: {}
