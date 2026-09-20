@@ -33,7 +33,7 @@ func CreateTrackingId(salt string) string {
 
 // getRandomLetterCode generates a code point value for a capital letter.
 func getRandomLetterCode() uint32 {
-	return 65 + uint32(rand.Intn(25))
+	return 65 + uint32(rand.Intn(26))
 }
 
 // getRandomNumber generates a string representation of a number with the requested number of digits.
