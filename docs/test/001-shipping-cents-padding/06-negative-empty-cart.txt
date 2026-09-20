@@ -1,0 +1,56 @@
+$ curl -s -c cookies.txt -o /dev/null http://localhost:8080/   # fresh session, cart never populated
+$ curl -s -b 'shop_session-id=<fresh-session>' -X POST http://localhost:8080/cart/checkout \
+    --data-urlencode 'email=someone@example.com' [... same demo fields as above ...]
+HTTP/1.1 200 OK
+Date: Tue, 14 Jul 2026 10:35:29 GMT
+Content-Type: text/html; charset=utf-8
+Transfer-Encoding: chunked
+
+
+--- response excerpt (empty cart) ---
+<h3>
+Your order is complete!
+</h3>
+</div>
+<div class="col-12 text-center">
+<p>We've sent you a confirmation email.</p>
+</div>
+</div>
+<div class="row border-bottom-solid padding-y-24">
+<div class="col-6 pl-md-0">
+Confirmation #
+</div>
+<div class="col-6 pr-md-0 text-right">
+bbb4961c-7f6f-11f1-af7a-daa790f68b9a
+</div>
+</div>
+<div class="row border-bottom-solid padding-y-24">
+<div class="col-6 pl-md-0">
+Tracking #
+</div>
+<div class="col-6 pr-md-0 text-right">
+QM-44086-220248280
+</div>
+</div>
+<div class="row padding-y-24">
+<div class="col-6 pl-md-0">
+Tax
+</div>
+<div class="col-6 pr-md-0 text-right">
+$0.00
+</div>
+</div>
+<div class="row padding-y-24">
+<div class="col-6 pl-md-0">
+Total Paid
+</div>
+
+--- checkoutservice logs covering this request (10:35:29) ---
+{"message":"[PlaceOrder] user_id=\"69a555a9-1bb1-46e3-98d6-22f867c1beb2\" user_currency=\"USD\"","severity":"info","timestamp":"2026-07-14T10:35:29.246747715Z"}
+{"message":"payment went through (transaction_id: d272fd7d-059a-4cc1-b7ab-0d63e03b6e5d)","severity":"info","timestamp":"2026-07-14T10:35:29.250835507Z"}
+{"message":"order confirmation email sent to \"someone@example.com\"","severity":"info","timestamp":"2026-07-14T10:35:29.253254048Z"}
+
+--- pod health after empty-cart negative test ---
+shippingservice: Running, 0 restarts (fresh rollout)
+checkoutservice: Running, 1 restart (pre-existing, occurred ~8m before this test, unrelated to our flow)
+frontend: Running, 1 restart (pre-existing, occurred ~8m before this test, unrelated to our flow)

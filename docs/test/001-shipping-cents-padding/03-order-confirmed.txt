@@ -1,0 +1,49 @@
+$ curl -s -b 'shop_session-id=<session>' -X POST http://localhost:8080/cart/checkout \
+    --data-urlencode 'email=someone@example.com' --data-urlencode 'street_address=1600 Amphitheatre Parkway' \
+    --data-urlencode 'zip_code=94043' --data-urlencode 'city=Mountain View' --data-urlencode 'state=CA' \
+    --data-urlencode 'country=United States' --data-urlencode 'credit_card_number=4432801561520454' \
+    --data-urlencode 'credit_card_expiration_month=1' --data-urlencode 'credit_card_expiration_year=2027' \
+    --data-urlencode 'credit_card_cvv=672'
+HTTP/1.1 200 OK
+Date: Tue, 14 Jul 2026 10:34:50 GMT
+Content-Type: text/html; charset=utf-8
+Transfer-Encoding: chunked
+
+
+--- order-confirmation page excerpt ---
+<h3>
+Your order is complete!
+</h3>
+</div>
+<div class="col-12 text-center">
+<p>We've sent you a confirmation email.</p>
+</div>
+</div>
+<div class="row border-bottom-solid padding-y-24">
+<div class="col-6 pl-md-0">
+Confirmation #
+</div>
+<div class="col-6 pr-md-0 text-right">
+a3f2a395-7f6f-11f1-af7a-daa790f68b9a
+</div>
+</div>
+<div class="row border-bottom-solid padding-y-24">
+<div class="col-6 pl-md-0">
+Tracking #
+</div>
+<div class="col-6 pr-md-0 text-right">
+LJ-44162-224626967
+</div>
+</div>
+<div class="row padding-y-24">
+<div class="col-6 pl-md-0">
+Tax
+</div>
+<div class="col-6 pr-md-0 text-right">
+$1.43
+</div>
+</div>
+<div class="row padding-y-24">
+<div class="col-6 pl-md-0">
+Total Paid
+</div>
