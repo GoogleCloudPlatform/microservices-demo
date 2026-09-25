@@ -68,6 +68,13 @@ spec:
         env:
         - name: FRONTEND_ADDR
           value: "frontend:80"
+        resources:
+          requests:
+            cpu: 50m
+            memory: 32Mi
+          limits:
+            cpu: 100m
+            memory: 64Mi
       containers:
       - name: main
         securityContext:

@@ -96,6 +96,8 @@ spec:
         env:
         - name: FRONTEND_ADDR
           value: "{{ .Values.frontend.name }}:80"
+        resources:
+          {{- toYaml .Values.loadGenerator.initContainerResources | nindent 10 }}
       {{- end }}
       containers:
       - name: main
