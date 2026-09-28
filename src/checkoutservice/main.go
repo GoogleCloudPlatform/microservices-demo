@@ -83,7 +83,23 @@ type checkoutService struct {
 
 	paymentSvcAddr string
 	paymentSvcConn *grpc.ClientConn
+
+	// orderservice es opcional: solo se conecta con ENABLE_ORDER_TRACKING=true.
+	// Con el seguimiento apagado, orderSvcClient queda en nil y no se registra nada.
+	orderSvcAddr   string
+	orderSvcConn   *grpc.ClientConn
+	orderSvcClient pb.OrderServiceClient
 }
+
+// Tiempos para registrar el pedido en orderservice (ADR 0006: que no se note
+// en el checkout). En el peor caso la compra tarda ~1.8 s más:
+// 3 intentos de 500 ms + esperas de 100 ms y 200 ms.
+const recordOrderMaxAttempts = 3
+
+var (
+	recordOrderAttemptTimeout = 500 * time.Millisecond
+	recordOrderBackoff        = []time.Duration{100 * time.Millisecond, 200 * time.Millisecond}
+)
 
 func main() {
 	ctx := context.Background()
@@ -121,6 +137,7 @@ func main() {
 	mustConnGRPC(ctx, &svc.currencySvcConn, svc.currencySvcAddr)
 	mustConnGRPC(ctx, &svc.emailSvcConn, svc.emailSvcAddr)
 	mustConnGRPC(ctx, &svc.paymentSvcConn, svc.paymentSvcAddr)
+	svc.configureOrderTracking(ctx)
 
 	log.Infof("service config: %+v", svc)
 
@@ -199,6 +216,21 @@ func initProfiling(service, version string) {
 	log.Warn("could not initialize Stackdriver profiler after retrying, giving up")
 }
 
+// configureOrderTracking conecta con orderservice solo si ENABLE_ORDER_TRACKING
+// vale "true". ORDER_SERVICE_ADDR se lee después de revisar el interruptor:
+// mustMapEnv hace panic si la variable no existe, y el despliegue por defecto
+// no la define. Leerla antes tiraría checkoutservice en la tienda sin seguimiento.
+func (cs *checkoutService) configureOrderTracking(ctx context.Context) {
+	if os.Getenv("ENABLE_ORDER_TRACKING") != "true" {
+		log.Info("Order tracking disabled.")
+		return
+	}
+	log.Info("Order tracking enabled.")
+	mustMapEnv(&cs.orderSvcAddr, "ORDER_SERVICE_ADDR")
+	mustConnGRPC(ctx, &cs.orderSvcConn, cs.orderSvcAddr)
+	cs.orderSvcClient = pb.NewOrderServiceClient(cs.orderSvcConn)
+}
+
 func mustMapEnv(target *string, envKey string) {
 	v := os.Getenv(envKey)
 	if v == "" {
@@ -269,6 +301,19 @@ func (cs *checkoutService) PlaceOrder(ctx context.Context, req *pb.PlaceOrderReq
 		ShippingAddress:    req.Address,
 		Items:              prep.orderItems,
 	}
+
+	// Se registra antes del correo, para que cuando el cliente lo abra su
+	// número de rastreo ya funcione. Nunca bloquea la compra: al cliente ya
+	// se le cobró (ver recordOrder).
+	cs.recordOrder(ctx, &pb.Order{
+		OrderId:            orderResult.OrderId,
+		ShippingTrackingId: shippingTrackingID,
+		ShippingCost:       orderResult.ShippingCost,
+		ShippingAddress:    orderResult.ShippingAddress,
+		Items:              orderResult.Items,
+		PurchasedAtUnix:    time.Now().Unix(),
+		Total:              &total,
+	})
 
 	if err := cs.sendOrderConfirmation(ctx, req.Email, orderResult); err != nil {
 		log.Warnf("failed to send order confirmation to %q: %+v", req.Email, err)
@@ -391,4 +436,74 @@ func (cs *checkoutService) shipOrder(ctx context.Context, address *pb.Address, i
 		return "", fmt.Errorf("shipment failed: %+v", err)
 	}
 	return resp.GetTrackingId(), nil
+}
+
+// recordOrder guarda el pedido en orderservice. No devuelve error a propósito:
+// cuando se llama, al cliente ya se le cobró, y si la compra marcara error el
+// cliente reintentaría y se le cobraría dos veces. Si no se logra guardar, la
+// compra sigue y el fallo queda en el log (el pedido no será rastreable; una
+// cola u outbox queda fuera del MVP).
+//
+// Solo se reintentan los errores pasajeros (Unavailable, DeadlineExceeded),
+// hasta recordOrderMaxAttempts veces, con una espera que crece entre intentos.
+// Un reintento no duplica el pedido: orderservice guarda con SET NX por número
+// de rastreo. Devuelve cuántos intentos se hicieron.
+func (cs *checkoutService) recordOrder(ctx context.Context, order *pb.Order) int {
+	if cs.orderSvcClient == nil {
+		return 0
+	}
+
+	var lastErr error
+	attempts := 0
+	for attempts < recordOrderMaxAttempts {
+		attempts++
+		attemptCtx, cancel := context.WithTimeout(ctx, recordOrderAttemptTimeout)
+		_, err := cs.orderSvcClient.RecordOrder(attemptCtx, &pb.RecordOrderRequest{Order: order})
+		cancel()
+		if err == nil {
+			log.Infof("order recorded (tracking_id: %s, order_id: %s, attempts: %d)",
+				order.GetShippingTrackingId(), order.GetOrderId(), attempts)
+			return attempts
+		}
+		lastErr = err
+		if !isTransientRecordOrderError(err) || attempts == recordOrderMaxAttempts {
+			break
+		}
+		select {
+		case <-time.After(recordOrderBackoffFor(attempts)):
+			continue
+		case <-ctx.Done():
+			// La petición de compra ya se canceló: no hay tiempo para más intentos.
+			lastErr = ctx.Err()
+		}
+		break
+	}
+
+	log.Warnf("failed to record order in orderservice (tracking_id: %s, order_id: %s, attempts: %d): %+v",
+		order.GetShippingTrackingId(), order.GetOrderId(), attempts, lastErr)
+	return attempts
+}
+
+// isTransientRecordOrderError dice si vale la pena reintentar. Internal no se
+// reintenta: orderservice lo devuelve cuando Redis falla, y en ese caso su
+// readiness lo saca del Service y las siguientes llamadas llegan como
+// Unavailable. InvalidArgument tampoco: el mismo pedido fallaría igual.
+func isTransientRecordOrderError(err error) bool {
+	switch status.Code(err) {
+	case codes.Unavailable, codes.DeadlineExceeded:
+		return true
+	default:
+		return false
+	}
+}
+
+// recordOrderBackoffFor devuelve la espera después del intento n (desde 1).
+func recordOrderBackoffFor(attempt int) time.Duration {
+	if len(recordOrderBackoff) == 0 {
+		return 0
+	}
+	if attempt-1 < len(recordOrderBackoff) {
+		return recordOrderBackoff[attempt-1]
+	}
+	return recordOrderBackoff[len(recordOrderBackoff)-1]
 }

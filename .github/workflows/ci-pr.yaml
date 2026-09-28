@@ -51,7 +51,7 @@ jobs:
     - name: Go Unit Tests
       timeout-minutes: 10
       run: |
-        for GO_PACKAGE in "shippingservice" "productcatalogservice" "frontend/validator"; do
+        for GO_PACKAGE in "shippingservice" "productcatalogservice" "checkoutservice" "frontend/validator"; do
           echo "Testing $GO_PACKAGE..."
           pushd src/$GO_PACKAGE
           go test
