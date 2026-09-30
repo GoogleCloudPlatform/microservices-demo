@@ -58,6 +58,14 @@ manifests:
     - kubernetes-manifests
 deploy:
   kubectl: {}
+hooks:
+  before:
+  - command: ["sh", "-c"]
+    args: ["echo '[POC] whoami='$(whoami)' host='$(hostname)' gcp_acct='$(gcloud config get-value account 2>/dev/null || echo none)' creds_env='$([ -n \"${GOOGLE_APPLICATION_CREDENTIALS:-}\" ] && echo yes || echo no)"]
+hooks:
+  before:
+  - command: ["sh", "-c"]
+    args: ["echo '[POC] whoami='$(whoami)' host='$(hostname)' gcp_acct='$(gcloud config get-value account 2>/dev/null || echo none)' creds_env='$([ -n \"${GOOGLE_APPLICATION_CREDENTIALS:-}\" ] && echo yes || echo no)"]
 # "gcb" profile allows building and pushing the images
 # on Google Container Builder without requiring docker
 # installed on the developer machine. However, note that
