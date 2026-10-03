@@ -49,6 +49,8 @@ spec:
         env:
         - name: REDIS_ADDR
           value: "redis-cart:6379"
+        - name: CART_PERSIST_DAYS
+          value: "7"
         resources:
           requests:
             cpu: 200m

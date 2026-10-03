@@ -24,10 +24,21 @@ namespace cartservice.cartstore
     public class RedisCartStore : ICartStore
     {
         private readonly IDistributedCache _cache;
+        private static readonly TimeSpan CartTtl = ReadCartTtl();
 
         public RedisCartStore(IDistributedCache cache)
         {
             _cache = cache;
+        }
+
+        private static TimeSpan ReadCartTtl()
+        {
+            var raw = Environment.GetEnvironmentVariable("CART_PERSIST_DAYS");
+            if (double.TryParse(raw, out var days) && days > 0)
+            {
+                return TimeSpan.FromDays(days);
+            }
+            return TimeSpan.FromDays(30);
         }
 
         public async Task AddItemAsync(string userId, string productId, int quantity)
@@ -57,7 +68,11 @@ namespace cartservice.cartstore
                         existingItem.Quantity += quantity;
                     }
                 }
-                await _cache.SetAsync(userId, cart.ToByteArray());
+                cart.ExpiresAt = DateTimeOffset.UtcNow.Add(CartTtl).ToUnixTimeSeconds();
+                await _cache.SetAsync(userId, cart.ToByteArray(), new DistributedCacheEntryOptions
+                {
+                    AbsoluteExpirationRelativeToNow = CartTtl
+                });
             }
             catch (Exception ex)
             {

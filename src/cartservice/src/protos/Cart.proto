@@ -45,6 +45,7 @@ message GetCartRequest {
 message Cart {
     string user_id = 1;
     repeated CartItem items = 2;
+    int64 expires_at = 3;
 }
 
 message Empty {}
