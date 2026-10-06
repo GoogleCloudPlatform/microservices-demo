@@ -1,0 +1,65 @@
+name: Update Image Tag in GitOps Repository
+
+on:
+  push:
+    branches:
+      - dev
+    paths:
+      - 'src/productcatalogservice/**'
+
+env:
+  BRANCH_APP: "dev"
+  IMAGE_NAME: brunopace85/online-boutique-productcatalogservice
+  SERVICE_NAME: productcatalogservice
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+
+      - name: Build & push Docker image
+        uses: mr-smithers-excellent/docker-build-push@v7
+        with:
+          # Usa a sintaxe de contexto ${{ env.VAR }} dentro de 'with:'
+          image: ${{ env.IMAGE_NAME }}
+          tags: ${{ github.sha }}
+          registry: docker.io
+          dockerfile: src/${{ env.SERVICE_NAME }}/Dockerfile
+          directory: src/${{ env.SERVICE_NAME }}
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+  update-gitops:
+    runs-on: ubuntu-latest
+    needs: build-and-push
+    
+    env:
+      GITOPS_REPO: "brunopace85/microservices-demo-manifests"
+      BRANCH: "main"
+      VALUE_NAME: "image"
+      NEW_TAG: ${{ github.sha }}
+      GITOPS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
+    
+    steps:
+      - name: Update Tag directly in GitOps Repo
+        run: |
+          # 1. Clona o repositório GitOps
+          REPO_URL="https://x-access-token:${GITOPS_TOKEN}@github.com/${GITOPS_REPO}.git"
+          git clone --depth 1 ${REPO_URL} --branch ${BRANCH} --single-branch ./gitops-repo
+          cd ./gitops-repo
+
+          # 2. Atualiza o valor no arquivo YAML usando sed
+          # Usa '|' como delimitador para evitar conflito com as barras da imagem
+          sed -i 's|'${VALUE_NAME}': .*$|'${VALUE_NAME}': "'${IMAGE_NAME}:${NEW_TAG}'"|g' "./${{ env.BRANCH_APP }}/${{ env.SERVICE_NAME }}.yaml"
+
+          # 3. Configura o Git e envia a alteração
+          git config user.name "${{ github.actor }}"
+          git config user.email "${{ github.actor }}@users.noreply.github.com"
+          git add .
+          git commit --allow-empty -m "Update revision of '${VALUE_NAME}' to ${NEW_TAG}"
+          git pull --rebase
+          git push
+        shell: bash
