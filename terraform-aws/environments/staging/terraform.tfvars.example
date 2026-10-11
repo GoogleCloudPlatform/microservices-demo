@@ -21,6 +21,12 @@ node_desired_size   = 3
 node_min_size       = 2
 node_max_size       = 5
 
+# EKS Cluster Admin Access (IAM ARNs – both human users and CI roles)
+cluster_admin_arns = [
+  "arn:aws:iam::798836978890:user/minhhuy",
+  "arn:aws:iam::798836978890:role/online-boutique-github-terraform",
+]
+
 # ElastiCache
 redis_version            = "7.1"
 redis_node_type          = "cache.t3.micro"

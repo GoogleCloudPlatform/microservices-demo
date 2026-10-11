@@ -82,24 +82,29 @@ resource "aws_iam_openid_connect_provider" "eks" {
 }
 
 # -----------------------------------------------------------------------------
-# EKS Access Entry (for API authentication mode)
-# Automatically grants Cluster Admin permissions to whoever creates/applies the cluster
+# EKS Access Entries (for API authentication mode)
+# Grants Cluster Admin permissions to specified IAM principals.
+# Uses explicit ARN list to avoid state flip-flop between local user and CI role.
 # -----------------------------------------------------------------------------
-data "aws_caller_identity" "current" {}
+resource "aws_eks_access_entry" "cluster_admins" {
+  for_each = toset(var.cluster_admin_arns)
 
-resource "aws_eks_access_entry" "cluster_creator" {
   cluster_name  = aws_eks_cluster.main.name
-  principal_arn = data.aws_caller_identity.current.arn
+  principal_arn = each.value
   type          = "STANDARD"
 }
 
-resource "aws_eks_access_policy_association" "cluster_creator" {
+resource "aws_eks_access_policy_association" "cluster_admins" {
+  for_each = toset(var.cluster_admin_arns)
+
   cluster_name  = aws_eks_cluster.main.name
   policy_arn    = "arn:aws:eks::aws:cluster-access-policy/AmazonEKSClusterAdminPolicy"
-  principal_arn = data.aws_caller_identity.current.arn
+  principal_arn = each.value
 
   access_scope {
     type = "cluster"
   }
+
+  depends_on = [aws_eks_access_entry.cluster_admins]
 }
 
