@@ -4,7 +4,7 @@ This document walks through the process of creating a new release of Online Bout
 
 ## Prerequisites for tagging a release
 
-1. Choose the logical [next release tag](https://github.com/GoogleCloudPlatform/bank-of-anthos/releases), using [semantic versioning](https://semver.org/): `vX.Y.Z`.
+1. Choose the logical [next release tag](https://github.com/GoogleCloudPlatform/microservices-demo/releases), using [semantic versioning](https://semver.org/): `vX.Y.Z`.
 
    If this release includes significant feature changes, update the minor version (`Y`). Otherwise, for bug-fix releases or standard quarterly release, update the patch version `Z`).
 
@@ -20,28 +20,41 @@ This document walks through the process of creating a new release of Online Bout
    gcloud auth configure-docker us-central1-docker.pkg.dev
    ```
 
-## Create and tag the new release
+## Create the release branch and PR
 
-Run the `make-release.sh` script found inside the `docs/releasing/` directory:
+The preferred way to start a new release is to run the **Manual Release Builder** workflow in GitHub Actions.
+
+### Trigger the release workflow
+
+1. Go to the **Actions** tab of the repository on GitHub.
+2. Select the **Manual Release Builder** workflow from the left sidebar.
+3. Click the **Run workflow** dropdown button.
+4. Fill in the parameters:
+   - **The release version (e.g., v0.3.5)**: Set the version string `vX.Y.Z`.
+   - **The repository prefix for container images**: Defaults to `us-central1-docker.pkg.dev/online-boutique-ci/microservices-demo`.
+   - **The Google Cloud Project ID for the release CI**: Defaults to `online-boutique-ci`.
+5. Click **Run workflow**.
+
+This workflow will:
+1. Build and push the container images for all services.
+2. Regenerate YAML manifests and Kustomize bases.
+3. Package and push the Helm chart.
+4. Create and push a new branch `release/vX.Y.Z` and a git tag `vX.Y.Z`.
+5. Automatically open a Pull Request targeting `main` with the release checklist.
+
+### Alternative: Manual release script
+
+If you need to run the release process manually from your local machine, ensure you have the prerequisites installed and authenticated. Then run the `make-release.sh` script:
 
 ```sh
-# assuming you are inside the root path of the bank-of-anthos repository
+# assuming you are inside the root path of the microservices-demo repository
 export TAG=vX.Y.Z # This is the new version (e.g. `v0.3.5`)
-export REPO_PREFIX=us-central1-docker.pkg.dev/google-samples/microservices-demo # This is the Docker repository for tagged images
-export PROJECT_ID=google-samples # This is the Google Cloud project for the release CI
+export REPO_PREFIX=us-central1-docker.pkg.dev/online-boutique-ci/microservices-demo # This is the Docker repository for tagged images
+export PROJECT_ID=online-boutique-ci # This is the Google Cloud project for the release CI
 ./docs/releasing/make-release.sh
 ```
 
-This script does the following:
-1. Uses `make-docker-images.sh` to build and push a Docker image for each microservice to the previously specified repository.
-2. Uses `make-release-artifacts.sh` to regenerates (and update the image $TAGS) YAML file at `./release/kubernetes-manifests.yaml` and `./kustomize/base/`.
-3. Runs `git tag` and pushes a new branch (e.g., `release/v0.3.5`) with the changes to `./release/kubernetes-manifests.yaml`.
-
-You can then browse the [Container Registry repository](https://pantheon.corp.google.com/gcr/images/google-samples/global/microservices-demo?project=google-samples) to make sure a Docker image was created for each microservice (with the new version tag).
-
-## Create the PR
-
-Now that the release branch has been created, you can find it in the [list of branches](https://github.com/GoogleCloudPlatform/microservices-demo/branches) and create a pull request targeting `main` (the default branch).
+Once the script completes, you can go to the GitHub branches list to manually create a pull request targeting `main`.
 
 This process is going to trigger multiple CI checks as well as stage the release onto a temporary cluster. Once the PR has been approved and all checks are successfully passing, you can then merge the branch. Make sure to include the release draft (see next section) in the pull-request description for reviewers to see.
 

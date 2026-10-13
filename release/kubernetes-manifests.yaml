@@ -21,19 +21,19 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: currencyservice
+  name: adservice
   labels:
-    app: currencyservice
+    app: adservice
 spec:
   selector:
     matchLabels:
-      app: currencyservice
+      app: adservice
   template:
     metadata:
       labels:
-        app: currencyservice
+        app: adservice
     spec:
-      serviceAccountName: currencyservice
+      serviceAccountName: adservice
       terminationGracePeriodSeconds: 5
       securityContext:
         fsGroup: 1000
@@ -49,153 +49,66 @@ spec:
               - ALL
           privileged: false
           readOnlyRootFilesystem: true
-        image: us-central1-docker.pkg.dev/google-samples/microservices-demo/currencyservice:v0.10.5
+        image: us-central1-docker.pkg.dev/online-boutique-ci/microservices-demo/adservice:v0.10.7
         ports:
-        - name: grpc
-          containerPort: 7000
+        - containerPort: 9555
         env:
         - name: PORT
-          value: "7000"
-        - name: DISABLE_PROFILER
-          value: "1"
-        readinessProbe:
-          grpc:
-            port: 7000
-        livenessProbe:
-          grpc:
-            port: 7000
+          value: "9555"
         resources:
           requests:
-            cpu: 100m
-            memory: 64Mi
-          limits:
             cpu: 200m
-            memory: 128Mi
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: currencyservice
-  labels:
-    app: currencyservice
-spec:
-  type: ClusterIP
-  selector:
-    app: currencyservice
-  ports:
-  - name: grpc
-    port: 7000
-    targetPort: 7000
----
-apiVersion: v1
-kind: ServiceAccount
-metadata:
-  name: currencyservice
----
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: loadgenerator
-  labels:
-    app: loadgenerator
-spec:
-  selector:
-    matchLabels:
-      app: loadgenerator
-  replicas: 1
-  template:
-    metadata:
-      labels:
-        app: loadgenerator
-      annotations:
-        sidecar.istio.io/rewriteAppHTTPProbers: "true"
-    spec:
-      serviceAccountName: loadgenerator
-      terminationGracePeriodSeconds: 5
-      restartPolicy: Always
-      securityContext:
-        fsGroup: 1000
-        runAsGroup: 1000
-        runAsNonRoot: true
-        runAsUser: 1000
-      initContainers:
-      - command:
-        - /bin/sh
-        - -exc
-        - |
-          MAX_RETRIES=12
-          RETRY_INTERVAL=10
-          for i in $(seq 1 $MAX_RETRIES); do
-            echo "Attempt $i: Pinging frontend: ${FRONTEND_ADDR}..."
-            STATUSCODE=$(wget --server-response http://${FRONTEND_ADDR} 2>&1 | awk '/^  HTTP/{print $2}')
-            if [ $STATUSCODE -eq 200 ]; then
-                echo "Frontend is reachable."
-                exit 0
-            fi
-            echo "Error: Could not reach frontend - Status code: ${STATUSCODE}"
-            sleep $RETRY_INTERVAL
-          done
-          echo "Failed to reach frontend after $MAX_RETRIES attempts."
-          exit 1
-        name: frontend-check
-        securityContext:
-          allowPrivilegeEscalation: false
-          capabilities:
-            drop:
-              - ALL
-          privileged: false
-          readOnlyRootFilesystem: true
-        image: busybox:latest
-        env:
-        - name: FRONTEND_ADDR
-          value: "frontend:80"
-      containers:
-      - name: main
-        securityContext:
-          allowPrivilegeEscalation: false
-          capabilities:
-            drop:
-              - ALL
-          privileged: false
-          readOnlyRootFilesystem: true
-        image: us-central1-docker.pkg.dev/google-samples/microservices-demo/loadgenerator:v0.10.5
-        env:
-        - name: FRONTEND_ADDR
-          value: "frontend:80"
-        - name: USERS
-          value: "10"
-        - name: RATE
-          value: "1"
-        resources:
-          requests:
+            memory: 180Mi
+          limits:
             cpu: 300m
-            memory: 256Mi
-          limits:
-            cpu: 500m
-            memory: 512Mi
+            memory: 300Mi
+        readinessProbe:
+          initialDelaySeconds: 20
+          periodSeconds: 15
+          grpc:
+            port: 9555
+        livenessProbe:
+          initialDelaySeconds: 20
+          periodSeconds: 15
+          grpc:
+            port: 9555
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: adservice
+  labels:
+    app: adservice
+spec:
+  type: ClusterIP
+  selector:
+    app: adservice
+  ports:
+  - name: grpc
+    port: 9555
+    targetPort: 9555
 ---
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: loadgenerator
+  name: adservice
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: productcatalogservice
+  name: shippingservice
   labels:
-    app: productcatalogservice
+    app: shippingservice
 spec:
   selector:
     matchLabels:
-      app: productcatalogservice
+      app: shippingservice
   template:
     metadata:
       labels:
-        app: productcatalogservice
+        app: shippingservice
     spec:
-      serviceAccountName: productcatalogservice
-      terminationGracePeriodSeconds: 5
+      serviceAccountName: shippingservice
       securityContext:
         fsGroup: 1000
         runAsGroup: 1000
@@ -210,20 +123,21 @@ spec:
               - ALL
           privileged: false
           readOnlyRootFilesystem: true
-        image: us-central1-docker.pkg.dev/google-samples/microservices-demo/productcatalogservice:v0.10.5
+        image: us-central1-docker.pkg.dev/online-boutique-ci/microservices-demo/shippingservice:v0.10.7
         ports:
-        - containerPort: 3550
+        - containerPort: 50051
         env:
         - name: PORT
-          value: "3550"
+          value: "50051"
         - name: DISABLE_PROFILER
           value: "1"
         readinessProbe:
+          periodSeconds: 5
           grpc:
-            port: 3550
+            port: 50051
         livenessProbe:
           grpc:
-            port: 3550
+            port: 50051
         resources:
           requests:
             cpu: 100m
@@ -235,22 +149,22 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: productcatalogservice
+  name: shippingservice
   labels:
-    app: productcatalogservice
+    app: shippingservice
 spec:
   type: ClusterIP
   selector:
-    app: productcatalogservice
+    app: shippingservice
   ports:
   - name: grpc
-    port: 3550
-    targetPort: 3550
+    port: 50051
+    targetPort: 50051
 ---
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: productcatalogservice
+  name: shippingservice
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -282,7 +196,7 @@ spec:
                 - ALL
             privileged: false
             readOnlyRootFilesystem: true
-          image: us-central1-docker.pkg.dev/google-samples/microservices-demo/checkoutservice:v0.10.5
+          image: us-central1-docker.pkg.dev/online-boutique-ci/microservices-demo/checkoutservice:v0.10.7
           ports:
           - containerPort: 5050
           readinessProbe:
@@ -337,92 +251,19 @@ metadata:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: shippingservice
+  name: currencyservice
   labels:
-    app: shippingservice
+    app: currencyservice
 spec:
   selector:
     matchLabels:
-      app: shippingservice
+      app: currencyservice
   template:
     metadata:
       labels:
-        app: shippingservice
+        app: currencyservice
     spec:
-      serviceAccountName: shippingservice
-      securityContext:
-        fsGroup: 1000
-        runAsGroup: 1000
-        runAsNonRoot: true
-        runAsUser: 1000
-      containers:
-      - name: server
-        securityContext:
-          allowPrivilegeEscalation: false
-          capabilities:
-            drop:
-              - ALL
-          privileged: false
-          readOnlyRootFilesystem: true
-        image: us-central1-docker.pkg.dev/google-samples/microservices-demo/shippingservice:v0.10.5
-        ports:
-        - containerPort: 50051
-        env:
-        - name: PORT
-          value: "50051"
-        - name: DISABLE_PROFILER
-          value: "1"
-        readinessProbe:
-          periodSeconds: 5
-          grpc:
-            port: 50051
-        livenessProbe:
-          grpc:
-            port: 50051
-        resources:
-          requests:
-            cpu: 100m
-            memory: 64Mi
-          limits:
-            cpu: 200m
-            memory: 128Mi
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: shippingservice
-  labels:
-    app: shippingservice
-spec:
-  type: ClusterIP
-  selector:
-    app: shippingservice
-  ports:
-  - name: grpc
-    port: 50051
-    targetPort: 50051
----
-apiVersion: v1
-kind: ServiceAccount
-metadata:
-  name: shippingservice
----
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: cartservice
-  labels:
-    app: cartservice
-spec:
-  selector:
-    matchLabels:
-      app: cartservice
-  template:
-    metadata:
-      labels:
-        app: cartservice
-    spec:
-      serviceAccountName: cartservice
+      serviceAccountName: currencyservice
       terminationGracePeriodSeconds: 5
       securityContext:
         fsGroup: 1000
@@ -438,117 +279,48 @@ spec:
               - ALL
           privileged: false
           readOnlyRootFilesystem: true
-        image: us-central1-docker.pkg.dev/google-samples/microservices-demo/cartservice:v0.10.5
+        image: us-central1-docker.pkg.dev/online-boutique-ci/microservices-demo/currencyservice:v0.10.7
         ports:
-        - containerPort: 7070
+        - name: grpc
+          containerPort: 7000
         env:
-        - name: REDIS_ADDR
-          value: "redis-cart:6379"
+        - name: PORT
+          value: "7000"
+        - name: DISABLE_PROFILER
+          value: "1"
+        readinessProbe:
+          grpc:
+            port: 7000
+        livenessProbe:
+          grpc:
+            port: 7000
         resources:
           requests:
-            cpu: 200m
+            cpu: 100m
             memory: 64Mi
           limits:
-            cpu: 300m
+            cpu: 200m
             memory: 128Mi
-        readinessProbe:
-          initialDelaySeconds: 15
-          grpc:
-            port: 7070
-        livenessProbe:
-          initialDelaySeconds: 15
-          periodSeconds: 10
-          grpc:
-            port: 7070
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: cartservice
+  name: currencyservice
   labels:
-    app: cartservice
+    app: currencyservice
 spec:
   type: ClusterIP
   selector:
-    app: cartservice
+    app: currencyservice
   ports:
   - name: grpc
-    port: 7070
-    targetPort: 7070
+    port: 7000
+    targetPort: 7000
 ---
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: cartservice
----
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: redis-cart
-  labels:
-    app: redis-cart
-spec:
-  selector:
-    matchLabels:
-      app: redis-cart
-  template:
-    metadata:
-      labels:
-        app: redis-cart
-    spec:
-      securityContext:
-        fsGroup: 1000
-        runAsGroup: 1000
-        runAsNonRoot: true
-        runAsUser: 1000
-      containers:
-      - name: redis
-        securityContext:
-          allowPrivilegeEscalation: false
-          capabilities:
-            drop:
-              - ALL
-          privileged: false
-          readOnlyRootFilesystem: true
-        image: redis:alpine
-        ports:
-        - containerPort: 6379
-        readinessProbe:
-          periodSeconds: 5
-          tcpSocket:
-            port: 6379
-        livenessProbe:
-          periodSeconds: 5
-          tcpSocket:
-            port: 6379
-        volumeMounts:
-        - mountPath: /data
-          name: redis-data
-        resources:
-          limits:
-            memory: 256Mi
-            cpu: 125m
-          requests:
-            cpu: 70m
-            memory: 200Mi
-      volumes:
-      - name: redis-data
-        emptyDir: {}
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: redis-cart
-  labels:
-    app: redis-cart
-spec:
-  type: ClusterIP
-  selector:
-    app: redis-cart
-  ports:
-  - name: tcp-redis
-    port: 6379
-    targetPort: 6379
+  name: currencyservice
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -581,7 +353,7 @@ spec:
               - ALL
           privileged: false
           readOnlyRootFilesystem: true
-        image: us-central1-docker.pkg.dev/google-samples/microservices-demo/emailservice:v0.10.5
+        image: us-central1-docker.pkg.dev/online-boutique-ci/microservices-demo/emailservice:v0.10.7
         ports:
         - containerPort: 8080
         env:
@@ -628,19 +400,19 @@ metadata:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: paymentservice
+  name: productcatalogservice
   labels:
-    app: paymentservice
+    app: productcatalogservice
 spec:
   selector:
     matchLabels:
-      app: paymentservice
+      app: productcatalogservice
   template:
     metadata:
       labels:
-        app: paymentservice
+        app: productcatalogservice
     spec:
-      serviceAccountName: paymentservice
+      serviceAccountName: productcatalogservice
       terminationGracePeriodSeconds: 5
       securityContext:
         fsGroup: 1000
@@ -656,20 +428,20 @@ spec:
               - ALL
           privileged: false
           readOnlyRootFilesystem: true
-        image: us-central1-docker.pkg.dev/google-samples/microservices-demo/paymentservice:v0.10.5
+        image: us-central1-docker.pkg.dev/online-boutique-ci/microservices-demo/productcatalogservice:v0.10.7
         ports:
-        - containerPort: 50051
+        - containerPort: 3550
         env:
         - name: PORT
-          value: "50051"
+          value: "3550"
         - name: DISABLE_PROFILER
           value: "1"
         readinessProbe:
           grpc:
-            port: 50051
+            port: 3550
         livenessProbe:
           grpc:
-            port: 50051
+            port: 3550
         resources:
           requests:
             cpu: 100m
@@ -681,22 +453,22 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: paymentservice
+  name: productcatalogservice
   labels:
-    app: paymentservice
+    app: productcatalogservice
 spec:
   type: ClusterIP
   selector:
-    app: paymentservice
+    app: productcatalogservice
   ports:
   - name: grpc
-    port: 50051
-    targetPort: 50051
+    port: 3550
+    targetPort: 3550
 ---
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: paymentservice
+  name: productcatalogservice
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -730,7 +502,7 @@ spec:
                 - ALL
             privileged: false
             readOnlyRootFilesystem: true
-          image: us-central1-docker.pkg.dev/google-samples/microservices-demo/frontend:v0.10.5
+          image: us-central1-docker.pkg.dev/online-boutique-ci/microservices-demo/frontend:v0.10.7
           ports:
           - containerPort: 8080
           readinessProbe:
@@ -857,7 +629,7 @@ spec:
               - ALL
           privileged: false
           readOnlyRootFilesystem: true
-        image: us-central1-docker.pkg.dev/google-samples/microservices-demo/recommendationservice:v0.10.5
+        image: us-central1-docker.pkg.dev/online-boutique-ci/microservices-demo/recommendationservice:v0.10.7
         ports:
         - containerPort: 8080
         readinessProbe:
@@ -906,19 +678,106 @@ metadata:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: adservice
+  name: loadgenerator
   labels:
-    app: adservice
+    app: loadgenerator
 spec:
   selector:
     matchLabels:
-      app: adservice
+      app: loadgenerator
+  replicas: 1
   template:
     metadata:
       labels:
-        app: adservice
+        app: loadgenerator
+      annotations:
+        sidecar.istio.io/rewriteAppHTTPProbers: "true"
     spec:
-      serviceAccountName: adservice
+      serviceAccountName: loadgenerator
+      terminationGracePeriodSeconds: 5
+      restartPolicy: Always
+      securityContext:
+        fsGroup: 1000
+        runAsGroup: 1000
+        runAsNonRoot: true
+        runAsUser: 1000
+      initContainers:
+      - command:
+        - /bin/sh
+        - -exc
+        - |
+          MAX_RETRIES=12
+          RETRY_INTERVAL=10
+          for i in $(seq 1 $MAX_RETRIES); do
+            echo "Attempt $i: Pinging frontend: ${FRONTEND_ADDR}..."
+            STATUSCODE=$(wget --server-response http://${FRONTEND_ADDR} 2>&1 | awk '/^  HTTP/{print $2}')
+            if [ $STATUSCODE -eq 200 ]; then
+                echo "Frontend is reachable."
+                exit 0
+            fi
+            echo "Error: Could not reach frontend - Status code: ${STATUSCODE}"
+            sleep $RETRY_INTERVAL
+          done
+          echo "Failed to reach frontend after $MAX_RETRIES attempts."
+          exit 1
+        name: frontend-check
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+              - ALL
+          privileged: false
+          readOnlyRootFilesystem: true
+        image: busybox:1.38.0@sha256:dc2d74b28e4cf8984fa52af1f39bc7c3d9c73760b41a74d629f5d11b1ab28616
+        env:
+        - name: FRONTEND_ADDR
+          value: "frontend:80"
+      containers:
+      - name: main
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+              - ALL
+          privileged: false
+          readOnlyRootFilesystem: true
+        image: us-central1-docker.pkg.dev/online-boutique-ci/microservices-demo/loadgenerator:v0.10.7
+        env:
+        - name: FRONTEND_ADDR
+          value: "frontend:80"
+        - name: USERS
+          value: "10"
+        - name: RATE
+          value: "1"
+        resources:
+          requests:
+            cpu: 300m
+            memory: 256Mi
+          limits:
+            cpu: 500m
+            memory: 512Mi
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: loadgenerator
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cartservice
+  labels:
+    app: cartservice
+spec:
+  selector:
+    matchLabels:
+      app: cartservice
+  template:
+    metadata:
+      labels:
+        app: cartservice
+    spec:
+      serviceAccountName: cartservice
       terminationGracePeriodSeconds: 5
       securityContext:
         fsGroup: 1000
@@ -934,47 +793,188 @@ spec:
               - ALL
           privileged: false
           readOnlyRootFilesystem: true
-        image: us-central1-docker.pkg.dev/google-samples/microservices-demo/adservice:v0.10.5
+        image: us-central1-docker.pkg.dev/online-boutique-ci/microservices-demo/cartservice:v0.10.7
         ports:
-        - containerPort: 9555
+        - containerPort: 7070
         env:
-        - name: PORT
-          value: "9555"
+        - name: REDIS_ADDR
+          value: "redis-cart:6379"
         resources:
           requests:
             cpu: 200m
-            memory: 180Mi
+            memory: 64Mi
           limits:
             cpu: 300m
-            memory: 300Mi
+            memory: 128Mi
         readinessProbe:
-          initialDelaySeconds: 20
-          periodSeconds: 15
+          initialDelaySeconds: 15
           grpc:
-            port: 9555
+            port: 7070
         livenessProbe:
-          initialDelaySeconds: 20
-          periodSeconds: 15
+          initialDelaySeconds: 15
+          periodSeconds: 10
           grpc:
-            port: 9555
+            port: 7070
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: adservice
+  name: cartservice
   labels:
-    app: adservice
+    app: cartservice
 spec:
   type: ClusterIP
   selector:
-    app: adservice
+    app: cartservice
   ports:
   - name: grpc
-    port: 9555
-    targetPort: 9555
+    port: 7070
+    targetPort: 7070
 ---
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: adservice
+  name: cartservice
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: redis-cart
+  labels:
+    app: redis-cart
+spec:
+  selector:
+    matchLabels:
+      app: redis-cart
+  template:
+    metadata:
+      labels:
+        app: redis-cart
+    spec:
+      securityContext:
+        fsGroup: 1000
+        runAsGroup: 1000
+        runAsNonRoot: true
+        runAsUser: 1000
+      containers:
+      - name: redis
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+              - ALL
+          privileged: false
+          readOnlyRootFilesystem: true
+        image: redis:alpine
+        ports:
+        - containerPort: 6379
+        readinessProbe:
+          periodSeconds: 5
+          tcpSocket:
+            port: 6379
+        livenessProbe:
+          periodSeconds: 5
+          tcpSocket:
+            port: 6379
+        volumeMounts:
+        - mountPath: /data
+          name: redis-data
+        resources:
+          limits:
+            memory: 256Mi
+            cpu: 125m
+          requests:
+            cpu: 70m
+            memory: 200Mi
+      volumes:
+      - name: redis-data
+        emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: redis-cart
+  labels:
+    app: redis-cart
+spec:
+  type: ClusterIP
+  selector:
+    app: redis-cart
+  ports:
+  - name: tcp-redis
+    port: 6379
+    targetPort: 6379
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: paymentservice
+  labels:
+    app: paymentservice
+spec:
+  selector:
+    matchLabels:
+      app: paymentservice
+  template:
+    metadata:
+      labels:
+        app: paymentservice
+    spec:
+      serviceAccountName: paymentservice
+      terminationGracePeriodSeconds: 5
+      securityContext:
+        fsGroup: 1000
+        runAsGroup: 1000
+        runAsNonRoot: true
+        runAsUser: 1000
+      containers:
+      - name: server
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+              - ALL
+          privileged: false
+          readOnlyRootFilesystem: true
+        image: us-central1-docker.pkg.dev/online-boutique-ci/microservices-demo/paymentservice:v0.10.7
+        ports:
+        - containerPort: 50051
+        env:
+        - name: PORT
+          value: "50051"
+        - name: DISABLE_PROFILER
+          value: "1"
+        readinessProbe:
+          grpc:
+            port: 50051
+        livenessProbe:
+          grpc:
+            port: 50051
+        resources:
+          requests:
+            cpu: 100m
+            memory: 64Mi
+          limits:
+            cpu: 200m
+            memory: 128Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: paymentservice
+  labels:
+    app: paymentservice
+spec:
+  type: ClusterIP
+  selector:
+    app: paymentservice
+  ports:
+  - name: grpc
+    port: 50051
+    targetPort: 50051
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: paymentservice
 # [END gke_release_kubernetes_manifests_microservices_demo]

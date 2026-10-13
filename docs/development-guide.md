@@ -30,7 +30,7 @@ This doc explains how to build and run the Online Boutique source code locally u
     ```
 
     ```sh
-    gcloud container clusters create-auto demo --region=us-central1
+    gcloud container clusters create-auto online-boutique --region=us-central1 --labels dev-tutorial=online-boutique
     ```
 
     ```

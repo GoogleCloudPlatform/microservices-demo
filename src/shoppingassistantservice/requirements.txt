@@ -27,7 +27,7 @@ charset-normalizer==3.4.3
     # via requests
 click==8.3.0
     # via flask
-cryptography==46.0.5
+cryptography==50.0.0
     # via google-cloud-alloydb-connector
 distro==1.9.0
     # via google-genai
@@ -161,7 +161,7 @@ packaging==25.0
     #   langsmith
 pgvector==0.3.6
     # via langchain-postgres
-pillow==12.1.1
+pillow==12.3.0
     # via -r requirements.in
 proto-plus==1.26.1
     # via
@@ -184,7 +184,7 @@ psycopg-binary==3.2.10
     # via psycopg
 psycopg-pool==3.2.6
     # via langchain-postgres
-pyasn1==0.6.3
+pyasn1==0.6.4
     # via
     #   pyasn1-modules
     #   rsa
