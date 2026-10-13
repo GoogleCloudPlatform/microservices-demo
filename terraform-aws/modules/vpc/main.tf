@@ -204,6 +204,11 @@ resource "aws_cloudwatch_log_group" "flow_logs" {
   name              = "/aws/vpc/flow-logs/${var.project_name}-${var.environment}"
   retention_in_days = 14
 
+  # Ensure clean destroy – log group will be removed from state.
+  # VPC flow logs don't have the EKS auto-recreation issue,
+  # but skip_destroy prevents errors if log streams are still draining.
+  skip_destroy = true
+
   tags = {
     Name = "${var.project_name}-${var.environment}-vpc-flow-logs"
   }
