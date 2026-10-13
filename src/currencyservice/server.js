@@ -19,58 +19,56 @@ const logger = pino({
   name: 'currencyservice-server',
   messageKey: 'message',
   formatters: {
-    level (logLevelString, logLevelNum) {
-      return { severity: logLevelString }
-    }
-  }
+    level(logLevelString) {
+      return {severity: logLevelString};
+    },
+  },
 });
 
-if(process.env.DISABLE_PROFILER) {
-  logger.info("Profiler disabled.")
-}
-else {
-  logger.info("Profiler enabled.")
+if (process.env.DISABLE_PROFILER) {
+  logger.info('Profiler disabled.');
+} else {
+  logger.info('Profiler enabled.');
   require('@google-cloud/profiler').start({
     serviceContext: {
       service: 'currencyservice',
-      version: '1.0.0'
-    }
+      version: '1.0.0',
+    },
   });
 }
 
 // Register GRPC OTel Instrumentation for trace propagation
 // regardless of whether tracing is emitted.
-const { GrpcInstrumentation } = require('@opentelemetry/instrumentation-grpc');
-const { registerInstrumentations } = require('@opentelemetry/instrumentation');
+const {GrpcInstrumentation} = require('@opentelemetry/instrumentation-grpc');
+const {registerInstrumentations} = require('@opentelemetry/instrumentation');
 
 registerInstrumentations({
-  instrumentations: [new GrpcInstrumentation()]
+  instrumentations: [new GrpcInstrumentation()],
 });
 
-if(process.env.ENABLE_TRACING == "1") {
-  logger.info("Tracing enabled.")
+if (process.env.ENABLE_TRACING == '1') {
+  logger.info('Tracing enabled.');
 
-  const { resourceFromAttributes } = require('@opentelemetry/resources');
+  const {resourceFromAttributes} = require('@opentelemetry/resources');
 
-  const { ATTR_SERVICE_NAME } = require('@opentelemetry/semantic-conventions');
+  const {ATTR_SERVICE_NAME} = require('@opentelemetry/semantic-conventions');
 
   const opentelemetry = require('@opentelemetry/sdk-node');
 
-  const { OTLPTraceExporter } = require('@opentelemetry/exporter-otlp-grpc');
+  const {OTLPTraceExporter} = require('@opentelemetry/exporter-otlp-grpc');
 
   const collectorUrl = process.env.COLLECTOR_SERVICE_ADDR;
   const traceExporter = new OTLPTraceExporter({url: collectorUrl});
   const sdk = new opentelemetry.NodeSDK({
     resource: resourceFromAttributes({
-      [ ATTR_SERVICE_NAME ]: process.env.OTEL_SERVICE_NAME || 'currencyservice',
+      [ATTR_SERVICE_NAME]: process.env.OTEL_SERVICE_NAME || 'currencyservice',
     }),
     traceExporter: traceExporter,
   });
 
-  sdk.start()
-}
-else {
-  logger.info("Tracing disabled.")
+  sdk.start();
+} else {
+  logger.info('Tracing disabled.');
 }
 
 const path = require('path');
@@ -78,7 +76,8 @@ const grpc = require('@grpc/grpc-js');
 const protoLoader = require('@grpc/proto-loader');
 
 const MAIN_PROTO_PATH = path.join(__dirname, './proto/demo.proto');
-const HEALTH_PROTO_PATH = path.join(__dirname, './proto/grpc/health/v1/health.proto');
+const HEALTH_PROTO_PATH = path.join(__dirname,
+    './proto/grpc/health/v1/health.proto');
 
 const PORT = process.env.PORT;
 
@@ -88,16 +87,16 @@ const healthProto = _loadProto(HEALTH_PROTO_PATH).grpc.health.v1;
 /**
  * Helper function that loads a protobuf file.
  */
-function _loadProto (path) {
+function _loadProto(path) {
   const packageDefinition = protoLoader.loadSync(
-    path,
-    {
-      keepCase: true,
-      longs: String,
-      enums: String,
-      defaults: true,
-      oneofs: true
-    }
+      path,
+      {
+        keepCase: true,
+        longs: String,
+        enums: String,
+        defaults: true,
+        oneofs: true,
+      },
   );
   return grpc.loadPackageDefinition(packageDefinition);
 }
@@ -106,7 +105,7 @@ function _loadProto (path) {
  * Helper function that gets currency data from a stored JSON file
  * Uses public data from European Central Bank
  */
-function _getCurrencyData (callback) {
+function _getCurrencyData(callback) {
   const data = require('./data/currency_conversion.json');
   callback(data);
 }
@@ -114,10 +113,11 @@ function _getCurrencyData (callback) {
 /**
  * Helper function that handles decimal/fractional carrying
  */
-function _carry (amount) {
+function _carry(amount) {
   const fractionSize = Math.pow(10, 9);
   amount.nanos += (amount.units % 1) * fractionSize;
-  amount.units = Math.floor(amount.units) + Math.floor(amount.nanos / fractionSize);
+  amount.units = Math.floor(amount.units) +
+  Math.floor(amount.nanos / fractionSize);
   amount.nanos = amount.nanos % fractionSize;
   return amount;
 }
@@ -125,7 +125,7 @@ function _carry (amount) {
 /**
  * Lists the supported currencies
  */
-function getSupportedCurrencies (call, callback) {
+function getSupportedCurrencies(call, callback) {
   logger.info('Getting supported currencies...');
   _getCurrencyData((data) => {
     callback(null, {currency_codes: Object.keys(data)});
@@ -135,7 +135,7 @@ function getSupportedCurrencies (call, callback) {
 /**
  * Converts between currencies
  */
-function convert (call, callback) {
+function convert(call, callback) {
   try {
     _getCurrencyData((data) => {
       const request = call.request;
@@ -144,7 +144,7 @@ function convert (call, callback) {
       const from = request.from;
       const euros = _carry({
         units: from.units / data[from.currency_code],
-        nanos: from.nanos / data[from.currency_code]
+        nanos: from.nanos / data[from.currency_code],
       });
 
       euros.nanos = Math.round(euros.nanos);
@@ -152,7 +152,7 @@ function convert (call, callback) {
       // Convert: EUR --> to_currency
       const result = _carry({
         units: euros.units * data[request.to_code],
-        nanos: euros.nanos * data[request.to_code]
+        nanos: euros.nanos * data[request.to_code],
       });
 
       result.units = Math.floor(result.units);
@@ -171,28 +171,29 @@ function convert (call, callback) {
 /**
  * Endpoint for health checks
  */
-function check (call, callback) {
-  callback(null, { status: 'SERVING' });
+function check(call, callback) {
+  callback(null, {status: 'SERVING'});
 }
 
 /**
  * Starts an RPC server that receives requests for the
  * CurrencyConverter service at the sample server port
  */
-function main () {
+function main() {
   logger.info(`Starting gRPC server on port ${PORT}...`);
   const server = new grpc.Server();
-  server.addService(shopProto.CurrencyService.service, {getSupportedCurrencies, convert});
+  server.addService(shopProto.CurrencyService.service,
+      {getSupportedCurrencies, convert});
   server.addService(healthProto.Health.service, {check});
 
   server.bindAsync(
-    `[::]:${PORT}`,
-    grpc.ServerCredentials.createInsecure(),
-    function() {
-      logger.info(`CurrencyService gRPC server started on port ${PORT}`);
-      server.start();
-    },
-   );
+      `[::]:${PORT}`,
+      grpc.ServerCredentials.createInsecure(),
+      function() {
+        logger.info(`CurrencyService gRPC server started on port ${PORT}`);
+        server.start();
+      },
+  );
 }
 
 main();
