@@ -20,9 +20,15 @@ resource "aws_kms_alias" "eks" {
 # -----------------------------------------------------------------------------
 # CloudWatch Log Group for EKS Control Plane
 # -----------------------------------------------------------------------------
+
 resource "aws_cloudwatch_log_group" "cluster" {
   name              = "/aws/eks/${var.cluster_name}/cluster"
   retention_in_days = 30
+
+  # EKS auto-creates this log group when logging is enabled.
+  # On destroy, EKS may recreate it during cluster shutdown.
+  # skip_destroy keeps it in AWS so Terraform can re-adopt it on next apply.
+  skip_destroy = true
 }
 
 # NOTE: No custom security group is created here. EKS automatically creates a
@@ -64,6 +70,15 @@ resource "aws_eks_cluster" "main" {
     aws_iam_role_policy_attachment.cluster_AmazonEKSVPCResourceController,
     aws_cloudwatch_log_group.cluster,
   ]
+
+  # Clean up the orphaned CloudWatch log group after EKS cluster is fully deleted.
+  # EKS auto-recreates the log group during cluster shutdown, so we must
+  # delete it AFTER the cluster is gone to prevent 'already exists' on re-apply.
+  provisioner "local-exec" {
+    when        = destroy
+    interpreter = ["bash", "-c"]
+    command     = "aws logs delete-log-group --log-group-name '/aws/eks/${self.name}/cluster' --region $(echo '${self.arn}' | cut -d: -f4) 2>/dev/null || true"
+  }
 
   tags = {
     Name = var.cluster_name

@@ -74,6 +74,7 @@ module "eks" {
   node_desired_size      = var.node_desired_size
   node_min_size          = var.node_min_size
   node_max_size          = var.node_max_size
+  cluster_admin_arns     = var.cluster_admin_arns
 }
 
 # NOTE: ECR repositories are managed globally in terraform-aws/global/ecr/

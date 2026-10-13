@@ -79,6 +79,12 @@ variable "node_max_size" {
   default     = 5
 }
 
+variable "cluster_admin_arns" {
+  description = "List of IAM ARNs to grant EKS Cluster Admin access (users + CI roles)"
+  type        = list(string)
+  default     = []
+}
+
 # ElastiCache
 variable "redis_version" {
   description = "Redis engine version"
