@@ -49,6 +49,11 @@ spec:
         env:
         - name: REDIS_ADDR
           value: "redis-cart:6379"
+        - name: REDIS_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: redis-cart-secret
+              key: password
         resources:
           requests:
             cpu: 200m
@@ -118,6 +123,13 @@ spec:
         image: redis:alpine
         ports:
         - containerPort: 6379
+        env:
+        - name: REDIS_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: redis-cart-secret
+              key: password
+        args: ["--requirepass", "$(REDIS_PASSWORD)"]
         readinessProbe:
           periodSeconds: 5
           tcpSocket:
