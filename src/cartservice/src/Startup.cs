@@ -10,6 +10,7 @@ using Microsoft.Extensions.Hosting;
 using cartservice.cartstore;
 using cartservice.services;
 using Microsoft.Extensions.Caching.StackExchangeRedis;
+using StackExchange.Redis;  
 
 namespace cartservice
 {
@@ -27,6 +28,7 @@ namespace cartservice
         public void ConfigureServices(IServiceCollection services)
         {
             string redisAddress = Configuration["REDIS_ADDR"];
+            string redisPassword = Configuration["REDIS_PASSWORD"];
             string spannerProjectId = Configuration["SPANNER_PROJECT"];
             string spannerConnectionString = Configuration["SPANNER_CONNECTION_STRING"];
             string alloyDBConnectionString = Configuration["ALLOYDB_PRIMARY_IP"];
@@ -36,6 +38,13 @@ namespace cartservice
                 services.AddStackExchangeRedisCache(options =>
                 {
                     options.Configuration = redisAddress;
+
+                    if (!string.IsNullOrEmpty(redisPassword))
+                    {
+                        var redisConfig = ConfigurationOptions.Parse(redisAddress);
+                        redisConfig.Password = redisPassword;
+                        options.ConfigurationOptions = redisConfig;
+                    }
                 });
                 services.AddSingleton<ICartStore, RedisCartStore>();
             }
