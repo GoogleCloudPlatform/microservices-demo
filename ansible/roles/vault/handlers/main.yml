@@ -1,0 +1,5 @@
+---
+- name: Reiniciar Vault
+  ansible.builtin.systemd_service:
+    name: vault
+    state: restarted

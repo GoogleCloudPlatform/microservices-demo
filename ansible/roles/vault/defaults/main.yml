@@ -1,0 +1,15 @@
+---
+# Puerto de la API y la UI web de Vault.
+vault_port: 8200
+
+# Rutas que crea el paquete oficial de HashiCorp.
+vault_config_dir: /etc/vault.d
+vault_data_dir: /opt/vault/data
+vault_tls_dir: /opt/vault/tls
+
+# Certificado TLS autofirmado (válido para la IP pública del servidor).
+vault_tls_days: 365
+
+# Carpeta (en tu máquina) donde se descarga el certificado público para que
+# el CLI de Vault y GitHub Actions puedan validar la conexión HTTPS.
+vault_local_out_dir: "{{ playbook_dir }}/out"

@@ -1,0 +1,147 @@
+---
+# --- 1. Dependencias del sistema --------------------------------------------
+- name: Instalar dependencias base
+  ansible.builtin.apt:
+    name:
+      - ca-certificates
+      - curl
+      - gnupg
+      - openssl
+      - jq
+    state: present
+    update_cache: true
+    cache_valid_time: 3600
+
+# --- 2. Repositorio oficial de HashiCorp -----------------------------------
+- name: Descargar la llave GPG de HashiCorp
+  ansible.builtin.get_url:
+    url: https://apt.releases.hashicorp.com/gpg
+    dest: /usr/share/keyrings/hashicorp-archive-keyring.asc
+    mode: "0644"
+
+- name: Agregar el repositorio de HashiCorp
+  ansible.builtin.apt_repository:
+    repo: >-
+      deb [arch=amd64 signed-by=/usr/share/keyrings/hashicorp-archive-keyring.asc]
+      https://apt.releases.hashicorp.com {{ ansible_distribution_release }} main
+    filename: hashicorp
+    state: present
+
+# --- 3. Instalar Vault ------------------------------------------------------
+# El paquete crea el usuario "vault", las carpetas /etc/vault.d y /opt/vault
+# y el servicio de systemd vault.service.
+- name: Instalar HashiCorp Vault
+  ansible.builtin.apt:
+    name: vault
+    state: present
+    update_cache: true
+    cache_valid_time: 3600
+
+# --- 4. Certificado TLS (HTTPS) --------------------------------------------
+- name: Crear carpeta de certificados
+  ansible.builtin.file:
+    path: "{{ vault_tls_dir }}"
+    state: directory
+    owner: vault
+    group: vault
+    mode: "0750"
+
+- name: Generar certificado TLS autofirmado para la IP pública
+  ansible.builtin.command:
+    cmd: >-
+      openssl req -x509 -newkey rsa:4096 -sha256 -nodes
+      -days {{ vault_tls_days }}
+      -keyout {{ vault_tls_dir }}/vault.key
+      -out {{ vault_tls_dir }}/vault.crt
+      -subj "/CN=vault-online-boutique"
+      -addext "subjectAltName=IP:{{ vault_public_ip }},IP:127.0.0.1,DNS:localhost"
+    creates: "{{ vault_tls_dir }}/vault.crt"   # solo la primera vez → idempotente
+  notify: Reiniciar Vault
+
+- name: Permisos de la llave privada TLS
+  ansible.builtin.file:
+    path: "{{ vault_tls_dir }}/vault.key"
+    owner: vault
+    group: vault
+    mode: "0600"
+
+- name: Permisos del certificado TLS
+  ansible.builtin.file:
+    path: "{{ vault_tls_dir }}/vault.crt"
+    owner: vault
+    group: vault
+    mode: "0644"
+
+# --- 5. Configuración de Vault ---------------------------------------------
+- name: Carpeta de datos de Vault
+  ansible.builtin.file:
+    path: "{{ vault_data_dir }}"
+    state: directory
+    owner: vault
+    group: vault
+    mode: "0700"
+
+- name: Carpeta del registro de auditoría
+  ansible.builtin.file:
+    path: /var/log/vault
+    state: directory
+    owner: vault
+    group: vault
+    mode: "0750"
+
+- name: Escribir vault.hcl (UI habilitada + listener HTTPS)
+  ansible.builtin.template:
+    src: vault.hcl.j2
+    dest: "{{ vault_config_dir }}/vault.hcl"
+    owner: vault
+    group: vault
+    mode: "0640"
+  notify: Reiniciar Vault
+
+# Para que, al entrar por SSH, el comando `vault` ya sepa a dónde conectarse.
+- name: Variables de entorno para el CLI de Vault en el servidor
+  ansible.builtin.copy:
+    dest: /etc/profile.d/vault.sh
+    mode: "0644"
+    content: |
+      export VAULT_ADDR="https://127.0.0.1:{{ vault_port }}"
+      export VAULT_CACERT="{{ vault_tls_dir }}/vault.crt"
+
+# --- 6. Servicio ------------------------------------------------------------
+- name: Habilitar e iniciar el servicio de Vault
+  ansible.builtin.systemd_service:
+    name: vault
+    enabled: true
+    state: started
+
+- name: Aplicar reinicio pendiente (si cambió la configuración)
+  ansible.builtin.meta: flush_handlers
+
+- name: Esperar a que Vault escuche en el puerto {{ vault_port }}
+  ansible.builtin.wait_for:
+    port: "{{ vault_port }}"
+    timeout: 60
+
+# Vault recién instalado responde 501 (sin inicializar); sellado responde 503.
+# Cualquiera de los dos significa que el servidor está vivo.
+- name: Comprobar que la API de Vault responde
+  ansible.builtin.uri:
+    url: "https://127.0.0.1:{{ vault_port }}/v1/sys/health"
+    validate_certs: false
+    status_code: [200, 429, 472, 473, 501, 503]
+  register: vault_health
+  changed_when: false
+
+- name: Mostrar estado de Vault
+  ansible.builtin.debug:
+    msg: >-
+      Vault responde en https://{{ vault_public_ip }}:{{ vault_port }}/ui
+      | inicializado={{ vault_health.json.initialized | default('?') }}
+      | sellado={{ vault_health.json.sealed | default('?') }}
+
+# --- 7. Descargar el certificado público a tu máquina ----------------------
+- name: Descargar el certificado público de Vault (para el CLI y GitHub Actions)
+  ansible.builtin.fetch:
+    src: "{{ vault_tls_dir }}/vault.crt"
+    dest: "{{ vault_local_out_dir }}/vault-ca.crt"
+    flat: true
