@@ -193,7 +193,19 @@ resource "aws_flow_log" "vpc" {
   log_destination      = aws_cloudwatch_log_group.flow_logs[0].arn
   iam_role_arn         = aws_iam_role.flow_logs[0].arn
 
-  # Ensure cleanup runs after flow log is destroyed
+  tags = {
+    Name = "${var.project_name}-${var.environment}-vpc-flow-logs"
+  }
+}
+
+resource "aws_cloudwatch_log_group" "flow_logs" {
+  count = var.enable_flow_logs ? 1 : 0
+
+  name              = "/aws/vpc/flow-logs/${var.project_name}-${var.environment}"
+  retention_in_days = 14
+
+  # Ensure cleanup_flow_log_group is destroyed AFTER this log group.
+  # Destroy order: flow_log → log_group → null_resource (cleanup)
   depends_on = [null_resource.cleanup_flow_log_group]
 
   tags = {
@@ -201,9 +213,9 @@ resource "aws_flow_log" "vpc" {
   }
 }
 
-# Clean up orphaned log group after flow log is destroyed.
-# VPC Flow Logs may recreate the log group while shutting down.
-# Destroy order: flow_log → this cleanup → log_group resource.
+# Cleanup orphaned log group AFTER both flow_log and log_group are destroyed.
+# VPC Flow Logs may briefly recreate the log group while shutting down.
+# This runs last and catches any orphan left behind.
 resource "null_resource" "cleanup_flow_log_group" {
   count = var.enable_flow_logs ? 1 : 0
 
@@ -215,17 +227,6 @@ resource "null_resource" "cleanup_flow_log_group" {
     when       = destroy
     command    = "aws logs delete-log-group --log-group-name ${self.triggers.log_group_name}"
     on_failure = continue
-  }
-}
-
-resource "aws_cloudwatch_log_group" "flow_logs" {
-  count = var.enable_flow_logs ? 1 : 0
-
-  name              = "/aws/vpc/flow-logs/${var.project_name}-${var.environment}"
-  retention_in_days = 14
-
-  tags = {
-    Name = "${var.project_name}-${var.environment}-vpc-flow-logs"
   }
 }
 
