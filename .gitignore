@@ -27,3 +27,16 @@ pkg/
 release/wi-kubernetes-manifests.yaml
 vendor/
 gha-creds-*.json
+
+# Plaintext env files — never commit
+*.env
+
+# un-ignore this - encrypted version
+!*.enc.env
+.env
+.env.*
+!.env.example
+
+# age keys — never commit
+keys.txt
+*.age.key

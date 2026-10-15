@@ -1,0 +1,27 @@
+services: 
+  currencyservice:
+    build:
+      context: ./src/currencyservice
+    env_file:
+      - ./src/currencyservice/.env
+    ports: 
+      - "7000:7000"
+    restart: unless-stopped
+    networks:
+     - boutique
+
+
+  paymentservice:
+    build: 
+      context: ./src/paymentservice
+    env_file:
+      - ./src/paymentservice/.env
+    ports:
+      - "50051:50051"
+    restart: unless-stopped
+    networks:
+     - boutique
+
+networks:
+  boutique:
+    driver: bridge              
