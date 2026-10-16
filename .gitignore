@@ -39,3 +39,7 @@ crash.log
 !infra/terraform-aws/.terraform.lock.hcl
 *.tfplan
 **/tfplan
+# Archivos locales y sensibles de Vault/Ansible
+infra/ansible-vault/inventory.ini
+*.pem
+**/*vault-init*.json
