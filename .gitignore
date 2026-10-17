@@ -2,6 +2,7 @@
 .eclipse.buildship.core.prefs
 .gradle/
 .idea/
+.ai/
 .kubernetes-manifests-*/
 .project
 .skaffold-*.yaml

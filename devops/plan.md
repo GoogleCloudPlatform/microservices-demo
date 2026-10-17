@@ -297,31 +297,27 @@ online-boutique-config/
 ├── argocd/                        # ArgoCD installation & config
 │   ├── install/
 │   │   └── values.yaml            # ArgoCD Helm values
-│   ├── app-of-apps/
-│   │   ├── dev.yaml               # App of Apps cho dev
-│   │   └── staging.yaml           # App of Apps cho staging
-│   └── argocd-apps/
+│   └── apps/
 │       ├── dev/
-│       │   ├── frontend.yaml
-│       │   ├── cartservice.yaml
-│       │   └── ...
+│       │   ├── online-boutique.yaml    # ArgoCD App: 11 microservices (dev)
+│       │   ├── aws-lb-controller.yaml  # ArgoCD App: AWS LB Controller Helm
+│       │   └── cluster-autoscaler.yaml # ArgoCD App: Cluster Autoscaler Helm
 │       └── staging/
-│           └── ...
+│           └── online-boutique.yaml    # ArgoCD App: 11 microservices (staging)
 ├── base/                          # Base Kustomize manifests
-│   ├── online-boutique/
-│   │   ├── kustomization.yaml
-│   │   └── *.yaml                 # Từ kubernetes-manifests/ gốc
-│   └── infrastructure/
-│       ├── istio/
-│       ├── monitoring/
-│       └── security/
+│   └── online-boutique/
+│       ├── kustomization.yaml
+│       ├── namespace.yaml
+│       └── *.yaml                 # 11 services (từ kubernetes-manifests/ gốc, đã dọn dẹp)
 ├── overlays/                      # Environment-specific overlays
 │   ├── dev/
-│   │   ├── kustomization.yaml
+│   │   ├── kustomization.yaml     # images newTag (CI update qua yq)
 │   │   └── patches/
+│   │       └── cartservice-redis.yaml  # Patch REDIS_ADDR → ElastiCache
 │   └── staging/
 │       ├── kustomization.yaml
 │       └── patches/
+│           └── cartservice-redis.yaml
 └── README.md
 ```
 
@@ -330,13 +326,37 @@ online-boutique-config/
 | Component | Chi tiết |
 |-----------|---------|
 | **Installation** | Helm chart, namespace `argocd` |
-| **Pattern** | App of Apps pattern |
+| **Pattern** | Application per environment (không cần App of Apps cho MVP) |
 | **Sync Policy** | **Auto-sync cho dev**, **Manual sync cho staging** |
 | **Notifications** | Slack/Discord integration |
 | **RBAC** | SSO via GitHub OAuth, role-based access |
-| **Image Updater** | ArgoCD Image Updater tự động detect new images từ ECR |
 
-### 3.3 Deployment Strategy
+> [!IMPORTANT]
+> **ArgoCD Image Updater đã bị loại bỏ.** Stage 2 đã triển khai cơ chế CI push-based: composite action `update-manifests` dùng `yq` commit tag `sha-xxx` vào `overlays/dev/kustomization.yaml`. Nếu bật cả Image Updater sẽ gây xung đột Git commit (race condition). CI push-based đơn giản hơn, không tốn tài nguyên pod trên EKS, và đảm bảo immutable tag traceability.
+
+### 3.3 Dọn dẹp Manifests
+
+Khi tạo `base/online-boutique/` từ `kubernetes-manifests/` gốc, cần điều chỉnh:
+
+| Hạng mục | Hành động | Lý do |
+|----------|-----------|-------|
+| `redis-cart` Deployment + Service | **Xóa** khỏi `cartservice.yaml` | Dùng AWS ElastiCache, không dùng in-cluster Redis |
+| `shoppingassistantservice` | **Không tạo** manifest | Phụ thuộc Google Cloud APIs (Gemini, AlloyDB) |
+| `cartservice` env `REDIS_ADDR` | **Patch** ở overlay: `redis-cart:6379` → ElastiCache endpoint | Lấy từ `terraform output redis_connection_string` |
+| Image names | **Map** qua Kustomize `images` section | `image: frontend` → ECR URI |
+
+### 3.4 Infrastructure Components (ArgoCD-managed)
+
+Stage 1 đã tạo IRSA roles nhưng chưa cài Helm chart. Stage 3 cài qua ArgoCD Applications:
+
+| Component | Helm Chart | Namespace | IRSA Role |
+|-----------|-----------|-----------|-----------|
+| **AWS LB Controller** | `aws/aws-load-balancer-controller` | `kube-system` | `aws_lb_controller_role_arn` |
+| **Cluster Autoscaler** | `autoscaler/cluster-autoscaler` | `kube-system` | `cluster_autoscaler_role_arn` |
+
+> Cài ở Stage 3 để chuẩn bị sẵn cho AWS ALB Ingress ở Stage 4.
+
+### 3.5 Deployment Strategy
 
 ```mermaid
 graph TD
@@ -346,18 +366,16 @@ graph TD
     D -->|Dev| E[Auto Sync]
     D -->|Staging| F[Manual Approval + Sync]
     E --> G[Health Check]
-    F --> H[Canary/Blue-Green Deploy]
-    H --> I[Progressive Rollout]
-    I --> G
+    F --> G
 ```
 
-### 3.4 Deliverables
+### 3.6 Deliverables
 - [ ] ArgoCD installation via Helm trên EKS
-- [ ] App of Apps pattern cho dev và staging
-- [ ] Kustomize base manifests + overlays cho dev/staging
-- [ ] ArgoCD Image Updater cấu hình cho ECR
+- [ ] ArgoCD Applications cho dev và staging (online-boutique)
+- [ ] Kustomize base manifests (11 services, không redis-cart, không shoppingassistantservice)
+- [ ] Kustomize overlays cho dev/staging (với ElastiCache Redis patch)
+- [ ] AWS LB Controller + Cluster Autoscaler cài qua ArgoCD Helm Applications
 - [ ] Sync policies (auto cho dev, manual cho staging)
-- [ ] Notification integration (Slack/Teams)
 - [ ] Rollback strategy documentation
 - [ ] 📝 Documentation: `devops/stage-3-cd-argocd.md`
 
