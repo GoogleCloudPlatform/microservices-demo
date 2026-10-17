@@ -150,6 +150,7 @@ jobs:
         if: inputs.language == 'java'
         run: |
           cd src/${{ inputs.service }}
+          chmod +x ./gradlew
           ./gradlew test --no-daemon
 
       # ─────────────────────────────────────────
