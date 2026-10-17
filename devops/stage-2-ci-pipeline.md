@@ -48,8 +48,6 @@ ci-main.yml (Orchestrator)
 │   ├── terraform-plan.yml     # Terraform plan khi PR thay đổi terraform-aws/
 │   └── terraform-apply.yml    # Terraform apply khi merge vào main
 └── actions/
-    ├── docker-build-push/     # Composite action: auth + build + ECR push
-    │   └── action.yml
     └── update-manifests/      # Composite action: update image tag trong config repo
         └── action.yml
 ```
@@ -192,7 +190,7 @@ AWS IAM Role: online-boutique-github-ci
 | `recommendationservice` | Python | `pytest` | `src/recommendationservice/Dockerfile` |
 | `shippingservice` | Go | `go test ./...` | `src/shippingservice/Dockerfile` |
 
-> **Lưu ý:** `shoppingassistantservice` không có ECR repo → không được build trong CI pipeline này.
+> **Lưu ý:** `shoppingassistantservice` **không được đưa vào CI pipeline** vì service này phụ thuộc hoàn toàn vào Google Cloud (Gemini AI qua `langchain-google-genai`, AlloyDB qua `google-cloud-alloydb-connector`, Secret Manager, Cloud Storage). Các Google Cloud APIs này không khả dụng trên AWS, nên service này sẽ không được build và deploy. Nếu sau này cần port sang AWS (thay Gemini bằng Amazon Bedrock, AlloyDB bằng RDS, v.v.), cần thêm ECR repo và build job tương ứng.
 
 ## 8. Docker Image Cache
 

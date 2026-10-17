@@ -1,6 +1,11 @@
 # See https://help.github.com/en/articles/about-code-owners
 # for more info about CODEOWNERS file.
 
-# These owners will be the default owners for everything in
-# the repo. Unless a later match takes precedence.
-* @GoogleCloudPlatform/devrel-flagship-app-maintainers @yoshi-approver
+# Default owners for everything in the repo
+* @online-boutique-application-demo/maintainers
+
+# Infrastructure (Terraform)
+terraform-aws/ @online-boutique-application-demo/maintainers
+
+# CI/CD Workflows
+.github/ @online-boutique-application-demo/maintainers

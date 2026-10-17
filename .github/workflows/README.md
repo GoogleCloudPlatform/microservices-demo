@@ -1,51 +1,61 @@
 # GitHub Actions Workflows
 
-This page describes the CI/CD workflows for the Online Boutique app, which run in [Github Actions](https://github.com/GoogleCloudPlatform/microservices-demo/actions).
+Trang này mô tả các CI/CD workflows cho Online Boutique trên AWS, chạy trên [GitHub Actions](https://github.com/online-boutique-application-demo/online-boutique-app/actions).
 
 ## Infrastructure
 
-The CI/CD pipelines for Online Boutique run on standard GitHub-hosted runners (Ubuntu). 
-
-We also host a test GKE cluster, which is where the deploy tests run. Every PR has its own namespace in the cluster.
+Các CI/CD pipelines chạy trên **GitHub-hosted runners (Ubuntu)**. Authentication với AWS sử dụng **OIDC** (không dùng long-lived access keys).
 
 ## Workflows
 
-**Note**: In order for the current CI/CD setup to work on your pull request, you must branch directly off the repo (no forks). This is because the Github secrets necessary for these tests aren't copied over when you fork.
+### CI – Build & Push to ECR: [`ci-main.yml`](ci-main.yml)
 
-### Code Tests - [ci-pr.yaml](ci-pr.yaml)
+**Trigger:** Push vào `main`, `feature/**`, `fix/**` hoặc PR vào `main`.
 
-These tests run on every commit for every open PR, as well as any commit to main / any release branch. Currently, this workflow runs only Go unit tests.
+Orchestrator workflow phát hiện service nào thay đổi (dùng `dorny/paths-filter`) và gọi [`ci-service.yml`](ci-service.yml) cho từng service song song:
 
+1. Setup language runtime (Go, .NET, Node.js, Python, Java)
+2. Run unit tests
+3. Lint / format check
+4. Build Docker image (multi-stage, Buildx)
+5. Push to Amazon ECR (tags: `sha-<commit>`, `branch-<name>`, `latest`)
+6. Update image tag trong `online-boutique-config` repo (chỉ trên main)
 
-### Deploy Tests- [ci-pr.yaml](ci-pr.yaml)
+**11 services** được build: tất cả trừ `shoppingassistantservice` (phụ thuộc Google Cloud APIs).
 
-These tests run on every commit for every open PR, as well as any commit to main / any release branch. This workflow:
+### Terraform Plan (PR): [`terraform-plan.yml`](terraform-plan.yml)
 
-1. Creates a dedicated GKE namespace for that PR, if it doesn't already exist, in the PR GKE cluster.
-2. Uses `skaffold run` to build and push the images specific to that PR commit. Then skaffold deploys those images, via `kubernetes-manifests`, to the PR namespace in the test cluster.
-3. Tests to make sure all the pods start up and become ready.
-4. Gets the LoadBalancer IP for the frontend service.
-5. Comments that IP in the pull request, for staging.
+**Trigger:** PR thay đổi `terraform-aws/`.
 
-### Push and Deploy Latest - [push-deploy](push-deploy.yml)
+1. Detect environment nào thay đổi (dev, staging, global/ecr, global/github-oidc)
+2. Chạy `terraform fmt -check`, `init`, `validate`, `plan`
+3. Post plan output dưới dạng comment lên PR
 
-This is the Continuous Deployment workflow, and it runs on every commit to the main branch. This workflow:
+### Terraform Apply (main): [`terraform-apply.yml`](terraform-apply.yml)
 
-1. Builds the container images for every service, tagging as `latest`.
-2. Pushes those images to Google Container Registry.
+**Trigger:** Push vào `main` thay đổi `terraform-aws/`.
 
-Note that this workflow does not update the image tags used in `release/kubernetes-manifests.yaml` - these release manifests are tied to a stable `v0.x.x` release.
+1. Detect environment nào thay đổi
+2. Chạy `terraform plan` rồi `terraform apply -auto-approve`
+3. Dev: auto-apply, Staging: requires manual approval (GitHub Environments)
+4. Hỗ trợ global ECR và global GitHub OIDC modules
 
-### Cleanup - [cleanup.yaml](cleanup.yaml)
+## Composite Actions
 
-This workflow runs when a PR closes, regardless of whether it was merged into main. This workflow deletes the PR-specific GKE namespace in the test cluster.
+### [`update-manifests`](../actions/update-manifests/action.yml)
 
-### Manual Release Builder - [make-release.yaml](make-release.yaml)
+Composite action cập nhật image tag trong GitOps repo (`online-boutique-config`):
+- Checkout config repo
+- Dùng `yq` để update `newTag` trong Kustomize overlays
+- Git commit + push
 
-This workflow is manually triggered via the `workflow_dispatch` event to automate the release process. When run, it:
-1. Validates the release version format.
-2. Automates the build and push of container images to Google Cloud Build.
-3. Automatically regenerates Kubernetes manifests and Kustomize bases.
-4. Packages and pushes the Helm chart.
-5. Branches and tags the repository.
-6. Opens a new Pull Request targeting `main` with the release checklist.
+## AWS Authentication
+
+Tất cả workflows dùng **GitHub OIDC** để assume IAM roles:
+
+| Role | Mục đích |
+|------|----------|
+| `online-boutique-github-ci` | CI: ECR push, EKS describe |
+| `online-boutique-github-terraform` | Terraform: full infrastructure management |
+
+Không cần cấu hình AWS access keys trong GitHub Secrets.
