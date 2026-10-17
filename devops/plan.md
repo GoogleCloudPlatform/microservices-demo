@@ -370,14 +370,14 @@ graph TD
 ```
 
 ### 3.6 Deliverables
-- [ ] ArgoCD installation via Helm trên EKS
-- [ ] ArgoCD Applications cho dev và staging (online-boutique)
-- [ ] Kustomize base manifests (11 services, không redis-cart, không shoppingassistantservice)
-- [ ] Kustomize overlays cho dev/staging (với ElastiCache Redis patch)
-- [ ] AWS LB Controller + Cluster Autoscaler cài qua ArgoCD Helm Applications
-- [ ] Sync policies (auto cho dev, manual cho staging)
-- [ ] Rollback strategy documentation
-- [ ] 📝 Documentation: `devops/stage-3-cd-argocd.md`
+- [x] ArgoCD installation via Helm trên EKS
+- [x] ArgoCD Applications cho dev và staging (online-boutique)
+- [x] Kustomize base manifests (11 services, không redis-cart, không shoppingassistantservice)
+- [x] Kustomize overlays cho dev/staging (với ElastiCache Redis patch)
+- [x] AWS LB Controller + Cluster Autoscaler cài qua ArgoCD Helm Applications
+- [x] Sync policies (auto cho dev, manual cho staging)
+- [x] Rollback strategy documentation
+- [x] 📝 Documentation: `devops/stage-3-cd-argocd.md`
 
 ---
 
