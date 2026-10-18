@@ -176,6 +176,11 @@ Tất cả 11/11 microservices đang chạy ổn định (1/1 Running):
 - Tỉ lệ lỗi tổng hợp: **0.00%** trên hàng nghìn requests.
 - `cartservice` kết nối và thực hiện các thao tác thêm giỏ hàng (`AddItemAsync`), lấy giỏ hàng (`GetCartAsync`), xóa giỏ hàng (`EmptyCartAsync`) trực tiếp trên **AWS ElastiCache Redis** thành công.
 
+### 5.4 Cổng Truy Cập Người Dùng (Frontend External Load Balancer)
+- **Loại Service:** LoadBalancer (AWS Network Load Balancer được quản lý bởi AWS Load Balancer Controller)
+- **External URL:** `http://k8s-onlinebo-frontend-8fcadd998c-83a9bd075377867b.elb.ap-southeast-1.amazonaws.com`
+- **Kiểm tra phản hồi:** `HTTP/1.1 200 OK` (Set-Cookie session id thành công)
+
 ---
 
 ## 6. Chiến Lược Rollback (Rollback Strategy)
@@ -212,3 +217,5 @@ argocd app rollback online-boutique-dev 1
 | **Degraded** | Pod crashloop hoặc fail readiness probe | Chạy `kubectl describe pod -n online-boutique <pod>` và `kubectl logs <pod>`. |
 | **ImagePullBackOff** | ECR chưa có image tag hoặc quyền node pull ECR lỗi | Kiểm tra `aws ecr list-images --repository-name online-boutique/<service>`. Đảm bảo EKS Node Group có IAM role quyền `AmazonEC2ContainerRegistryReadOnly`. |
 | **Redis Connection Timeout** | Security Group chặn port 6379 giữa EKS nodes và ElastiCache | Kiểm tra Security Group của ElastiCache cho phép ingress TCP 6379 từ EKS Node SG. |
+| **FailedBuildModel (0 match VPC and tags: [kubernetes.io/role/elb])** | VPC ID trong Helm values của AWS Load Balancer Controller (`aws-lb-controller.yaml`) không đúng với VPC thực tế của EKS, hoặc public subnet thiếu tag | Sửa `vpcId` trong `argocd/apps/dev/aws-lb-controller.yaml` về đúng ID của VPC cụm EKS (ví dụ `vpc-0d45fceb8cf9ac238`), apply lại Application và kiểm tra public subnets có tag `kubernetes.io/role/elb: 1`. |
+
