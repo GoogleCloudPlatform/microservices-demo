@@ -127,12 +127,25 @@ helm install argocd argo/argo-cd \
 
 ### 4.2 Truy Cập Giao Diện ArgoCD Web UI
 - **Loại Service:** LoadBalancer (AWS Network/Classic ELB)
-- **External URL:** `http://a51050e809ad448c18cdf1aec9585a12-1915342388.ap-southeast-1.elb.amazonaws.com`
+- **Lấy URL truy cập ArgoCD:**
+  - **Linux / macOS (Bash):**
+    ```bash
+    echo "http://$(kubectl -n argocd get svc argocd-server -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')"
+    ```
+  - **Windows (PowerShell):**
+    ```powershell
+    "http://" + (kubectl -n argocd get svc argocd-server -o jsonpath="{.status.loadBalancer.ingress[0].hostname}")
+    ```
 - **Username:** `admin`
 - **Lấy mật khẩu ban đầu:**
-  ```bash
-  kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d
-  ```
+  - **Linux / macOS (Bash):**
+    ```bash
+    kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d
+    ```
+  - **Windows (PowerShell):**
+    ```powershell
+    [System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String((kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}")))
+    ```
 
 ### 4.3 Triển Khai Các Ứng Dụng (Applications)
 
@@ -178,8 +191,25 @@ Tất cả 11/11 microservices đang chạy ổn định (1/1 Running):
 
 ### 5.4 Cổng Truy Cập Người Dùng (Frontend External Load Balancer)
 - **Loại Service:** LoadBalancer (AWS Network Load Balancer được quản lý bởi AWS Load Balancer Controller)
-- **External URL:** `http://k8s-onlinebo-frontend-8fcadd998c-83a9bd075377867b.elb.ap-southeast-1.amazonaws.com`
-- **Kiểm tra phản hồi:** `HTTP/1.1 200 OK` (Set-Cookie session id thành công)
+- **Lấy URL truy cập ứng dụng Online Boutique:**
+  - **Linux / macOS (Bash):**
+    ```bash
+    echo "http://$(kubectl -n online-boutique get svc frontend-external -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')"
+    ```
+  - **Windows (PowerShell):**
+    ```powershell
+    "http://" + (kubectl -n online-boutique get svc frontend-external -o jsonpath="{.status.loadBalancer.ingress[0].hostname}")
+    ```
+- **Kiểm tra phản hồi HTTP:**
+  - **Linux / macOS (Bash):**
+    ```bash
+    curl -s -I "http://$(kubectl -n online-boutique get svc frontend-external -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')"
+    ```
+  - **Windows (PowerShell):**
+    ```powershell
+    curl.exe -s -I ("http://" + (kubectl -n online-boutique get svc frontend-external -o jsonpath="{.status.loadBalancer.ingress[0].hostname}"))
+    ```
+  *(Kỳ vọng: trả về `HTTP/1.1 200 OK` và kèm `Set-Cookie: shop_session-id=...`)*
 
 ---
 
