@@ -77,7 +77,7 @@ class EmailService(BaseEmailService):
         "to": [{
           "address_spec": email_address
         }],
-        "subject": "Your Confirmation Email",
+        "subject": "First PR Test Email",
         "html_body": content
       }
     )
