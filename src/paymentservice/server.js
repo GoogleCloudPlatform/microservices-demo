@@ -11,6 +11,7 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+// Trigger CI/CD pipeline
 
 const path = require('path');
 const grpc = require('@grpc/grpc-js');
@@ -55,7 +56,7 @@ class HipsterShopServer {
 
 
   listen() {
-    const server = this.server 
+    const server = this.server
     const port = this.port
     server.bindAsync(
       `[::]:${port}`,
