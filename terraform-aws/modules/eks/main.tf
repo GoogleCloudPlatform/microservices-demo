@@ -86,6 +86,16 @@ resource "aws_eks_cluster" "main" {
 resource "aws_launch_template" "node" {
   name_prefix = "${var.cluster_name}-node-"
 
+  block_device_mappings {
+    device_name = "/dev/xvda"
+
+    ebs {
+      volume_size           = var.node_disk_size
+      volume_type           = "gp3"
+      delete_on_termination = true
+    }
+  }
+
   metadata_options {
     http_endpoint               = "enabled"
     http_tokens                 = "required"
@@ -108,7 +118,6 @@ resource "aws_eks_node_group" "main" {
   ami_type        = var.node_ami_type
   instance_types  = var.node_instance_types
   capacity_type   = var.capacity_type
-  disk_size       = var.node_disk_size
 
   launch_template {
     id      = aws_launch_template.node.id
