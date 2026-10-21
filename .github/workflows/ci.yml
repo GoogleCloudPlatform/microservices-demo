@@ -5,6 +5,7 @@ on:
 
   push:
     branches:
+      - main
       - Giovanna-branch
       - Leonardo-branch
     paths:

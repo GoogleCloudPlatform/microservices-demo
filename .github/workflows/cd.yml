@@ -6,21 +6,22 @@ on:
       - CI - Build and Push Frontend
     types:
       - completed
+    branches:
+      - main
   workflow_dispatch:
 
 env:
   AWS_REGION: us-east-1
   EKS_CLUSTER_NAME: online-boutique-cluster
   NAMESPACE: online-boutique
+  ECR_REPOSITORY: online-boutique-frontend
+  IMAGE_TAG: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_sha || 'latest' }}
 
 jobs:
   deploy:
     name: Deploy application with Helm
-    if: >
-      github.event_name == 'workflow_dispatch' ||
-      github.event.workflow_run.conclusion == 'success'
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
-
     permissions:
       contents: read
 
@@ -28,7 +29,7 @@ jobs:
       - name: Download repository
         uses: actions/checkout@v4
         with:
-          ref: Giovanna-branch
+          ref: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_sha || 'main' }}
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v6.3.0
@@ -58,9 +59,14 @@ jobs:
 
       - name: Deploy with Helm
         run: |
+          AWS_ACCOUNT_ID="$(aws sts get-caller-identity --query Account --output text)"
+          ECR_URI="${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPOSITORY}"
+
           helm upgrade --install online-boutique ./helm-chart \
             --namespace "$NAMESPACE" \
             --create-namespace \
+            --set-string frontend.image.repository="$ECR_URI" \
+            --set-string frontend.image.tag="$IMAGE_TAG" \
             --wait \
             --timeout 15m
 
