@@ -1,0 +1,74 @@
+name: CD - Deploy Frontend to EKS
+
+on:
+  workflow_run:
+    workflows:
+      - CI - Build and Push Frontend
+    types:
+      - completed
+  workflow_dispatch:
+
+env:
+  AWS_REGION: us-east-1
+  EKS_CLUSTER_NAME: online-boutique-cluster
+  NAMESPACE: online-boutique
+
+jobs:
+  deploy:
+    name: Deploy application with Helm
+    if: >
+      github.event_name == 'workflow_dispatch' ||
+      github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+
+    steps:
+      - name: Download repository
+        uses: actions/checkout@v4
+        with:
+          ref: Giovanna-branch
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v6.3.0
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Configure connection to EKS
+        run: |
+          aws eks update-kubeconfig \
+            --region "$AWS_REGION" \
+            --name "$EKS_CLUSTER_NAME"
+
+      - name: Verify EKS access
+        run: |
+          kubectl cluster-info
+          kubectl get nodes
+
+      - name: Install Helm
+        uses: azure/setup-helm@v4
+
+      - name: Validate Helm Chart
+        run: |
+          helm lint ./helm-chart
+
+      - name: Deploy with Helm
+        run: |
+          helm upgrade --install online-boutique ./helm-chart \
+            --namespace "$NAMESPACE" \
+            --create-namespace \
+            --wait \
+            --timeout 15m
+
+      - name: Verify deployment
+        run: |
+          helm status online-boutique --namespace "$NAMESPACE"
+          kubectl get pods --namespace "$NAMESPACE"
+          kubectl get services --namespace "$NAMESPACE"
+          kubectl rollout status deployment/frontend \
+            --namespace "$NAMESPACE" \
+            --timeout=5m
