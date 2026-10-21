@@ -72,7 +72,7 @@ class RecommendationService(hipstershop_pb2_grpc.RecommendationServiceServicer):
         # fetch list of products from product catalog stub
         cat_response = product_catalog_stub.ListProducts(hipstershop_pb2.Empty())
         product_ids = [x.id for x in cat_response.products]
-        filtered_products = list(set(product_ids)-set(request.product_ids))
+        filtered_products = list(set(request.product_ids)-set(product_ids))
         num_products = len(filtered_products)
         num_return = min(max_responses, num_products)
         # sample list of indicies to return

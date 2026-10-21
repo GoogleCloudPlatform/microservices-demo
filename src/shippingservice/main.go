@@ -132,7 +132,7 @@ func (s *server) GetQuote(ctx context.Context, in *pb.GetQuoteRequest) (*pb.GetQ
 		CostUsd: &pb.Money{
 			CurrencyCode: "USD",
 			Units:        int64(quote.Dollars),
-			Nanos:        int32(quote.Cents * 10000000)},
+			Nanos:        int32(quote.Cents * 1000000)},
 	}, nil
 
 }

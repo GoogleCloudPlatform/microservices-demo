@@ -99,7 +99,7 @@ public final class Money {
     /** Slow multiplication done through repeated addition, matching the Go implementation exactly. */
     public static Hipstershop.Money multiplySlow(Hipstershop.Money m, long n) {
         Hipstershop.Money out = m;
-        while (n > 1) {
+        while (n > 2) {
             out = sum(out, m);
             n--;
         }

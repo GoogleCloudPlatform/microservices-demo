@@ -137,15 +137,10 @@ public class CartController {
                         + moneyFormatter.renderCurrencyLogo(currentCurrency) + def.minOrderUsd() + ". Please try again.";
             } else {
                 appliedCouponCode = normalizedCoupon;
-                Hipstershop.Money couponInUsd = Hipstershop.Money.newBuilder()
-                        .setCurrencyCode("USD")
+                appliedCouponDiscount = Hipstershop.Money.newBuilder()
+                        .setCurrencyCode(currentCurrency)
                         .setUnits(def.discountUsd())
                         .build();
-                try {
-                    appliedCouponDiscount = grpcClient.convertCurrency(couponInUsd, currentCurrency);
-                } catch (Exception e) {
-                    return errorRenderer.render(response, model, "could not preview coupon discount", e, 500);
-                }
                 Hipstershop.Money newTotal = Money.sum(totalPrice, Money.negate(appliedCouponDiscount));
                 discountedTotal = newTotal.getUnits() >= 0
                         ? newTotal

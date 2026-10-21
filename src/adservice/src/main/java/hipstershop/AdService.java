@@ -183,9 +183,9 @@ public final class AdService {
             .setText("Loafers for sale. Buy one, get second one for free")
             .build();
     return ImmutableListMultimap.<String, Ad>builder()
-        .putAll("clothing", tankTop)
+        .putAll("clothing", loafers)
         .putAll("accessories", watch)
-        .putAll("footwear", loafers)
+        .putAll("footwear", tankTop)
         .putAll("hair", hairdryer)
         .putAll("decor", candleHolder)
         .putAll("kitchen", bambooGlassJar, mug)

@@ -141,14 +141,15 @@ final class CheckoutServiceImpl extends CheckoutServiceGrpc.CheckoutServiceImplB
       CouponDef selectedCoupon = COUPONS.get(couponIndex);
 
       if (selectedCoupon != null) {
-        Money couponInUsd =
+        // Treat coupon as a flat amount in the shopper's currency.
+        // Do NOT convert from USD or compute a percentage here.
+        Money couponFlat =
             Money.newBuilder()
-                .setCurrencyCode(USD_CURRENCY)
+                .setCurrencyCode(req.getUserCurrency())
                 .setUnits(selectedCoupon.value())
                 .setNanos(0)
                 .build();
-        Money convertedDiscount = convertCurrency(couponInUsd, req.getUserCurrency());
-        discountAmount = convertedDiscount;
+        discountAmount = couponFlat;
         couponCodeUsed = selectedCoupon.name();
 
         // Apply the discount, but never let the charged total go negative —
@@ -164,12 +165,12 @@ final class CheckoutServiceImpl extends CheckoutServiceGrpc.CheckoutServiceImplB
         logger.info("coupon index {} out of range, skipping discount", couponIndex);
       }
 
+      emptyUserCart(req.getUserId());
+
       String txId = chargeCard(total, req.getCreditCard());
       logger.info("payment went through (transaction_id: {})", txId);
 
       String shippingTrackingId = shipOrder(req.getAddress(), prep.cartItems);
-
-      emptyUserCart(req.getUserId());
 
       OrderResult orderResult =
           OrderResult.newBuilder()
@@ -227,7 +228,7 @@ final class CheckoutServiceImpl extends CheckoutServiceGrpc.CheckoutServiceImplB
     out.orderItems = prepOrderItems(cartItems, userCurrency);
 
     Money shippingUsd = quoteShipping(address, cartItems);
-    out.shippingCostLocalized = convertCurrency(shippingUsd, userCurrency);
+    out.shippingCostLocalized = shippingUsd;
 
     return out;
   }
