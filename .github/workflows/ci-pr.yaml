@@ -45,9 +45,9 @@ jobs:
         DOTNET_INSTALL_DIR: "./.dotnet"
       with:
         dotnet-version: '10.0'
-    - uses: actions/setup-go@v6
+    - uses: actions/setup-go@v7
       with:
-        go-version: '1.26'
+        go-version: '1.27'
     - name: Go Unit Tests
       timeout-minutes: 10
       run: |
@@ -66,7 +66,7 @@ jobs:
         mkdir -p .pr
         echo "${{ github.event.pull_request.number }}" > .pr/PR_NUMBER
     - name: Upload PR Number Artifact
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v7
       with:
         name: pr_number
         path: .pr/PR_NUMBER
