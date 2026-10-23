@@ -3,6 +3,13 @@ name: CI - Build and Push Frontend
 on:
   workflow_dispatch:
 
+  pull_request:
+    branches:
+      - main
+    paths:
+      - "src/frontend/**"
+      - ".github/workflows/ci.yml"
+
   push:
     branches:
       - main
