@@ -64,12 +64,27 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      # DevSecOps (Fase III): las credenciales ya NO viven en GitHub Secrets.
+      # Se piden a HashiCorp Vault en tiempo de ejecución con un token de solo
+      # lectura (politica online-boutique-ci). vault-action las enmascara en los logs.
+      - name: Leer credenciales de AWS desde Vault
+        uses: hashicorp/vault-action@v3
+        with:
+          url: ${{ secrets.VAULT_ADDR }}
+          method: token
+          token: ${{ secrets.VAULT_TOKEN }}
+          caCertificate: ${{ secrets.VAULT_CA_CERT }}
+          secrets: |
+            kv/data/online-boutique/aws access_key_id     | AWS_ACCESS_KEY_ID ;
+            kv/data/online-boutique/aws secret_access_key | AWS_SECRET_ACCESS_KEY ;
+            kv/data/online-boutique/aws session_token     | AWS_SESSION_TOKEN
+
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
+          aws-access-key-id: ${{ env.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ env.AWS_SECRET_ACCESS_KEY }}
+          aws-session-token: ${{ env.AWS_SESSION_TOKEN }}
           aws-region: ${{ env.AWS_REGION }}
 
       - name: Login to Amazon ECR
@@ -98,12 +113,28 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      # DevSecOps (Fase III): credenciales de AWS + secretos de la aplicación
+      # leídos de Vault en tiempo de ejecución (nunca guardados en GitHub).
+      - name: Leer secretos desde Vault
+        uses: hashicorp/vault-action@v3
+        with:
+          url: ${{ secrets.VAULT_ADDR }}
+          method: token
+          token: ${{ secrets.VAULT_TOKEN }}
+          caCertificate: ${{ secrets.VAULT_CA_CERT }}
+          secrets: |
+            kv/data/online-boutique/aws access_key_id     | AWS_ACCESS_KEY_ID ;
+            kv/data/online-boutique/aws secret_access_key | AWS_SECRET_ACCESS_KEY ;
+            kv/data/online-boutique/aws session_token     | AWS_SESSION_TOKEN ;
+            kv/data/online-boutique/app jwt_secret        | JWT_SECRET ;
+            kv/data/online-boutique/app openai_api_key    | OPENAI_API_KEY
+
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
+          aws-access-key-id: ${{ env.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ env.AWS_SECRET_ACCESS_KEY }}
+          aws-session-token: ${{ env.AWS_SESSION_TOKEN }}
           aws-region: ${{ env.AWS_REGION }}
 
       - name: Login to Amazon ECR
@@ -122,12 +153,18 @@ jobs:
         # ROLLBACK automatico a la version anterior y el job falla.
         run: |
           START=$(date +%s)
+          # El chatbot no tiene API key real todavía: en Vault se guarda el
+          # marcador "sin-configurar" y aquí se traduce a vacío.
+          OPENAI_KEY="$OPENAI_API_KEY"
+          [ "$OPENAI_KEY" = "sin-configurar" ] && OPENAI_KEY=""
+          # Los secretos se pasan desde variables de entorno (inyectadas por
+          # vault-action), nunca escritos en el YAML del workflow.
           helm upgrade --install onlineboutique ./helm-chart \
             -f helm-chart/values-aws.yaml \
             --set images.repository=${{ steps.login-ecr.outputs.registry }}/online-boutique \
             --set images.tag=${{ github.sha }} \
-            --set jwtSecret=${{ secrets.JWT_SECRET }} \
-            --set openai.apiKey=${{ secrets.OPENAI_API_KEY }} \
+            --set-string jwtSecret="$JWT_SECRET" \
+            --set-string openai.apiKey="$OPENAI_KEY" \
             --namespace default \
             --atomic --wait --timeout 10m
           echo "duration=$(( ($(date +%s) - START) / 60 )) min" >> $GITHUB_OUTPUT
@@ -175,4 +212,5 @@ jobs:
             echo "| Revision de Helm | $(helm history onlineboutique -n default --max 1 -o json 2>/dev/null | grep -o '\"revision\":[0-9]*' | cut -d: -f2) |"
             echo "| Duracion | ${{ steps.deploy.outputs.duration }} |"
             echo "| Tienda | ${{ steps.url.outputs.url }} |"
+            echo "| Secretos | Leídos de HashiCorp Vault (kv/online-boutique/*) |"
           } >> $GITHUB_STEP_SUMMARY
