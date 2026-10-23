@@ -31,7 +31,7 @@ gha-creds-*.json
 .env.*
 !.env.example
 
-# --- Fase III ---
+
 **/.terraform/
 ansible/inventory.ini
 ansible/out/

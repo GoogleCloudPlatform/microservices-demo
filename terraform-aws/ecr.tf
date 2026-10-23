@@ -1,7 +1,5 @@
 locals {
-  # Keep this in sync with the `service:` list in .github/workflows/aws-ci.yml.
-  # shoppingassistantservice (Google's GCP-coupled assistant) was replaced by
-  # accountservice + supportassistantservice — see docs/chatbot-support-design.md.
+
   microservices = [
     "adservice",
     "cartservice",

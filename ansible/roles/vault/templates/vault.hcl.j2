@@ -1,15 +1,9 @@
-# {{ ansible_managed }}
-# Configuración de HashiCorp Vault - Online Boutique (Fase III)
-
-# Interfaz web habilitada: https://{{ vault_public_ip }}:{{ vault_port }}/ui
 ui = true
 
-# Almacenamiento cifrado en el disco del servidor.
 storage "file" {
   path = "{{ vault_data_dir }}"
 }
 
-# Listener HTTPS. Nunca se expone Vault sin TLS.
 listener "tcp" {
   address       = "0.0.0.0:{{ vault_port }}"
   tls_cert_file = "{{ vault_tls_dir }}/vault.crt"
@@ -18,5 +12,4 @@ listener "tcp" {
 
 api_addr = "https://{{ vault_public_ip }}:{{ vault_port }}"
 
-# Registro de auditoría: se habilita después del init con
-#   vault audit enable file file_path=/var/log/vault_audit.log
+

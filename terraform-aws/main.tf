@@ -1,7 +1,5 @@
 locals {
-  # AWS Academy always names the sandbox role "LabRole"; only the account id
-  # in front of it changes between lab sessions, so that's the only part
-  # pulled dynamically.
+
   lab_role_arn = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/LabRole"
 }
 

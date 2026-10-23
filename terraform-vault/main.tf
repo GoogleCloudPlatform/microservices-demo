@@ -1,11 +1,3 @@
-# =============================================================================
-# Fase III - Servidor de HashiCorp Vault (fuera del clúster EKS)
-#
-# Vive en su PROPIA carpeta (y su propio .tfstate) a propósito: así un
-# `terraform destroy` del clúster (terraform-aws/) nunca borra la bóveda ni
-# los secretos que guarda en su disco.
-# =============================================================================
-
 terraform {
   required_providers {
     aws = {
@@ -23,7 +15,7 @@ provider "aws" {
   region = var.aws_region
 }
 
-# --- Imagen: Ubuntu 24.04 LTS oficial de Canonical ----------------------------
+#  Imagen: Ubuntu 24.04 LTS oficial de Canonical 
 data "aws_ami" "ubuntu" {
   most_recent = true
   owners      = ["099720109477"] # Canonical
@@ -34,7 +26,7 @@ data "aws_ami" "ubuntu" {
   }
 }
 
-# --- Red: la VPC por defecto (la misma que usa el clúster EKS) ---------------
+#  Red: la VPC por defecto (la misma que usa el clúster EKS) 
 data "aws_vpc" "default" {
   default = true
 }
@@ -45,7 +37,7 @@ data "aws_subnet" "vault" {
   default_for_az    = true
 }
 
-# --- Firewall: solo 8200 (Vault) y 22 (SSH desde TU IP) ----------------------
+#  Firewall: solo 8200 (Vault) y 22 (SSH desde TU IP) 
 resource "aws_security_group" "vault" {
   name        = "vault-server-sg"
   description = "Vault: API/UI por 8200 (TLS) y SSH solo desde la IP del administrador"
@@ -78,7 +70,7 @@ resource "aws_security_group" "vault" {
   tags = { Name = "vault-server-sg", Project = "online-boutique" }
 }
 
-# --- El servidor -------------------------------------------------------------
+#  El servidor 
 resource "aws_instance" "vault" {
   ami                    = data.aws_ami.ubuntu.id
   instance_type          = var.instance_type
@@ -99,14 +91,14 @@ resource "aws_instance" "vault" {
   tags = { Name = "vault-server", Project = "online-boutique" }
 }
 
-# --- IP fija: la dirección de Vault no cambia aunque la EC2 se reinicie -------
+#  IP fija: la dirección de Vault no cambia aunque la EC2 se reinicie 
 resource "aws_eip" "vault" {
   instance = aws_instance.vault.id
   domain   = "vpc"
   tags     = { Name = "vault-server-eip", Project = "online-boutique" }
 }
 
-# --- Genera automáticamente el inventario de Ansible -------------------------
+#  Genera automáticamente el inventario de Ansible 
 resource "local_file" "ansible_inventory" {
   filename        = "${path.module}/../ansible/inventory.ini"
   file_permission = "0644"

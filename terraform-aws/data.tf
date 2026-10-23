@@ -1,8 +1,4 @@
-# Resolves the currently-active account id at plan/apply time, instead of
-# hardcoding it. AWS Academy labs mint a NEW account (and new account id)
-# every session, so a hardcoded value here would need manual edits in every
-# file that referenced it — this is the whole reason main.tf's role_arn is
-# built from this instead of a literal.
+
 data "aws_caller_identity" "current" {}
 
 data "aws_vpc" "default" {

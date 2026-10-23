@@ -1,12 +1,3 @@
----
-# =============================================================================
-# Fase III - Aprovisiona el servidor de HashiCorp Vault.
-#
-#   ansible-playbook -i inventory.ini playbook.yml
-#
-# Es idempotente: correrlo 1 o 100 veces deja el servidor en el mismo estado.
-# La segunda ejecución debe terminar con changed=0.
-# =============================================================================
 - name: Servidor de HashiCorp Vault para Online Boutique
   hosts: vault
   become: true
