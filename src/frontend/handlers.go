@@ -64,11 +64,66 @@ func (fe *frontendServer) homeHandler(w http.ResponseWriter, r *http.Request) {
 		renderHTTPError(log, r, w, errors.Wrap(err, "could not retrieve currencies"), http.StatusInternalServerError)
 		return
 	}
-	products, err := fe.getProducts(r.Context())
+	allProducts, err := fe.getProducts(r.Context())
 	if err != nil {
 		renderHTTPError(log, r, w, errors.Wrap(err, "could not retrieve products"), http.StatusInternalServerError)
 		return
 	}
+
+	searchQuery := strings.TrimSpace(r.URL.Query().Get("q"))
+	selectedCategory := strings.TrimSpace(r.URL.Query().Get("category"))
+	maxPriceInput := strings.TrimSpace(r.URL.Query().Get("max_price"))
+
+	products := allProducts
+	if searchQuery != "" {
+		products, err = fe.searchProducts(r.Context(), searchQuery)
+		if err != nil {
+			renderHTTPError(log, r, w, errors.Wrap(err, "could not search products"), http.StatusInternalServerError)
+			return
+		}
+	}
+
+	categories := make([]string, 0)
+	seenCategories := make(map[string]bool)
+	for _, product := range allProducts {
+		for _, category := range product.GetCategories() {
+			if !seenCategories[category] {
+				seenCategories[category] = true
+				categories = append(categories, category)
+			}
+		}
+	}
+
+	maxPrice := -1.0
+	if maxPriceInput != "" {
+		maxPrice, err = strconv.ParseFloat(maxPriceInput, 64)
+		if err != nil || maxPrice < 0 {
+			renderHTTPError(log, r, w, errors.New("invalid maximum price"), http.StatusBadRequest)
+			return
+		}
+	}
+
+	filteredProducts := make([]*pb.Product, 0, len(products))
+	for _, product := range products {
+		if selectedCategory != "" && !stringinSlice(product.GetCategories(), selectedCategory) {
+			continue
+		}
+
+		if maxPrice >= 0 {
+			price := product.GetPriceUsd()
+			if price == nil {
+				continue
+			}
+			priceValue := float64(price.GetUnits()) + float64(price.GetNanos())/1e9
+			if priceValue > maxPrice {
+				continue
+			}
+		}
+
+		filteredProducts = append(filteredProducts, product)
+	}
+	products = filteredProducts
+
 	cart, err := fe.getCart(r.Context(), sessionID(r))
 	if err != nil {
 		renderHTTPError(log, r, w, errors.Wrap(err, "could not retrieve cart"), http.StatusInternalServerError)
@@ -108,12 +163,17 @@ func (fe *frontendServer) homeHandler(w http.ResponseWriter, r *http.Request) {
 	plat.setPlatformDetails(strings.ToLower(env))
 
 	if err := templates.ExecuteTemplate(w, "home", injectCommonTemplateData(r, map[string]interface{}{
-		"show_currency": true,
-		"currencies":    currencies,
-		"products":      ps,
-		"cart_size":     cartSize(cart),
-		"banner_color":  os.Getenv("BANNER_COLOR"), // illustrates canary deployments
-		"ad":            fe.chooseAd(r.Context(), []string{}, log),
+		"show_currency":     true,
+		"currencies":        currencies,
+		"products":          ps,
+		"search_query":      searchQuery,
+		"selected_category": selectedCategory,
+		"max_price":         maxPriceInput,
+		"categories":        categories,
+		"results_count":     len(ps),
+		"cart_size":         cartSize(cart),
+		"banner_color":      os.Getenv("BANNER_COLOR"), // illustrates canary deployments
+		"ad":                fe.chooseAd(r.Context(), []string{}, log),
 	})); err != nil {
 		log.Error(err)
 	}
@@ -232,7 +292,7 @@ func (fe *frontendServer) addToCartHandler(w http.ResponseWriter, r *http.Reques
 		renderHTTPError(log, r, w, errors.Wrap(err, "failed to add to cart"), http.StatusInternalServerError)
 		return
 	}
-	w.Header().Set("location", baseUrl + "/cart")
+	w.Header().Set("location", baseUrl+"/cart")
 	w.WriteHeader(http.StatusFound)
 }
 
@@ -244,7 +304,7 @@ func (fe *frontendServer) emptyCartHandler(w http.ResponseWriter, r *http.Reques
 		renderHTTPError(log, r, w, errors.Wrap(err, "failed to empty cart"), http.StatusInternalServerError)
 		return
 	}
-	w.Header().Set("location", baseUrl + "/")
+	w.Header().Set("location", baseUrl+"/")
 	w.WriteHeader(http.StatusFound)
 }
 
@@ -423,7 +483,7 @@ func (fe *frontendServer) logoutHandler(w http.ResponseWriter, r *http.Request) 
 		c.MaxAge = -1
 		http.SetCookie(w, c)
 	}
-	w.Header().Set("Location", baseUrl + "/")
+	w.Header().Set("Location", baseUrl+"/")
 	w.WriteHeader(http.StatusFound)
 }
 
