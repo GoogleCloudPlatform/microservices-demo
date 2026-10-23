@@ -1,0 +1,11 @@
+authorityKeyIdentifier=keyid,issuer
+basicConstraints=CA:FALSE
+keyUsage=digitalSignature,keyEncipherment
+extendedKeyUsage=serverAuth
+subjectAltName=@alt_names
+
+[alt_names]
+IP.1={{ ansible_host }}
+IP.2={{ ansible_default_ipv4.address }}
+IP.3=127.0.0.1
+DNS.1=localhost
