@@ -38,17 +38,7 @@ if ! awk -v users="$USERS" -v rate="$RATE" 'BEGIN {
 fi
 
 RAMP_UP="$(awk -v users="$USERS" -v rate="$RATE" 'BEGIN { print users / rate }')s"
-YEAR_MIN="$(($(date +%Y) + 1))"
-YEAR_MAX="$((YEAR_MIN + 70))"
-YEARS="$(awk -v first="$YEAR_MIN" -v last="$YEAR_MAX" 'BEGIN {
-  printf "["
-  for (year = first; year <= last; year++) {
-    if (year > first) printf ","
-    printf "%d", year
-  }
-  print "]"
-}')"
-export BASE_URL YEARS
+export BASE_URL
 
 # Streaming the generated config supports containers with a read-only root filesystem.
 sed \

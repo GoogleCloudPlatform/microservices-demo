@@ -13,6 +13,12 @@
 # limitations under the License.
 
 # yaml-language-server: $schema=https://raw.githubusercontent.com/Perfscale/perfscale/v0.28.0/schema/test.schema.json
+libraries:
+  - use: /loadgen/faker.wasm
+    as: faker
+    capabilities: []
+    with: { language: en, encoding: url }
+
 steps:
   - name: start home
     use: std/http@v1
@@ -132,27 +138,6 @@ steps:
       body: "product_id=${{ product }}&quantity=${{ quantity }}"
     check: { status: 200 }
 
-  - name: zip roll
-    use: std/random@v1
-    with: { type: integer, min: 10000, max: 99999 }
-    outputs: zip
-
-  - name: month roll
-    use: std/random@v1
-    with: { type: integer, min: 1, max: 12 }
-    outputs: month
-
-  - name: cvv roll
-    use: std/random@v1
-    with: { type: integer, min: 100, max: 999 }
-    outputs: cvv
-
-  - name: year
-    use: std/pick@v1
-    with:
-      from: "${{ env.YEARS }}"
-    outputs: year
-
   - name: checkout
     use: std/http@v1
     when: "${{ task }} == 19"
@@ -162,7 +147,7 @@ steps:
       headers:
         Content-Type: application/x-www-form-urlencoded
         Cookie: "shop_session-id=perfscale-${{ __vu__ }}"
-      body: "email=loadtest-${{ __vu__ }}-${{ __iter__ }}%40example.com&street_address=PerfscaleWay1&zip_code=${{ zip }}&city=MountainView&state=CA&country=USA&credit_card_number=4111111111111111&credit_card_expiration_month=${{ month }}&credit_card_expiration_year=${{ year }}&credit_card_cvv=${{ cvv }}"
+      body: 'email=${faker.internet("email")}&street_address=${faker.address("street_address")}&zip_code=${faker.address("zip_code")}&city=${faker.address("city")}&state=${faker.address("state_abbr")}&country=${faker.address("country")}&credit_card_number=${faker.payment("credit_card_number")}&credit_card_expiration_month=${faker.payment("credit_card_expiration_month")}&credit_card_expiration_year=${faker.payment("credit_card_expiration_year")}&credit_card_cvv=${faker.payment("credit_card_cvv")}'
     check: { status: 200 }
 
   - name: think roll
