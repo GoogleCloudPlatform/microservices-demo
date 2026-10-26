@@ -141,10 +141,10 @@ jobs:
         REQUEST_COUNT="0"
         while [[ "$REQUEST_COUNT"  -lt "50"  ]]; do
             sleep 5
-            REQUEST_COUNT=$(kubectl logs -l app=loadgenerator | grep Aggregated | awk '{print $2}')
+            REQUEST_COUNT=$(kubectl logs -l app=loadgenerator | awk '/^\[stats\]/ && match($0, /reqs=[0-9]+/) { requests = substr($0, RSTART + 5, RLENGTH - 5) } END { print requests + 0 }')
         done
         # ensure there are no errors hitting endpoints
-        ERROR_COUNT=$(kubectl logs -l app=loadgenerator | grep Aggregated | awk '{print $3}' | sed "s/[(][^)]*[)]//g")
+        ERROR_COUNT=$(kubectl logs -l app=loadgenerator | awk '/^\[check\].* → FAIL / { count++ } END { print count + 0 }')
         if [[ "$ERROR_COUNT" -gt "0" ]]; then
           exit 1
         fi
