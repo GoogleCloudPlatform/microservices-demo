@@ -29,19 +29,25 @@ on:
       - '.github/workflows/terraform-validate-ci.yaml'
       - 'helm-chart/**'
       - '.github/workflows/helm-chart-ci.yaml'
+permissions:
+  contents: read
+
 jobs:
   code-tests:
     runs-on: ubuntu-24.04
     steps:
-    - uses: actions/checkout@v7
-    - uses: actions/setup-dotnet@v6
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      with:
+        persist-credentials: false
+    - uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6
       env:
         DOTNET_INSTALL_DIR: "./.dotnet"
       with:
         dotnet-version: '10.0'
-    - uses: actions/setup-go@v7
+    - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7
       with:
         go-version: '1.27'
+        cache: false
     - name: Go Unit Tests
       timeout-minutes: 10
       run: |
@@ -66,31 +72,26 @@ jobs:
         profile: ["local-code"]
       fail-fast: true
     steps:
-    - uses: actions/checkout@v7
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      with:
+        persist-credentials: false
     - id: auth
-      uses: google-github-actions/auth@v3
+      uses: google-github-actions/auth@7c6bc770dae815cd3e89ee6cdf493a5fab2cc093 # v3
       with:
         workload_identity_provider: 'projects/816257685787/locations/global/workloadIdentityPools/github-actions-pool/providers/github-provider'
         service_account: 'github-action-runner@online-boutique-ci.iam.gserviceaccount.com'
-    - uses: google-github-actions/setup-gcloud@v2
+    - uses: google-github-actions/setup-gcloud@e427ad8a34f8676edf47cf7d7925499adf3eb74f # v2
       with:
         install_components: 'gke-gcloud-auth-plugin'
     - name: Set up QEMU
-      uses: docker/setup-qemu-action@v4
+      uses: docker/setup-qemu-action@99012661954931238ded8c8b007157a8430204e1 # v4
     - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v4
+      uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4
     - name: Install Skaffold
       run: |
         curl -Lo skaffold https://storage.googleapis.com/skaffold/releases/latest/skaffold-linux-amd64
         chmod +x skaffold
         sudo mv skaffold /usr/local/bin
-    - name: Cache Skaffold cache
-      uses: actions/cache@v6
-      with:
-        path: ~/.skaffold/cache
-        key: skaffold-${{ runner.os }}-${{ github.workflow }}-${{ github.run_id }}
-        restore-keys: |
-          skaffold-${{ runner.os }}-${{ github.workflow }}-
     - name: Build + Deploy PR images to GKE
       timeout-minutes: 20
       run: |
