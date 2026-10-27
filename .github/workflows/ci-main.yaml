@@ -72,7 +72,7 @@ jobs:
       with:
         workload_identity_provider: 'projects/816257685787/locations/global/workloadIdentityPools/github-actions-pool/providers/github-provider'
         service_account: 'github-action-runner@online-boutique-ci.iam.gserviceaccount.com'
-    - uses: google-github-actions/setup-gcloud@v2
+    - uses: google-github-actions/setup-gcloud@v3
       with:
         install_components: 'gke-gcloud-auth-plugin'
     - name: Set up QEMU
