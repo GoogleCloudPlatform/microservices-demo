@@ -25,7 +25,7 @@ concurrency:
 
 jobs:
   cleanup-namespace:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     environment: gke-staging
     permissions:
       contents: read

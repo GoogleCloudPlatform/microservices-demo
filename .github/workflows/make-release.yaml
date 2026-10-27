@@ -39,7 +39,7 @@ permissions:
 
 jobs:
   build-and-release:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-26.04
     steps:
       - name: Checkout code
         uses: actions/checkout@v7
