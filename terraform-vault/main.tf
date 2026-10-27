@@ -67,6 +67,7 @@ resource "aws_security_group" "vault" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
+ 
   tags = { Name = "vault-server-sg", Project = "online-boutique" }
 }
 
@@ -86,6 +87,9 @@ resource "aws_instance" "vault" {
 
   metadata_options {
     http_tokens = "required" # IMDSv2 obligatorio (buena práctica de seguridad)
+  }
+lifecycle {
+    ignore_changes = [ami]
   }
 
   tags = { Name = "vault-server", Project = "online-boutique" }
