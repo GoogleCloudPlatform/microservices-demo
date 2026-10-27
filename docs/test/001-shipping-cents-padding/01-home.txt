@@ -1,0 +1,19 @@
+$ curl -s -D - -o /dev/null http://localhost:8080/
+
+HTTP/1.1 200 OK
+Set-Cookie: shop_session-id=8d2e386b-b177-465d-a358-12284078f4ef; Max-Age=172800
+Date: Tue, 14 Jul 2026 10:33:44 GMT
+Content-Type: text/html; charset=utf-8
+Transfer-Encoding: chunked
+
+
+--- product grid excerpt (prices found in HTML) ---
+$19.99
+$18.99
+$109.99
+$89.99
+$24.99
+$18.99
+$18.49
+$5.49
+$8.99

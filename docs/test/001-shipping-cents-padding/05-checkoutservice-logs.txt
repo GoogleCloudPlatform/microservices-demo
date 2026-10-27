@@ -1,0 +1,7 @@
+{"message":"Tracing disabled.","severity":"info","timestamp":"2026-07-14T10:27:23.217193587Z"}
+{"message":"Profiling disabled.","severity":"info","timestamp":"2026-07-14T10:27:23.218200879Z"}
+{"message":"service config: \u0026{UnimplementedCheckoutServiceServer:{} productCatalogSvcAddr:productcatalogservice:3550 productCatalogSvcConn:0xa54fcfbec08 cartSvcAddr:cartservice:7070 cartSvcConn:0xa54fcfbf008 currencySvcAddr:currencyservice:7000 currencySvcConn:0xa54fcfbf408 shippingSvcAddr:shippingservice:50051 shippingSvcConn:0xa54fcfbe808 emailSvcAddr:emailservice:5000 emailSvcConn:0xa54fcfbf808 paymentSvcAddr:paymentservice:50051 paymentSvcConn:0xa54fcfbfc08}","severity":"info","timestamp":"2026-07-14T10:27:23.231295171Z"}
+{"message":"starting to listen on tcp: \"[::]:5050\"","severity":"info","timestamp":"2026-07-14T10:27:23.234839921Z"}
+{"message":"[PlaceOrder] user_id=\"8d2e386b-b177-465d-a358-12284078f4ef\" user_currency=\"USD\"","severity":"info","timestamp":"2026-07-14T10:34:49.387939919Z"}
+{"message":"payment went through (transaction_id: f69d650b-b8dd-43f5-9d8e-32bae9af3997)","severity":"info","timestamp":"2026-07-14T10:34:49.983524336Z"}
+{"message":"order confirmation email sent to \"someone@example.com\"","severity":"info","timestamp":"2026-07-14T10:34:50.181322586Z"}

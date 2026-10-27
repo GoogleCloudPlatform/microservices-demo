@@ -198,9 +198,22 @@ func TestGetRandomNumber(t *testing.T) {
 
 // TestQuoteString verifies the string representation of a Quote.
 func TestQuoteString(t *testing.T) {
-	q := Quote{Dollars: 8, Cents: 99}
-	expected := "$8.99"
-	if q.String() != expected {
-		t.Errorf("Quote.String() = '%s', want '%s'", q.String(), expected)
+	tests := []struct {
+		name  string
+		quote Quote
+		want  string
+	}{
+		{"two-digit cents", Quote{Dollars: 8, Cents: 99}, "$8.99"},
+		{"single-digit cents padded", Quote{Dollars: 8, Cents: 5}, "$8.05"},
+		{"zero quote", Quote{Dollars: 0, Cents: 0}, "$0.00"},
+		{"zero dollars single-digit cents", Quote{Dollars: 0, Cents: 9}, "$0.09"},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			if got := tc.quote.String(); got != tc.want {
+				t.Errorf("Quote.String() = %q, want %q", got, tc.want)
+			}
+		})
 	}
 }
