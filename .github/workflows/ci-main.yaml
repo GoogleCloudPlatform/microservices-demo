@@ -31,7 +31,7 @@ on:
       - '.github/workflows/helm-chart-ci.yaml'
 jobs:
   code-tests:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     steps:
     - uses: actions/checkout@v7
     - uses: actions/setup-dotnet@v6
@@ -56,7 +56,7 @@ jobs:
       run: |
         dotnet test src/cartservice/
   deployment-tests:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     needs: code-tests
     permissions:
       contents: read
