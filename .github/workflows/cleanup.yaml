@@ -14,25 +14,22 @@
 
 name: "Clean up deployment"
 on:
-  pull_request_target:
-    # run on pull requests targeting main
-    branches:
-      - main
-    types: closed
-    paths-ignore:
-      - '**/*.md'
-      - 'docs/**'
-      - 'LICENSE'
-      - 'kustomize/**'
-      - '.github/workflows/kustomize-build-ci.yaml'
-      - 'terraform/**'
-      - '.github/workflows/terraform-validate-ci.yaml'
+  schedule:
+    # Run every hour to clean up namespaces for closed/merged PRs
+    - cron: '0 * * * *'
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: false
+
 jobs:
   cleanup-namespace:
     runs-on: ubuntu-24.04
     environment: gke-staging
     permissions:
       contents: read
+      pull-requests: read
       id-token: write
     steps:
       - id: auth
@@ -43,16 +40,29 @@ jobs:
       - uses: google-github-actions/setup-gcloud@v2
         with:
           install_components: 'gke-gcloud-auth-plugin'
-      - name: Delete PR namespace in staging cluster
-        if: ${{ always() }}
+      - name: Delete closed PR namespaces in staging cluster
         timeout-minutes: 20
-        run: |
-          gcloud container clusters get-credentials $PR_CLUSTER \
-              --region $REGION --project $PROJECT_ID
-          NAMESPACE="pr${PR_NUMBER}"
-          kubectl delete namespace $NAMESPACE --ignore-not-found
         env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           PROJECT_ID: "online-boutique-ci"
           PR_CLUSTER: "prs-gke-cluster"
           REGION: "us-central1"
-          PR_NUMBER: ${{ github.event.number }}
+        run: |
+          gcloud container clusters get-credentials "$PR_CLUSTER" \
+              --region "$REGION" --project "$PROJECT_ID"
+
+          NAMESPACES=$(kubectl get namespaces -o jsonpath='{range .items[*]}{.metadata.name}{"\n"}{end}' | grep -E '^pr[0-9]+$' || true)
+          if [[ -z "$NAMESPACES" ]]; then
+            echo "No PR namespaces found."
+            exit 0
+          fi
+
+          for NAMESPACE in $NAMESPACES; do
+            PR_NUMBER="${NAMESPACE#pr}"
+            STATE=$(gh pr view "$PR_NUMBER" --repo "${{ github.repository }}" --json state --jq '.state' || true)
+            echo "Namespace $NAMESPACE (PR #$PR_NUMBER) state: ${STATE:-UNKNOWN}"
+            if [[ "$STATE" == "CLOSED" || "$STATE" == "MERGED" ]]; then
+              echo "Deleting namespace $NAMESPACE for $STATE PR #$PR_NUMBER..."
+              kubectl delete namespace "$NAMESPACE" --ignore-not-found
+            fi
+          done
