@@ -1,0 +1,160 @@
+# Copyright 2026 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# yaml-language-server: $schema=https://raw.githubusercontent.com/Perfscale/perfscale/v0.28.0/schema/test.schema.json
+libraries:
+  - use: /loadgen/faker.wasm
+    as: faker
+    capabilities: []
+    with: { language: en, encoding: url }
+
+steps:
+  - name: start home
+    use: std/http@v1
+    when: "${{ __iter__ }} == 0"
+    with:
+      url: "${{ env.BASE_URL }}/"
+      headers: { Cookie: "shop_session-id=perfscale-${{ __vu__ }}" }
+    check: { status: 200 }
+
+  - name: task roll
+    use: std/random@v1
+    with: { type: integer, min: 1, max: 19 }
+    outputs: task
+
+  - name: index
+    use: std/http@v1
+    when: "${{ task }} == 1"
+    with:
+      url: "${{ env.BASE_URL }}/"
+      headers: { Cookie: "shop_session-id=perfscale-${{ __vu__ }}" }
+    check: { status: 200 }
+
+  - name: currency roll
+    use: std/random@v1
+    with: { type: integer, min: 0, max: 5 }
+    outputs: currency_index
+
+  - name: currency
+    use: std/pick@v1
+    with:
+      from: ["EUR", "USD", "JPY", "CAD", "GBP", "TRY"]
+      index: "${{ currency_index }}"
+    outputs: currency
+
+  - name: set currency
+    use: std/http@v1
+    when: "${{ task }} >= 2 && ${{ task }} <= 3"
+    with:
+      method: POST
+      url: "${{ env.BASE_URL }}/setCurrency"
+      headers:
+        Content-Type: application/x-www-form-urlencoded
+        Cookie: "shop_session-id=perfscale-${{ __vu__ }}"
+      body: "currency_code=${{ currency }}"
+    check: { status: 200 }
+
+  - name: product roll
+    use: std/random@v1
+    with: { type: integer, min: 0, max: 8 }
+    outputs: product_index
+
+  - name: product
+    use: std/pick@v1
+    with:
+      from: ["0PUK6V6EV0", "1YMWWN1N4O", "2ZYFJ3GM2N", "66VCHSJNUP", "6E92ZMYYFZ", "9SIQT8TOJO", "L9ECAV7KIM", "LS4PSXUNUM", "OLJCESPC7Z"]
+      index: "${{ product_index }}"
+    outputs: product
+
+  - name: browse product
+    use: std/http@v1
+    when: "${{ task }} >= 4 && ${{ task }} <= 13"
+    with:
+      url: "${{ env.BASE_URL }}/product/${{ product }}"
+      headers: { Cookie: "shop_session-id=perfscale-${{ __vu__ }}" }
+    check: { status: 200 }
+
+  - name: quantity roll
+    use: std/random@v1
+    with: { type: integer, min: 1, max: 10 }
+    outputs: quantity
+
+  - name: add product page
+    use: std/http@v1
+    when: "${{ task }} >= 14 && ${{ task }} <= 15"
+    with:
+      url: "${{ env.BASE_URL }}/product/${{ product }}"
+      headers: { Cookie: "shop_session-id=perfscale-${{ __vu__ }}" }
+    check: { status: 200 }
+
+  - name: add to cart
+    use: std/http@v1
+    when: "${{ task }} >= 14 && ${{ task }} <= 15"
+    with:
+      method: POST
+      url: "${{ env.BASE_URL }}/cart"
+      headers:
+        Content-Type: application/x-www-form-urlencoded
+        Cookie: "shop_session-id=perfscale-${{ __vu__ }}"
+      body: "product_id=${{ product }}&quantity=${{ quantity }}"
+    check: { status: 200 }
+
+  - name: view cart
+    use: std/http@v1
+    when: "${{ task }} >= 16 && ${{ task }} <= 18"
+    with:
+      url: "${{ env.BASE_URL }}/cart"
+      headers: { Cookie: "shop_session-id=perfscale-${{ __vu__ }}" }
+    check: { status: 200 }
+
+  - name: checkout product page
+    use: std/http@v1
+    when: "${{ task }} == 19"
+    with:
+      url: "${{ env.BASE_URL }}/product/${{ product }}"
+      headers: { Cookie: "shop_session-id=perfscale-${{ __vu__ }}" }
+    check: { status: 200 }
+
+  - name: checkout add to cart
+    use: std/http@v1
+    when: "${{ task }} == 19"
+    with:
+      method: POST
+      url: "${{ env.BASE_URL }}/cart"
+      headers:
+        Content-Type: application/x-www-form-urlencoded
+        Cookie: "shop_session-id=perfscale-${{ __vu__ }}"
+      body: "product_id=${{ product }}&quantity=${{ quantity }}"
+    check: { status: 200 }
+
+  - name: checkout
+    use: std/http@v1
+    when: "${{ task }} == 19"
+    with:
+      method: POST
+      url: "${{ env.BASE_URL }}/cart/checkout"
+      headers:
+        Content-Type: application/x-www-form-urlencoded
+        Cookie: "shop_session-id=perfscale-${{ __vu__ }}"
+      body: 'email=${faker.internet("email")}&street_address=${faker.address("street_address")}&zip_code=${faker.address("zip_code")}&city=${faker.address("city")}&state=${faker.address("state_abbr")}&country=${faker.address("country")}&credit_card_number=${faker.payment("credit_card_number")}&credit_card_expiration_month=${faker.payment("credit_card_expiration_month")}&credit_card_expiration_year=${faker.payment("credit_card_expiration_year")}&credit_card_cvv=${faker.payment("credit_card_cvv")}'
+    check: { status: 200 }
+
+  - name: think roll
+    use: std/random@v1
+    with: { type: float, min: 1, max: 10 }
+    outputs: think_time
+
+  - name: think
+    use: std/sleep@v1
+    with: { seconds: "${{ think_time }}" }

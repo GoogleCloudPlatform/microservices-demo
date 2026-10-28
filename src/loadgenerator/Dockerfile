@@ -12,41 +12,25 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Define a default value so it's not empty if the builder fails to provide it
-ARG BUILDPLATFORM=linux/amd64
+# This artifact-only image carries the prebuilt Faker WASM component.
+FROM ghcr.io/perfscale/faker:0.1.0@sha256:7c2657d2bd797f9134a67877fdf9df14de410f5e1d200a7a9610409de094f3fd AS faker
 
-FROM --platform=$BUILDPLATFORM python:3.14.7-alpine@sha256:05b2b8b732ecd268fee8727a369f936f022d1321b59befd13c30ede22769dcdc AS base
-
-FROM base AS builder
-
-ENV PYTHONDONTWRITEBYTECODE=1
-ENV PYTHONUNBUFFERED=1
-
-RUN apk update \
-    && apk add --no-cache g++ linux-headers \
-    && rm -rf /var/cache/apk/*
-
-COPY requirements.txt .
-
-RUN pip install --prefix="/install" -r requirements.txt
-
-FROM base
-
-ENV PYTHONDONTWRITEBYTECODE=1
-ENV PYTHONUNBUFFERED=1
-
-RUN apk update \
-    && apk add --no-cache libstdc++ \
-    && rm -rf /var/cache/apk/*
+# The official Perfscale image already contains the binary and a non-root user.
+# No compiler, source checkout, Python runtime, or Locust dependencies are needed.
+FROM ghcr.io/perfscale/perfscale:0.28.0@sha256:7853b8f943dfea0aa18bc1cade3c40f7f3c56b76488a258cdd358d1c176181a1
 
 WORKDIR /loadgen
 
-COPY --from=builder /install /usr/local
+COPY test.yaml config.template.yaml ./
+COPY --chmod=0755 run-perfscale.sh ./
+COPY --from=faker /faker.wasm ./
 
-# Add application code.
-COPY locustfile.py .
+ENV FRONTEND_ADDR=http://localhost:8080 \
+    USERS=10 \
+    RATE=1 \
+    DURATION=1h \
+    RAMP_DOWN=30s \
+    PERFSCALE_BIN=perfscale
 
-# enable gevent support in debugger
-ENV GEVENT_SUPPORT=True
-
-ENTRYPOINT locust --host="http://${FRONTEND_ADDR}" --headless -u "${USERS:-10}" -r "${RATE:-1}" 2>&1
+USER perfscale
+ENTRYPOINT ["/loadgen/run-perfscale.sh"]
