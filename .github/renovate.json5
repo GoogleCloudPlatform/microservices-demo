@@ -13,7 +13,7 @@
     enabled: false,
   },
   constraints: {
-    python: '3.14.7',
+    python: '3.15.1',
   },
   kubernetes: {
     managerFilePatterns: [
