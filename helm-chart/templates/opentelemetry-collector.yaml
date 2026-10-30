@@ -82,6 +82,8 @@ spec:
           mountPath: /template
         - name: collector-gateway-config
           mountPath: /conf
+        resources:
+          {{- toYaml .Values.opentelemetryCollector.initContainerResources | nindent 10 }}
       {{- end }}
       containers:
       # This gateway container will receive traces and metrics from each microservice

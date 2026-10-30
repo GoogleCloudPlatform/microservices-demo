@@ -55,6 +55,13 @@ spec:
           mountPath: /template
         - name: collector-gateway-config
           mountPath: /conf
+        resources:
+          requests:
+            cpu: 50m
+            memory: 32Mi
+          limits:
+            cpu: 100m
+            memory: 64Mi
       containers:
       # This gateway container will receive traces and metrics from each microservice
       # and forward it to GCP

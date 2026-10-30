@@ -46,6 +46,14 @@ opentelemetryCollector:
   name: opentelemetrycollector
   # Specifies the project id for the otel collector. If set as "PROJECT_ID" (default value), an initContainer will automatically retrieve the project id value from the metadata server.
   projectId: "PROJECT_ID"
+  # Resource requests and limits for the initContainer that retrieves the project id.
+  initContainerResources:
+    requests:
+      cpu: 50m
+      memory: 32Mi
+    limits:
+      cpu: 100m
+      memory: 64Mi
 
 googleCloudOperations:
   profiler: false
@@ -143,6 +151,14 @@ loadGenerator:
   create: true
   name: loadgenerator
   checkFrontendInitContainer: true
+  # Resource requests and limits for the initContainer that checks the frontend is reachable.
+  initContainerResources:
+    requests:
+      cpu: 50m
+      memory: 32Mi
+    limits:
+      cpu: 100m
+      memory: 64Mi
   resources:
     requests:
       cpu: 300m
