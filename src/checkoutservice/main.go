@@ -260,7 +260,14 @@ func (cs *checkoutService) PlaceOrder(ctx context.Context, req *pb.PlaceOrderReq
 		return nil, status.Errorf(codes.Unavailable, "shipping error: %+v", err)
 	}
 
-	_ = cs.emptyUserCart(ctx, req.UserId)
+	if err := cs.emptyUserCart(ctx, req.UserId); err != nil {
+		// Retry once: a transient failure here would otherwise leave a stale,
+		// already-paid-for cart with no expiry (see #3578). The order itself is
+		// not failed on a second failure - only logged, same as the e-mail below.
+		if err := cs.emptyUserCart(ctx, req.UserId); err != nil {
+			log.Warnf("failed to empty cart for user %q after retry: %+v", req.UserId, err)
+		}
+	}
 
 	orderResult := &pb.OrderResult{
 		OrderId:            orderID.String(),
