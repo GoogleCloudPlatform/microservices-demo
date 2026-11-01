@@ -177,10 +177,17 @@ func TestCreateQuoteFromCount(t *testing.T) {
 
 // TestGetRandomLetterCode verifies the output is a valid uppercase letter.
 func TestGetRandomLetterCode(t *testing.T) {
-	for i := 0; i < 100; i++ {
+	seen := make(map[uint32]bool)
+	for i := 0; i < 10000; i++ {
 		code := getRandomLetterCode()
 		if code < 65 || code > 90 {
-			t.Errorf("getRandomLetterCode: got %d (%c), expected range 65-90 (A-Z)", code, code)
+			t.Fatalf("getRandomLetterCode: got %d (%c), expected range 65-90 (A-Z)", code, code)
+		}
+		seen[code] = true
+	}
+	for code := uint32(65); code <= 90; code++ {
+		if !seen[code] {
+			t.Errorf("getRandomLetterCode: never produced %c (%d) in 10000 draws", code, code)
 		}
 	}
 }
