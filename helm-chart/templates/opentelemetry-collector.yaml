@@ -27,6 +27,40 @@ metadata:
   {{- end }}
 ---
 {{- end }}
+# The k8sattributes processor reads pod metadata from the API server to derive
+# k8s.deployment.name (pod -> ReplicaSet -> Deployment) for each span it sees.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: {{ .Values.opentelemetryCollector.name }}
+rules:
+- apiGroups: [""]
+  resources: ["pods", "namespaces", "nodes"]
+  verbs: ["get", "list", "watch"]
+- apiGroups: ["apps"]
+  resources: ["replicasets"]
+  verbs: ["get", "list", "watch"]
+- apiGroups: ["extensions"]
+  resources: ["replicasets"]
+  verbs: ["get", "list", "watch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: {{ .Values.opentelemetryCollector.name }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: {{ .Values.opentelemetryCollector.name }}
+subjects:
+- kind: ServiceAccount
+  {{- if .Values.serviceAccounts.create }}
+  name: {{ .Values.opentelemetryCollector.name }}
+  {{- else }}
+  name: default
+  {{- end }}
+  namespace: {{ .Release.Namespace }}
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -76,7 +110,7 @@ spec:
         - '/bin/sh'
         - '-c'
         - |
-           sed "s/PROJECT_ID/$(curl -H 'Metadata-Flavor: Google' http://metadata.google.internal/computeMetadata/v1/project/project-id)/" /template/collector-gateway-config-template.yaml >> /conf/collector-gateway-config.yaml
+           sed "s/PROJECT_ID/$(wget -qO- --header 'Metadata-Flavor: Google' http://metadata.google.internal/computeMetadata/v1/project/project-id)/" /template/collector-gateway-config-template.yaml >> /conf/collector-gateway-config.yaml
         volumeMounts:
         - name: collector-gateway-config-template
           mountPath: /template
@@ -136,23 +170,91 @@ metadata:
 # https://opentelemetry.io/docs/collector/configuration/
 data:
   collector-gateway-config-template.yaml: |
+    extensions:
+      # Authenticates to the Telemetry API with the collector's Application
+      # Default Credentials (Workload Identity, or the node service account).
+      googleclientauth:
+        project: {{ .Values.opentelemetryCollector.projectId | quote }}
+        quota_project: {{ .Values.opentelemetryCollector.projectId | quote }}
     receivers:
       otlp:
         protocols: 
           grpc:
     processors:
+      # Resolves the sending pod from the connection source IP and attaches its
+      # workload identity. k8s.deployment.name is the attribute App Topology
+      # uses to key a GKE Deployment node.
+      k8sattributes:
+        auth_type: serviceAccount
+        passthrough: false
+        pod_association:
+        - sources:
+          - from: connection
+        extract:
+          metadata:
+          - k8s.namespace.name
+          - k8s.pod.name
+          - k8s.pod.uid
+          - k8s.node.name
+          - k8s.deployment.name
+          - k8s.statefulset.name
+          - k8s.daemonset.name
+          - k8s.cronjob.name
+      # Supplies cloud.provider, cloud.account.id, cloud.region /
+      # cloud.availability_zone and k8s.cluster.name from the GKE metadata
+      # server. override:false so it never clobbers what k8sattributes resolved.
+      resourcedetection:
+        detectors: [gcp]
+        timeout: 10s
+        override: false
+        gcp:
+          # This gateway describes its OWN pod, so host.* would label every
+          # service's spans with the collector's node. k8sattributes already
+          # supplies the real k8s.node.name for the sending pod.
+          resource_attributes:
+            host.id:
+              enabled: false
+            host.name:
+              enabled: false
+            host.type:
+              enabled: false
+      # The Telemetry API routes a request to a project using gcp.project_id and
+      # rejects the whole batch with HTTP 400 "Resource is missing required
+      # attribute" without it. resourcedetection supplies cloud.account.id,
+      # which is what App Topology matches on, but not this one -- both are
+      # needed, for different reasons.
+      resource:
+        attributes:
+        - key: gcp.project_id
+          value: {{ .Values.opentelemetryCollector.projectId | quote }}
+          action: upsert
+      batch:
+        send_batch_size: 200
+        send_batch_max_size: 200
+        timeout: 5s
     exporters:
+      # Traces go to the Telemetry API so OpenTelemetry resource attributes
+      # survive verbatim. Do not swap this back to the `googlecloud` exporter
+      # without re-checking App Topology: the legacy Cloud Trace API rewrites
+      # resource attributes into `g.co/r/...` span labels, which keeps traces
+      # flowing while silently removing every runtime edge.
+      otlphttp:
+        endpoint: https://telemetry.googleapis.com
+        encoding: proto
+        auth:
+          authenticator: googleclientauth
       googlecloud:
         project: {{ .Values.opentelemetryCollector.projectId | quote }}
     service:
+      extensions: [googleclientauth]
       pipelines:
         traces:
           receivers: [otlp] # Receive otlp-formatted data from other collector instances
-          processors: []
-          exporters: [googlecloud] # Export traces directly to Google Cloud
+          processors: [k8sattributes, resourcedetection, resource, batch]
+          exporters: [otlphttp] # Export traces to the Telemetry (OTLP) API
         metrics:
           receivers: [otlp]
-          processors: []
+          processors: [k8sattributes, resourcedetection, batch]
           exporters: [googlecloud] # Export metrics to Google Cloud
 {{- if .Values.networkPolicies.create }}
 ---

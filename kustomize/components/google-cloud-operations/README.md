@@ -31,6 +31,7 @@ gcloud services enable \
     monitoring.googleapis.com \
     cloudtrace.googleapis.com \
     cloudprofiler.googleapis.com \
+    telemetry.googleapis.com \
     --project ${PROJECT_ID}
 ```
 
@@ -40,9 +41,15 @@ In addition to that, you will need to grant the following IAM roles associated t
 PROJECT_ID=<your-gcp-project-id>
 GSA_NAME=<your-gsa>
 
+# Writes traces via the Telemetry (OTLP) API.
 gcloud projects add-iam-policy-binding ${PROJECT_ID} \
   --member "serviceAccount:${GSA_NAME}@${PROJECT_ID}.iam.gserviceaccount.com" \
-  --role roles/cloudtrace.agent
+  --role roles/telemetry.writer
+
+# Required because the Telemetry API bills quota against the project.
+gcloud projects add-iam-policy-binding ${PROJECT_ID} \
+  --member "serviceAccount:${GSA_NAME}@${PROJECT_ID}.iam.gserviceaccount.com" \
+  --role roles/serviceusage.serviceUsageConsumer
 
 gcloud projects add-iam-policy-binding ${PROJECT_ID} \
   --member "serviceAccount:${GSA_NAME}@${PROJECT_ID}.iam.gserviceaccount.com" \
@@ -88,6 +95,45 @@ Currently, this component adds a single collector service which collects traces 
 ![Collector Architecture Diagram](collector-model.png)
 
 If you wish to experiment with different backends, you can modify the appropriate lines in [otel-collector.yaml](otel-collector.yaml) to export traces or metrics to a different backend.  See the [OpenTelemetry docs](https://opentelemetry.io/docs/collector/configuration/) for more details.
+
+## App Topology / runtime edges
+
+[App Topology](https://cloud.google.com/stackdriver/docs/observability/application-topology)
+draws a runtime edge between two workloads when it can pair a caller's span with a
+callee's span *and* resolve both spans back to a concrete GKE workload. Resolution is by
+OpenTelemetry resource attribute, and the full set has to be present on the span:
+
+| Attribute | Supplied by |
+| --- | --- |
+| `cloud.provider` (`"gcp"`) | `resourcedetection` processor, `gcp` detector |
+| `cloud.account.id` (project **ID**, not number) | `resourcedetection` |
+| `cloud.region` *or* `cloud.availability_zone` | `resourcedetection` (regional vs zonal cluster) |
+| `k8s.cluster.name` | `resourcedetection` |
+| `k8s.namespace.name` | `k8sattributes` processor |
+| `k8s.deployment.name` (or statefulset/daemonset/cronjob) | `k8sattributes` processor |
+
+Two things in this component exist specifically to satisfy that, and are easy to break by
+accident:
+
+1. **Traces are exported over OTLP to `telemetry.googleapis.com`, not with the
+   `googlecloud` exporter.** The legacy Cloud Trace API rewrites OpenTelemetry resource
+   attributes (into `g.co/r/...` span labels), and App Topology matches on the raw OTLP
+   attribute names. Switching the traces pipeline back to the `googlecloud` exporter keeps
+   traces flowing to Cloud Trace and silently removes every runtime edge.
+2. **The collector needs RBAC.** The `k8sattributes` processor maps the sending pod's
+   connection IP to its pod, then walks pod -> ReplicaSet -> Deployment. That requires read
+   access to `pods`, `namespaces`, `nodes` and `replicasets`, which the ClusterRole in this
+   component grants.
+
+`gcp.project_id` is set separately by the `resource` processor. It is how the Telemetry API
+routes data to a project, and without it the API rejects the whole batch with
+`HTTP 400 Resource is missing required attribute`. `cloud.account.id` does not substitute
+for it.
+
+Edges also need trace context to propagate: if a service starts a fresh trace instead of
+continuing the caller's, its spans have no parent and no edge is produced. A useful
+invariant when checking a deployment is that the only parentless spans should be the ones
+entering your front door.
 
 ## Workload Identity
 
