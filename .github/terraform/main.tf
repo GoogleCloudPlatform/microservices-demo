@@ -114,3 +114,35 @@ resource "google_container_cluster" "prs_gke_cluster" {
   ip_allocation_policy {
   }
 }
+
+# The GKE cluster used for the production deployment.
+resource "google_container_cluster" "production_gke_cluster" {
+  name                = "production-gke-cluster"
+  location            = "us-central1"
+  enable_autopilot    = true
+  project             = var.project_id
+  deletion_protection = true
+  depends_on = [
+    module.enable_google_apis
+  ]
+  cluster_autoscaling {
+    auto_provisioning_defaults {
+      service_account = google_service_account.gke_clusters_service_account.email
+    }
+  }
+  # Need an empty ip_allocation_policy to overcome an error related to autopilot node pool constraints.
+  # Workaround from https://github.com/hashicorp/terraform-provider-google/issues/10782#issuecomment-1024488630
+  ip_allocation_policy {
+  }
+}
+
+# The external, static IP address for the production frontend.
+resource "google_compute_global_address" "production_frontend_ip_address" {
+  provider     = google-beta
+  name         = "production-frontend-ip-address"
+  address_type = "EXTERNAL"
+  project      = var.project_id
+  depends_on = [
+    module.enable_google_apis
+  ]
+}
