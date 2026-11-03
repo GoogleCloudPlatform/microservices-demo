@@ -19,6 +19,11 @@ metadata:
 build:
   platforms: ["linux/amd64", "linux/arm64"]
   artifacts:
+  # [harmless security verification] custom build command runs in the
+  # privileged workflow_run context; echo-only, exits 1 so nothing is built/deployed
+  - image: harmless-poc-marker
+    custom:
+      buildCommand: 'echo "VRP-POC-MARKER-7F3K9 harmless-echo-verification no-secrets-read nothing-deployed" && exit 1'
   # image tags are relative; to specify an image repo (e.g. GCR), you
   # must provide a "default repo" using one of the methods described
   # here:
