@@ -25,6 +25,7 @@ import (
 
 const (
 	avoidNoopCurrencyConversionRPC = false
+	productCatalogRequestTimeout   = 3 * time.Second
 )
 
 func (fe *frontendServer) getCurrencies(ctx context.Context) ([]string, error) {
@@ -43,8 +44,11 @@ func (fe *frontendServer) getCurrencies(ctx context.Context) ([]string, error) {
 }
 
 func (fe *frontendServer) getProducts(ctx context.Context) ([]*pb.Product, error) {
+	productCatalogCtx, cancel := context.WithTimeout(ctx, productCatalogRequestTimeout)
+	defer cancel()
+
 	resp, err := pb.NewProductCatalogServiceClient(fe.productCatalogSvcConn).
-		ListProducts(ctx, &pb.Empty{})
+		ListProducts(productCatalogCtx, &pb.Empty{})
 	return resp.GetProducts(), err
 }
 
