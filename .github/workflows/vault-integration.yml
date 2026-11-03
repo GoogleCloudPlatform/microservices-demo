@@ -1,0 +1,99 @@
+name: Validar integración con Vault
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - Giovanna-branch
+    paths:
+      - ".github/workflows/vault-integration.yml"
+      - "infra/ansible-vault/**"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: vault-integration
+  cancel-in-progress: false
+
+env:
+  AWS_REGION: us-east-1
+  VAULT_SECURITY_GROUP_ID: sg-0dc284b34ed3c14cb
+
+jobs:
+  validate-vault:
+    name: Recuperar secreto desde Vault
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Descargar repositorio
+        uses: actions/checkout@v4
+
+      - name: Configurar credenciales de AWS
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Obtener IP pública del ejecutor
+        id: runner-ip
+        shell: bash
+        run: |
+          RUNNER_IP="$(curl -fsS https://checkip.amazonaws.com | tr -d '[:space:]')"
+          echo "runner_ip=${RUNNER_IP}" >> "$GITHUB_OUTPUT"
+
+      - name: Autorizar temporalmente el acceso a Vault
+        id: allow-ip
+        shell: bash
+        run: |
+          RUNNER_IP="${{ steps.runner-ip.outputs.runner_ip }}"
+          echo "rule_added=false" >> "$GITHUB_OUTPUT"
+
+          if OUTPUT=$(aws ec2 authorize-security-group-ingress \
+            --group-id "$VAULT_SECURITY_GROUP_ID" \
+            --protocol tcp \
+            --port 8200 \
+            --cidr "${RUNNER_IP}/32" 2>&1); then
+            echo "rule_added=true" >> "$GITHUB_OUTPUT"
+            echo "Acceso temporal autorizado."
+          elif echo "$OUTPUT" | grep -q "InvalidPermission.Duplicate"; then
+            echo "La regla temporal ya existía."
+          else
+            echo "$OUTPUT"
+            exit 1
+          fi
+
+      - name: Obtener secreto desde Vault
+        uses: hashicorp/vault-action@v3
+        with:
+          url: ${{ vars.VAULT_ADDR }}
+          caCertificate: ${{ secrets.VAULT_CA_CERT }}
+          method: approle
+          roleId: ${{ secrets.VAULT_ROLE_ID }}
+          secretId: ${{ secrets.VAULT_SECRET_ID }}
+          secrets: |
+            online-boutique/data/ci/github demo_ci_token | DEMO_CI_TOKEN
+
+      - name: Comprobar recuperación del secreto
+        shell: bash
+        run: |
+          if [ -n "$DEMO_CI_TOKEN" ]; then
+            echo "Vault entregó correctamente el secreto autorizado."
+          else
+            echo "No se recibió el secreto desde Vault."
+            exit 1
+          fi
+
+      - name: Revocar acceso temporal a Vault
+        if: ${{ always() && steps.allow-ip.outputs.rule_added == 'true' }}
+        shell: bash
+        run: |
+          aws ec2 revoke-security-group-ingress \
+            --group-id "$VAULT_SECURITY_GROUP_ID" \
+            --protocol tcp \
+            --port 8200 \
+            --cidr "${{ steps.runner-ip.outputs.runner_ip }}/32"
+
+          echo "Acceso temporal eliminado."

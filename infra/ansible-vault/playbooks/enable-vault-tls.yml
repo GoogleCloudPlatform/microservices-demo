@@ -1,0 +1,154 @@
+---
+- name: Habilitar HTTPS en HashiCorp Vault
+  hosts: vault_servers
+  become: true
+  gather_facts: true
+
+  vars:
+    vault_tls_dir: /opt/vault/tls
+
+  handlers:
+    - name: Reiniciar Vault
+      ansible.builtin.systemd:
+        name: vault
+        state: restarted
+        daemon_reload: true
+
+  tasks:
+    - name: Instalar OpenSSL
+      ansible.builtin.apt:
+        name: openssl
+        state: present
+        update_cache: true
+
+    - name: Crear directorio para certificados
+      ansible.builtin.file:
+        path: "{{ vault_tls_dir }}"
+        state: directory
+        owner: root
+        group: vault
+        mode: "0755"
+
+    - name: Generar llave privada de la autoridad certificadora
+      ansible.builtin.command:
+        cmd: >-
+          openssl genrsa
+          -out {{ vault_tls_dir }}/ca.key
+          4096
+        creates: "{{ vault_tls_dir }}/ca.key"
+      no_log: true
+
+    - name: Generar certificado de la autoridad certificadora
+      ansible.builtin.command:
+        cmd: >-
+          openssl req -x509 -new -nodes
+          -key {{ vault_tls_dir }}/ca.key
+          -sha256
+          -days 3650
+          -out {{ vault_tls_dir }}/ca.crt
+          -subj "/CN=Online-Boutique-Vault-CA"
+        creates: "{{ vault_tls_dir }}/ca.crt"
+
+    - name: Generar llave privada del servidor Vault
+      ansible.builtin.command:
+        cmd: >-
+          openssl genrsa
+          -out {{ vault_tls_dir }}/vault.key
+          4096
+        creates: "{{ vault_tls_dir }}/vault.key"
+      no_log: true
+
+    - name: Generar solicitud de certificado del servidor
+      ansible.builtin.command:
+        cmd: >-
+          openssl req -new
+          -key {{ vault_tls_dir }}/vault.key
+          -out {{ vault_tls_dir }}/vault.csr
+          -subj "/CN={{ ansible_host }}"
+        creates: "{{ vault_tls_dir }}/vault.csr"
+
+    - name: Copiar configuración de direcciones permitidas
+      ansible.builtin.template:
+        src: ../templates/vault-cert-ext.cnf.j2
+        dest: "{{ vault_tls_dir }}/vault.ext"
+        owner: root
+        group: root
+        mode: "0644"
+      register: vault_ext
+
+    - name: Revisar si ya existe el certificado del servidor
+      ansible.builtin.stat:
+        path: "{{ vault_tls_dir }}/vault.crt"
+      register: vault_cert
+
+    - name: Firmar el certificado del servidor
+      ansible.builtin.command:
+        cmd: >-
+          openssl x509 -req
+          -in {{ vault_tls_dir }}/vault.csr
+          -CA {{ vault_tls_dir }}/ca.crt
+          -CAkey {{ vault_tls_dir }}/ca.key
+          -CAcreateserial
+          -out {{ vault_tls_dir }}/vault.crt
+          -days 825
+          -sha256
+          -extfile {{ vault_tls_dir }}/vault.ext
+      when: vault_ext.changed or not vault_cert.stat.exists
+      notify: Reiniciar Vault
+
+    - name: Proteger la llave de la autoridad certificadora
+      ansible.builtin.file:
+        path: "{{ vault_tls_dir }}/ca.key"
+        owner: root
+        group: root
+        mode: "0600"
+
+    - name: Permitir que Vault lea su llave privada
+      ansible.builtin.file:
+        path: "{{ vault_tls_dir }}/vault.key"
+        owner: root
+        group: vault
+        mode: "0640"
+
+    - name: Configurar permisos de los certificados
+      ansible.builtin.file:
+        path: "{{ item }}"
+        owner: root
+        group: root
+        mode: "0644"
+      loop:
+        - "{{ vault_tls_dir }}/ca.crt"
+        - "{{ vault_tls_dir }}/vault.crt"
+
+    - name: Activar la configuración HTTPS de Vault
+      ansible.builtin.template:
+        src: ../templates/vault-tls.hcl.j2
+        dest: /etc/vault.d/vault.hcl
+        owner: root
+        group: vault
+        mode: "0640"
+      notify: Reiniciar Vault
+
+    - name: Ejecutar el reinicio pendiente
+      ansible.builtin.meta: flush_handlers
+
+    - name: Esperar a que Vault responda en el puerto 8200
+      ansible.builtin.wait_for:
+        host: 127.0.0.1
+        port: 8200
+        delay: 2
+        timeout: 60
+
+    - name: Comprobar el endpoint HTTPS
+      ansible.builtin.uri:
+        url: https://127.0.0.1:8200/v1/sys/health
+        method: GET
+        ca_path: "{{ vault_tls_dir }}/ca.crt"
+        status_code:
+          - 200
+          - 429
+          - 472
+          - 473
+          - 501
+          - 503
+      changed_when: false
