@@ -95,6 +95,7 @@ spec:
         livenessProbe:
           grpc:
             port: 50051
+          failureThreshold: 5
         resources:
           {{- toYaml .Values.paymentService.resources | nindent 10 }}
 ---

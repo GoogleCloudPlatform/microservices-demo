@@ -57,6 +57,7 @@ spec:
         livenessProbe:
           grpc:
             port: 50051
+          failureThreshold: 5
         resources:
           requests:
             cpu: 100m
