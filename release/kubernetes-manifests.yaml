@@ -805,7 +805,7 @@ spec:
             memory: 64Mi
           limits:
             cpu: 300m
-            memory: 128Mi
+            memory: 256Mi
         readinessProbe:
           initialDelaySeconds: 15
           grpc:
