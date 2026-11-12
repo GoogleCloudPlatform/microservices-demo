@@ -98,3 +98,5 @@ resource "null_resource" "wait_conditions" {
     resource.null_resource.apply_deployment
   ]
 }
+
+
