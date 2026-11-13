@@ -201,6 +201,11 @@ cartDatabase:
   # Specifies the type of the cartservice's database, could be either redis or spanner.
   type: redis
   connectionString: "redis-cart:6379"
+  #added the authentication user still have the flexibillity
+  auth:
+    enabled: false
+    existingSecret: ""
+    secretPasswordKey: "password"
   inClusterRedis:
     create: true
     name: redis-cart

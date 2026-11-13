@@ -83,6 +83,13 @@ spec:
         - name: REDIS_ADDR
         {{- end }}
           value: {{ .Values.cartDatabase.connectionString | quote }}
+        {{- if .Values.cartDatabase.auth.enabled }}
+        - name: REDIS_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Values.cartDatabase.auth.existingSecret }}
+              key: {{ .Values.cartDatabase.auth.secretPasswordKey }}
+        {{- end }}
         resources:
           {{- toYaml .Values.cartService.resources | nindent 10 }}
         readinessProbe:
@@ -258,6 +265,15 @@ spec:
         {{- end }}
         ports:
         - containerPort: 6379
+        {{- if .Values.cartDatabase.auth.enabled }}
+        env:
+        - name: REDIS_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Values.cartDatabase.auth.existingSecret}}
+              key: {{ .Values.cartDatabase.auth.secretPasswordKey}}
+        args: ["--requirepass", "$(REDIS_PASSWORD)"]
+        {{- end}}
         readinessProbe:
           periodSeconds: 5
           tcpSocket:
