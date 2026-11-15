@@ -16,19 +16,8 @@ request, introducing a noticeable delay in the frontend. This delay will also
 show up in profiling tools: the `parseCatalog` function will take more than 80%
 of the CPU time.
 
-You can trigger this feature (and the delay) by sending a `USR1` signal and
-remove it (if needed) by sending a `USR2` signal:
-
-```
-# Trigger bug
-kubectl exec \
-    $(kubectl get pods -l app=productcatalogservice -o jsonpath='{.items[0].metadata.name}') \
-    -c server -- kill -USR1 1
-# Remove bug
-kubectl exec \
-    $(kubectl get pods -l app=productcatalogservice -o jsonpath='{.items[0].metadata.name}') \
-    -c server -- kill -USR2 1
-```
+You can trigger this feature (and the delay) by sending a `USR1` signal to the process and
+remove it (if needed) by sending a `USR2` signal.
 
 ## Latency injection
 
