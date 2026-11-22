@@ -86,10 +86,10 @@ checkoutService:
   name: checkoutservice
   resources:
     requests:
-      cpu: 100m
+      cpu: 150m
       memory: 64Mi
     limits:
-      cpu: 200m
+      cpu: 300m
       memory: 128Mi
 
 currencyService:
