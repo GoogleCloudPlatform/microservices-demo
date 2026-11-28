@@ -1,0 +1,97 @@
+---
+- name: Instalar y configurar HashiCorp Vault
+  hosts: vault_servers
+  become: true
+  gather_facts: true
+
+  tasks:
+    - name: Instalar paquetes necesarios
+      ansible.builtin.apt:
+        name:
+          - ca-certificates
+          - gpg
+          - wget
+        state: present
+        update_cache: true
+
+    - name: Revisar si existe la llave de HashiCorp
+      ansible.builtin.stat:
+        path: /usr/share/keyrings/hashicorp-archive-keyring.gpg
+      register: hashicorp_keyring
+
+    - name: Descargar la llave oficial de HashiCorp
+      ansible.builtin.get_url:
+        url: https://apt.releases.hashicorp.com/gpg
+        dest: /tmp/hashicorp-key.asc
+        mode: "0644"
+      register: hashicorp_key
+
+    - name: Convertir la llave al formato requerido
+      ansible.builtin.command:
+        cmd: >
+          gpg --batch --yes --dearmor
+          --output /usr/share/keyrings/hashicorp-archive-keyring.gpg
+          /tmp/hashicorp-key.asc
+      when: hashicorp_key.changed or not hashicorp_keyring.stat.exists
+
+    - name: Agregar el repositorio oficial de HashiCorp
+      ansible.builtin.apt_repository:
+        repo: >-
+          deb [arch=amd64 signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg]
+          https://apt.releases.hashicorp.com
+          {{ ansible_distribution_release }} main
+        filename: hashicorp
+        state: present
+        update_cache: true
+
+    - name: Instalar Vault
+      ansible.builtin.apt:
+        name: vault
+        state: present
+
+    - name: Crear el directorio de datos de Vault
+      ansible.builtin.file:
+        path: /opt/vault/data
+        state: directory
+        owner: vault
+        group: vault
+        mode: "0750"
+
+    - name: Copiar la configuración de Vault
+      ansible.builtin.template:
+        src: ../templates/vault.hcl.j2
+        dest: /etc/vault.d/vault.hcl
+        owner: vault
+        group: vault
+        mode: "0640"
+      notify: Reiniciar Vault
+
+    - name: Habilitar e iniciar Vault
+      ansible.builtin.service:
+        name: vault
+        state: started
+        enabled: true
+
+    - name: Aplicar reinicios pendientes
+      ansible.builtin.meta: flush_handlers
+
+    - name: Esperar a que Vault responda en el puerto 8200
+      ansible.builtin.wait_for:
+        host: 127.0.0.1
+        port: 8200
+        timeout: 60
+
+    - name: Consultar la versión instalada
+      ansible.builtin.command: vault version
+      register: vault_version
+      changed_when: false
+
+    - name: Mostrar la versión de Vault
+      ansible.builtin.debug:
+        var: vault_version.stdout
+
+  handlers:
+    - name: Reiniciar Vault
+      ansible.builtin.service:
+        name: vault
+        state: restarted

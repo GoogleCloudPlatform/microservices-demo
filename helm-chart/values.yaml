@@ -117,6 +117,9 @@ emailService:
 frontend:
   create: true
   name: frontend
+  image:
+    repository: ""
+    tag: ""
   externalService: true
   cymbalBranding: false
   # One of: local, gcp, aws, azure, onprem, alibaba. When not set, defaults to "local" unless running in GKE, otherwise auto-sets to gcp.

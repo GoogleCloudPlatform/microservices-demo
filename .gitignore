@@ -27,3 +27,19 @@ pkg/
 release/wi-kubernetes-manifests.yaml
 vendor/
 gha-creds-*.json
+# Terraform AWS del proyecto
+**/.terraform/*
+*.tfplan
+crash.log
+
+# Historial local de VS Code
+.history/
+
+# Conservar el archivo de bloqueo de Terraform AWS
+!infra/terraform-aws/.terraform.lock.hcl
+*.tfplan
+**/tfplan
+# Archivos locales y sensibles de Vault/Ansible
+infra/ansible-vault/inventory.ini
+*.pem
+**/*vault-init*.json

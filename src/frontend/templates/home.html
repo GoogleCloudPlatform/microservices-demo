@@ -43,6 +43,55 @@
             <h3>Hot Products</h3>
           </div>
 
+          <div class="col-12 mb-4">
+            <form method="GET" action="{{ $.baseUrl }}/" class="row align-items-end">
+              <div class="col-lg-4 col-md-6 mb-2">
+                <label for="product-search">Search products</label>
+                <input
+                  id="product-search"
+                  class="form-control"
+                  type="search"
+                  name="q"
+                  value="{{ $.search_query }}"
+                  placeholder="Name or description">
+              </div>
+
+              <div class="col-lg-3 col-md-6 mb-2">
+                <label for="product-category">Category</label>
+                <select id="product-category" class="form-control" name="category">
+                  <option value="">All categories</option>
+                  {{ range $.categories }}
+                  <option value="{{ . }}" {{ if eq . $.selected_category }}selected{{ end }}>
+                    {{ . }}
+                  </option>
+                  {{ end }}
+                </select>
+              </div>
+
+              <div class="col-lg-2 col-md-6 mb-2">
+                <label for="maximum-price">Maximum price (USD)</label>
+                <input
+                  id="maximum-price"
+                  class="form-control"
+                  type="number"
+                  name="max_price"
+                  min="0"
+                  step="0.01"
+                  value="{{ $.max_price }}"
+                  placeholder="100.00">
+              </div>
+
+              <div class="col-lg-3 col-md-6 mb-2">
+                <button type="submit" class="btn btn-primary btn-block">Apply filters</button>
+                <a href="{{ $.baseUrl }}/" class="btn btn-secondary btn-block">Clear filters</a>
+              </div>
+            </form>
+          </div>
+
+          <div class="col-12 mb-3">
+            <strong>{{ $.results_count }} product(s) found</strong>
+          </div>
+
           {{ range $.products }}
           <div class="col-md-4 hot-product-card">
             <a href="{{ $.baseUrl }}/product/{{.Item.Id}}">
