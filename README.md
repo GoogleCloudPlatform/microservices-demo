@@ -1,3 +1,10 @@
+## Proyecto integrador DevOps
+
+Online Boutique es la base de una tienda de demostración. La mejora del catálogo busca que los compradores encuentren productos y comparen precios con menos pasos. La propuesta inicial contempló ordenar por nombre y precio. En la prueba final en AWS se comprobó la búsqueda por nombre y la consulta de productos desde el frontend.
+
+El equipo planificó el trabajo en el [tablero Kanban](https://github.com/users/LeonardoH369/projects/3). Git y GitHub registraron los cambios. Terraform definió la infraestructura y los grupos de CloudWatch Logs, Helm desplegó la aplicación en Amazon EKS y Ansible configuró Vault en una instancia EC2 independiente. La prueba final verificó la detección de drift de Terraform y la recepción de registros de los microservicios en CloudWatch.
+
+
 <!-- <p align="center">
 <img src="/src/frontend/static/icons/Hipster_HeroLogoMaroon.svg" width="300" alt="Online Boutique" />
 </p> -->
